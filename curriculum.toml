@@ -1,0 +1,19 @@
+[[session]]
+id = 1
+cycle = 1
+topic_id = 1
+round = 1
+title = "SWAR vs SIMD vs scalar code"
+published = "2026-07-11"
+path = "topics/001-swar-simd-scalar/rounds/01.md"
+tags = ["swar", "simd", "aarch64", "benchmarking"]
+
+[[session]]
+id = 2
+cycle = 1
+topic_id = 2
+round = 1
+title = "Intrinsics vs handwritten assembly"
+published = "2026-07-12"
+path = "topics/002-intrinsics-vs-assembly/rounds/01.md"
+tags = ["codegen", "aarch64", "inline-assembly", "benchmarking"]
