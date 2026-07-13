@@ -17,3 +17,13 @@ title = "Intrinsics vs handwritten assembly"
 published = "2026-07-12"
 path = "topics/002-intrinsics-vs-assembly/rounds/01.md"
 tags = ["codegen", "aarch64", "inline-assembly", "benchmarking"]
+
+[[session]]
+id = 3
+cycle = 1
+topic_id = 3
+round = 1
+title = "Advanced Linux perf workflow: PMU skid, precise sampling, and counter multiplexing"
+published = "2026-07-13"
+path = "topics/003-linux-perf-workflow/rounds/01.md"
+tags = ["linux-perf", "pmu", "sampling", "multiplexing"]
