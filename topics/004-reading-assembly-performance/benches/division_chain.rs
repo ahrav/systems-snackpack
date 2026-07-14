@@ -33,6 +33,7 @@ fn measure_runtime(seed: u64, divisor: NonZeroU64) -> (u64, u128) {
 }
 
 fn median(samples: &mut [u128]) -> u128 {
+    assert!(!samples.is_empty(), "median requires at least one sample");
     samples.sort_unstable();
     samples[samples.len() / 2]
 }

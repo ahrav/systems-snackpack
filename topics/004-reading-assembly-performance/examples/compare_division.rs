@@ -13,7 +13,7 @@ fn main() {
         .map(|value| {
             value
                 .parse::<u64>()
-                .expect("iteration count must be a non-negative integer")
+                .expect("iteration count must be an unsigned 64-bit integer")
         })
         .unwrap_or(DEFAULT_ITERATIONS);
     let divisor = NonZeroU64::new(7).expect("seven is nonzero");
