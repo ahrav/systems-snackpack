@@ -17,3 +17,13 @@ title = "Intrinsics vs handwritten assembly"
 published = "2026-07-12"
 path = "topics/002-intrinsics-vs-assembly/rounds/01.md"
 tags = ["codegen", "aarch64", "inline-assembly", "benchmarking"]
+
+[[session]]
+id = 4
+cycle = 1
+topic_id = 4
+round = 1
+title = "Reading x86-64 and AArch64 assembly for performance"
+published = "2026-07-14"
+path = "topics/004-reading-assembly-performance/rounds/01.md"
+tags = ["assembly", "x86-64", "aarch64", "codegen", "benchmarking"]
