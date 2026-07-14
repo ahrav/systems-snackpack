@@ -1,6 +1,6 @@
 //! Provides a deterministic phase workload for Linux PMU experiments.
 //!
-//! The workload alternates two equal-iteration phases. [`branch_phase`] adds an
+//! The workload alternates two equal-iteration phases. [`branch_phase`] adds a
 //! data-dependent conditional branch to every loop iteration. [`arithmetic_phase`]
 //! uses a branch-free dependency chain apart from loop control. Inspect the
 //! optimized machine code before using those labels as measurement facts.
@@ -26,13 +26,25 @@ pub struct PhaseConfig {
     /// Loop iterations in each phase.
     pub iterations_per_phase: u64,
     /// Initial state for the deterministic recurrence.
+    ///
+    /// Must be nonzero. Zero is a fixed point of the xorshift update in
+    /// [`branch_phase`], so a zero seed leaves the first branch dispatch
+    /// degenerate instead of the intended data-dependent split.
     pub seed: u64,
 }
 
 impl PhaseConfig {
     /// Creates a workload configuration.
+    ///
+    /// # Panics
+    ///
+    /// In debug builds, panics when `seed` is zero; see [`PhaseConfig::seed`].
     #[must_use]
     pub const fn new(rounds: u32, iterations_per_phase: u64, seed: u64) -> Self {
+        debug_assert!(
+            seed != 0,
+            "seed must be nonzero: zero is a fixed point of the xorshift update"
+        );
         Self {
             rounds,
             iterations_per_phase,
@@ -76,6 +88,10 @@ pub fn run_alternating(config: PhaseConfig) -> PhaseResult {
 /// The two branch targets are separate non-inlined functions. This structure
 /// discourages if-conversion, but only generated assembly can establish the
 /// control flow for a specific compiler and target.
+///
+/// A `state` of zero is a fixed point of the xorshift update: the dispatch
+/// then takes the even path and the state does not advance until the even
+/// branch target injects a nonzero constant on the first iteration.
 #[inline(never)]
 #[must_use]
 pub fn branch_phase(iterations: u64, mut state: u64) -> u64 {
@@ -120,12 +136,20 @@ fn branch_odd(state: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use super::{PhaseConfig, arithmetic_phase, branch_phase, run_alternating};
+    use super::{PhaseConfig, PhaseResult, arithmetic_phase, branch_phase, run_alternating};
 
     #[test]
     fn alternating_run_is_deterministic() {
         let config = PhaseConfig::new(5, 1_000, 0x1234_5678_9abc_def0);
-        assert_eq!(run_alternating(config), run_alternating(config));
+        // The golden value pins the recurrence itself. Comparing two calls
+        // alone would pass for any pure function and miss an accidental
+        // change to the workload the measurement notes depend on.
+        let expected = PhaseResult {
+            checksum: 0x3ec4_c5ec_f387_2044,
+            completed_iterations: 10_000,
+        };
+        assert_eq!(run_alternating(config), expected);
+        assert_eq!(run_alternating(config), expected);
     }
 
     #[test]

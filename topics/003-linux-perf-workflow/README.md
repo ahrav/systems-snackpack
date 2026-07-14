@@ -108,9 +108,14 @@ objdump -drwC --no-show-raw-insn \
 ```
 
 Pin one homogeneous CPU. Store each repetition separately so the decision rule
-can inspect nine independent event counts and checksums.
+can inspect nine independent event counts and checksums. Run this block and
+every block after it in one shell session: `set -euo pipefail` makes a missing
+tool or a failed `perf stat` abort the sequence instead of leaving empty output
+files that read as valid data.
 
 ```bash
+set -euo pipefail
+
 CPU=2
 BIN=target/release/examples/perf_workload
 OUT=/tmp/perf-mux-topic-003
@@ -126,8 +131,18 @@ measure_reference() {
     -e '{branches:u,branch-misses:u}' \
     -- "$BIN" "$rounds" "$iterations" \
     >"$OUT/$name-reference-$run.out"
+  awk -F';' '/^#/ || NF < 5 { next }
+    $1 ~ /^</ || $5 + 0 < 100 {
+      printf "reject %s: %s ran %s%% of enabled time\n", FILENAME, $3, $5
+      exit 1
+    }' "$OUT/$name-reference-$run.csv"
 }
 ```
+
+The reference is a baseline only while its counters never multiplex. The `awk`
+gate reads the run-time and residency fields that `perf stat -x` emits with
+each event row and fails the sequence when any row reports `<not counted>` or
+less than 100% running; a multiplexed reference biases every later comparison.
 
 Request distinct supported events until the PMU must multiplex. The two strong
 groups keep IPC and branch-miss ratio inputs simultaneous. The other events
@@ -211,9 +226,16 @@ taskset -c "$CPU" perf record -o cycles.data \
 taskset -c "$CPU" perf record -o cycles-precise.data \
   -e cycles:uP -c 100003 --call-graph fp -- "$BIN" 400 250000
 perf evlist -v -i cycles-precise.data
-perf report -i cycles-precise.data --stats
-perf script -i cycles-precise.data --show-lost-events >/dev/null
+for capture in cycles cycles-precise; do
+  perf report -i "$capture.data" --stats > "$OUT/$capture-stats.txt"
+  perf script -i "$capture.data" --show-lost-events \
+    | awk '/LOST/' > "$OUT/$capture-lost-events.txt"
+done
 ```
+
+Both captures keep an auditable statistics and loss report. An empty loss file
+records that no loss event appeared; the failure gates above explain why that
+still does not prove a complete profile in overwrite mode.
 
 This comparison measures the profiles produced by two resolved event
 configurations. A changed histogram can support a skid hypothesis, but it does
