@@ -1,0 +1,45 @@
+source_commit=c7e530275ef811fc7cdf1214c6de15acf428abdb
+date=2026-07-14
+cpu_pin=0
+process_runs=9
+inner_warmup_pairs=6
+inner_samples_per_path=21
+iterations_per_sample=10000000
+outlier_policy=retain_all
+summary=benchmark-process medians and within-process runtime/constant ratio
+PROCESS_RUN=1
+constant median_total_ns=34663681 median_ns_per_iteration=3.466
+runtime median_total_ns=83704037 median_ns_per_iteration=8.370
+runtime_over_constant=2.415
+PROCESS_RUN=2
+constant median_total_ns=34665019 median_ns_per_iteration=3.467
+runtime median_total_ns=83707696 median_ns_per_iteration=8.371
+runtime_over_constant=2.415
+PROCESS_RUN=3
+constant median_total_ns=34666583 median_ns_per_iteration=3.467
+runtime median_total_ns=83707047 median_ns_per_iteration=8.371
+runtime_over_constant=2.415
+PROCESS_RUN=4
+constant median_total_ns=34664631 median_ns_per_iteration=3.466
+runtime median_total_ns=83705148 median_ns_per_iteration=8.371
+runtime_over_constant=2.415
+PROCESS_RUN=5
+constant median_total_ns=34663677 median_ns_per_iteration=3.466
+runtime median_total_ns=83707899 median_ns_per_iteration=8.371
+runtime_over_constant=2.415
+PROCESS_RUN=6
+constant median_total_ns=34663003 median_ns_per_iteration=3.466
+runtime median_total_ns=83706095 median_ns_per_iteration=8.371
+runtime_over_constant=2.415
+PROCESS_RUN=7
+constant median_total_ns=34662698 median_ns_per_iteration=3.466
+runtime median_total_ns=83703829 median_ns_per_iteration=8.370
+runtime_over_constant=2.415
+PROCESS_RUN=8
+constant median_total_ns=34663417 median_ns_per_iteration=3.466
+runtime median_total_ns=83706183 median_ns_per_iteration=8.371
+runtime_over_constant=2.415
+PROCESS_RUN=9
+constant median_total_ns=34662570 median_ns_per_iteration=3.466
+runtime median_total_ns=83699760 median_ns_per_iteration=8.370
+runtime_over_constant=2.415
