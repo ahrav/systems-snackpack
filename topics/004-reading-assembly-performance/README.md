@@ -83,7 +83,7 @@ Generated `target` files are absent from the `colgrep` index. Search them
 directly when checking the emitted sequence:
 
 ```bash
-rg -n 'divide_(constant|runtime)_chain|madd|udiv|umulh|b\.ne' \
+rg -n 'divide_(constant|runtime)_chain|madd|udiv|umulh|b\.ne|div[lq]|mulq' \
   target/release/deps/systems_snackpack_topic_004-*.s
 ```
 
@@ -115,13 +115,40 @@ The measured runtime/constant ratio is `1.194x`. The timer does not isolate
 divider or `umulh` latency. The result does not establish a ratio for another
 CPU, compiler, or input.
 
+Each Linux host ran nine separate benchmark processes on CPU 0 with `taskset`.
+Every process retained the six warm-up pairs and 21 measured samples per path
+described above. The path columns below report the median of nine process
+medians. The ratio column reports the median of the nine within-process ratios.
+
+| Linux target | Constant | Runtime | Median paired ratio |
+|---|---:|---:|---:|
+| AArch64, Arm MIDR `0x411fd401` | 3.466 ns/iteration | 8.371 ns/iteration | `2.414760x` |
+| x86-64, AMD EPYC 9R14 under KVM | 3.251 ns/iteration | 5.146 ns/iteration | `1.582993x` |
+
+The AArch64 release loops retained `udiv` versus `umulh` reduction. The x86-64
+runtime loop checked the numerator and divisor upper halves before selecting
+`divq` or `divl`; the constant loop used `mulq`, subtraction, and shifts. The
+x86-64 runtime loop can execute either divide form. Its elapsed time includes
+the width-selection branch and the selected divide form for each iteration.
+The experiment did not record the branch-outcome distribution and does not
+isolate `divq` latency.
+
+The two Linux ratios do not establish an ISA comparison. The hosts use
+different processors, and the x86-64 host runs under KVM. The sign-based
+intervals quantify sampling uncertainty only under their stated process-run
+assumptions for each recorded host and time block. They do not capture build,
+host, or fleet variation.
+
 The instruction lists above are observed codegen. The lower-bound and crossover
 equations are derived models. Vendor guides document named targets; uops.info
 reports third-party measurements for listed CPUs. Keep these evidence classes
 separate.
 
-See the [measurement record](measurements/2026-07-14-m1-pro.md) and
-[reference scopes](references.md).
+See the [Apple M1 Pro](measurements/2026-07-14-m1-pro.md),
+[Linux AArch64](measurements/2026-07-14-linux-aarch64.md), and
+[Linux x86-64](measurements/2026-07-14-linux-x86-64.md) records and the
+[reference scopes](references.md). [Round 2](rounds/02.md) summarizes the Linux
+follow-up.
 
 ## Failure checklist
 
