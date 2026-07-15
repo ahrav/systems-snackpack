@@ -1,0 +1,185 @@
+source_commit=3fe13cb
+archive_sha256=5545e01480c39e2ce107077190c7f215d5ee4270b349ec82f3ce4729b9eeade1  /tmp/systems-snackpack-topic-005-3fe13cb.tar.gz
+hostname=dev-dsk-ahrav-2c-b89a08b3.us-west-2.amazon.com
+uname=Linux dev-dsk-ahrav-2c-b89a08b3.us-west-2.amazon.com 6.12.94-123.180.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Thu Jul  9 21:10:41 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+rustc_begin
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+binary: rustc
+commit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf
+commit-date: 2026-02-11
+host: x86_64-unknown-linux-gnu
+release: 1.93.1
+LLVM version: 21.1.8
+rustc_end
+cargo 1.93.1 (083ac5135 2025-12-15)
+gate=cargo_fmt
+gate=cargo_test_lib_examples
+   Compiling systems-snackpack-topic-003 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/003-linux-perf-workflow)
+   Compiling systems-snackpack-topic-005 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/005-webassembly-performance-model)
+   Compiling systems-snackpack-topic-002 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/002-intrinsics-vs-assembly)
+   Compiling systems-snackpack-topic-004 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/004-reading-assembly-performance)
+   Compiling systems-snackpack-topic-001 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/001-swar-simd-scalar)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_001-656593039d89089c)
+
+running 2 tests
+test tests::variants_match_for_empty_and_short_inputs ... ok
+test tests::variants_match_for_deterministic_data ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/count_eq.rs (target/debug/examples/count_eq-bb61827742c3a969)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_002-ab8f1e48947b9e23)
+
+running 2 tests
+test tests::empty_input_has_a_stable_fold ... ok
+test tests::public_paths_match_the_reference ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare.rs (target/debug/examples/compare-b5540a8b48cf6fdd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_003-a5b1b5ab1c2e10cd)
+
+running 4 tests
+test tests::completed_iterations_count_both_phases ... ok
+test tests::phase_kernels_transform_state ... ok
+test tests::zero_rounds_preserve_the_seed ... ok
+test tests::alternating_run_is_deterministic ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/perf_workload.rs (target/debug/examples/perf_workload-f131b394e8fdedae)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_004-8ce874dbaaec2f79)
+
+running 2 tests
+test tests::zero_iterations_return_the_seed ... ok
+test tests::constant_and_runtime_division_match_for_seven ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare_division.rs (target/debug/examples/compare_division-8fd6127d1052dca5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_005-19b4808ea9f5e95e)
+
+running 3 tests
+test tests::one_step_matches_the_formula ... ok
+test tests::zero_steps_preserve_the_seed ... ok
+test tests::ten_million_step_digest_matches_the_recorded_experiment ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running unittests examples/check_digest.rs (target/debug/examples/check_digest-5a8f4899dcfa70f0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+gate=cargo_test_doc
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+   Doc-tests systems_snackpack_topic_001
+
+running 1 test
+test topics/001-swar-simd-scalar/src/lib.rs - (line 9) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.15s; merged doctests compilation took 0.14s
+   Doc-tests systems_snackpack_topic_002
+
+running 1 test
+test topics/002-intrinsics-vs-assembly/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.15s; merged doctests compilation took 0.14s
+   Doc-tests systems_snackpack_topic_003
+
+running 1 test
+test topics/003-linux-perf-workflow/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.15s; merged doctests compilation took 0.14s
+   Doc-tests systems_snackpack_topic_004
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_005
+
+running 1 test
+test topics/005-webassembly-performance-model/src/lib.rs - iterate (line 22) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.15s; merged doctests compilation took 0.14s
+gate=cargo_clippy
+    Checking systems-snackpack-topic-002 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/002-intrinsics-vs-assembly)
+    Checking systems-snackpack-topic-004 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/004-reading-assembly-performance)
+    Checking systems-snackpack-topic-003 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/003-linux-perf-workflow)
+    Checking systems-snackpack-topic-001 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/001-swar-simd-scalar)
+    Checking systems-snackpack-topic-005 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/005-webassembly-performance-model)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.13s
+gate=cargo_bench_no_run
+   Compiling systems-snackpack-topic-003 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/003-linux-perf-workflow)
+   Compiling systems-snackpack-topic-001 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/001-swar-simd-scalar)
+   Compiling systems-snackpack-topic-004 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/004-reading-assembly-performance)
+   Compiling systems-snackpack-topic-002 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/002-intrinsics-vs-assembly)
+   Compiling systems-snackpack-topic-005 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/005-webassembly-performance-model)
+    Finished `bench` profile [optimized] target(s) in 0.28s
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_001-c2100c550c74afaf)
+  Executable benches/throughput.rs (target/release/deps/throughput-fdfc0c66c79dd4d8)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_002-93830e70f3d10283)
+  Executable benches/fold.rs (target/release/deps/fold-9c307fe32fb9442c)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_003-b9d6e0f341d20117)
+  Executable benches/phase_workload.rs (target/release/deps/phase_workload-1a97dcd880927a3e)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_004-260bfd828de220de)
+  Executable benches/division_chain.rs (target/release/deps/division_chain-8db904a7495c2a0d)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_005-de3b85b8cc0f885d)
+gate=cargo_doc
+ Documenting systems-snackpack-topic-003 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/003-linux-perf-workflow)
+ Documenting systems-snackpack-topic-001 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/001-swar-simd-scalar)
+ Documenting systems-snackpack-topic-002 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/002-intrinsics-vs-assembly)
+ Documenting systems-snackpack-topic-005 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/005-webassembly-performance-model)
+ Documenting systems-snackpack-topic-004 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/004-reading-assembly-performance)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s
+   Generated /tmp/systems-snackpack-topic-005-workspace-3fe13cb/target/doc/systems_snackpack_topic_001/index.html and 4 other files
+gate=shell_syntax
+gate=python_syntax
+gate=raw_checksums
+measurements/raw/2026-07-15-linux-aarch64-manifest.txt: OK
+measurements/raw/2026-07-15-linux-aarch64-probe.txt: OK
+measurements/raw/2026-07-15-linux-aarch64-processes.jsonl: OK
+measurements/raw/2026-07-15-linux-aarch64-correctness.jsonl: OK
+measurements/raw/2026-07-15-linux-aarch64-codegen.txt: OK
+measurements/raw/2026-07-15-linux-x86-64-manifest.txt: OK
+measurements/raw/2026-07-15-linux-x86-64-probe.txt: OK
+measurements/raw/2026-07-15-linux-x86-64-processes.jsonl: OK
+measurements/raw/2026-07-15-linux-x86-64-correctness.jsonl: OK
+measurements/raw/2026-07-15-linux-x86-64-codegen.txt: OK
+gate=digest_example
+   Compiling systems-snackpack-topic-005 v0.1.0 (/tmp/systems-snackpack-topic-005-workspace-3fe13cb/topics/005-webassembly-performance-model)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running `target/debug/examples/check_digest`
+digest=0x85463ddc01d7d46f
+result=PASS

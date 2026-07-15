@@ -28,4 +28,5 @@ does not establish an ISA or vendor comparison.
 
 - [`2026-07-15-linux-aarch64.md`](2026-07-15-linux-aarch64.md): AArch64 host, method, results, and limits.
 - [`2026-07-15-linux-x86-64.md`](2026-07-15-linux-x86-64.md): x86-64 host, method, results, and limits.
-- [`raw/`](raw/): manifests with hashes, identity probes, process JSONL, correctness output, and native disassembly.
+- [`raw/`](raw/): manifests with hashes, identity probes, process JSONL,
+  correctness output, native disassembly, and both full workspace-gate logs.
