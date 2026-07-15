@@ -1,0 +1,80 @@
+manifest_utc=2026-07-15T14:12:21Z
+hostname=dev-dsk-ahrav-2c-b89a08b3.us-west-2.amazon.com
+uname_all=Linux dev-dsk-ahrav-2c-b89a08b3.us-west-2.amazon.com 6.12.94-123.180.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Thu Jul  9 21:10:41 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+uname_machine=x86_64
+kernel_release=6.12.94-123.180.amzn2023.x86_64
+nproc=48
+affinity=pid 3724816's current affinity list: 0-47
+os_release=Amazon Linux 2023
+cpu_model=AuthenticAMD|AMD EPYC 9R14|
+cpu_flags=fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy cr8_legacy abm sse4a misalignsse 3dnowprefetch topoext perfctr_core ssbd perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase bmi1 avx2 smep bmi2 invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx512_bf16 clzero xsaveerptr rdpru wbnoinvd arat avx512vbmi pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid flush_l1d
+gcc_version=gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+python_version=Python 3.9.25
+rustc_begin
+rustc 1.97.0 (2d8144b78 2026-07-07)
+binary: rustc
+commit-hash: 2d8144b7880597b6e6d3dfd63a9a9efae3f533d3
+commit-date: 2026-07-07
+host: x86_64-unknown-linux-gnu
+release: 1.97.0
+LLVM version: 22.1.6
+rustc_end
+cargo_version=cargo 1.97.0 (c980f4866 2026-06-30)
+wasmtime_cli_version=wasmtime 46.0.1 (823d1b8f2 2026-06-24)
+wasmtime_cli_release_url=https://github.com/bytecodealliance/wasmtime/releases/download/v46.0.1/wasmtime-v46.0.1-x86_64-linux.tar.xz
+wasmtime_c_api_release_url=https://github.com/bytecodealliance/wasmtime/releases/download/v46.0.1/wasmtime-v46.0.1-x86_64-linux-c-api.tar.xz
+wasmtime_c_api_embedded_version=version: 46.0.1
+explicit_wasmtime_config=Cranelift; opt-level=speed; parallel-compilation=false; no target override; Config infers native host target/features
+build_command=gcc -O2 -std=c11 -Wall -Wextra -Werror -Iwasmtime-c-api/include wasm_boundary_bench.c -Lwasmtime-c-api/lib -Wl,-rpath,'$ORIGIN/wasmtime-c-api/lib' -lwasmtime -ldl -lm -lpthread -o wasm_boundary_bench
+runner_command=./run_processes.py --bench ./wasm_boundary_bench --wat ./boundary.wat --iterations 10000000 --runs 12 --cpu 0 --warmup-processes 2
+governor=unavailable
+intel_no_turbo=unavailable
+amd_boost=unavailable
+perf_version=/tmp/systems-snackpack-topic-005-release-candidate-20260715/topics/005-webassembly-performance-model/experiment/run_all.sh: line 59: perf: command not found
+9ae0b17ea298bcc52277a8208d6ab7fae8e1a89579672f9d82f9d86c116edb62  wasmtime.tar.xz
+4b7e7acf08467de6147f11c8fb71c4db7623035064c096976aa969d54171fed4  wasmtime-c-api.tar.xz
+8e77a3388d09e9a9823b61387dca55f2c4dd5e6a9e18eb42c34e6f6382ce0fe5  wasmtime-c-api/lib/libwasmtime.so
+025c75489f406c4f3097c57944c01e5fa13840c23c28fe124c748e942f5cdaaa  wasmtime-c-api/include/wasmtime/conf.h
+e5a1e6312b877545c6d0f1b1b5b675becd989c7386156e3633fa1356868512a4  boundary.wat
+9f4ab3855957184a56e5cb037f68bfecb0de6fbff9366c6c522152804e84dfe4  wasm_boundary_bench.c
+47010e01124f02a04a62e22434206ab14ae50fd3eb754c62d50dc5277e27ab01  run_processes.py
+f9626e91e739efabcc8e0cb7f80efa359c479238c55f4585d92ee41d4eec2f70  wasm_boundary_bench
+ldd_begin
+	linux-vdso.so.1 (0x00007f69410f6000)
+	libwasmtime.so => /tmp/systems-snackpack-topic-005-runtime-20260715/./wasmtime-c-api/lib/libwasmtime.so (0x00007f693f99f000)
+	libm.so.6 => /lib64/libm.so.6 (0x00007f693f8bc000)
+	libc.so.6 => /lib64/libc.so.6 (0x00007f693f600000)
+	libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x00007f693f88e000)
+	libpthread.so.0 => /lib64/libpthread.so.0 (0x00007f693f887000)
+	libdl.so.2 => /lib64/libdl.so.2 (0x00007f693f882000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f69410f8000)
+ldd_end
+c_api_features_begin
+// WASMTIME_FEATURE_LIST
+#define WASMTIME_FEATURE_PROFILING
+#define WASMTIME_FEATURE_WAT
+#define WASMTIME_FEATURE_CACHE
+#define WASMTIME_FEATURE_PARALLEL_COMPILATION
+#define WASMTIME_FEATURE_WASI
+#define WASMTIME_FEATURE_WASI_HTTP
+#define WASMTIME_FEATURE_LOGGING
+/* #undef WASMTIME_FEATURE_DISABLE_LOGGING */
+#define WASMTIME_FEATURE_COREDUMP
+#define WASMTIME_FEATURE_ADDR2LINE
+#define WASMTIME_FEATURE_DEMANGLE
+#define WASMTIME_FEATURE_THREADS
+#define WASMTIME_FEATURE_GC
+#define WASMTIME_FEATURE_GC_DRC
+#define WASMTIME_FEATURE_GC_NULL
+#define WASMTIME_FEATURE_ASYNC
+#define WASMTIME_FEATURE_CRANELIFT
+#define WASMTIME_FEATURE_WINCH
+#define WASMTIME_FEATURE_DEBUG_BUILTINS
+#define WASMTIME_FEATURE_POOLING_ALLOCATOR
+#define WASMTIME_FEATURE_COMPONENT_MODEL
+#define WASMTIME_FEATURE_COMPONENT_MODEL_ASYNC
+#define WASMTIME_FEATURE_PULLEY
+/* #undef WASMTIME_FEATURE_ALL_ARCH */
+// ... if you add a line above this be sure to change the other locations
+// marked WASMTIME_FEATURE_LIST
+c_api_features_end

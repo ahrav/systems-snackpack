@@ -1,0 +1,12 @@
+probe_utc=2026-07-15T14:12:25Z
+hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+dmi_product=c7g.16xlarge
+dmi_vendor=Amazon EC2
+midr_el1=0x00000000411fd401
+
+lscpu_identity_begin
+Architecture:                            aarch64
+Vendor ID:                               ARM
+Model:                                   1
+Stepping:                                r1p1
+lscpu_identity_end

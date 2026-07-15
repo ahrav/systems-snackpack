@@ -1,0 +1,80 @@
+manifest_utc=2026-07-15T14:12:25Z
+hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+uname_all=Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.94-123.176.amzn2023.aarch64 #1 SMP Thu Jul  2 14:42:07 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+uname_machine=aarch64
+kernel_release=6.12.94-123.176.amzn2023.aarch64
+nproc=64
+affinity=pid 3457533's current affinity list: 0-63
+os_release=Amazon Linux 2023
+cpu_model=ARM|
+cpu_flags=fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng
+gcc_version=gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+python_version=Python 3.9.25
+rustc_begin
+rustc 1.95.0 (59807616e 2026-04-14)
+binary: rustc
+commit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860
+commit-date: 2026-04-14
+host: aarch64-unknown-linux-gnu
+release: 1.95.0
+LLVM version: 22.1.2
+rustc_end
+cargo_version=cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+wasmtime_cli_version=wasmtime 46.0.1 (823d1b8f2 2026-06-24)
+wasmtime_cli_release_url=https://github.com/bytecodealliance/wasmtime/releases/download/v46.0.1/wasmtime-v46.0.1-aarch64-linux.tar.xz
+wasmtime_c_api_release_url=https://github.com/bytecodealliance/wasmtime/releases/download/v46.0.1/wasmtime-v46.0.1-aarch64-linux-c-api.tar.xz
+wasmtime_c_api_embedded_version=version: 46.0.1
+explicit_wasmtime_config=Cranelift; opt-level=speed; parallel-compilation=false; no target override; Config infers native host target/features
+build_command=gcc -O2 -std=c11 -Wall -Wextra -Werror -Iwasmtime-c-api/include wasm_boundary_bench.c -Lwasmtime-c-api/lib -Wl,-rpath,'$ORIGIN/wasmtime-c-api/lib' -lwasmtime -ldl -lm -lpthread -o wasm_boundary_bench
+runner_command=./run_processes.py --bench ./wasm_boundary_bench --wat ./boundary.wat --iterations 10000000 --runs 12 --cpu 0 --warmup-processes 2
+governor=unavailable
+intel_no_turbo=unavailable
+amd_boost=unavailable
+perf_version=/tmp/systems-snackpack-topic-005-release-candidate-20260715/topics/005-webassembly-performance-model/experiment/run_all.sh: line 59: perf: command not found
+071c4def2a08f0ebc95c52dfd4f2886eb697ba495804217cf76e13b09d70a1be  wasmtime.tar.xz
+368406db8027c361e12ad838fb53f049b992985806bfb1256abba27112dff5ae  wasmtime-c-api.tar.xz
+2c6a69c6cf0d07160d08ad21784c7f1947f23f1f1b5406a0b8a02a42b22c83de  wasmtime-c-api/lib/libwasmtime.so
+025c75489f406c4f3097c57944c01e5fa13840c23c28fe124c748e942f5cdaaa  wasmtime-c-api/include/wasmtime/conf.h
+e5a1e6312b877545c6d0f1b1b5b675becd989c7386156e3633fa1356868512a4  boundary.wat
+9f4ab3855957184a56e5cb037f68bfecb0de6fbff9366c6c522152804e84dfe4  wasm_boundary_bench.c
+47010e01124f02a04a62e22434206ab14ae50fd3eb754c62d50dc5277e27ab01  run_processes.py
+7906e9d1e3dd2ef880b412a9ba682446eb1ba83b91350a8f42aa9070d552b37d  wasm_boundary_bench
+ldd_begin
+	linux-vdso.so.1 (0x0000ffff8811c000)
+	libwasmtime.so => /tmp/systems-snackpack-topic-005-runtime-20260715/./wasmtime-c-api/lib/libwasmtime.so (0x0000ffff86d80000)
+	libm.so.6 => /lib64/libm.so.6 (0x0000ffff86ccf000)
+	libc.so.6 => /lib64/libc.so.6 (0x0000ffff86b01000)
+	libgcc_s.so.1 => /lib64/libgcc_s.so.1 (0x0000ffff86ab0000)
+	libpthread.so.0 => /lib64/libpthread.so.0 (0x0000ffff86a6f000)
+	libdl.so.2 => /lib64/libdl.so.2 (0x0000ffff86a2e000)
+	/lib/ld-linux-aarch64.so.1 (0x0000ffff880d0000)
+ldd_end
+c_api_features_begin
+// WASMTIME_FEATURE_LIST
+#define WASMTIME_FEATURE_PROFILING
+#define WASMTIME_FEATURE_WAT
+#define WASMTIME_FEATURE_CACHE
+#define WASMTIME_FEATURE_PARALLEL_COMPILATION
+#define WASMTIME_FEATURE_WASI
+#define WASMTIME_FEATURE_WASI_HTTP
+#define WASMTIME_FEATURE_LOGGING
+/* #undef WASMTIME_FEATURE_DISABLE_LOGGING */
+#define WASMTIME_FEATURE_COREDUMP
+#define WASMTIME_FEATURE_ADDR2LINE
+#define WASMTIME_FEATURE_DEMANGLE
+#define WASMTIME_FEATURE_THREADS
+#define WASMTIME_FEATURE_GC
+#define WASMTIME_FEATURE_GC_DRC
+#define WASMTIME_FEATURE_GC_NULL
+#define WASMTIME_FEATURE_ASYNC
+#define WASMTIME_FEATURE_CRANELIFT
+#define WASMTIME_FEATURE_WINCH
+#define WASMTIME_FEATURE_DEBUG_BUILTINS
+#define WASMTIME_FEATURE_POOLING_ALLOCATOR
+#define WASMTIME_FEATURE_COMPONENT_MODEL
+#define WASMTIME_FEATURE_COMPONENT_MODEL_ASYNC
+#define WASMTIME_FEATURE_PULLEY
+/* #undef WASMTIME_FEATURE_ALL_ARCH */
+// ... if you add a line above this be sure to change the other locations
+// marked WASMTIME_FEATURE_LIST
+c_api_features_end
