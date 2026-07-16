@@ -34,10 +34,22 @@ env_record="$output_dir/host-env.txt"
   rustc -C target-cpu=native --print cfg
 } > "$env_record"
 
-cargo bench --quiet -p systems-snackpack-topic-006 --bench selectivity --no-run
-# Pick the most recently built bench binary by mtime; a lexicographic sort on
-# the hash suffix could silently select a stale artifact after partial cleans.
-bench_binary=$(rg --files target/release/deps | rg '/selectivity-[0-9a-f]+$' | xargs -r ls -t | head -n 1)
+# Take the benchmark executable path from Cargo's own artifact message rather
+# than globbing target/release/deps, where stale selectivity-* binaries from
+# earlier builds could otherwise be selected.
+bench_binary=$(
+  cargo bench --message-format=json --quiet -p systems-snackpack-topic-006 \
+    --bench selectivity --no-run \
+    | jq -r 'select(.reason == "compiler-artifact"
+        and .target.name == "selectivity"
+        and (.target.kind | index("bench")))
+        | .executable // empty' \
+    | tail -n 1
+)
+if [[ -z "$bench_binary" || ! -x "$bench_binary" ]]; then
+  echo "failed to locate the selectivity bench binary from cargo output" >&2
+  exit 1
+fi
 
 : > "$raw"
 {
