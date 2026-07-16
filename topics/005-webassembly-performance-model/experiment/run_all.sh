@@ -103,10 +103,10 @@ eval "$runner_command" > raw-processes.jsonl
 {
     printf 'probe_utc='; date -u +%Y-%m-%dT%H:%M:%SZ
     printf 'hostname='; hostname -f 2>/dev/null || hostname
-    printf 'dmi_product='; sed -n '1p' /sys/class/dmi/id/product_name 2>/dev/null || true
-    printf 'dmi_vendor='; sed -n '1p' /sys/class/dmi/id/sys_vendor 2>/dev/null || true
+    printf 'dmi_product=%s\n' "$(sed -n '1p' /sys/class/dmi/id/product_name 2>/dev/null || printf 'unavailable')"
+    printf 'dmi_vendor=%s\n' "$(sed -n '1p' /sys/class/dmi/id/sys_vendor 2>/dev/null || printf 'unavailable')"
     printf 'benchmark_cpu=%s\n' "$cpu"
-    printf 'midr_el1='; sed -n '1p' "/sys/devices/system/cpu/cpu${cpu}/regs/identification/midr_el1" 2>/dev/null || true; printf '\n'
+    printf 'midr_el1=%s\n' "$(sed -n '1p' "/sys/devices/system/cpu/cpu${cpu}/regs/identification/midr_el1" 2>/dev/null || printf 'unavailable')"
     printf 'lscpu_identity_begin\n'
     LC_ALL=C lscpu | sed -n -e '/^Architecture:/p' -e '/^Vendor ID:/p' -e '/^Model name:/p' \
         -e '/^CPU family:/p' -e '/^Model:/p' -e '/^Stepping:/p' \
