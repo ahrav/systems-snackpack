@@ -142,6 +142,13 @@ static uint64_t invoke_loop(wasmtime_context_t *context,
 }
 
 static uint64_t parse_u64(const char *text, const char *name) {
+  // strtoull accepts leading whitespace and a sign, silently wrapping
+  // "-1" to UINT64_MAX; require the input to start with a digit so a
+  // mistyped negative count fails fast instead of running unbounded.
+  if (text[0] < '0' || text[0] > '9') {
+    fprintf(stderr, "invalid %s: %s\n", name, text);
+    exit(2);
+  }
   errno = 0;
   char *end = NULL;
   unsigned long long value = strtoull(text, &end, 10);

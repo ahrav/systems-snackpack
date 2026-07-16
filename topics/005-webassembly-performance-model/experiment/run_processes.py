@@ -33,7 +33,7 @@ def run_one(bench, wat, iterations, order, cpu):
         raise RuntimeError(
             f"child reported order {record.get('order')!r} for a {order!r} invocation: {record}"
         )
-    if not record.get("correct"):
+    if record.get("correct") is not True:
         raise RuntimeError(f"child correctness failure: {record}")
     record.update({
         "external_wall_ns": wall_ns,
@@ -76,7 +76,7 @@ def summarize(records):
         "n_processes": len(records),
         "n_pairs": len(records),
         "orders": {order: sum(r["order"] == order for r in records) for order in ("GH", "HG")},
-        "all_correct": all(record["correct"] for record in records),
+        "all_correct": all(record["correct"] is True for record in records),
     }
     for name, values in (
         ("host_over_guest_ratio", ratios),
