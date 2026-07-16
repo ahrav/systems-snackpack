@@ -1,0 +1,201 @@
+3168:_ZN27systems_snackpack_topic_00614contains_exact17h152785633432bbfaE:
+3169-.Lfunc_begin3:
+3170-	.cfi_startproc
+3171-	.loc	1 200 8 prologue_end is_stmt 1
+3172-	cbz	x3, .LBB3_4
+3173-	stp	x29, x30, [sp, #-80]!
+3174-	.cfi_def_cfa_offset 80
+3175-	str	x25, [sp, #16]
+3176-	stp	x24, x23, [sp, #32]
+3177-	stp	x22, x21, [sp, #48]
+3178-	stp	x20, x19, [sp, #64]
+3179-	mov	x29, sp
+3180-	.cfi_def_cfa w29, 80
+3181-	.cfi_offset w19, -8
+3182-	.cfi_offset w20, -16
+3183-	.cfi_offset w21, -24
+3184-	.cfi_offset w22, -32
+3185-	.cfi_offset w23, -40
+3186-	.cfi_offset w24, -48
+3187-	.cfi_offset w25, -64
+3188-	.cfi_offset w30, -72
+3189-	.cfi_offset w29, -80
+3190-	.cfi_remember_state
+3191-	mov	x19, x3
+3192-	.loc	1 203 8
+3193-	subs	x22, x1, x3
+3194-	b.hs	.LBB3_5
+3195-	.loc	1 0 8 is_stmt 0
+3196-	mov	w0, wzr
+3197-.LBB3_3:
+3198-	.cfi_def_cfa wsp, 80
+3199-	ldp	x20, x19, [sp, #64]
+3200-	ldp	x22, x21, [sp, #48]
+3201-	ldr	x25, [sp, #16]
+3202-	ldp	x24, x23, [sp, #32]
+3203-	ldp	x29, x30, [sp], #80
+3204-	.cfi_def_cfa_offset 0
+3205-	.cfi_restore w19
+3206-	.cfi_restore w20
+3207-	.cfi_restore w21
+3208-	.cfi_restore w22
+3209-	.cfi_restore w23
+3210-	.cfi_restore w24
+3211-	.cfi_restore w25
+3212-	.cfi_restore w30
+3213-	.cfi_restore w29
+3214-	.loc	1 214 2 is_stmt 1
+3215-	ret
+3216-.LBB3_4:
+3217-	.loc	1 0 2 is_stmt 0
+3218-	mov	w0, #1
+3219-	.loc	1 214 2 is_stmt 1
+3220-	ret
+3221-.LBB3_5:
+3222-	.cfi_restore_state
+3223-	.loc	1 207 17
+3224-	ldrb	w23, [x2]
+3225-	mov	x20, x2
+3226-	mov	x21, x0
+3227-	mov	x24, xzr
+3228-	.loc	1 0 17 is_stmt 0
+3229-.Ltmp671:
+3230-	.p2align	5, , 16
+3231-.LBB3_6:
+3232-.Ltmp672:
+3233-	.loc	1 209 12 is_stmt 1
+3234-	ldrb	w8, [x21, x24]
+3235-.Ltmp673:
+3236-	.loc	21 1903 50
+3237-	cmp	x24, x22
+3238-.Ltmp674:
+3239-	.loc	27 1162 17
+3240-	cinc	x25, x24, lo
+3241-.Ltmp675:
+3242-	.loc	1 209 12
+3243-	cmp	w8, w23
+3244-	b.ne	.LBB3_8
+3245-	add	x0, x21, x24
+3246-.Ltmp676:
+3247-	.loc	20 152 13
+3248-	mov	x1, x20
+3249-	mov	x2, x19
+3250-	bl	bcmp
+3251-.Ltmp677:
+3252-	.loc	1 209 41
+3253-	cbz	w0, .LBB3_10
+3254-.Ltmp678:
+3255-.LBB3_8:
+3256-	.loc	1 0 41 is_stmt 0
+3257-	mov	w0, wzr
+3258-.Ltmp679:
+3259-	.loc	28 563 9 is_stmt 1
+3260-	cmp	x24, x22
+3261-	b.hs	.LBB3_3
+3262-	cmp	x25, x22
+3263-	mov	x24, x25
+3264-	b.ls	.LBB3_6
+3265-	b	.LBB3_3
+3266-.Ltmp680:
+3267-.LBB3_10:
+3268-	.loc	28 0 9 is_stmt 0
+3269-	mov	w0, #1
+3270-	.cfi_def_cfa wsp, 80
+3271-	ldp	x20, x19, [sp, #64]
+3272-	ldp	x22, x21, [sp, #48]
+3273-	ldr	x25, [sp, #16]
+3274-	ldp	x24, x23, [sp, #32]
+3275-	ldp	x29, x30, [sp], #80
+3276-	.cfi_def_cfa_offset 0
+3277-	.cfi_restore w19
+3278-	.cfi_restore w20
+3279-	.cfi_restore w21
+3280-	.cfi_restore w22
+3281-	.cfi_restore w23
+3282-	.cfi_restore w24
+3283-	.cfi_restore w25
+3284-	.cfi_restore w30
+3285-	.cfi_restore w29
+3286-	.loc	1 214 2 is_stmt 1
+3287-	ret
+3288-.Ltmp681:
+3289-.Lfunc_end3:
+3290-	.size	_ZN27systems_snackpack_topic_00614contains_exact17h152785633432bbfaE, .Lfunc_end3-_ZN27systems_snackpack_topic_00614contains_exact17h152785633432bbfaE
+3291-	.cfi_endproc
+3292-
+3293-	.section	".text._ZN4core3ptr123drop_in_place$LT$alloc..collections..btree..map..BTreeMap$LT$$u5b$u8$u3b$$u20$3$u5d$$C$alloc..vec..Vec$LT$usize$GT$$GT$$GT$17heb493e6193b61dbdE","ax",@progbits
+3294-	.p2align	4
+3295-	.type	_ZN4core3ptr123drop_in_place$LT$alloc..collections..btree..map..BTreeMap$LT$$u5b$u8$u3b$$u20$3$u5d$$C$alloc..vec..Vec$LT$usize$GT$$GT$$GT$17heb493e6193b61dbdE,@function
+3296-_ZN4core3ptr123drop_in_place$LT$alloc..collections..btree..map..BTreeMap$LT$$u5b$u8$u3b$$u20$3$u5d$$C$alloc..vec..Vec$LT$usize$GT$$GT$$GT$17heb493e6193b61dbdE:
+3297-.Lfunc_begin4:
+3298-	.loc	14 805 0
+3299-	.cfi_startproc
+3300-	sub	sp, sp, #128
+3301-	.cfi_def_cfa_offset 128
+3302-	stp	x29, x30, [sp, #96]
+3303-	str	x19, [sp, #112]
+3304-	add	x29, sp, #96
+3305-	.cfi_def_cfa w29, 32
+3306-	.cfi_offset w19, -16
+3307-	.cfi_offset w30, -24
+3308-	.cfi_offset w29, -32
+3309-.Ltmp682:
+3310-	.loc	14 1708 9 prologue_end
+3311-	ldr	x9, [x0]
+3312-.Ltmp683:
+3313-	.loc	8 1728 16
+3314-	cbz	x9, .LBB4_2
+3315-.Ltmp684:
+3316-	.loc	14 1708 9
+3317-	ldp	x10, x8, [x0, #8]
+3318-.Ltmp685:
+3319-	.loc	8 1731 13
+3320-	stp	xzr, x9, [sp, #8]
+3321-	stp	xzr, x9, [sp, #40]
+3322-	mov	w9, #1
+3323-	str	x10, [sp, #24]
+3324-	str	x10, [sp, #56]
+3325-	b	.LBB4_3
+3326-.Ltmp686:
+3327-.LBB4_2:
+3328-	.loc	8 0 13 is_stmt 0
+3329-	mov	x8, xzr
+3330-.LBB4_3:
+3331-.Ltmp687:
+3332-	.loc	8 1762 35 is_stmt 1
+3333-	sub	x0, x29, #24
+3334-	mov	x1, sp
+3335-.Ltmp688:
+3336-	.loc	8 0 0 is_stmt 0
+3337-	str	x9, [sp]
+3338-	str	x9, [sp, #32]
+3339-	str	x8, [sp, #64]
+3340-.Ltmp689:
+3341-	.loc	8 1762 35
+3342-	bl	_ZN5alloc11collections5btree3map25IntoIter$LT$K$C$V$C$A$GT$10dying_next17h44671deb6094960fE
+3343-	.loc	8 1762 30
+3344-	ldur	x8, [x29, #-24]
+3345-	.loc	8 1762 19
+3346-	cbz	x8, .LBB4_8
+3347-	.loc	8 0 19
+3348-	mov	w19, #24
+3349-	b	.LBB4_6
+3350-	.p2align	5, , 16
+3351-.LBB4_5:
+3352-	.loc	8 1762 35 is_stmt 1
+3353-	sub	x0, x29, #24
+3354-	mov	x1, sp
+3355-	bl	_ZN5alloc11collections5btree3map25IntoIter$LT$K$C$V$C$A$GT$10dying_next17h44671deb6094960fE
+3356-	.loc	8 1762 30 is_stmt 0
+3357-	ldur	x8, [x29, #-24]
+3358-	.loc	8 1762 19
+3359-	cbz	x8, .LBB4_8
+3360-.LBB4_6:
+3361-	.loc	8 1762 24 is_stmt 1
+3362-	ldur	x9, [x29, #-8]
+3363-.Ltmp690:
+3364-	.loc	18 1210 23
+3365-	madd	x8, x9, x19, x8
+3366-.Ltmp691:
+3367-	.loc	24 815 18
+3368-	ldr	x9, [x8, #8]!

@@ -1,0 +1,17 @@
+Source: e3442c23f06ef9c060f869574f532caef46fd04a
+12 paired blocks; 24 fresh method processes; 6 blocks per method order and workload order
+CPU: process affinity pinned to CPU 0
+Correctness: 320 queries verified
+Selective scan ms median [3rd, 10th]: 1553.627 [1552.517, 1556.980]
+Selective index ms median [3rd, 10th]: 5.504 [5.442, 5.570]
+Paired selective scan/index median [3rd, 10th]: 282.253x [278.818, 285.365]
+Common scan ms median [3rd, 10th]: 871.531 [870.585, 872.437]
+Common index ms median [3rd, 10th]: 892.756 [891.594, 893.424]
+Paired common index/scan median [3rd, 10th]: 1.024602 [1.021227, 1.026412]
+Index build ms median [3rd, 10th]: 629.885 [626.792, 631.156]
+Paired data generation ms median [3rd, 10th]: 9.276 [9.236, 9.328]
+Selective-first: speedup 285.055x; common ratio 1.025271
+Common-first: speedup 279.193x; common ratio 1.024586
+Selective candidates: scan 1310720, index 160; common candidates: both 1310720
+Intervals cover process-level variation in this one sequential host session. They are the third through tenth order statistics; 96.1426% nominal population-median coverage requires independent continuous draws, which the sequential schedule may not satisfy.
+Query timers exclude deterministic data generation, index construction, and process startup. Startup was not timed.

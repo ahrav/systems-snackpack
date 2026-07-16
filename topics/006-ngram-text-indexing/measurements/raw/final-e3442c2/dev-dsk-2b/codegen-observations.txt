@@ -1,0 +1,5 @@
+Native codegen build passed with -C target-cpu=native -C debuginfo=1.
+scan_count is a scalar document loop that calls contains_exact.
+contains_exact uses scalar first-byte ldrb/cmp filtering and calls bcmp for exact verification.
+No q/v/z vector-register references occurred inside scan_count, TrigramIndex::query, or contains_exact bodies.
+The full crate assembly contains SVE z0-z3 instructions in a core::slice::sort::unstable::ipnsort monomorphization and q0 loads/stores elsewhere. This proves emission, not execution by this benchmark.

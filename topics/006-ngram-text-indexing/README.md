@@ -122,7 +122,8 @@ Run 12 order-balanced process pairs on Linux CPU 0:
 topics/006-ngram-text-indexing/experiment/run_processes.sh /tmp/topic-006
 ```
 
-The runner requires Bash, Cargo, `jq`, `taskset`, `lscpu`, and `sha256sum`.
+The runner requires Bash, `cargo`, `rustc`, GCC, `jq`, `taskset`, `lscpu`, and
+`sha256sum`.
 
 Generate release assembly:
 
@@ -141,10 +142,10 @@ time, and exact-result hashes. Keep cross-host results separate.
 See the [measurement records](measurements/README.md), [source scopes](references.md),
 and [first-round note](rounds/01.md).
 
-The exact-source Linux runs passed on both required hosts. Selective queries
-reduced candidate documents from 1,310,720 to 160. Common/adversarial queries
-reduced none, and one host showed a workload-order reversal, so the artifact
-does not report a host-independent common-query overhead.
+The exact reviewed-source Linux runs passed on both required hosts. Selective
+queries reduced candidate documents from 1,310,720 to 160. Common/adversarial
+queries reduced none, and one host showed a workload-order reversal, so the
+artifact does not report a host-independent common-query overhead.
 
 ## Failure checklist
 

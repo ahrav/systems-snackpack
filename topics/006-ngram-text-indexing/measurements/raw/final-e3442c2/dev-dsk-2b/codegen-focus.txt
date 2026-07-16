@@ -1,0 +1,335 @@
+1-	.file	"systems_snackpack_topic_006.c536dde6b893cf22-cgu.0"
+2:	.section	.text._ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE,"ax",@progbits
+3:	.globl	_ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE
+4-	.p2align	4
+5:	.type	_ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE,@function
+6:_ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE:
+7-.Lfunc_begin0:
+8-	.file	1 "/tmp/topic006-pathfix-2b.QI0UDt/source" "topics/006-ngram-text-indexing/src/lib.rs"
+9-	.loc	1 185 0
+10-	.cfi_startproc
+11-	stp	x29, x30, [sp, #-64]!
+12-	.cfi_def_cfa_offset 64
+13-	str	x23, [sp, #16]
+14-	stp	x22, x21, [sp, #32]
+15-	stp	x20, x19, [sp, #48]
+16-	mov	x29, sp
+17-	.cfi_def_cfa w29, 64
+18-	.cfi_offset w19, -8
+--
+88-	ldp	x29, x30, [sp], #64
+89-	.cfi_def_cfa_offset 0
+90-	.cfi_restore w19
+91-	.cfi_restore w20
+92-	.cfi_restore w21
+93-	.cfi_restore w22
+94-	.cfi_restore w23
+95-	.cfi_restore w30
+96-	.cfi_restore w29
+97-	ret
+98-.Ltmp68:
+99-.Lfunc_end0:
+100:	.size	_ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE, .Lfunc_end0-_ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE
+101-	.cfi_endproc
+102-	.file	4 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/iter/adapters" "map.rs"
+103-	.file	5 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/iter/traits" "iterator.rs"
+104-	.file	6 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/iter/adapters" "filter.rs"
+105-
+106-	.section	.text._ZN27systems_snackpack_topic_00612TrigramIndex5build17h90afb4801df03c68E,"ax",@progbits
+107-	.globl	_ZN27systems_snackpack_topic_00612TrigramIndex5build17h90afb4801df03c68E
+108-	.p2align	4
+109-	.type	_ZN27systems_snackpack_topic_00612TrigramIndex5build17h90afb4801df03c68E,@function
+110-_ZN27systems_snackpack_topic_00612TrigramIndex5build17h90afb4801df03c68E:
+111-.Lfunc_begin1:
+112-	.loc	1 70 0 is_stmt 1
+--
+2307-	.uleb128 .Ltmp40-.Lfunc_begin1
+2308-	.uleb128 .Lfunc_end1-.Ltmp40
+2309-	.byte	0
+2310-	.byte	0
+2311-.Lcst_end0:
+2312-	.byte	127
+2313-	.byte	0
+2314-	.p2align	2, 0x0
+2315-.Lttbase0:
+2316-	.byte	0
+2317-	.p2align	2, 0x0
+2318-
+2319:	.section	.text._ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E,"ax",@progbits
+2320:	.globl	_ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E
+2321-	.p2align	4
+2322:	.type	_ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E,@function
+2323:_ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E:
+2324-.Lfunc_begin2:
+2325-	.loc	1 124 0
+2326-	.cfi_startproc
+2327-	.cfi_personality 156, DW.ref.rust_eh_personality
+2328-	.cfi_lsda 28, .Lexception1
+2329-	sub	sp, sp, #176
+2330-	.cfi_def_cfa_offset 176
+2331-	stp	x29, x30, [sp, #80]
+2332-	stp	x28, x27, [sp, #96]
+2333-	stp	x26, x25, [sp, #112]
+2334-	stp	x24, x23, [sp, #128]
+2335-	stp	x22, x21, [sp, #144]
+--
+2355-.Ltmp521:
+2356-	.loc	1 125 12 prologue_end
+2357-	cmp	x2, #3
+2358-	b.hs	.LBB2_3
+2359-.Ltmp522:
+2360-	.loc	7 2856 19
+2361-	ldp	x0, x24, [x22, #8]
+2362-.Ltmp523:
+2363-	.loc	1 128 32
+2364-	mov	x2, x21
+2365-	mov	x3, x20
+2366-	mov	x1, x24
+2367:	bl	_ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE
+2368-	mov	x26, x0
+2369-.LBB2_2:
+2370-	.loc	1 167 6
+2371-	mov	x0, x24
+2372-	mov	x1, x26
+2373-	.cfi_def_cfa wsp, 176
+2374-	.loc	1 167 6 epilogue_begin is_stmt 0
+2375-	ldp	x20, x19, [sp, #160]
+2376-	ldp	x22, x21, [sp, #144]
+2377-	ldp	x24, x23, [sp, #128]
+2378-	ldp	x26, x25, [sp, #112]
+2379-	ldp	x28, x27, [sp, #96]
+--
+3108-	mov	x19, x0
+3109-.Ltmp669:
+3110-	.loc	22 115 14
+3111-	mov	x0, x28
+3112-	mov	w2, #1
+3113-	bl	_RNvCsdBezzDwma51_7___rustc14___rust_dealloc
+3114-	mov	x0, x19
+3115-.Ltmp670:
+3116-.LBB2_91:
+3117-	.loc	22 0 14 is_stmt 0
+3118-	bl	_Unwind_Resume
+3119-.Lfunc_end2:
+3120:	.size	_ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E, .Lfunc_end2-_ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E
+3121-	.cfi_endproc
+3122-	.file	40 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/alloc/src/vec" "spec_from_iter_nested.rs"
+3123-	.file	41 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/alloc/src/vec" "spec_from_iter.rs"
+3124-	.file	42 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/alloc" "layout.rs"
+3125:	.section	.gcc_except_table._ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E,"a",@progbits
+3126-	.p2align	2, 0x0
+3127-GCC_except_table2:
+3128-.Lexception1:
+3129-	.byte	255
+3130-	.byte	255
+3131-	.byte	1
+3132-	.uleb128 .Lcst_end1-.Lcst_begin1
+3133-.Lcst_begin1:
+3134-	.uleb128 .Lfunc_begin2-.Lfunc_begin2
+3135-	.uleb128 .Ltmp44-.Lfunc_begin2
+3136-	.byte	0
+3137-	.byte	0
+--
+3238-.Ltmp674:
+3239-	.loc	27 1162 17
+3240-	cinc	x25, x24, lo
+3241-.Ltmp675:
+3242-	.loc	1 209 12
+3243-	cmp	w8, w23
+3244-	b.ne	.LBB3_8
+3245-	add	x0, x21, x24
+3246-.Ltmp676:
+3247-	.loc	20 152 13
+3248-	mov	x1, x20
+3249-	mov	x2, x19
+3250:	bl	bcmp
+3251-.Ltmp677:
+3252-	.loc	1 209 41
+3253-	cbz	w0, .LBB3_10
+3254-.Ltmp678:
+3255-.LBB3_8:
+3256-	.loc	1 0 41 is_stmt 0
+3257-	mov	w0, wzr
+3258-.Ltmp679:
+3259-	.loc	28 563 9 is_stmt 1
+3260-	cmp	x24, x22
+3261-	b.hs	.LBB3_3
+3262-	cmp	x25, x22
+--
+37969-	.byte	1
+37970-	.byte	3
+37971-	.word	.Linfo_string545
+37972-	.word	.Linfo_string546
+37973-	.byte	23
+37974-	.hword	1879
+37975-	.byte	1
+37976-	.byte	0
+37977-	.byte	0
+37978-	.byte	0
+37979-	.byte	0
+37980-.Ldebug_info_end0:
+37981:	.section	.text._ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE,"ax",@progbits
+37982-.Lsec_end0:
+37983-	.section	.text._ZN27systems_snackpack_topic_00612TrigramIndex5build17h90afb4801df03c68E,"ax",@progbits
+37984-.Lsec_end1:
+37985:	.section	.text._ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E,"ax",@progbits
+37986-.Lsec_end2:
+37987-	.section	.text._ZN27systems_snackpack_topic_00614contains_exact17h152785633432bbfaE,"ax",@progbits
+37988-.Lsec_end3:
+37989-	.section	".text._ZN4core3ptr123drop_in_place$LT$alloc..collections..btree..map..BTreeMap$LT$$u5b$u8$u3b$$u20$3$u5d$$C$alloc..vec..Vec$LT$usize$GT$$GT$$GT$17heb493e6193b61dbdE","ax",@progbits
+37990-.Lsec_end4:
+37991-	.section	".text._ZN4core3ptr69drop_in_place$LT$alloc..vec..Vec$LT$alloc..vec..Vec$LT$u8$GT$$GT$$GT$17h117a02a4d3bb733bE","ax",@progbits
+37992-.Lsec_end5:
+37993-	.section	.text._ZN4core5slice4sort6shared5pivot11median3_rec17h207ca54b501dd529E,"ax",@progbits
+37994-.Lsec_end6:
+37995-	.section	.text._ZN4core5slice4sort6shared5pivot11median3_rec17hd39f1166f52d4886E,"ax",@progbits
+37996-.Lsec_end7:
+37997-	.section	.text._ZN4core5slice4sort6shared9smallsort25insertion_sort_shift_left17h66cf973997d242c0E,"ax",@progbits
+--
+46204-	.asciz	"/tmp/topic006-pathfix-2b.QI0UDt/source"
+46205-.Linfo_string3:
+46206-	.asciz	"core"
+46207-.Linfo_string4:
+46208-	.asciz	"slice"
+46209-.Linfo_string5:
+46210-	.asciz	"iter"
+46211-.Linfo_string6:
+46212-	.asciz	"{impl#166}"
+46213-.Linfo_string7:
+46214-	.asciz	"_ZN91_$LT$core..slice..iter..Iter$LT$T$GT$$u20$as$u20$core..iter..traits..iterator..Iterator$GT$4fold17h5489e3a6341ff40bE"
+46215-.Linfo_string8:
+46216:	.asciz	"fold<alloc::vec::Vec<u8, alloc::alloc::Global>, usize, core::iter::adapters::map::map_fold::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, usize, usize, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>, core::iter::traits::accum::{impl#48}::sum::{closure_env#0}<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>>>>"
+46217-.Linfo_string9:
+46218-	.asciz	"adapters"
+46219-.Linfo_string10:
+46220-	.asciz	"map"
+46221-.Linfo_string11:
+46222-	.asciz	"{impl#2}"
+46223-.Linfo_string12:
+46224-	.asciz	"_ZN102_$LT$core..iter..adapters..map..Map$LT$I$C$F$GT$$u20$as$u20$core..iter..traits..iterator..Iterator$GT$4fold17h4611768524175b72E"
+46225-.Linfo_string13:
+46226:	.asciz	"fold<usize, core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>, usize, core::iter::traits::accum::{impl#48}::sum::{closure_env#0}<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>>>"
+46227-.Linfo_string14:
+46228-	.asciz	"traits"
+46229-.Linfo_string15:
+46230-	.asciz	"accum"
+46231-.Linfo_string16:
+46232-	.asciz	"{impl#48}"
+46233-.Linfo_string17:
+46234-	.asciz	"_ZN56_$LT$usize$u20$as$u20$core..iter..traits..accum..Sum$GT$3sum17ha6ed46014f09160fE"
+46235-.Linfo_string18:
+46236:	.asciz	"sum<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>>"
+46237-.Linfo_string19:
+46238-	.asciz	"iterator"
+46239-.Linfo_string20:
+46240-	.asciz	"Iterator"
+46241-.Linfo_string21:
+46242-	.asciz	"_ZN4core4iter6traits8iterator8Iterator3sum17he07f637c0ce75777E"
+46243-.Linfo_string22:
+46244:	.asciz	"sum<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>, usize>"
+46245-.Linfo_string23:
+46246-	.asciz	"filter"
+46247-.Linfo_string24:
+46248-	.asciz	"{impl#3}"
+46249-.Linfo_string25:
+46250-	.asciz	"_ZN108_$LT$core..iter..adapters..filter..Filter$LT$I$C$P$GT$$u20$as$u20$core..iter..traits..iterator..Iterator$GT$5count17h49fe665401368087E"
+46251-.Linfo_string26:
+46252:	.asciz	"count<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, systems_snackpack_topic_006::scan_count::{closure_env#0}>"
+46253-.Linfo_string27:
+46254-	.asciz	"systems_snackpack_topic_006"
+46255-.Linfo_string28:
+46256:	.asciz	"scan_count"
+46257-.Linfo_string29:
+46258:	.asciz	"_ZN27systems_snackpack_topic_00610scan_count28_$u7b$$u7b$closure$u7d$$u7d$17h2c5a3cd1afbb9fe2E"
+46259-.Linfo_string30:
+46260-	.asciz	"{closure#0}"
+46261-.Linfo_string31:
+46262-	.asciz	"count"
+46263-.Linfo_string32:
+46264-	.asciz	"to_usize"
+46265-.Linfo_string33:
+46266-	.asciz	"_ZN108_$LT$core..iter..adapters..filter..Filter$LT$I$C$P$GT$$u20$as$u20$core..iter..traits..iterator..Iterator$GT$5count8to_usize28_$u7b$$u7b$closure$u7d$$u7d$17hd72cc5b981e4922dE"
+46267-.Linfo_string34:
+46268:	.asciz	"{closure#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>"
+46269-.Linfo_string35:
+46270-	.asciz	"map_fold"
+46271-.Linfo_string36:
+46272-	.asciz	"_ZN4core4iter8adapters3map8map_fold28_$u7b$$u7b$closure$u7d$$u7d$17h29d5b3e884d808adE"
+46273-.Linfo_string37:
+46274:	.asciz	"{closure#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, usize, usize, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>, core::iter::traits::accum::{impl#48}::sum::{closure_env#0}<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>>>"
+46275-.Linfo_string38:
+46276-	.asciz	"sum"
+46277-.Linfo_string39:
+46278-	.asciz	"_ZN56_$LT$usize$u20$as$u20$core..iter..traits..accum..Sum$GT$3sum28_$u7b$$u7b$closure$u7d$$u7d$17h42fa0c6cf1a777a0E"
+46279-.Linfo_string40:
+46280:	.asciz	"{closure#0}<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>>"
+46281-.Linfo_string41:
+46282-	.asciz	"alloc"
+46283-.Linfo_string42:
+46284-	.asciz	"vec"
+46285-.Linfo_string43:
+46286-	.asciz	"Vec"
+46287-.Linfo_string44:
+46288-	.asciz	"_ZN5alloc3vec16Vec$LT$T$C$A$GT$8as_slice17h0e3cd1a989ff86a6E"
+46289-.Linfo_string45:
+46290-	.asciz	"as_slice<alloc::vec::Vec<u8, alloc::alloc::Global>, alloc::alloc::Global>"
+46291-.Linfo_string46:
+46292-	.asciz	"{impl#9}"
+--
+47620-	.asciz	"pivot"
+47621-.Linfo_string711:
+47622-	.asciz	"_ZN4core5slice4sort6shared5pivot7median317ha19cfacf34638971E"
+47623-.Linfo_string712:
+47624-	.asciz	"median3<&alloc::vec::Vec<usize, alloc::alloc::Global>, core::slice::{impl#0}::sort_unstable_by_key::{closure_env#0}<&alloc::vec::Vec<usize, alloc::alloc::Global>, usize, systems_snackpack_topic_006::{impl#0}::query::{closure_env#0}>>"
+47625-.Linfo_string713:
+47626-	.asciz	"_ZN5alloc3vec16Vec$LT$T$C$A$GT$3len17h6bf59b44c14468d5E"
+47627-.Linfo_string714:
+47628-	.asciz	"len<usize, alloc::alloc::Global>"
+47629-.Linfo_string715:
+47630-	.asciz	"query"
+47631-.Linfo_string716:
+47632:	.asciz	"_ZN27systems_snackpack_topic_00612TrigramIndex5query28_$u7b$$u7b$closure$u7d$$u7d$17hefffe8d749434e77E"
+47633-.Linfo_string717:
+47634-	.asciz	"sort_unstable_by_key"
+47635-.Linfo_string718:
+47636-	.asciz	"_ZN4core5slice29_$LT$impl$u20$$u5b$T$u5d$$GT$20sort_unstable_by_key28_$u7b$$u7b$closure$u7d$$u7d$17h009aeac3c85494d2E"
+47637-.Linfo_string719:
+47638-	.asciz	"{closure#0}<&alloc::vec::Vec<usize, alloc::alloc::Global>, usize, systems_snackpack_topic_006::{impl#0}::query::{closure_env#0}>"
+47639-.Linfo_string720:
+47640-	.asciz	"_ZN4core3ptr9const_ptr33_$LT$impl$u20$$BP$const$u20$T$GT$3add17h33d599d371a352f4E"
+47641-.Linfo_string721:
+47642-	.asciz	"_ZN50_$LT$A$u20$as$u20$core..slice..cmp..SliceChain$GT$11chaining_lt17hd351965423fa8abdE"
+47643-.Linfo_string722:
+47644-	.asciz	"chaining_lt<u8>"
+--
+48266-	.asciz	"grow"
+48267-.Linfo_string1034:
+48268-	.asciz	"_ZN4core6result19Result$LT$T$C$E$GT$7map_err17h9bf35856284a8fadE"
+48269-.Linfo_string1035:
+48270-	.asciz	"map_err<core::ptr::non_null::NonNull<[u8]>, core::alloc::AllocError, alloc::collections::TryReserveError, alloc::raw_vec::{impl#4}::finish_grow::{closure_env#0}<alloc::alloc::Global>>"
+48271-.Linfo_string1036:
+48272-	.asciz	"_ZN4core3num23_$LT$impl$u20$usize$GT$11checked_add17h31ec7b059e9d9ae5E"
+48273-.Linfo_string1037:
+48274-	.asciz	"checked_add"
+48275-.Linfo_string1038:
+48276-	.asciz	"reserve"
+48277-.Linfo_string1039:
+48278:	.asciz	"_ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE"
+48279-.Linfo_string1040:
+48280-	.asciz	"_ZN27systems_snackpack_topic_00612TrigramIndex5build17h90afb4801df03c68E"
+48281-.Linfo_string1041:
+48282-	.asciz	"build"
+48283-.Linfo_string1042:
+48284:	.asciz	"_ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E"
+48285-.Linfo_string1043:
+48286-	.asciz	"_ZN27systems_snackpack_topic_00614contains_exact17h152785633432bbfaE"
+48287-.Linfo_string1044:
+48288-	.asciz	"contains_exact"
+48289-.Linfo_string1045:
+48290-	.asciz	"_ZN4core3ptr123drop_in_place$LT$alloc..collections..btree..map..BTreeMap$LT$$u5b$u8$u3b$$u20$3$u5d$$C$alloc..vec..Vec$LT$usize$GT$$GT$$GT$17heb493e6193b61dbdE"
+48291-.Linfo_string1046:
+48292-	.asciz	"drop_in_place<alloc::collections::btree::map::BTreeMap<[u8; 3], alloc::vec::Vec<usize, alloc::alloc::Global>, alloc::alloc::Global>>"
+48293-.Linfo_string1047:
+48294-	.asciz	"_ZN4core3ptr69drop_in_place$LT$alloc..vec..Vec$LT$alloc..vec..Vec$LT$u8$GT$$GT$$GT$17h117a02a4d3bb733bE"
+48295-.Linfo_string1048:
+48296-	.asciz	"drop_in_place<alloc::vec::Vec<alloc::vec::Vec<u8, alloc::alloc::Global>, alloc::alloc::Global>>"

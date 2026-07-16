@@ -1,0 +1,6 @@
+jq_path=/usr/bin/jq
+jq_version=jq-1.8.1
+cargo_json_resolved_binary=/tmp/topic006-final-2c-20260716T155044Z-e3442c2/source/target/release/deps/selectivity-bd1c36e1c000a85b
+runner_recorded_binary=/tmp/topic006-final-2c-20260716T155044Z-e3442c2/source/target/release/deps/selectivity-bd1c36e1c000a85b
+paths_match=yes
+2ed2fc37735cd1aee47e87f79693221c663c0f7a3b8d9460c05a7a0802c3d380  /tmp/topic006-final-2c-20260716T155044Z-e3442c2/source/target/release/deps/selectivity-bd1c36e1c000a85b

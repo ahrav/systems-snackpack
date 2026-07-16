@@ -1,0 +1,4 @@
+   Compiling systems-snackpack-topic-006 v0.1.0 (/tmp/topic006-final-2c-20260716T155044Z-e3442c2/source/topics/006-ngram-text-indexing)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.29s
+     Running `target/debug/examples/check_equivalence`
+candidate_documents=2 exact_matches=1

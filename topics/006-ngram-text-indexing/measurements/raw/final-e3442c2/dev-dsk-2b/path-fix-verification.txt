@@ -1,0 +1,5 @@
+invocation_cwd=/tmp/topic006-pathfix-2b.QI0UDt/outside
+invocation=PROCESSES=12 CPU=0 ../source/topics/006-ngram-text-indexing/experiment/run_processes.sh results
+resolved_output=/tmp/topic006-pathfix-2b.QI0UDt/outside/results
+relative_output_status=ok
+wrong_repo_relative_output=absent

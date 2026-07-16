@@ -1,0 +1,47 @@
+1-#!/usr/bin/env bash
+2-set -euo pipefail
+3-
+4-root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
+5:output_dir=${1:-/tmp/systems-snackpack-topic-006}
+6-cpu=${CPU:-0}
+7-processes=${PROCESSES:-12}
+8-
+9-if (( processes < 4 || processes % 4 != 0 )); then
+10-  echo "PROCESSES must be a positive multiple of four" >&2
+11-  exit 2
+12-fi
+13-
+14:mkdir -p "$output_dir"
+15:output_dir=$(cd "$output_dir" && pwd)
+16-cd "$root"
+17-
+18:export RUSTFLAGS="-C target-cpu=native -C debuginfo=1"
+19:raw="$output_dir/processes.txt"
+20:env_record="$output_dir/host-env.txt"
+21-
+22-{
+23-  printf 'captured_utc=%s\n' "$(date -u +%FT%TZ)"
+24-  printf 'host=%s\n' "$(hostname -f 2>/dev/null || hostname)"
+25-  printf 'cpu=%s\n' "$cpu"
+26-  printf 'processes=%s\n' "$processes"
+27:  printf 'RUSTFLAGS=%s\n' "$RUSTFLAGS"
+28-  uname -a
+29-  lscpu
+30-  printf 'nproc=' && nproc
+31-  printf 'cpuset=' && taskset -pc $$
+32-  rustc -Vv
+33-  cargo -V
+--
+38-# Take the benchmark executable path from Cargo's own artifact message rather
+39-# than globbing target/release/deps, where stale selectivity-* binaries from
+40-# earlier builds could otherwise be selected.
+41-bench_binary=$(
+42-  cargo bench --message-format=json --quiet -p systems-snackpack-topic-006 \
+43-    --bench selectivity --no-run \
+44:    | jq -r 'select(.reason == "compiler-artifact"
+45-        and .target.name == "selectivity"
+46-        and (.target.kind | index("bench")))
+47-        | .executable // empty' \
+48-    | tail -n 1
+49-)
+50-if [[ -z "$bench_binary" || ! -x "$bench_binary" ]]; then

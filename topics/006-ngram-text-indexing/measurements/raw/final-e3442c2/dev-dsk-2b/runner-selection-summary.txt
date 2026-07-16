@@ -1,0 +1,11 @@
+Invocation cwd: /tmp/topic006-pathfix-2b.QI0UDt/outside
+Invocation: PROCESSES=12 CPU=0 ../source/topics/006-ngram-text-indexing/experiment/run_processes.sh results
+Resolved relative output: /tmp/topic006-pathfix-2b.QI0UDt/outside/results
+Expected outside results present: yes
+Incorrect source/results absent: yes
+jq path: /usr/bin/jq
+jq version: jq-1.8.1
+Runner exported RUSTFLAGS: -C target-cpu=native -C debuginfo=1
+Resolved executable: /tmp/topic006-pathfix-2b.QI0UDt/source/target/release/deps/selectivity-31f87ca22b6c748c
+Resolved executable SHA-256: 28b4d15868fb20d996a9cb0b448ac23749c05291b093de1bf34c7e754533f70e
+Exact-environment Cargo JSON replay selected the same executable and comparison exited 0.

@@ -1,0 +1,1 @@
+RUSTFLAGS='-C target-cpu=native -C debuginfo=1' cargo bench --message-format=json --quiet -p systems-snackpack-topic-006 --bench selectivity --no-run | jq -r 'select(.reason == "compiler-artifact" and .target.name == "selectivity" and (.target.kind | index("bench"))) | .executable // empty'

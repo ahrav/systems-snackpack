@@ -1,0 +1,146 @@
+3970-	.byte	1
+3971-	.uleb128 .Lcst_end1-.Lcst_begin1
+3972-.Lcst_begin1:
+3973-	.uleb128 .Lfunc_begin2-.Lfunc_begin2
+3974-	.uleb128 .Ltmp580-.Lfunc_begin2
+3975-	.byte	0
+3976-	.byte	0
+3977-	.uleb128 .Ltmp580-.Lfunc_begin2
+3978-	.uleb128 .Ltmp581-.Ltmp580
+3979-	.uleb128 .Ltmp582-.Lfunc_begin2
+3980-	.byte	0
+3981-	.uleb128 .Ltmp572-.Lfunc_begin2
+3982-	.uleb128 .Ltmp573-.Ltmp572
+3983-	.uleb128 .Ltmp574-.Lfunc_begin2
+3984-	.byte	0
+3985-	.uleb128 .Ltmp577-.Lfunc_begin2
+3986-	.uleb128 .Ltmp578-.Ltmp577
+3987-	.uleb128 .Ltmp579-.Lfunc_begin2
+3988-	.byte	0
+3989-	.uleb128 .Ltmp570-.Lfunc_begin2
+3990-	.uleb128 .Ltmp571-.Ltmp570
+3991-	.uleb128 .Ltmp582-.Lfunc_begin2
+3992-	.byte	0
+3993-	.uleb128 .Ltmp575-.Lfunc_begin2
+3994-	.uleb128 .Ltmp576-.Ltmp575
+3995-	.uleb128 .Ltmp579-.Lfunc_begin2
+3996-	.byte	0
+3997-	.uleb128 .Ltmp576-.Lfunc_begin2
+3998-	.uleb128 .Lfunc_end2-.Ltmp576
+3999-	.byte	0
+4000-	.byte	0
+4001-.Lcst_end1:
+4002-	.p2align	2, 0x0
+4003-
+4004-	.section	.text._ZN27systems_snackpack_topic_00614contains_exact17h5b728807dbcb1fe9E,"ax",@progbits
+4005-	.p2align	4
+4006-	.type	_ZN27systems_snackpack_topic_00614contains_exact17h5b728807dbcb1fe9E,@function
+4007-_ZN27systems_snackpack_topic_00614contains_exact17h5b728807dbcb1fe9E:
+4008-.Lfunc_begin3:
+4009-	.loc	1 199 0 is_stmt 1
+4010-	.cfi_startproc
+4011-	pushq	%rbp
+4012-	.cfi_def_cfa_offset 16
+4013-	pushq	%r15
+4014-	.cfi_def_cfa_offset 24
+4015-	pushq	%r14
+4016-	.cfi_def_cfa_offset 32
+4017-	pushq	%r13
+4018-	.cfi_def_cfa_offset 40
+4019-	pushq	%r12
+4020-	.cfi_def_cfa_offset 48
+4021-	pushq	%rbx
+4022-	.cfi_def_cfa_offset 56
+4023-	pushq	%rax
+4024-	.cfi_def_cfa_offset 64
+4025-	.cfi_offset %rbx, -56
+4026-	.cfi_offset %r12, -48
+4027-	.cfi_offset %r13, -40
+4028-	.cfi_offset %r14, -32
+4029-	.cfi_offset %r15, -24
+4030-	.cfi_offset %rbp, -16
+4031-	movq	%rdx, (%rsp)
+4032-.Ltmp818:
+4033-	.loc	38 136 9 prologue_end
+4034-	testq	%rcx, %rcx
+4035-.Ltmp819:
+4036-	.loc	1 200 8
+4037-	je	.LBB3_9
+4038-	.loc	1 0 8 is_stmt 0
+4039-	movq	%rsi, %r15
+4040-	.loc	1 203 8 is_stmt 1
+4041-	subq	%rcx, %r15
+4042-	movq	%rcx, %rbx
+4043-	jae	.LBB3_4
+4044-	.loc	1 0 8 is_stmt 0
+4045-	xorl	%eax, %eax
+4046-	.loc	1 203 8
+4047-	jmp	.LBB3_10
+4048-.LBB3_4:
+4049-	.loc	1 0 8
+4050-	movq	(%rsp), %rax
+4051-	movq	%rdi, %r12
+4052-	xorl	%r13d, %r13d
+4053-.Ltmp820:
+4054-	.loc	29 1162 17 is_stmt 1
+4055-	xorl	%r14d, %r14d
+4056-.Ltmp821:
+4057-	.loc	1 207 17
+4058-	movzbl	(%rax), %ebp
+4059-	.loc	1 0 17 is_stmt 0
+4060-.Ltmp822:
+4061-	.p2align	4
+4062-.LBB3_5:
+4063-.Ltmp823:
+4064-	.loc	22 1903 50 is_stmt 1
+4065-	cmpq	%r15, %r13
+4066-.Ltmp824:
+4067-	.loc	29 1162 17
+4068-	adcq	$0, %r14
+4069-.Ltmp825:
+4070-	.loc	1 209 12
+4071-	cmpb	%bpl, (%r12,%r13)
+4072-	jne	.LBB3_7
+4073-	.loc	1 0 12 is_stmt 0
+4074-	movq	(%rsp), %rsi
+4075-	.loc	1 209 0
+4076-	leaq	(%r12,%r13), %rdi
+4077-.Ltmp826:
+4078-	.loc	21 152 13 is_stmt 1
+4079-	movq	%rbx, %rdx
+4080:	callq	*bcmp@GOTPCREL(%rip)
+4081-	testl	%eax, %eax
+4082-.Ltmp827:
+4083-	.loc	1 209 41
+4084-	je	.LBB3_9
+4085-.Ltmp828:
+4086-.LBB3_7:
+4087-	.loc	1 0 41 is_stmt 0
+4088-	xorl	%eax, %eax
+4089-.Ltmp829:
+4090-	.loc	22 1903 50 is_stmt 1
+4091-	cmpq	%r15, %r13
+4092-.Ltmp830:
+4093-	.loc	30 563 9
+4094-	jae	.LBB3_10
+4095-	.loc	30 0 9 is_stmt 0
+4096-	movq	%r14, %r13
+4097-	.loc	30 563 9
+4098-	cmpq	%r15, %r14
+4099-	jbe	.LBB3_5
+4100-	jmp	.LBB3_10
+4101-.Ltmp831:
+4102-.LBB3_9:
+4103-	.loc	30 0 9
+4104-	movb	$1, %al
+4105-.LBB3_10:
+4106-	.loc	1 214 2 epilogue_begin is_stmt 1
+4107-	addq	$8, %rsp
+4108-	.cfi_def_cfa_offset 56
+4109-	popq	%rbx
+4110-	.cfi_def_cfa_offset 48
+4111-	popq	%r12
+4112-	.cfi_def_cfa_offset 40
+4113-	popq	%r13
+4114-	.cfi_def_cfa_offset 32
+4115-	popq	%r14

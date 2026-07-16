@@ -1,0 +1,1 @@
+cargo run -p systems-snackpack-topic-006 --example check_equivalence
