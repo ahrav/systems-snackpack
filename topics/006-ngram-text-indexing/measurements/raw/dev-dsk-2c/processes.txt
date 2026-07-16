@@ -1,0 +1,54 @@
+SESSION_START utc=2026-07-16T14:11:00Z host=dev-dsk-ahrav-2c-b89a08b3.us-west-2.amazon.com cpu=0 processes=12
+a6b903f22ce9041ef28da1a01bf53375968f2af1e8d2479aae95caf2c55f2f37  topics/006-ngram-text-indexing/src/lib.rs
+5f50a814cfc62e2749650b28dbec37ed506572dc47c4e236eaa4b05edbf2b921  topics/006-ngram-text-indexing/benches/selectivity.rs
+7913b079ab5569521904bff8968695d866f74063c3f7c3bcc45080e7a6c5a5dc  target/release/deps/selectivity-bd1c36e1c000a85b
+VERIFY status=ok checked=320 selective_hash=18349519834868522957 common_hash=2924345241696706948 selective_candidates=160 common_candidates=1310720
+PAIR_START pair=1 method_order=scan-index workload_order=selective-first utc=2026-07-16T14:11:04Z
+RESULT pid=1895969 method=scan workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13319847 build_ns=0 selective_ns=1245732135 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=672781328 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1896018 method=index workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13255476 build_ns=651969161 selective_ns=6290587 selective_hash=18349519834868522957 selective_candidates=160 common_ns=586262973 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=1 utc=2026-07-16T14:11:08Z
+PAIR_START pair=2 method_order=index-scan workload_order=selective-first utc=2026-07-16T14:11:08Z
+RESULT pid=1896059 method=index workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13339797 build_ns=650944446 selective_ns=6236336 selective_hash=18349519834868522957 selective_candidates=160 common_ns=585317050 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1896073 method=scan workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13317486 build_ns=0 selective_ns=1033701462 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=570084495 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=2 utc=2026-07-16T14:11:11Z
+PAIR_START pair=3 method_order=scan-index workload_order=common-first utc=2026-07-16T14:11:11Z
+RESULT pid=1896084 method=scan workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13238856 build_ns=0 selective_ns=1032543746 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=569807575 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1896093 method=index workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13226056 build_ns=653476697 selective_ns=6505148 selective_hash=18349519834868522957 selective_candidates=160 common_ns=586126671 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=3 utc=2026-07-16T14:11:15Z
+PAIR_START pair=4 method_order=index-scan workload_order=common-first utc=2026-07-16T14:11:15Z
+RESULT pid=1896103 method=index workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13339017 build_ns=651989840 selective_ns=6562098 selective_hash=18349519834868522957 selective_candidates=160 common_ns=585744541 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1896107 method=scan workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13301407 build_ns=0 selective_ns=1036118152 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=570723637 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=4 utc=2026-07-16T14:11:18Z
+PAIR_START pair=5 method_order=scan-index workload_order=selective-first utc=2026-07-16T14:11:18Z
+RESULT pid=1896117 method=scan workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13241467 build_ns=0 selective_ns=1239922041 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=674451319 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1896121 method=index workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13241476 build_ns=651671873 selective_ns=6227855 selective_hash=18349519834868522957 selective_candidates=160 common_ns=585529324 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=5 utc=2026-07-16T14:11:22Z
+PAIR_START pair=6 method_order=index-scan workload_order=selective-first utc=2026-07-16T14:11:22Z
+RESULT pid=1896145 method=index workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13323286 build_ns=651924664 selective_ns=6301766 selective_hash=18349519834868522957 selective_candidates=160 common_ns=586143318 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1896201 method=scan workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13297377 build_ns=0 selective_ns=1257666074 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=676191855 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=6 utc=2026-07-16T14:11:26Z
+PAIR_START pair=7 method_order=scan-index workload_order=common-first utc=2026-07-16T14:11:26Z
+RESULT pid=1896316 method=scan workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13267336 build_ns=0 selective_ns=1033637199 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=569330136 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1896330 method=index workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13236196 build_ns=652312405 selective_ns=6470637 selective_hash=18349519834868522957 selective_candidates=160 common_ns=585727165 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=7 utc=2026-07-16T14:11:30Z
+PAIR_START pair=8 method_order=index-scan workload_order=common-first utc=2026-07-16T14:11:30Z
+RESULT pid=1896419 method=index workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13293247 build_ns=650634378 selective_ns=6468458 selective_hash=18349519834868522957 selective_candidates=160 common_ns=586584438 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1896423 method=scan workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13311486 build_ns=0 selective_ns=1033324840 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=569507477 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=8 utc=2026-07-16T14:11:33Z
+PAIR_START pair=9 method_order=scan-index workload_order=selective-first utc=2026-07-16T14:11:33Z
+RESULT pid=1896433 method=scan workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13259265 build_ns=0 selective_ns=1242905232 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=674357958 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1896490 method=index workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13227585 build_ns=652343207 selective_ns=6294527 selective_hash=18349519834868522957 selective_candidates=160 common_ns=586110690 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=9 utc=2026-07-16T14:11:37Z
+PAIR_START pair=10 method_order=index-scan workload_order=selective-first utc=2026-07-16T14:11:37Z
+RESULT pid=1896606 method=index workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13340796 build_ns=650815962 selective_ns=6239506 selective_hash=18349519834868522957 selective_candidates=160 common_ns=586353430 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1896726 method=scan workload_order=selective-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13315515 build_ns=0 selective_ns=1253489670 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=673617208 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=10 utc=2026-07-16T14:11:41Z
+PAIR_START pair=11 method_order=scan-index workload_order=common-first utc=2026-07-16T14:11:41Z
+RESULT pid=1896916 method=scan workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13279106 build_ns=0 selective_ns=1033445404 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=568289014 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1897042 method=index workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13217146 build_ns=651486674 selective_ns=6654658 selective_hash=18349519834868522957 selective_candidates=160 common_ns=586046088 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=11 utc=2026-07-16T14:11:44Z
+PAIR_START pair=12 method_order=index-scan workload_order=common-first utc=2026-07-16T14:11:44Z
+RESULT pid=1897103 method=index workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13292305 build_ns=650003388 selective_ns=6431918 selective_hash=18349519834868522957 selective_candidates=160 common_ns=585857878 common_hash=2924345241696706948 common_candidates=1310720
+RESULT pid=1897123 method=scan workload_order=common-first corpus_bytes=6291456 documents=8192 document_bytes=768 queries=160 data_ns=13325747 build_ns=0 selective_ns=1035381962 selective_hash=18349519834868522957 selective_candidates=1310720 common_ns=569566269 common_hash=2924345241696706948 common_candidates=1310720
+PAIR_END pair=12 utc=2026-07-16T14:11:48Z
+SESSION_END utc=2026-07-16T14:11:48Z

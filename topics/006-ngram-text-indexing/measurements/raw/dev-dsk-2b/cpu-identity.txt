@@ -1,0 +1,12 @@
+captured_utc=2026-07-16T14:14:43Z
+dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.94-123.176.amzn2023.aarch64 #1 SMP Thu Jul  2 14:42:07 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x1
+CPU part	: 0xd40
+CPU revision	: 1
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x1
+amazon

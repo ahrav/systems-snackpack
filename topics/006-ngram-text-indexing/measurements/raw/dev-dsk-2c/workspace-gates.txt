@@ -1,0 +1,154 @@
+archive_has_no_git_metadata
+   Compiling systems-snackpack-topic-004 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/004-reading-assembly-performance)
+   Compiling systems-snackpack-topic-002 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/002-intrinsics-vs-assembly)
+   Compiling systems-snackpack-topic-003 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/003-linux-perf-workflow)
+   Compiling systems-snackpack-topic-001 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/001-swar-simd-scalar)
+   Compiling systems-snackpack-topic-006 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/006-ngram-text-indexing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_001-656593039d89089c)
+
+running 2 tests
+test tests::variants_match_for_empty_and_short_inputs ... ok
+test tests::variants_match_for_deterministic_data ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/count_eq.rs (target/debug/examples/count_eq-bb61827742c3a969)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_002-ab8f1e48947b9e23)
+
+running 2 tests
+test tests::empty_input_has_a_stable_fold ... ok
+test tests::public_paths_match_the_reference ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare.rs (target/debug/examples/compare-b5540a8b48cf6fdd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_003-a5b1b5ab1c2e10cd)
+
+running 4 tests
+test tests::completed_iterations_count_both_phases ... ok
+test tests::phase_kernels_transform_state ... ok
+test tests::zero_rounds_preserve_the_seed ... ok
+test tests::alternating_run_is_deterministic ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/perf_workload.rs (target/debug/examples/perf_workload-f131b394e8fdedae)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_004-8ce874dbaaec2f79)
+
+running 2 tests
+test tests::constant_and_runtime_division_match_for_seven ... ok
+test tests::zero_iterations_return_the_seed ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare_division.rs (target/debug/examples/compare_division-8fd6127d1052dca5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_006-7a3be8fed19086bc)
+
+running 4 tests
+test tests::document_postings_admit_wrong_distance ... ok
+test tests::index_matches_scan_across_edge_cases ... ok
+test tests::repeated_grams_keep_a_lossless_presence_filter ... ok
+test tests::short_patterns_fall_back_to_all_documents ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_equivalence.rs (target/debug/examples/check_equivalence-55cfad37d4a5e728)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+   Doc-tests systems_snackpack_topic_001
+
+running 1 test
+test topics/001-swar-simd-scalar/src/lib.rs - (line 9) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.15s; merged doctests compilation took 0.14s
+   Doc-tests systems_snackpack_topic_002
+
+running 1 test
+test topics/002-intrinsics-vs-assembly/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.15s; merged doctests compilation took 0.15s
+   Doc-tests systems_snackpack_topic_003
+
+running 1 test
+test topics/003-linux-perf-workflow/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.15s; merged doctests compilation took 0.14s
+   Doc-tests systems_snackpack_topic_004
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_006
+
+running 5 tests
+test topics/006-ngram-text-indexing/src/lib.rs - TrigramIndex::document_count (line 96) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - TrigramIndex::query (line 116) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - scan_count (line 179) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - TrigramIndex::build (line 64) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - (line 14) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.16s; merged doctests compilation took 0.16s
+    Checking systems-snackpack-topic-001 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/001-swar-simd-scalar)
+    Checking systems-snackpack-topic-006 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/006-ngram-text-indexing)
+    Checking systems-snackpack-topic-002 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/002-intrinsics-vs-assembly)
+    Checking systems-snackpack-topic-003 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/003-linux-perf-workflow)
+    Checking systems-snackpack-topic-004 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/004-reading-assembly-performance)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.17s
+   Compiling systems-snackpack-topic-006 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/006-ngram-text-indexing)
+   Compiling systems-snackpack-topic-003 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/003-linux-perf-workflow)
+   Compiling systems-snackpack-topic-001 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/001-swar-simd-scalar)
+   Compiling systems-snackpack-topic-004 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/004-reading-assembly-performance)
+   Compiling systems-snackpack-topic-002 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/002-intrinsics-vs-assembly)
+    Finished `bench` profile [optimized] target(s) in 0.51s
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_001-c2100c550c74afaf)
+  Executable benches/throughput.rs (target/release/deps/throughput-fdfc0c66c79dd4d8)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_002-93830e70f3d10283)
+  Executable benches/fold.rs (target/release/deps/fold-9c307fe32fb9442c)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_003-b9d6e0f341d20117)
+  Executable benches/phase_workload.rs (target/release/deps/phase_workload-1a97dcd880927a3e)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_004-260bfd828de220de)
+  Executable benches/division_chain.rs (target/release/deps/division_chain-8db904a7495c2a0d)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_006-49ec785d8d6c9561)
+  Executable benches/selectivity.rs (target/release/deps/selectivity-a3cfbd0b47e69591)
+ Documenting systems-snackpack-topic-001 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/001-swar-simd-scalar)
+ Documenting systems-snackpack-topic-002 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/002-intrinsics-vs-assembly)
+ Documenting systems-snackpack-topic-003 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/003-linux-perf-workflow)
+ Documenting systems-snackpack-topic-004 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/004-reading-assembly-performance)
+ Documenting systems-snackpack-topic-006 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/006-ngram-text-indexing)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s
+   Generated /tmp/systems-snackpack-topic006-b2fb451/target/doc/systems_snackpack_topic_001/index.html and 4 other files
+candidate_documents=2 exact_matches=1

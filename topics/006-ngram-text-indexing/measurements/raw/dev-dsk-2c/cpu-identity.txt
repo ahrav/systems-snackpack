@@ -1,0 +1,12 @@
+captured_utc=2026-07-16T14:14:44Z
+dev-dsk-ahrav-2c-b89a08b3.us-west-2.amazon.com
+Linux dev-dsk-ahrav-2c-b89a08b3.us-west-2.amazon.com 6.12.94-123.180.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Thu Jul  9 21:10:41 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+model name	: AMD EPYC 9R14
+model name	: AMD EPYC 9R14
+model name	: AMD EPYC 9R14
+model name	: AMD EPYC 9R14
+model name	: AMD EPYC 9R14
+model name	: AMD EPYC 9R14
+model name	: AMD EPYC 9R14
+model name	: AMD EPYC 9R14
+amazon
