@@ -63,9 +63,12 @@ if [ "$(stat -c '%F:%u' .)" != "directory:$(id -u)" ]; then
     echo "workspace root resolved to a directory not owned by the current user" >&2
     exit 1
 fi
-cp "$source_dir/boundary.wat" "$root/boundary.wat"
-cp "$source_dir/wasm_boundary_bench.c" "$root/wasm_boundary_bench.c"
-cp "$source_dir/run_processes.py" "$root/run_processes.py"
+# Copy through the verified working directory ('.'), not the $root
+# pathname, so a post-check replacement of the root entry cannot split
+# the copies from the build and run below.
+cp "$source_dir/boundary.wat" ./boundary.wat
+cp "$source_dir/wasm_boundary_bench.c" ./wasm_boundary_bench.c
+cp "$source_dir/run_processes.py" ./run_processes.py
 python3 -m py_compile run_processes.py
 eval "$build_command"
 

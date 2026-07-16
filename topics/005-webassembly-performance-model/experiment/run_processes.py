@@ -35,6 +35,18 @@ def run_one(bench, wat, iterations, order, cpu):
         )
     if record.get("correct") is not True:
         raise RuntimeError(f"child correctness failure: {record}")
+    # Summaries consume these directly; JSON permits booleans, floats, and
+    # NaN where the harness contract promises unsigned integers, so require
+    # finite non-negative ints (bool is an int subclass and is excluded).
+    for field in ("guest_ns", "host_ns", "compile_ns", "instantiate_ns",
+                  "cold_ready_ns", "warmup_ns"):
+        value = record.get(field)
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            raise RuntimeError(
+                f"child field {field} is not a non-negative integer: {record}"
+            )
+    if record["guest_ns"] == 0:
+        raise RuntimeError(f"child guest_ns is zero: {record}")
     record.update({
         "external_wall_ns": wall_ns,
         "command": command,
