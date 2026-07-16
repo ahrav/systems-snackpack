@@ -23,6 +23,12 @@ def run_one(bench, wat, iterations, order, cpu):
     if len(lines) != 1:
         raise RuntimeError(f"expected one JSON line, got {lines!r}")
     record = json.loads(lines[0])
+    if record.get("schema") != 1:
+        raise RuntimeError(f"unsupported child schema: {record}")
+    if record.get("iterations") != iterations:
+        raise RuntimeError(f"child reported different iterations: {record}")
+    if record.get("callback_calls") != iterations:
+        raise RuntimeError(f"child callback count mismatch: {record}")
     if record.get("order") != order:
         raise RuntimeError(
             f"child reported order {record.get('order')!r} for a {order!r} invocation: {record}"

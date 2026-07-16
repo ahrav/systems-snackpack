@@ -20,18 +20,19 @@ case "$(uname -m)" in
         ;;
 esac
 
-# The default root sits in shared /tmp; refuse symlinked or foreign-owned
-# workspaces and keep the tree private so another account cannot swap the
-# verified archives or extracted files between verification and use.
-if [ -L "$root" ]; then
-    echo "refusing symlinked workspace root: $root" >&2
-    exit 1
-fi
-mkdir -p "$root"
-chmod 0700 "$root"
-if [ ! -O "$root" ]; then
-    echo "workspace root is not owned by the current user: $root" >&2
-    exit 1
+# The default root sits in shared /tmp. Create it atomically: mkdir(2)
+# does not follow a trailing symlink, so a successful plain mkdir is a
+# fresh private directory and a pre-staged symlink cannot redirect it.
+# On EEXIST, validate the surviving path without following symlinks; a
+# sticky /tmp prevents another account from swapping a directory we own.
+parent="$(dirname -- "$root")"
+mkdir -p -- "$parent"
+if ! mkdir -m 0700 -- "$root" 2>/dev/null; then
+    if [ -L "$root" ] || [ ! -d "$root" ] || [ ! -O "$root" ]; then
+        echo "refusing existing unsafe workspace root: $root" >&2
+        exit 1
+    fi
+    chmod 0700 "$root"
 fi
 cd "$root"
 curl -fL --retry 3 -o wasmtime.tar.xz \

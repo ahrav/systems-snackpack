@@ -6,29 +6,27 @@ root="${WASM_TOPIC5_ROOT:-/tmp/systems-snackpack-topic-005}"
 evidence_dir="${WASM_TOPIC5_EVIDENCE_DIR:-${root}/evidence}"
 version=46.0.1
 
-# The default root sits in shared /tmp; refuse symlinked or foreign-owned
-# workspaces and keep the tree private so another account cannot swap
-# contents between verification and use.
-if [ -L "$root" ]; then
-    echo "refusing symlinked workspace root: $root" >&2
-    exit 1
-fi
-mkdir -p "$root"
-chmod 0700 "$root"
-if [ ! -O "$root" ]; then
-    echo "workspace root is not owned by the current user: $root" >&2
-    exit 1
-fi
-mkdir -p "$evidence_dir"
-if [ -L "$evidence_dir" ]; then
-    echo "refusing symlinked evidence directory: $evidence_dir" >&2
-    exit 1
-fi
-chmod 0700 "$evidence_dir"
-if [ ! -O "$evidence_dir" ]; then
-    echo "evidence directory is not owned by the current user: $evidence_dir" >&2
-    exit 1
-fi
+# The default root sits in shared /tmp. Create each directory atomically:
+# mkdir(2) does not follow a trailing symlink, so a successful plain mkdir
+# is a fresh private directory and a pre-staged symlink cannot redirect
+# it. On EEXIST, validate the surviving path without following symlinks;
+# a sticky /tmp prevents another account from swapping a directory we own.
+create_private_dir() {
+    local dir parent
+    dir="$1"
+    parent="$(dirname -- "$dir")"
+    mkdir -p -- "$parent"
+    if mkdir -m 0700 -- "$dir" 2>/dev/null; then
+        return 0
+    fi
+    if [ -L "$dir" ] || [ ! -d "$dir" ] || [ ! -O "$dir" ]; then
+        echo "refusing existing unsafe directory: $dir" >&2
+        exit 1
+    fi
+    chmod 0700 "$dir"
+}
+create_private_dir "$root"
+create_private_dir "$evidence_dir"
 # Resolve overrides to absolute paths so relative values (for example
 # WASM_TOPIC5_ROOT=work) survive the cd below.
 root="$(cd -- "$root" && pwd)"
