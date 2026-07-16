@@ -17,12 +17,13 @@ cover rebuild, runtime-version, host, fleet, instruction-set-architecture
 (ISA), or vendor variation. The two hosts remain separate experiments.
 
 Both host manifests record the same WAT, C embedder, and process-runner
-SHA-256 values — those of the sources that produced the evidence, taken at
-evidence commit `3fe13cb` (pinned in the workspace-gate logs). The harness
-has been revised since that commit: `boundary.wat` and the measured
-arithmetic are unchanged, but the per-callback guard in `host_step` changed
-from enabled asserts to unconditional checks. The tables describe the
-`3fe13cb` build; collect fresh evidence before comparing a build of the
+SHA-256 values — those of the sources that produced the evidence, preserved
+verbatim under [`raw/2026-07-15-sources/`](raw/2026-07-15-sources/) so the
+snapshot stays auditable from this repository regardless of branch history.
+The harness has been revised since that snapshot: `boundary.wat` and the
+measured arithmetic are unchanged, but the per-callback guard in `host_step`
+changed from enabled asserts to unconditional checks. The tables describe
+the snapshot build; collect fresh evidence before comparing a build of the
 current tree against them. All 24 measured processes passed correctness.
 
 | Recorded host | Guest direct | Typed callback | Paired added path | Paired ratio |
@@ -37,4 +38,5 @@ does not establish an ISA or vendor comparison.
 - [`2026-07-15-linux-aarch64.md`](2026-07-15-linux-aarch64.md): AArch64 host, method, results, and limits.
 - [`2026-07-15-linux-x86-64.md`](2026-07-15-linux-x86-64.md): x86-64 host, method, results, and limits.
 - [`raw/`](raw/): manifests with hashes, identity probes, process JSONL,
-  correctness output, native disassembly, and both full workspace-gate logs.
+  correctness output, native disassembly, both full workspace-gate logs,
+  and the verbatim evidence-time source snapshot.

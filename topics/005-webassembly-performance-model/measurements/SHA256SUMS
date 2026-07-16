@@ -10,3 +10,6 @@ a649d07cd75045ccdbaec88e310492e87534bbbce2b0282b99341ef61db78397  measurements/r
 87867445d5915ed2bb4012c1effd27ee53b7e1b0eab8bc8ad95c7c969bc61bfc  measurements/raw/2026-07-15-linux-x86-64-codegen.txt
 11feda68cfc95d890be7a43caea9372fcc4aa659756896d2b373e3e73e6435a9  measurements/raw/2026-07-15-linux-aarch64-workspace-gates.txt
 c2886e258c0ca549789f1393bb92777ccdab6aa3fbffb71a32047fd35b4f1ad6  measurements/raw/2026-07-15-linux-x86-64-workspace-gates.txt
+e5a1e6312b877545c6d0f1b1b5b675becd989c7386156e3633fa1356868512a4  measurements/raw/2026-07-15-sources/boundary.wat
+9f4ab3855957184a56e5cb037f68bfecb0de6fbff9366c6c522152804e84dfe4  measurements/raw/2026-07-15-sources/wasm_boundary_bench.c
+47010e01124f02a04a62e22434206ab14ae50fd3eb754c62d50dc5277e27ab01  measurements/raw/2026-07-15-sources/run_processes.py
