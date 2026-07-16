@@ -19,5 +19,9 @@ name = "systems-snackpack-topic-004"
 version = "0.1.0"
 
 [[package]]
+name = "systems-snackpack-topic-005"
+version = "0.1.0"
+
+[[package]]
 name = "systems-snackpack-topic-006"
 version = "0.1.0"

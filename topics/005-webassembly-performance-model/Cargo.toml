@@ -1,0 +1,9 @@
+[package]
+name = "systems-snackpack-topic-005"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
