@@ -42,7 +42,11 @@ printf '%s  %s\n' "$cli_sha" wasmtime.tar.xz | sha256sum -c -
 printf '%s  %s\n' "$c_api_sha" wasmtime-c-api.tar.xz | sha256sum -c -
 tar -xJf wasmtime.tar.xz
 tar -xJf wasmtime-c-api.tar.xz
-ln -sfn "wasmtime-v${version}-${arch}-linux" wasmtime
-ln -sfn "wasmtime-v${version}-${arch}-linux-c-api" wasmtime-c-api
+# -T treats the link name as the link itself: if a previous run left a
+# real directory at either name, plain -n would plant the new link inside
+# it and later phases would run against stale binaries or headers. With
+# -T that collision fails loudly instead.
+ln -sfnT "wasmtime-v${version}-${arch}-linux" wasmtime
+ln -sfnT "wasmtime-v${version}-${arch}-linux-c-api" wasmtime-c-api
 ./wasmtime/wasmtime --version
 strings wasmtime-c-api/lib/libwasmtime.so | sed -n 's/^version: /version: /p' | head -n 1
