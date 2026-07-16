@@ -9,21 +9,24 @@ version=46.0.1
 # The default root sits in shared /tmp. Create each directory atomically:
 # mkdir(2) does not follow a trailing symlink, so a successful plain mkdir
 # is a fresh private directory and a pre-staged symlink cannot redirect
-# it. On EEXIST, validate the surviving path without following symlinks;
-# a sticky /tmp prevents another account from swapping a directory we own.
+# it. On EEXIST, validate the surviving entry with one no-follow stat that
+# captures type and owner together: an entry that is a directory owned by
+# this user cannot be replaced by another account in a sticky parent, so
+# the validated precondition holds for every later use of the path.
 create_private_dir() {
-    local dir parent
+    local dir parent entry
     dir="$1"
     parent="$(dirname -- "$dir")"
     mkdir -p -- "$parent"
     if mkdir -m 0700 -- "$dir" 2>/dev/null; then
         return 0
     fi
-    if [ -L "$dir" ] || [ ! -d "$dir" ] || [ ! -O "$dir" ]; then
-        echo "refusing existing unsafe directory: $dir" >&2
+    entry="$(stat -c '%F:%u' -- "$dir" 2>/dev/null)" || entry="missing"
+    if [ "$entry" != "directory:$(id -u)" ]; then
+        echo "refusing existing unsafe directory: $dir ($entry)" >&2
         exit 1
     fi
-    chmod 0700 "$dir"
+    chmod 0700 -- "$dir"
 }
 create_private_dir "$root"
 create_private_dir "$evidence_dir"
@@ -54,6 +57,12 @@ build_command="gcc -O2 -std=c11 -Wall -Wextra -Werror -Iwasmtime-c-api/include w
 runner_command="./run_processes.py --bench ./wasm_boundary_bench --wat ./boundary.wat --iterations 10000000 --runs 12 --cpu ${cpu} --warmup-processes 2"
 
 cd "$root"
+# Re-verify through the working-directory handle: '.' names the resolved
+# inode, so this check cannot be raced by pathname replacement.
+if [ "$(stat -c '%F:%u' .)" != "directory:$(id -u)" ]; then
+    echo "workspace root resolved to a directory not owned by the current user" >&2
+    exit 1
+fi
 cp "$source_dir/boundary.wat" "$root/boundary.wat"
 cp "$source_dir/wasm_boundary_bench.c" "$root/wasm_boundary_bench.c"
 cp "$source_dir/run_processes.py" "$root/run_processes.py"

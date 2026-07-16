@@ -23,18 +23,27 @@ esac
 # The default root sits in shared /tmp. Create it atomically: mkdir(2)
 # does not follow a trailing symlink, so a successful plain mkdir is a
 # fresh private directory and a pre-staged symlink cannot redirect it.
-# On EEXIST, validate the surviving path without following symlinks; a
-# sticky /tmp prevents another account from swapping a directory we own.
+# On EEXIST, validate the surviving entry with one no-follow stat that
+# captures type and owner together: an entry that is a directory owned
+# by this user cannot be replaced by another account in a sticky parent,
+# so the validated precondition holds for every later use of the path.
 parent="$(dirname -- "$root")"
 mkdir -p -- "$parent"
 if ! mkdir -m 0700 -- "$root" 2>/dev/null; then
-    if [ -L "$root" ] || [ ! -d "$root" ] || [ ! -O "$root" ]; then
-        echo "refusing existing unsafe workspace root: $root" >&2
+    entry="$(stat -c '%F:%u' -- "$root" 2>/dev/null)" || entry="missing"
+    if [ "$entry" != "directory:$(id -u)" ]; then
+        echo "refusing existing unsafe workspace root: $root ($entry)" >&2
         exit 1
     fi
-    chmod 0700 "$root"
+    chmod 0700 -- "$root"
 fi
 cd "$root"
+# Re-verify through the working-directory handle: '.' names the resolved
+# inode, so this check cannot be raced by pathname replacement.
+if [ "$(stat -c '%F:%u' .)" != "directory:$(id -u)" ]; then
+    echo "workspace root resolved to a directory not owned by the current user" >&2
+    exit 1
+fi
 curl -fL --retry 3 -o wasmtime.tar.xz \
     "https://github.com/bytecodealliance/wasmtime/releases/download/v${version}/wasmtime-v${version}-${arch}-linux.tar.xz"
 curl -fL --retry 3 -o wasmtime-c-api.tar.xz \
