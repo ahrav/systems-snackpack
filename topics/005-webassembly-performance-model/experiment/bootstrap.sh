@@ -20,7 +20,19 @@ case "$(uname -m)" in
         ;;
 esac
 
+# The default root sits in shared /tmp; refuse symlinked or foreign-owned
+# workspaces and keep the tree private so another account cannot swap the
+# verified archives or extracted files between verification and use.
+if [ -L "$root" ]; then
+    echo "refusing symlinked workspace root: $root" >&2
+    exit 1
+fi
 mkdir -p "$root"
+chmod 0700 "$root"
+if [ ! -O "$root" ]; then
+    echo "workspace root is not owned by the current user: $root" >&2
+    exit 1
+fi
 cd "$root"
 curl -fL --retry 3 -o wasmtime.tar.xz \
     "https://github.com/bytecodealliance/wasmtime/releases/download/v${version}/wasmtime-v${version}-${arch}-linux.tar.xz"

@@ -6,18 +6,50 @@ root="${WASM_TOPIC5_ROOT:-/tmp/systems-snackpack-topic-005}"
 evidence_dir="${WASM_TOPIC5_EVIDENCE_DIR:-${root}/evidence}"
 version=46.0.1
 
+# The default root sits in shared /tmp; refuse symlinked or foreign-owned
+# workspaces and keep the tree private so another account cannot swap
+# contents between verification and use.
+if [ -L "$root" ]; then
+    echo "refusing symlinked workspace root: $root" >&2
+    exit 1
+fi
+mkdir -p "$root"
+chmod 0700 "$root"
+if [ ! -O "$root" ]; then
+    echo "workspace root is not owned by the current user: $root" >&2
+    exit 1
+fi
+mkdir -p "$evidence_dir"
+if [ ! -O "$evidence_dir" ]; then
+    echo "evidence directory is not owned by the current user: $evidence_dir" >&2
+    exit 1
+fi
+# Resolve overrides to absolute paths so relative values (for example
+# WASM_TOPIC5_ROOT=work) survive the cd below.
+root="$(cd -- "$root" && pwd)"
+evidence_dir="$(cd -- "$evidence_dir" && pwd)"
+
 case "$(uname -m)" in
     aarch64) archive_arch=aarch64 ;;
     x86_64) archive_arch=x86_64 ;;
     *) echo "unsupported host architecture: $(uname -m)" >&2; exit 1 ;;
 esac
 
+# CPU 0 is not guaranteed to be usable under cpusets or container
+# affinity limits; default to the first CPU in this shell's affinity set
+# and let WASM_TOPIC5_CPU override it.
+affinity_list="$(taskset -pc $$ | sed 's/.*: //')"
+default_cpu="${affinity_list%%[-,]*}"
+cpu="${WASM_TOPIC5_CPU:-$default_cpu}"
+case "$cpu" in
+    ''|*[!0-9]*) echo "invalid benchmark CPU: '$cpu'" >&2; exit 1 ;;
+esac
+
 cli_url="https://github.com/bytecodealliance/wasmtime/releases/download/v${version}/wasmtime-v${version}-${archive_arch}-linux.tar.xz"
 c_api_url="https://github.com/bytecodealliance/wasmtime/releases/download/v${version}/wasmtime-v${version}-${archive_arch}-linux-c-api.tar.xz"
 build_command="gcc -O2 -std=c11 -Wall -Wextra -Werror -Iwasmtime-c-api/include wasm_boundary_bench.c -Lwasmtime-c-api/lib -Wl,-rpath,'\$ORIGIN/wasmtime-c-api/lib' -lwasmtime -ldl -lm -lpthread -o wasm_boundary_bench"
-runner_command="./run_processes.py --bench ./wasm_boundary_bench --wat ./boundary.wat --iterations 10000000 --runs 12 --cpu 0 --warmup-processes 2"
+runner_command="./run_processes.py --bench ./wasm_boundary_bench --wat ./boundary.wat --iterations 10000000 --runs 12 --cpu ${cpu} --warmup-processes 2"
 
-mkdir -p "$root" "$evidence_dir"
 cd "$root"
 cp "$source_dir/boundary.wat" "$root/boundary.wat"
 cp "$source_dir/wasm_boundary_bench.c" "$root/wasm_boundary_bench.c"
@@ -40,8 +72,8 @@ eval "$runner_command" > raw-processes.jsonl
     printf 'nproc='; nproc
     printf 'affinity='; taskset -pc $$
     printf 'os_release='; . /etc/os-release; printf '%s %s\n' "$NAME" "$VERSION_ID"
-    printf 'cpu_model='; lscpu | sed -n -e 's/^Model name:[[:space:]]*//p' -e 's/^Vendor ID:[[:space:]]*//p' | tr '\n' '|'; printf '\n'
-    printf 'cpu_flags='; lscpu | sed -n -e 's/^Flags:[[:space:]]*//p'
+    printf 'cpu_model='; LC_ALL=C lscpu | sed -n -e 's/^Model name:[[:space:]]*//p' -e 's/^Vendor ID:[[:space:]]*//p' | tr '\n' '|'; printf '\n'
+    printf 'cpu_flags='; LC_ALL=C lscpu | sed -n -e 's/^Flags:[[:space:]]*//p'
     printf 'gcc_version='; gcc --version | sed -n '1p'
     printf 'python_version='; python3 --version
     printf 'rustc_begin\n'; rustc -vV 2>&1 || true; printf 'rustc_end\n'
@@ -71,7 +103,7 @@ eval "$runner_command" > raw-processes.jsonl
     printf 'dmi_vendor='; sed -n '1p' /sys/class/dmi/id/sys_vendor 2>/dev/null || true
     printf 'midr_el1='; sed -n '1p' /sys/devices/system/cpu/cpu0/regs/identification/midr_el1 2>/dev/null || true; printf '\n'
     printf 'lscpu_identity_begin\n'
-    lscpu | sed -n -e '/^Architecture:/p' -e '/^Vendor ID:/p' -e '/^Model name:/p' \
+    LC_ALL=C lscpu | sed -n -e '/^Architecture:/p' -e '/^Vendor ID:/p' -e '/^Model name:/p' \
         -e '/^CPU family:/p' -e '/^Model:/p' -e '/^Stepping:/p' \
         -e '/^Hypervisor vendor:/p' -e '/^Virtualization type:/p'
     printf 'lscpu_identity_end\n'

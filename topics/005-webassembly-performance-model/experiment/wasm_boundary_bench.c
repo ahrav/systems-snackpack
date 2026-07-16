@@ -1,6 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
 
-#include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <stdbool.h>
@@ -94,9 +93,13 @@ static wasm_trap_t *host_step(void *env, wasmtime_caller_t *caller,
                               const wasmtime_val_t *args, size_t nargs,
                               wasmtime_val_t *results, size_t nresults) {
   (void)caller;
-  assert(nargs == 1);
-  assert(nresults == 1);
-  assert(args[0].kind == WASMTIME_I64);
+  // Wasmtime enforces the wasm_functype_new_1_1(i64, i64) signature before
+  // dispatch; these unconditional checks guard the contract even in builds
+  // that define NDEBUG, where assert() would compile away.
+  if (nargs != 1 || nresults != 1 || args[0].kind != WASMTIME_I64) {
+    static const char message[] = "host_step signature contract violated";
+    return wasmtime_trap_new(message, sizeof(message) - 1);
+  }
   struct callback_state *state = env;
   state->calls++;
   uint64_t x = (uint64_t)args[0].of.i64;
@@ -130,7 +133,10 @@ static uint64_t invoke_loop(wasmtime_context_t *context,
   if (error != NULL || trap != NULL) {
     fail_wasmtime("wasmtime_func_call", error, trap);
   }
-  assert(result.kind == WASMTIME_I64);
+  if (result.kind != WASMTIME_I64) {
+    fprintf(stderr, "unexpected result kind from wasmtime_func_call\n");
+    exit(1);
+  }
   *elapsed_ns = end - start;
   return (uint64_t)result.of.i64;
 }
@@ -178,15 +184,25 @@ int main(int argc, char **argv) {
   }
 
   wasm_config_t *config = wasm_config_new();
-  assert(config != NULL);
+  if (config == NULL) {
+    fprintf(stderr, "wasm_config_new returned NULL\n");
+    return 1;
+  }
   wasmtime_config_strategy_set(config, WASMTIME_STRATEGY_CRANELIFT);
   wasmtime_config_cranelift_opt_level_set(config, WASMTIME_OPT_LEVEL_SPEED);
   wasmtime_config_parallel_compilation_set(config, false);
   t0 = monotonic_ns();
   wasm_engine_t *engine = wasm_engine_new_with_config(config);
   uint64_t engine_create_ns = monotonic_ns() - t0;
-  assert(engine != NULL);
+  if (engine == NULL) {
+    fprintf(stderr, "wasm_engine_new_with_config returned NULL\n");
+    return 1;
+  }
 
+  // wasmtime_module_new validates the raw bytes again as part of
+  // compilation; it cannot reuse this standalone pass. validate_ns
+  // measures validation in isolation, compile_ns includes a second
+  // validation, and cold_ready_ns includes both passes.
   t0 = monotonic_ns();
   error = wasmtime_module_validate(engine, (const uint8_t *)wasm.data,
                                    wasm.size);
@@ -227,7 +243,10 @@ int main(int argc, char **argv) {
 
   t0 = monotonic_ns();
   wasmtime_store_t *store = wasmtime_store_new(engine, NULL, NULL);
-  assert(store != NULL);
+  if (store == NULL) {
+    fprintf(stderr, "wasmtime_store_new returned NULL\n");
+    return 1;
+  }
   wasmtime_context_t *context = wasmtime_store_context(store);
   struct callback_state callback = {0};
   wasm_functype_t *host_type = wasm_functype_new_1_1(
@@ -257,8 +276,17 @@ int main(int argc, char **argv) {
       context, &instance, "guest_loop", strlen("guest_loop"), &guest_export);
   bool host_ok = wasmtime_instance_export_get(
       context, &instance, "host_loop", strlen("host_loop"), &host_export);
-  assert(guest_ok && guest_export.kind == WASMTIME_EXTERN_FUNC);
-  assert(host_ok && host_export.kind == WASMTIME_EXTERN_FUNC);
+  // Export lookup failure is a runtime condition, not a programmer
+  // invariant; guard it unconditionally so an NDEBUG build cannot hand
+  // invoke_loop an uninitialized function handle.
+  if (!guest_ok || guest_export.kind != WASMTIME_EXTERN_FUNC) {
+    fprintf(stderr, "guest_loop export missing or not a function\n");
+    return 1;
+  }
+  if (!host_ok || host_export.kind != WASMTIME_EXTERN_FUNC) {
+    fprintf(stderr, "host_loop export missing or not a function\n");
+    return 1;
+  }
   uint64_t export_lookup_ns = monotonic_ns() - t0;
   uint64_t cold_ready_ns = monotonic_ns() - process_start_ns;
 

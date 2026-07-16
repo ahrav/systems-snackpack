@@ -75,9 +75,11 @@ so both paths include one C-to-Wasm call.
 
 The C embedder timestamps WAT file loading, WAT decoding, engine creation,
 validation, compilation, store and import setup, instantiation, export lookup,
-internal warmup, and the two measured calls. `cold_ready_ns` spans process entry
-through export lookup; it is a harness-specific readiness measurement, not an
-application startup result.
+internal warmup, and the two measured calls. `wasmtime_module_new` validates
+the module bytes again internally, so the standalone validation phase and the
+compilation phase repeat that work rather than partitioning it.
+`cold_ready_ns` spans process entry through export lookup; it is a
+harness-specific readiness measurement, not an application startup result.
 
 Run the independent Rust digest check:
 
@@ -98,7 +100,8 @@ The scripts verify the Wasmtime 46.0.1 release archives by SHA-256 and configure
 Cranelift with speed optimization and parallel compilation disabled. By
 default, they use `/tmp/systems-snackpack-topic-005` and write evidence beneath
 its `evidence/` directory. Set `WASM_TOPIC5_ROOT` and
-`WASM_TOPIC5_EVIDENCE_DIR` to change those paths.
+`WASM_TOPIC5_EVIDENCE_DIR` to change those paths. Benchmark children pin to
+the first CPU in the script's affinity set; set `WASM_TOPIC5_CPU` to override.
 
 The runner excludes two whole-process warmups. Each child process also performs
 three unmeasured internal warmup rounds of 100,000 steps per path. It then makes

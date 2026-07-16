@@ -8,14 +8,20 @@ manifest, excluded warmups, measurements, and summary.
 
 For 12 ordered paired differences, `[X_(3), X_(10)]` is an exact 96.142578125%
 sign interval for the population median under independent, identically
-distributed, continuous sampling. The interval covers process variation within
-one host, build, and time block. It does not cover rebuild, runtime-version,
-host, fleet, instruction-set-architecture (ISA), or vendor variation. The two
-hosts remain separate experiments.
+distributed, continuous sampling. The runner alternates guest-first and
+host-first order deterministically, so the pooled sample mixes the two order
+strata; under an order effect the stated coverage holds only within that iid
+idealization, and each host record reports per-order medians. The interval
+covers process variation within one host, build, and time block. It does not
+cover rebuild, runtime-version, host, fleet, instruction-set-architecture
+(ISA), or vendor variation. The two hosts remain separate experiments.
 
 Both host manifests record the same WAT, C embedder, and process-runner
-SHA-256 values; those hashes match the checked-in experiment sources. All 24
-measured processes passed correctness.
+SHA-256 values, matching the experiment sources at evidence commit `3fe13cb`
+(pinned in the workspace-gate logs). Post-review hardening later changed the
+embedder, runner, and shell scripts; `boundary.wat` and the measured
+arithmetic and timed phases are unchanged. All 24 measured processes passed
+correctness.
 
 | Recorded host | Guest direct | Typed callback | Paired added path | Paired ratio |
 |---|---:|---:|---:|---:|
