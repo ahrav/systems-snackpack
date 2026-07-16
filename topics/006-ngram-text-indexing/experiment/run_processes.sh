@@ -12,6 +12,7 @@ if (( processes < 4 || processes % 4 != 0 )); then
 fi
 
 mkdir -p "$output_dir"
+output_dir=$(cd "$output_dir" && pwd)
 cd "$root"
 
 export RUSTFLAGS="-C target-cpu=native -C debuginfo=1"

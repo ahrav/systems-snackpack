@@ -122,6 +122,8 @@ Run 12 order-balanced process pairs on Linux CPU 0:
 topics/006-ngram-text-indexing/experiment/run_processes.sh /tmp/topic-006
 ```
 
+The runner requires Bash, Cargo, `jq`, `taskset`, `lscpu`, and `sha256sum`.
+
 Generate release assembly:
 
 ```bash
