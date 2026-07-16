@@ -23,6 +23,10 @@ def run_one(bench, wat, iterations, order, cpu):
     if len(lines) != 1:
         raise RuntimeError(f"expected one JSON line, got {lines!r}")
     record = json.loads(lines[0])
+    if record.get("order") != order:
+        raise RuntimeError(
+            f"child reported order {record.get('order')!r} for a {order!r} invocation: {record}"
+        )
     if not record.get("correct"):
         raise RuntimeError(f"child correctness failure: {record}")
     record.update({

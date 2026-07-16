@@ -20,6 +20,11 @@ if [ ! -O "$root" ]; then
     exit 1
 fi
 mkdir -p "$evidence_dir"
+if [ -L "$evidence_dir" ]; then
+    echo "refusing symlinked evidence directory: $evidence_dir" >&2
+    exit 1
+fi
+chmod 0700 "$evidence_dir"
 if [ ! -O "$evidence_dir" ]; then
     echo "evidence directory is not owned by the current user: $evidence_dir" >&2
     exit 1
@@ -85,7 +90,8 @@ eval "$runner_command" > raw-processes.jsonl
     printf 'explicit_wasmtime_config=Cranelift; opt-level=speed; parallel-compilation=false; no target override; Config infers native host target/features\n'
     printf 'build_command=%s\n' "$build_command"
     printf 'runner_command=%s\n' "$runner_command"
-    printf 'governor='; sed -n '1p' /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || printf 'unavailable\n'
+    printf 'benchmark_cpu=%s\n' "$cpu"
+    printf 'governor='; sed -n '1p' "/sys/devices/system/cpu/cpu${cpu}/cpufreq/scaling_governor" 2>/dev/null || printf 'unavailable\n'
     printf 'intel_no_turbo='; sed -n '1p' /sys/devices/system/cpu/intel_pstate/no_turbo 2>/dev/null || printf 'unavailable\n'
     printf 'amd_boost='; sed -n '1p' /sys/devices/system/cpu/cpufreq/boost 2>/dev/null || printf 'unavailable\n'
     printf 'perf_version='; perf --version 2>&1 || true
@@ -101,7 +107,8 @@ eval "$runner_command" > raw-processes.jsonl
     printf 'hostname='; hostname -f 2>/dev/null || hostname
     printf 'dmi_product='; sed -n '1p' /sys/class/dmi/id/product_name 2>/dev/null || true
     printf 'dmi_vendor='; sed -n '1p' /sys/class/dmi/id/sys_vendor 2>/dev/null || true
-    printf 'midr_el1='; sed -n '1p' /sys/devices/system/cpu/cpu0/regs/identification/midr_el1 2>/dev/null || true; printf '\n'
+    printf 'benchmark_cpu=%s\n' "$cpu"
+    printf 'midr_el1='; sed -n '1p' "/sys/devices/system/cpu/cpu${cpu}/regs/identification/midr_el1" 2>/dev/null || true; printf '\n'
     printf 'lscpu_identity_begin\n'
     LC_ALL=C lscpu | sed -n -e '/^Architecture:/p' -e '/^Vendor ID:/p' -e '/^Model name:/p' \
         -e '/^CPU family:/p' -e '/^Model:/p' -e '/^Stepping:/p' \

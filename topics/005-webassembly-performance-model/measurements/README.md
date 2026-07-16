@@ -17,11 +17,11 @@ cover rebuild, runtime-version, host, fleet, instruction-set-architecture
 (ISA), or vendor variation. The two hosts remain separate experiments.
 
 Both host manifests record the same WAT, C embedder, and process-runner
-SHA-256 values, matching the experiment sources at evidence commit `3fe13cb`
-(pinned in the workspace-gate logs). Post-review hardening later changed the
-embedder, runner, and shell scripts; `boundary.wat` and the measured
-arithmetic and timed phases are unchanged. All 24 measured processes passed
-correctness.
+SHA-256 values — those of the sources that produced the evidence, taken at
+evidence commit `3fe13cb` (pinned in the workspace-gate logs). The harness in
+this topic has been revised since that commit; `boundary.wat`, the measured
+arithmetic, and the timed phases are unchanged. All 24 measured processes
+passed correctness.
 
 | Recorded host | Guest direct | Typed callback | Paired added path | Paired ratio |
 |---|---:|---:|---:|---:|
