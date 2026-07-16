@@ -137,10 +137,11 @@ fn candidate_total(backend: &Backend, queries: &[Vec<u8>]) -> usize {
 }
 
 fn time_workload(backend: &Backend, queries: &[Vec<u8>]) -> (u128, u64) {
-    // Measure one complete batch after warming the first four queries. The
-    // interval contains only `run_queries` and excludes caller-side setup and
-    // diagnostics.
-    black_box(run_queries(backend, &queries[..4]));
+    // Measure one complete batch after warming the first four queries (or the
+    // whole batch when fewer are supplied). The interval contains only
+    // `run_queries` and excludes caller-side setup and diagnostics.
+    let warmup_len = queries.len().min(4);
+    black_box(run_queries(backend, &queries[..warmup_len]));
     let start = Instant::now();
     let hash = run_queries(backend, queries);
     (start.elapsed().as_nanos(), hash)

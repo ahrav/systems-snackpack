@@ -190,7 +190,9 @@ pub fn scan_count(documents: &[Vec<u8>], needle: &[u8]) -> usize {
 }
 
 fn to_gram(window: &[u8]) -> Gram {
-    [window[0], window[1], window[2]]
+    window
+        .try_into()
+        .expect("window is exactly GRAM_BYTES bytes")
 }
 
 #[inline(never)]

@@ -35,7 +35,9 @@ env_record="$output_dir/host-env.txt"
 } > "$env_record"
 
 cargo bench --quiet -p systems-snackpack-topic-006 --bench selectivity --no-run
-bench_binary=$(rg --files target/release/deps | rg '/selectivity-[0-9a-f]+$' | sort | tail -n 1)
+# Pick the most recently built bench binary by mtime; a lexicographic sort on
+# the hash suffix could silently select a stale artifact after partial cleans.
+bench_binary=$(rg --files target/release/deps | rg '/selectivity-[0-9a-f]+$' | xargs -r ls -t | head -n 1)
 
 : > "$raw"
 {
