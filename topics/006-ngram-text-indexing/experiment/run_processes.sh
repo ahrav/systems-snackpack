@@ -15,6 +15,9 @@ mkdir -p "$output_dir"
 output_dir=$(cd "$output_dir" && pwd)
 cd "$root"
 
+# Cargo prefers an inherited CARGO_ENCODED_RUSTFLAGS over RUSTFLAGS; clear it
+# so the flags recorded in host-env.txt are the flags the build actually used.
+unset CARGO_ENCODED_RUSTFLAGS
 export RUSTFLAGS="-C target-cpu=native -C debuginfo=1"
 raw="$output_dir/processes.txt"
 env_record="$output_dir/host-env.txt"
