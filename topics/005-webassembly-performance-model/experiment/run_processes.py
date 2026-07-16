@@ -25,9 +25,16 @@ def run_one(bench, wat, iterations, order, cpu):
     record = json.loads(lines[0])
     if record.get("schema") != 1:
         raise RuntimeError(f"unsupported child schema: {record}")
-    if record.get("iterations") != iterations:
+    # JSON floats such as 10000000.0 compare equal to the requested int;
+    # the harness contract promises unsigned integers, so require real
+    # ints (bool is an int subclass and is excluded) before comparing.
+    for field in ("iterations", "callback_calls"):
+        value = record.get(field)
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise RuntimeError(f"child field {field} is not an integer: {record}")
+    if record["iterations"] != iterations:
         raise RuntimeError(f"child reported different iterations: {record}")
-    if record.get("callback_calls") != iterations:
+    if record["callback_calls"] != iterations:
         raise RuntimeError(f"child callback count mismatch: {record}")
     if record.get("order") != order:
         raise RuntimeError(

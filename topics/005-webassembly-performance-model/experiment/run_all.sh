@@ -69,6 +69,9 @@ fi
 cp "$source_dir/boundary.wat" ./boundary.wat
 cp "$source_dir/wasm_boundary_bench.c" ./wasm_boundary_bench.c
 cp "$source_dir/run_processes.py" ./run_processes.py
+# cp preserves an existing destination's mode; a reused workspace could
+# hold a non-executable runner and fail only at invocation time.
+chmod 0755 ./run_processes.py
 python3 -m py_compile run_processes.py
 eval "$build_command"
 
