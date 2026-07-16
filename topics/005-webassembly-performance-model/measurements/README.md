@@ -18,10 +18,12 @@ cover rebuild, runtime-version, host, fleet, instruction-set-architecture
 
 Both host manifests record the same WAT, C embedder, and process-runner
 SHA-256 values — those of the sources that produced the evidence, taken at
-evidence commit `3fe13cb` (pinned in the workspace-gate logs). The harness in
-this topic has been revised since that commit; `boundary.wat`, the measured
-arithmetic, and the timed phases are unchanged. All 24 measured processes
-passed correctness.
+evidence commit `3fe13cb` (pinned in the workspace-gate logs). The harness
+has been revised since that commit: `boundary.wat` and the measured
+arithmetic are unchanged, but the per-callback guard in `host_step` changed
+from enabled asserts to unconditional checks. The tables describe the
+`3fe13cb` build; collect fresh evidence before comparing a build of the
+current tree against them. All 24 measured processes passed correctness.
 
 | Recorded host | Guest direct | Typed callback | Paired added path | Paired ratio |
 |---|---:|---:|---:|---:|
