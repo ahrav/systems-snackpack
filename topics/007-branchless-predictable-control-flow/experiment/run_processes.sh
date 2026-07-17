@@ -10,7 +10,7 @@ warmup_repetitions=${WARMUP_REPETITIONS:-16}
 
 for value_name in pairs length repetitions warmup_repetitions; do
   value=${!value_name}
-  if [[ ! $value =~ ^[0-9]+$ ]]; then
+  if [[ ! $value =~ ^(0|[1-9][0-9]*)$ ]]; then
     echo "$value_name must be an unsigned integer, got: $value" >&2
     exit 2
   fi
@@ -23,7 +23,8 @@ if (( length == 0 || repetitions == 0 || warmup_repetitions == 0 )); then
   echo "LENGTH, REPETITIONS, and WARMUP_REPETITIONS must be nonzero" >&2
   exit 2
 fi
-for command_name in cargo date gcc jq nproc rustc sha256sum taskset; do
+for command_name in cargo date dirname gcc hostname jq lscpu mkdir nproc python3 \
+  rustc sed seq sha256sum tail taskset tee uname; do
   if ! command -v "$command_name" >/dev/null; then
     echo "required command not found: $command_name" >&2
     exit 2
@@ -40,7 +41,7 @@ if [[ ! $allowed =~ ^([0-9]+) ]]; then
   exit 2
 fi
 cpu=${CPU:-${BASH_REMATCH[1]}}
-if [[ ! $cpu =~ ^[0-9]+$ ]]; then
+if [[ ! $cpu =~ ^(0|[1-9][0-9]*)$ ]]; then
   echo "CPU must name one logical CPU, got: $cpu" >&2
   exit 2
 fi

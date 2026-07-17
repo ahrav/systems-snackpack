@@ -29,10 +29,34 @@ def main() -> None:
         raise SystemExit("expected exactly one SESSION_START record")
     if sum(line.startswith("SESSION_END ") for line in lines) != 1:
         raise SystemExit("expected exactly one SESSION_END record")
-    if sum(line.startswith("PAIR_START ") for line in lines) != 12:
+    pair_starts = [parse_result(line) for line in lines if line.startswith("PAIR_START ")]
+    pair_ends = [parse_result(line) for line in lines if line.startswith("PAIR_END ")]
+    if len(pair_starts) != 12:
         raise SystemExit("expected 12 PAIR_START records")
-    if sum(line.startswith("PAIR_END ") for line in lines) != 12:
+    if len(pair_ends) != 12:
         raise SystemExit("expected 12 PAIR_END records")
+
+    pattern_orders = (
+        "zeros,alternating,random",
+        "zeros,random,alternating",
+        "alternating,zeros,random",
+        "alternating,random,zeros",
+        "random,zeros,alternating",
+        "random,alternating,zeros",
+    )
+    starts_by_pair = {int(record["pair"]): record for record in pair_starts}
+    ends_by_pair = {int(record["pair"]): record for record in pair_ends}
+    if set(starts_by_pair) != set(range(1, 13)) or len(starts_by_pair) != 12:
+        raise SystemExit("PAIR_START identifiers must be exactly 1..12")
+    if set(ends_by_pair) != set(range(1, 13)) or len(ends_by_pair) != 12:
+        raise SystemExit("PAIR_END identifiers must be exactly 1..12")
+    for pair, record in starts_by_pair.items():
+        pattern_index = (pair - 1 + (pair - 1) // 6) % 6
+        expected_variant_order = "branch,select" if pair % 2 == 1 else "select,branch"
+        if record.get("pattern_order") != pattern_orders[pattern_index]:
+            raise SystemExit(f"pair {pair} has invalid pattern order")
+        if record.get("variant_order") != expected_variant_order:
+            raise SystemExit(f"pair {pair} has invalid declared variant order")
 
     records = [
         parse_result(line)
@@ -72,6 +96,8 @@ def main() -> None:
         values = {record[field] for record in records}
         if len(values) != 1:
             raise SystemExit(f"inconsistent {field} values: {sorted(values)}")
+        if int(next(iter(values))) <= 0:
+            raise SystemExit(f"{field} must be positive")
 
     combinations = Counter(
         (record["pattern"], record["variant"], int(record["pair"]))
@@ -113,6 +139,13 @@ def main() -> None:
         for field in ("timed_ns", "main_ns", "external_wall_ns"):
             if int(record[field]) <= 0:
                 raise SystemExit(f"nonpositive {field} in pid {record['pid']}")
+        decisions = int(record["length"]) * int(record["repetitions"])
+        observed_rate = float(record["ns_per_decision"])
+        expected_rate = int(record["timed_ns"]) / decisions
+        if not math.isfinite(observed_rate) or observed_rate <= 0:
+            raise SystemExit(f"invalid ns_per_decision in pid {record['pid']}")
+        if not math.isclose(observed_rate, expected_rate, rel_tol=2e-9, abs_tol=1e-9):
+            raise SystemExit(f"inconsistent ns_per_decision in pid {record['pid']}")
 
     grouped: dict[tuple[str, str], list[float]] = defaultdict(list)
     paired: dict[tuple[str, int], dict[str, float]] = defaultdict(dict)
