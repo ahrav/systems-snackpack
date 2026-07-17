@@ -1,0 +1,2 @@
+cwd=/tmp/topic006-pathfix-2b.QI0UDt/outside
+PROCESSES=12 CPU=0 ../source/topics/006-ngram-text-indexing/experiment/run_processes.sh results

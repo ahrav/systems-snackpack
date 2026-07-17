@@ -1,0 +1,101 @@
+6:_ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE:
+7-.Lfunc_begin0:
+8-	.file	1 "/tmp/topic006-pathfix-2b.QI0UDt/source" "topics/006-ngram-text-indexing/src/lib.rs"
+9-	.loc	1 185 0
+10-	.cfi_startproc
+11-	stp	x29, x30, [sp, #-64]!
+12-	.cfi_def_cfa_offset 64
+13-	str	x23, [sp, #16]
+14-	stp	x22, x21, [sp, #32]
+15-	stp	x20, x19, [sp, #48]
+16-	mov	x29, sp
+17-	.cfi_def_cfa w29, 64
+18-	.cfi_offset w19, -8
+19-	.cfi_offset w20, -16
+20-	.cfi_offset w21, -24
+21-	.cfi_offset w22, -32
+22-	.cfi_offset w23, -48
+23-	.cfi_offset w30, -56
+24-	.cfi_offset w29, -64
+25-	.cfi_remember_state
+26-.Ltmp60:
+27-	.file	2 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/slice/iter" "macros.rs"
+28-	.loc	2 25 86 prologue_end
+29-	cbz	x1, .LBB0_4
+30-.Ltmp61:
+31-	.loc	2 0 86 is_stmt 0
+32-	mov	x19, x3
+33-	mov	x20, x2
+34-	mov	x21, x1
+35-	mov	x22, xzr
+36-.Ltmp62:
+37-	.loc	2 284 24 is_stmt 1
+38-	add	x23, x0, #16
+39-	.loc	2 0 24 is_stmt 0
+40-.Ltmp63:
+41-	.p2align	5, , 16
+42-.LBB0_2:
+43-	.loc	2 279 27 is_stmt 1
+44-	ldp	x0, x1, [x23, #-8]
+45-.Ltmp64:
+46-	.loc	1 188 28
+47-	mov	x2, x20
+48-	mov	x3, x19
+49-	bl	_ZN27systems_snackpack_topic_00614contains_exact17h152785633432bbfaE
+50-.Ltmp65:
+51-	.file	3 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/iter/traits" "accum.rs"
+52-	.loc	3 53 28
+53-	add	x22, x22, w0, uxtw
+54-.Ltmp66:
+55-	.loc	2 284 24
+56-	subs	x21, x21, #1
+57-	add	x23, x23, #24
+58-	b.ne	.LBB0_2
+59-.Ltmp67:
+60-	.loc	1 190 2
+61-	mov	x0, x22
+62-	.cfi_def_cfa wsp, 64
+63-	.loc	1 190 2 epilogue_begin is_stmt 0
+64-	ldp	x20, x19, [sp, #48]
+65-	ldp	x22, x21, [sp, #32]
+66-	ldr	x23, [sp, #16]
+67-	ldp	x29, x30, [sp], #64
+68-	.cfi_def_cfa_offset 0
+69-	.cfi_restore w19
+70-	.cfi_restore w20
+71-	.cfi_restore w21
+72-	.cfi_restore w22
+73-	.cfi_restore w23
+74-	.cfi_restore w30
+75-	.cfi_restore w29
+76-	ret
+77-.LBB0_4:
+78-	.cfi_restore_state
+79-	.loc	1 0 2
+80-	mov	x22, xzr
+81-	.loc	1 190 2 is_stmt 1
+82-	mov	x0, x22
+83-	.cfi_def_cfa wsp, 64
+84-	.loc	1 190 2 epilogue_begin is_stmt 0
+85-	ldp	x20, x19, [sp, #48]
+86-	ldp	x22, x21, [sp, #32]
+87-	ldr	x23, [sp, #16]
+88-	ldp	x29, x30, [sp], #64
+89-	.cfi_def_cfa_offset 0
+90-	.cfi_restore w19
+91-	.cfi_restore w20
+92-	.cfi_restore w21
+93-	.cfi_restore w22
+94-	.cfi_restore w23
+95-	.cfi_restore w30
+96-	.cfi_restore w29
+97-	ret
+98-.Ltmp68:
+99-.Lfunc_end0:
+100-	.size	_ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE, .Lfunc_end0-_ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE
+101-	.cfi_endproc
+102-	.file	4 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/iter/adapters" "map.rs"
+103-	.file	5 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/iter/traits" "iterator.rs"
+104-	.file	6 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/iter/adapters" "filter.rs"
+105-
+106-	.section	.text._ZN27systems_snackpack_topic_00612TrigramIndex5build17h90afb4801df03c68E,"ax",@progbits

@@ -1,0 +1,6 @@
+pre_run_source_results_absent=yes
+runner_invocation_cwd=/tmp/topic006-final-2c-20260716T155044Z-e3442c2/caller
+runner_output_argument=results
+resolved_output_directory=/tmp/topic006-final-2c-20260716T155044Z-e3442c2/caller/results
+post_run_caller_results_present=yes
+post_run_source_results_absent=yes

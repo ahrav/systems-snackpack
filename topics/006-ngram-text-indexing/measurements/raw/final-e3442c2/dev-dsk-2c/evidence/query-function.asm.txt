@@ -1,0 +1,1251 @@
+2711:_ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E:
+2712-.Lfunc_begin2:
+2713-	.loc	1 124 0
+2714-	.cfi_startproc
+2715-	.cfi_personality 155, DW.ref.rust_eh_personality
+2716-	.cfi_lsda 27, .Lexception1
+2717-	pushq	%rbp
+2718-	.cfi_def_cfa_offset 16
+2719-	pushq	%r15
+2720-	.cfi_def_cfa_offset 24
+2721-	pushq	%r14
+2722-	.cfi_def_cfa_offset 32
+2723-	pushq	%r13
+2724-	.cfi_def_cfa_offset 40
+2725-	pushq	%r12
+2726-	.cfi_def_cfa_offset 48
+2727-	pushq	%rbx
+2728-	.cfi_def_cfa_offset 56
+2729-	subq	$120, %rsp
+2730-	.cfi_def_cfa_offset 176
+2731-	.cfi_offset %rbx, -56
+2732-	.cfi_offset %r12, -48
+2733-	.cfi_offset %r13, -40
+2734-	.cfi_offset %r14, -32
+2735-	.cfi_offset %r15, -24
+2736-	.cfi_offset %rbp, -16
+2737-	movq	%rdx, %r14
+2738-	movq	%rsi, %r15
+2739-.Ltmp583:
+2740-	.loc	1 125 12 prologue_end
+2741-	cmpq	$3, %rdx
+2742-	jae	.LBB2_1
+2743-	.loc	1 0 12 is_stmt 0
+2744-	movq	%rdi, %rax
+2745-.Ltmp584:
+2746-	.loc	8 2856 19 is_stmt 1
+2747-	movq	16(%rax), %r12
+2748-.Ltmp585:
+2749-	.loc	11 504 9
+2750-	movq	8(%rdi), %rdi
+2751-.Ltmp586:
+2752-	.loc	1 128 32
+2753-	movq	%r15, %rdx
+2754-	movq	%r14, %rcx
+2755-	movq	%r12, %rsi
+2756-	callq	*_ZN27systems_snackpack_topic_00610scan_count17h37f5a2fc28c61894E@GOTPCREL(%rip)
+2757-	movq	%rax, %r13
+2758-.LBB2_102:
+2759-	.loc	1 167 6
+2760-	movq	%r12, %rax
+2761-	movq	%r13, %rdx
+2762-	.loc	1 167 6 epilogue_begin is_stmt 0
+2763-	addq	$120, %rsp
+2764-	.cfi_def_cfa_offset 56
+2765-	popq	%rbx
+2766-	.cfi_def_cfa_offset 48
+2767-	popq	%r12
+2768-	.cfi_def_cfa_offset 40
+2769-	popq	%r13
+2770-	.cfi_def_cfa_offset 32
+2771-	popq	%r14
+2772-	.cfi_def_cfa_offset 24
+2773-	popq	%r15
+2774-	.cfi_def_cfa_offset 16
+2775-	popq	%rbp
+2776-	.cfi_def_cfa_offset 8
+2777-	retq
+2778-.LBB2_1:
+2779-	.cfi_def_cfa_offset 176
+2780-.Ltmp587:
+2781-	.loc	10 1368 12 is_stmt 1
+2782-	leaq	-2(%r14), %r13
+2783-	movl	$3, %ecx
+2784-.Ltmp588:
+2785-	.loc	28 2946 26
+2786-	movq	%r13, %rax
+2787-	mulq	%rcx
+2788-	seto	%dl
+2789-	movq	%rax, %rbp
+2790-	testq	%rbp, %rbp
+2791-	sets	%cl
+2792-.Ltmp589:
+2793-	.loc	16 457 8
+2794-	orb	%dl, %cl
+2795-	je	.LBB2_4
+2796-.Ltmp590:
+2797-	.loc	16 0 8 is_stmt 0
+2798-	xorl	%ebx, %ebx
+2799-.LBB2_3:
+2800-.Ltmp591:
+2801-	.loc	11 427 25 is_stmt 1
+2802-	movq	%rbx, %rdi
+2803-	movq	%rbp, %rsi
+2804-	callq	*_ZN5alloc7raw_vec12handle_error17h3a8c375904e593b2E@GOTPCREL(%rip)
+2805-.Ltmp592:
+2806-.LBB2_4:
+2807-	.loc	11 0 25 is_stmt 0
+2808-	movq	%rdi, 80(%rsp)
+2809-.Ltmp593:
+2810-	.loc	11 463 12 is_stmt 1
+2811-	testq	%rbp, %rbp
+2812-	je	.LBB2_5
+2813-.Ltmp594:
+2814-	.loc	23 93 9
+2815-	callq	*_RNvCsdBezzDwma51_7___rustc35___rust_no_alloc_shim_is_unstable_v2@GOTPCREL(%rip)
+2816-	.loc	23 95 9
+2817-	movl	$1, %esi
+2818-	movq	%rbp, %rdi
+2819-	movl	$1, %ebx
+2820-	callq	*_RNvCsdBezzDwma51_7___rustc12___rust_alloc@GOTPCREL(%rip)
+2821-	movq	%rax, %r12
+2822-	movq	%r13, 8(%rsp)
+2823-.Ltmp595:
+2824-	.loc	11 472 25
+2825-	testq	%rax, %rax
+2826-	.loc	11 472 19 is_stmt 0
+2827-	jne	.LBB2_7
+2828-	jmp	.LBB2_3
+2829-.Ltmp596:
+2830-.LBB2_5:
+2831-	.loc	11 0 19
+2832-	movl	$1, %r12d
+2833-	movq	$0, 8(%rsp)
+2834-.LBB2_7:
+2835-	movl	%r13d, %eax
+2836-	leaq	-3(%r14), %rcx
+2837-	andl	$7, %eax
+2838-	cmpq	$7, %rcx
+2839-	jae	.LBB2_9
+2840-	xorl	%ecx, %ecx
+2841-	movq	%r15, %rdx
+2842-.Ltmp597:
+2843-	.loc	10 1357 12 is_stmt 1
+2844-	testq	%rax, %rax
+2845-	jne	.LBB2_13
+2846-	jmp	.LBB2_16
+2847-.Ltmp598:
+2848-.LBB2_9:
+2849-	.loc	10 0 12 is_stmt 0
+2850-	movq	%r13, %rdx
+2851-	andq	$-8, %rdx
+2852-	xorl	%ecx, %ecx
+2853-	movq	%r12, %rsi
+2854-	.p2align	4
+2855-.LBB2_10:
+2856-.Ltmp599:
+2857-	.loc	12 1718 17 is_stmt 1
+2858-	movzwl	(%r15,%rcx), %edi
+2859-	movzbl	2(%r15,%rcx), %r8d
+2860-.Ltmp600:
+2861-	.loc	13 1908 9
+2862-	movb	%r8b, 2(%rsi)
+2863-	movw	%di, (%rsi)
+2864-.Ltmp601:
+2865-	.loc	12 1718 17
+2866-	movzwl	1(%r15,%rcx), %edi
+2867-	movzbl	3(%r15,%rcx), %r8d
+2868-.Ltmp602:
+2869-	.loc	13 1908 9
+2870-	movb	%r8b, 5(%rsi)
+2871-	movw	%di, 3(%rsi)
+2872-.Ltmp603:
+2873-	.loc	12 1718 17
+2874-	movzwl	2(%r15,%rcx), %edi
+2875-	movzbl	4(%r15,%rcx), %r8d
+2876-.Ltmp604:
+2877-	.loc	13 1908 9
+2878-	movb	%r8b, 8(%rsi)
+2879-	movw	%di, 6(%rsi)
+2880-.Ltmp605:
+2881-	.loc	12 1718 17
+2882-	movzwl	3(%r15,%rcx), %edi
+2883-	movzbl	5(%r15,%rcx), %r8d
+2884-.Ltmp606:
+2885-	.loc	13 1908 9
+2886-	movb	%r8b, 11(%rsi)
+2887-	movw	%di, 9(%rsi)
+2888-.Ltmp607:
+2889-	.loc	12 1718 17
+2890-	movzwl	4(%r15,%rcx), %edi
+2891-	movzbl	6(%r15,%rcx), %r8d
+2892-.Ltmp608:
+2893-	.loc	13 1908 9
+2894-	movb	%r8b, 14(%rsi)
+2895-	movw	%di, 12(%rsi)
+2896-.Ltmp609:
+2897-	.loc	12 1718 17
+2898-	movzwl	5(%r15,%rcx), %edi
+2899-	movzbl	7(%r15,%rcx), %r8d
+2900-.Ltmp610:
+2901-	.loc	13 1908 9
+2902-	movb	%r8b, 17(%rsi)
+2903-	movw	%di, 15(%rsi)
+2904-.Ltmp611:
+2905-	.loc	12 1718 17
+2906-	movzwl	6(%r15,%rcx), %edi
+2907-	movzbl	8(%r15,%rcx), %r8d
+2908-.Ltmp612:
+2909-	.loc	13 1908 9
+2910-	movb	%r8b, 20(%rsi)
+2911-	movw	%di, 18(%rsi)
+2912-.Ltmp613:
+2913-	.loc	12 1718 17
+2914-	movzwl	7(%r15,%rcx), %edi
+2915-	movzbl	9(%r15,%rcx), %r8d
+2916-.Ltmp614:
+2917-	.loc	14 19 9
+2918-	addq	$8, %rcx
+2919-.Ltmp615:
+2920-	.loc	13 1908 9
+2921-	movb	%r8b, 23(%rsi)
+2922-	movw	%di, 21(%rsi)
+2923-.Ltmp616:
+2924-	.loc	10 1357 12
+2925-	addq	$24, %rsi
+2926-	cmpq	%rcx, %rdx
+2927-	jne	.LBB2_10
+2928-	leaq	-1(%rcx), %rbp
+2929-	leaq	(%r15,%rcx), %rdx
+2930-	testq	%rax, %rax
+2931-	je	.LBB2_16
+2932-.LBB2_13:
+2933-	leaq	(%rcx,%rcx,2), %rsi
+2934-	xorl	%edi, %edi
+2935-	addq	%r12, %rsi
+2936-.Ltmp617:
+2937-	.loc	10 0 12 is_stmt 0
+2938-.Ltmp618:
+2939-	.p2align	4
+2940-.LBB2_14:
+2941-	.loc	12 1718 17 is_stmt 1
+2942-	movzwl	(%rdx,%rdi), %r8d
+2943-	movzbl	2(%rdx,%rdi), %r9d
+2944-.Ltmp619:
+2945-	.loc	10 1357 12
+2946-	incq	%rdi
+2947-.Ltmp620:
+2948-	.loc	13 1908 9
+2949-	movb	%r9b, 2(%rsi)
+2950-	movw	%r8w, (%rsi)
+2951-.Ltmp621:
+2952-	.loc	10 1357 12
+2953-	addq	$3, %rsi
+2954-	cmpq	%rdi, %rax
+2955-	jne	.LBB2_14
+2956-.Ltmp622:
+2957-	.loc	15 29 27
+2958-	leaq	-1(%rcx,%rdi), %rbp
+2959-.LBB2_16:
+2960-	.loc	15 0 27 is_stmt 0
+2961-	movl	$1, %ebx
+2962-	.loc	15 29 27 is_stmt 1
+2963-	testq	%rbp, %rbp
+2964-.Ltmp623:
+2965-	.loc	16 434 8
+2966-	jne	.LBB2_17
+2967-.Ltmp624:
+2968-.LBB2_56:
+2969-	.loc	28 2946 26
+2970-	leaq	(,%rbx,8), %r13
+2971-	movq	%rbx, %rax
+2972-	shrq	$61, %rax
+2973-	movabsq	$9223372036854775800, %rcx
+2974-	setne	%al
+2975-	cmpq	%rcx, %r13
+2976-	seta	%cl
+2977-.Ltmp625:
+2978-	.loc	16 457 8
+2979-	orb	%al, %cl
+2980-	je	.LBB2_58
+2981-.Ltmp626:
+2982-	.loc	16 0 8 is_stmt 0
+2983-	xorl	%ebp, %ebp
+2984-.LBB2_63:
+2985-.Ltmp580:
+2986-	movq	8(%rsp), %rbx
+2987-.Ltmp627:
+2988-	.loc	11 427 25 is_stmt 1
+2989-	movq	%rbp, %rdi
+2990-	movq	%r13, %rsi
+2991-	callq	*_ZN5alloc7raw_vec12handle_error17h3a8c375904e593b2E@GOTPCREL(%rip)
+2992-.Ltmp581:
+2993-	jmp	.LBB2_64
+2994-.Ltmp628:
+2995-.LBB2_58:
+2996-	.loc	11 463 12
+2997-	testq	%r13, %r13
+2998-	je	.LBB2_59
+2999-.Ltmp629:
+3000-	.loc	23 93 9
+3001-	callq	*_RNvCsdBezzDwma51_7___rustc35___rust_no_alloc_shim_is_unstable_v2@GOTPCREL(%rip)
+3002-	.loc	23 95 9
+3003-	movl	$8, %esi
+3004-	movq	%r13, %rdi
+3005-	movl	$8, %ebp
+3006-	callq	*_RNvCsdBezzDwma51_7___rustc12___rust_alloc@GOTPCREL(%rip)
+3007-	movq	%rbx, %rsi
+3008-.Ltmp630:
+3009-	.loc	11 472 25
+3010-	testq	%rax, %rax
+3011-	.loc	11 472 19 is_stmt 0
+3012-	jne	.LBB2_60
+3013-	jmp	.LBB2_63
+3014-.Ltmp631:
+3015-.LBB2_59:
+3016-	.loc	11 0 19
+3017-	movl	$8, %eax
+3018-	xorl	%esi, %esi
+3019-.LBB2_60:
+3020-	leaq	.Lanon.eac71fac65293845933efd6d8361ed9b.1(%rip), %rdx
+3021-	.loc	8 913 9 is_stmt 1
+3022-	movq	%rsi, 48(%rsp)
+3023-	movq	%rax, 56(%rsp)
+3024-	movq	$0, 64(%rsp)
+3025-.Ltmp632:
+3026-	.loc	2 1692 9
+3027-	testq	%rbx, %rbx
+3028-.Ltmp633:
+3029-	.loc	1 137 21
+3030-	je	.LBB2_61
+3031-	.loc	1 0 21 is_stmt 0
+3032-	movq	80(%rsp), %rcx
+3033-	movq	24(%rcx), %rdi
+3034-	movq	%rdi, 40(%rsp)
+3035-	testq	%rdi, %rdi
+3036-.Ltmp634:
+3037-	.loc	18 745 9 is_stmt 1
+3038-	je	.LBB2_114
+3039-.Ltmp635:
+3040-	.loc	18 0 9 is_stmt 0
+3041-	movq	32(%rcx), %rcx
+3042-	leaq	(%rbx,%rbx,2), %rbx
+3043-	movq	%rdx, 72(%rsp)
+3044-.Ltmp636:
+3045-	.loc	3 180 28 is_stmt 1
+3046-	leaq	3(%r12), %rdx
+3047-	movq	%r14, 104(%rsp)
+3048-	xorl	%ebp, %ebp
+3049-	movq	%r12, 32(%rsp)
+3050-	movq	%r12, %r14
+3051-	addq	%r12, %rbx
+3052-	movq	%rcx, 24(%rsp)
+3053-	jmp	.LBB2_67
+3054-.Ltmp637:
+3055-	.loc	3 0 28 is_stmt 0
+3056-.Ltmp638:
+3057-	.p2align	4
+3058-.LBB2_112:
+3059-	.loc	8 2526 22 is_stmt 1
+3060-	subq	%rbp, %r13
+3061-.Ltmp639:
+3062-	.loc	2 1692 9
+3063-	xorl	%ecx, %ecx
+3064-.Ltmp640:
+3065-	.loc	8 2625 13
+3066-	leaq	1(%r12), %rbp
+3067-.Ltmp641:
+3068-	.loc	8 2526 22
+3069-	addq	$-16, %r13
+3070-.Ltmp642:
+3071-	.loc	2 1692 9
+3072-	cmpq	%rbx, %r14
+3073-	setne	%cl
+3074-.Ltmp643:
+3075-	.loc	13 1908 9
+3076-	movq	%r13, (%rax,%r12,8)
+3077-.Ltmp644:
+3078-	.loc	8 2625 13
+3079-	movq	%rbp, 64(%rsp)
+3080-.Ltmp645:
+3081-	.loc	3 180 28
+3082-	leaq	(%rcx,%rcx,2), %rdx
+3083-	addq	%r14, %rdx
+3084-.Ltmp646:
+3085-	.loc	2 1692 9
+3086-	cmpq	%rbx, %r14
+3087-.Ltmp647:
+3088-	.loc	1 137 21
+3089-	je	.LBB2_78
+3090-.LBB2_67:
+3091-	.loc	1 0 21 is_stmt 0
+3092-	movq	%r14, %rcx
+3093-	movq	%rdx, %r14
+3094-	movq	24(%rsp), %rdx
+3095-	movq	40(%rsp), %r13
+3096-	movq	%rbp, %r12
+3097-.LBB2_68:
+3098-.Ltmp648:
+3099-	.loc	19 396 56 is_stmt 1
+3100-	movzwl	274(%r13), %edi
+3101-	.loc	19 396 18 is_stmt 0
+3102-	leaq	276(%r13), %r8
+3103-	xorl	%ebp, %ebp
+3104-.Ltmp649:
+3105-	.loc	20 225 9 is_stmt 1
+3106-	leal	(,%rdi,8), %esi
+3107-	leaq	(%rsi,%rsi,2), %r9
+3108-	movq	$-1, %rsi
+3109-	jmp	.LBB2_69
+3110-	.loc	20 0 9 is_stmt 0
+3111-.Ltmp650:
+3112-	.p2align	4
+3113-.LBB2_73:
+3114-.Ltmp651:
+3115-	.loc	21 323 34 is_stmt 1
+3116-	movzbl	2(%rcx), %r10d
+3117-	movzbl	2(%r8), %r11d
+3118-	subl	%r11d, %r10d
+3119-.LBB2_74:
+3120-	movslq	%r10d, %r10
+3121-.Ltmp652:
+3122-	.loc	20 0 0 is_stmt 0
+3123-	addq	$3, %r8
+3124-.Ltmp653:
+3125-	.loc	22 1998 21 is_stmt 1
+3126-	testq	%r10, %r10
+3127-	sets	%r11b
+3128-	setg	%r10b
+3129-.Ltmp654:
+3130-	.loc	20 226 13
+3131-	addq	$-24, %rbp
+3132-	incq	%rsi
+3133-.Ltmp655:
+3134-	.loc	22 1998 21
+3135-	subb	%r11b, %r10b
+3136-.Ltmp656:
+3137-	.loc	20 226 13
+3138-	cmpb	$1, %r10b
+3139-	jne	.LBB2_75
+3140-.Ltmp657:
+3141-.LBB2_69:
+3142-	.loc	2 1692 9
+3143-	movq	%r9, %r10
+3144-	addq	%rbp, %r10
+3145-.Ltmp658:
+3146-	.loc	3 180 28
+3147-	je	.LBB2_70
+3148-.Ltmp659:
+3149-	.loc	21 323 34
+3150-	movbew	(%rcx), %r10w
+3151-	movbew	(%r8), %r11w
+3152-	cmpw	%r11w, %r10w
+3153-	je	.LBB2_73
+3154-	setae	%r10b
+3155-	movzbl	%r10b, %r10d
+3156-	leal	-1(%r10,%r10), %r10d
+3157-	jmp	.LBB2_74
+3158-.Ltmp660:
+3159-	.loc	21 0 34 is_stmt 0
+3160-.Ltmp661:
+3161-	.p2align	4
+3162-.LBB2_75:
+3163-	.loc	20 226 13 is_stmt 1
+3164-	movzbl	%r10b, %edi
+3165-	testl	%edi, %edi
+3166-	je	.LBB2_109
+3167-.Ltmp662:
+3168-	.loc	19 731 12
+3169-	subq	$1, %rdx
+3170-	jae	.LBB2_77
+3171-	jmp	.LBB2_113
+3172-	.loc	19 0 12 is_stmt 0
+3173-.Ltmp663:
+3174-	.p2align	4
+3175-.LBB2_70:
+3176-	movq	%rdi, %rsi
+3177-	.loc	19 731 12 is_stmt 1
+3178-	subq	$1, %rdx
+3179-	jb	.LBB2_113
+3180-.Ltmp664:
+3181-.LBB2_77:
+3182-	.loc	13 1708 9
+3183-	movq	312(%r13,%rsi,8), %r13
+3184-.Ltmp665:
+3185-	.loc	20 57 9
+3186-	jmp	.LBB2_68
+3187-.Ltmp666:
+3188-	.loc	20 0 9 is_stmt 0
+3189-.Ltmp667:
+3190-	.p2align	4
+3191-.LBB2_109:
+3192-	.loc	8 2619 12 is_stmt 1
+3193-	cmpq	48(%rsp), %r12
+3194-	jne	.LBB2_112
+3195-.Ltmp572:
+3196-	.loc	8 2620 22
+3197-	leaq	48(%rsp), %rdi
+3198-	callq	*_ZN5alloc7raw_vec19RawVec$LT$T$C$A$GT$8grow_one17haf546c0e5ed89132E@GOTPCREL(%rip)
+3199-.Ltmp573:
+3200-.Ltmp668:
+3201-	.loc	11 504 9
+3202-	movq	56(%rsp), %rax
+3203-	jmp	.LBB2_112
+3204-.Ltmp669:
+3205-.LBB2_113:
+3206-	.loc	1 167 5
+3207-	movq	48(%rsp), %rsi
+3208-	movq	32(%rsp), %r12
+3209-.LBB2_114:
+3210-.Ltmp670:
+3211-	.loc	11 523 39
+3212-	testq	%rsi, %rsi
+3213-	je	.LBB2_116
+3214-.Ltmp671:
+3215-	.loc	1 167 5
+3216-	movq	56(%rsp), %rdi
+3217-.Ltmp672:
+3218-	.loc	28 1187 17
+3219-	shlq	$3, %rsi
+3220-.Ltmp673:
+3221-	.loc	23 115 14
+3222-	movl	$8, %edx
+3223-	callq	*_RNvCsdBezzDwma51_7___rustc14___rust_dealloc@GOTPCREL(%rip)
+3224-.Ltmp674:
+3225-.LBB2_116:
+3226-	.loc	23 0 14 is_stmt 0
+3227-	movq	8(%rsp), %rax
+3228-.Ltmp675:
+3229-	.loc	11 523 39 is_stmt 1
+3230-	testq	%rax, %rax
+3231-	je	.LBB2_117
+3232-.Ltmp676:
+3233-	.loc	28 1187 17
+3234-	leaq	(%rax,%rax,2), %rsi
+3235-.Ltmp677:
+3236-	.loc	23 115 14
+3237-	movl	$1, %edx
+3238-	movq	%r12, %rdi
+3239-	callq	*_RNvCsdBezzDwma51_7___rustc14___rust_dealloc@GOTPCREL(%rip)
+3240-.Ltmp678:
+3241-.LBB2_117:
+3242-	.loc	23 0 14 is_stmt 0
+3243-	xorl	%r13d, %r13d
+3244-	xorl	%r12d, %r12d
+3245-.Ltmp679:
+3246-	.loc	11 523 39 is_stmt 1
+3247-	jmp	.LBB2_102
+3248-.Ltmp680:
+3249-.LBB2_78:
+3250-	.loc	11 504 9
+3251-	movq	56(%rsp), %rbx
+3252-.Ltmp681:
+3253-	.loc	15 29 27
+3254-	cmpq	$2, %rbp
+3255-.Ltmp682:
+3256-	.loc	16 434 8
+3257-	jae	.LBB2_79
+3258-.Ltmp683:
+3259-	.loc	27 272 10
+3260-	testq	%rbp, %rbp
+3261-	movl	$1, %ebp
+3262-	je	.LBB2_90
+3263-.Ltmp684:
+3264-.LBB2_81:
+3265-	.loc	1 150 41
+3266-	movq	(%rbx), %rax
+3267-	movq	%rbx, 88(%rsp)
+3268-.Ltmp685:
+3269-	.loc	8 1599 55
+3270-	movq	16(%rax), %rcx
+3271-.Ltmp686:
+3272-	.loc	2 1692 9
+3273-	testq	%rcx, %rcx
+3274-.Ltmp687:
+3275-	.loc	1 150 41
+3276-	je	.LBB2_82
+3277-.Ltmp688:
+3278-	.loc	1 0 41 is_stmt 0
+3279-	movq	80(%rsp), %rsi
+3280-	.loc	1 150 41
+3281-	movq	8(%rax), %r14
+3282-	leaq	(%rbx,%rbp,8), %rbp
+3283-	addq	$8, %rbx
+3284-	xorl	%r12d, %r12d
+3285-	xorl	%r13d, %r13d
+3286-	movq	8(%rsi), %rdx
+3287-	leaq	(%r14,%rcx,8), %rax
+3288-	movq	16(%rsi), %rcx
+3289-	movq	%rax, 40(%rsp)
+3290-.Ltmp689:
+3291-	.loc	3 180 28 is_stmt 1
+3292-	leaq	8(%r14), %rax
+3293-	movq	%rdx, 96(%rsp)
+3294-	leaq	.Lanon.eac71fac65293845933efd6d8361ed9b.2(%rip), %rdx
+3295-	movq	%rcx, 24(%rsp)
+3296-	movq	%rdx, 72(%rsp)
+3297-	jmp	.LBB2_93
+3298-.Ltmp690:
+3299-	.loc	3 0 28 is_stmt 0
+3300-.Ltmp691:
+3301-	.p2align	4
+3302-.LBB2_107:
+3303-	.loc	27 272 10 is_stmt 1
+3304-	cmpq	24(%rsp), %rdi
+3305-	jae	.LBB2_91
+3306-	.loc	27 0 10 is_stmt 0
+3307-	movq	96(%rsp), %rcx
+3308-	.loc	27 272 9
+3309-	leaq	(%rdi,%rdi,2), %rax
+3310-.Ltmp692:
+3311-	.loc	1 157 13 is_stmt 1
+3312-	incq	%r12
+3313-	.loc	1 158 16
+3314-	movq	%r15, %rdx
+3315-.Ltmp693:
+3316-	.loc	11 504 9
+3317-	movq	8(%rcx,%rax,8), %rdi
+3318-.Ltmp694:
+3319-	.loc	8 1599 55
+3320-	movq	16(%rcx,%rax,8), %rsi
+3321-	movq	104(%rsp), %rcx
+3322-.Ltmp695:
+3323-	.loc	1 158 16
+3324-	callq	_ZN27systems_snackpack_topic_00614contains_exact17h5b728807dbcb1fe9E
+3325-	movzbl	%al, %eax
+3326-	addq	%rax, %r13
+3327-.Ltmp696:
+3328-.LBB2_97:
+3329-	.loc	2 1692 9
+3330-	xorl	%eax, %eax
+3331-	cmpq	40(%rsp), %r14
+3332-	setne	%al
+3333-.Ltmp697:
+3334-	.loc	3 180 28
+3335-	leaq	(%r14,%rax,8), %rax
+3336-.Ltmp698:
+3337-	.loc	1 150 41
+3338-	je	.LBB2_98
+3339-.LBB2_93:
+3340-	.loc	1 150 26
+3341-	movq	(%r14), %rdi
+3342-	movq	%rax, %r14
+3343-	movq	%rbx, %rax
+3344-	jmp	.LBB2_94
+3345-	.loc	1 0 26 is_stmt 0
+3346-.Ltmp699:
+3347-	.p2align	4
+3348-.LBB2_96:
+3349-	xorl	%r9d, %r9d
+3350-.LBB2_106:
+3351-.Ltmp700:
+3352-	movb	%dl, %cl
+3353-	leaq	(%rax,%rcx,8), %rax
+3354-.Ltmp701:
+3355-	.loc	22 385 44 is_stmt 1
+3356-	cmpq	%rdi, (%rsi,%r9,8)
+3357-.Ltmp702:
+3358-	.loc	1 152 20
+3359-	jne	.LBB2_97
+3360-.Ltmp703:
+3361-.LBB2_94:
+3362-	.loc	2 1692 9
+3363-	xorl	%ecx, %ecx
+3364-	cmpq	%rbp, %rax
+3365-	setne	%dl
+3366-.Ltmp704:
+3367-	.loc	1 151 28
+3368-	je	.LBB2_107
+3369-.Ltmp705:
+3370-	.loc	1 152 20
+3371-	movq	(%rax), %r8
+3372-.Ltmp706:
+3373-	.loc	11 504 9
+3374-	movq	8(%r8), %rsi
+3375-.Ltmp707:
+3376-	.loc	8 1599 55
+3377-	movq	16(%r8), %r8
+3378-.Ltmp708:
+3379-	.loc	38 2972 12
+3380-	cmpq	$1, %r8
+3381-	je	.LBB2_96
+3382-	testq	%r8, %r8
+3383-	je	.LBB2_97
+3384-	.loc	38 0 12 is_stmt 0
+3385-	xorl	%r10d, %r10d
+3386-	.p2align	4
+3387-.LBB2_105:
+3388-.Ltmp709:
+3389-	.loc	38 2982 24 is_stmt 1
+3390-	movq	%r8, %r11
+3391-	shrq	%r11
+3392-.Ltmp710:
+3393-	.loc	38 2983 23
+3394-	leaq	(%r11,%r10), %r9
+3395-.Ltmp711:
+3396-	.loc	22 385 44
+3397-	cmpq	%rdi, (%rsi,%r9,8)
+3398-.Ltmp712:
+3399-	.file	41 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src" "hint.rs"
+3400-	.loc	41 823 9
+3401-	cmovaq	%r10, %r9
+3402-.Ltmp713:
+3403-	.loc	38 3003 13
+3404-	subq	%r11, %r8
+3405-	movq	%r9, %r10
+3406-.Ltmp714:
+3407-	.loc	38 2981 15
+3408-	cmpq	$1, %r8
+3409-	ja	.LBB2_105
+3410-	jmp	.LBB2_106
+3411-.Ltmp715:
+3412-.LBB2_82:
+3413-	.loc	38 0 15 is_stmt 0
+3414-	xorl	%r13d, %r13d
+3415-	xorl	%r12d, %r12d
+3416-.LBB2_98:
+3417-	.loc	1 167 5 is_stmt 1
+3418-	movq	48(%rsp), %rsi
+3419-.Ltmp716:
+3420-	.loc	11 523 39
+3421-	testq	%rsi, %rsi
+3422-	je	.LBB2_100
+3423-	.loc	11 0 39 is_stmt 0
+3424-	movq	88(%rsp), %rdi
+3425-.Ltmp717:
+3426-	.loc	28 1187 17 is_stmt 1
+3427-	shlq	$3, %rsi
+3428-.Ltmp718:
+3429-	.loc	23 115 14
+3430-	movl	$8, %edx
+3431-	callq	*_RNvCsdBezzDwma51_7___rustc14___rust_dealloc@GOTPCREL(%rip)
+3432-.Ltmp719:
+3433-.LBB2_100:
+3434-	.loc	23 0 14 is_stmt 0
+3435-	movq	8(%rsp), %rax
+3436-.Ltmp720:
+3437-	.loc	11 523 39 is_stmt 1
+3438-	testq	%rax, %rax
+3439-	je	.LBB2_102
+3440-	.loc	11 0 39 is_stmt 0
+3441-	movq	32(%rsp), %rdi
+3442-.Ltmp721:
+3443-	.loc	28 1187 17 is_stmt 1
+3444-	leaq	(%rax,%rax,2), %rsi
+3445-.Ltmp722:
+3446-	.loc	23 115 14
+3447-	movl	$1, %edx
+3448-	callq	*_RNvCsdBezzDwma51_7___rustc14___rust_dealloc@GOTPCREL(%rip)
+3449-	jmp	.LBB2_102
+3450-.Ltmp723:
+3451-.LBB2_17:
+3452-	.loc	23 0 14 is_stmt 0
+3453-	movq	8(%rsp), %rbx
+3454-.Ltmp724:
+3455-	.loc	15 45 35 is_stmt 1
+3456-	cmpq	$20, %rbp
+3457-.Ltmp725:
+3458-	.loc	16 434 8
+3459-	jae	.LBB2_18
+3460-.Ltmp726:
+3461-	.loc	15 46 17
+3462-	movl	$1, %edx
+3463-	movq	%r12, %rdi
+3464-	movq	%r13, %rsi
+3465-	callq	_ZN4core5slice4sort6shared9smallsort25insertion_sort_shift_left17h1dbe9fe54d4eaa62E
+3466-.Ltmp727:
+3467-.LBB2_24:
+3468-	.loc	8 2387 15
+3469-	leaq	6(%r12), %rcx
+3470-	leal	7(%rbp), %esi
+3471-	xorl	%eax, %eax
+3472-.LBB2_25:
+3473-.Ltmp728:
+3474-	.loc	8 2394 17
+3475-	movzbl	-1(%rcx), %edi
+3476-	movzbl	-4(%rcx), %r8d
+3477-	movzwl	-3(%rcx), %edx
+3478-	movzwl	-6(%rcx), %r9d
+3479-	shll	$16, %edi
+3480-	shll	$16, %r8d
+3481-	orl	%edx, %edi
+3482-	orl	%r9d, %r8d
+3483-.Ltmp729:
+3484-	.loc	31 157 18
+3485-	cmpl	%r8d, %edi
+3486-.Ltmp730:
+3487-	.loc	8 2396 16
+3488-	je	.LBB2_26
+3489-.Ltmp731:
+3490-	.loc	8 2387 15
+3491-	incq	%rax
+3492-	addq	$3, %rcx
+3493-	addb	$7, %sil
+3494-	cmpq	%rax, %rbp
+3495-	jne	.LBB2_25
+3496-	.loc	8 0 15 is_stmt 0
+3497-	movq	%r13, %rbx
+3498-	jmp	.LBB2_56
+3499-.LBB2_26:
+3500-.Ltmp732:
+3501-	.loc	8 2468 19 is_stmt 1
+3502-	leaq	1(%rax), %r8
+3503-	movq	%r14, %r13
+3504-	cmpq	%rbp, %r8
+3505-	jae	.LBB2_27
+3506-.Ltmp733:
+3507-	.loc	8 2474 20
+3508-	movq	%rbp, %rdx
+3509-	subq	%rax, %rdx
+3510-	leal	-1(%rdx), %edi
+3511-	addq	$-2, %rdx
+3512-	testb	$7, %dil
+3513-	je	.LBB2_29
+3514-	movzbl	%sil, %esi
+3515-	xorl	%edi, %edi
+3516-	movq	%r8, %rbx
+3517-	movq	%r12, %r14
+3518-	andl	$7, %esi
+3519-	negq	%rsi
+3520-	jmp	.LBB2_31
+3521-.Ltmp734:
+3522-.LBB2_33:
+3523-	.loc	8 2468 19
+3524-	decq	%rdi
+3525-	addq	$3, %rcx
+3526-	cmpq	%rdi, %rsi
+3527-	je	.LBB2_34
+3528-.LBB2_31:
+3529-.Ltmp735:
+3530-	.loc	8 2473 39
+3531-	movzbl	2(%rcx), %r10d
+3532-	movzwl	(%rcx), %r9d
+3533-.Ltmp736:
+3534-	.loc	17 961 18
+3535-	leaq	(%rbx,%rbx,2), %r8
+3536-.Ltmp737:
+3537-	.loc	8 2473 39
+3538-	movzbl	-1(%r14,%r8), %r11d
+3539-	shll	$16, %r10d
+3540-	orl	%r9d, %r10d
+3541-	movzwl	-3(%r14,%r8), %r9d
+3542-	shll	$16, %r11d
+3543-	orl	%r9d, %r11d
+3544-.Ltmp738:
+3545-	.loc	31 157 18
+3546-	cmpl	%r11d, %r10d
+3547-.Ltmp739:
+3548-	.loc	8 2474 20
+3549-	je	.LBB2_33
+3550-.Ltmp740:
+3551-	.loc	13 547 14
+3552-	movzbl	2(%rcx), %r9d
+3553-.Ltmp741:
+3554-	.loc	8 0 0 is_stmt 0
+3555-	addq	%r14, %r8
+3556-.Ltmp742:
+3557-	.loc	8 2488 21 is_stmt 1
+3558-	incq	%rbx
+3559-.Ltmp743:
+3560-	.loc	13 547 14
+3561-	movb	%r9b, 2(%r8)
+3562-	movzwl	(%rcx), %r9d
+3563-	movw	%r9w, (%r8)
+3564-	jmp	.LBB2_33
+3565-.Ltmp744:
+3566-.LBB2_79:
+3567-	.loc	15 45 35
+3568-	cmpq	$21, %rbp
+3569-.Ltmp745:
+3570-	.loc	16 434 8
+3571-	jae	.LBB2_80
+3572-.Ltmp746:
+3573-	.loc	15 46 17
+3574-	movl	$1, %edx
+3575-	movq	%rbx, %rdi
+3576-	movq	%rbp, %rsi
+3577-	callq	_ZN4core5slice4sort6shared9smallsort25insertion_sort_shift_left17h7e0c32173ab124d8E
+3578-	jmp	.LBB2_81
+3579-.Ltmp747:
+3580-.LBB2_27:
+3581-	.loc	15 0 17 is_stmt 0
+3582-	movq	%r8, %rbx
+3583-	movq	%r13, %r14
+3584-.Ltmp748:
+3585-	.loc	8 2468 19 is_stmt 1
+3586-	jmp	.LBB2_56
+3587-.LBB2_34:
+3588-.Ltmp749:
+3589-	.loc	8 2474 20
+3590-	subq	%rdi, %rax
+3591-	incq	%rax
+3592-	movq	%rax, %r8
+3593-	jmp	.LBB2_35
+3594-.LBB2_29:
+3595-	.loc	8 0 20 is_stmt 0
+3596-	movq	%r8, %rbx
+3597-.LBB2_35:
+3598-	movq	%r13, %r14
+3599-	.loc	8 2474 20 is_stmt 1
+3600-	cmpq	$7, %rdx
+3601-	jb	.LBB2_56
+3602-	leaq	(%r8,%r8,2), %rax
+3603-	subq	%r8, %rbp
+3604-	leaq	24(%r12,%rax), %rax
+3605-	jmp	.LBB2_37
+3606-.Ltmp750:
+3607-.LBB2_53:
+3608-	.loc	8 2468 19
+3609-	addq	$24, %rax
+3610-	addq	$-8, %rbp
+3611-	je	.LBB2_56
+3612-.LBB2_37:
+3613-.Ltmp751:
+3614-	.loc	17 961 18
+3615-	leaq	(%rbx,%rbx,2), %rcx
+3616-.Ltmp752:
+3617-	.loc	8 2473 39
+3618-	movzbl	-19(%rax), %esi
+3619-	movzwl	-21(%rax), %edx
+3620-	movzbl	-1(%r12,%rcx), %edi
+3621-	movzwl	-3(%r12,%rcx), %r8d
+3622-	shll	$16, %esi
+3623-	orl	%edx, %esi
+3624-	shll	$16, %edi
+3625-	orl	%r8d, %edi
+3626-.Ltmp753:
+3627-	.loc	31 157 18
+3628-	cmpl	%edi, %esi
+3629-	je	.LBB2_39
+3630-.Ltmp754:
+3631-	.loc	8 0 0 is_stmt 0
+3632-	leaq	-21(%rax), %rdx
+3633-	addq	%r12, %rcx
+3634-.Ltmp755:
+3635-	.loc	8 2488 21 is_stmt 1
+3636-	incq	%rbx
+3637-.Ltmp756:
+3638-	.loc	13 547 14
+3639-	movzbl	2(%rdx), %esi
+3640-	movb	%sil, 2(%rcx)
+3641-	movzwl	(%rdx), %edx
+3642-	movw	%dx, (%rcx)
+3643-.Ltmp757:
+3644-.LBB2_39:
+3645-	.loc	17 961 18
+3646-	leaq	(%rbx,%rbx,2), %rcx
+3647-.Ltmp758:
+3648-	.loc	8 2473 39
+3649-	movzbl	-16(%rax), %esi
+3650-	movzwl	-18(%rax), %edx
+3651-	movzbl	-1(%r12,%rcx), %edi
+3652-	movzwl	-3(%r12,%rcx), %r8d
+3653-	shll	$16, %esi
+3654-	orl	%edx, %esi
+3655-	shll	$16, %edi
+3656-	orl	%r8d, %edi
+3657-.Ltmp759:
+3658-	.loc	31 157 18
+3659-	cmpl	%edi, %esi
+3660-	je	.LBB2_41
+3661-.Ltmp760:
+3662-	.loc	8 0 0 is_stmt 0
+3663-	leaq	-18(%rax), %rdx
+3664-	addq	%r12, %rcx
+3665-.Ltmp761:
+3666-	.loc	8 2488 21 is_stmt 1
+3667-	incq	%rbx
+3668-.Ltmp762:
+3669-	.loc	13 547 14
+3670-	movzbl	2(%rdx), %esi
+3671-	movb	%sil, 2(%rcx)
+3672-	movzwl	(%rdx), %edx
+3673-	movw	%dx, (%rcx)
+3674-.Ltmp763:
+3675-.LBB2_41:
+3676-	.loc	17 961 18
+3677-	leaq	(%rbx,%rbx,2), %rcx
+3678-.Ltmp764:
+3679-	.loc	8 2473 39
+3680-	movzbl	-13(%rax), %esi
+3681-	movzwl	-15(%rax), %edx
+3682-	movzbl	-1(%r12,%rcx), %edi
+3683-	movzwl	-3(%r12,%rcx), %r8d
+3684-	shll	$16, %esi
+3685-	orl	%edx, %esi
+3686-	shll	$16, %edi
+3687-	orl	%r8d, %edi
+3688-.Ltmp765:
+3689-	.loc	31 157 18
+3690-	cmpl	%edi, %esi
+3691-	je	.LBB2_43
+3692-.Ltmp766:
+3693-	.loc	8 0 0 is_stmt 0
+3694-	leaq	-15(%rax), %rdx
+3695-	addq	%r12, %rcx
+3696-.Ltmp767:
+3697-	.loc	8 2488 21 is_stmt 1
+3698-	incq	%rbx
+3699-.Ltmp768:
+3700-	.loc	13 547 14
+3701-	movzbl	2(%rdx), %esi
+3702-	movb	%sil, 2(%rcx)
+3703-	movzwl	(%rdx), %edx
+3704-	movw	%dx, (%rcx)
+3705-.Ltmp769:
+3706-.LBB2_43:
+3707-	.loc	17 961 18
+3708-	leaq	(%rbx,%rbx,2), %rcx
+3709-.Ltmp770:
+3710-	.loc	8 2473 39
+3711-	movzbl	-10(%rax), %esi
+3712-	movzwl	-12(%rax), %edx
+3713-	movzbl	-1(%r12,%rcx), %edi
+3714-	movzwl	-3(%r12,%rcx), %r8d
+3715-	shll	$16, %esi
+3716-	orl	%edx, %esi
+3717-	shll	$16, %edi
+3718-	orl	%r8d, %edi
+3719-.Ltmp771:
+3720-	.loc	31 157 18
+3721-	cmpl	%edi, %esi
+3722-	je	.LBB2_45
+3723-.Ltmp772:
+3724-	.loc	8 0 0 is_stmt 0
+3725-	leaq	-12(%rax), %rdx
+3726-	addq	%r12, %rcx
+3727-.Ltmp773:
+3728-	.loc	8 2488 21 is_stmt 1
+3729-	incq	%rbx
+3730-.Ltmp774:
+3731-	.loc	13 547 14
+3732-	movzbl	2(%rdx), %esi
+3733-	movb	%sil, 2(%rcx)
+3734-	movzwl	(%rdx), %edx
+3735-	movw	%dx, (%rcx)
+3736-.Ltmp775:
+3737-.LBB2_45:
+3738-	.loc	17 961 18
+3739-	leaq	(%rbx,%rbx,2), %rcx
+3740-.Ltmp776:
+3741-	.loc	8 2473 39
+3742-	movzbl	-7(%rax), %esi
+3743-	movzwl	-9(%rax), %edx
+3744-	movzbl	-1(%r12,%rcx), %edi
+3745-	movzwl	-3(%r12,%rcx), %r8d
+3746-	shll	$16, %esi
+3747-	orl	%edx, %esi
+3748-	shll	$16, %edi
+3749-	orl	%r8d, %edi
+3750-.Ltmp777:
+3751-	.loc	31 157 18
+3752-	cmpl	%edi, %esi
+3753-	je	.LBB2_47
+3754-.Ltmp778:
+3755-	.loc	8 0 0 is_stmt 0
+3756-	leaq	-9(%rax), %rdx
+3757-	addq	%r12, %rcx
+3758-.Ltmp779:
+3759-	.loc	8 2488 21 is_stmt 1
+3760-	incq	%rbx
+3761-.Ltmp780:
+3762-	.loc	13 547 14
+3763-	movzbl	2(%rdx), %esi
+3764-	movb	%sil, 2(%rcx)
+3765-	movzwl	(%rdx), %edx
+3766-	movw	%dx, (%rcx)
+3767-.Ltmp781:
+3768-.LBB2_47:
+3769-	.loc	17 961 18
+3770-	leaq	(%rbx,%rbx,2), %rcx
+3771-.Ltmp782:
+3772-	.loc	8 2473 39
+3773-	movzbl	-4(%rax), %esi
+3774-	movzwl	-6(%rax), %edx
+3775-	movzbl	-1(%r12,%rcx), %edi
+3776-	movzwl	-3(%r12,%rcx), %r8d
+3777-	shll	$16, %esi
+3778-	orl	%edx, %esi
+3779-	shll	$16, %edi
+3780-	orl	%r8d, %edi
+3781-.Ltmp783:
+3782-	.loc	31 157 18
+3783-	cmpl	%edi, %esi
+3784-	je	.LBB2_49
+3785-.Ltmp784:
+3786-	.loc	8 0 0 is_stmt 0
+3787-	leaq	-6(%rax), %rdx
+3788-	addq	%r12, %rcx
+3789-.Ltmp785:
+3790-	.loc	8 2488 21 is_stmt 1
+3791-	incq	%rbx
+3792-.Ltmp786:
+3793-	.loc	13 547 14
+3794-	movzbl	2(%rdx), %esi
+3795-	movb	%sil, 2(%rcx)
+3796-	movzwl	(%rdx), %edx
+3797-	movw	%dx, (%rcx)
+3798-.Ltmp787:
+3799-.LBB2_49:
+3800-	.loc	17 961 18
+3801-	leaq	(%rbx,%rbx,2), %rcx
+3802-.Ltmp788:
+3803-	.loc	8 2473 39
+3804-	movzbl	-1(%rax), %esi
+3805-	movzwl	-3(%rax), %edx
+3806-	movzbl	-1(%r12,%rcx), %edi
+3807-	movzwl	-3(%r12,%rcx), %r8d
+3808-	shll	$16, %esi
+3809-	orl	%edx, %esi
+3810-	shll	$16, %edi
+3811-	orl	%r8d, %edi
+3812-.Ltmp789:
+3813-	.loc	31 157 18
+3814-	cmpl	%edi, %esi
+3815-	je	.LBB2_51
+3816-.Ltmp790:
+3817-	.loc	8 0 0 is_stmt 0
+3818-	leaq	-3(%rax), %rdx
+3819-	addq	%r12, %rcx
+3820-.Ltmp791:
+3821-	.loc	8 2488 21 is_stmt 1
+3822-	incq	%rbx
+3823-.Ltmp792:
+3824-	.loc	13 547 14
+3825-	movzbl	2(%rdx), %esi
+3826-	movb	%sil, 2(%rcx)
+3827-	movzwl	(%rdx), %edx
+3828-	movw	%dx, (%rcx)
+3829-.Ltmp793:
+3830-.LBB2_51:
+3831-	.loc	17 961 18
+3832-	leaq	(%rbx,%rbx,2), %rcx
+3833-.Ltmp794:
+3834-	.loc	8 2473 39
+3835-	movzbl	2(%rax), %esi
+3836-	movzwl	(%rax), %edx
+3837-	movzbl	-1(%r12,%rcx), %edi
+3838-	movzwl	-3(%r12,%rcx), %r8d
+3839-	shll	$16, %esi
+3840-	orl	%edx, %esi
+3841-	shll	$16, %edi
+3842-	orl	%r8d, %edi
+3843-.Ltmp795:
+3844-	.loc	31 157 18
+3845-	cmpl	%edi, %esi
+3846-	je	.LBB2_53
+3847-.Ltmp796:
+3848-	.loc	13 547 14
+3849-	movzbl	2(%rax), %edx
+3850-.Ltmp797:
+3851-	.loc	8 0 0 is_stmt 0
+3852-	addq	%r12, %rcx
+3853-.Ltmp798:
+3854-	.loc	8 2488 21 is_stmt 1
+3855-	incq	%rbx
+3856-.Ltmp799:
+3857-	.loc	13 547 14
+3858-	movb	%dl, 2(%rcx)
+3859-	movzwl	(%rax), %edx
+3860-	movw	%dx, (%rcx)
+3861-	jmp	.LBB2_53
+3862-.Ltmp800:
+3863-.LBB2_61:
+3864-	.loc	13 0 14 is_stmt 0
+3865-	movq	%rdx, 72(%rsp)
+3866-	movq	%r12, 32(%rsp)
+3867-.LBB2_90:
+3868-	xorl	%edi, %edi
+3869-	movq	$0, 24(%rsp)
+3870-.LBB2_91:
+3871-.Ltmp577:
+3872-	movq	24(%rsp), %rsi
+3873-	movq	72(%rsp), %rdx
+3874-.Ltmp801:
+3875-	callq	*_ZN4core9panicking18panic_bounds_check17hb15443e8431033c2E@GOTPCREL(%rip)
+3876-.Ltmp802:
+3877-.Ltmp578:
+3878-.LBB2_64:
+3879-	ud2
+3880-.LBB2_18:
+3881-.Ltmp570:
+3882-	leaq	23(%rsp), %rdx
+3883-.Ltmp803:
+3884-	.loc	15 50 13 is_stmt 1
+3885-	movq	%r12, %rdi
+3886-	movq	%r13, %rsi
+3887-	callq	*_ZN4core5slice4sort8unstable7ipnsort17h3d5e656b0777f998E@GOTPCREL(%rip)
+3888-.Ltmp571:
+3889-	jmp	.LBB2_24
+3890-.Ltmp804:
+3891-.LBB2_80:
+3892-.Ltmp575:
+3893-	.loc	15 0 13 is_stmt 0
+3894-	leaq	112(%rsp), %rdx
+3895-.Ltmp805:
+3896-	.loc	15 50 13
+3897-	movq	%rbx, %rdi
+3898-	movq	%rbp, %rsi
+3899-	callq	*_ZN4core5slice4sort8unstable7ipnsort17h0cdaf1b196f2e966E@GOTPCREL(%rip)
+3900-.Ltmp576:
+3901-	jmp	.LBB2_81
+3902-.Ltmp806:
+3903-.LBB2_84:
+3904-.Ltmp579:
+3905-	.loc	15 0 13
+3906-	jmp	.LBB2_85
+3907-.LBB2_83:
+3908-.Ltmp574:
+3909-.LBB2_85:
+3910-	.loc	1 167 5 is_stmt 1
+3911-	movq	48(%rsp), %rsi
+3912-	movq	%rax, %r14
+3913-.Ltmp807:
+3914-	.loc	11 523 39
+3915-	testq	%rsi, %rsi
+3916-	je	.LBB2_86
+3917-.Ltmp808:
+3918-	.loc	1 167 5
+3919-	movq	56(%rsp), %rdi
+3920-.Ltmp809:
+3921-	.loc	28 1187 17
+3922-	shlq	$3, %rsi
+3923-.Ltmp810:
+3924-	.loc	23 115 14
+3925-	movl	$8, %edx
+3926-	callq	*_RNvCsdBezzDwma51_7___rustc14___rust_dealloc@GOTPCREL(%rip)
+3927-.Ltmp811:
+3928-.LBB2_86:
+3929-	.loc	23 0 14 is_stmt 0
+3930-	movq	32(%rsp), %r12
+3931-	movq	8(%rsp), %rbx
+3932-.Ltmp812:
+3933-	.loc	11 523 39 is_stmt 1
+3934-	jmp	.LBB2_20
+3935-.Ltmp813:
+3936-.LBB2_19:
+3937-.Ltmp582:
+3938-	.loc	11 0 39 is_stmt 0
+3939-	movq	%rax, %r14
+3940-.LBB2_20:
+3941-.Ltmp814:
+3942-	.loc	11 523 39 is_stmt 1
+3943-	testq	%rbx, %rbx
+3944-	je	.LBB2_22
+3945-.Ltmp815:
+3946-	.loc	28 1187 17
+3947-	leaq	(%rbx,%rbx,2), %rsi
+3948-.Ltmp816:
+3949-	.loc	23 115 14
+3950-	movl	$1, %edx
+3951-	movq	%r12, %rdi
+3952-	callq	*_RNvCsdBezzDwma51_7___rustc14___rust_dealloc@GOTPCREL(%rip)
+3953-.Ltmp817:
+3954-.LBB2_22:
+3955-	.loc	23 0 14 is_stmt 0
+3956-	movq	%r14, %rdi
+3957-	callq	_Unwind_Resume@PLT
+3958-.Lfunc_end2:
+3959-	.size	_ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E, .Lfunc_end2-_ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E
+3960-	.cfi_endproc
+3961-	.file	42 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/alloc/src/vec" "spec_from_iter_nested.rs"

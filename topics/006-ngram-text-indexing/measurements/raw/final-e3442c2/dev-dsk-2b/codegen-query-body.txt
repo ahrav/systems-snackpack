@@ -1,0 +1,821 @@
+2323:_ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E:
+2324-.Lfunc_begin2:
+2325-	.loc	1 124 0
+2326-	.cfi_startproc
+2327-	.cfi_personality 156, DW.ref.rust_eh_personality
+2328-	.cfi_lsda 28, .Lexception1
+2329-	sub	sp, sp, #176
+2330-	.cfi_def_cfa_offset 176
+2331-	stp	x29, x30, [sp, #80]
+2332-	stp	x28, x27, [sp, #96]
+2333-	stp	x26, x25, [sp, #112]
+2334-	stp	x24, x23, [sp, #128]
+2335-	stp	x22, x21, [sp, #144]
+2336-	stp	x20, x19, [sp, #160]
+2337-	add	x29, sp, #80
+2338-	.cfi_def_cfa w29, 96
+2339-	.cfi_offset w19, -8
+2340-	.cfi_offset w20, -16
+2341-	.cfi_offset w21, -24
+2342-	.cfi_offset w22, -32
+2343-	.cfi_offset w23, -40
+2344-	.cfi_offset w24, -48
+2345-	.cfi_offset w25, -56
+2346-	.cfi_offset w26, -64
+2347-	.cfi_offset w27, -72
+2348-	.cfi_offset w28, -80
+2349-	.cfi_offset w30, -88
+2350-	.cfi_offset w29, -96
+2351-	.cfi_remember_state
+2352-	mov	x20, x2
+2353-	mov	x21, x1
+2354-	mov	x22, x0
+2355-.Ltmp521:
+2356-	.loc	1 125 12 prologue_end
+2357-	cmp	x2, #3
+2358-	b.hs	.LBB2_3
+2359-.Ltmp522:
+2360-	.loc	7 2856 19
+2361-	ldp	x0, x24, [x22, #8]
+2362-.Ltmp523:
+2363-	.loc	1 128 32
+2364-	mov	x2, x21
+2365-	mov	x3, x20
+2366-	mov	x1, x24
+2367-	bl	_ZN27systems_snackpack_topic_00610scan_count17hcc8a1af892b6d68fE
+2368-	mov	x26, x0
+2369-.LBB2_2:
+2370-	.loc	1 167 6
+2371-	mov	x0, x24
+2372-	mov	x1, x26
+2373-	.cfi_def_cfa wsp, 176
+2374-	.loc	1 167 6 epilogue_begin is_stmt 0
+2375-	ldp	x20, x19, [sp, #160]
+2376-	ldp	x22, x21, [sp, #144]
+2377-	ldp	x24, x23, [sp, #128]
+2378-	ldp	x26, x25, [sp, #112]
+2379-	ldp	x28, x27, [sp, #96]
+2380-	ldp	x29, x30, [sp, #80]
+2381-	add	sp, sp, #176
+2382-	.cfi_def_cfa_offset 0
+2383-	.cfi_restore w19
+2384-	.cfi_restore w20
+2385-	.cfi_restore w21
+2386-	.cfi_restore w22
+2387-	.cfi_restore w23
+2388-	.cfi_restore w24
+2389-	.cfi_restore w25
+2390-	.cfi_restore w26
+2391-	.cfi_restore w27
+2392-	.cfi_restore w28
+2393-	.cfi_restore w30
+2394-	.cfi_restore w29
+2395-	ret
+2396-.LBB2_3:
+2397-	.cfi_restore_state
+2398-.Ltmp524:
+2399-	.loc	10 1368 12 is_stmt 1
+2400-	sub	x23, x20, #2
+2401-	mov	w8, #3
+2402-	mov	x25, xzr
+2403-.Ltmp525:
+2404-	.loc	26 2946 26
+2405-	umulh	x8, x23, x8
+2406-	add	x24, x23, x23, lsl #1
+2407-	cmp	xzr, x8
+2408-.Ltmp526:
+2409-	.loc	15 457 8
+2410-	b.ne	.LBB2_9
+2411-	tbnz	x24, #63, .LBB2_9
+2412-.Ltmp527:
+2413-	.loc	9 463 12
+2414-	cbz	x24, .LBB2_10
+2415-.Ltmp528:
+2416-	.loc	22 93 9
+2417-	bl	_RNvCsdBezzDwma51_7___rustc35___rust_no_alloc_shim_is_unstable_v2
+2418-	.loc	22 95 9
+2419-	mov	x0, x24
+2420-	mov	w1, #1
+2421-	mov	w25, #1
+2422-	bl	_RNvCsdBezzDwma51_7___rustc12___rust_alloc
+2423-.Ltmp529:
+2424-	.loc	9 472 19
+2425-	cbz	x0, .LBB2_9
+2426-.Ltmp530:
+2427-	.loc	9 0 19 is_stmt 0
+2428-	mov	x28, x0
+2429-	mov	x25, x23
+2430-	cmp	x20, #3
+2431-	b.ne	.LBB2_11
+2432-.LBB2_8:
+2433-	mov	x8, xzr
+2434-	mov	x9, x21
+2435-.Ltmp531:
+2436-	.loc	10 1357 12 is_stmt 1
+2437-	tbnz	w20, #0, .LBB2_14
+2438-	b	.LBB2_15
+2439-.Ltmp532:
+2440-.LBB2_9:
+2441-	.loc	9 427 25
+2442-	mov	x0, x25
+2443-	mov	x1, x24
+2444-	bl	_ZN5alloc7raw_vec12handle_error17h36c248164e914976E
+2445-.Ltmp533:
+2446-.LBB2_10:
+2447-	.loc	9 0 25 is_stmt 0
+2448-	mov	x25, xzr
+2449-	mov	w28, #1
+2450-	cmp	x20, #3
+2451-	b.eq	.LBB2_8
+2452-.LBB2_11:
+2453-	mov	x8, xzr
+2454-	and	x9, x23, #0xfffffffffffffffe
+2455-	mov	x10, x28
+2456-	.p2align	5, , 16
+2457-.LBB2_12:
+2458-.Ltmp534:
+2459-	.loc	12 89 24 is_stmt 1
+2460-	add	x11, x21, x8
+2461-.Ltmp535:
+2462-	.loc	13 19 9
+2463-	add	x8, x8, #2
+2464-.Ltmp536:
+2465-	.loc	11 1718 17
+2466-	ldrh	w12, [x11]
+2467-	ldrb	w13, [x11, #2]
+2468-.Ltmp537:
+2469-	.loc	10 1357 12
+2470-	cmp	x9, x8
+2471-.Ltmp538:
+2472-	.loc	14 1908 9
+2473-	strh	w12, [x10]
+2474-.Ltmp539:
+2475-	.loc	11 1718 17
+2476-	ldurh	w12, [x11, #1]
+2477-	ldrb	w11, [x11, #3]
+2478-.Ltmp540:
+2479-	.loc	14 1908 9
+2480-	strb	w13, [x10, #2]
+2481-	strb	w11, [x10, #5]
+2482-	sturh	w12, [x10, #3]
+2483-.Ltmp541:
+2484-	.loc	10 1357 12
+2485-	add	x10, x10, #6
+2486-	b.ne	.LBB2_12
+2487-	sub	x19, x8, #1
+2488-	add	x9, x21, x8
+2489-	tbz	w20, #0, .LBB2_15
+2490-.Ltmp542:
+2491-.LBB2_14:
+2492-	.loc	11 1718 17
+2493-	ldrh	w10, [x9]
+2494-	ldrb	w9, [x9, #2]
+2495-.Ltmp543:
+2496-	.loc	16 961 18
+2497-	add	x11, x8, x8, lsl #1
+2498-	mov	x19, x8
+2499-	add	x11, x28, x11
+2500-.Ltmp544:
+2501-	.loc	14 1908 9
+2502-	strb	w9, [x11, #2]
+2503-	strh	w10, [x11]
+2504-.Ltmp545:
+2505-.LBB2_15:
+2506-	.loc	15 434 8
+2507-	cbnz	x19, .LBB2_69
+2508-.Ltmp546:
+2509-	.loc	15 0 8 is_stmt 0
+2510-	mov	w26, #1
+2511-.LBB2_17:
+2512-	mov	x24, xzr
+2513-.Ltmp547:
+2514-	.loc	26 2946 26 is_stmt 1
+2515-	lsl	x23, x26, #3
+2516-.Ltmp548:
+2517-	.loc	15 457 8
+2518-	lsr	x8, x26, #61
+2519-	cbnz	x8, .LBB2_36
+2520-	.loc	15 0 8 is_stmt 0
+2521-	mov	x8, #9223372036854775800
+2522-	.loc	15 457 8
+2523-	cmp	x23, x8
+2524-	b.hi	.LBB2_36
+2525-.Ltmp549:
+2526-	.loc	9 463 12 is_stmt 1
+2527-	cbz	x23, .LBB2_43
+2528-.Ltmp550:
+2529-	.loc	22 93 9
+2530-	bl	_RNvCsdBezzDwma51_7___rustc35___rust_no_alloc_shim_is_unstable_v2
+2531-	.loc	22 95 9
+2532-	mov	x0, x23
+2533-	mov	w1, #8
+2534-	mov	w24, #8
+2535-	bl	_RNvCsdBezzDwma51_7___rustc12___rust_alloc
+2536-	mov	x8, x26
+2537-.Ltmp551:
+2538-	.loc	9 472 19
+2539-	cbz	x0, .LBB2_36
+2540-.Ltmp552:
+2541-	.loc	7 913 9
+2542-	stp	x8, x0, [sp, #40]
+2543-	str	xzr, [sp, #56]
+2544-.Ltmp553:
+2545-	.loc	1 137 21
+2546-	cbz	x26, .LBB2_44
+2547-.LBB2_22:
+2548-	.loc	1 0 21 is_stmt 0
+2549-	ldr	x23, [x22, #24]
+2550-.Ltmp554:
+2551-	.loc	17 745 9 is_stmt 1
+2552-	cbz	x23, .LBB2_38
+2553-.Ltmp555:
+2554-	.loc	17 0 9 is_stmt 0
+2555-	add	x8, x26, x26, lsl #1
+2556-	ldr	x26, [x22, #32]
+2557-	stp	x25, x28, [sp, #16]
+2558-	mov	x25, xzr
+2559-.Ltmp556:
+2560-	.loc	2 180 28 is_stmt 1
+2561-	add	x9, x28, #3
+2562-	mov	w27, #3
+2563-	add	x24, x28, x8
+2564-	b	.LBB2_25
+2565-	.loc	2 0 28 is_stmt 0
+2566-.Ltmp557:
+2567-	.p2align	5, , 16
+2568-.LBB2_24:
+2569-	.loc	2 180 28 is_stmt 1
+2570-	cmp	x28, x24
+2571-.Ltmp558:
+2572-	.loc	14 1908 9
+2573-	str	x19, [x0, x25, lsl #3]
+2574-.Ltmp559:
+2575-	.loc	7 2625 13
+2576-	add	x25, x25, #1
+2577-.Ltmp560:
+2578-	.loc	2 180 28
+2579-	csel	x8, xzr, x27, eq
+2580-.Ltmp561:
+2581-	.loc	7 2625 13
+2582-	str	x25, [sp, #56]
+2583-.Ltmp562:
+2584-	.loc	2 180 28
+2585-	add	x9, x28, x8
+2586-.Ltmp563:
+2587-	.loc	1 137 21
+2588-	b.eq	.LBB2_48
+2589-.LBB2_25:
+2590-	.loc	1 0 21 is_stmt 0
+2591-	mov	x8, x28
+2592-	mov	x28, x9
+2593-	mov	x9, x26
+2594-	mov	x10, x23
+2595-.LBB2_26:
+2596-.Ltmp564:
+2597-	.loc	18 396 56 is_stmt 1
+2598-	ldrh	w12, [x10, #274]
+2599-	.loc	18 396 18 is_stmt 0
+2600-	add	x14, x10, #276
+2601-.Ltmp565:
+2602-	.loc	19 225 9 is_stmt 1
+2603-	sub	x19, x10, #16
+2604-	mov	x11, #-1
+2605-	add	x13, x12, x12, lsl #1
+2606-	.loc	19 0 9 is_stmt 0
+2607-.Ltmp566:
+2608-	.p2align	5, , 16
+2609-.LBB2_27:
+2610-.Ltmp567:
+2611-	.loc	2 180 28 is_stmt 1
+2612-	cbz	x13, .LBB2_31
+2613-.Ltmp568:
+2614-	.loc	20 323 34
+2615-	ldrb	w15, [x8, #2]
+2616-	ldrh	w16, [x8]
+2617-.Ltmp569:
+2618-	.loc	19 226 13
+2619-	sub	x13, x13, #3
+2620-	add	x19, x19, #24
+2621-	add	x11, x11, #1
+2622-.Ltmp570:
+2623-	.loc	20 323 34
+2624-	orr	w15, w16, w15, lsl #16
+2625-	ldrb	w16, [x14, #2]
+2626-	ldrh	w17, [x14], #3
+2627-	rev	w15, w15
+2628-	orr	w16, w17, w16, lsl #16
+2629-	rev	w16, w16
+2630-	cmp	w15, w16
+2631-	cset	w15, hi
+2632-	csinv	w15, w15, wzr, hs
+2633-	sxtw	x15, w15
+2634-.Ltmp571:
+2635-	.loc	21 1998 21
+2636-	cmp	x15, #0
+2637-	cset	w15, gt
+2638-	csinv	w15, w15, wzr, ge
+2639-	and	w15, w15, #0xff
+2640-.Ltmp572:
+2641-	.loc	19 226 13
+2642-	cmp	w15, #1
+2643-	b.eq	.LBB2_27
+2644-	cbz	w15, .LBB2_33
+2645-.Ltmp573:
+2646-	.loc	18 731 12
+2647-	cbnz	x9, .LBB2_32
+2648-	b	.LBB2_37
+2649-	.loc	18 0 12 is_stmt 0
+2650-.Ltmp574:
+2651-	.p2align	5, , 16
+2652-.LBB2_31:
+2653-	mov	x11, x12
+2654-	.loc	18 731 12 is_stmt 1
+2655-	cbz	x9, .LBB2_37
+2656-.Ltmp575:
+2657-.LBB2_32:
+2658-	.loc	18 1115 29
+2659-	add	x10, x10, x11, lsl #3
+2660-.Ltmp576:
+2661-	.loc	18 1116 33
+2662-	sub	x9, x9, #1
+2663-.Ltmp577:
+2664-	.loc	14 1708 9
+2665-	ldr	x10, [x10, #312]
+2666-.Ltmp578:
+2667-	.loc	19 57 9
+2668-	b	.LBB2_26
+2669-.Ltmp579:
+2670-	.loc	19 0 9 is_stmt 0
+2671-.Ltmp580:
+2672-	.p2align	5, , 16
+2673-.LBB2_33:
+2674-	.loc	9 509 49 is_stmt 1
+2675-	ldr	x8, [sp, #40]
+2676-.Ltmp581:
+2677-	.loc	7 2619 12
+2678-	cmp	x25, x8
+2679-	b.ne	.LBB2_24
+2680-.Ltmp44:
+2681-	.loc	7 2620 22
+2682-	add	x0, sp, #40
+2683-	bl	_ZN5alloc7raw_vec19RawVec$LT$T$C$A$GT$8grow_one17ha413a61c972a9289E
+2684-.Ltmp45:
+2685-.Ltmp582:
+2686-	.loc	9 504 9
+2687-	ldr	x0, [sp, #48]
+2688-	b	.LBB2_24
+2689-.Ltmp583:
+2690-.LBB2_36:
+2691-.Ltmp52:
+2692-	.loc	9 427 25
+2693-	mov	x0, x24
+2694-	mov	x1, x23
+2695-	bl	_ZN5alloc7raw_vec12handle_error17h36c248164e914976E
+2696-.Ltmp53:
+2697-	b	.LBB2_47
+2698-.Ltmp584:
+2699-.LBB2_37:
+2700-	.loc	1 167 5
+2701-	ldr	x8, [sp, #40]
+2702-	ldp	x25, x28, [sp, #16]
+2703-.LBB2_38:
+2704-.Ltmp585:
+2705-	.loc	9 523 39
+2706-	cbz	x8, .LBB2_40
+2707-.Ltmp586:
+2708-	.loc	1 167 5
+2709-	ldr	x0, [sp, #48]
+2710-.Ltmp587:
+2711-	.loc	26 1187 17
+2712-	lsl	x1, x8, #3
+2713-.Ltmp588:
+2714-	.loc	22 115 14
+2715-	mov	w2, #8
+2716-	bl	_RNvCsdBezzDwma51_7___rustc14___rust_dealloc
+2717-.Ltmp589:
+2718-.LBB2_40:
+2719-	.loc	9 523 39
+2720-	cbz	x25, .LBB2_42
+2721-.Ltmp590:
+2722-	.loc	26 1187 17
+2723-	add	x1, x25, x25, lsl #1
+2724-.Ltmp591:
+2725-	.loc	22 115 14
+2726-	mov	x0, x28
+2727-	mov	w2, #1
+2728-	bl	_RNvCsdBezzDwma51_7___rustc14___rust_dealloc
+2729-.Ltmp592:
+2730-.LBB2_42:
+2731-	.loc	22 0 14 is_stmt 0
+2732-	mov	x26, xzr
+2733-	mov	x24, xzr
+2734-.Ltmp593:
+2735-	.loc	9 523 39 is_stmt 1
+2736-	b	.LBB2_2
+2737-.Ltmp594:
+2738-.LBB2_43:
+2739-	.loc	9 0 39 is_stmt 0
+2740-	mov	x8, xzr
+2741-	mov	w0, #8
+2742-.Ltmp595:
+2743-	.loc	7 913 9 is_stmt 1
+2744-	stp	xzr, x0, [sp, #40]
+2745-	str	xzr, [sp, #56]
+2746-.Ltmp596:
+2747-	.loc	1 137 21
+2748-	cbnz	x26, .LBB2_22
+2749-.Ltmp597:
+2750-.LBB2_44:
+2751-	.loc	1 0 21 is_stmt 0
+2752-	stp	x25, x28, [sp, #16]
+2753-.LBB2_45:
+2754-	mov	x0, xzr
+2755-	adrp	x8, .Lanon.a69676561e70b0a03c5f84f42b566e7b.1
+2756-	add	x8, x8, :lo12:.Lanon.a69676561e70b0a03c5f84f42b566e7b.1
+2757-	str	xzr, [sp, #32]
+2758-	str	x8, [sp]
+2759-.LBB2_46:
+2760-.Ltmp49:
+2761-	ldr	x1, [sp, #32]
+2762-	ldr	x2, [sp]
+2763-.Ltmp598:
+2764-	bl	_ZN4core9panicking18panic_bounds_check17hb2e5aecf3acac563E
+2765-.Ltmp599:
+2766-.Ltmp50:
+2767-.LBB2_47:
+2768-	brk	#0x1
+2769-.LBB2_48:
+2770-.Ltmp600:
+2771-	.loc	9 504 9 is_stmt 1
+2772-	ldr	x19, [sp, #48]
+2773-.Ltmp601:
+2774-	.loc	15 434 8
+2775-	cmp	x25, #2
+2776-	b.hs	.LBB2_79
+2777-.Ltmp602:
+2778-	.loc	12 272 10
+2779-	cbz	x25, .LBB2_45
+2780-.Ltmp603:
+2781-	.loc	12 0 10 is_stmt 0
+2782-	mov	w25, #1
+2783-.LBB2_51:
+2784-	.loc	1 150 41 is_stmt 1
+2785-	ldr	x9, [x19]
+2786-	str	x19, [sp, #8]
+2787-.Ltmp604:
+2788-	.loc	7 1599 55
+2789-	ldr	x8, [x9, #16]
+2790-.Ltmp605:
+2791-	.loc	1 150 41
+2792-	cbz	x8, .LBB2_64
+2793-.Ltmp606:
+2794-	.loc	1 150 41 is_stmt 0
+2795-	ldr	x23, [x9, #8]
+2796-	ldp	x22, x9, [x22, #8]
+2797-	mov	x24, xzr
+2798-	mov	x26, xzr
+2799-	add	x27, x19, #8
+2800-	add	x25, x19, x25, lsl #3
+2801-	mov	w19, #8
+2802-	str	x9, [sp, #32]
+2803-	add	x28, x23, x8, lsl #3
+2804-.Ltmp607:
+2805-	.loc	2 180 28 is_stmt 1
+2806-	add	x8, x23, #8
+2807-	adrp	x9, .Lanon.a69676561e70b0a03c5f84f42b566e7b.2
+2808-	add	x9, x9, :lo12:.Lanon.a69676561e70b0a03c5f84f42b566e7b.2
+2809-	str	x9, [sp]
+2810-	b	.LBB2_56
+2811-.Ltmp608:
+2812-	.loc	2 0 28 is_stmt 0
+2813-.Ltmp609:
+2814-	.p2align	5, , 16
+2815-.LBB2_53:
+2816-	ldr	x8, [sp, #32]
+2817-.Ltmp610:
+2818-	.loc	12 272 10 is_stmt 1
+2819-	cmp	x0, x8
+2820-	b.hs	.LBB2_46
+2821-	.loc	12 272 9 is_stmt 0
+2822-	mov	w8, #24
+2823-.Ltmp611:
+2824-	.loc	1 158 16 is_stmt 1
+2825-	mov	x2, x21
+2826-	mov	x3, x20
+2827-	.loc	1 157 13
+2828-	add	x24, x24, #1
+2829-.Ltmp612:
+2830-	.loc	12 272 9
+2831-	madd	x8, x0, x8, x22
+2832-.Ltmp613:
+2833-	.loc	9 504 9
+2834-	ldp	x0, x1, [x8, #8]
+2835-.Ltmp614:
+2836-	.loc	1 158 16
+2837-	bl	_ZN27systems_snackpack_topic_00614contains_exact17h152785633432bbfaE
+2838-	add	x26, x26, w0, uxtw
+2839-.Ltmp615:
+2840-.LBB2_55:
+2841-	.loc	2 180 28
+2842-	cmp	x23, x28
+2843-	csel	x8, xzr, x19, eq
+2844-	add	x8, x23, x8
+2845-.Ltmp616:
+2846-	.loc	1 150 41
+2847-	b.eq	.LBB2_65
+2848-.LBB2_56:
+2849-	.loc	1 150 26
+2850-	ldr	x0, [x23]
+2851-	mov	x23, x8
+2852-	mov	x8, x27
+2853-	b	.LBB2_59
+2854-	.loc	1 0 26 is_stmt 0
+2855-.Ltmp617:
+2856-	.p2align	5, , 16
+2857-.LBB2_57:
+2858-	mov	x12, xzr
+2859-.LBB2_58:
+2860-.Ltmp618:
+2861-	add	x8, x8, x9
+2862-.Ltmp619:
+2863-	.loc	36 3007 19 is_stmt 1
+2864-	ldr	x9, [x10, x12, lsl #3]
+2865-.Ltmp620:
+2866-	.loc	1 152 20
+2867-	cmp	x9, x0
+2868-	b.ne	.LBB2_55
+2869-.Ltmp621:
+2870-.LBB2_59:
+2871-	.loc	2 180 28
+2872-	cmp	x8, x25
+2873-	csel	x9, xzr, x19, eq
+2874-.Ltmp622:
+2875-	.loc	1 151 28
+2876-	b.eq	.LBB2_53
+2877-.Ltmp623:
+2878-	.loc	1 152 20
+2879-	ldr	x11, [x8]
+2880-.Ltmp624:
+2881-	.loc	9 504 9
+2882-	ldp	x10, x11, [x11, #8]
+2883-.Ltmp625:
+2884-	.loc	36 2972 12
+2885-	cmp	x11, #1
+2886-	b.eq	.LBB2_57
+2887-	cbz	x11, .LBB2_55
+2888-	.loc	36 0 12 is_stmt 0
+2889-	mov	x12, xzr
+2890-	.p2align	5, , 16
+2891-.LBB2_63:
+2892-.Ltmp626:
+2893-	.loc	36 2982 24 is_stmt 1
+2894-	lsr	x13, x11, #1
+2895-.Ltmp627:
+2896-	.loc	36 2983 23
+2897-	add	x14, x13, x12
+2898-.Ltmp628:
+2899-	.loc	36 3003 13
+2900-	sub	x11, x11, x13
+2901-.Ltmp629:
+2902-	.loc	36 2988 23
+2903-	ldr	x15, [x10, x14, lsl #3]
+2904-.Ltmp630:
+2905-	.file	39 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src" "hint.rs"
+2906-	.loc	39 823 9
+2907-	cmp	x15, x0
+2908-	csel	x12, x12, x14, hi
+2909-.Ltmp631:
+2910-	.loc	36 2981 15
+2911-	cmp	x11, #1
+2912-	b.hi	.LBB2_63
+2913-	b	.LBB2_58
+2914-.Ltmp632:
+2915-.LBB2_64:
+2916-	.loc	36 0 15 is_stmt 0
+2917-	mov	x26, xzr
+2918-	mov	x24, xzr
+2919-.LBB2_65:
+2920-	.loc	1 167 5 is_stmt 1
+2921-	ldr	x8, [sp, #40]
+2922-.Ltmp633:
+2923-	.loc	9 523 39
+2924-	cbz	x8, .LBB2_67
+2925-	.loc	9 0 39 is_stmt 0
+2926-	ldr	x0, [sp, #8]
+2927-.Ltmp634:
+2928-	.loc	26 1187 17 is_stmt 1
+2929-	lsl	x1, x8, #3
+2930-.Ltmp635:
+2931-	.loc	22 115 14
+2932-	mov	w2, #8
+2933-	bl	_RNvCsdBezzDwma51_7___rustc14___rust_dealloc
+2934-.Ltmp636:
+2935-.LBB2_67:
+2936-	.loc	22 0 14 is_stmt 0
+2937-	ldp	x8, x0, [sp, #16]
+2938-.Ltmp637:
+2939-	.loc	9 523 39 is_stmt 1
+2940-	cbz	x8, .LBB2_2
+2941-.Ltmp638:
+2942-	.loc	26 1187 17
+2943-	add	x1, x8, x8, lsl #1
+2944-.Ltmp639:
+2945-	.loc	22 115 14
+2946-	mov	w2, #1
+2947-	bl	_RNvCsdBezzDwma51_7___rustc14___rust_dealloc
+2948-	b	.LBB2_2
+2949-.Ltmp640:
+2950-.LBB2_69:
+2951-	.loc	15 434 8
+2952-	cmp	x19, #20
+2953-	b.hs	.LBB2_81
+2954-.Ltmp641:
+2955-	.loc	29 46 17
+2956-	mov	x0, x28
+2957-	mov	x1, x23
+2958-	mov	w2, #1
+2959-	bl	_ZN4core5slice4sort6shared9smallsort25insertion_sort_shift_left17hc982e1b4aae9e230E
+2960-.Ltmp642:
+2961-.LBB2_71:
+2962-	.loc	7 2387 15
+2963-	sub	x8, x19, #1
+2964-	add	x9, x28, #6
+2965-	mov	w26, #1
+2966-.LBB2_72:
+2967-.Ltmp643:
+2968-	.loc	7 2394 17
+2969-	ldurb	w10, [x9, #-1]
+2970-	ldurh	w11, [x9, #-3]
+2971-	ldurh	w12, [x9, #-6]
+2972-	orr	w10, w11, w10, lsl #16
+2973-	ldurb	w11, [x9, #-4]
+2974-	orr	w11, w12, w11, lsl #16
+2975-.Ltmp644:
+2976-	.loc	7 2396 16
+2977-	cmp	w10, w11
+2978-	b.eq	.LBB2_75
+2979-.Ltmp645:
+2980-	.loc	7 2387 15
+2981-	sub	x8, x8, #1
+2982-.Ltmp646:
+2983-	.loc	7 2399 13
+2984-	add	x26, x26, #1
+2985-.Ltmp647:
+2986-	.loc	7 2387 15
+2987-	add	x9, x9, #3
+2988-	cmn	x8, #1
+2989-	b.ne	.LBB2_72
+2990-	.loc	7 0 15 is_stmt 0
+2991-	mov	x26, x23
+2992-	b	.LBB2_17
+2993-.LBB2_75:
+2994-.Ltmp648:
+2995-	.loc	7 2468 19 is_stmt 1
+2996-	cmp	x26, x19
+2997-	b.lo	.LBB2_77
+2998-	b	.LBB2_17
+2999-.LBB2_76:
+3000-	.loc	7 2468 19
+3001-	subs	x8, x8, #1
+3002-	add	x9, x9, #3
+3003-	b.eq	.LBB2_17
+3004-.LBB2_77:
+3005-.Ltmp649:
+3006-	.loc	7 2473 39
+3007-	ldrb	w11, [x9, #2]
+3008-	ldrh	w12, [x9]
+3009-.Ltmp650:
+3010-	.loc	16 961 18
+3011-	add	x10, x26, x26, lsl #1
+3012-	add	x10, x28, x10
+3013-.Ltmp651:
+3014-	.loc	7 2473 39
+3015-	ldurh	w13, [x10, #-3]
+3016-	orr	w11, w12, w11, lsl #16
+3017-	ldurb	w12, [x10, #-1]
+3018-	orr	w12, w13, w12, lsl #16
+3019-.Ltmp652:
+3020-	.loc	7 2474 20
+3021-	cmp	w11, w12
+3022-	b.eq	.LBB2_76
+3023-.Ltmp653:
+3024-	.loc	14 547 14
+3025-	ldrh	w11, [x9]
+3026-	ldrb	w12, [x9, #2]
+3027-.Ltmp654:
+3028-	.loc	7 2488 21
+3029-	add	x26, x26, #1
+3030-.Ltmp655:
+3031-	.loc	14 547 14
+3032-	strb	w12, [x10, #2]
+3033-	strh	w11, [x10]
+3034-	b	.LBB2_76
+3035-.Ltmp656:
+3036-.LBB2_79:
+3037-	.loc	15 434 8
+3038-	cmp	x25, #21
+3039-	b.hs	.LBB2_82
+3040-.Ltmp657:
+3041-	.loc	29 46 17
+3042-	mov	x0, x19
+3043-	mov	x1, x25
+3044-	mov	w2, #1
+3045-	bl	_ZN4core5slice4sort6shared9smallsort25insertion_sort_shift_left17h66cf973997d242c0E
+3046-	b	.LBB2_51
+3047-.Ltmp658:
+3048-.LBB2_81:
+3049-.Ltmp42:
+3050-	.loc	29 50 13
+3051-	sub	x2, x29, #1
+3052-	mov	x0, x28
+3053-	mov	x1, x23
+3054-	bl	_ZN4core5slice4sort8unstable7ipnsort17h756b85c9fff36e41E
+3055-.Ltmp43:
+3056-	b	.LBB2_71
+3057-.Ltmp659:
+3058-.LBB2_82:
+3059-.Ltmp47:
+3060-	.loc	29 50 13 is_stmt 0
+3061-	sub	x2, x29, #16
+3062-	mov	x0, x19
+3063-	mov	x1, x25
+3064-	bl	_ZN4core5slice4sort8unstable7ipnsort17h3399a122a30b0d0fE
+3065-.Ltmp48:
+3066-	b	.LBB2_51
+3067-.Ltmp660:
+3068-.LBB2_83:
+3069-.Ltmp51:
+3070-	.loc	29 0 13
+3071-	b	.LBB2_85
+3072-.LBB2_84:
+3073-.Ltmp46:
+3074-.LBB2_85:
+3075-	.loc	1 167 5 is_stmt 1
+3076-	ldr	x8, [sp, #40]
+3077-	mov	x20, x0
+3078-.Ltmp661:
+3079-	.loc	9 523 39
+3080-	cbz	x8, .LBB2_87
+3081-.Ltmp662:
+3082-	.loc	1 167 5
+3083-	ldr	x0, [sp, #48]
+3084-.Ltmp663:
+3085-	.loc	26 1187 17
+3086-	lsl	x1, x8, #3
+3087-.Ltmp664:
+3088-	.loc	22 115 14
+3089-	mov	w2, #8
+3090-	bl	_RNvCsdBezzDwma51_7___rustc14___rust_dealloc
+3091-.Ltmp665:
+3092-.LBB2_87:
+3093-	.loc	22 0 14 is_stmt 0
+3094-	ldp	x25, x28, [sp, #16]
+3095-	mov	x0, x20
+3096-.Ltmp666:
+3097-	.loc	9 523 39 is_stmt 1
+3098-	b	.LBB2_89
+3099-.Ltmp667:
+3100-.LBB2_88:
+3101-.Ltmp54:
+3102-.LBB2_89:
+3103-	.loc	9 523 39
+3104-	cbz	x25, .LBB2_91
+3105-.Ltmp668:
+3106-	.loc	26 1187 17
+3107-	add	x1, x25, x25, lsl #1
+3108-	mov	x19, x0
+3109-.Ltmp669:
+3110-	.loc	22 115 14
+3111-	mov	x0, x28
+3112-	mov	w2, #1
+3113-	bl	_RNvCsdBezzDwma51_7___rustc14___rust_dealloc
+3114-	mov	x0, x19
+3115-.Ltmp670:
+3116-.LBB2_91:
+3117-	.loc	22 0 14 is_stmt 0
+3118-	bl	_Unwind_Resume
+3119-.Lfunc_end2:
+3120-	.size	_ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E, .Lfunc_end2-_ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E
+3121-	.cfi_endproc
+3122-	.file	40 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/alloc/src/vec" "spec_from_iter_nested.rs"
+3123-	.file	41 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/alloc/src/vec" "spec_from_iter.rs"
+3124-	.file	42 "/rustc/01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf/library/core/src/alloc" "layout.rs"
+3125-	.section	.gcc_except_table._ZN27systems_snackpack_topic_00612TrigramIndex5query17h715491e353d10911E,"a",@progbits
+3126-	.p2align	2, 0x0
+3127-GCC_except_table2:
+3128-.Lexception1:
+3129-	.byte	255
+3130-	.byte	255
+3131-	.byte	1
+3132-	.uleb128 .Lcst_end1-.Lcst_begin1
+3133-.Lcst_begin1:
+3134-	.uleb128 .Lfunc_begin2-.Lfunc_begin2
+3135-	.uleb128 .Ltmp44-.Lfunc_begin2
+3136-	.byte	0
+3137-	.byte	0
+3138-	.uleb128 .Ltmp44-.Lfunc_begin2
+3139-	.uleb128 .Ltmp45-.Ltmp44
+3140-	.uleb128 .Ltmp46-.Lfunc_begin2
+3141-	.byte	0
+3142-	.uleb128 .Ltmp52-.Lfunc_begin2
+3143-	.uleb128 .Ltmp53-.Ltmp52

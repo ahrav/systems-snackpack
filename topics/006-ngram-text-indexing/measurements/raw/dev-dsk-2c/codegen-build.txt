@@ -1,0 +1,2 @@
+   Compiling systems-snackpack-topic-006 v0.1.0 (/tmp/systems-snackpack-topic006-b2fb451/topics/006-ngram-text-indexing)
+    Finished `release` profile [optimized] target(s) in 0.67s

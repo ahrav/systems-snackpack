@@ -1,0 +1,9 @@
+source_sha=e3442c23f06ef9c060f869574f532caef46fd04a
+copy=git archive --format=tar SOURCE_SHA | ssh HOST tar -xf - -C REMOTE/source
+probe=uname -a; uname -m; nproc; rg CPU fields /proc/cpuinfo; lscpu; rustc -vV; cargo -V; gcc --version; command -v jq; jq --version; rustc --print cfg; rustc -C target-cpu=native --print cfg; rustc --print target-features
+correctness=(cd REMOTE/source && cargo run -p systems-snackpack-topic-006 --example check_equivalence)
+benchmark=(cd REMOTE/caller && PROCESSES=12 CPU=0 REMOTE/source/topics/006-ngram-text-indexing/experiment/run_processes.sh results)
+path_assertions=test REMOTE/caller/results/processes.txt exists; test REMOTE/source/results absent
+binary_resolution=cargo bench --message-format=json --quiet -p systems-snackpack-topic-006 --bench selectivity --no-run | jq runner filter | tail -n 1
+codegen=RUSTFLAGS=-C target-cpu=native -C debuginfo=1 cargo rustc -p systems-snackpack-topic-006 --release --lib -- --emit=asm
+inspection=rg -n scan_count|TrigramIndex.*query|bcmp|memcmp|xmm|ymm|zmm|sve target/release/deps/systems_snackpack_topic_006-*.s

@@ -1,0 +1,3 @@
+78:4023-	.section	.text._ZN4core5slice4sort8unstable7ipnsort17h3399a122a30b0d0fE,"ax",@progbits
+81:4026-	.type	_ZN4core5slice4sort8unstable7ipnsort17h3399a122a30b0d0fE,@function
+181:4126:	cntw	x10

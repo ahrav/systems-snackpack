@@ -1,0 +1,45 @@
+2:	.section	.text._ZN27systems_snackpack_topic_00610scan_count17h37f5a2fc28c61894E,"ax",@progbits
+3:	.globl	_ZN27systems_snackpack_topic_00610scan_count17h37f5a2fc28c61894E
+5:	.type	_ZN27systems_snackpack_topic_00610scan_count17h37f5a2fc28c61894E,@function
+6:_ZN27systems_snackpack_topic_00610scan_count17h37f5a2fc28c61894E:
+100:	.size	_ZN27systems_snackpack_topic_00610scan_count17h37f5a2fc28c61894E, .Lfunc_end0-_ZN27systems_snackpack_topic_00610scan_count17h37f5a2fc28c61894E
+2256:	vmovups	136(%rsp), %xmm0
+2258:	vmovups	(%r12), %xmm1
+2264:	vmovups	%xmm0, 24(%rbx)
+2266:	vmovups	%xmm1, (%rbx)
+2707:	.section	.text._ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E,"ax",@progbits
+2708:	.globl	_ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E
+2710:	.type	_ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E,@function
+2711:_ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E:
+2756:	callq	*_ZN27systems_snackpack_topic_00610scan_count17h37f5a2fc28c61894E@GOTPCREL(%rip)
+3959:	.size	_ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E, .Lfunc_end2-_ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E
+3964:	.section	.gcc_except_table._ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E,"a",@progbits
+4080:	callq	*bcmp@GOTPCREL(%rip)
+5076:	vmovaps	.LCPI10_0(%rip), %zmm0
+5093:	vpermpd	(%r10,%r11,8), %zmm0, %zmm1
+5094:	vpermpd	-64(%r10,%r11,8), %zmm0, %zmm2
+5095:	vpermpd	-64(%r9), %zmm0, %zmm3
+5096:	vmovups	%zmm1, -64(%r9)
+5097:	vpermpd	(%r9), %zmm0, %zmm1
+5098:	vmovups	%zmm2, (%r9)
+5099:	vmovups	%zmm3, (%r10,%r11,8)
+5105:	vmovups	%zmm1, -64(%r10,%r11,8)
+5135:	vpermpd	$27, (%r10,%r8,8), %ymm0
+5136:	vpermpd	$27, (%r9), %ymm1
+5137:	vmovups	%ymm0, (%r9)
+5138:	vmovups	%ymm1, (%r10,%r8,8)
+40433:	.section	.text._ZN27systems_snackpack_topic_00610scan_count17h37f5a2fc28c61894E,"ax",@progbits
+40437:	.section	.text._ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E,"ax",@progbits
+48082:	.asciz	"fold<alloc::vec::Vec<u8, alloc::alloc::Global>, usize, core::iter::adapters::map::map_fold::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, usize, usize, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>, core::iter::traits::accum::{impl#48}::sum::{closure_env#0}<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>>>>"
+48092:	.asciz	"fold<usize, core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>, usize, core::iter::traits::accum::{impl#48}::sum::{closure_env#0}<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>>>"
+48102:	.asciz	"sum<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>>"
+48110:	.asciz	"sum<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>, usize>"
+48118:	.asciz	"count<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, systems_snackpack_topic_006::scan_count::{closure_env#0}>"
+48122:	.asciz	"scan_count"
+48124:	.asciz	"_ZN27systems_snackpack_topic_00610scan_count28_$u7b$$u7b$closure$u7d$$u7d$17h5778e8170efa7baeE"
+48134:	.asciz	"{closure#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>"
+48140:	.asciz	"{closure#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, usize, usize, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>, core::iter::traits::accum::{impl#48}::sum::{closure_env#0}<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>>>"
+48146:	.asciz	"{closure#0}<core::iter::adapters::map::Map<core::slice::iter::Iter<alloc::vec::Vec<u8, alloc::alloc::Global>>, core::iter::adapters::filter::{impl#3}::count::to_usize::{closure_env#0}<&alloc::vec::Vec<u8, alloc::alloc::Global>, systems_snackpack_topic_006::scan_count::{closure_env#0}>>>"
+49508:	.asciz	"_ZN27systems_snackpack_topic_00612TrigramIndex5query28_$u7b$$u7b$closure$u7d$$u7d$17h2ad400a9398aebbaE"
+50148:	.asciz	"_ZN27systems_snackpack_topic_00610scan_count17h37f5a2fc28c61894E"
+50154:	.asciz	"_ZN27systems_snackpack_topic_00612TrigramIndex5query17h63549c32590c64d4E"

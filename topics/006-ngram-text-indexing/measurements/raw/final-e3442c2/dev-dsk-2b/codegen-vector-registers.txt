@@ -1,0 +1,16 @@
+1873:	ldur	q0, [x29, #-80]
+1879:	stur	q0, [x8, #24]
+1881:	ldr	q0, [x0]
+1883:	str	q0, [x8]
+4157:	ldr	z0, [x15]
+4160:	ldr	z1, [x15, #1, mul vl]
+4166:	rev	z0.d, z0.d
+4167:	ldr	z2, [x17]
+4168:	ldr	z3, [x11]
+4169:	rev	z2.d, z2.d
+4170:	rev	z3.d, z3.d
+4171:	str	z0, [x17]
+4172:	rev	z0.d, z1.d
+4173:	str	z2, [x15]
+4174:	str	z3, [x15, #1, mul vl]
+4180:	str	z0, [x11]
