@@ -66,6 +66,23 @@ the paired median is the third through tenth ordered ratio from 12 pairs. It
 covers process-run variation in one host window under those assumptions, not
 input, build, machine, or fleet variation.
 
+## Measured result
+
+Commit `26b49a5` ran on both required Linux hosts with Rust 1.93.1, native CPU
+features, vectorization disabled, 12 order-balanced process pairs per pattern,
+and 100,663,296 decisions per timed process. Ratios above one favor select.
+
+| Host | Zeros | Alternating | Fixed random |
+| --- | ---: | ---: | ---: |
+| AArch64 host | 1.066 | 1.240 | 4.846 |
+| x86-64 host | 1.380 | 1.083 | 8.403 |
+
+These paired geometric means apply only to the recorded binaries, hosts, and
+run windows. The random penalty is consistent with recovery from wrong-path
+speculation, but no site-attributed miss counter was measured. See the
+[cross-host record](measurements/2026-07-17-cross-host.md) for intervals,
+dispersion, code generation, and startup boundaries.
+
 See [Round 1](rounds/01.md), [measurement records](measurements/README.md), and
 [source scopes](references.md).
 

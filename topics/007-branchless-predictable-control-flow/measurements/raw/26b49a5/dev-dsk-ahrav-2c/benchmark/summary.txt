@@ -1,0 +1,10 @@
+replication=fresh_process paired_interval=exact_96.1_percent_median_order_statistic interval_assumptions=iid_continuous_pair_ratios
+zeros branch: n=12 mean=0.542506071 sd=0.000259763 median=0.542413662 mad=0.000116736 min=0.542164624 max=0.542968690
+zeros select: n=12 mean=0.393126355 sd=0.000733577 median=0.393076404 mad=0.000324706 min=0.391659637 max=0.394492577
+zeros paired branch/select: pairs=12 geomean=1.379980946 median=1.380224671 mad=0.001233325 exact96.1%=[1.378655460,1.381605213]
+alternating branch: n=12 mean=0.425698160 sd=0.014572679 median=0.422956567 mad=0.009340887 min=0.406548560 max=0.452011545
+alternating select: n=12 mean=0.392915518 sd=0.001012042 median=0.393065433 mad=0.000647868 min=0.391003589 max=0.394811253
+alternating paired branch/select: pairs=12 geomean=1.082862959 median=1.076698760 mad=0.022155829 exact96.1%=[1.054024572,1.118184591]
+random branch: n=12 mean=3.300727409 sd=0.001553889 median=3.301053996 mad=0.001884958 min=3.299061149 max=3.303113292
+random select: n=12 mean=0.392818388 sd=0.000803910 median=0.393099005 mad=0.000300363 min=0.390520692 max=0.393583099
+random paired branch/select: pairs=12 geomean=8.402695820 median=8.395352507 mad=0.007815694 exact96.1%=[8.391929414,8.412821181]

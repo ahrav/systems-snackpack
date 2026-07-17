@@ -1,0 +1,1 @@
+command=rustup run 1.93.1 cargo fmt --all -- --check 

@@ -1,0 +1,5 @@
+completed_utc=2026-07-17T15:13:53Z
+source_commit=26b49a55473a8fc43b73d6e5e4ef58a7d72f3698
+source_archive_sha256=ba4a0704a4431c22714fdaa6111c144dcfa8da9a7cae246fce0a077a5ecaf217
+benchmark_binary=/tmp/systems-snackpack-topic7-final-26b49a5/evidence-26b49a5/benchmark/target/release/deps/control_flow-701af6579cd28ee3
+status=ok

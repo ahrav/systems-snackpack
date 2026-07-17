@@ -1,0 +1,1 @@
+command=rustup run 1.93.1 bash topics/007-branchless-predictable-control-flow/experiment/run_processes.sh /tmp/systems-snackpack-topic7-final-26b49a5/evidence-26b49a5/benchmark

@@ -1,0 +1,4 @@
+command=rustup run 1.93.1 cargo bench -p systems-snackpack-topic-007 --bench control_flow -- --verify 
+    Finished `bench` profile [optimized] target(s) in 0.01s
+     Running benches/control_flow.rs (target/release/deps/control_flow-cf5a85bd5edd3201)
+VERIFY status=ok fixed_code_shape_supported=true
