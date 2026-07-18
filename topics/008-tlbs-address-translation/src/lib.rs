@@ -183,6 +183,8 @@ impl SmapsEvidence {
 pub struct AnonymousRegion {
     pointer: NonNull<u8>,
     length: usize,
+    allocation_pointer: NonNull<u8>,
+    allocation_length: usize,
     mode: MappingMode,
     ring_ready: bool,
     first_page_writable: bool,
@@ -201,7 +203,7 @@ impl AnonymousRegion {
     /// # Errors
     ///
     /// Returns [`MappingError::InvalidLength`] when `length` is zero, is not a
-    /// multiple of 2 MiB, or cannot include the temporary alignment padding.
+    /// multiple of 2 MiB, or cannot include the alignment and guard padding.
     /// Returns [`MappingError::PageGeometryIo`],
     /// [`MappingError::PageGeometryParse`], or
     /// [`MappingError::UnsupportedPageGeometry`] when Linux cannot prove the
@@ -217,10 +219,12 @@ impl AnonymousRegion {
             return Err(MappingError::InvalidLength(length));
         }
         platform::validate_page_geometry()?;
-        let pointer = platform::map_aligned(length)?;
+        let (pointer, allocation_pointer, allocation_length) = platform::map_aligned(length)?;
         let mut region = Self {
             pointer,
             length,
+            allocation_pointer,
+            allocation_length,
             mode,
             ring_ready: false,
             first_page_writable: true,
@@ -398,9 +402,10 @@ impl AnonymousRegion {
 
 impl Drop for AnonymousRegion {
     fn drop(&mut self) {
-        // SAFETY: This object uniquely owns the mapping returned by
-        // `map_aligned`, and Drop runs once with its original length.
-        unsafe { platform::unmap(self.pointer, self.length) };
+        // SAFETY: This object uniquely owns the complete guarded allocation
+        // returned by `map_aligned`, and Drop runs once with its original
+        // allocation pointer and length.
+        unsafe { platform::unmap(self.allocation_pointer, self.allocation_length) };
     }
 }
 
@@ -578,17 +583,23 @@ mod platform {
         Ok(())
     }
 
-    pub(super) fn map_aligned(length: usize) -> Result<NonNull<u8>, MappingError> {
+    pub(super) fn map_aligned(
+        length: usize,
+    ) -> Result<(NonNull<u8>, NonNull<u8>, usize), MappingError> {
         let allocation_length = length
             .checked_add(PMD_PAGE_SIZE)
+            .and_then(|value| value.checked_add(2 * BASE_PAGE_SIZE))
             .ok_or(MappingError::InvalidLength(length))?;
-        // SAFETY: Arguments request a new private anonymous mapping; no input
-        // pointer is dereferenced and the return value is checked before use.
+        // Map the reservation inaccessible, then expose only the aligned
+        // experiment range. The untouched pages on both sides prevent Linux
+        // from merging that range with a compatible neighboring VMA.
+        // SAFETY: Arguments request a new private anonymous reservation; no
+        // input pointer is dereferenced and the return value is checked.
         let allocation = unsafe {
             raw_mmap(
                 std::ptr::null_mut(),
                 allocation_length,
-                PROT_READ | PROT_WRITE,
+                0,
                 MAP_PRIVATE | MAP_ANONYMOUS,
                 -1,
                 0,
@@ -597,37 +608,61 @@ mod platform {
         if allocation as isize == -1 {
             return Err(system_error("mmap"));
         }
+        let Some(allocation_pointer) = NonNull::new(allocation.cast::<u8>()) else {
+            // Linux normally rejects address zero through `mmap_min_addr`, but
+            // a successful null mapping still has to be released here.
+            // SAFETY: Cleanup covers the complete live reservation.
+            unsafe { raw_munmap(allocation, allocation_length) };
+            return Err(MappingError::MappingMismatch(
+                "mmap returned a null allocation".to_owned(),
+            ));
+        };
         let start = allocation as usize;
+        // A successful mapping cannot wrap the process address space. The
+        // reservation includes enough padding for one guard page before the
+        // next 2 MiB boundary and one guard page after the usable range.
         let aligned = start
-            .checked_add(PMD_PAGE_SIZE - 1)
-            .ok_or(MappingError::InvalidLength(length))?
-            & !(PMD_PAGE_SIZE - 1);
-        let prefix = aligned - start;
-        let suffix = allocation_length - prefix - length;
-        if prefix != 0 {
-            // SAFETY: The prefix is a page-aligned subrange of the fresh
-            // mapping and is no longer used after this call.
-            if unsafe { raw_munmap(allocation, prefix) } != 0 {
-                let error = system_error("munmap aligned prefix");
-                // SAFETY: Cleanup covers the still-owned original mapping.
+            .checked_add(BASE_PAGE_SIZE)
+            .and_then(|value| value.checked_add(PMD_PAGE_SIZE - 1))
+            .ok_or_else(|| {
+                // SAFETY: Cleanup covers the complete live reservation.
                 unsafe { raw_munmap(allocation, allocation_length) };
-                return Err(error);
-            }
+                MappingError::InvalidLength(length)
+            })?
+            & !(PMD_PAGE_SIZE - 1);
+        let guarded_end = aligned
+            .checked_add(length)
+            .and_then(|value| value.checked_add(BASE_PAGE_SIZE));
+        let allocation_end = start.checked_add(allocation_length);
+        let (Some(guarded_end), Some(allocation_end)) = (guarded_end, allocation_end) else {
+            // SAFETY: Cleanup covers the complete live reservation.
+            unsafe { raw_munmap(allocation, allocation_length) };
+            return Err(MappingError::MappingMismatch(
+                "aligned mapping does not fit its guarded allocation".to_owned(),
+            ));
+        };
+        if guarded_end > allocation_end {
+            // SAFETY: Cleanup covers the complete live reservation.
+            unsafe { raw_munmap(allocation, allocation_length) };
+            return Err(MappingError::MappingMismatch(
+                "aligned mapping does not fit its guarded allocation".to_owned(),
+            ));
         }
-        if suffix != 0 {
-            let suffix_address = (aligned + length) as *mut c_void;
-            // SAFETY: The suffix is a page-aligned subrange of the remaining
-            // fresh mapping and is no longer used after this call.
-            if unsafe { raw_munmap(suffix_address, suffix) } != 0 {
-                let error = system_error("munmap aligned suffix");
-                // SAFETY: Cleanup covers the remaining aligned mapping.
-                unsafe { raw_munmap(aligned as *mut c_void, length + suffix) };
-                return Err(error);
-            }
-        }
-        NonNull::new(aligned as *mut u8).ok_or_else(|| {
+        let pointer = NonNull::new(aligned as *mut u8).ok_or_else(|| {
+            // SAFETY: Cleanup covers the complete live reservation.
+            unsafe { raw_munmap(allocation, allocation_length) };
             MappingError::MappingMismatch("mmap returned a null aligned address".to_owned())
-        })
+        })?;
+        // SAFETY: The aligned range lies inside the inaccessible reservation.
+        // One or more inaccessible pages remain before it, and at least one
+        // inaccessible page remains after it.
+        if unsafe { raw_mprotect(pointer.as_ptr().cast(), length, PROT_READ | PROT_WRITE) } != 0 {
+            let error = system_error("mprotect aligned mapping");
+            // SAFETY: Cleanup covers the complete live reservation.
+            unsafe { raw_munmap(allocation, allocation_length) };
+            return Err(error);
+        }
+        Ok((pointer, allocation_pointer, allocation_length))
     }
 
     pub(super) fn advise(
@@ -707,7 +742,9 @@ mod platform {
         Err(MappingError::UnsupportedPlatform)
     }
 
-    pub(super) fn map_aligned(_length: usize) -> Result<NonNull<u8>, MappingError> {
+    pub(super) fn map_aligned(
+        _length: usize,
+    ) -> Result<(NonNull<u8>, NonNull<u8>, usize), MappingError> {
         Err(MappingError::UnsupportedPlatform)
     }
 
