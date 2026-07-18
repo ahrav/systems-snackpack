@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+root=$(cd "$script_dir/../../.." && pwd)
 output_dir=${1:-/tmp/systems-snackpack-topic-007}
 pairs=${PAIRS:-12}
 length=${LENGTH:-262144}
@@ -33,6 +34,9 @@ done
 
 mkdir -p "$output_dir"
 output_dir=$(cd "$output_dir" && pwd)
+# Remove prior run artifacts up front so an interrupted rerun can never leave a
+# stale summary.txt beside a newer partial process log in the same directory.
+rm -f "$output_dir/processes.txt" "$output_dir/host-env.txt" "$output_dir/summary.txt"
 cd "$root"
 
 allowed=$(taskset -pc $$ | sed 's/.*: //')
@@ -142,4 +146,4 @@ for pair in $(seq 1 "$pairs"); do
 done
 
 printf 'SESSION_END utc=%s\n' "$(date -u +%FT%TZ)" | tee -a "$raw"
-"$(dirname "${BASH_SOURCE[0]}")/summarize.py" "$raw" > "$output_dir/summary.txt"
+"$script_dir/summarize.py" "$raw" > "$output_dir/summary.txt"

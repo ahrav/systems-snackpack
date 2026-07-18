@@ -11,8 +11,17 @@ from pathlib import Path
 
 
 def parse_result(line: str) -> dict[str, str]:
-    fields = line.split()
-    return dict(field.split("=", 1) for field in fields[1:])
+    # This parser is the evidence-integrity gate: reject bare tokens and
+    # duplicate keys instead of silently keeping the last occurrence.
+    record: dict[str, str] = {}
+    for field in line.split()[1:]:
+        key, separator, value = field.partition("=")
+        if not separator or not key:
+            raise SystemExit(f"malformed field {field!r} in record: {line}")
+        if key in record:
+            raise SystemExit(f"duplicate field {key!r} in record: {line}")
+        record[key] = value
+    return record
 
 
 def median_absolute_deviation(values: list[float]) -> float:
