@@ -150,6 +150,10 @@ fn main() {
     let order = parse_u64(&arguments, "--order", 0);
     assert!(length > 0, "--length must be nonzero");
     assert!(repetitions > 0, "--repetitions must be nonzero");
+    assert!(
+        warmup_repetitions > 0,
+        "--warmup-repetitions must be nonzero"
+    );
 
     let setup_start = Instant::now();
     let (conditions, ones) = make_conditions(pattern, length);

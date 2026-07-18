@@ -23,7 +23,7 @@ if (( length == 0 || repetitions == 0 || warmup_repetitions == 0 )); then
   echo "LENGTH, REPETITIONS, and WARMUP_REPETITIONS must be nonzero" >&2
   exit 2
 fi
-for command_name in cargo date dirname gcc hostname jq lscpu mkdir nproc python3 \
+for command_name in cargo date dirname hostname jq lscpu mkdir nproc python3 \
   rustc sed seq sha256sum tail taskset tee uname; do
   if ! command -v "$command_name" >/dev/null; then
     echo "required command not found: $command_name" >&2
@@ -69,7 +69,8 @@ env_record="$output_dir/host-env.txt"
   printf 'allowed_cpus=' && taskset -pc $$
   rustc -Vv
   cargo -V
-  gcc --version
+  # gcc is optional: the build chain is pure Rust; log it only when present.
+  gcc --version 2>/dev/null || echo 'gcc=absent'
   rustc -C target-cpu=native --print cfg
 } > "$env_record"
 
