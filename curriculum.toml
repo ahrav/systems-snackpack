@@ -67,3 +67,13 @@ title = "Branchless code and predictable control flow"
 published = "2026-07-17"
 path = "topics/007-branchless-predictable-control-flow/rounds/01.md"
 tags = ["branch-prediction", "conditional-select", "x86-64", "aarch64", "benchmarking"]
+
+[[session]]
+id = 8
+cycle = 1
+topic_id = 8
+round = 1
+title = "TLBs and address translation"
+published = "2026-07-18"
+path = "topics/008-tlbs-address-translation/rounds/01.md"
+tags = ["tlb", "address-translation", "transparent-huge-pages", "shootdowns", "benchmarking"]
