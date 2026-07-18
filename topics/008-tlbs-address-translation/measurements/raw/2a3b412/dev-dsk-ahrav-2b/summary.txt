@@ -1,7 +1,0 @@
-replication=fresh_process paired_interval=exact_96.1_percent_median_order_statistic interval_assumptions=iid_continuous_pair_ratios
-reach base ns_per_access: n=12 mean=129.831330120 sd=1.452066426 median=129.190534473 mad=0.785057187 min=128.185340166 max=132.832641363
-reach thp ns_per_access: n=12 mean=116.508129120 sd=2.578536763 median=116.513609767 mad=2.142792701 min=112.587681532 max=119.857310295
-reach paired base/thp: pairs=12 geomean=1.114541825 median=1.119376042 mad=0.022151304 exact96.1%=[1.090904258,1.140879739]
-shootdown readers=1 ns_per_pair: n=12 mean=4865.600016667 sd=596.600477510 median=4900.342775000 mad=513.079125000 min=4104.661350000 max=5625.847250000
-shootdown readers=16 ns_per_pair: n=12 mean=5454.186329167 sd=357.218845093 median=5415.333725000 mad=215.568375000 min=4929.506100000 max=6102.118500000
-shootdown paired readers16/readers1: pairs=12 geomean=1.126624064 median=1.119091999 mad=0.163291259 exact96.1%=[0.949006477,1.309710049]

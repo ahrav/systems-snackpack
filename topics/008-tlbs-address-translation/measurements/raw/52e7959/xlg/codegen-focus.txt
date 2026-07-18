@@ -1,0 +1,53 @@
+   21b1c:	pop    %r15
+   21b1e:	ret
+   21b1f:	int3
+
+0000000000021b20 <topic008_chase_pages>:
+   21b20:	mov    %rsi,%rax
+   21b23:	test   %rdx,%rdx
+   21b26:	je     21ba6 <topic008_chase_pages+0x86>
+   21b28:	mov    %rdx,%rcx
+   21b2b:	and    $0x7,%rcx
+   21b2f:	je     21ba7 <topic008_chase_pages+0x87>
+   21b31:	xor    %esi,%esi
+   21b33:	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+   21b40:	shl    $0xc,%rax
+   21b44:	inc    %rsi
+   21b47:	mov    (%rdi,%rax,1),%rax
+   21b4b:	cmp    %rsi,%rcx
+   21b4e:	jne    21b40 <topic008_chase_pages+0x20>
+   21b50:	mov    %rdx,%rcx
+   21b53:	sub    %rsi,%rcx
+   21b56:	cmp    $0x8,%rdx
+   21b5a:	jb     21ba6 <topic008_chase_pages+0x86>
+   21b5c:	nopl   0x0(%rax)
+   21b60:	shl    $0xc,%rax
+   21b64:	mov    (%rdi,%rax,1),%rax
+   21b68:	shl    $0xc,%rax
+   21b6c:	mov    (%rdi,%rax,1),%rax
+   21b70:	shl    $0xc,%rax
+   21b74:	mov    (%rdi,%rax,1),%rax
+   21b78:	shl    $0xc,%rax
+   21b7c:	mov    (%rdi,%rax,1),%rax
+   21b80:	shl    $0xc,%rax
+   21b84:	mov    (%rdi,%rax,1),%rax
+   21b88:	shl    $0xc,%rax
+   21b8c:	mov    (%rdi,%rax,1),%rax
+   21b90:	shl    $0xc,%rax
+   21b94:	mov    (%rdi,%rax,1),%rax
+   21b98:	shl    $0xc,%rax
+   21b9c:	add    $0xfffffffffffffff8,%rcx
+   21ba0:	mov    (%rdi,%rax,1),%rax
+   21ba4:	jne    21b60 <topic008_chase_pages+0x40>
+   21ba6:	ret
+   21ba7:	mov    %rdx,%rcx
+   21baa:	cmp    $0x8,%rdx
+   21bae:	jae    21b60 <topic008_chase_pages+0x40>
+   21bb0:	jmp    21ba6 <topic008_chase_pages+0x86>
+   21bb2:	int3
+   21bb3:	int3
+   21bb4:	int3
+   21bb5:	int3
+   21bb6:	int3
+   21bb7:	int3
+   21bb8:	int3

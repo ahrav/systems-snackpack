@@ -10,15 +10,20 @@ processes.
 
 | Comparison | Arm host | `xlg` |
 | --- | ---: | ---: |
-| Reach base/THP paired median | 1.119 | 5.035 |
-| Reach 96.1% median interval | 1.091 to 1.141 | 4.794 to 5.108 |
-| Permission 16/1 paired median | 1.119 | 1.571 |
-| Permission 96.1% median interval | 0.949 to 1.310 | 1.417 to 1.607 |
+| Reach base/THP paired median | 1.131 | 5.162 |
+| Reach 96.1% median interval | 1.112 to 1.154 | 5.018 to 5.249 |
+| Permission 16/1 paired median | 1.028 | 1.810 |
+| Permission 96.1% median interval | 0.883 to 1.179 | 1.781 to 1.852 |
 
 The Arm PMU run retained many L1D TLB refill events under THP but reduced L2D
-refills and DTLB walks from about 1.25 million to below 1,000. The `xlg` PMU
-run reduced L2 DTLB misses from about 3.84 million to 5,392. These event names
+refills and DTLB walks from about 1.27 million to below 1,000. The `xlg` PMU
+run reduced L2 DTLB misses from about 3.89 million to 5,056. These event names
 and definitions differ, so their counts are not cross-host comparable.
+
+The final guarded-allocation source also passed 200 fresh VMA-construction
+tests on each host. Those repetitions cover the process-layout variation that
+caused an unguarded aligned mapping to coalesce with an adjacent VMA in one CI
+process.
 
 Measured: the magnitude of the THP reach result and the reader-count result
 differed between these two hosts. Inferred: both PMU records are consistent
@@ -33,6 +38,6 @@ measurement.
 
 Evidence roots:
 
-- [`dev-dsk-ahrav-2b`](raw/2a3b412/dev-dsk-ahrav-2b/)
-- [`xlg`](raw/2a3b412/xlg/)
-- [SHA-256 manifest](raw/2a3b412/SHA256SUMS)
+- [`dev-dsk-ahrav-2b`](raw/52e7959/dev-dsk-ahrav-2b/)
+- [`xlg`](raw/52e7959/xlg/)
+- [SHA-256 manifest](raw/52e7959/SHA256SUMS)

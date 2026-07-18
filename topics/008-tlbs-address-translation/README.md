@@ -26,7 +26,9 @@ unrelated flushes; it does not make stale translations safe.
 ## Experiment boundary
 
 The Linux-only experiment rejects hosts that do not report 4 KiB base pages
-and 2 MiB PMD THPs. It has two workloads:
+and 2 MiB PMD THPs. It retains inaccessible padding around the aligned usable
+range so adjacent compatible VMAs cannot merge with the range being verified.
+It has two workloads:
 
 - `reach` follows one dependent load per base page. It compares an explicit
   base-page mapping with a mapping verified through `/proc/self/smaps` to use
@@ -42,19 +44,23 @@ interprocessor-interrupt or architecture instruction latency.
 
 ## Recorded result
 
-The 2026-07-18 run used source candidate `2a3b412`, 12 fresh order-balanced
+The 2026-07-18 run used source candidate `52e7959`, 12 fresh order-balanced
 process pairs, a 256 MiB reach mapping, 64 passes, and 20,000 permission-change
 pairs per process. Values below are host observations, not ISA claims.
 
 | Host | Reach base | Reach THP | Paired base/THP median (96.1% interval) | Permission 1 reader | Permission 16 readers | Paired 16/1 median (96.1% interval) |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Arm host | 129.831 ns/access | 116.508 ns/access | 1.119 (1.091, 1.141) | 4.866 us/pair | 5.454 us/pair | 1.119 (0.949, 1.310) |
-| `xlg` | 158.537 ns/access | 32.053 ns/access | 5.035 (4.794, 5.108) | 14.832 us/pair | 22.624 us/pair | 1.571 (1.417, 1.607) |
+| Arm host | 130.704 ns/access | 115.398 ns/access | 1.131 (1.112, 1.154) | 4.633 us/pair | 4.688 us/pair | 1.028 (0.883, 1.179) |
+| `xlg` | 158.468 ns/access | 31.166 ns/access | 5.162 (5.018, 5.249) | 10.777 us/pair | 19.587 us/pair | 1.810 (1.781, 1.852) |
 
 Each individual timing is a mean across 12 processes. Paired columns report
 median ratios and intervals. Dated records give standard deviations, setup and
 external-wall boundaries, PMU observations, generated code, and exact host
 identities.
+
+The final candidate also passed 200 fresh base-mapping construction tests on
+each required host. This repeated the VMA-boundary check that had exposed a
+coalescing-sensitive constructor in an earlier CI run.
 
 ## Run
 

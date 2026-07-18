@@ -1,0 +1,7 @@
+RESULT pid=2146154 workload=reach variant=thp mib=256 pages=65536 passes=16 accesses=1048576 pair=0 order=0 setup_ns=23120255 warmup_ns=4577272 timed_ns=41633436 run_to_pre_emit_ns=69580264 ns_per_access=39.704738617 anon_huge_kib_before=262144 anon_huge_kib_after=262144 kernel_page_kib=4 mmu_page_kib=4 vm_flags=rd,wr,mr,mw,me,ac,sd,hg
+263519336,,cycles,72271980,100.00,3.646,GHz
+16559474,,instructions,72271980,100.00,0.06,insn per cycle
+401,,page-faults,72271980,100.00,5.548,K/sec
+72.27,msec,task-clock,72271980,100.00,0.990,CPUs utilized
+544483,,l1_dtlb_misses,72271980,100.00,7.534,M/sec
+5056,,l2_dtlb_misses,72271980,100.00,69.958,K/sec

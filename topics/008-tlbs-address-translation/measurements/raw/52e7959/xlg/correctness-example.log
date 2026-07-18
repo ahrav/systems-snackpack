@@ -1,0 +1,2 @@
+CHECK status=ok variant=base bytes=67108864 start=0x7f91a1000000 vma=0x7f91a1000000-0x7f91a5000000 anon_huge_kib=0 kernel_page_kib=4 mmu_page_kib=4 vm_flags=rd,wr,mr,mw,me,ac,sd,nh
+CHECK status=ok variant=thp bytes=67108864 start=0x7f91a1000000 vma=0x7f91a1000000-0x7f91a5000000 anon_huge_kib=65536 kernel_page_kib=4 mmu_page_kib=4 vm_flags=rd,wr,mr,mw,me,ac,sd,hg

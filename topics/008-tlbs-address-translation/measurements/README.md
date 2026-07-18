@@ -10,6 +10,10 @@ each mapping. Every base process must report zero `AnonHugePages`; every THP
 process must report the complete mapping as `AnonHugePages` both before and
 after timing.
 
+The final source also repeats base-mapping construction in 200 fresh test
+processes per host. Retained `PROT_NONE` padding must keep the aligned usable
+range as an exact VMA in every process.
+
 The permission-change comparison also uses 12 fresh, paired, order-balanced
 processes. It measures two `mprotect` calls per pair plus page-table work,
 scheduling, invalidation, and completion. It does not isolate TLB shootdown or
@@ -23,4 +27,4 @@ Recorded evidence:
 - [Arm host, 2026-07-18](2026-07-18-dev-dsk-ahrav-2b.md)
 - [`xlg`, 2026-07-18](2026-07-18-xlg.md)
 - [Cross-host boundary](2026-07-18-cross-host.md)
-- [Raw logs and checksums](raw/2a3b412/)
+- [Raw logs and checksums](raw/52e7959/)
