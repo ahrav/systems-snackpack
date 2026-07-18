@@ -1,0 +1,129 @@
+   Compiling systems-snackpack-topic-007 v0.1.0 (/tmp/topic8-final-2a3b412.Fao4Bf/topics/007-branchless-predictable-control-flow)
+   Compiling systems-snackpack-topic-004 v0.1.0 (/tmp/topic8-final-2a3b412.Fao4Bf/topics/004-reading-assembly-performance)
+   Compiling systems-snackpack-topic-005 v0.1.0 (/tmp/topic8-final-2a3b412.Fao4Bf/topics/005-webassembly-performance-model)
+   Compiling systems-snackpack-topic-002 v0.1.0 (/tmp/topic8-final-2a3b412.Fao4Bf/topics/002-intrinsics-vs-assembly)
+   Compiling systems-snackpack-topic-008 v0.1.0 (/tmp/topic8-final-2a3b412.Fao4Bf/topics/008-tlbs-address-translation)
+   Compiling systems-snackpack-topic-001 v0.1.0 (/tmp/topic8-final-2a3b412.Fao4Bf/topics/001-swar-simd-scalar)
+   Compiling systems-snackpack-topic-003 v0.1.0 (/tmp/topic8-final-2a3b412.Fao4Bf/topics/003-linux-perf-workflow)
+   Compiling systems-snackpack-topic-006 v0.1.0 (/tmp/topic8-final-2a3b412.Fao4Bf/topics/006-ngram-text-indexing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.90s
+     Running unittests src/lib.rs (results/target/debug/deps/systems_snackpack_topic_001-5967f93b0f02ed19)
+
+running 2 tests
+test tests::variants_match_for_empty_and_short_inputs ... ok
+test tests::variants_match_for_deterministic_data ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/count_eq.rs (results/target/debug/examples/count_eq-a28750aa17758a70)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (results/target/debug/deps/systems_snackpack_topic_002-4afe9b128b0d879a)
+
+running 2 tests
+test tests::empty_input_has_a_stable_fold ... ok
+test tests::public_paths_match_the_reference ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare.rs (results/target/debug/examples/compare-748591be1e57e6a1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (results/target/debug/deps/systems_snackpack_topic_003-159e38ba69440f6c)
+
+running 4 tests
+test tests::completed_iterations_count_both_phases ... ok
+test tests::phase_kernels_transform_state ... ok
+test tests::zero_rounds_preserve_the_seed ... ok
+test tests::alternating_run_is_deterministic ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/perf_workload.rs (results/target/debug/examples/perf_workload-3abfc8841e16691e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (results/target/debug/deps/systems_snackpack_topic_004-f0512a2d8d980909)
+
+running 2 tests
+test tests::zero_iterations_return_the_seed ... ok
+test tests::constant_and_runtime_division_match_for_seven ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare_division.rs (results/target/debug/examples/compare_division-29dd67651229d816)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (results/target/debug/deps/systems_snackpack_topic_005-f3be606d28dd9833)
+
+running 3 tests
+test tests::one_step_matches_the_formula ... ok
+test tests::zero_steps_preserve_the_seed ... ok
+test tests::ten_million_step_digest_matches_the_recorded_experiment ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running unittests examples/check_digest.rs (results/target/debug/examples/check_digest-1035bd71941d6d08)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (results/target/debug/deps/systems_snackpack_topic_006-f3969b1be9253f45)
+
+running 4 tests
+test tests::document_postings_admit_wrong_distance ... ok
+test tests::repeated_grams_keep_a_lossless_presence_filter ... ok
+test tests::index_matches_scan_across_edge_cases ... ok
+test tests::short_patterns_fall_back_to_all_documents ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_equivalence.rs (results/target/debug/examples/check_equivalence-63dceeb062e7c620)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (results/target/debug/deps/systems_snackpack_topic_007-5a7ff45422eb56ec)
+
+running 2 tests
+test tests::hinted_selection_matches_the_value_contract ... ok
+test tests::variants_match_for_binary_and_nonbinary_conditions ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_equivalence.rs (results/target/debug/examples/check_equivalence-e457c1d9527286a9)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (results/target/debug/deps/systems_snackpack_topic_008-82b685db64ebcddc)
+
+running 5 tests
+test tests::random_stream_is_repeatable_and_nonconstant ... ok
+test tests::rejects_invalid_lengths_before_platform_dispatch ... ok
+test tests::smaps_parser_rejects_a_missing_huge_page_count ... ok
+test tests::smaps_parser_preserves_an_explicit_zero_huge_page_count ... ok
+test tests::base_mapping_builds_one_complete_ring ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_translation.rs (results/target/debug/examples/check_translation-1557f66430987ac1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -40,6 +40,22 @@ time. It includes system calls, page-table work, scheduling, reader
 interference, invalidation, and acknowledgement. It is not a direct measure of
 interprocessor-interrupt or architecture instruction latency.
 
+## Recorded result
+
+The 2026-07-18 run used source candidate `2a3b412`, 12 fresh order-balanced
+process pairs, a 256 MiB reach mapping, 64 passes, and 20,000 permission-change
+pairs per process. Values below are host observations, not ISA claims.
+
+| Host | Reach base | Reach THP | Paired base/THP median (96.1% interval) | Permission 1 reader | Permission 16 readers | Paired 16/1 median (96.1% interval) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Arm host | 129.831 ns/access | 116.508 ns/access | 1.119 (1.091, 1.141) | 4.866 us/pair | 5.454 us/pair | 1.119 (0.949, 1.310) |
+| `xlg` | 158.537 ns/access | 32.053 ns/access | 5.035 (4.794, 5.108) | 14.832 us/pair | 22.624 us/pair | 1.571 (1.417, 1.607) |
+
+Each individual timing is a mean across 12 processes. Paired columns report
+median ratios and intervals. Dated records give standard deviations, setup and
+external-wall boundaries, PMU observations, generated code, and exact host
+identities.
+
 ## Run
 
 Check the mapping and checksum contracts:

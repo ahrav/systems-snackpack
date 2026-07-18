@@ -17,3 +17,10 @@ interprocessor-interrupt latency.
 
 Cross-host notes compare observations. They do not treat two guest machines as
 samples of an instruction set, CPU vendor, or bare-metal platform.
+
+Recorded evidence:
+
+- [Arm host, 2026-07-18](2026-07-18-dev-dsk-ahrav-2b.md)
+- [`xlg`, 2026-07-18](2026-07-18-xlg.md)
+- [Cross-host boundary](2026-07-18-cross-host.md)
+- [Raw logs and checksums](raw/2a3b412/)
