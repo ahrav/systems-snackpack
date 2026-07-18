@@ -1,2 +1,2 @@
 # Preserve generated logs and disassembly byte-for-byte.
-**/* -whitespace
+**/* -text -whitespace

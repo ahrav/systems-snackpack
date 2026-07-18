@@ -47,6 +47,9 @@ if [[ ! $cpu =~ ^(0|[1-9][0-9]*)$ ]]; then
 fi
 
 export CARGO_TARGET_DIR="$output_dir/target"
+# Cargo prefers an inherited CARGO_ENCODED_RUSTFLAGS over RUSTFLAGS; clear it
+# so the flags recorded in host-env.txt are the flags the build actually used.
+unset CARGO_ENCODED_RUSTFLAGS
 export RUSTFLAGS="-C target-cpu=native -C debuginfo=1 -C no-vectorize-loops -C no-vectorize-slp"
 raw="$output_dir/processes.txt"
 env_record="$output_dir/host-env.txt"

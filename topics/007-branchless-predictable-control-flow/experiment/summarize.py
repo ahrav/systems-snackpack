@@ -25,16 +25,6 @@ def main() -> None:
         raise SystemExit("usage: summarize.py processes.txt")
 
     lines = Path(sys.argv[1]).read_text(encoding="utf-8").splitlines()
-    if sum(line.startswith("SESSION_START ") for line in lines) != 1:
-        raise SystemExit("expected exactly one SESSION_START record")
-    if sum(line.startswith("SESSION_END ") for line in lines) != 1:
-        raise SystemExit("expected exactly one SESSION_END record")
-    pair_starts = [parse_result(line) for line in lines if line.startswith("PAIR_START ")]
-    pair_ends = [parse_result(line) for line in lines if line.startswith("PAIR_END ")]
-    if len(pair_starts) != 12:
-        raise SystemExit("expected 12 PAIR_START records")
-    if len(pair_ends) != 12:
-        raise SystemExit("expected 12 PAIR_END records")
 
     pattern_orders = (
         "zeros,alternating,random",
@@ -44,25 +34,117 @@ def main() -> None:
         "random,zeros,alternating",
         "random,alternating,zeros",
     )
-    starts_by_pair = {int(record["pair"]): record for record in pair_starts}
-    ends_by_pair = {int(record["pair"]): record for record in pair_ends}
-    if set(starts_by_pair) != set(range(1, 13)) or len(starts_by_pair) != 12:
-        raise SystemExit("PAIR_START identifiers must be exactly 1..12")
-    if set(ends_by_pair) != set(range(1, 13)) or len(ends_by_pair) != 12:
-        raise SystemExit("PAIR_END identifiers must be exactly 1..12")
-    for pair, record in starts_by_pair.items():
-        pattern_index = (pair - 1 + (pair - 1) // 6) % 6
-        expected_variant_order = "branch,select" if pair % 2 == 1 else "select,branch"
-        if record.get("pattern_order") != pattern_orders[pattern_index]:
-            raise SystemExit(f"pair {pair} has invalid pattern order")
-        if record.get("variant_order") != expected_variant_order:
-            raise SystemExit(f"pair {pair} has invalid declared variant order")
 
-    records = [
-        parse_result(line)
-        for line in lines
-        if line.startswith("RESULT ")
-    ]
+    # Walk the log sequentially so the accepted protocol is the recorded
+    # protocol: one session, pairs 1..12 in order, and each pair's six RESULT
+    # records inside its PAIR_START/PAIR_END block in the declared
+    # pattern-by-variant order. Provenance lines (checksums, VERIFY) are
+    # allowed only outside pair blocks.
+    session: dict[str, str] | None = None
+    session_ended = False
+    current_pair: dict[str, object] | None = None
+    completed_pairs = 0
+    records: list[dict[str, str]] = []
+
+    for line_number, line in enumerate(lines, start=1):
+        if line.startswith("SESSION_START "):
+            if session is not None:
+                raise SystemExit(f"line {line_number}: duplicate SESSION_START")
+            session = parse_result(line)
+        elif line.startswith("SESSION_END "):
+            if session is None or session_ended:
+                raise SystemExit(f"line {line_number}: unexpected SESSION_END")
+            if current_pair is not None:
+                raise SystemExit(f"line {line_number}: SESSION_END inside a pair")
+            session_ended = True
+        elif line.startswith("PAIR_START "):
+            if session is None or session_ended:
+                raise SystemExit(f"line {line_number}: PAIR_START outside a session")
+            if current_pair is not None:
+                raise SystemExit(f"line {line_number}: nested PAIR_START")
+            record = parse_result(line)
+            pair = int(record["pair"])
+            if pair != completed_pairs + 1:
+                raise SystemExit(
+                    f"line {line_number}: PAIR_START pair={pair}, "
+                    f"expected pair={completed_pairs + 1}"
+                )
+            pattern_index = (pair - 1 + (pair - 1) // 6) % 6
+            expected_variant_order = "branch,select" if pair % 2 == 1 else "select,branch"
+            if record.get("pattern_order") != pattern_orders[pattern_index]:
+                raise SystemExit(f"pair {pair} has invalid pattern order")
+            if record.get("variant_order") != expected_variant_order:
+                raise SystemExit(f"pair {pair} has invalid declared variant order")
+            current_pair = {
+                "pair": pair,
+                "patterns": pattern_orders[pattern_index].split(","),
+                "variants": expected_variant_order.split(","),
+                "results": [],
+            }
+        elif line.startswith("PAIR_END "):
+            if current_pair is None:
+                raise SystemExit(f"line {line_number}: PAIR_END outside a pair")
+            record = parse_result(line)
+            if int(record["pair"]) != current_pair["pair"]:
+                raise SystemExit(f"line {line_number}: PAIR_END pair mismatch")
+            results = current_pair["results"]
+            assert isinstance(results, list)
+            if len(results) != 6:
+                raise SystemExit(
+                    f"pair {current_pair['pair']} has {len(results)} RESULT "
+                    "records, expected 6"
+                )
+            completed_pairs += 1
+            current_pair = None
+        elif line.startswith("RESULT "):
+            if current_pair is None:
+                raise SystemExit(f"line {line_number}: RESULT outside a pair")
+            record = parse_result(line)
+            results = current_pair["results"]
+            assert isinstance(results, list)
+            index = len(results)
+            if index >= 6:
+                raise SystemExit(
+                    f"line {line_number}: more than six RESULT records in "
+                    f"pair {current_pair['pair']}"
+                )
+            patterns = current_pair["patterns"]
+            variants = current_pair["variants"]
+            assert isinstance(patterns, list) and isinstance(variants, list)
+            expected_pattern = patterns[index // 2]
+            expected_variant = variants[index % 2]
+            expected_order = str(index % 2 + 1)
+            if record.get("pair") != str(current_pair["pair"]):
+                raise SystemExit(f"line {line_number}: RESULT pair mismatch")
+            if record.get("pattern") != expected_pattern:
+                raise SystemExit(
+                    f"line {line_number}: RESULT pattern "
+                    f"{record.get('pattern')!r}, expected {expected_pattern!r}"
+                )
+            if record.get("variant") != expected_variant:
+                raise SystemExit(
+                    f"line {line_number}: RESULT variant "
+                    f"{record.get('variant')!r}, expected {expected_variant!r}"
+                )
+            if record.get("order") != expected_order:
+                raise SystemExit(
+                    f"line {line_number}: RESULT order "
+                    f"{record.get('order')!r}, expected {expected_order!r}"
+                )
+            results.append(record)
+            records.append(record)
+        elif current_pair is not None:
+            raise SystemExit(
+                f"line {line_number}: unexpected record inside "
+                f"pair {current_pair['pair']}"
+            )
+
+    if session is None:
+        raise SystemExit("expected exactly one SESSION_START record")
+    if not session_ended:
+        raise SystemExit("expected exactly one SESSION_END record")
+    if completed_pairs != 12:
+        raise SystemExit(f"expected 12 completed pairs, found {completed_pairs}")
     if len(records) != 72:
         raise SystemExit(f"expected 72 RESULT records, found {len(records)}")
 
@@ -81,11 +163,21 @@ def main() -> None:
         "ns_per_decision",
         "external_wall_ns",
         "checksum",
+        "cpu",
     }
     for index, record in enumerate(records, start=1):
         missing = required_fields - set(record)
         if missing:
             raise SystemExit(f"RESULT {index} missing fields: {sorted(missing)}")
+
+    session_cpu = session.get("cpu")
+    if session_cpu is None or not session_cpu.isdigit():
+        raise SystemExit("SESSION_START must declare the pinned cpu")
+    cpus = {record["cpu"] for record in records}
+    if cpus != {session_cpu}:
+        raise SystemExit(
+            f"expected every RESULT on cpu {session_cpu}, found {sorted(cpus)}"
+        )
 
     pairs = {int(record["pair"]) for record in records}
     if pairs != set(range(1, 13)):
@@ -111,21 +203,6 @@ def main() -> None:
     }
     if set(combinations) != expected_combinations or set(combinations.values()) != {1}:
         raise SystemExit("expected exactly one result per pattern, variant, and pair")
-
-    for pair in range(1, 13):
-        expected_orders = {"branch": 1, "select": 2}
-        if pair % 2 == 0:
-            expected_orders = {"branch": 2, "select": 1}
-        for pattern in ("zeros", "alternating", "random"):
-            observed = {
-                record["variant"]: int(record["order"])
-                for record in records
-                if int(record["pair"]) == pair and record["pattern"] == pattern
-            }
-            if observed != expected_orders:
-                raise SystemExit(
-                    f"pair {pair} pattern {pattern} has invalid variant order: {observed}"
-                )
 
     for pattern in ("zeros", "alternating", "random"):
         ones = {record["ones"] for record in records if record["pattern"] == pattern}
