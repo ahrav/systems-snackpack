@@ -11,12 +11,12 @@ from pathlib import Path
 
 
 def parse_result(line: str) -> dict[str, str]:
-    # This parser is the evidence-integrity gate: reject bare tokens and
-    # duplicate keys instead of silently keeping the last occurrence.
+    # This parser is the evidence-integrity gate: reject bare tokens, empty
+    # keys or values, and duplicate keys instead of silently accepting them.
     record: dict[str, str] = {}
     for field in line.split()[1:]:
         key, separator, value = field.partition("=")
-        if not separator or not key:
+        if not separator or not key or not value:
             raise SystemExit(f"malformed field {field!r} in record: {line}")
         if key in record:
             raise SystemExit(f"duplicate field {key!r} in record: {line}")
