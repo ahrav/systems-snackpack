@@ -1,0 +1,5 @@
+command=rustup run 1.93.1 cargo run -p systems-snackpack-topic-007 --example check_equivalence 
+   Compiling systems-snackpack-topic-007 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/007-branchless-predictable-control-flow)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running `target/debug/examples/check_equivalence`
+status=ok conditions=65536 repetitions=0,1,17

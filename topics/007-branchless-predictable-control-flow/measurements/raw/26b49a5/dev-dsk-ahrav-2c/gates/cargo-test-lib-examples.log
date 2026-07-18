@@ -1,0 +1,112 @@
+command=rustup run 1.93.1 cargo test --workspace --lib --examples 
+   Compiling systems-snackpack-topic-006 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/006-ngram-text-indexing)
+   Compiling systems-snackpack-topic-003 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/003-linux-perf-workflow)
+   Compiling systems-snackpack-topic-004 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/004-reading-assembly-performance)
+   Compiling systems-snackpack-topic-005 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/005-webassembly-performance-model)
+   Compiling systems-snackpack-topic-002 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/002-intrinsics-vs-assembly)
+   Compiling systems-snackpack-topic-007 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/007-branchless-predictable-control-flow)
+   Compiling systems-snackpack-topic-001 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/001-swar-simd-scalar)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_001-656593039d89089c)
+
+running 2 tests
+test tests::variants_match_for_empty_and_short_inputs ... ok
+test tests::variants_match_for_deterministic_data ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/count_eq.rs (target/debug/examples/count_eq-bb61827742c3a969)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_002-ab8f1e48947b9e23)
+
+running 2 tests
+test tests::empty_input_has_a_stable_fold ... ok
+test tests::public_paths_match_the_reference ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare.rs (target/debug/examples/compare-b5540a8b48cf6fdd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_003-a5b1b5ab1c2e10cd)
+
+running 4 tests
+test tests::completed_iterations_count_both_phases ... ok
+test tests::phase_kernels_transform_state ... ok
+test tests::zero_rounds_preserve_the_seed ... ok
+test tests::alternating_run_is_deterministic ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/perf_workload.rs (target/debug/examples/perf_workload-f131b394e8fdedae)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_004-8ce874dbaaec2f79)
+
+running 2 tests
+test tests::zero_iterations_return_the_seed ... ok
+test tests::constant_and_runtime_division_match_for_seven ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare_division.rs (target/debug/examples/compare_division-8fd6127d1052dca5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_005-19b4808ea9f5e95e)
+
+running 3 tests
+test tests::one_step_matches_the_formula ... ok
+test tests::zero_steps_preserve_the_seed ... ok
+test tests::ten_million_step_digest_matches_the_recorded_experiment ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running unittests examples/check_digest.rs (target/debug/examples/check_digest-5a8f4899dcfa70f0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_006-7a3be8fed19086bc)
+
+running 4 tests
+test tests::document_postings_admit_wrong_distance ... ok
+test tests::index_matches_scan_across_edge_cases ... ok
+test tests::repeated_grams_keep_a_lossless_presence_filter ... ok
+test tests::short_patterns_fall_back_to_all_documents ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_equivalence.rs (target/debug/examples/check_equivalence-55cfad37d4a5e728)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_007-7e214406b4b53968)
+
+running 2 tests
+test tests::hinted_selection_matches_the_value_contract ... ok
+test tests::variants_match_for_binary_and_nonbinary_conditions ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_equivalence.rs (target/debug/examples/check_equivalence-cd3cfe719b5e8b30)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

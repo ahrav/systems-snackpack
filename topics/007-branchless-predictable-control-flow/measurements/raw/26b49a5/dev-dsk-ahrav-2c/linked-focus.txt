@@ -1,0 +1,154 @@
+1918-   180ed:	cc                   	int3
+1919-   180ee:	cc                   	int3
+1920-   180ef:	cc                   	int3
+1921-
+1922:00000000000180f0 <systems_snackpack_topic_007::forced_branch_sum>:
+1923-   180f0:	31 c0                	xor    %eax,%eax
+1924-   180f2:	48 85 d2             	test   %rdx,%rdx
+1925:   180f5:	74 4f                	je     18146 <systems_snackpack_topic_007::forced_branch_sum+0x56>
+1926-   180f7:	48 85 f6             	test   %rsi,%rsi
+1927:   180fa:	74 4a                	je     18146 <systems_snackpack_topic_007::forced_branch_sum+0x56>
+1928-   180fc:	b9 07 00 00 00       	mov    $0x7,%ecx
+1929-   18101:	45 31 c0             	xor    %r8d,%r8d
+1930-   18104:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+1931-   1810b:	00 00 00 00 00 
+1932-   18110:	45 31 c9             	xor    %r9d,%r9d
+1933-   18113:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+1934-   1811a:	84 00 00 00 00 00 
+1935-   18120:	46 0f b6 14 0f       	movzbl (%rdi,%r9,1),%r10d
+1936-   18125:	41 bb 03 00 00 00    	mov    $0x3,%r11d
+1937-   1812b:	45 84 d2             	test   %r10b,%r10b
+1938:   1812e:	74 03                	je     18133 <systems_snackpack_topic_007::forced_branch_sum+0x43>
+1939-   18130:	49 89 cb             	mov    %rcx,%r11
+1940-   18133:	4c 01 d8             	add    %r11,%rax
+1941-   18136:	49 ff c1             	inc    %r9
+1942-   18139:	4c 39 ce             	cmp    %r9,%rsi
+1943:   1813c:	75 e2                	jne    18120 <systems_snackpack_topic_007::forced_branch_sum+0x30>
+1944-   1813e:	49 ff c0             	inc    %r8
+1945-   18141:	49 39 d0             	cmp    %rdx,%r8
+1946:   18144:	75 ca                	jne    18110 <systems_snackpack_topic_007::forced_branch_sum+0x20>
+1947-   18146:	c3                   	ret
+1948-   18147:	cc                   	int3
+1949-   18148:	cc                   	int3
+1950-   18149:	cc                   	int3
+1951-   1814a:	cc                   	int3
+1952-   1814b:	cc                   	int3
+1953-   1814c:	cc                   	int3
+1954-   1814d:	cc                   	int3
+1955-   1814e:	cc                   	int3
+1956-   1814f:	cc                   	int3
+1957-
+1958:0000000000018150 <systems_snackpack_topic_007::forced_select_sum>:
+1959-   18150:	31 c0                	xor    %eax,%eax
+1960-   18152:	48 85 d2             	test   %rdx,%rdx
+1961:   18155:	74 4e                	je     181a5 <systems_snackpack_topic_007::forced_select_sum+0x55>
+1962-   18157:	48 85 f6             	test   %rsi,%rsi
+1963:   1815a:	74 49                	je     181a5 <systems_snackpack_topic_007::forced_select_sum+0x55>
+1964-   1815c:	b9 07 00 00 00       	mov    $0x7,%ecx
+1965-   18161:	45 31 c0             	xor    %r8d,%r8d
+1966-   18164:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+1967-   1816b:	00 00 00 00 00 
+1968-   18170:	45 31 c9             	xor    %r9d,%r9d
+1969-   18173:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+1970-   1817a:	84 00 00 00 00 00 
+1971-   18180:	46 0f b6 14 0f       	movzbl (%rdi,%r9,1),%r10d
+1972-   18185:	41 bb 03 00 00 00    	mov    $0x3,%r11d
+1973-   1818b:	45 84 d2             	test   %r10b,%r10b
+1974-   1818e:	4c 0f 45 d9          	cmovne %rcx,%r11
+1975-   18192:	4c 01 d8             	add    %r11,%rax
+1976-   18195:	49 ff c1             	inc    %r9
+1977-   18198:	4c 39 ce             	cmp    %r9,%rsi
+1978:   1819b:	75 e3                	jne    18180 <systems_snackpack_topic_007::forced_select_sum+0x30>
+1979-   1819d:	49 ff c0             	inc    %r8
+1980-   181a0:	49 39 d0             	cmp    %rdx,%r8
+1981:   181a3:	75 cb                	jne    18170 <systems_snackpack_topic_007::forced_select_sum+0x20>
+1982-   181a5:	c3                   	ret
+1983-   181a6:	cc                   	int3
+1984-   181a7:	cc                   	int3
+1985-   181a8:	cc                   	int3
+1986-   181a9:	cc                   	int3
+1987-   181aa:	cc                   	int3
+1988-   181ab:	cc                   	int3
+1989-   181ac:	cc                   	int3
+1990-   181ad:	cc                   	int3
+1991-   181ae:	cc                   	int3
+1992-   181af:	cc                   	int3
+1993-
+1994-00000000000181b0 <__rustc::rust_panic>:
+1995-   181b0:	55                   	push   %rbp
+1996-   181b1:	48 89 e5             	mov    %rsp,%rbp
+1997-   181b4:	48 83 ec 20          	sub    $0x20,%rsp
+1998-   181b8:	ff 15 aa 7a 04 00    	call   *0x47aaa(%rip)        # 5fc68 <_DYNAMIC+0x220>
+1999-   181be:	89 45 f8             	mov    %eax,-0x8(%rbp)
+2000-   181c1:	48 8d 45 f8          	lea    -0x8(%rbp),%rax
+2001-   181c5:	48 89 45 e0          	mov    %rax,-0x20(%rbp)
+2002-   181c9:	48 8b 05 38 7b 04 00 	mov    0x47b38(%rip),%rax        # 5fd08 <_DYNAMIC+0x2c0>
+2003-   181d0:	48 89 45 e8          	mov    %rax,-0x18(%rbp)
+2004-   181d4:	48 8d 35 76 e2 fe ff 	lea    -0x11d8a(%rip),%rsi        # 6451 <__abi_tag+0x6155>
+2005-   181db:	48 8d 7d ff          	lea    -0x1(%rbp),%rdi
+2006-   181df:	48 8d 55 e0          	lea    -0x20(%rbp),%rdx
+2007-   181e3:	e8 f8 b1 00 00       	call   233e0 <std::io::Write::write_fmt>
+2008-   181e8:	48 89 45 f0          	mov    %rax,-0x10(%rbp)
+2009-   181ec:	48 8d 7d f0          	lea    -0x10(%rbp),%rdi
+2010-   181f0:	e8 3b 4a 01 00       	call   2cc30 <core::ptr::drop_in_place<core::result::Result<(),std::io::error::Error>>>
+2011-   181f5:	ff 15 65 7b 04 00    	call   *0x47b65(%rip)        # 5fd60 <_DYNAMIC+0x318>
+2012-   181fb:	cc                   	int3
+2013-   181fc:	cc                   	int3
+2014-   181fd:	cc                   	int3
+2015-   181fe:	cc                   	int3
+2016-   181ff:	cc                   	int3
+2017-
+2018-0000000000018200 <__rustc::__rdl_alloc>:
+2019-   18200:	48 89 fa             	mov    %rdi,%rdx
+2020-   18203:	48 83 fe 11          	cmp    $0x11,%rsi
+2021-   18207:	0f 92 c0             	setb   %al
+2022-   1820a:	48 39 fe             	cmp    %rdi,%rsi
+2023-   1820d:	0f 96 c1             	setbe  %cl
+2024-   18210:	84 c8                	test   %cl,%al
+2025-   18212:	74 09                	je     1821d <__rustc::__rdl_alloc+0x1d>
+2026-   18214:	48 89 d7             	mov    %rdx,%rdi
+2027-   18217:	ff 25 4b 7b 04 00    	jmp    *0x47b4b(%rip)        # 5fd68 <malloc@GLIBC_2.2.5>
+2028-   1821d:	55                   	push   %rbp
+2029-   1821e:	48 89 e5             	mov    %rsp,%rbp
+2030-   18221:	48 83 ec 10          	sub    $0x10,%rsp
+2031-   18225:	48 c7 45 f8 00 00 00 	movq   $0x0,-0x8(%rbp)
+2032-   1822c:	00 
+2033-   1822d:	48 83 fe 09          	cmp    $0x9,%rsi
+2034-   18231:	b8 08 00 00 00       	mov    $0x8,%eax
+2035-   18236:	48 0f 43 c6          	cmovae %rsi,%rax
+2036-   1823a:	48 8d 7d f8          	lea    -0x8(%rbp),%rdi
+2037-   1823e:	48 89 c6             	mov    %rax,%rsi
+2038-   18241:	ff 15 29 7b 04 00    	call   *0x47b29(%rip)        # 5fd70 <posix_memalign@GLIBC_2.2.5>
+2039-   18247:	85 c0                	test   %eax,%eax
+2040-   18249:	75 0a                	jne    18255 <__rustc::__rdl_alloc+0x55>
+2041-   1824b:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+2042-   1824f:	48 83 c4 10          	add    $0x10,%rsp
+2043-   18253:	5d                   	pop    %rbp
+2044-   18254:	c3                   	ret
+2045-   18255:	31 c0                	xor    %eax,%eax
+2046-   18257:	48 83 c4 10          	add    $0x10,%rsp
+2047-   1825b:	5d                   	pop    %rbp
+2048-   1825c:	c3                   	ret
+2049-   1825d:	cc                   	int3
+2050-   1825e:	cc                   	int3
+2051-   1825f:	cc                   	int3
+2052-
+2053-0000000000018260 <__rustc::__rdl_dealloc>:
+2054-   18260:	ff 25 12 7b 04 00    	jmp    *0x47b12(%rip)        # 5fd78 <free@GLIBC_2.2.5>
+2055-   18266:	cc                   	int3
+2056-   18267:	cc                   	int3
+2057-   18268:	cc                   	int3
+2058-   18269:	cc                   	int3
+2059-   1826a:	cc                   	int3
+2060-   1826b:	cc                   	int3
+2061-   1826c:	cc                   	int3
+2062-   1826d:	cc                   	int3
+2063-   1826e:	cc                   	int3
+2064-   1826f:	cc                   	int3
+2065-
+2066-0000000000018270 <__rustc::__rdl_realloc>:
+2067-   18270:	55                   	push   %rbp
+2068-   18271:	48 89 e5             	mov    %rsp,%rbp
+2069-   18274:	41 57                	push   %r15
+2070-   18276:	41 56                	push   %r14
+2071-   18278:	41 54                	push   %r12

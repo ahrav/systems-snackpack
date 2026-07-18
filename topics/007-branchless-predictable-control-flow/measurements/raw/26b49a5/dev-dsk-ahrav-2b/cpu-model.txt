@@ -1,0 +1,5 @@
+CPU architecture: 8
+CPU implementer	: 0x41
+CPU part	: 0xd40
+CPU revision	: 1
+CPU variant	: 0x1

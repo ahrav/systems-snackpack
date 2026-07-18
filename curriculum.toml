@@ -57,3 +57,13 @@ title = "N-grams, trigrams, and text indexing"
 published = "2026-07-16"
 path = "topics/006-ngram-text-indexing/rounds/01.md"
 tags = ["ngram", "trigram", "text-indexing", "posting-lists", "benchmarking"]
+
+[[session]]
+id = 7
+cycle = 1
+topic_id = 7
+round = 1
+title = "Branchless code and predictable control flow"
+published = "2026-07-17"
+path = "topics/007-branchless-predictable-control-flow/rounds/01.md"
+tags = ["branch-prediction", "conditional-select", "x86-64", "aarch64", "benchmarking"]

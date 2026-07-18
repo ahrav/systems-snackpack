@@ -1,0 +1,594 @@
+5288-   14dbc:	f90093e0 	str	x0, [sp, #288]
+5289-   14dc0:	aa1503e0 	mov	x0, x21
+5290-   14dc4:	52a00021 	mov	w1, #0x10000               	// #65536
+5291-   14dc8:	aa1f03e2 	mov	x2, xzr
+5292:   14dcc:	9400050d 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5293-   14dd0:	eb16001f 	cmp	x0, x22
+5294-   14dd4:	f9009be0 	str	x0, [sp, #304]
+5295-   14dd8:	54005461 	b.ne	15864 <control_flow::main+0xb64>  // b.any
+5296-   14ddc:	aa1503e0 	mov	x0, x21
+5297-   14de0:	52a00021 	mov	w1, #0x10000               	// #65536
+5298-   14de4:	aa1f03e2 	mov	x2, xzr
+5299:   14de8:	9400051e 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5300-   14dec:	eb16001f 	cmp	x0, x22
+5301-   14df0:	f81d03a0 	stur	x0, [x29, #-48]
+5302-   14df4:	54005401 	b.ne	15874 <control_flow::main+0xb74>  // b.any
+5303-   14df8:	aa1503e0 	mov	x0, x21
+5304-   14dfc:	52a00021 	mov	w1, #0x10000               	// #65536
+5305-   14e00:	52800022 	mov	w2, #0x1                   	// #1
+5306-   14e04:	940004d7 	bl	16160 <systems_snackpack_topic_007::expected_sum>
+5307-   14e08:	aa0003f6 	mov	x22, x0
+5308-   14e0c:	f90093e0 	str	x0, [sp, #288]
+5309-   14e10:	aa1503e0 	mov	x0, x21
+5310-   14e14:	52a00021 	mov	w1, #0x10000               	// #65536
+5311-   14e18:	52800022 	mov	w2, #0x1                   	// #1
+5312:   14e1c:	940004f9 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5313-   14e20:	eb16001f 	cmp	x0, x22
+5314-   14e24:	f9009be0 	str	x0, [sp, #304]
+5315-   14e28:	540051e1 	b.ne	15864 <control_flow::main+0xb64>  // b.any
+5316-   14e2c:	aa1503e0 	mov	x0, x21
+5317-   14e30:	52a00021 	mov	w1, #0x10000               	// #65536
+5318-   14e34:	52800022 	mov	w2, #0x1                   	// #1
+5319:   14e38:	9400050a 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5320-   14e3c:	eb16001f 	cmp	x0, x22
+5321-   14e40:	f81d03a0 	stur	x0, [x29, #-48]
+5322-   14e44:	54005181 	b.ne	15874 <control_flow::main+0xb74>  // b.any
+5323-   14e48:	aa1503e0 	mov	x0, x21
+5324-   14e4c:	52a00021 	mov	w1, #0x10000               	// #65536
+5325-   14e50:	52800222 	mov	w2, #0x11                  	// #17
+5326-   14e54:	940004c3 	bl	16160 <systems_snackpack_topic_007::expected_sum>
+5327-   14e58:	aa0003f6 	mov	x22, x0
+5328-   14e5c:	f90093e0 	str	x0, [sp, #288]
+5329-   14e60:	aa1503e0 	mov	x0, x21
+5330-   14e64:	52a00021 	mov	w1, #0x10000               	// #65536
+5331-   14e68:	52800222 	mov	w2, #0x11                  	// #17
+5332:   14e6c:	940004e5 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5333-   14e70:	eb16001f 	cmp	x0, x22
+5334-   14e74:	f9009be0 	str	x0, [sp, #304]
+5335-   14e78:	54004f61 	b.ne	15864 <control_flow::main+0xb64>  // b.any
+5336-   14e7c:	aa1503e0 	mov	x0, x21
+5337-   14e80:	52a00021 	mov	w1, #0x10000               	// #65536
+5338-   14e84:	52800222 	mov	w2, #0x11                  	// #17
+5339:   14e88:	940004f6 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5340-   14e8c:	eb16001f 	cmp	x0, x22
+5341-   14e90:	f81d03a0 	stur	x0, [x29, #-48]
+5342-   14e94:	54004f01 	b.ne	15874 <control_flow::main+0xb74>  // b.any
+5343-   14e98:	aa1503e0 	mov	x0, x21
+5344-   14e9c:	52a00021 	mov	w1, #0x10000               	// #65536
+5345-   14ea0:	52800022 	mov	w2, #0x1                   	// #1
+5346-   14ea4:	9400049b 	bl	16110 <__rustc::__rust_dealloc>
+5347-   14ea8:	940004aa 	bl	16150 <__rustc::__rust_no_alloc_shim_is_unstable_v2>
+5348-   14eac:	52a00020 	mov	w0, #0x10000               	// #65536
+5349-   14eb0:	52800021 	mov	w1, #0x1                   	// #1
+5350-   14eb4:	94000493 	bl	16100 <__rustc::__rust_alloc>
+5351-   14eb8:	b4005480 	cbz	x0, 15948 <control_flow::main+0xc48>
+5352-   14ebc:	aa0003f5 	mov	x21, x0
+5353-   14ec0:	aa1f03e8 	mov	x8, xzr
+5354-   14ec4:	320883e9 	mov	w9, #0x1000100             	// #16777472
+5355-   14ec8:	b8286aa9 	str	w9, [x21, x8]
+5356-   14ecc:	91001108 	add	x8, x8, #0x4
+5357-   14ed0:	f140411f 	cmp	x8, #0x10, lsl #12
+5358-   14ed4:	54ffffa1 	b.ne	14ec8 <control_flow::main+0x1c8>  // b.any
+5359-   14ed8:	aa1503e0 	mov	x0, x21
+5360-   14edc:	52a00021 	mov	w1, #0x10000               	// #65536
+5361-   14ee0:	aa1f03e2 	mov	x2, xzr
+5362-   14ee4:	9400049f 	bl	16160 <systems_snackpack_topic_007::expected_sum>
+5363-   14ee8:	aa0003f6 	mov	x22, x0
+5364-   14eec:	f90093e0 	str	x0, [sp, #288]
+5365-   14ef0:	aa1503e0 	mov	x0, x21
+5366-   14ef4:	52a00021 	mov	w1, #0x10000               	// #65536
+5367-   14ef8:	aa1f03e2 	mov	x2, xzr
+5368:   14efc:	940004c1 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5369-   14f00:	eb16001f 	cmp	x0, x22
+5370-   14f04:	f9009be0 	str	x0, [sp, #304]
+5371-   14f08:	54004ae1 	b.ne	15864 <control_flow::main+0xb64>  // b.any
+5372-   14f0c:	aa1503e0 	mov	x0, x21
+5373-   14f10:	52a00021 	mov	w1, #0x10000               	// #65536
+5374-   14f14:	aa1f03e2 	mov	x2, xzr
+5375:   14f18:	940004d2 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5376-   14f1c:	eb16001f 	cmp	x0, x22
+5377-   14f20:	f81d03a0 	stur	x0, [x29, #-48]
+5378-   14f24:	54004a81 	b.ne	15874 <control_flow::main+0xb74>  // b.any
+5379-   14f28:	aa1503e0 	mov	x0, x21
+5380-   14f2c:	52a00021 	mov	w1, #0x10000               	// #65536
+5381-   14f30:	52800022 	mov	w2, #0x1                   	// #1
+5382-   14f34:	9400048b 	bl	16160 <systems_snackpack_topic_007::expected_sum>
+5383-   14f38:	aa0003f6 	mov	x22, x0
+5384-   14f3c:	f90093e0 	str	x0, [sp, #288]
+5385-   14f40:	aa1503e0 	mov	x0, x21
+5386-   14f44:	52a00021 	mov	w1, #0x10000               	// #65536
+5387-   14f48:	52800022 	mov	w2, #0x1                   	// #1
+5388:   14f4c:	940004ad 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5389-   14f50:	eb16001f 	cmp	x0, x22
+5390-   14f54:	f9009be0 	str	x0, [sp, #304]
+5391-   14f58:	54004861 	b.ne	15864 <control_flow::main+0xb64>  // b.any
+5392-   14f5c:	aa1503e0 	mov	x0, x21
+5393-   14f60:	52a00021 	mov	w1, #0x10000               	// #65536
+5394-   14f64:	52800022 	mov	w2, #0x1                   	// #1
+5395:   14f68:	940004be 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5396-   14f6c:	eb16001f 	cmp	x0, x22
+5397-   14f70:	f81d03a0 	stur	x0, [x29, #-48]
+5398-   14f74:	54004801 	b.ne	15874 <control_flow::main+0xb74>  // b.any
+5399-   14f78:	aa1503e0 	mov	x0, x21
+5400-   14f7c:	52a00021 	mov	w1, #0x10000               	// #65536
+5401-   14f80:	52800222 	mov	w2, #0x11                  	// #17
+5402-   14f84:	94000477 	bl	16160 <systems_snackpack_topic_007::expected_sum>
+5403-   14f88:	aa0003f6 	mov	x22, x0
+5404-   14f8c:	f90093e0 	str	x0, [sp, #288]
+5405-   14f90:	aa1503e0 	mov	x0, x21
+5406-   14f94:	52a00021 	mov	w1, #0x10000               	// #65536
+5407-   14f98:	52800222 	mov	w2, #0x11                  	// #17
+5408:   14f9c:	94000499 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5409-   14fa0:	eb16001f 	cmp	x0, x22
+5410-   14fa4:	f9009be0 	str	x0, [sp, #304]
+5411-   14fa8:	540045e1 	b.ne	15864 <control_flow::main+0xb64>  // b.any
+5412-   14fac:	aa1503e0 	mov	x0, x21
+5413-   14fb0:	52a00021 	mov	w1, #0x10000               	// #65536
+5414-   14fb4:	52800222 	mov	w2, #0x11                  	// #17
+5415:   14fb8:	940004aa 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5416-   14fbc:	eb16001f 	cmp	x0, x22
+5417-   14fc0:	f81d03a0 	stur	x0, [x29, #-48]
+5418-   14fc4:	54004581 	b.ne	15874 <control_flow::main+0xb74>  // b.any
+5419-   14fc8:	aa1503e0 	mov	x0, x21
+5420-   14fcc:	52a00021 	mov	w1, #0x10000               	// #65536
+5421-   14fd0:	52800022 	mov	w2, #0x1                   	// #1
+5422-   14fd4:	9400044f 	bl	16110 <__rustc::__rust_dealloc>
+5423-   14fd8:	9400045e 	bl	16150 <__rustc::__rust_no_alloc_shim_is_unstable_v2>
+5424-   14fdc:	52a00020 	mov	w0, #0x10000               	// #65536
+5425-   14fe0:	52800021 	mov	w1, #0x1                   	// #1
+5426-   14fe4:	94000447 	bl	16100 <__rustc::__rust_alloc>
+5427-   14fe8:	b4004b00 	cbz	x0, 15948 <control_flow::main+0xc48>
+5428-   14fec:	d29da069 	mov	x9, #0xed03                	// #60675
+5429-   14ff0:	d29ba3aa 	mov	x10, #0xdd1d                	// #56605
+5430-   14ff4:	aa0003f5 	mov	x21, x0
+5431-   14ff8:	aa1f03e8 	mov	x8, xzr
+5432-   14ffc:	f2ba3249 	movk	x9, #0xd192, lsl #16
+5433-   15000:	f2a9ed8a 	movk	x10, #0x4f6c, lsl #16
+5434-   15004:	f2c94649 	movk	x9, #0x4a32, lsl #32
+5435-   15008:	f2de922a 	movk	x10, #0xf491, lsl #32
+5436-   1500c:	f2fa36a9 	movk	x9, #0xd1b5, lsl #48
+5437-   15010:	f2e4a8aa 	movk	x10, #0x2545, lsl #48
+5438-   15014:	d503201f 	nop
+5439-   15018:	d503201f 	nop
+5440-   1501c:	d503201f 	nop
+5441-   15020:	ca493129 	eor	x9, x9, x9, lsr #12
+5442-   15024:	ca096529 	eor	x9, x9, x9, lsl #25
+5443-   15028:	ca496d29 	eor	x9, x9, x9, lsr #27
+5444-   1502c:	9b0a7d2b 	mul	x11, x9, x10
+5445-   15030:	d37ffd6b 	lsr	x11, x11, #63
+5446-   15034:	38286aab 	strb	w11, [x21, x8]
+5447-   15038:	91000508 	add	x8, x8, #0x1
+5448-   1503c:	f140411f 	cmp	x8, #0x10, lsl #12
+5449-   15040:	54ffff01 	b.ne	15020 <control_flow::main+0x320>  // b.any
+5450-   15044:	aa1503e0 	mov	x0, x21
+5451-   15048:	52a00021 	mov	w1, #0x10000               	// #65536
+5452-   1504c:	aa1f03e2 	mov	x2, xzr
+5453-   15050:	94000444 	bl	16160 <systems_snackpack_topic_007::expected_sum>
+5454-   15054:	aa0003f6 	mov	x22, x0
+5455-   15058:	f90093e0 	str	x0, [sp, #288]
+5456-   1505c:	aa1503e0 	mov	x0, x21
+5457-   15060:	52a00021 	mov	w1, #0x10000               	// #65536
+5458-   15064:	aa1f03e2 	mov	x2, xzr
+5459:   15068:	94000466 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5460-   1506c:	eb16001f 	cmp	x0, x22
+5461-   15070:	f9009be0 	str	x0, [sp, #304]
+5462-   15074:	54003f81 	b.ne	15864 <control_flow::main+0xb64>  // b.any
+5463-   15078:	aa1503e0 	mov	x0, x21
+5464-   1507c:	52a00021 	mov	w1, #0x10000               	// #65536
+5465-   15080:	aa1f03e2 	mov	x2, xzr
+5466:   15084:	94000477 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5467-   15088:	eb16001f 	cmp	x0, x22
+5468-   1508c:	f81d03a0 	stur	x0, [x29, #-48]
+5469-   15090:	54003f21 	b.ne	15874 <control_flow::main+0xb74>  // b.any
+5470-   15094:	aa1503e0 	mov	x0, x21
+5471-   15098:	52a00021 	mov	w1, #0x10000               	// #65536
+5472-   1509c:	52800022 	mov	w2, #0x1                   	// #1
+5473-   150a0:	94000430 	bl	16160 <systems_snackpack_topic_007::expected_sum>
+5474-   150a4:	aa0003f6 	mov	x22, x0
+5475-   150a8:	f90093e0 	str	x0, [sp, #288]
+5476-   150ac:	aa1503e0 	mov	x0, x21
+5477-   150b0:	52a00021 	mov	w1, #0x10000               	// #65536
+5478-   150b4:	52800022 	mov	w2, #0x1                   	// #1
+5479:   150b8:	94000452 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5480-   150bc:	eb16001f 	cmp	x0, x22
+5481-   150c0:	f9009be0 	str	x0, [sp, #304]
+5482-   150c4:	54003d01 	b.ne	15864 <control_flow::main+0xb64>  // b.any
+5483-   150c8:	aa1503e0 	mov	x0, x21
+5484-   150cc:	52a00021 	mov	w1, #0x10000               	// #65536
+5485-   150d0:	52800022 	mov	w2, #0x1                   	// #1
+5486:   150d4:	94000463 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5487-   150d8:	eb16001f 	cmp	x0, x22
+5488-   150dc:	f81d03a0 	stur	x0, [x29, #-48]
+5489-   150e0:	54003ca1 	b.ne	15874 <control_flow::main+0xb74>  // b.any
+5490-   150e4:	aa1503e0 	mov	x0, x21
+5491-   150e8:	52a00021 	mov	w1, #0x10000               	// #65536
+5492-   150ec:	52800222 	mov	w2, #0x11                  	// #17
+5493-   150f0:	9400041c 	bl	16160 <systems_snackpack_topic_007::expected_sum>
+5494-   150f4:	aa0003f6 	mov	x22, x0
+5495-   150f8:	f90093e0 	str	x0, [sp, #288]
+5496-   150fc:	aa1503e0 	mov	x0, x21
+5497-   15100:	52a00021 	mov	w1, #0x10000               	// #65536
+5498-   15104:	52800222 	mov	w2, #0x11                  	// #17
+5499:   15108:	9400043e 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5500-   1510c:	eb16001f 	cmp	x0, x22
+5501-   15110:	f9009be0 	str	x0, [sp, #304]
+5502-   15114:	54003a81 	b.ne	15864 <control_flow::main+0xb64>  // b.any
+5503-   15118:	aa1503e0 	mov	x0, x21
+5504-   1511c:	52a00021 	mov	w1, #0x10000               	// #65536
+5505-   15120:	52800222 	mov	w2, #0x11                  	// #17
+5506:   15124:	9400044f 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5507-   15128:	eb16001f 	cmp	x0, x22
+5508-   1512c:	f81d03a0 	stur	x0, [x29, #-48]
+5509-   15130:	54003a21 	b.ne	15874 <control_flow::main+0xb74>  // b.any
+5510-   15134:	aa1503e0 	mov	x0, x21
+5511-   15138:	52a00021 	mov	w1, #0x10000               	// #65536
+5512-   1513c:	52800022 	mov	w2, #0x1                   	// #1
+5513-   15140:	52800036 	mov	w22, #0x1                   	// #1
+5514-   15144:	940003f3 	bl	16110 <__rustc::__rust_dealloc>
+5515-   15148:	3903a3f6 	strb	w22, [sp, #232]
+5516-   1514c:	d0000349 	adrp	x9, 7f000 <anon.28ba7e108d232bf67884747044ad285f.0.llvm.9632587992019638900+0x17c8>
+5517-   15150:	9103a3e8 	add	x8, sp, #0xe8
+5518-   15154:	f947b129 	ldr	x9, [x9, #3936]
+5519-   15158:	a91427e8 	stp	x8, x9, [sp, #320]
+5520-   1515c:	f00001c0 	adrp	x0, 50000 <_fini+0x23d8>
+5521-   15160:	91016000 	add	x0, x0, #0x58
+5522-   15164:	910503e1 	add	x1, sp, #0x140
+5523-   15168:	9400295f 	bl	1f6e4 <std::io::stdio::_print>
+5524-   1516c:	91002275 	add	x21, x19, #0x8
+5525-   15170:	14000007 	b	1518c <control_flow::main+0x48c>
+5526-   15174:	d503201f 	nop
+5527-   15178:	d503201f 	nop
+5528-   1517c:	d503201f 	nop
+5529-   15180:	f1000694 	subs	x20, x20, #0x1
+5530-   15184:	910062b5 	add	x21, x21, #0x18
+5531-   15188:	540034e0 	b.eq	15824 <control_flow::main+0xb24>  // b.none
+5532-   1518c:	f85f82a1 	ldur	x1, [x21, #-8]
+5533-   15190:	b4ffff81 	cbz	x1, 15180 <control_flow::main+0x480>
+5534-   15194:	f94002a0 	ldr	x0, [x21]
+5535-   15198:	52800022 	mov	w2, #0x1                   	// #1
+5536-   1519c:	940003dd 	bl	16110 <__rustc::__rust_dealloc>
+5537-   151a0:	17fffff8 	b	15180 <control_flow::main+0x480>
+5538-   151a4:	f100069f 	cmp	x20, #0x1
+5539-   151a8:	54003c20 	b.eq	1592c <control_flow::main+0xc2c>  // b.none
+5540-   151ac:	d285a5aa 	mov	x10, #0x2d2d                	// #11565
+5541-   151b0:	91000689 	add	x9, x20, #0x1
+5542-   151b4:	9100a268 	add	x8, x19, #0x28
+5543-   151b8:	52800e8b 	mov	w11, #0x74                  	// #116
+5544-   151bc:	90000342 	adrp	x2, 7d000 <GCC_except_table0+0x1c4f0>
+5545-   151c0:	911c6042 	add	x2, x2, #0x718
+5546-   151c4:	f00001c0 	adrp	x0, 50000 <_fini+0x23d8>
+5547-   151c8:	91000000 	add	x0, x0, #0x0
+5548-   151cc:	f2ac2eca 	movk	x10, #0x6176, lsl #16
+5549-   151d0:	f2cd2e4a 	movk	x10, #0x6972, lsl #32
+5550-   151d4:	f2edcc2a 	movk	x10, #0x6e61, lsl #48
+5551-   151d8:	14000006 	b	151f0 <control_flow::main+0x4f0>
+5552-   151dc:	d503201f 	nop
+5553-   151e0:	d1000529 	sub	x9, x9, #0x1
+5554-   151e4:	91006108 	add	x8, x8, #0x18
+5555-   151e8:	f1000d3f 	cmp	x9, #0x3
+5556-   151ec:	54003a83 	b.cc	1593c <control_flow::main+0xc3c>  // b.lo, b.ul, b.last
+5557-   151f0:	f85e810c 	ldur	x12, [x8, #-24]
+5558-   151f4:	f100259f 	cmp	x12, #0x9
+5559-   151f8:	54ffff41 	b.ne	151e0 <control_flow::main+0x4e0>  // b.any
+5560-   151fc:	f85e010c 	ldur	x12, [x8, #-32]
+5561-   15200:	f940018d 	ldr	x13, [x12]
+5562-   15204:	3940218c 	ldrb	w12, [x12, #8]
+5563-   15208:	eb0a01bf 	cmp	x13, x10
+5564-   1520c:	7a4b0180 	ccmp	w12, w11, #0x0, eq	// eq = none
+5565-   15210:	54fffe81 	b.ne	151e0 <control_flow::main+0x4e0>  // b.any
+5566-   15214:	a97fa109 	ldp	x9, x8, [x8, #-8]
+5567-   15218:	f100191f 	cmp	x8, #0x6
+5568-   1521c:	54000841 	b.ne	15324 <control_flow::main+0x624>  // b.any
+5569-   15220:	b940012a 	ldr	w10, [x9]
+5570-   15224:	7940092b 	ldrh	w11, [x9, #4]
+5571-   15228:	528e4c4c 	mov	w12, #0x7262                	// #29282
+5572-   1522c:	72adcc2c 	movk	w12, #0x6e61, lsl #16
+5573-   15230:	6b0c015f 	cmp	w10, w12
+5574-   15234:	528d0c6a 	mov	w10, #0x6863                	// #26723
+5575-   15238:	7a4a0160 	ccmp	w11, w10, #0x0, eq	// eq = none
+5576-   1523c:	1a9f07fb 	cset	w27, ne	// ne = any
+5577-   15240:	54000120 	b.eq	15264 <control_flow::main+0x564>  // b.none
+5578-   15244:	b940012a 	ldr	w10, [x9]
+5579-   15248:	7940092b 	ldrh	w11, [x9, #4]
+5580-   1524c:	528cae6c 	mov	w12, #0x6573                	// #25971
+5581-   15250:	72acad8c 	movk	w12, #0x656c, lsl #16
+5582-   15254:	6b0c015f 	cmp	w10, w12
+5583-   15258:	528e8c6a 	mov	w10, #0x7463                	// #29795
+5584-   1525c:	7a4a0160 	ccmp	w11, w10, #0x0, eq	// eq = none
+5585-   15260:	54000621 	b.ne	15324 <control_flow::main+0x624>  // b.any
+5586-   15264:	d285a5aa 	mov	x10, #0x2d2d                	// #11565
+5587-   15268:	91000688 	add	x8, x20, #0x1
+5588-   1526c:	9100a269 	add	x9, x19, #0x28
+5589-   15270:	52800dcb 	mov	w11, #0x6e                  	// #110
+5590-   15274:	90000342 	adrp	x2, 7d000 <GCC_except_table0+0x1c4f0>
+5591-   15278:	911cc042 	add	x2, x2, #0x730
+5592-   1527c:	b00001e0 	adrp	x0, 52000 <_fini+0x43d8>
+5593-   15280:	9100a000 	add	x0, x0, #0x28
+5594-   15284:	f2ac2e0a 	movk	x10, #0x6170, lsl #16
+5595-   15288:	f2ce8e8a 	movk	x10, #0x7474, lsl #32
+5596-   1528c:	f2ee4caa 	movk	x10, #0x7265, lsl #48
+--
+5774-   15554:	f90053e0 	str	x0, [sp, #160]
+5775-   15558:	aa1603e0 	mov	x0, x22
+5776-   1555c:	aa1503e1 	mov	x1, x21
+5777-   15560:	52800022 	mov	w2, #0x1                   	// #1
+5778:   15564:	94000327 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5779-   15568:	eb19001f 	cmp	x0, x25
+5780-   1556c:	f90057e0 	str	x0, [sp, #168]
+5781-   15570:	54001ba1 	b.ne	158e4 <control_flow::main+0xbe4>  // b.any
+5782-   15574:	aa1603e0 	mov	x0, x22
+5783-   15578:	aa1503e1 	mov	x1, x21
+5784-   1557c:	52800022 	mov	w2, #0x1                   	// #1
+5785:   15580:	94000338 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5786-   15584:	eb19001f 	cmp	x0, x25
+5787-   15588:	f9005be0 	str	x0, [sp, #176]
+5788-   1558c:	54001b61 	b.ne	158f8 <control_flow::main+0xbf8>  // b.any
+5789-   15590:	94003ba3 	bl	2441c <std::time::Instant::now>
+5790-   15594:	f9005fe0 	str	x0, [sp, #184]
+5791-   15598:	b900c3e1 	str	w1, [sp, #192]
+5792-   1559c:	340000db 	cbz	w27, 155b4 <control_flow::main+0x8b4>
+5793-   155a0:	aa1603e0 	mov	x0, x22
+5794-   155a4:	aa1503e1 	mov	x1, x21
+5795-   155a8:	aa1803e2 	mov	x2, x24
+5796:   155ac:	9400032d 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5797-   155b0:	14000005 	b	155c4 <control_flow::main+0x8c4>
+5798-   155b4:	aa1603e0 	mov	x0, x22
+5799-   155b8:	aa1503e1 	mov	x1, x21
+5800-   155bc:	aa1803e2 	mov	x2, x24
+5801:   155c0:	94000310 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5802-   155c4:	f90067e0 	str	x0, [sp, #200]
+5803-   155c8:	910323e8 	add	x8, sp, #0xc8
+5804-   155cc:	9102e3e0 	add	x0, sp, #0xb8
+5805-   155d0:	94003b95 	bl	24424 <std::time::Instant::elapsed>
+5806-   155d4:	52994008 	mov	w8, #0xca00                	// #51712
+5807-   155d8:	72a77348 	movk	w8, #0x3b9a, lsl #16
+5808-   155dc:	9bc87c09 	umulh	x9, x0, x8
+5809-   155e0:	9b087c08 	mul	x8, x0, x8
+5810-   155e4:	ab214108 	adds	x8, x8, w1, uxtw
+5811-   155e8:	9a893529 	cinc	x9, x9, cs	// cs = hs, nlast
+5812-   155ec:	a90d27e8 	stp	x8, x9, [sp, #208]
+5813-   155f0:	94003b8b 	bl	2441c <std::time::Instant::now>
+5814-   155f4:	f90077e0 	str	x0, [sp, #232]
+5815-   155f8:	b900f3e1 	str	w1, [sp, #240]
+5816-   155fc:	340000db 	cbz	w27, 15614 <control_flow::main+0x914>
+5817-   15600:	aa1603e0 	mov	x0, x22
+5818-   15604:	aa1503e1 	mov	x1, x21
+5819-   15608:	aa1703e2 	mov	x2, x23
+5820:   1560c:	94000315 	bl	16260 <systems_snackpack_topic_007::forced_select_sum>
+5821-   15610:	14000005 	b	15624 <control_flow::main+0x924>
+5822-   15614:	aa1603e0 	mov	x0, x22
+5823-   15618:	aa1503e1 	mov	x1, x21
+5824-   1561c:	aa1703e2 	mov	x2, x23
+5825:   15620:	940002f8 	bl	16200 <systems_snackpack_topic_007::forced_branch_sum>
+5826-   15624:	f9007fe0 	str	x0, [sp, #248]
+5827-   15628:	9103e3e8 	add	x8, sp, #0xf8
+5828-   1562c:	9103a3e0 	add	x0, sp, #0xe8
+5829-   15630:	94003b7d 	bl	24424 <std::time::Instant::elapsed>
+5830-   15634:	52994008 	mov	w8, #0xca00                	// #51712
+5831-   15638:	72a77348 	movk	w8, #0x3b9a, lsl #16
+5832-   1563c:	9bc87c09 	umulh	x9, x0, x8
+5833-   15640:	9b087c08 	mul	x8, x0, x8
+5834-   15644:	ab214118 	adds	x24, x8, w1, uxtw
+5835-   15648:	9a893539 	cinc	x25, x9, cs	// cs = hs, nlast
+5836-   1564c:	a91067f8 	stp	x24, x25, [sp, #256]
+5837-   15650:	aa1603e0 	mov	x0, x22
+5838-   15654:	aa1503e1 	mov	x1, x21
+5839-   15658:	aa1703e2 	mov	x2, x23
+5840-   1565c:	940002c1 	bl	16160 <systems_snackpack_topic_007::expected_sum>
+5841-   15660:	f9407fe8 	ldr	x8, [sp, #248]
+5842-   15664:	f9008be0 	str	x0, [sp, #272]
+5843-   15668:	eb00011f 	cmp	x8, x0
+5844-   1566c:	54001501 	b.ne	1590c <control_flow::main+0xc0c>  // b.any
+5845-   15670:	aa1803e0 	mov	x0, x24
+5846-   15674:	aa1903e1 	mov	x1, x25
+5847-   15678:	9b157efa 	mul	x26, x23, x21
+5848-   1567c:	9bd57ef7 	umulh	x23, x23, x21
+5849-   15680:	9400df3f 	bl	4d37c <__floatuntidf>
+5850-   15684:	aa1a03e0 	mov	x0, x26
+5851-   15688:	aa1703e1 	mov	x1, x23
+5852-   1568c:	1e604008 	fmov	d8, d0
+5853-   15690:	9400df3b 	bl	4d37c <__floatuntidf>
+5854-   15694:	1e601900 	fdiv	d0, d8, d0
+5855-   15698:	fd008fe0 	str	d0, [sp, #280]
+5856-   1569c:	94003ce5 	bl	24a30 <std::process::id>
+5857-   156a0:	b00001e8 	adrp	x8, 52000 <_fini+0x43d8>
+5858-   156a4:	9102e908 	add	x8, x8, #0xba
+5859-   156a8:	b00001e9 	adrp	x9, 52000 <_fini+0x43d8>
+5860-   156ac:	9102d129 	add	x9, x9, #0xb4
+5861-   156b0:	b81fc3a0 	stur	w0, [x29, #-4]
+5862-   156b4:	7100037f 	cmp	w27, #0x0
+5863-   156b8:	9a880128 	csel	x8, x9, x8, eq	// eq = none
+5864-   156bc:	528000c9 	mov	w9, #0x6                   	// #6
+5865-   156c0:	a91227e8 	stp	x8, x9, [sp, #288]
+5866-   156c4:	b00001e8 	adrp	x8, 52000 <_fini+0x43d8>
+5867-   156c8:	9106b108 	add	x8, x8, #0x1ac
+5868-   156cc:	b8bc5909 	ldrsw	x9, [x8, w28, uxtw #2]
+5869-   156d0:	8b090108 	add	x8, x8, x9
+5870-   156d4:	b00001e9 	adrp	x9, 52000 <_fini+0x43d8>
+5871-   156d8:	9106e129 	add	x9, x9, #0x1b8
+5872-   156dc:	f87c5929 	ldr	x9, [x9, w28, uxtw #3]
+5873-   156e0:	a91327e8 	stp	x8, x9, [sp, #304]
+5874-   156e4:	910023e0 	add	x0, sp, #0x8
+5875-   156e8:	94003b4f 	bl	24424 <std::time::Instant::elapsed>
+5876-   156ec:	52994008 	mov	w8, #0xca00                	// #51712
+5877-   156f0:	910483e9 	add	x9, sp, #0x120
+5878-   156f4:	9000000a 	adrp	x10, 15000 <control_flow::main+0x300>
+5879-   156f8:	913e814a 	add	x10, x10, #0xfa0
+5880-   156fc:	a9152be9 	stp	x9, x10, [sp, #336]
+5881-   15700:	72a77348 	movk	w8, #0x3b9a, lsl #16
+5882-   15704:	9104c3ec 	add	x12, sp, #0x130
+5883-   15708:	a9162bec 	stp	x12, x10, [sp, #352]
+5884-   1570c:	d000034a 	adrp	x10, 7f000 <anon.28ba7e108d232bf67884747044ad285f.0.llvm.9632587992019638900+0x17c8>
+5885-   15710:	d10013a9 	sub	x9, x29, #0x4
+5886-   15714:	f947fd4a 	ldr	x10, [x10, #4088]
+5887-   15718:	9bc87c0b 	umulh	x11, x0, x8
+5888-   1571c:	9b087c08 	mul	x8, x0, x8
+5889-   15720:	910143ec 	add	x12, sp, #0x50
+5890-   15724:	ab214108 	adds	x8, x8, w1, uxtw
+5891-   15728:	9a8b356b 	cinc	x11, x11, cs	// cs = hs, nlast
+5892-   1572c:	a93d2fa8 	stp	x8, x11, [x29, #-48]
+5893-   15730:	d0000348 	adrp	x8, 7f000 <anon.28ba7e108d232bf67884747044ad285f.0.llvm.9632587992019638900+0x17c8>
+5894-   15734:	910163eb 	add	x11, sp, #0x58
+5895-   15738:	f9479908 	ldr	x8, [x8, #3888]
+5896-   1573c:	a9142be9 	stp	x9, x10, [sp, #320]
+5897-   15740:	d0000349 	adrp	x9, 7f000 <anon.28ba7e108d232bf67884747044ad285f.0.llvm.9632587992019638900+0x17c8>
+5898-   15744:	910183ea 	add	x10, sp, #0x60
+5899-   15748:	f947ad29 	ldr	x9, [x9, #3928]
+5900-   1574c:	a91723ec 	stp	x12, x8, [sp, #368]
+5901-   15750:	a91927ea 	stp	x10, x9, [sp, #400]
+5902-   15754:	9101a3ea 	add	x10, sp, #0x68
+5903-   15758:	a91827eb 	stp	x11, x9, [sp, #384]
+5904-   1575c:	a91a27ea 	stp	x10, x9, [sp, #416]
+5905-   15760:	9101c3ea 	add	x10, sp, #0x70
+5906-   15764:	a91b27ea 	stp	x10, x9, [sp, #432]
+5907-   15768:	910223ea 	add	x10, sp, #0x88
+5908-   1576c:	a91c23ea 	stp	x10, x8, [sp, #448]
+5909-   15770:	d000034a 	adrp	x10, 7f000 <anon.28ba7e108d232bf67884747044ad285f.0.llvm.9632587992019638900+0x17c8>
+5910-   15774:	910243e8 	add	x8, sp, #0x90
+5911-   15778:	f947c54a 	ldr	x10, [x10, #3976]
+5912-   1577c:	a91d2be8 	stp	x8, x10, [sp, #464]
+5913-   15780:	910343e8 	add	x8, sp, #0xd0
+5914-   15784:	f90107ea 	str	x10, [sp, #520]
+5915-   15788:	a91e2be8 	stp	x8, x10, [sp, #480]
+--
+6614-   161f4:	d503201f 	nop
+6615-   161f8:	d503201f 	nop
+6616-   161fc:	d503201f 	nop
+6617-
+6618:0000000000016200 <systems_snackpack_topic_007::forced_branch_sum>:
+6619:   16200:	b40002a2 	cbz	x2, 16254 <systems_snackpack_topic_007::forced_branch_sum+0x54>
+6620:   16204:	b4000281 	cbz	x1, 16254 <systems_snackpack_topic_007::forced_branch_sum+0x54>
+6621-   16208:	aa0003e8 	mov	x8, x0
+6622-   1620c:	aa1f03e0 	mov	x0, xzr
+6623-   16210:	aa1f03e9 	mov	x9, xzr
+6624-   16214:	528000ea 	mov	w10, #0x7                   	// #7
+6625-   16218:	d503201f 	nop
+6626-   1621c:	d503201f 	nop
+6627-   16220:	aa0103eb 	mov	x11, x1
+6628-   16224:	aa0803ec 	mov	x12, x8
+6629-   16228:	3840158d 	ldrb	w13, [x12], #1
+6630-   1622c:	5280006e 	mov	w14, #0x3                   	// #3
+6631:   16230:	3400004d 	cbz	w13, 16238 <systems_snackpack_topic_007::forced_branch_sum+0x38>
+6632-   16234:	aa0a03ee 	mov	x14, x10
+6633-   16238:	8b0001c0 	add	x0, x14, x0
+6634-   1623c:	f100056b 	subs	x11, x11, #0x1
+6635:   16240:	54ffff41 	b.ne	16228 <systems_snackpack_topic_007::forced_branch_sum+0x28>  // b.any
+6636-   16244:	91000529 	add	x9, x9, #0x1
+6637-   16248:	eb02013f 	cmp	x9, x2
+6638:   1624c:	54fffea1 	b.ne	16220 <systems_snackpack_topic_007::forced_branch_sum+0x20>  // b.any
+6639-   16250:	d65f03c0 	ret
+6640-   16254:	aa1f03e0 	mov	x0, xzr
+6641-   16258:	d65f03c0 	ret
+6642-   1625c:	d503201f 	nop
+6643-
+6644:0000000000016260 <systems_snackpack_topic_007::forced_select_sum>:
+6645:   16260:	b40002a2 	cbz	x2, 162b4 <systems_snackpack_topic_007::forced_select_sum+0x54>
+6646:   16264:	b4000281 	cbz	x1, 162b4 <systems_snackpack_topic_007::forced_select_sum+0x54>
+6647-   16268:	aa0003e8 	mov	x8, x0
+6648-   1626c:	aa1f03e0 	mov	x0, xzr
+6649-   16270:	aa1f03e9 	mov	x9, xzr
+6650-   16274:	528000ea 	mov	w10, #0x7                   	// #7
+6651-   16278:	d503201f 	nop
+6652-   1627c:	d503201f 	nop
+6653-   16280:	aa0103eb 	mov	x11, x1
+6654-   16284:	aa0803ec 	mov	x12, x8
+6655-   16288:	3840158d 	ldrb	w13, [x12], #1
+6656-   1628c:	5280006e 	mov	w14, #0x3                   	// #3
+6657-   16290:	710001bf 	cmp	w13, #0x0
+6658-   16294:	9a8e114e 	csel	x14, x10, x14, ne	// ne = any
+6659-   16298:	8b0001c0 	add	x0, x14, x0
+6660-   1629c:	f100056b 	subs	x11, x11, #0x1
+6661:   162a0:	54ffff41 	b.ne	16288 <systems_snackpack_topic_007::forced_select_sum+0x28>  // b.any
+6662-   162a4:	91000529 	add	x9, x9, #0x1
+6663-   162a8:	eb02013f 	cmp	x9, x2
+6664:   162ac:	54fffea1 	b.ne	16280 <systems_snackpack_topic_007::forced_select_sum+0x20>  // b.any
+6665-   162b0:	d65f03c0 	ret
+6666-   162b4:	aa1f03e0 	mov	x0, xzr
+6667-   162b8:	d65f03c0 	ret
+6668-
+6669-00000000000162bc <__rustc::__rdl_alloc>:
+6670-   162bc:	f100403f 	cmp	x1, #0x10
+6671-   162c0:	aa0003e2 	mov	x2, x0
+6672-   162c4:	540000a8 	b.hi	162d8 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+6673-   162c8:	eb02003f 	cmp	x1, x2
+6674-   162cc:	54000068 	b.hi	162d8 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+6675-   162d0:	aa0203e0 	mov	x0, x2
+6676-   162d4:	17ffe7b3 	b	101a0 <malloc@plt>
+6677-   162d8:	d10083ff 	sub	sp, sp, #0x20
+6678-   162dc:	a9017bfd 	stp	x29, x30, [sp, #16]
+6679-   162e0:	910043fd 	add	x29, sp, #0x10
+6680-   162e4:	f100203f 	cmp	x1, #0x8
+6681-   162e8:	52800108 	mov	w8, #0x8                   	// #8
+6682-   162ec:	910023e0 	add	x0, sp, #0x8
+6683-   162f0:	9a888021 	csel	x1, x1, x8, hi	// hi = pmore
+6684-   162f4:	f90007ff 	str	xzr, [sp, #8]
+6685-   162f8:	97ffe7ca 	bl	10220 <posix_memalign@plt>
+6686-   162fc:	f94007e8 	ldr	x8, [sp, #8]
+6687-   16300:	7100001f 	cmp	w0, #0x0
+6688-   16304:	9a9f0100 	csel	x0, x8, xzr, eq	// eq = none
+6689-   16308:	a9417bfd 	ldp	x29, x30, [sp, #16]
+6690-   1630c:	910083ff 	add	sp, sp, #0x20
+6691-   16310:	d65f03c0 	ret
+6692-
+6693-0000000000016314 <__rustc::__rdl_dealloc>:
+6694-   16314:	17ffe7ff 	b	10310 <free@plt>
+6695-
+6696-0000000000016318 <__rustc::__rdl_realloc>:
+6697-   16318:	d10103ff 	sub	sp, sp, #0x40
+6698-   1631c:	a9017bfd 	stp	x29, x30, [sp, #16]
+6699-   16320:	a90257f6 	stp	x22, x21, [sp, #32]
+6700-   16324:	a9034ff4 	stp	x20, x19, [sp, #48]
+6701-   16328:	910043fd 	add	x29, sp, #0x10
+6702-   1632c:	aa0303f3 	mov	x19, x3
+6703-   16330:	aa0103f4 	mov	x20, x1
+6704-   16334:	f100405f 	cmp	x2, #0x10
+6705-   16338:	54000128 	b.hi	1635c <__rustc::__rdl_realloc+0x44>  // b.pmore
+6706-   1633c:	eb13005f 	cmp	x2, x19
+6707-   16340:	540000e8 	b.hi	1635c <__rustc::__rdl_realloc+0x44>  // b.pmore
+6708-   16344:	aa1303e1 	mov	x1, x19
+6709-   16348:	a9434ff4 	ldp	x20, x19, [sp, #48]
+6710-   1634c:	a94257f6 	ldp	x22, x21, [sp, #32]
+6711-   16350:	a9417bfd 	ldp	x29, x30, [sp, #16]
+6712-   16354:	910103ff 	add	sp, sp, #0x40
+6713-   16358:	17ffe7c6 	b	10270 <realloc@plt>
+6714-   1635c:	f100205f 	cmp	x2, #0x8
+6715-   16360:	52800108 	mov	w8, #0x8                   	// #8
+6716-   16364:	aa0003f6 	mov	x22, x0
+6717-   16368:	9a888041 	csel	x1, x2, x8, hi	// hi = pmore
+6718-   1636c:	910023e0 	add	x0, sp, #0x8
+6719-   16370:	aa1303e2 	mov	x2, x19
+6720-   16374:	f90007ff 	str	xzr, [sp, #8]
+6721-   16378:	97ffe7aa 	bl	10220 <posix_memalign@plt>
+6722-   1637c:	2a0003e8 	mov	w8, w0
+6723-   16380:	aa1f03e0 	mov	x0, xzr
+6724-   16384:	35000168 	cbnz	w8, 163b0 <__rustc::__rdl_realloc+0x98>
+6725-   16388:	f94007f5 	ldr	x21, [sp, #8]
+6726-   1638c:	b4000135 	cbz	x21, 163b0 <__rustc::__rdl_realloc+0x98>
+6727-   16390:	eb14027f 	cmp	x19, x20
+6728-   16394:	aa1503e0 	mov	x0, x21
+6729-   16398:	aa1603e1 	mov	x1, x22
+6730-   1639c:	9a943262 	csel	x2, x19, x20, cc	// cc = lo, ul, last
+6731-   163a0:	97ffe728 	bl	10040 <memcpy@plt>
+6732-   163a4:	aa1603e0 	mov	x0, x22
+6733-   163a8:	97ffe7da 	bl	10310 <free@plt>
+6734-   163ac:	aa1503e0 	mov	x0, x21
+6735-   163b0:	a9434ff4 	ldp	x20, x19, [sp, #48]
+6736-   163b4:	a94257f6 	ldp	x22, x21, [sp, #32]
+6737-   163b8:	a9417bfd 	ldp	x29, x30, [sp, #16]
+6738-   163bc:	910103ff 	add	sp, sp, #0x40
+6739-   163c0:	d65f03c0 	ret
+6740-
+6741-00000000000163c4 <__rustc::__rust_drop_panic>:
+6742-   163c4:	a9bd7bfd 	stp	x29, x30, [sp, #-48]!
+6743-   163c8:	f9000bf5 	str	x21, [sp, #16]
+6744-   163cc:	a9024ff4 	stp	x20, x19, [sp, #32]
+6745-   163d0:	910003fd 	mov	x29, sp
+6746-   163d4:	900001f3 	adrp	x19, 52000 <_fini+0x43d8>
+6747-   163d8:	91342273 	add	x19, x19, #0xd08
+6748-   163dc:	52800794 	mov	w20, #0x3c                  	// #60
+6749-   163e0:	52800040 	mov	w0, #0x2                   	// #2
+6750-   163e4:	aa1303e1 	mov	x1, x19
+6751-   163e8:	aa1403e2 	mov	x2, x20
+6752-   163ec:	97ffe7b5 	bl	102c0 <write@plt>
+6753-   163f0:	b100041f 	cmn	x0, #0x1
+6754-   163f4:	54000100 	b.eq	16414 <__rustc::__rust_drop_panic+0x50>  // b.none

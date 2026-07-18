@@ -1,0 +1,10 @@
+command=env RUSTDOCFLAGS=-Dwarnings rustup run 1.93.1 cargo doc --workspace --no-deps 
+ Documenting systems-snackpack-topic-002 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/002-intrinsics-vs-assembly)
+ Documenting systems-snackpack-topic-007 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/007-branchless-predictable-control-flow)
+ Documenting systems-snackpack-topic-004 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/004-reading-assembly-performance)
+ Documenting systems-snackpack-topic-005 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/005-webassembly-performance-model)
+ Documenting systems-snackpack-topic-003 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/003-linux-perf-workflow)
+ Documenting systems-snackpack-topic-001 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/001-swar-simd-scalar)
+ Documenting systems-snackpack-topic-006 v0.1.0 (/tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/topics/006-ngram-text-indexing)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s
+   Generated /tmp/systems-snackpack-topic7-final-26b49a5/source-26b49a5/target/doc/systems_snackpack_topic_001/index.html and 6 other files

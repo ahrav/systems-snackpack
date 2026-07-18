@@ -1,0 +1,5 @@
+cpu family	: 25
+model		: 17
+model name	: AMD EPYC 9R14
+stepping	: 1
+vendor_id	: AuthenticAMD
