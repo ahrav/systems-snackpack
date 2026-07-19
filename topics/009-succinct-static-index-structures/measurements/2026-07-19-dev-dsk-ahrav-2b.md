@@ -3,13 +3,15 @@
 ## Identity and source
 
 - Alias: `dev-dsk-ahrav-2b`
+- SSH target and resolved host:
+  `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`
 - Kernel: Linux `6.12.94-123.180.amzn2023.aarch64`
 - CPU evidence: 64 online Arm CPUs; CPU 0 MIDR `0x411fd401`
   (implementer `0x41`, part `0xd40`, variant 1, revision 1)
 - Toolchain: rustc 1.95.0, LLVM 22.1.2, cargo 1.95.0, GCC 11.5.0
 - Build flags: `-C target-cpu=native -C debuginfo=1 -C codegen-units=1`
-- Source: `4e855a3e9cff664ea6c4de6f7d90f13dabadb999`
-- Archive SHA-256: `a83745ddf9ff30b629169315fe2332badf57cdb1a7fdaee231d4b0447c92c4bb`
+- Source: `03b9067f7a24bfc717d0237e4b41599d30178a03`
+- Archive SHA-256: `a0d3f5ead392eb9a1739b9f08ffc2c96fad74cc572618dfc9d7fc60c2d0620f9`
 
 The native rustc configuration included NEON, SVE, LSE, CRC, dot-product,
 I8MM, and BF16 features. This list records compiler input. It does not prove
@@ -24,11 +26,7 @@ representation used 11,010,048 logical bytes. The prefix oracle used
 
 The remote Topic 9 workspace passed formatting, library and example tests,
 doctests, Clippy with warnings denied, benchmark compilation, and rustdoc with
-warnings denied. The exact source-file hashes match the source tree at
-candidate `4e855a3`, the commit this evidence was collected from. Later
-review fixes changed the harness and bench sources, so the recorded hashes
-intentionally differ from the final tree; auditors must check out the
-candidate commit to reproduce them.
+warnings denied. The exact source-file hashes match candidate `03b9067`.
 
 ## Timing
 
@@ -39,22 +37,22 @@ warmup were outside the query timers.
 
 | Metric | Compact | Prefix |
 | --- | ---: | ---: |
-| Mean | 12.897 ns/query | 10.999 ns/query |
-| Standard deviation | 0.567 | 0.133 |
-| Median | 12.861 ns/query | 10.951 ns/query |
-| Median absolute deviation | 0.542 | 0.062 |
-| Range | 12.294 to 13.618 | 10.850 to 11.285 |
+| Mean | 13.131 ns/query | 10.950 ns/query |
+| Standard deviation | 0.313 | 0.100 |
+| Median | 13.190 ns/query | 10.962 ns/query |
+| Median absolute deviation | 0.306 | 0.081 |
+| Range | 12.740 to 13.506 | 10.804 to 11.124 |
 
-The paired prefix/compact ratio had median `0.849694`, median absolute
-deviation `0.037487`, and exact 96.1% paired-median interval `0.814860` to
-`0.902087`. The interval is the third through tenth ordered ratio under
-independent, identically distributed continuous pair ratios.
+Across all 12 balanced pairs, the descriptive prefix/compact ratio median was
+`0.840882`, its median absolute deviation was `0.022981`, and its range was
+`0.799937` to `0.864540`. The six compact-prefix pairs had median `0.852307`
+and exact 96.875% median interval `0.846308` to `0.864540`. The six
+prefix-compact pairs had median `0.813999` and interval `0.799937` to
+`0.835455`. Each stratum interval is its minimum and maximum and assumes IID,
+continuous ratios within that order stratum. No common-distribution interval
+is assigned to the pooled ratios.
 
-The median compact time was 12.319 ns when measured first and 13.435 ns when
-measured second. The corresponding paired-ratio medians were 0.895 and 0.815.
-Alternating order balanced this observed order effect; it did not remove it.
-
-Median construction time was 2.925 ms for the compact directory and 119.639 ms
+Median construction time was 2.987 ms for the compact directory and 125.658 ms
 for the prefix oracle. Construction was not part of the query timer.
 
 ## Generated code and boundary
@@ -69,4 +67,4 @@ TLB, bandwidth, or instruction-throughput causes. Both structures remained
 allocated in each process; page residency was not measured. CPU pinning did not
 isolate CPU 0 or fix its frequency.
 
-Evidence: [raw host directory](raw/4e855a3/dev-dsk-ahrav-2b/).
+Evidence: [raw host directory](raw/03b9067/dev-dsk-ahrav-2b/).

@@ -1,0 +1,20 @@
+   Compiling systems-snackpack-topic-009 v0.1.0 (/tmp/topic009-03b9067-c.7LrKrr/topics/009-succinct-static-index-structures)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+     Running unittests src/lib.rs (out/target/debug/deps/systems_snackpack_topic_009-03162407323b60bc)
+
+running 6 tests
+test tests::all_zero_and_all_one_boundaries_match ... ok
+test tests::empty_input_has_one_valid_prefix ... ok
+test tests::logical_bytes_match_the_fixed_layout ... ok
+test tests::deterministic_random_input_matches_exhaustively ... ok
+test tests::rejects_word_count_beyond_u32_rank_range ... ok
+test tests::superblock_and_word_boundaries_match ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_equivalence.rs (out/target/debug/examples/check_equivalence-8fb0512a9e29e34b)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

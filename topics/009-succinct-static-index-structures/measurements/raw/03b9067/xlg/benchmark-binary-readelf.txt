@@ -1,0 +1,31 @@
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)
+    OS: Linux, ABI: 3.2.0
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
+    Build ID: 9dccdfde149d1f1509cc76ac470d562a23c4dba0
+
+Displaying notes found in: .gnu.build.attributes
+  Owner                Data size 	Description
+  GA$<version>3a1      0x00000010	OPEN
+    Applies to region from 0x16f80 to 0x16fa6
+  GA$<version>3a1      0x00000010	OPEN
+    Applies to region from 0 (crtstuff.c)
+  GA$<version>3a1      0x00000010	OPEN
+    Applies to region from 0x5d8d8 to 0x5d8ee
+  GA$<version>3a1      0x00000010	OPEN
+    Applies to region from 0x5d8f4 to 0x5d8fc
+  GA$<version>3a1      0x00000010	OPEN
+    Applies to region from 0x16fb0 to 0x17069
+  GA$<version>3a1      0x00000010	OPEN
+    Applies to region from 0 (crtstuff.c)
+  GA$<version>3a1      0x00000010	OPEN
+    Applies to region from 0 (crtstuff.c)
+  GA$<version>3a1      0x00000010	OPEN
+    Applies to region from 0x5d8ee to 0x5d8f3
+  GA$<version>3a1      0x00000010	OPEN
+    Applies to region from 0x5d8fc to 0x5d901

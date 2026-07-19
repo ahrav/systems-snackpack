@@ -85,25 +85,26 @@ stored keys without collisions but gives arbitrary answers for non-members.
 
 ## Recorded result
 
-The 2026-07-19 exact-source run used candidate `4e855a3`, archive SHA-256
-`a83745ddf9ff30b629169315fe2332badf57cdb1a7fdaee231d4b0447c92c4bb`,
+The final 2026-07-19 exact-source run used candidate `03b9067`, archive SHA-256
+`a0d3f5ead392eb9a1739b9f08ffc2c96fad74cc572618dfc9d7fc60c2d0620f9`,
 and 12 fresh order-balanced paired processes per host. The dataset contained
 `2^26` deterministic pseudo-random bits. Each process issued 4,000,000 queries
 per variant after 262,144 warmup queries.
 
-| Host | Compact median | Prefix median | Paired prefix/compact median | Exact 96.1% interval |
+| Host | Compact median | Prefix median | Pooled ratio median | Compact-prefix / prefix-compact ratio median |
 | --- | ---: | ---: | ---: | ---: |
-| Arm host | 12.861 ns/query | 10.951 ns/query | 0.850 | 0.815 to 0.902 |
-| `xlg` | 5.124 ns/query | 8.384 ns/query | 1.641 | 1.399 to 1.709 |
+| Arm host | 13.190 ns/query | 10.962 ns/query | 0.841 | 0.852 / 0.814 |
+| `xlg` | 5.290 ns/query | 8.766 ns/query | 1.667 | 1.772 / 1.496 |
 
 The compact representation used 11,010,048 logical bytes. The prefix oracle
 used 268,435,460 bytes, a prefix/compact ratio of 24.381. Both hosts exhaustively
 matched all 67,108,865 valid prefix positions.
 
 The smaller representation did not win on both machines. Both hosts also
-showed an order effect: the compact loop was slower when it ran second. The
-balanced paired interval includes that process-level variation. The experiment
-did not collect PMU data, so cache or TLB mechanisms remain hypotheses.
+showed an order effect. The pooled ratio median is descriptive. Each six-pair
+order stratum has a separate minimum-to-maximum 96.875% median interval under
+an IID continuous-ratio assumption. The experiment did not collect PMU data,
+so cache or TLB mechanisms remain hypotheses.
 
 ## Run
 
@@ -131,9 +132,10 @@ warmup. External wall time includes parent-shell command substitution,
 `taskset`, process startup and teardown, and captured output transfer.
 
 The summarizer reports per-variant process distributions and paired
-`PrefixRank / CompactRank` ratios. Its exact 96.1% median interval is the third
-through tenth ordered ratio from 12 pairs, assuming independent, identically
-distributed continuous pair ratios.
+`PrefixRank / CompactRank` ratios. It keeps the six compact-prefix and six
+prefix-compact processes in separate inference strata. Within one stratum,
+the minimum and maximum form an exact 96.875% median interval only under an
+independent, identically distributed continuous-ratio model.
 
 Inspect [Round 1](rounds/01.md), [measurement records](measurements/README.md),
 and [primary sources](references.md) before interpreting a host result.

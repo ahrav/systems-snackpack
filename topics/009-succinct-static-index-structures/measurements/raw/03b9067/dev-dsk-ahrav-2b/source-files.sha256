@@ -1,0 +1,5 @@
+9baf63bb797c3b7b7ca3d6c0f57fc8a2b82ee4567499d12c408a97dcae23da4a  topics/009-succinct-static-index-structures/src/lib.rs
+8567f1932c768f2451b370e056dac098d6dcf1a617b9f9baf46f9ea952fdf17c  topics/009-succinct-static-index-structures/benches/succinct_rank.rs
+5f762fe0ea7bec749f87eb0b6ca94d8b1181fe77c5bfd38f03d2293d42ac30b4  topics/009-succinct-static-index-structures/examples/check_equivalence.rs
+1973e52abd0a524707e62e500fd8b25444959cfb5da3b142664f89c44afb7a0d  topics/009-succinct-static-index-structures/experiment/run_processes.sh
+299e31e337b5eef677acc5cb46c9b4a883396d76368a1fa7c2b517f82190a6dc  topics/009-succinct-static-index-structures/experiment/summarize.py

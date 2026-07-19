@@ -1,0 +1,7 @@
+completed_utc=2026-07-19T20:06:27Z
+benchmark_binary=/tmp/topic009-03b9067-c.7LrKrr/out/target/release/deps/succinct_rank-52a4f3bb7c611fe4
+source_commit=03b9067f7a24bfc717d0237e4b41599d30178a03
+source_archive_sha256=a0d3f5ead392eb9a1739b9f08ffc2c96fad74cc572618dfc9d7fc60c2d0620f9
+process_replication=12 fresh paired order-balanced processes
+schema_gate=one smoke RESULT validated by summarize.py --schema-check before the pair loop
+timing_boundary=dataset clone index builds query build warmup timed queries and external launch-to-exit recorded separately
