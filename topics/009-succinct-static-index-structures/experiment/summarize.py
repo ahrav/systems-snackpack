@@ -73,14 +73,24 @@ def describe(label: str, values: list[float]) -> None:
 
 def describe_ratios(label: str, ratios: list[float]) -> None:
     if len(ratios) != 12:
-        raise ValueError(f"ratio interval requires 12 pairs, got {len(ratios)}")
-    ordered = sorted(ratios)
+        raise ValueError(f"balanced summary requires 12 pairs, got {len(ratios)}")
     geometric_mean = math.exp(statistics.fmean(math.log(value) for value in ratios))
     print(
         f"{label}: pairs={len(ratios)} geomean={geometric_mean:.9f} "
         f"median={statistics.median(ratios):.9f} "
         f"mad={median_absolute_deviation(ratios):.9f} "
-        f"exact96.1%=[{ordered[2]:.9f},{ordered[9]:.9f}]"
+        f"min={min(ratios):.9f} max={max(ratios):.9f}"
+    )
+
+
+def describe_ratio_stratum(label: str, ratios: list[float]) -> None:
+    if len(ratios) != 6:
+        raise ValueError(f"order stratum requires 6 pairs, got {len(ratios)}")
+    print(
+        f"{label}: pairs={len(ratios)} median={statistics.median(ratios):.9f} "
+        f"mad={median_absolute_deviation(ratios):.9f} "
+        f"exact96.875%_median_interval=[{min(ratios):.9f},{max(ratios):.9f}] "
+        "interval_assumptions=iid_continuous_ratios_within_this_order_stratum"
     )
 
 
@@ -249,6 +259,7 @@ def main() -> None:
     compact: list[float] = []
     prefix: list[float] = []
     ratios: list[float] = []
+    ratios_by_order: dict[str, list[float]] = {order: [] for order in VALID_ORDERS}
     compact_build: list[float] = []
     prefix_build: list[float] = []
     external: list[float] = []
@@ -270,7 +281,9 @@ def main() -> None:
 
         compact.append(compact_rate)
         prefix.append(prefix_rate)
-        ratios.append(prefix_rate / compact_rate)
+        ratio = prefix_rate / compact_rate
+        ratios.append(ratio)
+        ratios_by_order[record["order"]].append(ratio)
         compact_build.append(values["compact_build_ns"] / 1_000_000)
         prefix_build.append(values["prefix_build_ns"] / 1_000_000)
         external.append(values["external_wall_ns"] / 1_000_000)
@@ -290,8 +303,8 @@ def main() -> None:
             )
 
     print(
-        "replication=fresh_process paired_interval=exact_96.1_percent_median_order_statistic "
-        "interval_assumptions=iid_continuous_pair_ratios"
+        "replication=fresh_process pooled_ratio_summary=descriptive "
+        "order_strata=6_compact-prefix_and_6_prefix-compact"
     )
     print(
         f"bits={expected_bits} queries_per_variant={expected_queries} "
@@ -301,6 +314,8 @@ def main() -> None:
     describe("compact ns_per_query", compact)
     describe("prefix ns_per_query", prefix)
     describe_ratios("paired prefix/compact", ratios)
+    for order in VALID_ORDERS:
+        describe_ratio_stratum(f"paired prefix/compact order={order}", ratios_by_order[order])
     describe("compact build_ms", compact_build)
     describe("prefix build_ms", prefix_build)
     describe("external launch_to_exit_ms", external)
