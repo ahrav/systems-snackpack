@@ -1,0 +1,8 @@
+pmu_base_status=ok
+pmu_thp_status=ok
+completed_utc=2026-07-18T22:12:19Z
+benchmark_binary=/tmp/topic8-final-52e7959-xlg/results/target/release/deps/address_translation-3b92ffc3fb3a025b
+source_commit=52e7959c18e03869aacf2548b60198c72e52e2c0
+source_archive_sha256=2da77211c70a818ab257bfb5d59cd6acd6e5642812476dd5362bc6add36b238a
+process_replication=12 paired order-balanced fresh processes per comparison
+timing_boundary=setup warmup timed run-to-pre-emit external-launch-to-exit recorded separately

@@ -1,0 +1,129 @@
+   Compiling systems-snackpack-topic-004 v0.1.0 (/tmp/topic8-final-52e7959-xlg/source/topics/004-reading-assembly-performance)
+   Compiling systems-snackpack-topic-007 v0.1.0 (/tmp/topic8-final-52e7959-xlg/source/topics/007-branchless-predictable-control-flow)
+   Compiling systems-snackpack-topic-001 v0.1.0 (/tmp/topic8-final-52e7959-xlg/source/topics/001-swar-simd-scalar)
+   Compiling systems-snackpack-topic-002 v0.1.0 (/tmp/topic8-final-52e7959-xlg/source/topics/002-intrinsics-vs-assembly)
+   Compiling systems-snackpack-topic-006 v0.1.0 (/tmp/topic8-final-52e7959-xlg/source/topics/006-ngram-text-indexing)
+   Compiling systems-snackpack-topic-008 v0.1.0 (/tmp/topic8-final-52e7959-xlg/source/topics/008-tlbs-address-translation)
+   Compiling systems-snackpack-topic-005 v0.1.0 (/tmp/topic8-final-52e7959-xlg/source/topics/005-webassembly-performance-model)
+   Compiling systems-snackpack-topic-003 v0.1.0 (/tmp/topic8-final-52e7959-xlg/source/topics/003-linux-perf-workflow)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running unittests src/lib.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/deps/systems_snackpack_topic_001-a4a6f9407001ffcb)
+
+running 2 tests
+test tests::variants_match_for_empty_and_short_inputs ... ok
+test tests::variants_match_for_deterministic_data ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/count_eq.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/examples/count_eq-f455a5b1f5baea3d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/deps/systems_snackpack_topic_002-7cce13393fe17c65)
+
+running 2 tests
+test tests::empty_input_has_a_stable_fold ... ok
+test tests::public_paths_match_the_reference ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/examples/compare-08cf85135d0d3cfb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/deps/systems_snackpack_topic_003-19ad6b5c2c9ebe1b)
+
+running 4 tests
+test tests::completed_iterations_count_both_phases ... ok
+test tests::phase_kernels_transform_state ... ok
+test tests::zero_rounds_preserve_the_seed ... ok
+test tests::alternating_run_is_deterministic ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/perf_workload.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/examples/perf_workload-93ff43cd5aa12442)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/deps/systems_snackpack_topic_004-8a341a127145c45a)
+
+running 2 tests
+test tests::zero_iterations_return_the_seed ... ok
+test tests::constant_and_runtime_division_match_for_seven ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare_division.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/examples/compare_division-992940959531c5d4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/deps/systems_snackpack_topic_005-51f6593531b4214d)
+
+running 3 tests
+test tests::one_step_matches_the_formula ... ok
+test tests::zero_steps_preserve_the_seed ... ok
+test tests::ten_million_step_digest_matches_the_recorded_experiment ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running unittests examples/check_digest.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/examples/check_digest-6755790893fdb8ec)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/deps/systems_snackpack_topic_006-2347cfbb4df7c56a)
+
+running 4 tests
+test tests::document_postings_admit_wrong_distance ... ok
+test tests::index_matches_scan_across_edge_cases ... ok
+test tests::repeated_grams_keep_a_lossless_presence_filter ... ok
+test tests::short_patterns_fall_back_to_all_documents ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_equivalence.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/examples/check_equivalence-c82fe2fe6e98e71c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/deps/systems_snackpack_topic_007-976af9fdf7eab12c)
+
+running 2 tests
+test tests::hinted_selection_matches_the_value_contract ... ok
+test tests::variants_match_for_binary_and_nonbinary_conditions ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_equivalence.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/examples/check_equivalence-bc6f1fe146cd241c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/deps/systems_snackpack_topic_008-58d69eacbbcb9f50)
+
+running 5 tests
+test tests::random_stream_is_repeatable_and_nonconstant ... ok
+test tests::rejects_invalid_lengths_before_platform_dispatch ... ok
+test tests::smaps_parser_preserves_an_explicit_zero_huge_page_count ... ok
+test tests::smaps_parser_rejects_a_missing_huge_page_count ... ok
+test tests::base_mapping_builds_one_complete_ring ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_translation.rs (/tmp/topic8-final-52e7959-xlg/results/target/debug/examples/check_translation-e7659217a62059d5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,87 @@
+  branch-loads                                       [Hardware cache event]
+  dTLB-load-misses                                   [Hardware cache event]
+  dTLB-loads                                         [Hardware cache event]
+  iTLB-load-misses                                   [Hardware cache event]
+  iTLB-loads                                         [Hardware cache event]
+  branch-instructions OR cpu/branch-instructions/    [Kernel PMU event]
+  branch-misses OR cpu/branch-misses/                [Kernel PMU event]
+--
+  bp_l1_tlb_fetch_hit                               
+       [The number of instruction fetches that hit in the L1 ITLB]
+  bp_l1_tlb_fetch_hit.if1g                          
+       [The number of instruction fetches that hit in the L1 ITLB. L1
+        Instruction TLB hit (1G page size)]
+  bp_l1_tlb_fetch_hit.if2m                          
+       [The number of instruction fetches that hit in the L1 ITLB. L1
+        Instruction TLB hit (2M page size)]
+  bp_l1_tlb_fetch_hit.if4k                          
+       [The number of instruction fetches that hit in the L1 ITLB. L1
+        Instrcution TLB hit (4K or 16K page size)]
+  bp_l2_btb_correct                                 
+--
+  bp_tlb_rel                                        
+       [The number of ITLB reload requests]
+
+cache:
+  bp_l1_tlb_miss_l2_tlb_hit                         
+       [L1 ITLB Miss, L2 ITLB Hit. The number of instruction fetches that miss
+        in the L1 ITLB but hit in the L2 ITLB]
+  bp_l1_tlb_miss_l2_tlb_miss                        
+       [The number of instruction fetches that miss in both the L1 and L2 TLBs]
+  bp_l1_tlb_miss_l2_tlb_miss.coalesced_4k           
+       [The number of valid fills into the ITLB originating from the LS
+        Page-Table Walker. Tablewalk requests are issued for L1-ITLB and
+        L2-ITLB misses. Walk for >4K Coalesced page]
+  bp_l1_tlb_miss_l2_tlb_miss.if1g                   
+       [The number of valid fills into the ITLB originating from the LS
+        Page-Table Walker. Tablewalk requests are issued for L1-ITLB and
+        L2-ITLB misses. Walk for 1G page]
+  bp_l1_tlb_miss_l2_tlb_miss.if2m                   
+       [The number of valid fills into the ITLB originating from the LS
+        Page-Table Walker. Tablewalk requests are issued for L1-ITLB and
+        L2-ITLB misses. Walk for 2M page]
+  bp_l1_tlb_miss_l2_tlb_miss.if4k                   
+       [The number of valid fills into the ITLB originating from the LS
+        Page-Table Walker. Tablewalk requests are issued for L1-ITLB and
+        L2-ITLB misses. Walk to 4K page]
+  bp_snp_re_sync                                    
+       [The number of pipeline restarts caused by invalidating probes that hit
+--
+  ls_l1_d_tlb_miss.all                              
+       [All L1 DTLB Misses or Reloads. Use l1_dtlb_misses instead]
+  ls_l1_d_tlb_miss.tlb_reload_1g_l2_hit             
+       [L1 DTLB Miss. DTLB reload to a 1G page that hit in the L2 TLB]
+  ls_l1_d_tlb_miss.tlb_reload_1g_l2_miss            
+       [L1 DTLB Miss. DTLB reload to a 1G page that also missed in the L2 TLB]
+  ls_l1_d_tlb_miss.tlb_reload_2m_l2_hit             
+       [L1 DTLB Miss. DTLB reload to a 2M page that hit in the L2 TLB]
+  ls_l1_d_tlb_miss.tlb_reload_2m_l2_miss            
+       [L1 DTLB Miss. DTLB reload to a 2M page that also missed in the L2 TLB]
+  ls_l1_d_tlb_miss.tlb_reload_4k_l2_hit             
+       [L1 DTLB Miss. DTLB reload to a 4K page that hit in the L2 TLB]
+  ls_l1_d_tlb_miss.tlb_reload_4k_l2_miss            
+       [L1 DTLB Miss. DTLB reload to a 4K page that missed the L2 TLB]
+  ls_l1_d_tlb_miss.tlb_reload_coalesced_page_hit    
+       [L1 DTLB Miss. DTLB reload to a coalesced page that hit in the L2 TLB]
+  ls_l1_d_tlb_miss.tlb_reload_coalesced_page_miss   
+       [L1 DTLB Miss. DTLB reload coalesced page that also missed in the L2
+        TLB]
+  ls_locks.bus_lock                                 
+--
+       [L1 Data Cache Fills: From within same CCX]
+  l1_dtlb_misses                                    
+       [L1 DTLB Misses]
+  l2_cache_accesses_from_dc_misses                  
+       [L2 Cache Accesses from L1 Data Cache Misses (including prefetch)]
+--
+       [L2 Cache Misses from L1 Instruction Cache Misses]
+  l2_dtlb_misses                                    
+       [L2 DTLB Misses & Data page walks]
+  l2_itlb_misses                                    
+       [L2 ITLB Misses & Instruction page walks]
+  macro_ops_retired                                 
+       [Macro-ops Retired]
+--
+tlb:
+  l1_itlb_misses
+       [L1 ITLB Misses]

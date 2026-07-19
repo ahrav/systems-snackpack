@@ -1,0 +1,107 @@
+   19288:	str	x19, [sp, #16]
+   1928c:	mov	x29, sp
+   19290:	ldr	x0, [x0, #16]
+   19294:	mov	x19, x8
+   19298:	bl	1b9e0 <topic008_chase_pages>
+   1929c:	mov	w8, #0xd                   	// #13
+   192a0:	str	x0, [x19, #8]
+   192a4:	str	w8, [x19]
+   192a8:	ldr	x19, [sp, #16]
+   192ac:	ldp	x29, x30, [sp], #32
+   192b0:	ret
+   192b4:	mov	w9, #0x6                   	// #6
+   192b8:	str	w9, [x8]
+   192bc:	ret
+   192c0:	mov	w9, #0x5                   	// #5
+   192c4:	str	x1, [x8, #8]
+   192c8:	str	w9, [x8]
+   192cc:	ret
+   192d0:	nop
+   192d4:	nop
+   192d8:	nop
+   192dc:	nop
+
+00000000000192e0 <systems_snackpack_topic_008::AnonymousRegion::smaps_evidence>:
+   192e0:	str	d8, [sp, #-112]!
+   192e4:	stp	x29, x30, [sp, #16]
+   192e8:	stp	x28, x27, [sp, #32]
+   192ec:	stp	x26, x25, [sp, #48]
+   192f0:	stp	x24, x23, [sp, #64]
+   192f4:	stp	x22, x21, [sp, #80]
+   192f8:	stp	x20, x19, [sp, #96]
+   192fc:	add	x29, sp, #0x10
+   19300:	sub	sp, sp, #0x190
+   19304:	mov	x22, x0
+   19308:	mov	x21, x8
+   1930c:	adrp	x0, 62000 <_fini+0xc108>
+   19310:	add	x0, x0, #0x7f6
+   19314:	add	x8, sp, #0x58
+   19318:	mov	w1, #0x10                  	// #16
+   1931c:	add	x24, sp, #0x58
+   19320:	bl	239ec <std::fs::read_to_string::inner>
+   19324:	ldp	x8, x9, [sp, #88]
+   19328:	mov	x10, #0x8000000000000000    	// #-9223372036854775808
+   1932c:	cmp	x8, x10
+   19330:	b.ne	19348 <systems_snackpack_topic_008::AnonymousRegion::smaps_evidence+0x68>  // b.any
+   19334:	mov	w8, #0x9                   	// #9
+   19338:	str	x9, [x21, #16]
+   1933c:	str	x10, [x21]
+   19340:	str	w8, [x21, #8]
+   19344:	b	19c40 <systems_snackpack_topic_008::AnonymousRegion::smaps_evidence+0x960>
+   19348:	stp	x9, x8, [sp]
+   1934c:	ldr	x8, [x22, #16]
+   19350:	movi	v0.2s, #0xa
+--
+   1b9d4:	ret
+   1b9d8:	nop
+   1b9dc:	nop
+
+000000000001b9e0 <topic008_chase_pages>:
+   1b9e0:	cbz	x2, 1ba48 <topic008_chase_pages+0x68>
+   1b9e4:	mov	x8, x2
+   1b9e8:	ands	x9, x2, #0x3
+   1b9ec:	b.eq	1ba14 <topic008_chase_pages+0x34>  // b.none
+   1b9f0:	nop
+   1b9f4:	nop
+   1b9f8:	nop
+   1b9fc:	nop
+   1ba00:	lsl	x10, x1, #12
+   1ba04:	sub	x8, x8, #0x1
+   1ba08:	subs	x9, x9, #0x1
+   1ba0c:	ldr	x1, [x0, x10]
+   1ba10:	b.ne	1ba00 <topic008_chase_pages+0x20>  // b.any
+   1ba14:	cmp	x2, #0x4
+   1ba18:	b.cc	1ba48 <topic008_chase_pages+0x68>  // b.lo, b.ul, b.last
+   1ba1c:	nop
+   1ba20:	lsl	x9, x1, #12
+   1ba24:	subs	x8, x8, #0x4
+   1ba28:	ldr	x9, [x0, x9]
+   1ba2c:	lsl	x9, x9, #12
+   1ba30:	ldr	x9, [x0, x9]
+   1ba34:	lsl	x9, x9, #12
+   1ba38:	ldr	x9, [x0, x9]
+   1ba3c:	lsl	x9, x9, #12
+   1ba40:	ldr	x1, [x0, x9]
+   1ba44:	b.ne	1ba20 <topic008_chase_pages+0x40>  // b.any
+   1ba48:	mov	x0, x1
+   1ba4c:	ret
+
+000000000001ba50 <__rustc::__rdl_alloc>:
+   1ba50:	cmp	x1, #0x10
+   1ba54:	mov	x2, x0
+   1ba58:	b.hi	1ba6c <__rustc::__rdl_alloc+0x1c>  // b.pmore
+   1ba5c:	cmp	x1, x2
+   1ba60:	b.hi	1ba6c <__rustc::__rdl_alloc+0x1c>  // b.pmore
+   1ba64:	mov	x0, x2
+   1ba68:	b	101c0 <malloc@plt>
+   1ba6c:	sub	sp, sp, #0x20
+   1ba70:	stp	x29, x30, [sp, #16]
+   1ba74:	add	x29, sp, #0x10
+   1ba78:	cmp	x1, #0x8
+   1ba7c:	mov	w8, #0x8                   	// #8
+   1ba80:	add	x0, sp, #0x8
+   1ba84:	csel	x1, x1, x8, hi	// hi = pmore
+   1ba88:	str	xzr, [sp, #8]
+   1ba8c:	bl	10250 <posix_memalign@plt>
+   1ba90:	ldr	x8, [sp, #8]
+   1ba94:	cmp	w0, #0x0

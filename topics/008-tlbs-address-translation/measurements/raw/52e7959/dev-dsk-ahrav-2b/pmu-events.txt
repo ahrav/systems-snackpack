@@ -1,0 +1,15 @@
+  branch-loads                                       [Hardware cache event]
+  dTLB-load-misses                                   [Hardware cache event]
+  dTLB-loads                                         [Hardware cache event]
+  iTLB-load-misses                                   [Hardware cache event]
+  iTLB-loads                                         [Hardware cache event]
+  sample_collision OR armv8_pmuv3_0/sample_collision/ [Kernel PMU event]
+  sample_feed OR armv8_pmuv3_0/sample_feed/          [Kernel PMU event]
+--
+cache:
+  dtlb_walk                                         
+       [Access to data TLB causes a translation table walk]
+  itlb_walk                                         
+       [Access to instruction TLB that causes a translation table walk]
+  l1d_cache                                         
+       [Level 1 data cache access]

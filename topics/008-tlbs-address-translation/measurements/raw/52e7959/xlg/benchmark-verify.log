@@ -1,0 +1,2 @@
+VERIFY variant=base status=ok pages=1024 anon_huge_kib=0 kernel_page_kib=4 mmu_page_kib=4 vm_flags=rd,wr,mr,mw,me,ac,sd,nh
+VERIFY variant=thp status=ok pages=1024 anon_huge_kib=4096 kernel_page_kib=4 mmu_page_kib=4 vm_flags=rd,wr,mr,mw,me,ac,sd,hg
