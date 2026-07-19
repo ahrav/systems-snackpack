@@ -23,7 +23,7 @@ if (( pairs != 12 )); then
   echo "the recorded interval requires exactly 12 pairs" >&2
   exit 2
 fi
-for command in cargo rustc taskset rg jq nm readelf objdump gzip sha256sum python3; do
+for command in cargo rustc taskset rg jq nm readelf objdump gzip sha256sum python3 git; do
   if ! command -v "$command" >/dev/null 2>&1; then
     echo "required command is unavailable: $command" >&2
     exit 2

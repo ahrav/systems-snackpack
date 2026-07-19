@@ -25,10 +25,11 @@ RESULT_POSITIVE_FIELDS = (
 )
 
 # RESULT fields whose producer contract allows zero: stage durations can
-# quantize to zero on hosts with coarse monotonic clocks, and `ones` and
-# `checksum` are values, not counters of performed work.
+# quantize to zero on hosts with coarse monotonic clocks, and `checksum` is
+# a value, not a counter of performed work. `ones` (also a zero-allowed
+# value) is validated separately because archived 4e855a3 sessions predate
+# the field; see `validate_result_record`.
 RESULT_NON_NEGATIVE_FIELDS = (
-    "ones",
     "dataset_ns",
     "input_clone_ns",
     "compact_build_ns",
@@ -99,11 +100,16 @@ def positive_integer(record: dict[str, str], field: str) -> int:
 
 def validate_result_record(
     record: dict[str, str],
+    *,
+    require_ones: bool = True,
 ) -> tuple[dict[str, int], float, float]:
     """Check one RESULT record against the producer schema.
 
     Returns the validated integer fields plus the reported per-query rates.
-    Session-level cross-checks (bits, queries, bytes, cpu) stay in `main`.
+    Session-level cross-checks (bits, queries, bytes, cpu, ones) stay in
+    `main`. `require_ones` is False only for archived 4e855a3 sessions,
+    whose producer predates the dataset fingerprint; such records must not
+    carry the field at all.
     """
     values = {
         field: integer_field(record, field, 1) for field in RESULT_POSITIVE_FIELDS
@@ -111,6 +117,10 @@ def validate_result_record(
     values.update(
         {field: integer_field(record, field, 0) for field in RESULT_NON_NEGATIVE_FIELDS}
     )
+    if require_ones:
+        values["ones"] = integer_field(record, "ones", 0)
+    elif "ones" in record:
+        raise SystemExit(f"unexpected ones field in archived-schema record: {record}")
     if record.get("order") not in VALID_ORDERS:
         raise SystemExit(f"invalid order field: {record}")
     integer_field(record, "cpu", 0)
@@ -229,6 +239,12 @@ def main() -> None:
     expected_compact_bytes = expected_compact_byte_count(expected_bits)
     expected_prefix_bytes = (expected_bits + 1) * 4
     session_cpu = positive_integer(session, "cpu") if session.get("cpu") != "0" else 0
+    # Sessions from eddb9f3 onward record the exhaustively verified dataset
+    # fingerprint in SESSION_START; archived 4e855a3 sessions predate it.
+    # The two schemas must not mix within one session file.
+    session_ones = (
+        integer_field(session, "ones", 0) if session.get("ones") is not None else None
+    )
 
     compact: list[float] = []
     prefix: list[float] = []
@@ -237,10 +253,12 @@ def main() -> None:
     prefix_build: list[float] = []
     external: list[float] = []
     checksums: set[str] = set()
-    dataset_ones: set[str] = set()
+    dataset_ones: set[int] = set()
 
     for record in records:
-        values, compact_rate, prefix_rate = validate_result_record(record)
+        values, compact_rate, prefix_rate = validate_result_record(
+            record, require_ones=session_ones is not None
+        )
         if values["bits"] != expected_bits or values["queries"] != expected_queries:
             raise SystemExit("RESULT input differs from SESSION_START")
         if values["compact_bytes"] != expected_compact_bytes:
@@ -257,12 +275,19 @@ def main() -> None:
         prefix_build.append(values["prefix_build_ns"] / 1_000_000)
         external.append(values["external_wall_ns"] / 1_000_000)
         checksums.add(record["checksum"])
-        dataset_ones.add(record["ones"])
+        if session_ones is not None:
+            dataset_ones.add(values["ones"])
 
     if len(checksums) != 1:
         raise SystemExit("query checksums differ across processes")
-    if len(dataset_ones) != 1:
-        raise SystemExit("dataset fingerprints (ones) differ across processes")
+    if session_ones is not None:
+        if len(dataset_ones) != 1:
+            raise SystemExit("dataset fingerprints (ones) differ across processes")
+        if dataset_ones != {session_ones}:
+            raise SystemExit(
+                "RESULT dataset fingerprint differs from the exhaustively "
+                "verified session ones"
+            )
 
     print(
         "replication=fresh_process paired_interval=exact_96.1_percent_median_order_statistic "
