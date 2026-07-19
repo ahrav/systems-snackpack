@@ -118,7 +118,7 @@ Run 12 fresh, order-balanced process pairs on Linux:
 
 ```bash
 topics/009-succinct-static-index-structures/experiment/run_processes.sh \
-  /tmp/systems-snackpack-topic-009 local candidate unknown
+  /tmp/systems-snackpack-topic-009 local "$(git rev-parse HEAD)" unknown
 cat /tmp/systems-snackpack-topic-009/summary.txt
 ```
 

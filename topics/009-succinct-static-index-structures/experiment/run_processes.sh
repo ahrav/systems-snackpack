@@ -29,6 +29,10 @@ for command in cargo rustc taskset rg jq nm readelf objdump gzip sha256sum pytho
     exit 2
   fi
 done
+if [[ ! $cpu =~ ^[0-9]+$ ]]; then
+  echo "CPU must be a single decimal CPU index; taskset lists or ranges would break the pinned-single-CPU measurement boundary" >&2
+  exit 2
+fi
 if ! taskset -c "$cpu" true >/dev/null 2>&1; then
   echo "CPU $cpu is outside this process's allowed affinity mask" >&2
   exit 2

@@ -166,28 +166,46 @@ fn run(order: &str, query_count: usize, bit_power: usize, pair: usize) {
         assert_eq!(prepared.compact.rank1(pos), prepared.prefix.rank1(pos));
     }
 
-    let warmup_count = prepared.queries.len().min(WARMUP_QUERIES);
-    let warmup = &prepared.queries[..warmup_count];
-    let warmup_started = Instant::now();
-    let (compact_warmup_ns, compact_warmup_sum) = time_compact(&prepared.compact, warmup);
-    let (prefix_warmup_ns, prefix_warmup_sum) = time_prefix(&prepared.prefix, warmup);
-    let warmup_ns = warmup_started.elapsed().as_nanos();
-    assert_eq!(compact_warmup_sum, prefix_warmup_sum);
-
-    let ((compact_ns, compact_sum), (prefix_ns, prefix_sum)) = match order {
-        "compact-prefix" => (
-            time_compact(&prepared.compact, &prepared.queries),
-            time_prefix(&prepared.prefix, &prepared.queries),
-        ),
-        "prefix-compact" => {
-            let prefix = time_prefix(&prepared.prefix, &prepared.queries);
-            let compact = time_compact(&prepared.compact, &prepared.queries);
-            (compact, prefix)
-        }
+    let compact_first = match order {
+        "compact-prefix" => true,
+        "prefix-compact" => false,
         _ => {
             eprintln!("order must be compact-prefix or prefix-compact, got {order:?}");
             process::exit(2);
         }
+    };
+
+    let warmup_count = prepared.queries.len().min(WARMUP_QUERIES);
+    let warmup = &prepared.queries[..warmup_count];
+    // Warm up in the same order as the timed pair. With a fixed warmup order
+    // the first timed variant would start right after its own warmup in one
+    // order but right after the rival's warmup in the other, so the
+    // pre-measurement cache exposure would differ systematically between the
+    // two orders the paired protocol is meant to balance. Matching orders
+    // means the first timed variant is always preceded by the rival's warmup.
+    let warmup_started = Instant::now();
+    let ((compact_warmup_ns, compact_warmup_sum), (prefix_warmup_ns, prefix_warmup_sum)) =
+        if compact_first {
+            let compact = time_compact(&prepared.compact, warmup);
+            let prefix = time_prefix(&prepared.prefix, warmup);
+            (compact, prefix)
+        } else {
+            let prefix = time_prefix(&prepared.prefix, warmup);
+            let compact = time_compact(&prepared.compact, warmup);
+            (compact, prefix)
+        };
+    let warmup_ns = warmup_started.elapsed().as_nanos();
+    assert_eq!(compact_warmup_sum, prefix_warmup_sum);
+
+    let ((compact_ns, compact_sum), (prefix_ns, prefix_sum)) = if compact_first {
+        (
+            time_compact(&prepared.compact, &prepared.queries),
+            time_prefix(&prepared.prefix, &prepared.queries),
+        )
+    } else {
+        let prefix = time_prefix(&prepared.prefix, &prepared.queries);
+        let compact = time_compact(&prepared.compact, &prepared.queries);
+        (compact, prefix)
     };
     assert_eq!(compact_sum, prefix_sum);
 

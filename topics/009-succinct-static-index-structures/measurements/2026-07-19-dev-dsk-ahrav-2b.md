@@ -24,7 +24,11 @@ representation used 11,010,048 logical bytes. The prefix oracle used
 
 The remote Topic 9 workspace passed formatting, library and example tests,
 doctests, Clippy with warnings denied, benchmark compilation, and rustdoc with
-warnings denied. The exact source-file hashes also match the checked-in source.
+warnings denied. The exact source-file hashes match the source tree at
+candidate `4e855a3`, the commit this evidence was collected from. Later
+review fixes changed the harness and bench sources, so the recorded hashes
+intentionally differ from the final tree; auditors must check out the
+candidate commit to reproduce them.
 
 ## Timing
 
