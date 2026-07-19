@@ -1,4 +1,4 @@
-SESSION_START utc=2026-07-19T18:13:27Z host_alias=dev-dsk-ahrav-2b host=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com cpu=0 pairs=12 bit_power=26 queries=4000000 source_commit=4e855a3e9cff664ea6c4de6f7d90f13dabadb999
+SESSION_START utc=2026-07-19T18:13:27Z host_alias=dev-dsk-ahrav-2b cpu=0 pairs=12 bit_power=26 queries=4000000 source_commit=4e855a3e9cff664ea6c4de6f7d90f13dabadb999
 bf26f8ca2873d368f38bc24b56d05ab9148fa982ddfc7af6e59bafbb35930bce  /tmp/systems-snackpack-topic009.RgwLiA/out/target/release/deps/succinct_rank-aa64c081ebf0b97e
 cc402d2301dc2a8e6dc7ad4b708a915fd6b2bc85687ae36c968898a2058abdb2  topics/009-succinct-static-index-structures/src/lib.rs
 68f33a4c9e2c68ceaddf2e78865e5faa135563ffc33be5fe9a29953875d8a259  topics/009-succinct-static-index-structures/benches/succinct_rank.rs

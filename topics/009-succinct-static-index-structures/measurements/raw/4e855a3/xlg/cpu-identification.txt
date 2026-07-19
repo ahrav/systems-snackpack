@@ -1,5 +1,4 @@
 captured_utc=2026-07-19T18:18:43Z
-resolved_host=dev-dsk-ahrav-2c-a9191cb6.us-west-2.amazon.com
 architecture=x86_64
 vendor_id=AuthenticAMD
 cpu_family=25

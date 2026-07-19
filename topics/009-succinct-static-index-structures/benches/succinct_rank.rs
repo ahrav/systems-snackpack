@@ -211,11 +211,12 @@ fn run(order: &str, query_count: usize, bit_power: usize, pair: usize) {
     );
 
     println!(
-        "RESULT pid={} pair={} order={} bits={} queries={} warmup_queries={} dataset_ns={} input_clone_ns={} compact_build_ns={} prefix_build_ns={} query_build_ns={} warmup_ns={} compact_warmup_ns={} prefix_warmup_ns={} compact_ns={} prefix_ns={} compact_ns_per_query={:.9} prefix_ns_per_query={:.9} checksum={} compact_bytes={} prefix_bytes={} main_elapsed_ns={}",
+        "RESULT pid={} pair={} order={} bits={} ones={} queries={} warmup_queries={} dataset_ns={} input_clone_ns={} compact_build_ns={} prefix_build_ns={} query_build_ns={} warmup_ns={} compact_warmup_ns={} prefix_warmup_ns={} compact_ns={} prefix_ns={} compact_ns_per_query={:.9} prefix_ns_per_query={:.9} checksum={} compact_bytes={} prefix_bytes={} main_elapsed_ns={}",
         process::id(),
         pair,
         order,
         prepared.compact.len(),
+        prepared.compact.ones(),
         query_count,
         warmup_count,
         prepared.dataset_ns,

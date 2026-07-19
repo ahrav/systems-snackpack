@@ -3,7 +3,6 @@
 ## Identity and source
 
 - Alias: `dev-dsk-ahrav-2b`
-- Resolved host: `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`
 - Kernel: Linux `6.12.94-123.180.amzn2023.aarch64`
 - CPU evidence: 64 online Arm CPUs; CPU 0 MIDR `0x411fd401`
   (implementer `0x41`, part `0xd40`, variant 1, revision 1)

@@ -46,7 +46,6 @@ export RUSTFLAGS="-C target-cpu=native -C debuginfo=1 -C codegen-units=1"
 {
   printf 'captured_utc=%s\n' "$(date -u +%FT%TZ)"
   printf 'host_alias=%s\n' "$host_alias"
-  printf 'resolved_host=%s\n' "$(hostname -f 2>/dev/null || hostname)"
   printf 'source_commit=%s\n' "$source_commit"
   printf 'source_archive_sha256=%s\n' "$source_archive_sha256"
   printf 'cpu=%s\n' "$cpu"
@@ -55,7 +54,6 @@ export RUSTFLAGS="-C target-cpu=native -C debuginfo=1 -C codegen-units=1"
   printf 'queries=%s\n' "$queries"
   printf 'RUSTFLAGS=%s\n' "$RUSTFLAGS"
   printf 'cpus_allowed=' && taskset -pc $$
-  uname -a
   printf 'uname_machine=' && uname -m
   printf 'kernel_release=' && uname -r
   lscpu
@@ -84,6 +82,13 @@ run_gate cargo-doc env RUSTDOCFLAGS=-D\ warnings cargo doc --workspace --no-deps
 
 cargo run --quiet -p systems-snackpack-topic-009 --example check_equivalence -- "$bit_power" \
   > "$output_dir/correctness-example.log" 2>&1
+correctness_record=$(<"$output_dir/correctness-example.log")
+if [[ $correctness_record =~ (^|[[:space:]])ones=([0-9]+)($|[[:space:]]) ]]; then
+  expected_ones=${BASH_REMATCH[2]}
+else
+  echo "correctness example did not report a valid ones count" >&2
+  exit 1
+fi
 
 bench_binary=$(
   cargo bench --message-format=json --quiet -p systems-snackpack-topic-009 \
@@ -124,9 +129,9 @@ done
 raw="$output_dir/processes.txt"
 : > "$raw"
 {
-  printf 'SESSION_START utc=%s host_alias=%s host=%s cpu=%s pairs=%s bit_power=%s queries=%s source_commit=%s\n' \
-    "$(date -u +%FT%TZ)" "$host_alias" "$(hostname -f 2>/dev/null || hostname)" \
-    "$cpu" "$pairs" "$bit_power" "$queries" "$source_commit"
+  printf 'SESSION_START utc=%s host_alias=%s cpu=%s pairs=%s bit_power=%s queries=%s ones=%s source_commit=%s\n' \
+    "$(date -u +%FT%TZ)" "$host_alias" "$cpu" "$pairs" "$bit_power" "$queries" \
+    "$expected_ones" "$source_commit"
   cat "$output_dir/benchmark-binary.sha256"
   cat "$output_dir/source-files.sha256"
   cat "$output_dir/benchmark-verify.log"

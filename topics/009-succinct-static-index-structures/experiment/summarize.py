@@ -116,8 +116,13 @@ def main() -> None:
 
     expected_bits = 1 << positive_integer(session, "bit_power")
     expected_queries = positive_integer(session, "queries")
-    expected_compact_bytes = expected_bits // 8 + expected_bits // 128 + expected_bits // 32
+    expected_words = expected_bits // 64
+    expected_superblocks = (expected_words + 7) // 8
+    expected_compact_bytes = expected_words * 8 + expected_superblocks * 4 + expected_words * 2
     expected_prefix_bytes = (expected_bits + 1) * 4
+    expected_ones = (
+        positive_integer(session, "ones") if session.get("ones") is not None else None
+    )
     session_cpu = positive_integer(session, "cpu") if session.get("cpu") != "0" else 0
 
     compact: list[float] = []
@@ -158,6 +163,8 @@ def main() -> None:
             raise SystemExit("compact byte count differs from the fixed layout")
         if values["prefix_bytes"] != expected_prefix_bytes:
             raise SystemExit("prefix byte count differs from the full table")
+        if expected_ones is not None and positive_integer(record, "ones") != expected_ones:
+            raise SystemExit("RESULT dataset differs from the correctness example")
         if record.get("cpu") != str(session_cpu):
             raise SystemExit("RESULT CPU differs from SESSION_START")
         if values["external_wall_ns"] < values["compact_ns"] + values["prefix_ns"]:

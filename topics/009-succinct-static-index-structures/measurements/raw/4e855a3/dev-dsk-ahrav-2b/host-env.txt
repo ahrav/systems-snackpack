@@ -1,6 +1,5 @@
 captured_utc=2026-07-19T18:13:19Z
 host_alias=dev-dsk-ahrav-2b
-resolved_host=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
 source_commit=4e855a3e9cff664ea6c4de6f7d90f13dabadb999
 source_archive_sha256=a83745ddf9ff30b629169315fe2332badf57cdb1a7fdaee231d4b0447c92c4bb
 cpu=0
@@ -9,7 +8,6 @@ bit_power=26
 queries=4000000
 RUSTFLAGS=-C target-cpu=native -C debuginfo=1 -C codegen-units=1
 cpus_allowed=pid 3425392's current affinity list: 0-63
-Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.94-123.180.amzn2023.aarch64 #1 SMP Thu Jul  9 21:13:38 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
 uname_machine=aarch64
 kernel_release=6.12.94-123.180.amzn2023.aarch64
 Architecture:                            aarch64
