@@ -6,17 +6,9 @@
 
 use std::{env, process, time::Instant};
 
-use systems_snackpack_topic_009::{CompactRank, PrefixRank};
+use systems_snackpack_topic_009::{CompactRank, PrefixRank, dataset_words};
 
 const DEFAULT_BIT_POWER: usize = 20;
-
-fn splitmix64(state: &mut u64) -> u64 {
-    *state = state.wrapping_add(0x9e37_79b9_7f4a_7c15);
-    let mut value = *state;
-    value = (value ^ (value >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-    value = (value ^ (value >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-    value ^ (value >> 31)
-}
 
 fn parse_bit_power() -> usize {
     let raw = env::args().nth(1);
@@ -38,10 +30,7 @@ fn parse_bit_power() -> usize {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let bit_power = parse_bit_power();
     let bit_len = 1_usize << bit_power;
-    let mut state = 0x243f_6a88_85a3_08d3_u64;
-    let words = (0..bit_len / 64)
-        .map(|_| splitmix64(&mut state))
-        .collect::<Vec<_>>();
+    let words = dataset_words(bit_len);
 
     let compact = CompactRank::from_words(words.clone())?;
     let prefix = PrefixRank::from_words(&words)?;

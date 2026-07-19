@@ -19,20 +19,12 @@
 use std::{env, hint::black_box, process, time::Instant};
 
 use systems_snackpack_topic_009::{
-    CompactRank, PrefixRank, inspect_compact_rank, inspect_prefix_rank,
+    CompactRank, PrefixRank, dataset_words, inspect_compact_rank, inspect_prefix_rank, splitmix64,
 };
 
 const DEFAULT_BIT_POWER: usize = 26;
 const DEFAULT_QUERIES: usize = 4_000_000;
 const WARMUP_QUERIES: usize = 262_144;
-
-fn splitmix64(state: &mut u64) -> u64 {
-    *state = state.wrapping_add(0x9e37_79b9_7f4a_7c15);
-    let mut value = *state;
-    value = (value ^ (value >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-    value = (value ^ (value >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-    value ^ (value >> 31)
-}
 
 fn parse_usize(raw: Option<&String>, default: usize, label: &str) -> usize {
     raw.map_or(default, |value| {
@@ -41,11 +33,6 @@ fn parse_usize(raw: Option<&String>, default: usize, label: &str) -> usize {
             process::exit(2);
         })
     })
-}
-
-fn make_words(bit_len: usize) -> Vec<u64> {
-    let mut state = 0x243f_6a88_85a3_08d3_u64;
-    (0..bit_len / 64).map(|_| splitmix64(&mut state)).collect()
 }
 
 fn make_queries(bit_len: usize, count: usize) -> Vec<usize> {
@@ -82,7 +69,7 @@ fn prepare(bit_power: usize, query_count: usize) -> Prepared {
     let bit_len = 1_usize << bit_power;
 
     let started = Instant::now();
-    let words = make_words(bit_len);
+    let words = dataset_words(bit_len);
     let dataset_ns = started.elapsed().as_nanos();
 
     let started = Instant::now();

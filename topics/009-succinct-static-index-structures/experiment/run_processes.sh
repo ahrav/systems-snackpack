@@ -126,6 +126,16 @@ for symbol in topic009_inspect_compact_rank topic009_inspect_prefix_rank; do
   fi
 done
 
+# Validate the RESULT record schema against the summarizer before spending a
+# full measured session. A drifted field name or type fails here, not after
+# all 12 pairs have run.
+smoke="$output_dir/schema-smoke.txt"
+smoke_start=$(date +%s%N)
+smoke_result=$(taskset -c "$cpu" "$bench_binary" --run compact-prefix 4096 20 1)
+smoke_wall_ns=$(( $(date +%s%N) - smoke_start ))
+printf '%s external_wall_ns=%d cpu=%d\n' "$smoke_result" "$smoke_wall_ns" "$cpu" > "$smoke"
+"$script_dir/summarize.py" --schema-check "$smoke"
+
 raw="$output_dir/processes.txt"
 : > "$raw"
 {
@@ -162,5 +172,6 @@ printf 'SESSION_END utc=%s\n' "$(date -u +%FT%TZ)" | tee -a "$raw"
   printf 'source_commit=%s\n' "$source_commit"
   printf 'source_archive_sha256=%s\n' "$source_archive_sha256"
   printf 'process_replication=12 fresh paired order-balanced processes\n'
+  printf 'schema_gate=one smoke RESULT validated by summarize.py --schema-check before the pair loop\n'
   printf 'timing_boundary=dataset clone index builds query build warmup timed queries and external launch-to-exit recorded separately\n'
 } > "$output_dir/run-manifest.txt"

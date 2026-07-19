@@ -32,6 +32,34 @@ const SUPERBLOCK_WORDS: usize = 8;
 /// Maximum word count supported by 32-bit cumulative counts.
 pub const MAX_WORDS: usize = (u32::MAX as usize) / WORD_BITS;
 
+/// Seed for the deterministic experiment dataset.
+///
+/// The bench and the equivalence example both derive their input from this
+/// seed through [`dataset_words`], so the exhaustively verified dataset and
+/// the timed dataset are the same bytes for a given length.
+pub const DATASET_SEED: u64 = 0x243f_6a88_85a3_08d3;
+
+/// Advances a SplitMix64 state and returns its next output.
+pub fn splitmix64(state: &mut u64) -> u64 {
+    *state = state.wrapping_add(0x9e37_79b9_7f4a_7c15);
+    let mut value = *state;
+    value = (value ^ (value >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+    value = (value ^ (value >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
+    value ^ (value >> 31)
+}
+
+/// Generates the deterministic experiment dataset for `bit_len` bits.
+///
+/// Produces `bit_len / 64` complete words from [`DATASET_SEED`]. Both
+/// experiment binaries must build their input through this function so the
+/// verified and timed datasets stay byte-identical.
+pub fn dataset_words(bit_len: usize) -> Vec<u64> {
+    let mut state = DATASET_SEED;
+    (0..bit_len / WORD_BITS)
+        .map(|_| splitmix64(&mut state))
+        .collect()
+}
+
 /// A failure to build a rank representation.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum BuildError {
@@ -312,17 +340,7 @@ mod tests {
 
     #[test]
     fn deterministic_random_input_matches_exhaustively() {
-        let mut state = 0x243f_6a88_85a3_08d3_u64;
-        let words = (0..64)
-            .map(|_| {
-                state = state.wrapping_add(0x9e37_79b9_7f4a_7c15);
-                let mut value = state;
-                value = (value ^ (value >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-                value = (value ^ (value >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-                value ^ (value >> 31)
-            })
-            .collect();
-        assert_parity(words);
+        assert_parity(dataset_words(64 * WORD_BITS));
     }
 
     #[test]
