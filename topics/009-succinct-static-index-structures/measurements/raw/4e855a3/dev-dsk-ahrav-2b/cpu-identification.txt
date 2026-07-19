@@ -1,0 +1,9 @@
+captured_utc=2026-07-19T18:18:44Z
+resolved_host=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+architecture=aarch64
+midr_el1=0x00000000411fd401
+cpu_implementer=0x41
+cpu_architecture=8
+cpu_variant=0x1
+cpu_part=0xd40
+cpu_revision=1

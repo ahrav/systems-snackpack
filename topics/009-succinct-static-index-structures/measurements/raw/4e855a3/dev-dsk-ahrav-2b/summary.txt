@@ -1,0 +1,8 @@
+replication=fresh_process paired_interval=exact_96.1_percent_median_order_statistic interval_assumptions=iid_continuous_pair_ratios
+bits=67108864 queries_per_variant=4000000 compact_bytes=11010048 prefix_bytes=268435460 prefix_over_compact_bytes=24.380952744
+compact ns_per_query: n=12 mean=12.896899500 sd=0.567141527 median=12.861254375 mad=0.541784375 min=12.293950000 max=13.617989000
+prefix ns_per_query: n=12 mean=10.998560729 sd=0.133028711 median=10.951237750 mad=0.061787625 min=10.849531000 max=11.284689750
+paired prefix/compact: pairs=12 geomean=0.853504811 median=0.849694057 mad=0.037486551 exact96.1%=[0.814860238,0.902086534]
+compact build_ms: n=12 mean=2.913469750 sd=0.045541708 median=2.924829000 mad=0.037546500 min=2.852405000 max=2.983180000
+prefix build_ms: n=12 mean=119.766345917 sd=0.954419196 median=119.639015000 mad=0.599373500 min=118.544360000 max=121.743404000
+external launch_to_exit_ms: n=12 mean=268.233057083 sd=2.799466227 median=268.349519500 mad=1.110179500 min=263.256037000 max=272.689618000

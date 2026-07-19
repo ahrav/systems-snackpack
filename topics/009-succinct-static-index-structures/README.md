@@ -46,7 +46,7 @@ total                  = 1.3125 bits per input bit
 recover each source bit from adjacent differences, so it does not retain a
 second payload copy. It is the correctness oracle, not a plausible production
 design.
-The compact query performs three dependent indexed loads, a mask, and a
+The compact query performs three indexed data loads, a mask, and a
 population count. The prefix query performs one indexed load. The experiment
 therefore tests whether the smaller working set repays extra query work.
 
@@ -82,6 +82,28 @@ stored keys without collisions but gives arbitrary answers for non-members.
   linked binary built with the shipping target flags.
 - Do not compare structures without matching the query contract, membership
   semantics, and stored payload.
+
+## Recorded result
+
+The 2026-07-19 exact-source run used candidate `4e855a3`, archive SHA-256
+`a83745ddf9ff30b629169315fe2332badf57cdb1a7fdaee231d4b0447c92c4bb`,
+and 12 fresh order-balanced paired processes per host. The dataset contained
+`2^26` deterministic pseudo-random bits. Each process issued 4,000,000 queries
+per variant after 262,144 warmup queries.
+
+| Host | Compact median | Prefix median | Paired prefix/compact median | Exact 96.1% interval |
+| --- | ---: | ---: | ---: | ---: |
+| Arm host | 12.861 ns/query | 10.951 ns/query | 0.850 | 0.815 to 0.902 |
+| `xlg` | 5.124 ns/query | 8.384 ns/query | 1.641 | 1.399 to 1.709 |
+
+The compact representation used 11,010,048 logical bytes. The prefix oracle
+used 268,435,460 bytes, a prefix/compact ratio of 24.381. Both hosts exhaustively
+matched all 67,108,865 valid prefix positions.
+
+The smaller representation did not win on both machines. Both hosts also
+showed an order effect: the compact loop was slower when it ran second. The
+balanced paired interval includes that process-level variation. The experiment
+did not collect PMU data, so cache or TLB mechanisms remain hypotheses.
 
 ## Run
 

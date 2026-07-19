@@ -1,0 +1,6 @@
+completed_utc=2026-07-19T18:13:28Z
+benchmark_binary=/tmp/systems-snackpack-topic009.vGUAvx/out/target/release/deps/succinct_rank-52a4f3bb7c611fe4
+source_commit=4e855a3e9cff664ea6c4de6f7d90f13dabadb999
+source_archive_sha256=a83745ddf9ff30b629169315fe2332badf57cdb1a7fdaee231d4b0447c92c4bb
+process_replication=12 fresh paired order-balanced processes
+timing_boundary=dataset clone index builds query build warmup timed queries and external launch-to-exit recorded separately

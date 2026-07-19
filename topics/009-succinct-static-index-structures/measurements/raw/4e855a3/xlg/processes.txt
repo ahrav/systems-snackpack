@@ -1,0 +1,45 @@
+SESSION_START utc=2026-07-19T18:13:24Z host_alias=xlg host=dev-dsk-ahrav-2c-a9191cb6.us-west-2.amazon.com cpu=0 pairs=12 bit_power=26 queries=4000000 source_commit=4e855a3e9cff664ea6c4de6f7d90f13dabadb999
+43bcd990ebf6e4624d084eb7a92ba3cdd420dfe17be000a09db3852f83fff20a  /tmp/systems-snackpack-topic009.vGUAvx/out/target/release/deps/succinct_rank-52a4f3bb7c611fe4
+cc402d2301dc2a8e6dc7ad4b708a915fd6b2bc85687ae36c968898a2058abdb2  topics/009-succinct-static-index-structures/src/lib.rs
+68f33a4c9e2c68ceaddf2e78865e5faa135563ffc33be5fe9a29953875d8a259  topics/009-succinct-static-index-structures/benches/succinct_rank.rs
+f135b754656a69c3cf7983d1e0a17d06771b47df384ab0db613ccdbafb5b1e24  topics/009-succinct-static-index-structures/examples/check_equivalence.rs
+df60a266e4a2657060bfaabb9c8c0d040568d8347998ae3df93ddda4c3182e8c  topics/009-succinct-static-index-structures/experiment/run_processes.sh
+3f3d35e49282b803029bb3dd8a1a57ef4d667d5dbf9fec451bfde7011c622220  topics/009-succinct-static-index-structures/experiment/summarize.py
+VERIFY pid=2727572 bits=1048576 positions_checked=1048577 ones=523716 compact_bytes=172032 prefix_bytes=4194308 main_elapsed_ns=4510801
+PAIR_START pair=1 order=compact-prefix utc=2026-07-19T18:13:24Z
+RESULT pid=2727597 pair=1 order=compact-prefix bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3882468 input_clone_ns=4303670 compact_build_ns=2689952 prefix_build_ns=149405434 query_build_ns=14071615 warmup_ns=6098438 compact_warmup_ns=3401396 prefix_warmup_ns=2696442 compact_ns=20160163 prefix_ns=33707844 compact_ns_per_query=5.040040750 prefix_ns_per_query=8.426961000 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=235539469 external_wall_ns=262166172 cpu=0
+PAIR_END pair=1 utc=2026-07-19T18:13:25Z
+PAIR_START pair=2 order=prefix-compact utc=2026-07-19T18:13:25Z
+RESULT pid=2727608 pair=2 order=prefix-compact bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3539336 input_clone_ns=3888818 compact_build_ns=2582472 prefix_build_ns=148746161 query_build_ns=14205545 warmup_ns=6110988 compact_warmup_ns=3410415 prefix_warmup_ns=2700303 compact_ns=21311307 prefix_ns=33040591 compact_ns_per_query=5.327826750 prefix_ns_per_query=8.260147750 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=234586254 external_wall_ns=260743024 cpu=0
+PAIR_END pair=2 utc=2026-07-19T18:13:25Z
+PAIR_START pair=3 order=compact-prefix utc=2026-07-19T18:13:25Z
+RESULT pid=2727619 pair=3 order=compact-prefix bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3358025 input_clone_ns=3868228 compact_build_ns=2589632 prefix_build_ns=146950404 query_build_ns=13735113 warmup_ns=6096508 compact_warmup_ns=3371646 prefix_warmup_ns=2724762 compact_ns=19864830 prefix_ns=33945346 compact_ns_per_query=4.966207500 prefix_ns_per_query=8.486336500 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=231522311 external_wall_ns=258025613 cpu=0
+PAIR_END pair=3 utc=2026-07-19T18:13:25Z
+PAIR_START pair=4 order=prefix-compact utc=2026-07-19T18:13:25Z
+RESULT pid=2727630 pair=4 order=prefix-compact bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3526226 input_clone_ns=3834108 compact_build_ns=2589152 prefix_build_ns=148668281 query_build_ns=14383115 warmup_ns=6069078 compact_warmup_ns=3361416 prefix_warmup_ns=2707572 compact_ns=23613558 prefix_ns=33030462 compact_ns_per_query=5.903389500 prefix_ns_per_query=8.257615500 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=236831675 external_wall_ns=263147196 cpu=0
+PAIR_END pair=4 utc=2026-07-19T18:13:25Z
+PAIR_START pair=5 order=compact-prefix utc=2026-07-19T18:13:25Z
+RESULT pid=2727641 pair=5 order=compact-prefix bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3429466 input_clone_ns=3777427 compact_build_ns=2624912 prefix_build_ns=147081434 query_build_ns=13782643 warmup_ns=6085818 compact_warmup_ns=3375126 prefix_warmup_ns=2710612 compact_ns=20376514 prefix_ns=33912725 compact_ns_per_query=5.094128500 prefix_ns_per_query=8.478181250 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=232195485 external_wall_ns=258442084 cpu=0
+PAIR_END pair=5 utc=2026-07-19T18:13:26Z
+PAIR_START pair=6 order=prefix-compact utc=2026-07-19T18:13:26Z
+RESULT pid=2727653 pair=6 order=prefix-compact bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3480336 input_clone_ns=3911848 compact_build_ns=2590132 prefix_build_ns=148660461 query_build_ns=14423166 warmup_ns=6106918 compact_warmup_ns=3388946 prefix_warmup_ns=2717862 compact_ns=24899594 prefix_ns=33032042 compact_ns_per_query=6.224898500 prefix_ns_per_query=8.258010500 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=238237172 external_wall_ns=265490597 cpu=0
+PAIR_END pair=6 utc=2026-07-19T18:13:26Z
+PAIR_START pair=7 order=compact-prefix utc=2026-07-19T18:13:26Z
+RESULT pid=2727664 pair=7 order=compact-prefix bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3469126 input_clone_ns=3883828 compact_build_ns=2600422 prefix_build_ns=146737472 query_build_ns=13747423 warmup_ns=6136018 compact_warmup_ns=3411266 prefix_warmup_ns=2724652 compact_ns=19833791 prefix_ns=33929816 compact_ns_per_query=4.958447750 prefix_ns_per_query=8.482454000 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=231451431 external_wall_ns=257890640 cpu=0
+PAIR_END pair=7 utc=2026-07-19T18:13:26Z
+PAIR_START pair=8 order=prefix-compact utc=2026-07-19T18:13:26Z
+RESULT pid=2727675 pair=8 order=prefix-compact bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3487566 input_clone_ns=3722707 compact_build_ns=2603332 prefix_build_ns=148746593 query_build_ns=14477147 warmup_ns=6111008 compact_warmup_ns=3407286 prefix_warmup_ns=2703632 compact_ns=26076390 prefix_ns=33231491 compact_ns_per_query=6.519097500 prefix_ns_per_query=8.307872750 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=239566798 external_wall_ns=266571622 cpu=0
+PAIR_END pair=8 utc=2026-07-19T18:13:27Z
+PAIR_START pair=9 order=compact-prefix utc=2026-07-19T18:13:27Z
+RESULT pid=2727686 pair=9 order=compact-prefix bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3389236 input_clone_ns=3834327 compact_build_ns=2634912 prefix_build_ns=148006248 query_build_ns=13788553 warmup_ns=6122818 compact_warmup_ns=3391106 prefix_warmup_ns=2731622 compact_ns=19858232 prefix_ns=34168916 compact_ns_per_query=4.964558000 prefix_ns_per_query=8.542229000 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=232928077 external_wall_ns=259703370 cpu=0
+PAIR_END pair=9 utc=2026-07-19T18:13:27Z
+PAIR_START pair=10 order=prefix-compact utc=2026-07-19T18:13:27Z
+RESULT pid=2727697 pair=10 order=prefix-compact bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3523286 input_clone_ns=3729347 compact_build_ns=2570022 prefix_build_ns=149374084 query_build_ns=14591217 warmup_ns=6135188 compact_warmup_ns=3413526 prefix_warmup_ns=2721552 compact_ns=20616564 prefix_ns=33364934 compact_ns_per_query=5.154141000 prefix_ns_per_query=8.341233500 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=235008977 external_wall_ns=262564953 cpu=0
+PAIR_END pair=10 utc=2026-07-19T18:13:27Z
+PAIR_START pair=11 order=compact-prefix utc=2026-07-19T18:13:27Z
+RESULT pid=2727708 pair=11 order=compact-prefix bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3446466 input_clone_ns=3878218 compact_build_ns=2653232 prefix_build_ns=148071788 query_build_ns=13894334 warmup_ns=6172718 compact_warmup_ns=3414535 prefix_warmup_ns=2758073 compact_ns=20354704 prefix_ns=34528198 compact_ns_per_query=5.088676000 prefix_ns_per_query=8.632049500 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=234126803 external_wall_ns=260963096 cpu=0
+PAIR_END pair=11 utc=2026-07-19T18:13:27Z
+PAIR_START pair=12 order=prefix-compact utc=2026-07-19T18:13:27Z
+RESULT pid=2727719 pair=12 order=prefix-compact bits=67108864 queries=4000000 warmup_queries=262144 dataset_ns=3548546 input_clone_ns=3860678 compact_build_ns=2561832 prefix_build_ns=148968982 query_build_ns=14642237 warmup_ns=6126508 compact_warmup_ns=3410446 prefix_warmup_ns=2715852 compact_ns=21171527 prefix_ns=33252713 compact_ns_per_query=5.292881750 prefix_ns_per_query=8.313178250 checksum=67100650454407 compact_bytes=11010048 prefix_bytes=268435460 main_elapsed_ns=235261638 external_wall_ns=261635918 cpu=0
+PAIR_END pair=12 utc=2026-07-19T18:13:28Z
+SESSION_END utc=2026-07-19T18:13:28Z
