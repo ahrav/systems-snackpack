@@ -5,6 +5,7 @@ fca9ae7824bbd1ac78b8042be1874c8969a919492a5a0a914a3e198526826f92  dev-dsk-ahrav-
 57377bafd454b416826535eaf1e9cb357c655fde59a37f619e2db45541ba1d86  dev-dsk-ahrav-2b/codegen-focus.txt
 c4c4c032a0979e4f3bf909f6a95d3995605ae719deb49aa174cb1cba8132095c  dev-dsk-ahrav-2b/codegen-full.txt.gz
 52448ff4e785f73f9446c8172fe6ac007d615fd6ca5dcfb6b8f0c5ca6aedce37  dev-dsk-ahrav-2b/correctness-example.log
+542f6be27b064df3d975f37fbf565104ac917164c3642401ba996e4845773987  dev-dsk-ahrav-2b/cpu-identification.txt
 dd07d8d4af82d6cdca9ea18e957acf15084b485ffa43ae298e1d9a8da57dc538  dev-dsk-ahrav-2b/gates/cargo-bench-no-run.log
 26a162995f66f361b3a5af3565f9c2b1ae490fa254ea65a9a1798ca6010391aa  dev-dsk-ahrav-2b/gates/cargo-clippy.log
 4f41d4b1d0793c908a03b25f5add0de84245822b2239df288dcdf4ac9513d164  dev-dsk-ahrav-2b/gates/cargo-doc.log
@@ -25,6 +26,7 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  dev-dsk-ahrav-
 b50ca6c02d023b383544134982e0f180c31da80543ab40825f07dc13cfb3da2d  xlg/codegen-focus.txt
 bf29d07dad05609340319ff9e50e66c819a121ae74784f5d3cf278c06706ae89  xlg/codegen-full.txt.gz
 145b0d600dc394b3a125f816e97e268d36f87e428bb43b5207a40f71baf0264d  xlg/correctness-example.log
+8f85c18343cd10917ef77e3b7c9255c7d0e4a9ae712acf2b7dc9fa6c207a9f34  xlg/cpu-identification.txt
 1ff543a4cd105644987ba4261dadddd7f315bd7d7f0d8fdd7654ab63bcfbde5a  xlg/gates/cargo-bench-no-run.log
 79a9e6d6df62fc725b16d48acfc9fc792c661816c5d26ee3077d07ffaa853fb3  xlg/gates/cargo-clippy.log
 78ef84b2e2fcf84964e9686eca08800336a96f9bb60b777acb520e2d9e56e681  xlg/gates/cargo-doc.log

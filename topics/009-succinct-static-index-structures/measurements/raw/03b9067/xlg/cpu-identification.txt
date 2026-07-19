@@ -1,0 +1,17 @@
+captured_utc=2026-07-19T20:14:48Z
+resolved_host=dev-dsk-ahrav-2c-a9191cb6.us-west-2.amazon.com
+Linux dev-dsk-ahrav-2c-a9191cb6.us-west-2.amazon.com 6.12.94-123.180.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Thu Jul  9 21:10:41 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+Architecture:                            x86_64
+CPU(s):                                  128
+On-line CPU(s) list:                     0-127
+Vendor ID:                               AuthenticAMD
+Model name:                              AMD EPYC 9R14
+CPU family:                              25
+Model:                                   17
+Stepping:                                1
+vendor_id	: AuthenticAMD
+cpu family	: 25
+model		: 17
+model name	: AMD EPYC 9R14
+stepping	: 1
+microcode	: 0xa101154
