@@ -37,6 +37,28 @@ fi
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 repo_root=$(cd "$script_dir/../../.." && pwd)
 cd "$repo_root"
+
+# The declared SOURCE_COMMIT becomes part of the exact-source evidence, so it
+# must describe the tree actually being measured. Mirror the topic-008 runner:
+# the commit must resolve locally and the working tree (tracked and untracked)
+# must match it exactly before any measurement is recorded.
+if [[ ! $source_commit =~ ^[0-9a-f]{40}$ ]]; then
+  echo "SOURCE_COMMIT must be the 40-digit source-candidate commit" >&2
+  exit 2
+fi
+if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  resolved_source_commit=$(git -C "$repo_root" rev-parse --verify "$source_commit^{commit}" 2>/dev/null || true)
+  if [[ $resolved_source_commit != "$source_commit" ]]; then
+    echo "SOURCE_COMMIT does not resolve to the declared commit" >&2
+    exit 2
+  fi
+  if ! git -C "$repo_root" diff --quiet "$source_commit" -- \
+    || [[ -n $(git -C "$repo_root" ls-files --others --exclude-standard) ]]; then
+    echo "working tree must exactly match SOURCE_COMMIT before recording measurements" >&2
+    exit 2
+  fi
+fi
+
 mkdir -p "$output_dir/gates"
 
 export CARGO_TARGET_DIR="$output_dir/target"
