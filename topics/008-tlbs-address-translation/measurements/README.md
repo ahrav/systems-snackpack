@@ -10,9 +10,9 @@ each mapping. Every base process must report zero `AnonHugePages`; every THP
 process must report the complete mapping as `AnonHugePages` both before and
 after timing.
 
-The final source also repeats base-mapping construction in 200 fresh test
-processes per host. Retained `PROT_NONE` padding must keep the aligned usable
-range as an exact VMA in every process.
+The recorded source candidate also repeats base-mapping construction in 200
+fresh test processes per host. Retained `PROT_NONE` padding must keep the
+aligned usable range as an exact VMA in every process.
 
 The permission-change comparison also uses 12 fresh, paired, order-balanced
 processes. It measures two `mprotect` calls per pair plus page-table work,

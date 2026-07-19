@@ -244,7 +244,9 @@ impl AnonymousRegion {
         self.length
     }
 
-    /// Returns `false`; successful construction always owns a nonempty mapping.
+    /// Reports whether the usable mapping is empty.
+    ///
+    /// Successful construction guarantees that this returns `false`.
     pub const fn is_empty(&self) -> bool {
         self.length == 0
     }
@@ -505,10 +507,9 @@ fn parse_smaps(contents: &str, address: usize) -> Result<SmapsEvidence, MappingE
 fn parse_vma_header(line: &str) -> Option<(usize, usize)> {
     let range = line.split_whitespace().next()?;
     let (start, end) = range.split_once('-')?;
-    Some((
-        usize::from_str_radix(start, 16).ok()?,
-        usize::from_str_radix(end, 16).ok()?,
-    ))
+    let start = usize::from_str_radix(start, 16).ok()?;
+    let end = usize::from_str_radix(end, 16).ok()?;
+    (start < end).then_some((start, end))
 }
 
 fn parse_kib_field(line: &str, name: &str) -> Result<Option<usize>, MappingError> {
@@ -780,6 +781,7 @@ mod platform {
 mod tests {
     use super::{
         AnonymousRegion, MappingError, MappingMode, PMD_PAGE_SIZE, next_random, parse_smaps,
+        parse_vma_header,
     };
 
     const COMPLETE_SMAPS: &str = "1000-3000 rw-p 00000000 00:00 0\n\
@@ -830,10 +832,28 @@ VmFlags: rd wr mr mw me ac sd nh\n";
         ));
     }
 
+    #[test]
+    fn vma_header_parser_rejects_nonincreasing_ranges() {
+        assert_eq!(parse_vma_header("1000-1000 rw-p"), None);
+        assert_eq!(parse_vma_header("3000-1000 rw-p"), None);
+        assert_eq!(parse_vma_header("1000-3000 rw-p"), Some((0x1000, 0x3000)));
+    }
+
     #[cfg(target_os = "linux")]
     #[test]
     fn base_mapping_builds_one_complete_ring() {
-        let mut region = AnonymousRegion::new(PMD_PAGE_SIZE, MappingMode::BasePages).unwrap();
+        let mut region = match AnonymousRegion::new(PMD_PAGE_SIZE, MappingMode::BasePages) {
+            Ok(region) => region,
+            Err(
+                error @ (MappingError::PageGeometryIo(_)
+                | MappingError::PageGeometryParse(_)
+                | MappingError::UnsupportedPageGeometry { .. }),
+            ) => {
+                eprintln!("skipping base mapping test on unsupported host: {error}");
+                return;
+            }
+            Err(error) => panic!("failed to create base mapping: {error}"),
+        };
         region.build_random_page_ring(0x5eed).unwrap();
         assert_eq!(
             region.chase_pages(0, region.page_count() as u64).unwrap(),

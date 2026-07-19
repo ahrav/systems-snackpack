@@ -16,7 +16,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut region = AnonymousRegion::new(32 * PMD_PAGE_SIZE, mode)?;
         region.build_random_page_ring(0x746c_622d_7269_6e67)?;
         let pages = region.page_count();
-        let final_page = region.chase_pages(0, (pages * 2) as u64)?;
+        let steps = pages.checked_mul(2).expect("page step count overflow") as u64;
+        let final_page = region.chase_pages(0, steps)?;
         assert_eq!(final_page, 0);
         let evidence = region.smaps_evidence()?;
         println!(

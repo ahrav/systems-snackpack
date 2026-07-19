@@ -90,10 +90,12 @@ if [[ ! $cpu =~ ^(0|[1-9][0-9]*)$ ]]; then
   echo "CPU must name one logical CPU, got: $cpu" >&2
   exit 2
 fi
-if ! taskset -c "$((cpu + 16))" true >/dev/null 2>&1; then
-  echo "shootdown workload requires CPUs $cpu through $((cpu + 16)) to be allowed" >&2
-  exit 2
-fi
+for ((required_cpu = cpu; required_cpu <= cpu + 16; required_cpu++)); do
+  if ! taskset -c "$required_cpu" true >/dev/null 2>&1; then
+    echo "shootdown workload requires CPUs $cpu through $((cpu + 16)) to be allowed; CPU $required_cpu is unavailable" >&2
+    exit 2
+  fi
+done
 
 export CARGO_TARGET_DIR="$output_dir/target"
 unset CARGO_ENCODED_RUSTFLAGS

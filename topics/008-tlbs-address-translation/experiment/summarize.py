@@ -38,10 +38,12 @@ def describe(label: str, values: list[float]) -> None:
 
 
 def describe_ratios(label: str, ratios: list[float]) -> None:
+    if len(ratios) != 12:
+        raise ValueError(f"describe_ratios requires exactly 12 pairs, got {len(ratios)}")
     ordered = sorted(ratios)
     geometric_mean = math.exp(statistics.fmean(math.log(value) for value in ratios))
     print(
-        f"{label}: pairs=12 geomean={geometric_mean:.9f} "
+        f"{label}: pairs={len(ratios)} geomean={geometric_mean:.9f} "
         f"median={statistics.median(ratios):.9f} "
         f"mad={median_absolute_deviation(ratios):.9f} "
         f"exact96.1%=[{ordered[2]:.9f},{ordered[9]:.9f}]"

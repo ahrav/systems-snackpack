@@ -20,10 +20,10 @@ refills and DTLB walks from about 1.27 million to below 1,000. The `xlg` PMU
 run reduced L2 DTLB misses from about 3.89 million to 5,056. These event names
 and definitions differ, so their counts are not cross-host comparable.
 
-The final guarded-allocation source also passed 200 fresh VMA-construction
-tests on each host. Those repetitions cover the process-layout variation that
-caused an unguarded aligned mapping to coalesce with an adjacent VMA in one CI
-process.
+The recorded guarded-allocation source candidate also passed 200 fresh
+VMA-construction tests on each host. Those repetitions cover the process-layout
+variation that caused an unguarded aligned mapping to coalesce with an adjacent
+VMA in one CI process.
 
 Measured: the magnitude of the THP reach result and the reader-count result
 differed between these two hosts. Inferred: both PMU records are consistent
