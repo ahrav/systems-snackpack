@@ -10,4 +10,4 @@
 - [Esposito, Graf, and Vigna, *RecSplit*](https://arxiv.org/abs/1910.06416) — Minimal perfect hashing with explicit space and construction tradeoffs.
 - [Rust `u64::count_ones`](https://doc.rust-lang.org/std/primitive.u64.html#method.count_ones) — Language-level population-count semantics.
 - [rustc `target-cpu`](https://doc.rust-lang.org/stable/rustc/codegen-options/index.html#target-cpu) — Target feature selection used for generated-code inspection.
-- [Kalibera and Jones, ISMM 2013](https://doi.org/10.1145/2464157.2464163) — Process-level replication and benchmark uncertainty.
+- [Kalibera and Jones, ISMM 2013](https://doi.org/10.1145/2464157.2464160) — Process-level replication and benchmark uncertainty.
