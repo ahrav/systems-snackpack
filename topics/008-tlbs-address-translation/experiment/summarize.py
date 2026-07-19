@@ -224,6 +224,8 @@ def main() -> None:
             if missing:
                 raise SystemExit(f"shootdown RESULT missing fields: {sorted(missing)}")
             require_positive_int(record, ("readers", "mprotect_pairs", "warmup_pairs", "reader_loads", "reader_checksum"))
+            if int(record["reader_checksum"]) != int(record["reader_loads"]):
+                raise SystemExit(f"reader checksum differs from load count in pid {record['pid']}")
             readers = record["readers"]
             if readers not in {"1", "16"}:
                 raise SystemExit(f"unexpected reader count {readers}")

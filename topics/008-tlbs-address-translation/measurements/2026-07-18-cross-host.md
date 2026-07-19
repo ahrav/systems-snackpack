@@ -26,10 +26,10 @@ variation that caused an unguarded aligned mapping to coalesce with an adjacent
 VMA in one CI process.
 
 Measured: the magnitude of the THP reach result and the reader-count result
-differed between these two hosts. Inferred: both PMU records are consistent
-with THP removing lower-level translation work, while the remaining translation
-path differed. The experiment does not establish why, and it does not identify
-an ISA, vendor, bare-metal, hypervisor, or kernel-wide effect.
+differed between these two hosts. Both whole-process PMU records also differed
+between mappings, but setup and page-fault work prevent attributing those
+differences to the timed chase. The experiment does not identify an ISA, vendor,
+bare-metal, hypervisor, or kernel-wide effect.
 
 The permission workload changes one page between read-only and read-write. Its
 timer covers the complete `mprotect` pair and concurrent reader interference.

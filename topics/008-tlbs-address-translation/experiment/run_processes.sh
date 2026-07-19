@@ -3,7 +3,7 @@ set -euo pipefail
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 root=$(cd "$script_dir/../../.." && pwd)
-output_dir=${1:-/tmp/systems-snackpack-topic-008}
+output_dir=${1:-}
 pairs=${PAIRS:-12}
 mib=${MIB:-256}
 passes=${PASSES:-64}
@@ -32,7 +32,7 @@ if (( mib % 2 != 0 )); then
   exit 2
 fi
 
-for command_name in cargo date dirname getconf git gzip hostname jq lscpu mkdir nm nproc \
+for command_name in cargo date dirname getconf git gzip hostname jq lscpu mkdir mktemp nm nproc \
   objdump perf python3 readelf rg rustc sed seq sha256sum tail taskset tee tr uname; do
   if ! command -v "$command_name" >/dev/null; then
     echo "required command not found: $command_name" >&2
@@ -51,15 +51,43 @@ if [[ $base_page_bytes != 4096 || $pmd_page_bytes != 2097152 ]]; then
   exit 2
 fi
 
-if [[ -z $source_commit ]] && git -C "$root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  source_commit=$(git -C "$root" rev-parse HEAD)
+inside_work_tree=false
+if git -C "$root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  inside_work_tree=true
+  if [[ -z $source_commit ]]; then
+    source_commit=$(git -C "$root" rev-parse HEAD)
+  fi
 fi
 if [[ ! $source_commit =~ ^[0-9a-f]{40}$ ]]; then
   echo "SOURCE_COMMIT must be the 40-digit source-candidate commit" >&2
   exit 2
 fi
+if [[ $inside_work_tree == true ]]; then
+  resolved_source_commit=$(git -C "$root" rev-parse --verify "$source_commit^{commit}" 2>/dev/null || true)
+  if [[ $resolved_source_commit != "$source_commit" ]]; then
+    echo "SOURCE_COMMIT does not resolve to the declared commit" >&2
+    exit 2
+  fi
+  if ! git -C "$root" diff --quiet "$source_commit" -- \
+    || [[ -n $(git -C "$root" ls-files --others --exclude-standard) ]]; then
+    echo "working tree must exactly match SOURCE_COMMIT before recording measurements" >&2
+    exit 2
+  fi
+fi
 
-mkdir -p "$output_dir" "$output_dir/gates"
+if [[ -z $output_dir ]]; then
+  output_dir=$(mktemp -d "${TMPDIR:-/tmp}/systems-snackpack-topic-008.XXXXXXXX")
+elif [[ -L $output_dir ]]; then
+  echo "output directory must not be a symbolic link: $output_dir" >&2
+  exit 2
+else
+  mkdir -p "$output_dir"
+fi
+if [[ -L $output_dir/gates ]]; then
+  echo "output gates directory must not be a symbolic link: $output_dir/gates" >&2
+  exit 2
+fi
+mkdir -p "$output_dir/gates"
 output_dir=$(cd "$output_dir" && pwd)
 rm -f \
   "$output_dir/processes.txt" \

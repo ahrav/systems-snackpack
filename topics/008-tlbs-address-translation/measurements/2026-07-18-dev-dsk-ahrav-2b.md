@@ -82,8 +82,8 @@ followed by an address-dependent `ldr`. There is no vectorization or independent
 memory-level parallelism in the timed kernel.
 
 Measured: THP reduced steady-state time for this workload, and the permission
-ratio's interval includes 1. Inferred: the PMU change is consistent with fewer
-lower-level translation walks after THP materialization. The counters do not
-identify a TLB level's capacity or one invalidation mechanism.
+ratio's interval includes 1. The whole-process PMU counts differ, but setup and
+page-fault work prevent attributing that difference to the timed chase. The
+counters do not identify a TLB level's capacity or one invalidation mechanism.
 
 Raw evidence: [`raw/52e7959/dev-dsk-ahrav-2b`](raw/52e7959/dev-dsk-ahrav-2b/).
