@@ -1,8 +1,10 @@
 //! Times both rank representations on identical deterministic point queries.
 //!
 //! Each `--run` invocation constructs both indexes and the query sequence,
-//! warms the compact loop and then the prefix loop, and times both query loops
-//! in the requested order. The `compact_ns` and `prefix_ns` intervals include
+//! then warms and times both query loops in the requested order
+//! (`compact-prefix` or `prefix-compact`), so the first timed variant is
+//! always preceded by the rival's warmup. The `compact_ns` and `prefix_ns`
+//! intervals include
 //! the query loop, `rank1` calls, black-box barriers, and checksum accumulation.
 //! They exclude input generation, index construction, query construction, and
 //! warmup; separate fields report those stages. Timed positions are in

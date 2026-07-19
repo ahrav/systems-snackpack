@@ -19,8 +19,25 @@ if [[ $(uname -s) != Linux ]]; then
   echo "the process runner requires Linux" >&2
   exit 2
 fi
+# `(( ... ))` would evaluate arithmetic expressions such as `6+6`, so every
+# numeric argument must be a plain unsigned decimal before any arithmetic
+# or serialization uses it (mirrors the topic-008 preflight).
+for value_name in cpu pairs bit_power queries; do
+  value=${!value_name}
+  if [[ ! $value =~ ^(0|[1-9][0-9]*)$ ]]; then
+    echo "$value_name must be an unsigned decimal integer, got: $value" >&2
+    exit 2
+  fi
+done
 if (( pairs != 12 )); then
   echo "the two balanced order strata require exactly 12 pairs" >&2
+  exit 2
+fi
+# The alias is serialized into whitespace-delimited key=value records, so an
+# empty value or embedded whitespace/control characters would corrupt
+# SESSION_START and only fail after the full pair loop.
+if [[ ! $host_alias =~ ^[A-Za-z0-9._-]+$ ]]; then
+  echo "HOST_ALIAS must be non-empty and contain only [A-Za-z0-9._-]" >&2
   exit 2
 fi
 for command in cargo rustc taskset rg jq nm readelf objdump gzip sha256sum python3 git; do
@@ -29,10 +46,6 @@ for command in cargo rustc taskset rg jq nm readelf objdump gzip sha256sum pytho
     exit 2
   fi
 done
-if [[ ! $cpu =~ ^[0-9]+$ ]]; then
-  echo "CPU must be a single decimal CPU index; taskset lists or ranges would break the pinned-single-CPU measurement boundary" >&2
-  exit 2
-fi
 if ! taskset -c "$cpu" true >/dev/null 2>&1; then
   echo "CPU $cpu is outside this process's allowed affinity mask" >&2
   exit 2
@@ -63,7 +76,37 @@ if git -C "$repo_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   fi
 fi
 
+# Output preflight (mirrors the topic-008 runner): reject symlinked
+# directories so redirections cannot follow a pre-existing link to an
+# unintended target, canonicalize the path, and remove every known artifact
+# so a failed later run cannot leave fresh partial evidence beside stale
+# success metadata from an earlier session.
+if [[ -L $output_dir ]]; then
+  echo "output directory must not be a symbolic link: $output_dir" >&2
+  exit 2
+fi
+mkdir -p "$output_dir"
+if [[ -L $output_dir/gates ]]; then
+  echo "output gates directory must not be a symbolic link: $output_dir/gates" >&2
+  exit 2
+fi
 mkdir -p "$output_dir/gates"
+output_dir=$(cd "$output_dir" && pwd)
+rm -f \
+  "$output_dir/processes.txt" \
+  "$output_dir/summary.txt" \
+  "$output_dir/host-env.txt" \
+  "$output_dir/correctness-example.log" \
+  "$output_dir/benchmark-verify.log" \
+  "$output_dir/schema-smoke.txt" \
+  "$output_dir/codegen-focus.txt" \
+  "$output_dir/codegen-full.txt.gz" \
+  "$output_dir/benchmark-binary-symbols.txt" \
+  "$output_dir/benchmark-binary-readelf.txt" \
+  "$output_dir/benchmark-binary.sha256" \
+  "$output_dir/source-files.sha256" \
+  "$output_dir/run-manifest.txt"
+rm -f "$output_dir/gates/"*.log
 
 export CARGO_TARGET_DIR="$output_dir/target"
 unset CARGO_ENCODED_RUSTFLAGS

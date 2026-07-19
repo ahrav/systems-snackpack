@@ -53,7 +53,19 @@ pub fn splitmix64(state: &mut u64) -> u64 {
 /// Produces `bit_len / 64` complete words from [`DATASET_SEED`]. Both
 /// experiment binaries must build their input through this function so the
 /// verified and timed datasets stay byte-identical.
+///
+/// # Panics
+///
+/// Panics unless `bit_len` is a multiple of 64: a partial trailing word
+/// cannot be represented, and silently flooring would let a caller that
+/// retains the requested length issue positions the generated data does
+/// not contain.
 pub fn dataset_words(bit_len: usize) -> Vec<u64> {
+    assert_eq!(
+        bit_len % WORD_BITS,
+        0,
+        "dataset bit length must be a multiple of {WORD_BITS}, got {bit_len}"
+    );
     let mut state = DATASET_SEED;
     (0..bit_len / WORD_BITS)
         .map(|_| splitmix64(&mut state))
@@ -341,6 +353,12 @@ mod tests {
     #[test]
     fn deterministic_random_input_matches_exhaustively() {
         assert_parity(dataset_words(64 * WORD_BITS));
+    }
+
+    #[test]
+    #[should_panic(expected = "dataset bit length must be a multiple of 64")]
+    fn dataset_rejects_partial_trailing_word() {
+        dataset_words(65);
     }
 
     #[test]

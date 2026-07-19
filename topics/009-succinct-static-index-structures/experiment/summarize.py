@@ -43,6 +43,10 @@ RESULT_NON_NEGATIVE_FIELDS = (
 
 VALID_ORDERS = ("compact-prefix", "prefix-compact")
 
+# Mirrors `WARMUP_QUERIES` in `benches/succinct_rank.rs`: every process warms
+# each variant with `min(queries, WARMUP_QUERIES)` positions.
+WARMUP_QUERIES = 262_144
+
 
 def parse_record(line: str) -> dict[str, str]:
     record: dict[str, str] = {}
@@ -147,8 +151,28 @@ def validate_result_record(
     if not math.isclose(prefix_rate, expected_prefix_rate, rel_tol=2e-9, abs_tol=1e-9):
         raise SystemExit("prefix rate is inconsistent with elapsed time")
 
-    if values["external_wall_ns"] < values["compact_ns"] + values["prefix_ns"]:
-        raise SystemExit("external wall time is shorter than both timed queries")
+    if values["warmup_queries"] != min(values["queries"], WARMUP_QUERIES):
+        raise SystemExit("warmup workload differs from the producer formula")
+
+    # The producer intervals nest: warmup covers both per-variant warmups,
+    # `main_elapsed_ns` covers every sequential in-process stage, and the
+    # runner's external wall time encloses the whole process.
+    if values["warmup_ns"] < values["compact_warmup_ns"] + values["prefix_warmup_ns"]:
+        raise SystemExit("warmup interval is shorter than its per-variant warmups")
+    stage_total = (
+        values["dataset_ns"]
+        + values["input_clone_ns"]
+        + values["compact_build_ns"]
+        + values["prefix_build_ns"]
+        + values["query_build_ns"]
+        + values["warmup_ns"]
+        + values["compact_ns"]
+        + values["prefix_ns"]
+    )
+    if values["main_elapsed_ns"] < stage_total:
+        raise SystemExit("main interval is shorter than its sequential stages")
+    if values["external_wall_ns"] < values["main_elapsed_ns"]:
+        raise SystemExit("external wall time is shorter than the main interval")
 
     return values, compact_rate, prefix_rate
 
@@ -165,16 +189,15 @@ def expected_compact_byte_count(bits: int) -> int:
 
 def schema_check(path: Path) -> None:
     """Validate a single smoke RESULT line before a session collects pairs."""
-    results = [
-        line
-        for line in path.read_text(encoding="utf-8").splitlines()
-        if line.startswith("RESULT ")
+    lines = [
+        line for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
     ]
-    if len(results) != 1:
+    if len(lines) != 1 or not lines[0].startswith("RESULT "):
         raise SystemExit(
-            f"schema check expects exactly one RESULT line, found {len(results)}"
+            "schema check expects exactly one non-empty RESULT line, found "
+            f"{len(lines)} line(s)"
         )
-    record = parse_record(results[0])
+    record = parse_record(lines[0])
     values, _, _ = validate_result_record(record)
     if values["compact_bytes"] != expected_compact_byte_count(values["bits"]):
         raise SystemExit("compact byte count differs from the fixed layout")
@@ -239,12 +262,17 @@ def main() -> None:
 
     if session is None or not ended:
         raise SystemExit("expected one complete session")
+    if positive_integer(session, "pairs") != 12:
+        raise SystemExit("SESSION_START must declare exactly 12 pairs")
     if len(records) != 12:
         raise SystemExit(f"expected 12 paired process records, found {len(records)}")
-    if len({record.get("pid") for record in records}) != 12:
+    if len({integer_field(record, "pid", 1) for record in records}) != 12:
         raise SystemExit("expected one distinct process ID per pair")
 
-    expected_bits = 1 << positive_integer(session, "bit_power")
+    bit_power = positive_integer(session, "bit_power")
+    if not 6 <= bit_power <= 31:
+        raise SystemExit("bit_power outside the producer contract [6, 31]")
+    expected_bits = 1 << bit_power
     expected_queries = positive_integer(session, "queries")
     expected_compact_bytes = expected_compact_byte_count(expected_bits)
     expected_prefix_bytes = (expected_bits + 1) * 4
