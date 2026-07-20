@@ -117,7 +117,7 @@ done
 export CARGO_TARGET_DIR="$output_dir/target"
 export CARGO_INCREMENTAL=0
 unset CARGO_ENCODED_RUSTFLAGS
-export RUSTFLAGS="-C target-cpu=native -C debuginfo=1 -C codegen-units=1 -C panic=abort"
+export RUSTFLAGS="-C target-cpu=native -C debuginfo=1 -C codegen-units=1"
 
 {
   printf 'captured_utc=%s\n' "$(date -u +%FT%TZ)"
