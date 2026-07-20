@@ -1,0 +1,13 @@
+[package]
+name = "systems-snackpack-topic-010"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[[bench]]
+name = "crc32c"
+harness = false
