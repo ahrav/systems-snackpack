@@ -58,7 +58,7 @@ throughput result is high.
 
 The focused benchmark does not claim peak CRC throughput. It compares a simple
 table implementation with one dependent hardware instruction chain over the
-same resident 4 KiB slice. Wider folding implementations can use carry-less
+same repeatedly warmed 4 KiB slice. Wider folding implementations can use carry-less
 multiplication and parallel accumulators to expose more instruction-level
 parallelism. They are a different implementation class.
 
@@ -94,6 +94,12 @@ binary hashes, native compiler features, and linked-binary instructions. They
 do not turn two machines into samples of an ISA, vendor, kernel, or cloud
 instance family.
 
+Candidate `2ef0239` used 12 order-balanced pairs per host. The simple
+hardware chain's median speedup over the slice-by-one table was `54.830x` on
+the Arm host and `21.886x` on `xlg`. Those ratios apply only to the exact
+4 KiB, warmed-input implementation pair. They do not estimate a folding CRC,
+hash function, other polynomial, or end-to-end storage path.
+
 ## Run
 
 Check correctness:
@@ -106,8 +112,14 @@ cargo bench -p systems-snackpack-topic-010 --bench crc32c -- --verify
 Run the Linux evidence harness from the repository root:
 
 ```bash
+git archive --format=tar HEAD Cargo.toml Cargo.lock \
+  topics/010-hashing-checksums-prng | gzip -9 \
+  > /tmp/systems-snackpack-topic-010-source.tar.gz
+topic10_source_sha=$(sha256sum \
+  /tmp/systems-snackpack-topic-010-source.tar.gz | cut -d ' ' -f 1)
 topics/010-hashing-checksums-prng/experiment/run_processes.sh \
-  /tmp/systems-snackpack-topic-010 local "$(git rev-parse HEAD)" unknown
+  /tmp/systems-snackpack-topic-010 local "$(git rev-parse HEAD)" \
+  "$topic10_source_sha"
 cat /tmp/systems-snackpack-topic-010/summary.txt
 ```
 

@@ -1,0 +1,139 @@
+   1a03d:	int3
+   1a03e:	int3
+   1a03f:	int3
+
+000000000001a040 <topic010_crc32c_hardware_update>:
+   1a040:	mov    %edi,%eax
+   1a042:	movabs $0x7ffffffffffffff8,%rdi
+   1a04c:	mov    %edx,%ecx
+   1a04e:	not    %eax
+   1a050:	and    $0x7,%ecx
+   1a053:	and    %rdx,%rdi
+   1a056:	test   %rdi,%rdi
+   1a059:	je     1a0f8 <topic010_crc32c_hardware_update+0xb8>
+   1a05f:	add    $0xfffffffffffffff8,%rdx
+   1a063:	mov    %edx,%r8d
+   1a066:	not    %r8d
+   1a069:	test   $0x38,%r8b
+   1a06d:	jne    1a077 <topic010_crc32c_hardware_update+0x37>
+   1a06f:	mov    %rsi,%r8
+   1a072:	mov    %rdi,%r9
+   1a075:	jmp    1a0a3 <topic010_crc32c_hardware_update+0x63>
+   1a077:	mov    %edx,%r10d
+   1a07a:	shr    $0x3,%r10d
+   1a07e:	mov    %rsi,%r8
+   1a081:	mov    %rdi,%r9
+   1a084:	inc    %r10d
+   1a087:	and    $0x7,%r10d
+   1a08b:	nopl   0x0(%rax,%rax,1)
+   1a090:	crc32q (%r8),%rax
+   1a096:	add    $0xfffffffffffffff8,%r9
+   1a09a:	add    $0x8,%r8
+   1a09e:	dec    %r10
+   1a0a1:	jne    1a090 <topic010_crc32c_hardware_update+0x50>
+   1a0a3:	cmp    $0x38,%rdx
+   1a0a7:	jb     1a0f8 <topic010_crc32c_hardware_update+0xb8>
+   1a0a9:	xor    %edx,%edx
+   1a0ab:	nopl   0x0(%rax,%rax,1)
+   1a0b0:	crc32q (%r8,%rdx,1),%rax
+   1a0b7:	crc32q 0x8(%r8,%rdx,1),%rax
+   1a0bf:	crc32q 0x10(%r8,%rdx,1),%rax
+   1a0c7:	crc32q 0x18(%r8,%rdx,1),%rax
+   1a0cf:	crc32q 0x20(%r8,%rdx,1),%rax
+   1a0d7:	crc32q 0x28(%r8,%rdx,1),%rax
+   1a0df:	crc32q 0x30(%r8,%rdx,1),%rax
+   1a0e7:	crc32q 0x38(%r8,%rdx,1),%rax
+   1a0ef:	add    $0x40,%rdx
+   1a0f3:	cmp    %rdx,%r9
+   1a0f6:	jne    1a0b0 <topic010_crc32c_hardware_update+0x70>
+   1a0f8:	add    %rdi,%rsi
+   1a0fb:	cmp    $0x4,%ecx
+   1a0fe:	jae    1a112 <topic010_crc32c_hardware_update+0xd2>
+   1a100:	cmp    $0x2,%ecx
+   1a103:	jae    1a124 <topic010_crc32c_hardware_update+0xe4>
+   1a105:	test   %rcx,%rcx
+   1a108:	je     1a10f <topic010_crc32c_hardware_update+0xcf>
+   1a10a:	crc32b (%rsi),%eax
+   1a10f:	not    %eax
+   1a111:	ret
+   1a112:	crc32l (%rsi),%eax
+   1a117:	add    $0xfffffffffffffffc,%rcx
+   1a11b:	add    $0x4,%rsi
+   1a11f:	cmp    $0x2,%ecx
+   1a122:	jb     1a105 <topic010_crc32c_hardware_update+0xc5>
+   1a124:	crc32w (%rsi),%eax
+   1a12a:	add    $0xfffffffffffffffe,%rcx
+   1a12e:	add    $0x2,%rsi
+   1a132:	test   %rcx,%rcx
+   1a135:	jne    1a10a <topic010_crc32c_hardware_update+0xca>
+   1a137:	jmp    1a10f <topic010_crc32c_hardware_update+0xcf>
+--
+   1a13d:	int3
+   1a13e:	int3
+   1a13f:	int3
+
+000000000001a140 <topic010_crc32c_table_update>:
+   1a140:	mov    %edi,%eax
+   1a142:	test   %rdx,%rdx
+   1a145:	je     1a23d <topic010_crc32c_table_update+0xfd>
+   1a14b:	mov    %rdx,%rdi
+   1a14e:	not    %eax
+   1a150:	and    $0x7,%rdi
+   1a154:	je     1a185 <topic010_crc32c_table_update+0x45>
+   1a156:	lea    -0xfd15(%rip),%r8        # a448 <GCC_except_table142+0x2184>
+   1a15d:	mov    %rsi,%rcx
+   1a160:	movzbl (%rcx),%r9d
+   1a164:	inc    %rcx
+   1a167:	xor    %al,%r9b
+   1a16a:	shr    $0x8,%eax
+   1a16d:	movzbl %r9b,%r9d
+   1a171:	xor    (%r8,%r9,4),%eax
+   1a175:	dec    %rdi
+   1a178:	jne    1a160 <topic010_crc32c_table_update+0x20>
+   1a17a:	cmp    $0x8,%rdx
+   1a17e:	jae    1a192 <topic010_crc32c_table_update+0x52>
+   1a180:	jmp    1a23b <topic010_crc32c_table_update+0xfb>
+   1a185:	mov    %rsi,%rcx
+   1a188:	cmp    $0x8,%rdx
+   1a18c:	jb     1a23b <topic010_crc32c_table_update+0xfb>
+   1a192:	add    %rdx,%rsi
+   1a195:	lea    -0xfd54(%rip),%rdx        # a448 <GCC_except_table142+0x2184>
+   1a19c:	nopl   0x0(%rax)
+   1a1a0:	movzbl (%rcx),%edi
+   1a1a3:	movzbl 0x1(%rcx),%r8d
+   1a1a8:	movzbl 0x2(%rcx),%r9d
+   1a1ad:	xor    %al,%dil
+   1a1b0:	shr    $0x8,%eax
+   1a1b3:	movzbl %dil,%edi
+   1a1b7:	xor    (%rdx,%rdi,4),%eax
+   1a1ba:	xor    %al,%r8b
+   1a1bd:	shr    $0x8,%eax
+   1a1c0:	movzbl %r8b,%edi
+   1a1c4:	movzbl 0x3(%rcx),%r8d
+   1a1c9:	xor    (%rdx,%rdi,4),%eax
+   1a1cc:	xor    %al,%r9b
+   1a1cf:	shr    $0x8,%eax
+   1a1d2:	movzbl %r9b,%edi
+   1a1d6:	movzbl 0x4(%rcx),%r9d
+   1a1db:	xor    (%rdx,%rdi,4),%eax
+   1a1de:	xor    %al,%r8b
+   1a1e1:	shr    $0x8,%eax
+   1a1e4:	movzbl %r8b,%edi
+   1a1e8:	movzbl 0x5(%rcx),%r8d
+   1a1ed:	xor    (%rdx,%rdi,4),%eax
+   1a1f0:	xor    %al,%r9b
+   1a1f3:	shr    $0x8,%eax
+   1a1f6:	movzbl %r9b,%edi
+   1a1fa:	movzbl 0x6(%rcx),%r9d
+   1a1ff:	xor    (%rdx,%rdi,4),%eax
+   1a202:	xor    %al,%r8b
+   1a205:	shr    $0x8,%eax
+   1a208:	movzbl %r8b,%edi
+   1a20c:	movzbl 0x7(%rcx),%r8d
+   1a211:	add    $0x8,%rcx
+   1a215:	xor    (%rdx,%rdi,4),%eax
+   1a218:	xor    %al,%r9b
+   1a21b:	shr    $0x8,%eax
+   1a21e:	movzbl %r9b,%edi
+   1a222:	xor    (%rdx,%rdi,4),%eax
+   1a225:	xor    %al,%r8b

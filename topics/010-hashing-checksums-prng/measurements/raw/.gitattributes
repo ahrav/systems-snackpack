@@ -1,0 +1,3 @@
+# Preserve tool output byte-for-byte; do not normalize evidence whitespace.
+** -whitespace
+*.gz binary

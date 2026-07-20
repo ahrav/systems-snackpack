@@ -1,0 +1,7 @@
+completed_utc=2026-07-20T14:42:30Z
+benchmark_binary=/tmp/topic10-2ef0239-N3kQWY/evidence/target/release/deps/crc32c-58f9465822f415f0
+source_commit=2ef02391a7f2e68587cbf8f18494b73331f9a4d8
+source_archive_sha256=3b0c06b53e402bf9bb74ac24da77e326419607f9f37af47b7ca3a78e45d91598
+replication=12 order-balanced pairs; 24 fresh pinned processes
+steady_state_boundary=each RESULT excludes data setup and the fixed warmup; it times len*iterations bytes
+launch_to_exit_boundary=process startup + setup + warmup + timed loop + teardown; recorded separately and excluded from the throughput ratio

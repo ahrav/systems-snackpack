@@ -1,0 +1,1 @@
+CHECK crc32c_vector=e3069283 crc32_iso_hdlc_vector=cbf43926 hardware=hardware slice_cases=16800 split_cases=33411 check_ns=728644585
