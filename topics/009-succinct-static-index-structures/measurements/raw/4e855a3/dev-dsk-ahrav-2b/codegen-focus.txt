@@ -1,0 +1,226 @@
+   15328:	lsr	x21, x8, #1
+   1532c:	add	x0, sp, #0x260
+   15330:	add	x27, sp, #0x260
+   15334:	mov	x1, x21
+   15338:	bl	171b0 <topic009_inspect_compact_rank>
+   1533c:	mov	w20, w0
+   15340:	str	w0, [sp, #592]
+   15344:	add	x0, x27, #0xa0
+   15348:	mov	x1, x21
+   1534c:	bl	172a0 <topic009_inspect_prefix_rank>
+   15350:	cmp	w20, w0
+   15354:	str	w0, [sp, #600]
+   15358:	b.ne	15f38 <succinct_rank::main+0xf78>  // b.any
+   1535c:	bl	328e0 <std::process::id>
+   15360:	orr	x8, x26, #0x1
+   15364:	stur	w0, [x29, #-8]
+   15368:	str	w24, [sp, #160]
+   1536c:	str	x8, [sp, #480]
+   15370:	lsl	x8, x19, #2
+   15374:	add	x8, x8, x22, lsl #3
+   15378:	add	x8, x8, x23, lsl #1
+   1537c:	str	x8, [sp, #512]
+   15380:	lsl	x8, x25, #2
+   15384:	str	x8, [sp, #528]
+   15388:	sub	x0, x29, #0x30
+   1538c:	bl	26270 <<std::time::Instant>::elapsed>
+   15390:	mov	w8, #0xca00                	// #51712
+   15394:	adrp	x10, 7f000 <__dso_handle+0x19b0>
+   15398:	add	x11, sp, #0x1e0
+   1539c:	add	x12, sp, #0xa0
+   153a0:	add	x13, sp, #0x200
+   153a4:	add	x14, sp, #0x210
+   153a8:	movk	w8, #0x3b9a, lsl #16
+   153ac:	umulh	x9, x0, x8
+   153b0:	mul	x8, x0, x8
+   153b4:	adds	x8, x8, w1, uxtw
+   153b8:	cinc	x9, x9, cs	// cs = hs, nlast
+   153bc:	stp	x8, x9, [sp, #128]
+   153c0:	adrp	x8, 7f000 <__dso_handle+0x19b0>
+   153c4:	sub	x9, x29, #0x8
+   153c8:	ldr	x8, [x8, #3880]
+   153cc:	stp	x9, x8, [sp, #208]
+   153d0:	add	x9, sp, #0xc0
+   153d4:	ldr	x10, [x10, #3824]
+   153d8:	stp	x12, x8, [sp, #256]
+   153dc:	add	x8, sp, #0x80
+   153e0:	stp	x9, x10, [sp, #224]
+   153e4:	stp	x11, x10, [sp, #240]
+   153e8:	stp	x13, x10, [sp, #272]
+   153ec:	stp	x14, x10, [sp, #288]
+   153f0:	adrp	x9, 7f000 <__dso_handle+0x19b0>
+   153f4:	ldr	x9, [x9, #4064]
+   153f8:	stp	x8, x9, [sp, #304]
+   153fc:	adrp	x0, 50000 <_fini+0x171c>
+   15400:	add	x0, x0, #0x92
+   15404:	add	x1, sp, #0xd0
+   15408:	bl	33080 <std::io::stdio::_print>
+   1540c:	add	x0, sp, #0x260
+--
+   15c6c:	cbz	x9, 16130 <succinct_rank::main+0x1170>
+   15c70:	ldr	x24, [x8]
+   15c74:	add	x0, sp, #0xd0
+   15c78:	mov	x1, x24
+   15c7c:	bl	171b0 <topic009_inspect_compact_rank>
+   15c80:	str	w0, [sp, #564]
+   15c84:	add	x9, sp, #0x234
+   15c88:	add	x8, sp, #0xd0
+   15c8c:	add	x0, x8, #0xa0
+   15c90:	mov	x1, x24
+   15c94:	bl	172a0 <topic009_inspect_prefix_rank>
+   15c98:	str	w0, [sp, #568]
+   15c9c:	add	x8, sp, #0x238
+   15ca0:	ldr	w8, [sp, #564]
+   15ca4:	ldr	w9, [sp, #568]
+   15ca8:	cmp	w8, w9
+   15cac:	b.ne	15f8c <succinct_rank::main+0xfcc>  // b.any
+   15cb0:	bl	328e0 <std::process::id>
+   15cb4:	ldr	x20, [sp, #224]
+   15cb8:	str	w0, [sp, #572]
+   15cbc:	mov	x0, x19
+   15cc0:	mov	x1, x23
+   15cc4:	lsl	x8, x20, #6
+   15cc8:	str	x8, [sp, #576]
+   15ccc:	bl	4e048 <__floatuntidf>
+   15cd0:	ldr	x8, [sp, #16]
+   15cd4:	mov	x0, x28
+   15cd8:	mov	x1, x27
+   15cdc:	ucvtf	d8, x8
+   15ce0:	fdiv	d0, d0, d8
+   15ce4:	str	d0, [sp, #584]
+   15ce8:	bl	4e048 <__floatuntidf>
+   15cec:	fdiv	d0, d0, d8
+   15cf0:	ldr	x8, [sp, #248]
+   15cf4:	ldr	x9, [sp, #272]
+   15cf8:	lsl	x8, x8, #2
+   15cfc:	add	x8, x8, x20, lsl #3
+   15d00:	add	x8, x8, x9, lsl #1
+   15d04:	str	x8, [sp, #600]
+   15d08:	ldr	x8, [sp, #384]
+   15d0c:	lsl	x8, x8, #2
+   15d10:	stur	x8, [x29, #-8]
+   15d14:	str	d0, [sp, #592]
+   15d18:	add	x0, sp, #0xc0
+   15d1c:	bl	26270 <<std::time::Instant>::elapsed>
+   15d20:	add	x8, sp, #0xa0
+   15d24:	adrp	x9, 16000 <succinct_rank::main+0x1040>
+   15d28:	add	x9, x9, #0x990
+   15d2c:	add	x10, sp, #0xb8
+   15d30:	str	x8, [sp, #640]
+   15d34:	mov	w8, #0xca00                	// #51712
+   15d38:	add	x11, sp, #0xb0
+   15d3c:	str	x9, [sp, #648]
+   15d40:	add	x12, sp, #0x1a8
+   15d44:	movk	w8, #0x3b9a, lsl #16
+   15d48:	umulh	x9, x0, x8
+   15d4c:	mul	x8, x0, x8
+   15d50:	adds	x8, x8, w1, uxtw
+   15d54:	cinc	x9, x9, cs	// cs = hs, nlast
+--
+   171a4:	nop
+   171a8:	nop
+   171ac:	nop
+
+00000000000171b0 <topic009_inspect_compact_rank>:
+   171b0:	stp	x29, x30, [sp, #-16]!
+   171b4:	mov	x29, sp
+   171b8:	mov	x8, x1
+   171bc:	ldr	x1, [x0, #16]
+   171c0:	lsl	x9, x1, #6
+   171c4:	cmp	x8, x9
+   171c8:	b.ls	171d8 <topic009_inspect_compact_rank+0x28>  // b.plast
+   171cc:	mov	w0, wzr
+   171d0:	ldp	x29, x30, [sp], #16
+   171d4:	ret
+   171d8:	b.ne	171e8 <topic009_inspect_compact_rank+0x38>  // b.any
+   171dc:	ldr	w0, [x0, #72]
+   171e0:	ldp	x29, x30, [sp], #16
+   171e4:	ret
+   171e8:	ands	x9, x8, #0x3f
+   171ec:	mov	x10, #0xffffffffffffffff    	// #-1
+   171f0:	neg	x9, x9
+   171f4:	lsr	x9, x10, x9
+   171f8:	ldr	x10, [x0, #40]
+   171fc:	csel	x11, xzr, x9, eq	// eq = none
+   17200:	lsr	x9, x8, #9
+   17204:	cmp	x9, x10
+   17208:	b.cs	17260 <topic009_inspect_compact_rank+0xb0>  // b.hs, b.nlast
+   1720c:	ldr	x10, [x0, #64]
+   17210:	lsr	x8, x8, #6
+   17214:	cmp	x8, x10
+   17218:	b.cs	17274 <topic009_inspect_compact_rank+0xc4>  // b.hs, b.nlast
+   1721c:	cmp	x8, x1
+   17220:	b.cs	17288 <topic009_inspect_compact_rank+0xd8>  // b.hs, b.nlast
+   17224:	ldr	x12, [x0, #32]
+   17228:	ldr	x10, [x0, #8]
+   1722c:	ptrue	p0.d
+   17230:	ldr	w9, [x12, x9, lsl #2]
+   17234:	ldr	x12, [x0, #56]
+   17238:	ldrh	w12, [x12, x8, lsl #1]
+   1723c:	ldr	x8, [x10, x8, lsl #3]
+   17240:	and	x8, x8, x11
+   17244:	add	w9, w9, w12
+   17248:	fmov	d0, x8
+   1724c:	cnt	z0.d, p0/m, z0.d
+   17250:	fmov	w8, s0
+   17254:	add	w0, w9, w8
+   17258:	ldp	x29, x30, [sp], #16
+   1725c:	ret
+   17260:	adrp	x2, 7d000 <GCC_except_table0+0x1b1e4>
+   17264:	add	x2, x2, #0x800
+   17268:	mov	x0, x9
+   1726c:	mov	x1, x10
+--
+   17294:	bl	149e8 <core::panicking::panic_bounds_check>
+   17298:	nop
+   1729c:	nop
+
+00000000000172a0 <topic009_inspect_prefix_rank>:
+   172a0:	ldr	x8, [x0, #16]
+   172a4:	cmp	x1, x8
+   172a8:	b.cs	172b8 <topic009_inspect_prefix_rank+0x18>  // b.hs, b.nlast
+   172ac:	ldr	x8, [x0, #8]
+   172b0:	ldr	w0, [x8, x1, lsl #2]
+   172b4:	ret
+   172b8:	mov	w0, wzr
+   172bc:	ret
+
+00000000000172c0 <<std::backtrace_rs::symbolize::gimli::Cache>::with_global::<std::backtrace_rs::symbolize::gimli::resolve::{closure#1}>>:
+   172c0:	stp	x29, x30, [sp, #-96]!
+   172c4:	bl	3b098 <OUTLINED_FUNCTION_40>
+   172c8:	sub	sp, sp, #0x1, lsl #12
+   172cc:	str	xzr, [sp]
+   172d0:	sub	sp, sp, #0x2a0
+   172d4:	adrp	x26, 80000 <DW.ref.rust_eh_personality>
+   172d8:	mov	x9, #0x8000000000000000    	// #-9223372036854775808
+   172dc:	mov	x21, x0
+   172e0:	ldr	x8, [x26, #88]
+   172e4:	adrp	x19, 80000 <DW.ref.rust_eh_personality>
+   172e8:	add	x19, x19, #0x60
+   172ec:	adrp	x22, 80000 <DW.ref.rust_eh_personality>
+   172f0:	add	x22, x22, #0x58
+   172f4:	str	x2, [sp, #496]
+   172f8:	cmp	x8, x9
+   172fc:	str	x1, [sp, #560]
+   17300:	b.ne	174ac <<std::backtrace_rs::symbolize::gimli::Cache>::with_global::<std::backtrace_rs::symbolize::gimli::resolve::{closure#1}>+0x1ec>  // b.any
+   17304:	adrp	x8, 53000 <_fini+0x471c>
+   17308:	mov	w9, #0x1                   	// #1
+   1730c:	add	x11, sp, #0x121
+   17310:	ldr	d0, [x8, #2008]
+   17314:	adrp	x8, 54000 <_fini+0x571c>
+   17318:	add	x8, x8, #0xbcf
+   1731c:	ldr	x10, [x8]
+   17320:	ldur	x8, [x8, #7]
+   17324:	str	wzr, [sp, #4384]
+   17328:	strb	w9, [x11, #4095]
+   1732c:	add	x9, sp, #0x158
+   17330:	add	x0, sp, #0x250
+   17334:	str	x10, [sp, #592]
+   17338:	mov	w1, #0x10                  	// #16
+   1733c:	stur	x8, [x9, #255]
+   17340:	add	x8, sp, #0xe00
+   17344:	strh	wzr, [sp, #4388]
+   17348:	str	d0, [sp, #4376]
+   1734c:	strb	wzr, [sp, #607]
+   17350:	bl	46b04 <<core::ffi::c_str::CStr>::from_bytes_with_nul>
+   17354:	ldr	x8, [sp, #3584]

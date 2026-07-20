@@ -1,0 +1,107 @@
+   1a49d:	int3
+   1a49e:	int3
+   1a49f:	int3
+
+000000000001a4a0 <topic009_inspect_compact_rank>:
+   1a4a0:	push   %rax
+   1a4a1:	mov    0x10(%rdi),%r8
+   1a4a5:	xor    %eax,%eax
+   1a4a7:	mov    %r8,%rcx
+   1a4aa:	shl    $0x6,%rcx
+   1a4ae:	cmp    %rcx,%rsi
+   1a4b1:	ja     1a4b8 <topic009_inspect_compact_rank+0x18>
+   1a4b3:	jne    1a4ba <topic009_inspect_compact_rank+0x1a>
+   1a4b5:	mov    0x48(%rdi),%eax
+   1a4b8:	pop    %rcx
+   1a4b9:	ret
+   1a4ba:	mov    %esi,%eax
+   1a4bc:	and    $0x3f,%eax
+   1a4bf:	mov    $0xffffffffffffffff,%rcx
+   1a4c6:	bzhi   %rax,%rcx,%rdx
+   1a4cb:	test   %rax,%rax
+   1a4ce:	mov    %rsi,%rcx
+   1a4d1:	cmove  %rax,%rdx
+   1a4d5:	mov    0x28(%rdi),%rax
+   1a4d9:	shr    $0x9,%rcx
+   1a4dd:	cmp    %rax,%rcx
+   1a4e0:	jae    1a515 <topic009_inspect_compact_rank+0x75>
+   1a4e2:	mov    0x40(%rdi),%rax
+   1a4e6:	shr    $0x6,%rsi
+   1a4ea:	cmp    %rax,%rsi
+   1a4ed:	jae    1a528 <topic009_inspect_compact_rank+0x88>
+   1a4ef:	cmp    %r8,%rsi
+   1a4f2:	jae    1a53b <topic009_inspect_compact_rank+0x9b>
+   1a4f4:	mov    0x8(%rdi),%rax
+   1a4f8:	mov    0x20(%rdi),%r8
+   1a4fc:	mov    0x38(%rdi),%rdi
+   1a500:	movzwl (%rdi,%rsi,2),%edi
+   1a504:	and    (%rax,%rsi,8),%rdx
+   1a508:	add    (%r8,%rcx,4),%edi
+   1a50c:	popcnt %rdx,%rax
+   1a511:	add    %edi,%eax
+   1a513:	pop    %rcx
+   1a514:	ret
+   1a515:	lea    0x445f4(%rip),%rdx        # 5eb10 <__dso_handle+0x1b0>
+   1a51c:	mov    %rcx,%rdi
+   1a51f:	mov    %rax,%rsi
+   1a522:	call   *0x46b30(%rip)        # 61058 <_DYNAMIC+0x300>
+   1a528:	lea    0x445f9(%rip),%rdx        # 5eb28 <__dso_handle+0x1c8>
+   1a52f:	mov    %rsi,%rdi
+   1a532:	mov    %rax,%rsi
+   1a535:	call   *0x46b1d(%rip)        # 61058 <_DYNAMIC+0x300>
+   1a53b:	lea    0x445fe(%rip),%rdx        # 5eb40 <__dso_handle+0x1e0>
+   1a542:	mov    %rsi,%rdi
+--
+   1a548:	call   *0x46b0a(%rip)        # 61058 <_DYNAMIC+0x300>
+   1a54e:	int3
+   1a54f:	int3
+
+000000000001a550 <topic009_inspect_prefix_rank>:
+   1a550:	xor    %eax,%eax
+   1a552:	cmp    0x10(%rdi),%rsi
+   1a556:	jae    1a55f <topic009_inspect_prefix_rank+0xf>
+   1a558:	mov    0x8(%rdi),%rax
+   1a55c:	mov    (%rax,%rsi,4),%eax
+   1a55f:	ret
+
+000000000001a560 <<std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<std::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::initialize::<<std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<std::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::get_or_init<std::io::stdio::stdout::{closure#0}>::{closure#0}, !>>:
+   1a560:	mov    0x4842a(%rip),%eax        # 62990 <std::io::stdio::STDOUT+0x38>
+   1a566:	test   %eax,%eax
+   1a568:	jne    1a56b <<std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<std::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::initialize::<<std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<std::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::get_or_init<std::io::stdio::stdout::{closure#0}>::{closure#0}, !>+0xb>
+   1a56a:	ret
+   1a56b:	push   %rbp
+   1a56c:	mov    %rsp,%rbp
+   1a56f:	sub    $0x20,%rsp
+   1a573:	lea    0x483de(%rip),%rax        # 62958 <std::io::stdio::STDOUT>
+   1a57a:	lea    -0x20(%rbp),%rcx
+   1a57e:	mov    %rax,(%rcx)
+   1a581:	lea    -0x1(%rbp),%rax
+   1a585:	mov    %rax,0x8(%rcx)
+   1a589:	lea    -0x10(%rbp),%rdx
+   1a58d:	mov    %rcx,(%rdx)
+   1a590:	lea    0x483f9(%rip),%rdi        # 62990 <std::io::stdio::STDOUT+0x38>
+   1a597:	lea    0x445d2(%rip),%rcx        # 5eb70 <__dso_handle+0x210>
+   1a59e:	lea    0x445f3(%rip),%r8        # 5eb98 <__dso_handle+0x238>
+   1a5a5:	push   $0x1
+   1a5a7:	pop    %rsi
+   1a5a8:	call   *0x46b3a(%rip)        # 610e8 <_DYNAMIC+0x390>
+   1a5ae:	add    $0x20,%rsp
+   1a5b2:	pop    %rbp
+   1a5b3:	ret
+
+000000000001a5b4 <<std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<std::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::initialize::<<std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<std::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::get_or_init<std::io::stdio::cleanup::{closure#0}>::{closure#0}, !>>:
+   1a5b4:	mov    0x483d6(%rip),%eax        # 62990 <std::io::stdio::STDOUT+0x38>
+   1a5ba:	test   %eax,%eax
+   1a5bc:	jne    1a5bf <<std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<std::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::initialize::<<std::sync::once_lock::OnceLock<std::sync::reentrant_lock::ReentrantLock<core::cell::RefCell<std::io::buffered::linewriter::LineWriter<std::io::stdio::StdoutRaw>>>>>::get_or_init<std::io::stdio::cleanup::{closure#0}>::{closure#0}, !>+0xb>
+   1a5be:	ret
+   1a5bf:	push   %rbp
+   1a5c0:	mov    %rsp,%rbp
+   1a5c3:	sub    $0x30,%rsp
+   1a5c7:	lea    -0x28(%rbp),%rax
+   1a5cb:	mov    %rdi,(%rax)
+   1a5ce:	lea    0x48383(%rip),%rcx        # 62958 <std::io::stdio::STDOUT>
+   1a5d5:	mov    %rcx,0x8(%rax)
+   1a5d9:	lea    -0x1(%rbp),%rcx
+   1a5dd:	mov    %rcx,0x10(%rax)
+   1a5e1:	lea    -0x10(%rbp),%rdx
+   1a5e5:	mov    %rax,(%rdx)

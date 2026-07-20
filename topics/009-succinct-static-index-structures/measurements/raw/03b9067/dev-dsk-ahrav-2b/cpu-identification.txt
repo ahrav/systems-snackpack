@@ -1,0 +1,10 @@
+captured_utc=2026-07-19T20:14:43Z
+resolved_host=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.94-123.180.amzn2023.aarch64 #1 SMP Thu Jul  9 21:13:38 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+midr_el1=0x00000000411fd401
+Architecture:                            aarch64
+CPU(s):                                  64
+On-line CPU(s) list:                     0-63
+Vendor ID:                               ARM
+Model:                                   1
+Stepping:                                r1p1

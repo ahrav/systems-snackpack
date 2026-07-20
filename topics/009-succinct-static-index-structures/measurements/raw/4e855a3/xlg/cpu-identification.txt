@@ -1,0 +1,8 @@
+captured_utc=2026-07-19T18:18:43Z
+architecture=x86_64
+vendor_id=AuthenticAMD
+cpu_family=25
+model=17
+model_name=AMD EPYC 9R14
+stepping=1
+microcode=0xa101154

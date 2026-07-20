@@ -1,0 +1,118 @@
+captured_utc=2026-07-19T20:06:18Z
+host_alias=xlg
+source_commit=03b9067f7a24bfc717d0237e4b41599d30178a03
+source_archive_sha256=a0d3f5ead392eb9a1739b9f08ffc2c96fad74cc572618dfc9d7fc60c2d0620f9
+cpu=0
+pairs=12
+bit_power=26
+queries=4000000
+RUSTFLAGS=-C target-cpu=native -C debuginfo=1 -C codegen-units=1
+cpus_allowed=pid 2789656's current affinity list: 0-127
+uname_machine=x86_64
+kernel_release=6.12.94-123.180.amzn2023.x86_64
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           48 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  128
+On-line CPU(s) list:                     0-127
+Vendor ID:                               AuthenticAMD
+Model name:                              AMD EPYC 9R14
+CPU family:                              25
+Model:                                   17
+Thread(s) per core:                      1
+Core(s) per socket:                      64
+Socket(s):                               2
+Stepping:                                1
+BogoMIPS:                                5200.00
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy cr8_legacy abm sse4a misalignsse 3dnowprefetch topoext perfctr_core ssbd perfmon_v2 ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase bmi1 avx2 smep bmi2 invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx512_bf16 clzero xsaveerptr rdpru wbnoinvd arat avx512vbmi pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid flush_l1d
+Hypervisor vendor:                       KVM
+Virtualization type:                     full
+L1d cache:                               4 MiB (128 instances)
+L1i cache:                               4 MiB (128 instances)
+L2 cache:                                128 MiB (128 instances)
+L3 cache:                                512 MiB (16 instances)
+NUMA node(s):                            2
+NUMA node0 CPU(s):                       0-63
+NUMA node1 CPU(s):                       64-127
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Mitigation; Safe RET
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; STIBP disabled; PBRSB-eIBRS Not affected; BHI Not affected
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Mitigation; Clear CPU buffers
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+available_cpus=128
+rustc 1.97.1 (8bab26f4f 2026-07-14)
+binary: rustc
+commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+commit-date: 2026-07-14
+host: x86_64-unknown-linux-gnu
+release: 1.97.1
+LLVM version: 22.1.6
+cargo 1.97.1 (c980f4866 2026-06-30)
+gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+clang=absent
+stable-x86_64-unknown-linux-gnu (default)
+GNU objdump version 2.41-50.amzn2023.0.5
+target_arch="x86_64"
+target_endian="little"
+target_feature="adx"
+target_feature="aes"
+target_feature="avx"
+target_feature="avx2"
+target_feature="avx512bf16"
+target_feature="avx512bitalg"
+target_feature="avx512bw"
+target_feature="avx512cd"
+target_feature="avx512dq"
+target_feature="avx512f"
+target_feature="avx512ifma"
+target_feature="avx512vbmi"
+target_feature="avx512vbmi2"
+target_feature="avx512vl"
+target_feature="avx512vnni"
+target_feature="avx512vpopcntdq"
+target_feature="bmi1"
+target_feature="bmi2"
+target_feature="cmpxchg16b"
+target_feature="f16c"
+target_feature="fma"
+target_feature="fxsr"
+target_feature="gfni"
+target_feature="lzcnt"
+target_feature="movbe"
+target_feature="pclmulqdq"
+target_feature="popcnt"
+target_feature="rdrand"
+target_feature="rdseed"
+target_feature="sha"
+target_feature="sse"
+target_feature="sse2"
+target_feature="sse3"
+target_feature="sse4.1"
+target_feature="sse4.2"
+target_feature="sse4a"
+target_feature="ssse3"
+target_feature="vaes"
+target_feature="vpclmulqdq"
+target_feature="xsave"
+target_feature="xsavec"
+target_feature="xsaveopt"
+target_feature="xsaves"
+target_pointer_width="64"
+target_vendor="unknown"

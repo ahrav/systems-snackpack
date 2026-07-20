@@ -1,0 +1,10 @@
+replication=fresh_process pooled_ratio_summary=descriptive order_strata=6_compact-prefix_and_6_prefix-compact
+bits=67108864 queries_per_variant=4000000 compact_bytes=11010048 prefix_bytes=268435460 prefix_over_compact_bytes=24.380952744
+compact ns_per_query: n=12 mean=5.453148667 sd=0.543244861 median=5.290022500 mad=0.309522750 min=4.890092000 max=6.396859500
+prefix ns_per_query: n=12 mean=8.778838563 sd=0.123164308 median=8.766480000 mad=0.068410375 min=8.582763000 max=8.974117000
+paired prefix/compact: pairs=12 geomean=1.616825342 median=1.667257755 mad=0.117774710 min=1.347070465 max=1.802939290
+paired prefix/compact order=compact-prefix: pairs=6 median=1.771798668 mad=0.015503961 exact96.875%_median_interval=[1.751461352,1.802939290] interval_assumptions=iid_continuous_ratios_within_this_order_stratum
+paired prefix/compact order=prefix-compact: pairs=6 median=1.495605820 mad=0.081568643 exact96.875%_median_interval=[1.347070465,1.583054158] interval_assumptions=iid_continuous_ratios_within_this_order_stratum
+compact build_ms: n=12 mean=2.682047500 sd=0.065349702 median=2.695898500 mad=0.062905500 min=2.596562000 max=2.761834000
+prefix build_ms: n=12 mean=153.031518417 sd=1.932366017 median=152.437080500 mad=0.419332000 min=151.660456000 max=158.706181000
+external launch_to_exit_ms: n=12 mean=271.252395250 sd=2.574425252 median=271.513284000 mad=1.677309000 min=267.553704000 max=276.201298000

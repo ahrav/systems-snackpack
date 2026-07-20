@@ -77,3 +77,13 @@ title = "TLBs and address translation"
 published = "2026-07-18"
 path = "topics/008-tlbs-address-translation/rounds/01.md"
 tags = ["tlb", "address-translation", "transparent-huge-pages", "shootdowns", "benchmarking"]
+
+[[session]]
+id = 9
+cycle = 1
+topic_id = 9
+round = 1
+title = "Succinct and static index structures"
+published = "2026-07-19"
+path = "topics/009-succinct-static-index-structures/rounds/01.md"
+tags = ["succinct", "rank-select", "elias-fano", "static-indexes", "benchmarking"]

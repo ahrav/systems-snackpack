@@ -1,0 +1,3 @@
+ssh_target=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+resolved_host=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+uname=Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.94-123.180.amzn2023.aarch64 #1 SMP Thu Jul  9 21:13:38 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux

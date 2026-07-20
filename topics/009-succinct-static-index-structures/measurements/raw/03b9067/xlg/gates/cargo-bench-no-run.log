@@ -1,0 +1,4 @@
+   Compiling systems-snackpack-topic-009 v0.1.0 (/tmp/topic009-03b9067-c.7LrKrr/topics/009-succinct-static-index-structures)
+    Finished `bench` profile [optimized] target(s) in 0.39s
+  Executable benches src/lib.rs (out/target/release/deps/systems_snackpack_topic_009-f4d2cc919100be64)
+  Executable benches/succinct_rank.rs (out/target/release/deps/succinct_rank-52a4f3bb7c611fe4)
