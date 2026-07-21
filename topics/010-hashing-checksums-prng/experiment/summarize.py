@@ -130,6 +130,8 @@ def schema_check(path: Path) -> None:
     results = [validate_result(parse_record(line)) for line in lines]
     if [result["mode"] for result in results] != ["table", "hardware"]:
         raise SystemExit("schema check must contain table then hardware")
+    if [result["position"] for result in results] != [1, 2]:
+        raise SystemExit("schema check must record positions 1 then 2")
     for result in results:
         if result["pair"] != 1 or result["order"] != "table-hardware":
             raise SystemExit("schema check carries inconsistent pair metadata")

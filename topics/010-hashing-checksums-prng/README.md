@@ -96,7 +96,9 @@ instance family.
 
 Candidate `2ef0239` used 12 order-balanced pairs per host. The simple
 hardware chain's median speedup over the slice-by-one table was `54.830x` on
-the Arm host and `21.886x` on `xlg`. Those ratios apply only to the exact
+the Arm host (`dev-dsk-ahrav-2b`, `aarch64`) and `21.886x` on the x86-64 host
+(`xlg`, `x86_64`); each host record links its captured `host-env.txt`. Those
+ratios apply only to the exact
 4 KiB, warmed-input implementation pair. They do not estimate a folding CRC,
 hash function, other polynomial, or end-to-end storage path.
 
