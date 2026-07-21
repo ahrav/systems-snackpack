@@ -1,0 +1,4 @@
+   Compiling systems-snackpack-topic-011 v0.1.0 (/tmp/tmp.avo6eXtMJo/topics/011-cycle-accurate-measurement)
+    Finished `bench` profile [optimized] target(s) in 1.03s
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_011-be63fae8ab6f2f37)
+  Executable benches/cycle_probe.rs (target/release/deps/cycle_probe-a1bbf3ebfc673074)

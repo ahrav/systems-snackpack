@@ -131,13 +131,16 @@ not PMU cycle counts.
 
 ## Recorded result
 
-Candidate `4b00356` is retained as superseded evidence. Its Arm record used the
-intended `ISB; MRS CNTVCT_EL0; ISB` boundary, but its AMD path relied on an
-`MFENCE; RDTSC; MFENCE` instruction-ordering claim that the cited AMD manual
-does not provide. Its measurements are not the final cross-host pair. Read the
-[supersession note](measurements/superseded-4b00356.md) before using that raw
-record. The corrected exact-source measurements are recorded after both hosts
-pass the revised bracket, correctness, code-generation, and replication gates.
+Candidate `5117e64` passed the exact-source harness on both required hosts. At
+batch 65,536, the Arm host reported `3.077450707 ns/op` after converting
+reference ticks and `3.077438354 ns/op` from `CLOCK_MONOTONIC_RAW`. `xlg`
+reported `3.526778161` and `3.513793945 ns/op`. Each value is a median across
+12 fresh-process medians, not across 6000 independent samples.
+
+Candidate `4b00356` remains as [superseded evidence](measurements/superseded-4b00356.md)
+because its AMD boundary was not supported by the cited architecture contract.
+Read the [corrected cross-host note](measurements/2026-07-21-corrected-cross-host.md)
+before comparing the final records.
 
 ## Run
 
@@ -184,5 +187,5 @@ JSON, executes the 12-process design, validates the log, and captures code
 generation.
 
 Read [Round 1](rounds/01.md), the [measurement boundary](measurements/README.md),
-the [recorded result](measurements/2026-07-21-cross-host.md), and the
+the [recorded result](measurements/2026-07-21-corrected-cross-host.md), and the
 [primary sources](references.md) before interpreting a result.

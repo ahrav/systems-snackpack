@@ -1,0 +1,20 @@
+00000000000189c0 <cycle_probe::linux::read_counter>:
+   189c0:	push   %rax
+   189c1:	mov    %rdi,%rsi
+   189c4:	rdtscp
+   189c7:	shl    $0x20,%rdx
+   189cb:	or     %rdx,%rax
+   189ce:	mov    %rax,%r8
+   189d1:	mov    %ecx,%r9d
+   189d4:	mov    %rbx,%rdi
+   189d7:	xor    %eax,%eax
+   189d9:	cpuid
+   189db:	mov    %rdi,%rbx
+   189de:	mov    %r8,0x8(%rsi)
+   189e2:	movl   $0x1,(%rsi)
+   189e8:	mov    %r9d,0x4(%rsi)
+   189ec:	pop    %rax
+   189ed:	ret
+   189ee:	int3
+   189ef:	int3
+

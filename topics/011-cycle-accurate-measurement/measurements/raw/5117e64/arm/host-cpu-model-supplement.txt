@@ -1,0 +1,9 @@
+capture_utc=2026-07-21T16:03:57.553105526Z
+resolved_hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+source=/sys/devices/system/cpu/cpu0/regs/identification/midr_el1
+midr_el1=0x00000000411fd401
+source=/sys/devices/virtual/dmi/id/product_name
+product_name=c7g.16xlarge
+source=/sys/devices/virtual/dmi/id/product_version
+product_version=
+boundary=read-only supplemental identity capture after the benchmark on the same host

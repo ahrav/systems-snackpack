@@ -1,0 +1,10 @@
+0000000000015eb0 <cycle_probe::linux::read_counter>:
+   15eb0:	isb
+   15eb4:	mrs	x8, cntvct_el0
+   15eb8:	isb
+   15ebc:	str	x8, [x0, #8]
+   15ec0:	str	wzr, [x0]
+   15ec4:	ret
+   15ec8:	nop
+   15ecc:	nop
+

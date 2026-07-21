@@ -1,0 +1,3 @@
+2:   15eb0:	isb
+3:   15eb4:	mrs	x8, cntvct_el0
+4:   15eb8:	isb

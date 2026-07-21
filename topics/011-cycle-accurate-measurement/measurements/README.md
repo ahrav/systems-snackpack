@@ -43,6 +43,10 @@ comparison.
 
 ## Recorded evidence
 
+- [Corrected Arm host](2026-07-21-corrected-arm.md)
+- [Corrected `xlg` alias and resolved hostname](2026-07-21-corrected-xlg.md)
+- [Corrected cross-host boundary](2026-07-21-corrected-cross-host.md)
+- [Corrected raw evidence checksums](raw/5117e64/SHA256SUMS)
 - [Superseded candidate `4b00356`](superseded-4b00356.md)
 - [Superseded Arm host record](2026-07-21-dev-dsk-ahrav-2b.md)
 - [Superseded `xlg` record](2026-07-21-xlg.md)

@@ -13,7 +13,7 @@ CPU-0-pinned processes, and the same three-block ABBA order schedule.
 | Host record | Counter bracket | Batch-4096 reference-derived ns/op | Batch-4096 raw-clock ns/op | External process wall median |
 | --- | --- | ---: | ---: | ---: |
 | `dev-dsk-ahrav-2b` | `ISB; MRS CNTVCT_EL0; ISB` | `3.085239955` | `3.084960938` | `20.899653 ms` |
-| `xlg` → `dev-dsk-ahrav-2c-a9191cb6` | `MFENCE; RDTSC; MFENCE` | `3.522954993` | `3.518066406` | `1025.430262 ms` |
+| `xlg` (`dev-dsk-ahrav-2c-a9191cb6`) | `MFENCE; RDTSC; MFENCE` | `3.522954993` | `3.518066406` | `1025.430262 ms` |
 
 Raw counter ticks, raw-clock batch durations, and external process wall times
 are measured. The table's per-operation values and counter-to-time conversions

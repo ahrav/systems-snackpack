@@ -1,0 +1,2 @@
+PROBE_COUNTER arch=aarch64 bracket=isb-mrs-cntvct-isb features=cntvct_smoke=ok frequency_hz=1050000000 frequency_source=cntfrq_el0 reads=1000000 zero=0 backward=0 aux_changes=0 start_aux=none end_aux=none min_nonzero_ticks=38 max_ticks=20396 gcd_ticks=1 start_cpu=0 end_cpu=0
+PROBE_CLOCK clock=monotonic_raw advertised_resolution_ns=1 reads=200000 zero=0 backward=0 min_nonzero_ns=35 max_ns=4483 start_cpu=0 end_cpu=0

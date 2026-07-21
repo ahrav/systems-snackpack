@@ -1,0 +1,18 @@
+   Compiling systems-snackpack-topic-011 v0.1.0 (/tmp/tmp.kxhoEolYnb/topics/011-cycle-accurate-measurement)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_011-8f91a47ecb37f99d)
+
+running 4 tests
+test tests::conversion_rejects_invalid_intervals_and_overflow ... ok
+test tests::dependent_chain_matches_repeated_steps ... ok
+test tests::fixed_point_vectors_preserve_endpoint_rounding ... ok
+test tests::quantization_guard_rounds_up ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_contracts.rs (target/debug/examples/check_contracts-b752e07c44e9c09e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,28 @@
+replication=12_fresh_processes orders=6_raw-first_and_6_clock-first cpu=0 samples_per_timer_per_batch=500
+benchmark_binary_sha256=6c6b6314650fc39b434a6443464fc52618d8adc068c2997da777ec70b6c63688
+empirical_granularity_guard=largest_batch_at_least_200x_minimum_observed_read_delta counter_threshold_ticks=447200 clock_threshold_ns=3800
+frequency_hz_median=2599989498.500000000Hz frequency_hz_mad=914.000000000Hz frequency_hz_range=[2599985866.000000000,2599992621.000000000]Hz
+batch=1
+reference_median=870.003513978ns/op reference_mad=0.000305841ns/op reference_range=[870.002469134,870.004729480]ns/op
+clock_median=30.000000000ns/op clock_mad=0.000000000ns/op clock_range=[30.000000000,30.000000000]ns/op
+reference_clock_ratio_median=29.000117133x reference_clock_ratio_mad=0.000010195x reference_clock_ratio_range=[29.000082304,29.000157649]x
+order=raw-first reference_median=870.003490387ns/op clock_median=30.000000000ns/op
+order=clock-first reference_median=870.003513978ns/op clock_median=30.000000000ns/op
+batch=16
+reference_median=57.500232246ns/op reference_mad=0.000020214ns/op reference_range=[57.500163190,57.500312581]ns/op
+clock_median=4.375000000ns/op clock_mad=0.000000000ns/op clock_range=[4.375000000,4.375000000]ns/op
+reference_clock_ratio_median=13.142910228x reference_clock_ratio_mad=0.000004620x reference_clock_ratio_range=[13.142894443,13.142928590]x
+order=raw-first reference_median=57.500230687ns/op clock_median=4.375000000ns/op
+order=clock-first reference_median=57.500232246ns/op clock_median=4.375000000ns/op
+batch=256
+reference_median=6.875027769ns/op reference_mad=0.000002417ns/op reference_range=[6.875019512,6.875037374]ns/op
+clock_median=3.593750000ns/op clock_mad=0.000000000ns/op clock_range=[3.593750000,3.593750000]ns/op
+reference_clock_ratio_median=1.913051205x reference_clock_ratio_mad=0.000000673x reference_clock_ratio_range=[1.913048908,1.913053878]x
+order=raw-first reference_median=6.875027582ns/op clock_median=3.593750000ns/op
+order=clock-first reference_median=6.875027769ns/op clock_median=3.593750000ns/op
+batch=65536
+reference_median=3.526778161ns/op reference_mad=0.000001240ns/op reference_range=[3.526773925,3.526783088]ns/op
+clock_median=3.513793945ns/op clock_mad=0.000000000ns/op clock_range=[3.513793945,3.513793945]ns/op
+reference_clock_ratio_median=1.003695213x reference_clock_ratio_mad=0.000000353x reference_clock_ratio_range=[1.003694007,1.003696615]x
+order=raw-first reference_median=3.526778065ns/op clock_median=3.513793945ns/op
+order=clock-first reference_median=3.526778161ns/op clock_median=3.513793945ns/op
