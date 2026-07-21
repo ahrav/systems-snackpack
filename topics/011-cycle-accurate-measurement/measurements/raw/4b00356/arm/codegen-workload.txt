@@ -1,0 +1,34 @@
+000000000001a080 <systems_snackpack_topic_011::dependent_chain>:
+   1a080:	cbz	x1, 1a0e0 <systems_snackpack_topic_011::dependent_chain+0x60>
+   1a084:	mov	x8, #0x7c15                	// #31765
+   1a088:	mov	x9, #0xe5b9                	// #58809
+   1a08c:	mov	x10, #0x11eb                	// #4587
+   1a090:	movk	x8, #0x7f4a, lsl #16
+   1a094:	movk	x9, #0x1ce4, lsl #16
+   1a098:	movk	x10, #0x1331, lsl #16
+   1a09c:	movk	x8, #0x79b9, lsl #32
+   1a0a0:	movk	x9, #0x476d, lsl #32
+   1a0a4:	movk	x10, #0x49bb, lsl #32
+   1a0a8:	movk	x8, #0x9e37, lsl #48
+   1a0ac:	movk	x9, #0xbf58, lsl #48
+   1a0b0:	movk	x10, #0x94d0, lsl #48
+   1a0b4:	nop
+   1a0b8:	nop
+   1a0bc:	nop
+   1a0c0:	add	x11, x0, x8
+   1a0c4:	subs	x1, x1, #0x1
+   1a0c8:	eor	x11, x11, x11, lsr #30
+   1a0cc:	mul	x11, x11, x9
+   1a0d0:	eor	x11, x11, x11, lsr #27
+   1a0d4:	mul	x11, x11, x10
+   1a0d8:	eor	x0, x11, x11, lsr #31
+   1a0dc:	b.ne	1a0c0 <systems_snackpack_topic_011::dependent_chain+0x40>  // b.any
+   1a0e0:	sub	sp, sp, #0x10
+   1a0e4:	str	x0, [sp, #8]
+   1a0e8:	add	x8, sp, #0x8
+   1a0ec:	ldr	x0, [sp, #8]
+   1a0f0:	add	sp, sp, #0x10
+   1a0f4:	ret
+   1a0f8:	nop
+   1a0fc:	nop
+

@@ -117,6 +117,21 @@ not PMU cycle counts.
 - Host results describe one binary, workload, kernel, and machine. They do not
   rank an instruction-set architecture or processor vendor.
 
+## Recorded result
+
+Candidate `4b00356` used 12 fresh processes per host on 2026-07-21. At batch
+4096, the Arm host's process-median summary reported `3.085239955 ns/op` after
+converting reference ticks and `3.084960938 ns/op` after dividing the raw-clock
+batch median by 4096. `xlg` reported `3.522954993 ns/op` and
+`3.518066406 ns/op` through the same respective derivations. These are medians
+across process medians. Within each host, the reference/clock ratio approached
+1 as batch size grew, a pattern consistent with fixed-bracket amortization.
+
+The linked workload shape differs across hosts, and the x86 external
+process-wall boundary includes runtime TSC calibration. Read the
+[cross-host boundary note](measurements/2026-07-21-cross-host.md) before making
+comparisons.
+
 ## Run
 
 Check portable arithmetic and workload contracts:
@@ -158,4 +173,5 @@ the Cargo-produced benchmark from JSON, executes the 12-process design,
 validates the log, and captures code generation.
 
 Read [Round 1](rounds/01.md), the [measurement boundary](measurements/README.md),
-and the [primary sources](references.md) before interpreting a result.
+the [recorded result](measurements/2026-07-21-cross-host.md), and the
+[primary sources](references.md) before interpreting a result.

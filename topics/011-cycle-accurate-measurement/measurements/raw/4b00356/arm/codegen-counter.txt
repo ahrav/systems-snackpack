@@ -1,0 +1,3 @@
+2:   15dd0:	isb
+3:   15dd4:	mrs	x0, cntvct_el0
+4:   15dd8:	isb

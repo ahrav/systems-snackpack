@@ -1,0 +1,26 @@
+00000000000187e0 <cycle_probe::linux::read_counter>:
+   187e0:	test   %edi,%edi
+   187e2:	je     187f6 <cycle_probe::linux::read_counter+0x16>
+   187e4:	lfence
+   187e7:	rdtsc
+   187e9:	lfence
+   187ec:	shl    $0x20,%rdx
+   187f0:	mov    %eax,%eax
+   187f2:	or     %rdx,%rax
+   187f5:	ret
+   187f6:	mfence
+   187f9:	rdtsc
+   187fb:	mfence
+   187fe:	shl    $0x20,%rdx
+   18802:	mov    %eax,%eax
+   18804:	or     %rdx,%rax
+   18807:	ret
+   18808:	int3
+   18809:	int3
+   1880a:	int3
+   1880b:	int3
+   1880c:	int3
+   1880d:	int3
+   1880e:	int3
+   1880f:	int3
+

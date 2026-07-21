@@ -1,0 +1,6 @@
+0000000000015dd0 <cycle_probe::linux::read_counter>:
+   15dd0:	isb
+   15dd4:	mrs	x0, cntvct_el0
+   15dd8:	isb
+   15ddc:	ret
+

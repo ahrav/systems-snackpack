@@ -1,0 +1,2 @@
+PROBE_COUNTER arch=x86_64 bracket=mfence-rdtsc-mfence features=vendor=AuthenticAMD_tsc=true_invariant_tsc=true_calibration_rounds=10_calibration_order=5_counter-inner_5_counter-outer_calibration_mad_hz=16510_calibration_range_hz=2599932605-2600012626 frequency_hz=2599994557 frequency_source=runtime_monotonic_raw_10x100ms_median reads=1000000 zero=0 backward=0 min_nonzero_ticks=104 max_ticks=42458 gcd_ticks=26 start_cpu=0 end_cpu=0
+PROBE_CLOCK clock=monotonic_raw advertised_resolution_ns=1 reads=200000 zero=0 backward=0 min_nonzero_ns=19 max_ns=6180 start_cpu=0 end_cpu=0

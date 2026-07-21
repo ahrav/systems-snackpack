@@ -1,0 +1,137 @@
+11:   187f6:	mfence
+12:   187f9:	rdtsc
+13:   187fb:	mfence
+000000000001d4a0 <systems_snackpack_topic_011::dependent_chain>:
+   1d4a0:	test   %rsi,%rsi
+   1d4a3:	je     1d66e <systems_snackpack_topic_011::dependent_chain+0x1ce>
+   1d4a9:	mov    %esi,%r8d
+   1d4ac:	movabs $0xbf58476d1ce4e5b9,%rax
+   1d4b6:	movabs $0x9e3779b97f4a7c15,%rcx
+   1d4c0:	movabs $0x94d049bb133111eb,%rdx
+   1d4ca:	and    $0x7,%r8d
+   1d4ce:	cmp    $0x8,%rsi
+   1d4d2:	jb     1d632 <systems_snackpack_topic_011::dependent_chain+0x192>
+   1d4d8:	and    $0xfffffffffffffff8,%rsi
+   1d4dc:	nopl   0x0(%rax)
+   1d4e0:	add    %rcx,%rdi
+   1d4e3:	mov    %rdi,%r9
+   1d4e6:	shr    $0x1e,%r9
+   1d4ea:	xor    %rdi,%r9
+   1d4ed:	imul   %rax,%r9
+   1d4f1:	mov    %r9,%rdi
+   1d4f4:	shr    $0x1b,%rdi
+   1d4f8:	xor    %r9,%rdi
+   1d4fb:	imul   %rdx,%rdi
+   1d4ff:	mov    %rdi,%r9
+   1d502:	shr    $0x1f,%r9
+   1d506:	xor    %rdi,%r9
+   1d509:	add    %rcx,%r9
+   1d50c:	mov    %r9,%rdi
+   1d50f:	shr    $0x1e,%rdi
+   1d513:	xor    %r9,%rdi
+   1d516:	imul   %rax,%rdi
+   1d51a:	mov    %rdi,%r9
+   1d51d:	shr    $0x1b,%r9
+   1d521:	xor    %rdi,%r9
+   1d524:	imul   %rdx,%r9
+   1d528:	mov    %r9,%rdi
+   1d52b:	shr    $0x1f,%rdi
+   1d52f:	xor    %r9,%rdi
+   1d532:	add    %rcx,%rdi
+   1d535:	mov    %rdi,%r9
+   1d538:	shr    $0x1e,%r9
+   1d53c:	xor    %rdi,%r9
+   1d53f:	imul   %rax,%r9
+   1d543:	mov    %r9,%rdi
+   1d546:	shr    $0x1b,%rdi
+   1d54a:	xor    %r9,%rdi
+   1d54d:	imul   %rdx,%rdi
+   1d551:	mov    %rdi,%r9
+   1d554:	shr    $0x1f,%r9
+   1d558:	xor    %rdi,%r9
+   1d55b:	add    %rcx,%r9
+   1d55e:	mov    %r9,%rdi
+   1d561:	shr    $0x1e,%rdi
+   1d565:	xor    %r9,%rdi
+   1d568:	imul   %rax,%rdi
+   1d56c:	mov    %rdi,%r9
+   1d56f:	shr    $0x1b,%r9
+   1d573:	xor    %rdi,%r9
+   1d576:	imul   %rdx,%r9
+   1d57a:	mov    %r9,%rdi
+   1d57d:	shr    $0x1f,%rdi
+   1d581:	xor    %r9,%rdi
+   1d584:	add    %rcx,%rdi
+   1d587:	mov    %rdi,%r9
+   1d58a:	shr    $0x1e,%r9
+   1d58e:	xor    %rdi,%r9
+   1d591:	imul   %rax,%r9
+   1d595:	mov    %r9,%rdi
+   1d598:	shr    $0x1b,%rdi
+   1d59c:	xor    %r9,%rdi
+   1d59f:	imul   %rdx,%rdi
+   1d5a3:	mov    %rdi,%r9
+   1d5a6:	shr    $0x1f,%r9
+   1d5aa:	xor    %rdi,%r9
+   1d5ad:	add    %rcx,%r9
+   1d5b0:	mov    %r9,%rdi
+   1d5b3:	shr    $0x1e,%rdi
+   1d5b7:	xor    %r9,%rdi
+   1d5ba:	imul   %rax,%rdi
+   1d5be:	mov    %rdi,%r9
+   1d5c1:	shr    $0x1b,%r9
+   1d5c5:	xor    %rdi,%r9
+   1d5c8:	imul   %rdx,%r9
+   1d5cc:	mov    %r9,%rdi
+   1d5cf:	shr    $0x1f,%rdi
+   1d5d3:	xor    %r9,%rdi
+   1d5d6:	add    %rcx,%rdi
+   1d5d9:	mov    %rdi,%r9
+   1d5dc:	shr    $0x1e,%r9
+   1d5e0:	xor    %rdi,%r9
+   1d5e3:	imul   %rax,%r9
+   1d5e7:	mov    %r9,%rdi
+   1d5ea:	shr    $0x1b,%rdi
+   1d5ee:	xor    %r9,%rdi
+   1d5f1:	imul   %rdx,%rdi
+   1d5f5:	mov    %rdi,%r9
+   1d5f8:	shr    $0x1f,%r9
+   1d5fc:	xor    %rdi,%r9
+   1d5ff:	add    %rcx,%r9
+   1d602:	mov    %r9,%rdi
+   1d605:	shr    $0x1e,%rdi
+   1d609:	xor    %r9,%rdi
+   1d60c:	imul   %rax,%rdi
+   1d610:	mov    %rdi,%r9
+   1d613:	shr    $0x1b,%r9
+   1d617:	xor    %rdi,%r9
+   1d61a:	imul   %rdx,%r9
+   1d61e:	mov    %r9,%rdi
+   1d621:	shr    $0x1f,%rdi
+   1d625:	xor    %r9,%rdi
+   1d628:	add    $0xfffffffffffffff8,%rsi
+   1d62c:	jne    1d4e0 <systems_snackpack_topic_011::dependent_chain+0x40>
+   1d632:	test   %r8,%r8
+   1d635:	je     1d66e <systems_snackpack_topic_011::dependent_chain+0x1ce>
+   1d637:	nopw   0x0(%rax,%rax,1)
+   1d640:	add    %rcx,%rdi
+   1d643:	mov    %rdi,%rsi
+   1d646:	shr    $0x1e,%rsi
+   1d64a:	xor    %rdi,%rsi
+   1d64d:	imul   %rax,%rsi
+   1d651:	mov    %rsi,%r9
+   1d654:	shr    $0x1b,%r9
+   1d658:	xor    %rsi,%r9
+   1d65b:	imul   %rdx,%r9
+   1d65f:	mov    %r9,%rdi
+   1d662:	shr    $0x1f,%rdi
+   1d666:	xor    %r9,%rdi
+   1d669:	dec    %r8
+   1d66c:	jne    1d640 <systems_snackpack_topic_011::dependent_chain+0x1a0>
+   1d66e:	mov    %rdi,-0x8(%rsp)
+   1d673:	lea    -0x8(%rsp),%rax
+   1d678:	mov    -0x8(%rsp),%rax
+   1d67d:	ret
+   1d67e:	int3
+   1d67f:	int3
+

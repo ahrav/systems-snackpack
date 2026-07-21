@@ -11,8 +11,9 @@ all of these conditions:
 
 - `SOURCE_ARCHIVE` is an absolute gzip-compressed Git archive whose SHA-256 and
   embedded commit match the declared values;
-- the build runs from the verified extraction with `CARGO_ENCODED_RUSTFLAGS`
-  cleared and the recorded native `RUSTFLAGS` applied;
+- the build runs from the verified extraction with `CARGO_ENCODED_RUSTFLAGS`,
+  `RUSTC_WRAPPER`, and `RUSTC_WORKSPACE_WRAPPER` cleared and the recorded native
+  `RUSTFLAGS` applied;
 - portable conversion and recurrence checks pass;
 - both probes start and end on CPU 0, advance at least once, and report no
   backward values;
@@ -34,3 +35,10 @@ each process's doubled median ticks and recorded frequency. The cross-host note
 keeps measured values, derived values, and observed code generation separate
 from inferred mechanisms. It does not treat two machines as an architecture
 comparison.
+
+## Recorded evidence
+
+- [Arm host](2026-07-21-dev-dsk-ahrav-2b.md)
+- [`xlg` alias and resolved hostname](2026-07-21-xlg.md)
+- [Cross-host boundary](2026-07-21-cross-host.md)
+- [Raw evidence checksums](raw/4b00356/SHA256SUMS)
