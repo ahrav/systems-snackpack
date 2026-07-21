@@ -226,6 +226,22 @@ def summarize(path: Path) -> None:
             raise SystemExit(f"{name} probe observed backward values")
         integer(probe, minimum_field, 1)
 
+    counter_arch = counter_probe.get("arch")
+    if counter_arch == "x86_64":
+        if counter_probe.get("bracket") != "rdtscp-cpuid":
+            raise SystemExit("x86 counter probe did not use the RDTSCP/CPUID boundary")
+        if "rdtscp=true" not in counter_probe.get("features", ""):
+            raise SystemExit("x86 counter probe omitted RDTSCP feature evidence")
+        if integer(counter_probe, "aux_changes") != 0:
+            raise SystemExit("x86 counter probe observed a TSC_AUX change")
+        if integer(counter_probe, "start_aux") != integer(counter_probe, "end_aux"):
+            raise SystemExit("x86 counter probe TSC_AUX endpoints differ")
+    elif counter_arch == "aarch64":
+        if counter_probe.get("bracket") != "isb-mrs-cntvct-isb":
+            raise SystemExit("Arm counter probe did not use the ISB/CNTVCT boundary")
+    else:
+        raise SystemExit("counter probe reported an unsupported architecture")
+
     pids = [integer(run, "pid", 1) for run in runs]
     if len(set(pids)) != PROCESS_COUNT:
         raise SystemExit("each process must have a distinct PID")
@@ -242,8 +258,15 @@ def summarize(path: Path) -> None:
         end = end_by_pid.get(pid)
         if end is None:
             raise SystemExit(f"PID {pid} has no END record")
+        if run.get("arch") != counter_arch:
+            raise SystemExit(f"PID {pid} architecture differs from the counter probe")
+        if run.get("bracket") != counter_probe.get("bracket"):
+            raise SystemExit(f"PID {pid} bracket differs from the counter probe")
         if integer(run, "start_cpu") != 0 or integer(end, "end_cpu") != 0:
             raise SystemExit(f"PID {pid} did not start and end on CPU 0")
+        if counter_arch == "x86_64":
+            if integer(run, "start_aux") != integer(end, "end_aux"):
+                raise SystemExit(f"PID {pid} TSC_AUX endpoints differ")
         if integer(end, "rejected_counter") != 0 or integer(end, "rejected_clock") != 0:
             raise SystemExit(f"PID {pid} rejected one or more samples")
         if not re.fullmatch(r"[0-9a-f]{16}", end.get("checksum", "")):

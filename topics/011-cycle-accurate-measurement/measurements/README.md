@@ -17,6 +17,8 @@ all of these conditions:
 - portable conversion and recurrence checks pass;
 - both probes start and end on CPU 0, advance at least once, and report no
   backward values;
+- x86 endpoints use the RDTSCP/CPUID boundary, capture TSC_AUX, and report no
+  TSC_AUX change; this supplements rather than replaces the CPU check;
 - 12 distinct CPU-0-pinned processes complete in the fixed three-block ABBA
   schedule, six per timer order, with identical final checksums;
 - every process reports all four batch sizes with zero rejected samples and
@@ -38,7 +40,8 @@ comparison.
 
 ## Recorded evidence
 
-- [Arm host](2026-07-21-dev-dsk-ahrav-2b.md)
-- [`xlg` alias and resolved hostname](2026-07-21-xlg.md)
-- [Cross-host boundary](2026-07-21-cross-host.md)
-- [Raw evidence checksums](raw/4b00356/SHA256SUMS)
+- [Superseded candidate `4b00356`](superseded-4b00356.md)
+- [Superseded Arm host record](2026-07-21-dev-dsk-ahrav-2b.md)
+- [Superseded `xlg` record](2026-07-21-xlg.md)
+- [Superseded cross-host boundary](2026-07-21-cross-host.md)
+- [Superseded raw evidence checksums](raw/4b00356/SHA256SUMS)

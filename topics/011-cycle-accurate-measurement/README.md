@@ -19,13 +19,20 @@ Every result records five independent properties:
 
 The Linux benchmark compares an ordered architectural reference counter with
 `CLOCK_MONOTONIC_RAW`. It does not read a PMU cycle event. The x86-64 path
-requires TSC and invariant TSC feature evidence and identifies the vendor. It
-uses `MFENCE; RDTSC; MFENCE` on AMD and `LFENCE; RDTSC; LFENCE` on Intel. When
-CPUID leaf `0x15` lacks usable ratio or crystal-frequency fields, the benchmark
-derives frequency from the median of ten 100 ms comparisons with
+requires TSC, RDTSCP, and invariant-TSC feature evidence. Every endpoint uses
+`RDTSCP; CPUID`: RDTSCP waits for earlier instruction execution and load
+visibility, while the following serializing CPUID prevents later work from
+crossing the endpoint. This is not a prior-store visibility boundary. The read
+also captures `TSC_AUX`; the harness rejects an endpoint pair when it changes
+and independently checks `sched_getcpu`. Neither check detects every virtual
+machine migration.
+
+When CPUID leaf `0x15` lacks usable ratio or crystal-frequency fields, the
+benchmark derives frequency from the median of ten 100 ms comparisons with
 `CLOCK_MONOTONIC_RAW`, five in each nesting order. The AArch64 path tests
 `CNTVCT_EL0` access in a child before the parent executes it, brackets the read
-with `ISB`, then reads `CNTFRQ_EL0` for the scale.
+with `ISB`, then reads `CNTFRQ_EL0` for the scale. These are deliberately strong
+instruction boundaries; their fixed cost is part of the batching experiment.
 
 ## Cost model
 
@@ -54,20 +61,24 @@ observed delta. Passing this guard does not prove a 1% timestamp-error bound.
 
 ## Fixed-point conversion
 
-Linux perf exposes `time_mult`, `time_shift`, and `time_offset`. Convert both
-absolute counter endpoints with one coherent parameter snapshot, then subtract.
-Scaling an already-subtracted delta loses the fixed-point rounding phase.
+The library tests a generic fixed-point map, not a complete perf mmap-page
+reader. Convert both endpoints with one coherent parameter snapshot, then
+subtract. Scaling an already-subtracted delta loses the endpoints' distinct
+rounding phases. A common time origin cancels.
 
-The rounding test uses `start=1`, `end=2`, `mult=3`, `shift=1`, and `offset=50`:
+The rounding test uses `start=1`, `end=2`, `mult=3`, and `shift=1`:
 
 ```text
-absolute(end) - absolute(start) = 53 - 51 = 2
-scale(end - start)              = floor(3 / 2) = 1
+scale(end) - scale(start) = floor(6 / 2) - floor(3 / 2) = 2
+scale(end - start)        = floor(3 / 2) = 1
 ```
 
 The library verifies this case and rejects backward or overflowing intervals.
-The benchmark does not implement a perf mmap-page reader; the example isolates
-the arithmetic contract that such a reader must preserve.
+Linux perf has separate contracts. `cap_user_time` supplies a delta used to
+update enabled/running time. `cap_user_time_zero` supplies the `time_zero`
+origin for an absolute timestamp. `cap_user_time_short` requires reconstructing
+the full cycle value with `time_cycles` and `time_mask` before scaling. A real
+reader must snapshot those fields under an unchanged even metadata sequence.
 
 ## Experiment boundary
 
@@ -119,18 +130,13 @@ not PMU cycle counts.
 
 ## Recorded result
 
-Candidate `4b00356` used 12 fresh processes per host on 2026-07-21. At batch
-4096, the Arm host's process-median summary reported `3.085239955 ns/op` after
-converting reference ticks and `3.084960938 ns/op` after dividing the raw-clock
-batch median by 4096. `xlg` reported `3.522954993 ns/op` and
-`3.518066406 ns/op` through the same respective derivations. These are medians
-across process medians. Within each host, the reference/clock ratio approached
-1 as batch size grew, a pattern consistent with fixed-bracket amortization.
-
-The linked workload shape differs across hosts, and the x86 external
-process-wall boundary includes runtime TSC calibration. Read the
-[cross-host boundary note](measurements/2026-07-21-cross-host.md) before making
-comparisons.
+Candidate `4b00356` is retained as superseded evidence. Its Arm record used the
+intended `ISB; MRS CNTVCT_EL0; ISB` boundary, but its AMD path relied on an
+`MFENCE; RDTSC; MFENCE` instruction-ordering claim that the cited AMD manual
+does not provide. Its measurements are not the final cross-host pair. Read the
+[supersession note](measurements/superseded-4b00356.md) before using that raw
+record. The corrected exact-source measurements are recorded after both hosts
+pass the revised bracket, correctness, code-generation, and replication gates.
 
 ## Run
 

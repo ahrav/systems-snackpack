@@ -2,7 +2,7 @@
 //!
 //! Reference-counter ticks, elapsed nanoseconds, and PMU cycles are different
 //! quantities. This crate keeps counter access in the Linux benchmark and keeps
-//! conversion and workload logic testable on every workspace host.
+//! generic fixed-point and workload logic testable on every workspace host.
 
 /// Errors from fixed-point timestamp conversion.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -15,12 +15,13 @@ pub enum ConversionError {
     ZeroErrorBudget,
 }
 
-/// Scales an absolute counter endpoint with perf's multiplier and shift.
+/// Scales a counter endpoint with a fixed-point multiplier and shift.
 ///
 /// The result is `floor(ticks * mult / 2^shift)`. Returns `None` when the result
-/// does not fit in `u64`. Use [`endpoint_delta_ns`] for an interval so
-/// subtraction happens after each endpoint is rounded.
-pub fn scale_absolute_ticks(ticks: u64, mult: u32, shift: u16) -> Option<u64> {
+/// does not fit in `u64`. This is generic arithmetic, not a complete Linux perf
+/// mmap-page conversion. Use [`endpoint_delta_ns`] for an interval so subtraction
+/// happens after each endpoint is rounded.
+pub fn scale_fixed_point_ticks(ticks: u64, mult: u32, shift: u16) -> Option<u64> {
     let product = u128::from(ticks) * u128::from(mult);
     let scaled = product.checked_shr(u32::from(shift)).unwrap_or(0);
     u64::try_from(scaled).ok()
@@ -28,31 +29,26 @@ pub fn scale_absolute_ticks(ticks: u64, mult: u32, shift: u16) -> Option<u64> {
 
 /// Converts two absolute counter values and subtracts their converted times.
 ///
-/// `offset` applies to each converted endpoint and therefore cancels. Converting
-/// the endpoints before subtraction accounts for their distinct fixed-point
-/// rounding phases.
+/// A common origin would cancel. Converting the endpoints before subtraction
+/// accounts for their distinct fixed-point rounding phases. Linux perf readers
+/// must separately implement the applicable
+/// `cap_user_time`, `cap_user_time_zero`, and `cap_user_time_short` contracts.
 ///
 /// # Errors
 ///
 /// Returns [`ConversionError::EndBeforeStart`] when `end < start`. Returns
-/// [`ConversionError::Overflow`] when a scaled endpoint or its sum with `offset`
-/// does not fit in `u64`.
+/// [`ConversionError::Overflow`] when a scaled endpoint does not fit in `u64`.
 pub fn endpoint_delta_ns(
     start: u64,
     end: u64,
     mult: u32,
     shift: u16,
-    offset: u64,
 ) -> Result<u64, ConversionError> {
     if end < start {
         return Err(ConversionError::EndBeforeStart);
     }
-    let start_ns = scale_absolute_ticks(start, mult, shift)
-        .and_then(|value| value.checked_add(offset))
-        .ok_or(ConversionError::Overflow)?;
-    let end_ns = scale_absolute_ticks(end, mult, shift)
-        .and_then(|value| value.checked_add(offset))
-        .ok_or(ConversionError::Overflow)?;
+    let start_ns = scale_fixed_point_ticks(start, mult, shift).ok_or(ConversionError::Overflow)?;
+    let end_ns = scale_fixed_point_ticks(end, mult, shift).ok_or(ConversionError::Overflow)?;
     end_ns
         .checked_sub(start_ns)
         .ok_or(ConversionError::EndBeforeStart)
@@ -113,25 +109,28 @@ mod tests {
 
     #[test]
     fn fixed_point_vectors_preserve_endpoint_rounding() {
-        assert_eq!(endpoint_delta_ns(100, 223, 1, 0, 50), Ok(123));
-        assert_eq!(endpoint_delta_ns(1024, 2048, 1000, 10, 7), Ok(1000));
-        assert_eq!(endpoint_delta_ns(5, 9, 3, 1, 0), Ok(6));
+        assert_eq!(endpoint_delta_ns(100, 223, 1, 0), Ok(123));
+        assert_eq!(endpoint_delta_ns(1024, 2048, 1000, 10), Ok(1000));
+        assert_eq!(endpoint_delta_ns(5, 9, 3, 1), Ok(6));
 
-        assert_eq!(endpoint_delta_ns(1, 2, 3, 1, 50), Ok(2));
-        assert_eq!(scale_absolute_ticks(1, 3, 1), Some(1));
-        assert_eq!(scale_absolute_ticks(u64::MAX, u32::MAX, 127), Some(0));
-        assert_eq!(scale_absolute_ticks(u64::MAX, u32::MAX, 128), Some(0));
-        assert_eq!(scale_absolute_ticks(u64::MAX, u32::MAX, u16::MAX), Some(0));
+        assert_eq!(endpoint_delta_ns(1, 2, 3, 1), Ok(2));
+        assert_eq!(scale_fixed_point_ticks(1, 3, 1), Some(1));
+        assert_eq!(scale_fixed_point_ticks(u64::MAX, u32::MAX, 127), Some(0));
+        assert_eq!(scale_fixed_point_ticks(u64::MAX, u32::MAX, 128), Some(0));
+        assert_eq!(
+            scale_fixed_point_ticks(u64::MAX, u32::MAX, u16::MAX),
+            Some(0)
+        );
     }
 
     #[test]
     fn conversion_rejects_invalid_intervals_and_overflow() {
         assert_eq!(
-            endpoint_delta_ns(2, 1, 1, 0, 0),
+            endpoint_delta_ns(2, 1, 1, 0),
             Err(ConversionError::EndBeforeStart)
         );
         assert_eq!(
-            endpoint_delta_ns(0, u64::MAX, u32::MAX, 0, 0),
+            endpoint_delta_ns(0, u64::MAX, u32::MAX, 0),
             Err(ConversionError::Overflow)
         );
     }

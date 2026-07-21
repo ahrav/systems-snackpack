@@ -1,5 +1,9 @@
 # 2026-07-21 cross-host note
 
+> Superseded: candidate `4b00356` used an x86 ordering boundary not supported by
+> the cited AMD architecture contract. Retained for provenance only. See the
+> [supersession note](superseded-4b00356.md).
+
 Both records use source and archive commit
 `4b00356711a3934fd92ec62a099991a71ecd6529` and archive SHA-256
 `d9952eb769dbf1d8716fa32cebca446e87fbf1948d4388645546896d60b05bc9`.

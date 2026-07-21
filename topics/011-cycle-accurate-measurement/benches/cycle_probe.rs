@@ -17,10 +17,10 @@ const BATCHES: [usize; 4] = [1, 16, 256, 4096];
 const SEED: u64 = 0x243f_6a88_85a3_08d3;
 
 fn verify() {
-    assert_eq!(endpoint_delta_ns(100, 223, 1, 0, 50), Ok(123));
-    assert_eq!(endpoint_delta_ns(1024, 2048, 1000, 10, 7), Ok(1000));
-    assert_eq!(endpoint_delta_ns(5, 9, 3, 1, 0), Ok(6));
-    assert_eq!(endpoint_delta_ns(1, 2, 3, 1, 50), Ok(2));
+    assert_eq!(endpoint_delta_ns(100, 223, 1, 0), Ok(123));
+    assert_eq!(endpoint_delta_ns(1024, 2048, 1000, 10), Ok(1000));
+    assert_eq!(endpoint_delta_ns(5, 9, 3, 1), Ok(6));
+    assert_eq!(endpoint_delta_ns(1, 2, 3, 1), Ok(2));
     assert_eq!(minimum_batch_duration(40, 10_000), Ok(8_000));
 
     let mut expected = SEED;
@@ -120,9 +120,13 @@ mod linux {
         #[cfg(target_arch = "aarch64")]
         ArmGenericTimer,
         #[cfg(target_arch = "x86_64")]
-        AmdStrong,
-        #[cfg(target_arch = "x86_64")]
-        IntelLoadBoundary,
+        X86RdtscpCpuid,
+    }
+
+    #[derive(Clone, Copy)]
+    struct CounterRead {
+        ticks: u64,
+        aux: Option<u32>,
     }
 
     struct Counter {
@@ -196,11 +200,13 @@ mod linux {
                     ));
                 }
 
-                let (kind, bracket) = match vendor {
-                    "AuthenticAMD" => (CounterKind::AmdStrong, "mfence-rdtsc-mfence"),
-                    "GenuineIntel" => (CounterKind::IntelLoadBoundary, "lfence-rdtsc-lfence"),
-                    _ => return Err(format!("unsupported x86 counter vendor {vendor:?}")),
-                };
+                // SAFETY: The maximum extended leaf covers 0x8000_0001.
+                let rdtscp = unsafe { __cpuid(0x8000_0001) }.edx & (1 << 27) != 0;
+                if !rdtscp {
+                    return Err("required x86 feature unavailable: rdtscp=false".to_owned());
+                }
+                let kind = CounterKind::X86RdtscpCpuid;
+                let bracket = "rdtscp-cpuid";
 
                 let max_basic = vendor_leaf.eax;
                 let (frequency_hz, frequency_source, calibration_features) = if max_basic >= 0x15 {
@@ -230,7 +236,7 @@ mod linux {
                     frequency_source,
                     bracket,
                     features: format!(
-                        "vendor={vendor} tsc={tsc} invariant_tsc={invariant} {calibration_features}"
+                        "vendor={vendor} tsc={tsc} rdtscp={rdtscp} invariant_tsc={invariant} {calibration_features}"
                     ),
                 });
             }
@@ -239,14 +245,14 @@ mod linux {
             Err("architectural reference-counter path is unsupported".to_owned())
         }
 
-        fn read(&self) -> u64 {
+        fn read(&self) -> CounterRead {
             read_counter(self.kind)
         }
     }
 
     #[cfg(target_arch = "aarch64")]
     #[inline(never)]
-    fn read_counter(_kind: CounterKind) -> u64 {
+    fn read_counter(_kind: CounterKind) -> CounterRead {
         let value: u64;
         // Omitting `nomem` keeps compiler memory accesses outside the bracket.
         // SAFETY: `Counter::detect` first executes this instruction in a child;
@@ -260,7 +266,10 @@ mod linux {
                 options(nostack)
             );
         }
-        value
+        CounterRead {
+            ticks: value,
+            aux: None,
+        }
     }
 
     #[cfg(target_arch = "aarch64")]
@@ -276,33 +285,38 @@ mod linux {
 
     #[cfg(target_arch = "x86_64")]
     #[inline(never)]
-    fn read_counter(kind: CounterKind) -> u64 {
-        let low: u32;
-        let high: u32;
+    fn read_counter(_kind: CounterKind) -> CounterRead {
+        let ticks: u64;
+        let aux: u32;
         // Omitting `nomem` keeps compiler memory accesses outside the bracket.
-        // SAFETY: `Counter::detect` checks the x86 vendor, TSC feature, and
-        // invariant-TSC feature before selecting the vendor-scoped sequence.
+        // RDTSCP waits for earlier instruction execution and load visibility;
+        // it is not a store-visibility boundary. CPUID prevents later work from
+        // executing before the endpoint completes. RDI temporarily preserves
+        // RBX because LLVM reserves RBX on some x86-64 targets.
+        // SAFETY: `Counter::detect` checks TSC, RDTSCP, and invariant TSC.
         unsafe {
-            match kind {
-                CounterKind::AmdStrong => asm!(
-                    "mfence",
-                    "rdtsc",
-                    "mfence",
-                    out("eax") low,
-                    out("edx") high,
-                    options(nostack)
-                ),
-                CounterKind::IntelLoadBoundary => asm!(
-                    "lfence",
-                    "rdtsc",
-                    "lfence",
-                    out("eax") low,
-                    out("edx") high,
-                    options(nostack)
-                ),
-            }
+            asm!(
+                "rdtscp",
+                "shl rdx, 32",
+                "or rax, rdx",
+                "mov r8, rax",
+                "mov r9d, ecx",
+                "mov rdi, rbx",
+                "xor eax, eax",
+                "cpuid",
+                "mov rbx, rdi",
+                out("r8") ticks,
+                out("r9") aux,
+                lateout("rax") _,
+                lateout("rcx") _,
+                lateout("rdx") _,
+                lateout("rdi") _,
+            );
         }
-        (u64::from(high) << 32) | u64::from(low)
+        CounterRead {
+            ticks,
+            aux: Some(aux),
+        }
     }
 
     #[cfg(target_arch = "x86_64")]
@@ -333,8 +347,12 @@ mod linux {
             let elapsed_ns = end_ns
                 .checked_sub(start_ns)
                 .ok_or_else(|| "raw clock moved backward during calibration".to_owned())?;
+            if start_tick.aux != end_tick.aux {
+                return Err("TSC_AUX changed during TSC calibration".to_owned());
+            }
             let elapsed_ticks = end_tick
-                .checked_sub(start_tick)
+                .ticks
+                .checked_sub(start_tick.ticks)
                 .ok_or_else(|| "TSC moved backward during calibration".to_owned())?;
             if elapsed_ns == 0 {
                 return Err("zero-duration TSC calibration".to_owned());
@@ -368,12 +386,12 @@ mod linux {
             let frequency_hz = arm_frequency();
             let first = read_counter(CounterKind::ArmGenericTimer);
             let second = read_counter(CounterKind::ArmGenericTimer);
-            if frequency_hz == 0 || second < first {
+            if frequency_hz == 0 || second.ticks < first.ticks {
                 return Err("Arm counter smoke check failed".to_owned());
             }
             println!(
                 "COUNTER_SMOKE frequency_hz={frequency_hz} delta_ticks={}",
-                second - first
+                second.ticks - first.ticks
             );
             return Ok(());
         }
@@ -407,6 +425,10 @@ mod linux {
             .join(",")
     }
 
+    fn display_aux(aux: Option<u32>) -> String {
+        aux.map_or_else(|| "none".to_owned(), |value| value.to_string())
+    }
+
     struct BatchResult {
         ticks: Vec<u64>,
         nanoseconds: Vec<u64>,
@@ -421,10 +443,10 @@ mod linux {
         let next = dependent_chain(black_box(state), batch);
         let end = counter.read();
         let cpu_after = current_cpu()?;
-        if cpu_before != cpu_after || end < start {
+        if cpu_before != cpu_after || start.aux != end.aux || end.ticks < start.ticks {
             return Err("counter sample migrated or moved backward".to_owned());
         }
-        Ok((end - start, next))
+        Ok((end.ticks - start.ticks, next))
     }
 
     fn measure_clock(state: u64, batch: usize) -> Result<(u64, u64), String> {
@@ -500,6 +522,8 @@ mod linux {
         let counter = Counter::detect()?;
         let start_cpu = current_cpu()?;
         let mut previous = counter.read();
+        let start_aux = previous.aux;
+        let mut aux_changes = 0_usize;
         let mut zero = 0_usize;
         let mut backward = 0_usize;
         let mut minimum = u64::MAX;
@@ -507,12 +531,15 @@ mod linux {
         let mut gcd = 0_u64;
         for _ in 0..reads {
             let current = counter.read();
-            if current < previous {
+            if current.aux != previous.aux {
+                aux_changes += 1;
+            }
+            if current.ticks < previous.ticks {
                 backward += 1;
-            } else if current == previous {
+            } else if current.ticks == previous.ticks {
                 zero += 1;
             } else {
-                let delta = current - previous;
+                let delta = current.ticks - previous.ticks;
                 minimum = cmp::min(minimum, delta);
                 maximum = cmp::max(maximum, delta);
                 gcd = gcd_u64(gcd, delta);
@@ -521,7 +548,7 @@ mod linux {
         }
         let end_cpu = current_cpu()?;
         println!(
-            "PROBE_COUNTER arch={} bracket={} features={} frequency_hz={} frequency_source={} reads={} zero={} backward={} min_nonzero_ticks={} max_ticks={} gcd_ticks={} start_cpu={} end_cpu={}",
+            "PROBE_COUNTER arch={} bracket={} features={} frequency_hz={} frequency_source={} reads={} zero={} backward={} aux_changes={} start_aux={} end_aux={} min_nonzero_ticks={} max_ticks={} gcd_ticks={} start_cpu={} end_cpu={}",
             std::env::consts::ARCH,
             counter.bracket,
             counter.features.replace(' ', "_"),
@@ -530,6 +557,9 @@ mod linux {
             reads,
             zero,
             backward,
+            aux_changes,
+            display_aux(start_aux),
+            display_aux(previous.aux),
             if minimum == u64::MAX { 0 } else { minimum },
             maximum,
             gcd,
@@ -541,6 +571,11 @@ mod linux {
         }
         if backward != 0 {
             return Err(format!("counter probe observed {backward} backward reads"));
+        }
+        if aux_changes != 0 {
+            return Err(format!(
+                "counter probe observed {aux_changes} TSC_AUX changes"
+            ));
         }
         if minimum == u64::MAX {
             return Err("counter probe observed no advancing read".to_owned());
@@ -605,9 +640,10 @@ mod linux {
         }
         let counter = Counter::detect()?;
         let start_cpu = current_cpu()?;
+        let start_aux = counter.read().aux;
         let mut state = dependent_chain(SEED, WARMUP_STEPS);
         println!(
-            "RUN pid={} order={} samples={} warmup_steps={} frequency_hz={} frequency_source={} bracket={} arch={} start_cpu={} features={}",
+            "RUN pid={} order={} samples={} warmup_steps={} frequency_hz={} frequency_source={} bracket={} arch={} start_cpu={} start_aux={} features={}",
             process::id(),
             order,
             samples,
@@ -617,6 +653,7 @@ mod linux {
             counter.bracket,
             std::env::consts::ARCH,
             start_cpu,
+            display_aux(start_aux),
             counter.features.replace(' ', "_")
         );
 
@@ -664,10 +701,12 @@ mod linux {
                 comma_separated(&result.nanoseconds)
             );
         }
+        let end_aux = counter.read().aux;
         println!(
-            "END pid={} checksum={state:016x} end_cpu={} rejected_counter={} rejected_clock={}",
+            "END pid={} checksum={state:016x} end_cpu={} end_aux={} rejected_counter={} rejected_clock={}",
             process::id(),
             current_cpu()?,
+            display_aux(end_aux),
             total_rejected_counter,
             total_rejected_clock
         );

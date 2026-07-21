@@ -1,5 +1,9 @@
 # 2026-07-21: dev-dsk-ahrav-2b
 
+> Superseded as one half of candidate pair `4b00356` because the paired x86
+> record used an unsupported ordering claim. This Arm record is retained for
+> provenance. See the [supersession note](superseded-4b00356.md).
+
 ## Boundary
 
 - Source and archive commit: `4b00356711a3934fd92ec62a099991a71ecd6529`

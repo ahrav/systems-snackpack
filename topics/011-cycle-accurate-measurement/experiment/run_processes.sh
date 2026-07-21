@@ -115,11 +115,13 @@ objdump -d -C --no-show-raw-insn "$benchmark" >"$output_dir/codegen-full.txt"
 awk '/<cycle_probe::linux::read_counter>:/ { capture = 1 } capture { print } capture && /^$/ { exit }' \
   "$output_dir/codegen-full.txt" >"$output_dir/codegen-counter-function.txt"
 rg -q '<cycle_probe::linux::read_counter>:' "$output_dir/codegen-counter-function.txt"
-if rg -q 'bracket=mfence-rdtsc-mfence' "$output_dir/counter-probe.log"; then
-  rg -n -U 'mfence\n[^\n]*rdtsc\n[^\n]*mfence' \
-    "$output_dir/codegen-counter-function.txt" >"$output_dir/codegen-counter.txt"
-elif rg -q 'bracket=lfence-rdtsc-lfence' "$output_dir/counter-probe.log"; then
-  rg -n -U 'lfence\n[^\n]*rdtsc\n[^\n]*lfence' \
+if rg -q 'bracket=rdtscp-cpuid' "$output_dir/counter-probe.log"; then
+  awk '
+    /rdtscp/ { rdtscp_line = NR }
+    rdtscp_line && /cpuid/ && NR > rdtscp_line && NR - rdtscp_line <= 16 { found = 1 }
+    END { exit !found }
+  ' "$output_dir/codegen-counter-function.txt"
+  rg -n 'rdtscp|cpuid' \
     "$output_dir/codegen-counter-function.txt" >"$output_dir/codegen-counter.txt"
 elif rg -q 'bracket=isb-mrs-cntvct-isb' "$output_dir/counter-probe.log"; then
   rg -n -U 'isb\n[^\n]*mrs[^\n]*cntvct_el0\n[^\n]*isb' \
