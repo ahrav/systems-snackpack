@@ -123,5 +123,10 @@ topics/010-hashing-checksums-prng/experiment/run_processes.sh \
 cat /tmp/systems-snackpack-topic-010/summary.txt
 ```
 
+On a remote host without the Git checkout, extract the transferred tarball and
+run the harness from the extracted tree with `SOURCE_ARCHIVE` pointing at the
+tarball. The harness re-hashes the tarball against `SOURCE_ARCHIVE_SHA256` and
+rejects an extracted tree that differs from the archive contents.
+
 Read [Round 1](rounds/01.md), the [measurement boundary](measurements/README.md),
 and the [primary sources](references.md) before interpreting a host result.

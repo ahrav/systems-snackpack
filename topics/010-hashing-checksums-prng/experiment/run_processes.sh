@@ -51,8 +51,9 @@ if [[ ! $source_archive_sha256 =~ ^[0-9a-f]{64}$ ]]; then
   echo "SOURCE_ARCHIVE_SHA256 must be a 64-digit lowercase SHA-256" >&2
   exit 2
 fi
-for command_name in cargo date dirname env gcc git gzip hostname lscpu mkdir \
-  nm nproc objdump python3 readelf rg rm rustc seq sha256sum taskset tee uname; do
+for command_name in cargo cut date diff dirname env gcc git gzip hostname lscpu \
+  mkdir mktemp nm nproc objdump python3 readelf rg rm rustc seq sha256sum tar \
+  taskset tee uname; do
   if ! command -v "$command_name" >/dev/null 2>&1; then
     echo "required command is unavailable: $command_name" >&2
     exit 2
@@ -68,8 +69,10 @@ repo_root=$(cd "$script_dir/../../.." && pwd)
 cd "$repo_root"
 
 # A Git checkout must be byte-for-byte at the declared candidate. A source
-# archive has no .git directory, so its independently recorded archive digest
-# is the provenance boundary for the remote run.
+# archive has no .git directory, so archive mode requires the transferred
+# tarball itself (SOURCE_ARCHIVE): the harness re-hashes it against the
+# declared digest and requires the extracted tree to match its contents,
+# so the recorded digest is verified rather than merely declared.
 source_kind=archive
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   source_kind=git
@@ -83,6 +86,29 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     echo "working tree must exactly match SOURCE_COMMIT before measurement" >&2
     exit 2
   fi
+else
+  if [[ -z ${SOURCE_ARCHIVE:-} ]]; then
+    echo "archive mode requires SOURCE_ARCHIVE=/path/to/source.tar.gz" >&2
+    exit 2
+  fi
+  if [[ ! -f $SOURCE_ARCHIVE ]]; then
+    echo "SOURCE_ARCHIVE is not a regular file: $SOURCE_ARCHIVE" >&2
+    exit 2
+  fi
+  measured_archive_sha256=$(sha256sum "$SOURCE_ARCHIVE" | cut -d ' ' -f 1)
+  if [[ $measured_archive_sha256 != "$source_archive_sha256" ]]; then
+    echo "SOURCE_ARCHIVE digest $measured_archive_sha256 does not match declared SOURCE_ARCHIVE_SHA256" >&2
+    exit 2
+  fi
+  archive_extract_dir=$(mktemp -d)
+  trap 'rm -rf "$archive_extract_dir"' EXIT
+  tar -xzf "$SOURCE_ARCHIVE" -C "$archive_extract_dir"
+  if ! diff -r "$archive_extract_dir" "$repo_root" >/dev/null; then
+    echo "working tree must exactly match the SOURCE_ARCHIVE contents before measurement" >&2
+    exit 2
+  fi
+  rm -rf "$archive_extract_dir"
+  trap - EXIT
 fi
 
 if [[ -L $output_dir ]]; then

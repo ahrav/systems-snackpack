@@ -89,10 +89,12 @@ def validate_result(record: dict[str, str]) -> dict[str, int | float | str]:
         raise SystemExit("external wall interval is shorter than the timed interval")
     if int(values["address_mod_64"]) >= 64:
         raise SystemExit("address_mod_64 is outside [0, 63]")
-    for field in ("checksum", "digest"):
+    for field, width in (("checksum", 8), ("digest", 16)):
         value = record.get(field)
-        if value is None or not value:
-            raise SystemExit(f"missing {field}: {record}")
+        if value is None or not re.fullmatch(rf"[0-9a-f]{{{width}}}", value):
+            raise SystemExit(
+                f"{field} must be {width} lowercase hex digits: {record}"
+            )
         values[field] = value
     order = record.get("order")
     if order not in VALID_ORDERS:
@@ -179,6 +181,7 @@ def summarize(path: Path) -> None:
     session: dict[str, str] | None = None
     current_pair: dict[str, str] | None = None
     records: list[dict[str, int | float | str]] = []
+    artifact_hash: str | None = None
     ended = False
 
     for line_number, line in enumerate(lines, start=1):
@@ -220,11 +223,14 @@ def summarize(path: Path) -> None:
         elif line.startswith("ARTIFACT "):
             if session is None or current_pair is not None or ended:
                 raise SystemExit(f"line {line_number}: unexpected ARTIFACT")
+            if artifact_hash is not None:
+                raise SystemExit(f"line {line_number}: duplicate ARTIFACT")
             artifact = parse_record(line)
             if not re.fullmatch(
                 r"[0-9a-f]{64}", artifact.get("benchmark_binary_sha256", "")
             ):
                 raise SystemExit(f"line {line_number}: invalid benchmark artifact hash")
+            artifact_hash = artifact["benchmark_binary_sha256"]
         elif current_pair is not None:
             raise SystemExit(f"line {line_number}: unexpected line inside pair")
         elif line.strip():
@@ -232,6 +238,10 @@ def summarize(path: Path) -> None:
 
     if session is None or not ended:
         raise SystemExit("expected one complete session")
+    if artifact_hash is None:
+        raise SystemExit(
+            "session must record exactly one ARTIFACT benchmark_binary_sha256 line"
+        )
     if integer_field(session, "pairs", 1) != PAIRS:
         raise SystemExit(f"SESSION_START must declare exactly {PAIRS} pairs")
     if not re.fullmatch(r"[0-9a-f]{40}", session.get("source_commit", "")):
@@ -305,6 +315,7 @@ def summarize(path: Path) -> None:
         "replication=24_fresh_processes pairing=12_order_balanced_pairs "
         "orders=6_table-hardware_and_6_hardware-table cpu=0"
     )
+    print(f"benchmark_binary_sha256={artifact_hash}")
     print(
         f"len={expected_len} align={expected_align} iterations={expected_iterations} "
         f"bytes_per_process={expected_len * expected_iterations} "
