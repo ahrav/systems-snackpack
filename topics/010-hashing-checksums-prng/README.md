@@ -114,7 +114,7 @@ cargo bench -p systems-snackpack-topic-010 --bench crc32c -- --verify
 Run the Linux evidence harness from the repository root:
 
 ```bash
-git archive --format=tar HEAD Cargo.toml Cargo.lock \
+git archive --format=tar HEAD Cargo.toml Cargo.lock rust-toolchain.toml \
   topics/010-hashing-checksums-prng | gzip -9 \
   > /tmp/systems-snackpack-topic-010-source.tar.gz
 topic10_source_sha=$(sha256sum \

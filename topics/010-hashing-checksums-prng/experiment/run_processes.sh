@@ -64,8 +64,8 @@ if ! taskset -c "$cpu" true >/dev/null 2>&1; then
   exit 2
 fi
 
-script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-repo_root=$(cd "$script_dir/../../.." && pwd)
+script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
+repo_root=$(cd "$script_dir/../../.." && pwd -P)
 cd "$repo_root"
 
 # A Git checkout must be byte-for-byte at the declared candidate. A source
@@ -87,10 +87,13 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     exit 2
   fi
   # The README builds the archive with this exact pipeline, so git mode can
-  # recompute the digest instead of trusting the caller-supplied value.
+  # recompute the digest instead of trusting the caller-supplied value. The
+  # archive includes rust-toolchain.toml because the toolchain pin is a
+  # build-affecting input that the digest must capture.
   measured_archive_sha256=$(
     git archive --format=tar "$source_commit" Cargo.toml Cargo.lock \
-      topics/010-hashing-checksums-prng | gzip -9 | sha256sum | cut -d ' ' -f 1
+      rust-toolchain.toml topics/010-hashing-checksums-prng \
+      | gzip -9 | sha256sum | cut -d ' ' -f 1
   )
   if [[ $measured_archive_sha256 != "$source_archive_sha256" ]]; then
     echo "recomputed source archive digest $measured_archive_sha256 does not match declared SOURCE_ARCHIVE_SHA256" >&2
@@ -126,7 +129,9 @@ if [[ -L $output_dir ]]; then
   exit 2
 fi
 mkdir -p "$output_dir"
-output_dir=$(cd "$output_dir" && pwd)
+# Physical path: a symlinked ancestor must not smuggle the output directory
+# past the outside-source-tree boundary check below.
+output_dir=$(cd "$output_dir" && pwd -P)
 case "$output_dir" in
   "$repo_root"|"$repo_root"/*)
     echo "OUTPUT_DIR must be outside the source tree" >&2
