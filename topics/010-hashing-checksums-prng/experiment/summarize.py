@@ -85,8 +85,11 @@ def validate_result(record: dict[str, str]) -> dict[str, int | float | str]:
         raise SystemExit("ns_per_byte is inconsistent with elapsed_ns/total_bytes")
     if not math.isclose(gb_per_s, expected_gb_per_s, rel_tol=2e-6, abs_tol=1e-9):
         raise SystemExit("gb_per_s is inconsistent with total_bytes/elapsed_ns")
-    if int(values["external_wall_ns"]) < elapsed_ns:
-        raise SystemExit("external wall interval is shorter than the timed interval")
+    if int(values["external_wall_ns"]) < int(values["setup_ns"]) + elapsed_ns:
+        raise SystemExit(
+            "external wall interval is shorter than the enclosed setup and"
+            " timed intervals"
+        )
     if int(values["address_mod_64"]) >= 64:
         raise SystemExit("address_mod_64 is outside [0, 63]")
     for field, width in (("checksum", 8), ("digest", 16)):

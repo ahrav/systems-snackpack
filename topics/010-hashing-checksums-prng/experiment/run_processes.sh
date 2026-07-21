@@ -86,6 +86,16 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     echo "working tree must exactly match SOURCE_COMMIT before measurement" >&2
     exit 2
   fi
+  # The README builds the archive with this exact pipeline, so git mode can
+  # recompute the digest instead of trusting the caller-supplied value.
+  measured_archive_sha256=$(
+    git archive --format=tar "$source_commit" Cargo.toml Cargo.lock \
+      topics/010-hashing-checksums-prng | gzip -9 | sha256sum | cut -d ' ' -f 1
+  )
+  if [[ $measured_archive_sha256 != "$source_archive_sha256" ]]; then
+    echo "recomputed source archive digest $measured_archive_sha256 does not match declared SOURCE_ARCHIVE_SHA256" >&2
+    exit 2
+  fi
 else
   if [[ -z ${SOURCE_ARCHIVE:-} ]]; then
     echo "archive mode requires SOURCE_ARCHIVE=/path/to/source.tar.gz" >&2
