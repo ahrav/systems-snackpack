@@ -24,7 +24,7 @@ all of these conditions:
 - every process reports all four batch sizes with zero rejected samples and
   retains all 500 requested raw values;
 - raw minima and exact doubled medians reproduce every derived batch field;
-- each 4096-operation median reaches 200 times its timer's minimum positive
+- each 65,536-operation median reaches 200 times its timer's minimum positive
   probe delta as an empirical granularity guard, not an accuracy bound;
 - workspace format, test, Clippy, benchmark-build, and rustdoc gates pass;
 - separate symbol-bounded linked-code gates match the full selected counter

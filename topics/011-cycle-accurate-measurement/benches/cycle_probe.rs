@@ -13,7 +13,7 @@ const DEFAULT_PROBE_READS: usize = 1_000_000;
 #[cfg(target_os = "linux")]
 const WARMUP_STEPS: usize = 1_000_000;
 #[cfg(target_os = "linux")]
-const BATCHES: [usize; 4] = [1, 16, 256, 4096];
+const BATCHES: [usize; 4] = [1, 16, 256, 65_536];
 const SEED: u64 = 0x243f_6a88_85a3_08d3;
 
 fn verify() {

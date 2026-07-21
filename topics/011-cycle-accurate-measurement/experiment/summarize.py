@@ -11,7 +11,7 @@ import statistics
 import sys
 from pathlib import Path
 
-BATCHES = (1, 16, 256, 4096)
+BATCHES = (1, 16, 256, 65_536)
 ORDERS = ("raw-first", "clock-first")
 PROCESS_COUNT = 12
 EXPECTED_ORDERS = (

@@ -42,9 +42,10 @@ For timer `j` and batch size `n`:
 M_j(n) = fixed_bracket_j + n * target + loop_j(n) + quantization_j(n) + disturbance_j
 ```
 
-The experiment uses batch sizes 1, 16, 256, and 4096. A converging per-operation
-estimate supports the fixed-cost model. It does not isolate the recurrence's
-instruction latency.
+The experiment uses batch sizes 1, 16, 256, and 65,536. The largest batch is
+large enough to amortize the deliberately strong x86 CPUID boundary on the
+recorded host. A converging per-operation estimate supports the fixed-cost
+model. It does not isolate the recurrence's instruction latency.
 
 For a defensible upper bound `q` on each endpoint's timestamp error and relative
 quantization budget `e`, a conservative minimum batch duration is:
@@ -56,7 +57,7 @@ batch_duration >= 2q / e
 [`minimum_batch_duration`](src/lib.rs) computes the rounded-up bound with `e`
 in parts per million. The probe's minimum positive adjacent-read delta is
 precision evidence, not an upper error bound. The summarizer applies a separate
-empirical guard: every 4096-operation process median must reach 200 times that
+empirical guard: every 65,536-operation process median must reach 200 times that
 observed delta. Passing this guard does not prove a 1% timestamp-error bound.
 
 ## Fixed-point conversion
@@ -159,7 +160,9 @@ root:
 
 ```bash
 git archive --format=tar HEAD Cargo.toml Cargo.lock rust-toolchain.toml \
-  topics/011-cycle-accurate-measurement | gzip -9 \
+  topics/011-cycle-accurate-measurement \
+  ':(exclude)topics/011-cycle-accurate-measurement/measurements/raw' \
+  | gzip -n -9 \
   > /tmp/systems-snackpack-topic-011-source.tar.gz
 topic11_source_sha=$(sha256sum \
   /tmp/systems-snackpack-topic-011-source.tar.gz | cut -d ' ' -f 1)
