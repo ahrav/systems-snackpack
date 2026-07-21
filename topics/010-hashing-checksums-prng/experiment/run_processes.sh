@@ -73,8 +73,12 @@ cd "$repo_root"
 # tarball itself (SOURCE_ARCHIVE): the harness re-hashes it against the
 # declared digest and requires the extracted tree to match its contents,
 # so the recorded digest is verified rather than merely declared.
+# Git mode is selected only when repo_root itself is the top of a work tree;
+# an extracted archive nested under an unrelated checkout must not inherit
+# the ancestor repository's Git metadata.
 source_kind=archive
-if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+git_toplevel=$(git rev-parse --show-toplevel 2>/dev/null || true)
+if [[ -n $git_toplevel && $(cd "$git_toplevel" && pwd -P) == "$repo_root" ]]; then
   source_kind=git
   resolved_source_commit=$(git rev-parse --verify "$source_commit^{commit}" 2>/dev/null || true)
   if [[ $resolved_source_commit != "$source_commit" ]]; then
