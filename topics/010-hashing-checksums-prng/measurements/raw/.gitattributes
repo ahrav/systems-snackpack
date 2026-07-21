@@ -1,0 +1,3 @@
+# Preserve tool output byte-for-byte; no EOL conversion or whitespace checks.
+**/* -text -whitespace
+*.gz binary

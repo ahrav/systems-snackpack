@@ -1,0 +1,10 @@
+captured_after_benchmark_utc=2026-07-20T14:46:06Z
+cpu=0
+vendor=AuthenticAMD
+model_name=AMD EPYC 9R14
+family=25
+model=17
+stepping=1
+microcode=0xa101154
+hypervisor=KVM
+evidence_source=lscpu in host-env.txt and first microcode record in /proc/cpuinfo

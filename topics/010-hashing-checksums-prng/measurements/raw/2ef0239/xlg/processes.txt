@@ -1,0 +1,51 @@
+SESSION_START utc=2026-07-20T14:41:51Z host_alias=xlg cpu=0 pairs=12 len=4096 align=3 iterations=262144 source_commit=2ef02391a7f2e68587cbf8f18494b73331f9a4d8 source_archive_sha256=3b0c06b53e402bf9bb74ac24da77e326419607f9f37af47b7ca3a78e45d91598
+ARTIFACT benchmark_binary_sha256=45f7699becd48650848f45321d316a697711b20635fefd1cd8acfeef916e8376
+PAIR_START pair=1 order=table-hardware utc=2026-07-20T14:41:51Z
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2324085901 setup_ns=51520 warmup_bytes=67108864 ns_per_byte=2.164473665 gb_per_s=0.462006083 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004628 address_mod_64=19 pair=1 order=table-hardware position=1 external_wall_ns=2473745020 cpu=0
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106246657 setup_ns=42700 warmup_bytes=67108864 ns_per_byte=0.098949910 gb_per_s=10.106123377 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004643 address_mod_64=19 pair=1 order=table-hardware position=2 external_wall_ns=117459508 cpu=0
+PAIR_END pair=1 utc=2026-07-20T14:41:54Z
+PAIR_START pair=2 order=hardware-table utc=2026-07-20T14:41:54Z
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106184208 setup_ns=43731 warmup_bytes=67108864 ns_per_byte=0.098891750 gb_per_s=10.112066985 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004654 address_mod_64=19 pair=2 order=hardware-table position=1 external_wall_ns=117067448 cpu=0
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2324117651 setup_ns=52280 warmup_bytes=67108864 ns_per_byte=2.164503234 gb_per_s=0.461999772 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004659 address_mod_64=19 pair=2 order=hardware-table position=2 external_wall_ns=2474295211 cpu=0
+PAIR_END pair=2 utc=2026-07-20T14:41:56Z
+PAIR_START pair=3 order=table-hardware utc=2026-07-20T14:41:56Z
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2323961701 setup_ns=51420 warmup_bytes=67108864 ns_per_byte=2.164357995 gb_per_s=0.462030774 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004691 address_mod_64=19 pair=3 order=table-hardware position=1 external_wall_ns=2473999688 cpu=0
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106164659 setup_ns=42820 warmup_bytes=67108864 ns_per_byte=0.098873544 gb_per_s=10.113929005 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004697 address_mod_64=19 pair=3 order=table-hardware position=2 external_wall_ns=117313529 cpu=0
+PAIR_END pair=3 utc=2026-07-20T14:41:59Z
+PAIR_START pair=4 order=hardware-table utc=2026-07-20T14:41:59Z
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106271779 setup_ns=43860 warmup_bytes=67108864 ns_per_byte=0.098973307 gb_per_s=10.103734351 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004708 address_mod_64=19 pair=4 order=hardware-table position=1 external_wall_ns=116940358 cpu=0
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2323861360 setup_ns=52340 warmup_bytes=67108864 ns_per_byte=2.164264545 gb_per_s=0.462050724 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004713 address_mod_64=19 pair=4 order=hardware-table position=2 external_wall_ns=2474045588 cpu=0
+PAIR_END pair=4 utc=2026-07-20T14:42:02Z
+PAIR_START pair=5 order=table-hardware utc=2026-07-20T14:42:02Z
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2324500261 setup_ns=51250 warmup_bytes=67108864 ns_per_byte=2.164859568 gb_per_s=0.461923727 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004754 address_mod_64=19 pair=5 order=table-hardware position=1 external_wall_ns=2475165452 cpu=0
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106285569 setup_ns=43710 warmup_bytes=67108864 ns_per_byte=0.098986150 gb_per_s=10.102423444 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004760 address_mod_64=19 pair=5 order=table-hardware position=2 external_wall_ns=117330569 cpu=0
+PAIR_END pair=5 utc=2026-07-20T14:42:04Z
+PAIR_START pair=6 order=hardware-table utc=2026-07-20T14:42:04Z
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106138379 setup_ns=43780 warmup_bytes=67108864 ns_per_byte=0.098849068 gb_per_s=10.116433227 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004771 address_mod_64=19 pair=6 order=hardware-table position=1 external_wall_ns=117592661 cpu=0
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2324049298 setup_ns=52650 warmup_bytes=67108864 ns_per_byte=2.164439576 gb_per_s=0.462013360 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004776 address_mod_64=19 pair=6 order=hardware-table position=2 external_wall_ns=2474287428 cpu=0
+PAIR_END pair=6 utc=2026-07-20T14:42:07Z
+PAIR_START pair=7 order=table-hardware utc=2026-07-20T14:42:07Z
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2324232988 setup_ns=51740 warmup_bytes=67108864 ns_per_byte=2.164610650 gb_per_s=0.461976845 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004797 address_mod_64=19 pair=7 order=table-hardware position=1 external_wall_ns=2474249404 cpu=0
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106915054 setup_ns=43450 warmup_bytes=67108864 ns_per_byte=0.099572403 gb_per_s=10.042943288 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004865 address_mod_64=19 pair=7 order=table-hardware position=2 external_wall_ns=118229054 cpu=0
+PAIR_END pair=7 utc=2026-07-20T14:42:09Z
+PAIR_START pair=8 order=hardware-table utc=2026-07-20T14:42:09Z
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106195124 setup_ns=44050 warmup_bytes=67108864 ns_per_byte=0.098901916 gb_per_s=10.111027546 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004877 address_mod_64=19 pair=8 order=hardware-table position=1 external_wall_ns=116837531 cpu=0
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2323995358 setup_ns=52110 warmup_bytes=67108864 ns_per_byte=2.164389340 gb_per_s=0.462024083 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004882 address_mod_64=19 pair=8 order=hardware-table position=2 external_wall_ns=2473816553 cpu=0
+PAIR_END pair=8 utc=2026-07-20T14:42:12Z
+PAIR_START pair=9 order=table-hardware utc=2026-07-20T14:42:12Z
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2324414050 setup_ns=51950 warmup_bytes=67108864 ns_per_byte=2.164779278 gb_per_s=0.461940859 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004895 address_mod_64=19 pair=9 order=table-hardware position=1 external_wall_ns=2474027085 cpu=0
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106175762 setup_ns=42970 warmup_bytes=67108864 ns_per_byte=0.098883884 gb_per_s=10.112871373 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004901 address_mod_64=19 pair=9 order=table-hardware position=2 external_wall_ns=117273401 cpu=0
+PAIR_END pair=9 utc=2026-07-20T14:42:15Z
+PAIR_START pair=10 order=hardware-table utc=2026-07-20T14:42:15Z
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106143012 setup_ns=44270 warmup_bytes=67108864 ns_per_byte=0.098853383 gb_per_s=10.115991658 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004912 address_mod_64=19 pair=10 order=hardware-table position=1 external_wall_ns=117615272 cpu=0
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2324285619 setup_ns=52080 warmup_bytes=67108864 ns_per_byte=2.164659667 gb_per_s=0.461966385 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004917 address_mod_64=19 pair=10 order=hardware-table position=2 external_wall_ns=2474122226 cpu=0
+PAIR_END pair=10 utc=2026-07-20T14:42:17Z
+PAIR_START pair=11 order=table-hardware utc=2026-07-20T14:42:17Z
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2324033820 setup_ns=51910 warmup_bytes=67108864 ns_per_byte=2.164425161 gb_per_s=0.462016437 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004930 address_mod_64=19 pair=11 order=table-hardware position=1 external_wall_ns=2473487153 cpu=0
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106312632 setup_ns=43411 warmup_bytes=67108864 ns_per_byte=0.099011354 gb_per_s=10.099851765 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004936 address_mod_64=19 pair=11 order=table-hardware position=2 external_wall_ns=117617483 cpu=0
+PAIR_END pair=11 utc=2026-07-20T14:42:20Z
+PAIR_START pair=12 order=hardware-table utc=2026-07-20T14:42:20Z
+RESULT mode=hardware len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=106156202 setup_ns=44250 warmup_bytes=67108864 ns_per_byte=0.098865667 gb_per_s=10.114734738 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004947 address_mod_64=19 pair=12 order=hardware-table position=1 external_wall_ns=116715739 cpu=0
+RESULT mode=table len=4096 align=3 iterations=262144 total_bytes=1073741824 elapsed_ns=2324325399 setup_ns=52450 warmup_bytes=67108864 ns_per_byte=2.164696715 gb_per_s=0.461958478 checksum=cf69b429 digest=9308e4ddc9cac909 pid=4004952 address_mod_64=19 pair=12 order=hardware-table position=2 external_wall_ns=2474046916 cpu=0
+PAIR_END pair=12 utc=2026-07-20T14:42:22Z
+SESSION_END utc=2026-07-20T14:42:22Z

@@ -1,0 +1,4 @@
+   Compiling systems-snackpack-topic-010 v0.1.0 (/tmp/topic10-2ef0239-N3kQWY/source/topics/010-hashing-checksums-prng)
+    Finished `bench` profile [optimized] target(s) in 0.57s
+  Executable benches src/lib.rs (/tmp/topic10-2ef0239-N3kQWY/evidence/target/release/deps/systems_snackpack_topic_010-c174f6d1c69dfcb6)
+  Executable benches/crc32c.rs (/tmp/topic10-2ef0239-N3kQWY/evidence/target/release/deps/crc32c-58f9465822f415f0)

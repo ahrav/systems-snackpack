@@ -1,0 +1,6 @@
+a3ecc8a0e17d9ccc23349b6284a8ea165f031b4352f72d5b87c2d4bd359d7b6c  topics/010-hashing-checksums-prng/Cargo.toml
+44d011d5b90044d3c0a846a919e97bd3d6338589d8983973d09a78efb70f7b21  topics/010-hashing-checksums-prng/src/lib.rs
+6d07210a28f208c3d0474eb604859fd331b4cf25f2afd8eb8cd92547c654da04  topics/010-hashing-checksums-prng/examples/check_equivalence.rs
+76dc176cd25616da488dd7f201f045972193db519851e9333c7846c3d3e597f5  topics/010-hashing-checksums-prng/benches/crc32c.rs
+17c6e7365b1f83653b050dafb48b08abc4a5f7e8835bed0c8010eeb55112f3ef  topics/010-hashing-checksums-prng/experiment/run_processes.sh
+2c5298c538aa0eb13a42de553238929f9d7ea3d9efa049583ac6a40e7b997d0d  topics/010-hashing-checksums-prng/experiment/summarize.py

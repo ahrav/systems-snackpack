@@ -1,0 +1,13 @@
+replication=24_fresh_processes pairing=12_order_balanced_pairs orders=6_table-hardware_and_6_hardware-table cpu=0
+len=4096 align=3 iterations=262144 bytes_per_process=1073741824 warmup_bytes_per_process=67108864 address_mod_64_values=19
+table elapsed: n=12 median=2886.314518500ms mad=0.317119000ms min=2885.970044000ms max=2968.621939000ms
+table throughput: n=12 median=0.372011372GB/s mad=0.000040872GB/s min=0.361697059GB/s max=0.372055776GB/s
+table setup: n=12 median=0.043777000ms mad=0.000206500ms min=0.043540000ms max=0.050031000ms
+table launch_to_exit: n=12 median=3070.065097500ms mad=0.316111500ms min=3069.677589000ms max=3158.462545000ms
+hardware elapsed: n=12 median=52.687514000ms mad=0.070728500ms min=52.439252000ms max=53.543495000ms
+hardware throughput: n=12 median=20.379436251GB/s mad=0.027348701GB/s min=20.053637216GB/s max=20.475918001GB/s
+hardware setup: n=12 median=0.032946500ms mad=0.000131500ms min=0.032699000ms max=0.033514000ms
+hardware launch_to_exit: n=12 median=58.998178500ms mad=0.135959500ms min=58.701694000ms max=60.982701000ms
+paired table_elapsed/hardware_elapsed (hardware_speedup): pairs=12 median=54.830320600x mad=0.081289510x min=54.190398572x max=56.097519448x geomean=54.891505315x pooled_descriptive_log_ratio_t95_mean_ci=[54.617410862x,55.166975295x] ci_scope=between_pair_process_variation ci_assumptions=iid_pairs_and_approximately_normal_log_ratios
+paired hardware_speedup order=table-hardware: pairs=6 median=54.845781431x mad=0.089285015x min=54.697889020x max=56.097519448x exact96.875%_median_interval=[54.697889020x,56.097519448x] interval_assumptions=iid_continuous_ratios_within_order_stratum
+paired hardware_speedup order=hardware-table: pairs=6 median=54.781671783x mad=0.075301730x min=54.190398572x max=55.014445425x exact96.875%_median_interval=[54.190398572x,55.014445425x] interval_assumptions=iid_continuous_ratios_within_order_stratum

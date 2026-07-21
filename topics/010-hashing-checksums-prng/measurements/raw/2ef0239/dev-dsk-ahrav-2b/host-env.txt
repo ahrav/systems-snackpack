@@ -1,0 +1,110 @@
+captured_utc=2026-07-20T14:41:48Z
+host_alias=dev-dsk-ahrav-2b
+host_fqdn=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+source_kind=archive
+source_commit=2ef02391a7f2e68587cbf8f18494b73331f9a4d8
+source_archive_sha256=3b0c06b53e402bf9bb74ac24da77e326419607f9f37af47b7ca3a78e45d91598
+cpu=0
+pairs=12
+len=4096
+align=3
+iterations=262144
+RUSTFLAGS=-C target-cpu=native -C debuginfo=1 -C codegen-units=1
+CARGO_INCREMENTAL=0
+uname_machine=aarch64
+kernel_release=6.12.94-123.180.amzn2023.aarch64
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.94-123.180.amzn2023.aarch64 #1 SMP Thu Jul  9 21:13:38 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+Architecture:                            aarch64
+CPU op-mode(s):                          32-bit, 64-bit
+Byte Order:                              Little Endian
+CPU(s):                                  64
+On-line CPU(s) list:                     0-63
+Vendor ID:                               ARM
+Model:                                   1
+Thread(s) per core:                      1
+Core(s) per socket:                      64
+Socket(s):                               1
+Stepping:                                r1p1
+BogoMIPS:                                2100.00
+Flags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng
+L1d cache:                               4 MiB (64 instances)
+L1i cache:                               4 MiB (64 instances)
+L2 cache:                                64 MiB (64 instances)
+L3 cache:                                32 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-63
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; CSV2, BHB
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+available_cpus=64
+cpus_allowed=pid 3565559's current affinity list: 0-63
+rustc 1.95.0 (59807616e 2026-04-14)
+binary: rustc
+commit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860
+commit-date: 2026-04-14
+host: aarch64-unknown-linux-gnu
+release: 1.95.0
+LLVM version: 22.1.2
+cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+clang=absent
+stable-aarch64-unknown-linux-gnu (default)
+GNU objdump version 2.41-50.amzn2023.0.5
+Copyright (C) 2023 Free Software Foundation, Inc.
+This program is free software; you may redistribute it under the terms of
+the GNU General Public License version 3 or (at your option) any later version.
+This program has absolutely no warranty.
+target_arch="aarch64"
+target_endian="little"
+target_feature="aes"
+target_feature="bf16"
+target_feature="crc"
+target_feature="dit"
+target_feature="dotprod"
+target_feature="dpb"
+target_feature="dpb2"
+target_feature="fcma"
+target_feature="fhm"
+target_feature="flagm"
+target_feature="fp16"
+target_feature="i8mm"
+target_feature="jsconv"
+target_feature="lor"
+target_feature="lse"
+target_feature="neon"
+target_feature="paca"
+target_feature="pacg"
+target_feature="pan"
+target_feature="pmuv3"
+target_feature="rand"
+target_feature="ras"
+target_feature="rcpc"
+target_feature="rcpc2"
+target_feature="rdm"
+target_feature="sha2"
+target_feature="sha3"
+target_feature="sm4"
+target_feature="spe"
+target_feature="ssbs"
+target_feature="sve"
+target_feature="vh"
+target_pointer_width="64"
+target_vendor="unknown"

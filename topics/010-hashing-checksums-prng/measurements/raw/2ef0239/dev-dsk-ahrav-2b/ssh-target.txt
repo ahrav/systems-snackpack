@@ -1,0 +1,3 @@
+requested_fqdn=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+resolved_fqdn=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+host_alias=dev-dsk-ahrav-2b

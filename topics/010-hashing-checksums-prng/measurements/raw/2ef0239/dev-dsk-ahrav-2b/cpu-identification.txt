@@ -1,0 +1,9 @@
+captured_after_benchmark_utc=2026-07-20T14:46:06Z
+cpu=0
+midr_el1=0x00000000411fd401
+implementer=0x41
+architecture=8
+variant=0x1
+part=0xd40
+revision=1
+evidence_source=/sys/devices/system/cpu/cpu0/regs/identification/midr_el1 and first /proc/cpuinfo record

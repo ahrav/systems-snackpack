@@ -1,0 +1,18 @@
+   Compiling systems-snackpack-topic-010 v0.1.0 (/tmp/topic10-2ef0239-yT26Ko/source/topics/010-hashing-checksums-prng)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s
+     Running unittests src/lib.rs (/tmp/topic10-2ef0239-yT26Ko/evidence/target/debug/deps/systems_snackpack_topic_010-8099595fe4082593)
+
+running 4 tests
+test tests::kernel_metadata_matches_selection ... ok
+test tests::standard_check_vectors_distinguish_the_polynomials ... ok
+test tests::empty_and_fragmented_updates_match_the_oracle ... ok
+test tests::every_short_length_and_offset_matches ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+     Running unittests examples/check_equivalence.rs (/tmp/topic10-2ef0239-yT26Ko/evidence/target/debug/examples/check_equivalence-a4d5be0ada5053a5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
