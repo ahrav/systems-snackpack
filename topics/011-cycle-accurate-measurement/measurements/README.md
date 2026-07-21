@@ -4,7 +4,8 @@ A host record applies to one commit-bound source archive, benchmark binary,
 host, and 12-process design. The runner builds only a temporary extraction of
 the verified archive and removes it on exit. Each host directory retains
 environment, correctness, workspace gates, counter probe, raw process output,
-summary, source hashes, binary hash, and linked code generation.
+summary, pre-build source hashes, their post-build verification, binary hash,
+and linked code generation.
 
 A final record is complete only after the harness and record review establish
 all of these conditions:
@@ -14,6 +15,8 @@ all of these conditions:
 - the build runs from the verified extraction with `CARGO_ENCODED_RUSTFLAGS`,
   `RUSTC_WRAPPER`, and `RUSTC_WORKSPACE_WRAPPER` cleared and the recorded native
   `RUSTFLAGS` applied;
+- source is inventoried before Cargo runs, every build uses `--locked`, and the
+  post-build source verification matches every inventoried file;
 - portable conversion and recurrence checks pass;
 - both probes start and end on CPU 0, advance at least once, and report no
   backward values;

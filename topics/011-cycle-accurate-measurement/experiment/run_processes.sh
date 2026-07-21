@@ -88,18 +88,23 @@ cd -- "$repo_root"
 
 mkdir -p -- "$output_dir/gates"
 
+# Bind the source inventory before any Cargo subcommand can touch the lockfile.
+{
+  rg --files Cargo.toml Cargo.lock rust-toolchain.toml topics/011-cycle-accurate-measurement
+} | sort | xargs sha256sum >"$output_dir/source-files.sha256"
+
 # Prevent inherited encoded flags and compiler wrappers from changing the build.
 unset CARGO_ENCODED_RUSTFLAGS RUSTC_WORKSPACE_WRAPPER RUSTC_WRAPPER
 export RUSTFLAGS="-C target-cpu=native -C debuginfo=1 -C codegen-units=1"
 
 cargo fmt --all -- --check >"$output_dir/gates/cargo-fmt.log" 2>&1
-cargo test --workspace --lib --examples >"$output_dir/gates/cargo-test-lib-examples.log" 2>&1
-cargo test --workspace --doc >"$output_dir/gates/cargo-test-doc.log" 2>&1
-cargo clippy --workspace --all-targets -- -D warnings >"$output_dir/gates/cargo-clippy.log" 2>&1
-cargo bench --workspace --no-run >"$output_dir/gates/cargo-bench-no-run.log" 2>&1
-RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps >"$output_dir/gates/cargo-doc.log" 2>&1
+cargo test --locked --workspace --lib --examples >"$output_dir/gates/cargo-test-lib-examples.log" 2>&1
+cargo test --locked --workspace --doc >"$output_dir/gates/cargo-test-doc.log" 2>&1
+cargo clippy --locked --workspace --all-targets -- -D warnings >"$output_dir/gates/cargo-clippy.log" 2>&1
+cargo bench --locked --workspace --no-run >"$output_dir/gates/cargo-bench-no-run.log" 2>&1
+RUSTDOCFLAGS="-D warnings" cargo doc --locked --workspace --no-deps >"$output_dir/gates/cargo-doc.log" 2>&1
 
-cargo build --release -p systems-snackpack-topic-011 --bench cycle_probe \
+cargo build --locked --release -p systems-snackpack-topic-011 --bench cycle_probe \
   --message-format=json-render-diagnostics >"$output_dir/cargo-build.jsonl" 2>"$output_dir/cargo-build.stderr"
 benchmark=$(python3 "$script_dir/summarize.py" --locate-bench cycle_probe systems-snackpack-topic-011 \
   <"$output_dir/cargo-build.jsonl")
@@ -202,10 +207,7 @@ done
 printf 'SESSION_END processes=%s\n' "$processes" >>"$output_dir/processes.txt"
 
 python3 "$script_dir/summarize.py" "$output_dir/processes.txt" >"$output_dir/summary.txt"
-
-{
-  rg --files Cargo.toml Cargo.lock rust-toolchain.toml topics/011-cycle-accurate-measurement
-} | sort | xargs sha256sum >"$output_dir/source-files.sha256"
+sha256sum -c "$output_dir/source-files.sha256" >"$output_dir/source-files-verify.log"
 
 printf 'evidence_dir=%s\n' "$output_dir"
 awk '1' "$output_dir/summary.txt"

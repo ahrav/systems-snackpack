@@ -177,9 +177,11 @@ SOURCE_ARCHIVE=/tmp/systems-snackpack-topic-011-source.tar.gz \
 the SHA-256 and embedded commit, extracts a scratch tree, and builds only that
 tree. It removes the scratch tree on exit. Before building, it clears
 `CARGO_ENCODED_RUSTFLAGS`, `RUSTC_WRAPPER`, and `RUSTC_WORKSPACE_WRAPPER`, then
-sets the recorded native `RUSTFLAGS`. The harness runs workspace gates, selects
-the Cargo-produced benchmark from JSON, executes the 12-process design,
-validates the log, and captures code generation.
+sets the recorded native `RUSTFLAGS`. It inventories source before any Cargo
+subcommand, uses `--locked` for every build gate, and verifies the inventory
+again after the run. The harness selects the Cargo-produced benchmark from
+JSON, executes the 12-process design, validates the log, and captures code
+generation.
 
 Read [Round 1](rounds/01.md), the [measurement boundary](measurements/README.md),
 the [recorded result](measurements/2026-07-21-cross-host.md), and the
