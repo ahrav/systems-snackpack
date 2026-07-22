@@ -35,17 +35,21 @@ if [[ -z ${SOURCE_ARCHIVE:-} || $SOURCE_ARCHIVE != /* || ! -f $SOURCE_ARCHIVE ]]
   exit 2
 fi
 
-observed_archive_sha=$(sha256sum "$SOURCE_ARCHIVE" | awk '{print $1}')
+# Read SOURCE_ARCHIVE exactly once into private copies. The hash check, the
+# commit check, and the build-tree extraction all consume these pinned copies,
+# so the verified bytes and the built bytes cannot diverge if the path is
+# rewritten mid-run (TOCTOU).
+archive_gz=$(mktemp)
+archive_tar=$(mktemp)
+trap 'rm -f -- "$archive_gz" "$archive_tar"' EXIT
+cp -- "$SOURCE_ARCHIVE" "$archive_gz"
+observed_archive_sha=$(sha256sum "$archive_gz" | awk '{print $1}')
 if [[ $observed_archive_sha != "$source_archive_sha256" ]]; then
   echo "source archive SHA-256 mismatch" >&2
   exit 2
 fi
-archive_tar=$(mktemp)
-trap 'rm -f -- "$archive_tar"' EXIT
-gzip -dc "$SOURCE_ARCHIVE" >"$archive_tar"
+gzip -dc "$archive_gz" >"$archive_tar"
 archive_commit=$(git get-tar-commit-id <"$archive_tar")
-rm -f -- "$archive_tar"
-trap - EXIT
 if [[ $archive_commit != "$source_commit" ]]; then
   echo "source archive commit differs from SOURCE_COMMIT" >&2
   exit 2
@@ -60,14 +64,18 @@ if [[ -z ${TOPIC11_INTERNAL_MARKER:-} ]]; then
   internal_marker=$(mktemp)
   printf '%s\t%s\t%s\n' "$extracted_root" "$source_commit" "$source_archive_sha256" \
     >"$internal_marker"
-  trap 'rm -rf -- "$extracted_root"; rm -f -- "$internal_marker"' EXIT
-  tar -xzf "$SOURCE_ARCHIVE" -C "$extracted_root"
+  trap 'rm -rf -- "$extracted_root"; rm -f -- "$internal_marker" "$archive_gz" "$archive_tar"' EXIT
+  # Extract the pinned decompressed copy — the same bytes the hash and commit
+  # checks verified — never the caller-controlled SOURCE_ARCHIVE path.
+  tar -xf "$archive_tar" -C "$extracted_root"
   child_status=0
-  env TOPIC11_INTERNAL_MARKER="$internal_marker" SOURCE_ARCHIVE="$SOURCE_ARCHIVE" \
+  # Hand the child the pinned compressed copy so its re-verification binds to
+  # the identical bytes.
+  env TOPIC11_INTERNAL_MARKER="$internal_marker" SOURCE_ARCHIVE="$archive_gz" \
     "$extracted_root/topics/011-cycle-accurate-measurement/experiment/run_processes.sh" "$@" \
     || child_status=$?
   rm -rf -- "$extracted_root"
-  rm -f -- "$internal_marker"
+  rm -f -- "$internal_marker" "$archive_gz" "$archive_tar"
   trap - EXIT
   exit "$child_status"
 fi
