@@ -1,7 +1,9 @@
 # Measurement records
 
-The final record set will contain one host note per required Linux target, one
-cross-host note, and raw evidence under `raw/<source-prefix>/<host>/`.
+The record set contains the [AArch64 host note](2026-07-22-dev-dsk-ahrav-2b.md),
+the [xlg host note](2026-07-22-xlg.md), the
+[cross-host comparison](2026-07-22-cross-host.md), and raw evidence under
+[`raw/bdd17c6/`](raw/bdd17c6/).
 
 Every host record must retain:
 

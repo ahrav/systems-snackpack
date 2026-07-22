@@ -1,0 +1,15 @@
+Cargo.lock: OK
+Cargo.toml: OK
+rust-toolchain.toml: OK
+topics/012-mmap-page-faults/Cargo.toml: OK
+topics/012-mmap-page-faults/README.md: OK
+topics/012-mmap-page-faults/benches/fault_cost_model.rs: OK
+topics/012-mmap-page-faults/examples/check_contracts.rs: OK
+topics/012-mmap-page-faults/experiment/run_one.py: OK
+topics/012-mmap-page-faults/experiment/run_processes.sh: OK
+topics/012-mmap-page-faults/experiment/summarize.py: OK
+topics/012-mmap-page-faults/experiment/vm_faults.c: OK
+topics/012-mmap-page-faults/measurements/README.md: OK
+topics/012-mmap-page-faults/references.md: OK
+topics/012-mmap-page-faults/rounds/01.md: OK
+topics/012-mmap-page-faults/src/lib.rs: OK

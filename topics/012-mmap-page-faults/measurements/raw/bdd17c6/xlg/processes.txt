@@ -1,0 +1,66 @@
+SESSION_START host_alias=xlg source_commit=bdd17c6947fbf66207e4bf7204a786d996bad83b source_archive_sha256=74738647fce356a0db4e6901f668ea5cb956778030bbc8300187057c16d5a83b cpu=0 blocks=8 mib=32
+PROCESS_START run_id=b01-p1 block=1 position=1 mode=anon-first
+PROCESS_END run_id=b01-p1 external_wall_ns=20174650
+PROCESS_START run_id=b01-p2 block=1 position=2 mode=anon-refault
+PROCESS_END run_id=b01-p2 external_wall_ns=26623004
+PROCESS_START run_id=b01-p3 block=1 position=3 mode=file-warm
+PROCESS_END run_id=b01-p3 external_wall_ns=27521299
+PROCESS_START run_id=b01-p4 block=1 position=4 mode=file-cold
+PROCESS_END run_id=b01-p4 external_wall_ns=4754626007
+PROCESS_START run_id=b02-p1 block=2 position=1 mode=anon-refault
+PROCESS_END run_id=b02-p1 external_wall_ns=27920561
+PROCESS_START run_id=b02-p2 block=2 position=2 mode=file-warm
+PROCESS_END run_id=b02-p2 external_wall_ns=27595760
+PROCESS_START run_id=b02-p3 block=2 position=3 mode=file-cold
+PROCESS_END run_id=b02-p3 external_wall_ns=4747605483
+PROCESS_START run_id=b02-p4 block=2 position=4 mode=anon-first
+PROCESS_END run_id=b02-p4 external_wall_ns=20029409
+PROCESS_START run_id=b03-p1 block=3 position=1 mode=file-warm
+PROCESS_END run_id=b03-p1 external_wall_ns=18171222
+PROCESS_START run_id=b03-p2 block=3 position=2 mode=file-cold
+PROCESS_END run_id=b03-p2 external_wall_ns=4744746432
+PROCESS_START run_id=b03-p3 block=3 position=3 mode=anon-first
+PROCESS_END run_id=b03-p3 external_wall_ns=20344940
+PROCESS_START run_id=b03-p4 block=3 position=4 mode=anon-refault
+PROCESS_END run_id=b03-p4 external_wall_ns=27810000
+PROCESS_START run_id=b04-p1 block=4 position=1 mode=file-cold
+PROCESS_END run_id=b04-p1 external_wall_ns=4813656760
+PROCESS_START run_id=b04-p2 block=4 position=2 mode=anon-first
+PROCESS_END run_id=b04-p2 external_wall_ns=20726141
+PROCESS_START run_id=b04-p3 block=4 position=3 mode=anon-refault
+PROCESS_END run_id=b04-p3 external_wall_ns=26590555
+PROCESS_START run_id=b04-p4 block=4 position=4 mode=file-warm
+PROCESS_END run_id=b04-p4 external_wall_ns=24800169
+PROCESS_START run_id=b05-p1 block=5 position=1 mode=file-cold
+PROCESS_END run_id=b05-p1 external_wall_ns=4770114363
+PROCESS_START run_id=b05-p2 block=5 position=2 mode=file-warm
+PROCESS_END run_id=b05-p2 external_wall_ns=39500446
+PROCESS_START run_id=b05-p3 block=5 position=3 mode=anon-refault
+PROCESS_END run_id=b05-p3 external_wall_ns=27280638
+PROCESS_START run_id=b05-p4 block=5 position=4 mode=anon-first
+PROCESS_END run_id=b05-p4 external_wall_ns=19828758
+PROCESS_START run_id=b06-p1 block=6 position=1 mode=anon-first
+PROCESS_END run_id=b06-p1 external_wall_ns=19982828
+PROCESS_START run_id=b06-p2 block=6 position=2 mode=file-cold
+PROCESS_END run_id=b06-p2 external_wall_ns=4751329409
+PROCESS_START run_id=b06-p3 block=6 position=3 mode=file-warm
+PROCESS_END run_id=b06-p3 external_wall_ns=53381940
+PROCESS_START run_id=b06-p4 block=6 position=4 mode=anon-refault
+PROCESS_END run_id=b06-p4 external_wall_ns=27454248
+PROCESS_START run_id=b07-p1 block=7 position=1 mode=anon-refault
+PROCESS_END run_id=b07-p1 external_wall_ns=26969458
+PROCESS_START run_id=b07-p2 block=7 position=2 mode=anon-first
+PROCESS_END run_id=b07-p2 external_wall_ns=19540026
+PROCESS_START run_id=b07-p3 block=7 position=3 mode=file-cold
+PROCESS_END run_id=b07-p3 external_wall_ns=4747032501
+PROCESS_START run_id=b07-p4 block=7 position=4 mode=file-warm
+PROCESS_END run_id=b07-p4 external_wall_ns=42978689
+PROCESS_START run_id=b08-p1 block=8 position=1 mode=file-warm
+PROCESS_END run_id=b08-p1 external_wall_ns=41655014
+PROCESS_START run_id=b08-p2 block=8 position=2 mode=anon-refault
+PROCESS_END run_id=b08-p2 external_wall_ns=26913905
+PROCESS_START run_id=b08-p3 block=8 position=3 mode=anon-first
+PROCESS_END run_id=b08-p3 external_wall_ns=19478306
+PROCESS_START run_id=b08-p4 block=8 position=4 mode=file-cold
+PROCESS_END run_id=b08-p4 external_wall_ns=4745002847
+SESSION_END processes=32

@@ -1,0 +1,30 @@
+0000000000401a90 <touch_read_pages>:
+  401a90:	test   rsi,rsi
+  401a93:	je     401ae3 <touch_read_pages+0x53>
+  401a95:	cmp    rdx,0x1
+  401a99:	jne    401ac2 <touch_read_pages+0x32>
+  401a9b:	add    rsi,rdi
+  401a9e:	xor    r8d,r8d
+  401aa1:	data16 cs nop WORD PTR [rax+rax*1+0x0]
+  401aac:	nop    DWORD PTR [rax+0x0]
+  401ab0:	movzx  eax,BYTE PTR [rdi]
+  401ab3:	inc    rdi
+  401ab6:	add    r8,rax
+  401ab9:	cmp    rdi,rsi
+  401abc:	jne    401ab0 <touch_read_pages+0x20>
+  401abe:	mov    rax,r8
+  401ac1:	ret
+  401ac2:	xor    ecx,ecx
+  401ac4:	xor    r8d,r8d
+  401ac7:	nop    WORD PTR [rax+rax*1+0x0]
+  401ad0:	movzx  eax,BYTE PTR [rdi]
+  401ad3:	inc    rcx
+  401ad6:	add    rdi,rdx
+  401ad9:	add    r8,rax
+  401adc:	cmp    rsi,rcx
+  401adf:	jne    401ad0 <touch_read_pages+0x40>
+  401ae1:	jmp    401abe <touch_read_pages+0x2e>
+  401ae3:	xor    r8d,r8d
+  401ae6:	jmp    401abe <touch_read_pages+0x2e>
+  401ae8:	nop    DWORD PTR [rax+rax*1+0x0]
+

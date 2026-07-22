@@ -1,0 +1,40 @@
+0000000000401af0 <touch_write_pages>:
+  401af0:	test   rsi,rsi
+  401af3:	je     401b5f <touch_write_pages+0x6f>
+  401af5:	cmp    rdx,0x1
+  401af9:	jne    401b2d <touch_write_pages+0x3d>
+  401afb:	add    rsi,rdi
+  401afe:	mov    edx,0x11
+  401b03:	xor    r8d,r8d
+  401b06:	cs nop WORD PTR [rax+rax*1+0x0]
+  401b10:	mov    eax,edx
+  401b12:	inc    rdi
+  401b15:	sub    edx,0x7d
+  401b18:	or     eax,0x1
+  401b1b:	mov    BYTE PTR [rdi-0x1],al
+  401b1e:	movzx  eax,al
+  401b21:	add    r8,rax
+  401b24:	cmp    rdi,rsi
+  401b27:	jne    401b10 <touch_write_pages+0x20>
+  401b29:	mov    rax,r8
+  401b2c:	ret
+  401b2d:	mov    r9d,0x11
+  401b33:	xor    ecx,ecx
+  401b35:	xor    r8d,r8d
+  401b38:	nop    DWORD PTR [rax+rax*1+0x0]
+  401b40:	mov    eax,r9d
+  401b43:	inc    rcx
+  401b46:	sub    r9d,0x7d
+  401b4a:	or     eax,0x1
+  401b4d:	mov    BYTE PTR [rdi],al
+  401b4f:	movzx  eax,al
+  401b52:	add    rdi,rdx
+  401b55:	add    r8,rax
+  401b58:	cmp    rsi,rcx
+  401b5b:	jne    401b40 <touch_write_pages+0x50>
+  401b5d:	jmp    401b29 <touch_write_pages+0x39>
+  401b5f:	xor    r8d,r8d
+  401b62:	jmp    401b29 <touch_write_pages+0x39>
+  401b64:	data16 cs nop WORD PTR [rax+rax*1+0x0]
+  401b6f:	nop
+

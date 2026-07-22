@@ -1,0 +1,33 @@
+0000000000410ac4 <touch_write_pages>:
+  410ac4:	mov	x3, x0
+  410ac8:	cbz	x1, 410b34 <touch_write_pages+0x70>
+  410acc:	cmp	x2, #0x1
+  410ad0:	b.ne	410b00 <touch_write_pages+0x3c>  // b.any
+  410ad4:	add	x4, x0, x1
+  410ad8:	mov	w2, #0x11                  	// #17
+  410adc:	mov	x0, #0x0                   	// #0
+  410ae0:	orr	w1, w2, #0x1
+  410ae4:	sub	w2, w2, #0x7d
+  410ae8:	add	x0, x0, w1, uxtb
+  410aec:	and	w2, w2, #0xff
+  410af0:	strb	w1, [x3], #1
+  410af4:	cmp	x3, x4
+  410af8:	b.ne	410ae0 <touch_write_pages+0x1c>  // b.any
+  410afc:	ret
+  410b00:	mov	w4, #0x11                  	// #17
+  410b04:	mov	x5, #0x0                   	// #0
+  410b08:	mov	x0, #0x0                   	// #0
+  410b0c:	orr	w6, w4, #0x1
+  410b10:	add	x5, x5, #0x1
+  410b14:	add	x0, x0, w6, uxtb
+  410b18:	sub	w4, w4, #0x7d
+  410b1c:	strb	w6, [x3]
+  410b20:	and	w4, w4, #0xff
+  410b24:	add	x3, x3, x2
+  410b28:	cmp	x1, x5
+  410b2c:	b.ne	410b0c <touch_write_pages+0x48>  // b.any
+  410b30:	ret
+  410b34:	mov	x0, #0x0                   	// #0
+  410b38:	ret
+  410b3c:	nop
+

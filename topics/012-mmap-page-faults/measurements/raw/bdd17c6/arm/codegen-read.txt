@@ -1,0 +1,27 @@
+0000000000410a60 <touch_read_pages>:
+  410a60:	cbz	x1, 410abc <touch_read_pages+0x5c>
+  410a64:	cmp	x2, #0x1
+  410a68:	b.ne	410a94 <touch_read_pages+0x34>  // b.any
+  410a6c:	mov	x2, x0
+  410a70:	mov	x0, #0x0                   	// #0
+  410a74:	add	x1, x2, x1
+  410a78:	nop
+  410a7c:	nop
+  410a80:	ldrb	w3, [x2], #1
+  410a84:	add	x0, x0, w3, uxtb
+  410a88:	cmp	x2, x1
+  410a8c:	b.ne	410a80 <touch_read_pages+0x20>  // b.any
+  410a90:	ret
+  410a94:	mov	x3, x0
+  410a98:	mov	x4, #0x0                   	// #0
+  410a9c:	mov	x0, #0x0                   	// #0
+  410aa0:	ldrb	w5, [x3]
+  410aa4:	add	x4, x4, #0x1
+  410aa8:	add	x3, x3, x2
+  410aac:	add	x0, x0, w5, uxtb
+  410ab0:	cmp	x1, x4
+  410ab4:	b.ne	410aa0 <touch_read_pages+0x40>  // b.any
+  410ab8:	ret
+  410abc:	mov	x0, #0x0                   	// #0
+  410ac0:	ret
+
