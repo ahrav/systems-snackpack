@@ -1,0 +1,2 @@
+4:   189c4:	rdtscp
+11:   189d9:	cpuid

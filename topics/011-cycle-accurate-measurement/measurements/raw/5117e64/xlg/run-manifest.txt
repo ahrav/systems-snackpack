@@ -1,0 +1,8 @@
+source_commit=5117e64d5c5df6ef1615749cacb95eabe38956c0
+source_archive_commit=5117e64d5c5df6ef1615749cacb95eabe38956c0
+source_archive_sha256=8a8ce53a63029ad3b6512b4f3787ae12a57d326af71a0d97420045ff8da3b6cc
+host_alias=xlg
+cpu=0
+processes=12
+samples=500
+rustflags=-C target-cpu=native -C debuginfo=1 -C codegen-units=1

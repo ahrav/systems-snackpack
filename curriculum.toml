@@ -97,3 +97,13 @@ title = "Hashing, checksums, and PRNG selection"
 published = "2026-07-20"
 path = "topics/010-hashing-checksums-prng/rounds/01.md"
 tags = ["hashing", "checksums", "crc32c", "prng", "benchmarking"]
+
+[[session]]
+id = 11
+cycle = 1
+topic_id = 11
+round = 1
+title = "Cycle-accurate measurement"
+published = "2026-07-21"
+path = "topics/011-cycle-accurate-measurement/rounds/01.md"
+tags = ["timestamping", "rdtscp", "cntvct-el0", "fixed-point", "benchmarking"]

@@ -1,0 +1,8 @@
+source_commit=4b00356711a3934fd92ec62a099991a71ecd6529
+source_archive_commit=4b00356711a3934fd92ec62a099991a71ecd6529
+source_archive_sha256=d9952eb769dbf1d8716fa32cebca446e87fbf1948d4388645546896d60b05bc9
+host_alias=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+cpu=0
+processes=12
+samples=500
+rustflags=-C target-cpu=native -C debuginfo=1 -C codegen-units=1
