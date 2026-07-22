@@ -180,8 +180,8 @@ def validate_sequence(
             raise SystemExit("PROCESS_END index differs from PROCESS_START")
         if process_end.get("order") != expected_order:
             raise SystemExit("PROCESS_END order differs from PROCESS_START")
-        if integer(process_end, "external_wall_ns", 1) == 0:
-            raise SystemExit("PROCESS_END must report positive external wall time")
+        # `integer(..., minimum=1)` rejects zero and negative wall times.
+        integer(process_end, "external_wall_ns", 1)
 
     session_end, cursor = require_prefix(lines, cursor, "SESSION_END ")
     if integer(session_end, "processes", 1) != PROCESS_COUNT:

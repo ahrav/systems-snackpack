@@ -49,9 +49,12 @@ pub fn endpoint_delta_ns(
     }
     let start_ns = scale_fixed_point_ticks(start, mult, shift).ok_or(ConversionError::Overflow)?;
     let end_ns = scale_fixed_point_ticks(end, mult, shift).ok_or(ConversionError::Overflow)?;
-    end_ns
+    // `end >= start` here, and for fixed `mult` and `shift` the scaling is a
+    // monotone non-decreasing function of `ticks`, so `end_ns >= start_ns`
+    // and the subtraction cannot underflow.
+    Ok(end_ns
         .checked_sub(start_ns)
-        .ok_or(ConversionError::EndBeforeStart)
+        .expect("monotone fixed-point scaling keeps end_ns >= start_ns"))
 }
 
 /// Returns the minimum batch duration for a two-endpoint quantization budget.

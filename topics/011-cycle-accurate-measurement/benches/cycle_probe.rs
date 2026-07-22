@@ -476,20 +476,31 @@ mod linux {
         for sample in 0..samples {
             state = state.wrapping_add(sample as u64);
             let counter_first = order == "raw-first";
+            // A rejected measurement discards the chain value it computed.
+            // Recomputing that value unmeasured keeps the deterministic
+            // workload progression — and the final checksum — identical to a
+            // rejection-free run, so later samples and the cross-process
+            // checksum comparison never depend on the rejection pattern.
             if counter_first {
                 match measure_counter(counter, state, batch) {
                     Ok((elapsed, next)) => {
                         ticks.push(elapsed);
                         state = next;
                     }
-                    Err(_) => rejected_counter += 1,
+                    Err(_) => {
+                        rejected_counter += 1;
+                        state = dependent_chain(state, batch);
+                    }
                 }
                 match measure_clock(state, batch) {
                     Ok((elapsed, next)) => {
                         nanoseconds.push(elapsed);
                         state = next;
                     }
-                    Err(_) => rejected_clock += 1,
+                    Err(_) => {
+                        rejected_clock += 1;
+                        state = dependent_chain(state, batch);
+                    }
                 }
             } else {
                 match measure_clock(state, batch) {
@@ -497,14 +508,20 @@ mod linux {
                         nanoseconds.push(elapsed);
                         state = next;
                     }
-                    Err(_) => rejected_clock += 1,
+                    Err(_) => {
+                        rejected_clock += 1;
+                        state = dependent_chain(state, batch);
+                    }
                 }
                 match measure_counter(counter, state, batch) {
                     Ok((elapsed, next)) => {
                         ticks.push(elapsed);
                         state = next;
                     }
-                    Err(_) => rejected_counter += 1,
+                    Err(_) => {
+                        rejected_counter += 1;
+                        state = dependent_chain(state, batch);
+                    }
                 }
             }
         }
