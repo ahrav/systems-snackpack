@@ -43,3 +43,12 @@ byte pattern `(j * 29 + 7) & 0xff`, whose page-aligned bytes were uniform, so
 their file checksums read `57344` rather than the per-page-varying sums the
 current workload and validator use; each retained run validates against the
 archived code it was produced by, not against a later validator.
+
+The evidence source tree stays reachable through the annotated tag
+`topic12-evidence-bdd17c6`, which points at commit
+`bdd17c6947fbf66207e4bf7204a786d996bad83b`. Merge strategies that do not keep
+the PR branch's commits in the mainline history would otherwise strand the
+recorded `source_commit`: the raw rows and archive SHA-256 would survive, but
+no reachable tree could be inspected or re-archived. `git archive` of the tag
+reproduces the measured tree, and the retained archive's embedded commit id
+(`git get-tar-commit-id`) binds the evidence to exactly that commit.

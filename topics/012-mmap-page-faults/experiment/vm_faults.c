@@ -78,15 +78,19 @@ static void write_file(int fd, size_t len) {
     if (chunk == NULL) {
         fail("malloc file chunk");
     }
-    for (size_t i = 0; i < chunk_len; ++i) {
-        // The (i >> 12) term varies the byte across 4 KiB units, so the first
-        // byte of every base page differs from its neighbors; a traversal that
-        // rereads one resident page cannot reproduce the whole-file checksum.
-        chunk[i] = (unsigned char)((((i >> 12) * 131U) + (i * 29U) + 7U) & 0xffU);
-    }
     size_t done = 0;
     while (done < len) {
         const size_t want = len - done < chunk_len ? len - done : chunk_len;
+        // Derive every byte from its absolute file offset. The multiplicative
+        // hash of the 4 KiB unit index keeps the page-first byte sequence
+        // aperiodic across the whole file, so no truncated traversal that
+        // rereads a window of resident pages can reproduce the checksum that
+        // one read per page produces.
+        for (size_t i = 0; i < want; ++i) {
+            const uint64_t offset = done + i;
+            const uint64_t page_hash = ((offset >> 12) * 2654435761ULL) >> 16;
+            chunk[i] = (unsigned char)((page_hash + offset * 29U + 7U) & 0xffU);
+        }
         ssize_t n = write(fd, chunk, want);
         if (n < 0) {
             if (errno == EINTR) {

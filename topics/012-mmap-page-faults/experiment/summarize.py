@@ -202,19 +202,19 @@ def expected_anon_first_checksum(pages: int) -> int:
 def expected_file_checksum(pages: int, page_size: int) -> int:
     """Recompute the checksum touch_read_pages() in vm_faults.c must report.
 
-    write_file() fills the benchmark file with 1 MiB chunks whose byte ``j``
-    is ``(((j >> 12) * 131) + j * 29 + 7) & 0xff``; the ``j >> 12`` term
-    varies the byte across 4 KiB units so page-aligned offsets carry distinct
-    values and a same-page-repeat traversal cannot reproduce this sum. The
-    read loop sums the first byte of each page, i.e. the chunk byte at offset
-    ``(i * page_size) % chunk_len``.
+    write_file() derives the byte at absolute file offset ``o`` from
+    ``((((o >> 12) * 2654435761) >> 16) + o * 29 + 7) & 0xff``. The
+    multiplicative hash of the 4 KiB unit index keeps the page-first byte
+    sequence aperiodic across the whole file, so a traversal that rereads a
+    resident window of pages cannot reproduce the sum that one read per page
+    produces. The read loop sums the first byte of each page.
     """
-    chunk_len = 1 << 20
 
-    def chunk_byte(offset: int) -> int:
-        return (((offset >> 12) * 131) + offset * 29 + 7) & 0xFF
+    def file_byte(offset: int) -> int:
+        page_hash = ((offset >> 12) * 2654435761) >> 16
+        return (page_hash + offset * 29 + 7) & 0xFF
 
-    return sum(chunk_byte((index * page_size) % chunk_len) for index in range(pages))
+    return sum(file_byte(index * page_size) for index in range(pages))
 
 
 def median_absolute_deviation(values: list[float]) -> float:
