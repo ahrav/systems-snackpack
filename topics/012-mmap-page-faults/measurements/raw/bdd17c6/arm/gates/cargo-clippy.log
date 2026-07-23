@@ -1,0 +1,13 @@
+    Checking systems-snackpack-topic-004 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/004-reading-assembly-performance)
+    Checking systems-snackpack-topic-008 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/008-tlbs-address-translation)
+    Checking systems-snackpack-topic-002 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/002-intrinsics-vs-assembly)
+    Checking systems-snackpack-topic-007 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/007-branchless-predictable-control-flow)
+    Checking systems-snackpack-topic-001 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/001-swar-simd-scalar)
+    Checking systems-snackpack-topic-003 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/003-linux-perf-workflow)
+    Checking systems-snackpack-topic-009 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/009-succinct-static-index-structures)
+    Checking systems-snackpack-topic-006 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/006-ngram-text-indexing)
+    Checking systems-snackpack-topic-012 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/012-mmap-page-faults)
+    Checking systems-snackpack-topic-010 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/010-hashing-checksums-prng)
+    Checking systems-snackpack-topic-011 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/011-cycle-accurate-measurement)
+    Checking systems-snackpack-topic-005 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/005-webassembly-performance-model)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.41s

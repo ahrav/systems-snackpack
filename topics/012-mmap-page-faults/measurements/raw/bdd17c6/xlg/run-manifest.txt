@@ -1,0 +1,14 @@
+source_commit=bdd17c6947fbf66207e4bf7204a786d996bad83b
+source_archive_embedded_commit=bdd17c6947fbf66207e4bf7204a786d996bad83b
+source_archive_sha256=74738647fce356a0db4e6901f668ea5cb956778030bbc8300187057c16d5a83b
+executing_driver_sha256=d439df3df286dbce573f5e2b09eb3df6d5cb76079dec527dd01baacbe26e35c6
+archived_driver_sha256=d439df3df286dbce573f5e2b09eb3df6d5cb76079dec527dd01baacbe26e35c6
+host_alias=xlg
+resolved_hostname=dev-dsk-ahrav-2c-a9191cb6.us-west-2.amazon.com
+cpu=0
+blocks=8
+mib=32
+file_dir=/local/home/ahrav
+file_fstype=xfs
+c_flags=-O3 -std=c11 -Wall -Wextra -Werror -fno-omit-frame-pointer -march=native
+rustflags=-C target-cpu=native -C debuginfo=1 -C codegen-units=1

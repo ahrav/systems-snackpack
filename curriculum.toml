@@ -107,3 +107,13 @@ title = "Cycle-accurate measurement"
 published = "2026-07-21"
 path = "topics/011-cycle-accurate-measurement/rounds/01.md"
 tags = ["timestamping", "rdtscp", "cntvct-el0", "fixed-point", "benchmarking"]
+
+[[session]]
+id = 12
+cycle = 1
+topic_id = 12
+round = 1
+title = "mmap and virtual-memory behavior: minor and major page faults"
+published = "2026-07-22"
+path = "topics/012-mmap-page-faults/rounds/01.md"
+tags = ["mmap", "page-faults", "page-cache", "virtual-memory", "benchmarking"]

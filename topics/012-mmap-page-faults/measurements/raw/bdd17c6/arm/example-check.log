@@ -1,0 +1,4 @@
+   Compiling systems-snackpack-topic-012 v0.1.0 (/tmp/tmp.bQosFwo9tF/topics/012-mmap-page-faults)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.17s
+     Running `target/debug/examples/check_contracts`
+validated cold-file evidence and eight-block schedule

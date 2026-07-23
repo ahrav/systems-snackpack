@@ -1,0 +1,24 @@
+replication_unit=fresh-process processes_per_mode=8 blocks=8
+page_size=4096 pages=8192
+MODE anon-first
+touch_median=14.845654500ms touch_mean=14.935327000ms touch_sample_sd=0.500035551ms touch_mad=0.370845000ms touch_range=[14.414730000,15.702389000]ms
+setup_median=0.078520000ms setup_mean=0.078663625ms setup_sample_sd=0.007814971ms setup_mad=0.006955000ms setup_range=[0.068749000,0.090380000]ms
+external_wall_median=20.006118500ms external_wall_mean=20.013132250ms external_wall_sample_sd=0.412243276ms external_wall_mad=0.258091000ms external_wall_range=[19.478306000,20.726141000]ms
+minflt_range=[8192,8192] majflt_range=[0,0]
+MODE anon-refault
+touch_median=6.882309000ms touch_mean=6.904039250ms touch_sample_sd=0.074914903ms touch_mad=0.013874500ms touch_range=[6.847229000,7.084959000]ms
+setup_median=17.044769000ms setup_mean=16.887975250ms setup_sample_sd=0.416942087ms setup_mad=0.185075000ms setup_range=[16.018969000,17.249249000]ms
+external_wall_median=27.125048000ms external_wall_mean=27.195296125ms external_wall_sample_sd=0.507321148ms external_wall_mad=0.415622000ms external_wall_range=[26.590555000,27.920561000]ms
+minflt_range=[8192,8192] majflt_range=[0,0]
+MODE file-warm
+touch_median=1.349075000ms touch_mean=1.364795000ms touch_sample_sd=0.102673986ms touch_mad=0.071580000ms touch_range=[1.238650000,1.530570000]ms
+setup_median=28.909618000ms setup_mean=29.642808250ms setup_sample_sd=11.695425805ms setup_mad=8.184064500ms setup_range=[13.325760000,48.826937000]ms
+external_wall_median=33.548103000ms external_wall_mean=34.450567375ms external_wall_sample_sd=11.721052319ms external_wall_mad=8.427422500ms external_wall_range=[18.171222000,53.381940000]ms
+minflt_range=[512,512] majflt_range=[0,0]
+MODE file-cold
+touch_median=4722.963078500ms touch_mean=4730.475993000ms touch_sample_sd=17.756816896ms touch_mad=1.320240500ms touch_range=[4717.707519000,4770.507826000]ms
+setup_median=21.492368500ms setup_mean=21.185253625ms setup_sample_sd=6.821737320ms setup_mad=4.067654500ms setup_range=[14.390070000,35.136527000]ms
+external_wall_median=4749.467446000ms external_wall_mean=4759.264225250ms external_wall_sample_sd=23.483861579ms external_wall_mad=4.592806500ms external_wall_range=[4744.746432000,4813.656760000]ms
+minflt_range=[0,0] majflt_range=[8192,8192]
+PAIRED anon_first_over_refault_read geometric_mean=2.162332205x median=2.160942777x sample_sd=0.083361116x range=[2.047236971,2.281216863]x
+PAIRED cold_over_warm_file geometric_mean=3474.537294992x median=3503.583523489x sample_sd=260.297056128x range=[3084.579260014,3812.951308279]x
