@@ -110,6 +110,28 @@ pub const fn balanced_schedule() -> [[&'static str; 4]; 8] {
     ]
 }
 
+/// Reports whether a schedule satisfies the order-balance contract.
+///
+/// A balanced schedule places all four modes in every block and places every
+/// mode in each ordinal position exactly twice. Both conditions are required:
+/// position balance alone admits blocks that repeat a mode.
+pub fn schedule_is_order_balanced(schedule: &[[&'static str; 4]; 8]) -> bool {
+    let modes = ["anon-first", "anon-refault", "file-warm", "file-cold"];
+    let blocks_complete = schedule
+        .iter()
+        .all(|block| modes.iter().all(|mode| block.contains(mode)));
+    let positions_balanced = modes.iter().all(|mode| {
+        (0..4).all(|position| {
+            schedule
+                .iter()
+                .filter(|block| block[position] == *mode)
+                .count()
+                == 2
+        })
+    });
+    blocks_complete && positions_balanced
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -198,5 +220,22 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn balance_validator_accepts_the_schedule_and_rejects_violations() {
+        assert!(schedule_is_order_balanced(&balanced_schedule()));
+
+        // Repeating a mode within a block keeps position counts plausible in
+        // that block yet must fail the block-completeness condition.
+        let mut duplicated_mode = balanced_schedule();
+        duplicated_mode[0] = ["anon-first", "anon-first", "file-warm", "file-cold"];
+        assert!(!schedule_is_order_balanced(&duplicated_mode));
+
+        // Swapping two positions in one block preserves completeness yet must
+        // fail the position-balance condition.
+        let mut unbalanced_positions = balanced_schedule();
+        unbalanced_positions[0] = ["anon-refault", "anon-first", "file-warm", "file-cold"];
+        assert!(!schedule_is_order_balanced(&unbalanced_positions));
     }
 }

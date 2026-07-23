@@ -28,6 +28,9 @@
 - [Crotty, Leis, and Pavlo, CIDR 2022](https://db.cs.cmu.edu/papers/2022/cidr2022-p13-crotty.pdf):
   scoped DBMS evidence for mmap behavior under eviction and storage parallelism.
 
-The interface ledger uses Linux man-pages 6.18 and upstream Linux v6.18.
-Recorded hosts may run vendor kernels with backports, so host records retain the
-exact kernel and observed generated code.
+The interface ledger uses Linux man-pages 6.18 and upstream Linux v6.18. The
+man7.org links above render the current man-pages release rather than a pinned
+one; they were retrieved on 2026-07-22, when man7.org served release 6.18 (each
+page's colophon states the release it was generated from). Recorded hosts may
+run vendor kernels with backports, so host records retain the exact kernel and
+observed generated code.

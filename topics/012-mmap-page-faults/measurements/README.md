@@ -29,9 +29,10 @@ behavior, device-cache-cold performance, or a universal major/minor ratio.
 
 The `vm_faults.sha256` files under `raw/bdd17c6/` name the transient run
 directory, so `sha256sum -c vm_faults.sha256` fails after relocation into this
-repository. Verify the retained binaries through each directory's `SHA256SUMS`
-instead, which names `./vm_faults` relative to its own location; the digest on
-its `vm_faults` line equals the digest inside `vm_faults.sha256`. The retained
-files stay byte-identical to what the recorded runs produced rather than being
-edited after the fact. The runner now writes relative names, so later evidence
-does not carry this wart.
+repository. Verify from inside each evidence directory instead, for example
+`cd raw/bdd17c6/arm && sha256sum -c SHA256SUMS` (and likewise for `xlg`); the
+manifest names `./vm_faults` relative to the current working directory, and the
+digest on its `vm_faults` line equals the digest inside `vm_faults.sha256`. The
+retained files stay byte-identical to what the recorded runs produced rather
+than being edited after the fact. The runner now writes relative names, so
+later evidence does not carry this wart.

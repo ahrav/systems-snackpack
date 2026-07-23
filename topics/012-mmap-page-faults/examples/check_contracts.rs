@@ -1,7 +1,8 @@
 //! Checks the cold-file evidence contract and process schedule.
 
 use systems_snackpack_topic_012::{
-    Observation, amortized_ns_per_fault, balanced_schedule, faults_per_page, validate_cold_file,
+    Observation, amortized_ns_per_fault, balanced_schedule, faults_per_page,
+    schedule_is_order_balanced, validate_cold_file,
 };
 
 fn main() {
@@ -17,6 +18,10 @@ fn main() {
     assert_eq!(faults_per_page(observation), Some(1.0));
     assert_eq!(amortized_ns_per_fault(observation), Some(488_281.25));
     assert_eq!(balanced_schedule().len(), 8);
+    assert!(
+        schedule_is_order_balanced(&balanced_schedule()),
+        "schedule violates the order-balance contract"
+    );
     println!("validated cold-file evidence and eight-block schedule");
     // The shell runner and Python validator hold independent copies of the
     // schedule as a double-entry control; each cross-checks itself against
