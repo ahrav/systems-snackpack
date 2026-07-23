@@ -18,4 +18,10 @@ fn main() {
     assert_eq!(amortized_ns_per_fault(observation), Some(488_281.25));
     assert_eq!(balanced_schedule().len(), 8);
     println!("validated cold-file evidence and eight-block schedule");
+    // The shell runner and Python validator hold independent copies of the
+    // schedule as a double-entry control; each cross-checks itself against
+    // these lines before any measurement process starts.
+    for block in balanced_schedule() {
+        println!("SCHEDULE {}", block.join(" "));
+    }
 }

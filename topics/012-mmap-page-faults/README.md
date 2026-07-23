@@ -133,7 +133,7 @@ The SHA-256 binds the run to archive bytes. The runner does not independently
 prove that those bytes came from a trusted Git object database. For publication,
 create the archive from the pushed commit and record both values.
 
-Run the portable contracts and build-only benchmark locally:
+Run the portable contracts and the arithmetic-only benchmark locally:
 
 ```bash
 cargo run -p systems-snackpack-topic-012 --example check_contracts

@@ -9,6 +9,7 @@ import statistics
 import sys
 from collections import defaultdict
 from pathlib import Path
+from typing import NoReturn
 
 MODES = ("anon-first", "anon-refault", "file-warm", "file-cold")
 SCHEDULE = (
@@ -41,7 +42,7 @@ FIELDS = (
 INTEGER_FIELDS = FIELDS[2:]
 
 
-def fail(message: str) -> None:
+def fail(message: str) -> NoReturn:
     raise SystemExit(message)
 
 
@@ -135,6 +136,8 @@ def validate(rows: list[dict[str, int | str]]) -> dict[int, dict[str, dict[str, 
                 fail(f"{expected_id}: warm mapping was not resident before touch")
             if integer(row, "majflt") != 0:
                 fail(f"{expected_id}: warm mapping reported a major fault")
+            if integer(row, "minflt") == 0:
+                fail(f"{expected_id}: warm mapping reported no minor fault")
             if integer(row, "cold_verified") != 0 or integer(row, "fadvise_rc") != 0:
                 fail(f"{expected_id}: warm mode has invalid cold-control fields")
         else:
@@ -142,6 +145,8 @@ def validate(rows: list[dict[str, int | str]]) -> dict[int, dict[str, dict[str, 
                 fail(f"{expected_id}: anonymous mapping had resident pages before touch")
             if integer(row, "majflt") != 0:
                 fail(f"{expected_id}: anonymous mode reported a major fault")
+            if integer(row, "minflt") == 0:
+                fail(f"{expected_id}: anonymous mode reported no minor fault")
             if integer(row, "cold_verified") != 0 or integer(row, "fadvise_rc") != 0:
                 fail(f"{expected_id}: anonymous mode has invalid file-control fields")
             if mode == "anon-refault" and integer(row, "checksum") != 0:
@@ -224,7 +229,14 @@ def summarize(path: Path) -> None:
 
 def main() -> None:
     if len(sys.argv) != 2:
-        fail(f"usage: {Path(sys.argv[0]).name} RAW_CSV")
+        fail(f"usage: {Path(sys.argv[0]).name} RAW_CSV|--print-schedule")
+    if sys.argv[1] == "--print-schedule":
+        # Emits this validator's independent schedule copy in the same shape
+        # check_contracts prints, so the runner can prove three-way agreement
+        # before launching any measurement process.
+        for block in SCHEDULE:
+            print("SCHEDULE " + " ".join(block))
+        return
     path = Path(sys.argv[1])
     if not path.is_file():
         fail(f"raw CSV does not exist: {path}")

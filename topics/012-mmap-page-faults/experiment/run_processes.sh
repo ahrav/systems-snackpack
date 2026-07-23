@@ -160,7 +160,7 @@ cargo bench --locked -p systems-snackpack-topic-012 --bench fault_cost_model \
 
 c_flags=(-O3 -std=c11 -Wall -Wextra -Werror -fno-omit-frame-pointer -march=native)
 cc "${c_flags[@]}" "$script_dir/vm_faults.c" -o "$output_dir/vm_faults"
-sha256sum "$output_dir/vm_faults" >"$output_dir/vm_faults.sha256"
+(cd -- "$output_dir" && sha256sum vm_faults >vm_faults.sha256)
 readelf -h "$output_dir/vm_faults" >"$output_dir/vm_faults.readelf.txt"
 nm -an "$output_dir/vm_faults" >"$output_dir/vm_faults.symbols.txt"
 codegen_arch=$(uname -m)
@@ -253,6 +253,9 @@ printf 'SESSION_START host_alias=%s source_commit=%s source_archive_sha256=%s cp
   "$host_alias" "$source_commit" "$source_archive_sha256" "$cpu" "$blocks" "$mib" \
   >"$output_dir/processes.txt"
 
+# This copy of the schedule is deliberately independent of the copies in
+# summarize.py and balanced_schedule(); the three-way agreement check below
+# keeps the validator an independent oracle while failing fast on drift.
 orders=(
   'anon-first anon-refault file-warm file-cold'
   'anon-refault file-warm file-cold anon-first'
@@ -263,6 +266,14 @@ orders=(
   'anon-refault anon-first file-cold file-warm'
   'file-warm anon-refault anon-first file-cold'
 )
+
+shell_schedule=$(printf 'SCHEDULE %s\n' "${orders[@]}")
+rust_schedule=$(awk '/^SCHEDULE /' "$output_dir/example-check.log")
+python_schedule=$(python3 "$script_dir/summarize.py" --print-schedule)
+if [[ $rust_schedule != "$shell_schedule" || $python_schedule != "$shell_schedule" ]]; then
+  echo "schedule copies disagree across runner, validator, and Rust contract" >&2
+  exit 2
+fi
 
 for (( block = 1; block <= blocks; block++ )); do
   read -r -a modes <<<"${orders[$((block - 1))]}"
