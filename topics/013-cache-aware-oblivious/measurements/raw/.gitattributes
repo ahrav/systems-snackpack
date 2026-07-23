@@ -1,0 +1,4 @@
+# Preserve retained tool output byte-for-byte.
+**/* -text -whitespace
+*.gz binary
+cache_layout-bench binary
