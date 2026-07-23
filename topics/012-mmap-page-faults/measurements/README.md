@@ -24,3 +24,14 @@ processes per mode, not the pages within a mapping.
 The file-cold mode uses `MADV_RANDOM` and therefore represents an intentionally
 sharp storage-backed fault path. It does not estimate ordinary sequential mmap
 behavior, device-cache-cold performance, or a universal major/minor ratio.
+
+## Known limitation in the bdd17c6 evidence
+
+The `vm_faults.sha256` files under `raw/bdd17c6/` name the transient run
+directory, so `sha256sum -c vm_faults.sha256` fails after relocation into this
+repository. Verify the retained binaries through each directory's `SHA256SUMS`
+instead, which names `./vm_faults` relative to its own location; the digest on
+its `vm_faults` line equals the digest inside `vm_faults.sha256`. The retained
+files stay byte-identical to what the recorded runs produced rather than being
+edited after the fact. The runner now writes relative names, so later evidence
+does not carry this wart.
