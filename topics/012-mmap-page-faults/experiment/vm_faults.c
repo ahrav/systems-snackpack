@@ -79,7 +79,10 @@ static void write_file(int fd, size_t len) {
         fail("malloc file chunk");
     }
     for (size_t i = 0; i < chunk_len; ++i) {
-        chunk[i] = (unsigned char)((i * 29U + 7U) & 0xffU);
+        // The (i >> 12) term varies the byte across 4 KiB units, so the first
+        // byte of every base page differs from its neighbors; a traversal that
+        // rereads one resident page cannot reproduce the whole-file checksum.
+        chunk[i] = (unsigned char)((((i >> 12) * 131U) + (i * 29U) + 7U) & 0xffU);
     }
     size_t done = 0;
     while (done < len) {

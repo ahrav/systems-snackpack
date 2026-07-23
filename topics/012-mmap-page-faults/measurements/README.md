@@ -38,4 +38,8 @@ than being edited after the fact. The runner now writes relative names, so
 later evidence does not carry this wart. The bdd17c6 records likewise predate
 the runner's post-measurement binary reverification, so they contain no
 `vm_faults-verify.log`; later evidence retains that log alongside the
-source-file verification log.
+source-file verification log. The bdd17c6 rows also record the earlier file
+byte pattern `(j * 29 + 7) & 0xff`, whose page-aligned bytes were uniform, so
+their file checksums read `57344` rather than the per-page-varying sums the
+current workload and validator use; each retained run validates against the
+archived code it was produced by, not against a later validator.

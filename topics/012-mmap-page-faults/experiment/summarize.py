@@ -203,13 +203,18 @@ def expected_file_checksum(pages: int, page_size: int) -> int:
     """Recompute the checksum touch_read_pages() in vm_faults.c must report.
 
     write_file() fills the benchmark file with 1 MiB chunks whose byte ``j``
-    is ``(j * 29 + 7) & 0xff``; the read loop sums the first byte of each
-    page, i.e. the chunk byte at offset ``(i * page_size) % chunk_len``.
+    is ``(((j >> 12) * 131) + j * 29 + 7) & 0xff``; the ``j >> 12`` term
+    varies the byte across 4 KiB units so page-aligned offsets carry distinct
+    values and a same-page-repeat traversal cannot reproduce this sum. The
+    read loop sums the first byte of each page, i.e. the chunk byte at offset
+    ``(i * page_size) % chunk_len``.
     """
     chunk_len = 1 << 20
-    return sum(
-        (((index * page_size) % chunk_len) * 29 + 7) & 0xFF for index in range(pages)
-    )
+
+    def chunk_byte(offset: int) -> int:
+        return (((offset >> 12) * 131) + offset * 29 + 7) & 0xFF
+
+    return sum(chunk_byte((index * page_size) % chunk_len) for index in range(pages))
 
 
 def median_absolute_deviation(values: list[float]) -> float:
