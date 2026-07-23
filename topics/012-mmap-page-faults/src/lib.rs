@@ -226,11 +226,14 @@ mod tests {
     fn balance_validator_accepts_the_schedule_and_rejects_violations() {
         assert!(schedule_is_order_balanced(&balanced_schedule()));
 
-        // Repeating a mode within a block keeps position counts plausible in
-        // that block yet must fail the block-completeness condition.
-        let mut duplicated_mode = balanced_schedule();
-        duplicated_mode[0] = ["anon-first", "anon-first", "file-warm", "file-cold"];
-        assert!(!schedule_is_order_balanced(&duplicated_mode));
+        // Swapping two same-position entries between different blocks keeps
+        // every global per-position count intact, so only the
+        // block-completeness condition can reject this fixture.
+        let mut incomplete_blocks = balanced_schedule();
+        let moved = incomplete_blocks[0][0];
+        incomplete_blocks[0][0] = incomplete_blocks[1][0];
+        incomplete_blocks[1][0] = moved;
+        assert!(!schedule_is_order_balanced(&incomplete_blocks));
 
         // Swapping two positions in one block preserves completeness yet must
         // fail the position-balance condition.

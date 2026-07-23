@@ -165,15 +165,51 @@ def validate(rows: list[dict[str, int | str]]) -> dict[int, dict[str, dict[str, 
         for block in blocks
         for mode in ("file-warm", "file-cold")
     }
-    if len(anon_first_checksums) != 1 or anon_first_checksums == {0}:
-        fail("anonymous first-write checksums differ or are zero")
-    if len(file_checksums) != 1 or file_checksums == {0}:
-        fail("file checksums differ or are zero")
+    # Compare against independently recomputed expected sums; shared nonzero
+    # values alone would accept a systematically regressed workload.
+    pages = integer(rows[0], "pages")
+    page_size = integer(rows[0], "page_size")
+    expected_anon_first = expected_anon_first_checksum(pages)
+    if anon_first_checksums != {expected_anon_first}:
+        fail(
+            "anonymous first-write checksums differ from the workload formula: "
+            f"expected {expected_anon_first}, observed {sorted(anon_first_checksums)}"
+        )
+    expected_file = expected_file_checksum(pages, page_size)
+    if file_checksums != {expected_file}:
+        fail(
+            "file checksums differ from the workload formula: "
+            f"expected {expected_file}, observed {sorted(file_checksums)}"
+        )
     for mode in MODES:
         for position in range(4):
             if sum(order[position] == mode for order in SCHEDULE) != 2:
                 fail("schedule does not balance each mode across positions")
     return blocks
+
+
+def expected_anon_first_checksum(pages: int) -> int:
+    """Recompute the checksum touch_write_pages() in vm_faults.c must report.
+
+    The workload writes ``(unsigned char)(((i * 131) + 17) | 1)`` to the first
+    byte of page ``i`` and sums the written values. This copy is deliberately
+    independent of the C implementation so the validator stays an oracle for
+    workload regressions rather than restating whatever the binary produced.
+    """
+    return sum(((index * 131 + 17) | 1) & 0xFF for index in range(pages))
+
+
+def expected_file_checksum(pages: int, page_size: int) -> int:
+    """Recompute the checksum touch_read_pages() in vm_faults.c must report.
+
+    write_file() fills the benchmark file with 1 MiB chunks whose byte ``j``
+    is ``(j * 29 + 7) & 0xff``; the read loop sums the first byte of each
+    page, i.e. the chunk byte at offset ``(i * page_size) % chunk_len``.
+    """
+    chunk_len = 1 << 20
+    return sum(
+        (((index * page_size) % chunk_len) * 29 + 7) & 0xFF for index in range(pages)
+    )
 
 
 def median_absolute_deviation(values: list[float]) -> float:

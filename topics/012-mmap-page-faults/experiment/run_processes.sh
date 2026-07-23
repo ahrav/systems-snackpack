@@ -131,9 +131,16 @@ case "$file_fstype" in
     ;;
 esac
 
-if [[ -d $output_dir ]] && (( $(rg --files -uu -0 "$output_dir" | wc -c) != 0 )); then
-  echo "OUTPUT_DIR must be absent or empty" >&2
-  exit 2
+# A glob over direct children rejects every pre-existing entry, including
+# empty directories and non-regular files that a file-lister cannot see.
+if [[ -d $output_dir ]]; then
+  shopt -s nullglob dotglob
+  existing_entries=("$output_dir"/*)
+  shopt -u nullglob dotglob
+  if (( ${#existing_entries[@]} != 0 )); then
+    echo "OUTPUT_DIR must be absent or empty" >&2
+    exit 2
+  fi
 fi
 mkdir -p -- "$output_dir/gates"
 output_dir=$(cd -- "$output_dir" && pwd)
@@ -294,6 +301,10 @@ printf 'SESSION_END processes=%s\n' "$((blocks * 4))" >>"$output_dir/processes.t
 
 python3 "$script_dir/summarize.py" "$output_dir/raw.csv" >"$output_dir/summary.txt"
 sha256sum -c "$output_dir/source-files.sha256" >"$output_dir/source-files-verify.log"
+# Every process reopens $output_dir/vm_faults, so reverify the binary after
+# the measurement loop; the final SHA256SUMS hashes the current binary and the
+# recorded checksum independently and cannot enforce their agreement.
+(cd -- "$output_dir" && sha256sum -c vm_faults.sha256 >vm_faults-verify.log)
 checksums_tmp=$(mktemp)
 (
   cd -- "$output_dir"

@@ -35,4 +35,7 @@ manifest names `./vm_faults` relative to the current working directory, and the
 digest on its `vm_faults` line equals the digest inside `vm_faults.sha256`. The
 retained files stay byte-identical to what the recorded runs produced rather
 than being edited after the fact. The runner now writes relative names, so
-later evidence does not carry this wart.
+later evidence does not carry this wart. The bdd17c6 records likewise predate
+the runner's post-measurement binary reverification, so they contain no
+`vm_faults-verify.log`; later evidence retains that log alongside the
+source-file verification log.
