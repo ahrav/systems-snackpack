@@ -197,19 +197,24 @@ rustc \
 
 # The recorded `rustc -vV` provenance only describes the compiler Cargo
 # invokes when no environment variable or Cargo configuration redirects the
-# compiler, wrapper, flags, or profile. Unset every documented redirect and
-# fail closed on discoverable Cargo config files: TOML admits section, dotted,
-# and inline spellings for `build.rustc*` and `profile.*` overrides, so any
-# config content is an unrecorded build input rather than something a pattern
-# scan can whitelist.
-unset CARGO_BUILD_TARGET CARGO_ENCODED_RUSTFLAGS RUSTC_WORKSPACE_WRAPPER RUSTC_WRAPPER \
-  RUSTC RUSTDOC RUSTC_BOOTSTRAP RUSTDOCFLAGS \
-  CARGO_BUILD_RUSTC CARGO_BUILD_RUSTC_WRAPPER CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER \
-  CARGO_BUILD_RUSTDOC CARGO_BUILD_RUSTFLAGS CARGO_BUILD_RUSTDOCFLAGS
-while IFS= read -r profile_variable; do
-  unset "$profile_variable"
-done < <(compgen -e | rg '^CARGO_PROFILE_' || true)
+# compiler, wrapper, flags, profile, target overrides, or incremental mode.
+# Enumerating dangerous names loses to Cargo's namespace (CARGO_BUILD_*,
+# CARGO_PROFILE_*, CARGO_TARGET_<TRIPLE>_*, CARGO_ENCODED_*, and additions),
+# so sweep every exported CARGO_*/RUSTC*/RUSTDOC*/RUSTFLAGS variable and
+# re-export the recorded values below. CARGO_HOME survives because it only
+# locates the registry cache and config file, and any discoverable config
+# file aborts the run. RUSTUP_* survives so the build resolves the same
+# toolchain the probe recorded.
+while IFS= read -r swept_variable; do
+  if [[ $swept_variable != CARGO_HOME ]]; then
+    unset "$swept_variable"
+  fi
+done < <(compgen -e | rg '^(CARGO_|RUSTC|RUSTDOC|RUSTFLAGS)' || true)
 
+# TOML admits section, dotted, and inline spellings for `build.rustc*`,
+# `profile.*`, and `target.*` overrides, so config content cannot be
+# whitelisted by pattern; any discoverable config file is an unrecorded
+# build input.
 cargo_config_candidates=(
   "${CARGO_HOME:-$HOME/.cargo}/config.toml"
   "${CARGO_HOME:-$HOME/.cargo}/config"
