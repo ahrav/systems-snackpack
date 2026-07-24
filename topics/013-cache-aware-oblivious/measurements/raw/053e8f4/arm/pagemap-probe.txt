@@ -1,0 +1,10 @@
+page_size=4096
+mapping_bytes=262144
+virtual_base=0xffff87483000
+entries=64
+present_entries=64
+swapped_entries=0
+exclusive_entries=64
+soft_dirty_entries=0
+nonzero_pfn_entries=0
+zero_pfn_entries=64

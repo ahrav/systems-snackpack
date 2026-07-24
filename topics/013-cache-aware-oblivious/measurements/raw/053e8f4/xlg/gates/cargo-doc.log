@@ -1,0 +1,15 @@
+ Documenting systems-snackpack-topic-006 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/006-ngram-text-indexing)
+ Documenting systems-snackpack-topic-005 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/005-webassembly-performance-model)
+ Documenting systems-snackpack-topic-013 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/013-cache-aware-oblivious)
+ Documenting systems-snackpack-topic-012 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/012-mmap-page-faults)
+ Documenting systems-snackpack-topic-010 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/010-hashing-checksums-prng)
+ Documenting systems-snackpack-topic-008 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/008-tlbs-address-translation)
+ Documenting systems-snackpack-topic-001 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/001-swar-simd-scalar)
+ Documenting systems-snackpack-topic-002 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/002-intrinsics-vs-assembly)
+ Documenting systems-snackpack-topic-004 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/004-reading-assembly-performance)
+ Documenting systems-snackpack-topic-007 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/007-branchless-predictable-control-flow)
+ Documenting systems-snackpack-topic-009 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/009-succinct-static-index-structures)
+ Documenting systems-snackpack-topic-011 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/011-cycle-accurate-measurement)
+ Documenting systems-snackpack-topic-003 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/003-linux-perf-workflow)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.40s
+   Generated /tmp/tmp.qSc91L4Bnj/target/doc/systems_snackpack_topic_001/index.html and 12 other files

@@ -181,4 +181,5 @@ kernel. Combined setup and conditioning, process startup, and checksum
 verification are outside the kernel interval and remain in the raw record.
 
 Read the [first-visit note](rounds/01.md), [primary-source
-ledger](references.md), and [measurement contract](measurements/README.md).
+ledger](references.md), [measurement contract](measurements/README.md), and
+[two-host results](measurements/2026-07-23-cross-host.md).

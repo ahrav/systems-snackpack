@@ -1,0 +1,16 @@
+   Compiling systems-snackpack-topic-013 v0.1.0 (/tmp/tmp.qSc91L4Bnj/topics/013-cache-aware-oblivious)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running `target/debug/examples/check_contracts`
+validated three kernels, padding, modulo cycles, and schedule
+SCHEDULE pow2-naive pow2-tiled pow2-recursive padded-naive padded-tiled padded-recursive
+SCHEDULE pow2-tiled pow2-recursive padded-naive padded-tiled padded-recursive pow2-naive
+SCHEDULE pow2-recursive padded-naive padded-tiled padded-recursive pow2-naive pow2-tiled
+SCHEDULE padded-naive padded-tiled padded-recursive pow2-naive pow2-tiled pow2-recursive
+SCHEDULE padded-tiled padded-recursive pow2-naive pow2-tiled pow2-recursive padded-naive
+SCHEDULE padded-recursive pow2-naive pow2-tiled pow2-recursive padded-naive padded-tiled
+SCHEDULE padded-recursive padded-tiled padded-naive pow2-recursive pow2-tiled pow2-naive
+SCHEDULE padded-tiled padded-naive pow2-recursive pow2-tiled pow2-naive padded-recursive
+SCHEDULE padded-naive pow2-recursive pow2-tiled pow2-naive padded-recursive padded-tiled
+SCHEDULE pow2-recursive pow2-tiled pow2-naive padded-recursive padded-tiled padded-naive
+SCHEDULE pow2-tiled pow2-naive padded-recursive padded-tiled padded-naive pow2-recursive
+SCHEDULE pow2-naive padded-recursive padded-tiled padded-naive pow2-recursive pow2-tiled

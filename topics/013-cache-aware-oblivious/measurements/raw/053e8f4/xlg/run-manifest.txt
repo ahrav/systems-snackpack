@@ -1,0 +1,22 @@
+source_commit=053e8f4d269e93276020a7937587762303e0104b
+source_archive_embedded_commit=053e8f4d269e93276020a7937587762303e0104b
+source_archive_sha256=51a39afc9da86c2a7c070e69b0b714cdb56dd1819cfae6e882bc7730c4721292
+executing_driver_sha256=9f1ed08f4a1ed96a182a8d38b6055152d05a99763fac289b825c842e9d5e301e
+archived_driver_sha256=9f1ed08f4a1ed96a182a8d38b6055152d05a99763fac289b825c842e9d5e301e
+host_alias=xlg
+resolved_hostname=dev-dsk-ahrav-2c-a9191cb6.us-west-2.amazon.com
+cpu=0
+blocks=12
+processes=72
+matrix_edge=2048
+page_size=4096
+validated_data_unified_cache_line_bytes=64
+validated_data_unified_cache_count=3
+leading_dimensions=2048,2049
+tile_edge=32
+recursive_leaf_elements=1024
+condition_bytes=134217728
+cargo_target_dir=/tmp/tmp.qSc91L4Bnj/target
+rustflags=-C target-cpu=native -C debuginfo=1 -C codegen-units=1
+embedded_commit_environment=053e8f4d269e93276020a7937587762303e0104b
+benchmark_sha256=b0007d7d0e191abec5190e093b9f6cce41fbc40ce1a2ba72e18cc4ddeda74b94

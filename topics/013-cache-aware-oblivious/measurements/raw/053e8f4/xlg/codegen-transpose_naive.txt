@@ -1,0 +1,84 @@
+0000000000017f20 <systems_snackpack_topic_013::transpose_naive>:
+   17f20:	push   r15
+   17f22:	push   r14
+   17f24:	push   r12
+   17f26:	push   rbx
+   17f27:	push   rax
+   17f28:	mov    rbx,QWORD PTR [rsp+0x30]
+   17f2d:	cmp    rbx,r9
+   17f30:	jae    17f36 <systems_snackpack_topic_013::transpose_naive+0x16>
+   17f32:	xor    edx,edx
+   17f34:	jmp    17f64 <systems_snackpack_topic_013::transpose_naive+0x44>
+   17f36:	mov    r10,rdx
+   17f39:	mov    rax,r9
+   17f3c:	mul    rbx
+   17f3f:	jo     17fe5 <systems_snackpack_topic_013::transpose_naive+0xc5>
+   17f45:	mov    edx,0x2
+   17f4a:	cmp    r10,rax
+   17f4d:	jae    17f54 <systems_snackpack_topic_013::transpose_naive+0x34>
+   17f4f:	mov    rbx,r10
+   17f52:	jmp    17f61 <systems_snackpack_topic_013::transpose_naive+0x41>
+   17f54:	mov    edx,0x3
+   17f59:	cmp    r8,rax
+   17f5c:	jae    17f7e <systems_snackpack_topic_013::transpose_naive+0x5e>
+   17f5e:	mov    rbx,r8
+   17f61:	mov    r9,rax
+   17f64:	mov    QWORD PTR [rdi],rdx
+   17f67:	mov    QWORD PTR [rdi+0x8],r9
+   17f6b:	mov    QWORD PTR [rdi+0x10],rbx
+   17f6f:	mov    rax,rdi
+   17f72:	add    rsp,0x8
+   17f76:	pop    rbx
+   17f77:	pop    r12
+   17f79:	pop    r14
+   17f7b:	pop    r15
+   17f7d:	ret
+   17f7e:	test   r9,r9
+   17f81:	je     17fdc <systems_snackpack_topic_013::transpose_naive+0xbc>
+   17f83:	lea    rdx,[rbx*8+0x0]
+   17f8b:	xor    r14d,r14d
+   17f8e:	xor    r15d,r15d
+   17f91:	data16 data16 data16 data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
+   17fa0:	mov    rax,r15
+   17fa3:	inc    r15
+   17fa6:	xor    r12d,r12d
+   17fa9:	nop    DWORD PTR [rax+0x0]
+   17fb0:	lea    r11,[r14+r12*1]
+   17fb4:	cmp    r11,r10
+   17fb7:	jae    17fef <systems_snackpack_topic_013::transpose_naive+0xcf>
+   17fb9:	cmp    rax,r8
+   17fbc:	jae    18002 <systems_snackpack_topic_013::transpose_naive+0xe2>
+   17fbe:	mov    r11,QWORD PTR [rsi+r12*8]
+   17fc2:	inc    r12
+   17fc5:	mov    QWORD PTR [rcx+rax*8],r11
+   17fc9:	add    rax,rbx
+   17fcc:	cmp    r9,r12
+   17fcf:	jne    17fb0 <systems_snackpack_topic_013::transpose_naive+0x90>
+   17fd1:	add    r14,rbx
+   17fd4:	add    rsi,rdx
+   17fd7:	cmp    r15,r9
+   17fda:	jne    17fa0 <systems_snackpack_topic_013::transpose_naive+0x80>
+   17fdc:	mov    QWORD PTR [rdi],0x5
+   17fe3:	jmp    17f6f <systems_snackpack_topic_013::transpose_naive+0x4f>
+   17fe5:	mov    edx,0x1
+   17fea:	jmp    17f64 <systems_snackpack_topic_013::transpose_naive+0x44>
+   17fef:	lea    rdx,[rip+0x41c02]        # 59bf8 <__dso_handle+0x108>
+   17ff6:	mov    rdi,r11
+   17ff9:	mov    rsi,r10
+   17ffc:	call   QWORD PTR [rip+0x43e16]        # 5be18 <_DYNAMIC+0x230>
+   18002:	lea    rdx,[rip+0x41c07]        # 59c10 <__dso_handle+0x120>
+   18009:	mov    rdi,rax
+   1800c:	mov    rsi,r8
+   1800f:	call   QWORD PTR [rip+0x43e03]        # 5be18 <_DYNAMIC+0x230>
+   18015:	int3
+   18016:	int3
+   18017:	int3
+   18018:	int3
+   18019:	int3
+   1801a:	int3
+   1801b:	int3
+   1801c:	int3
+   1801d:	int3
+   1801e:	int3
+   1801f:	int3
+

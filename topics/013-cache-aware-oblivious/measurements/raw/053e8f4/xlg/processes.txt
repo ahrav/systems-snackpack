@@ -1,0 +1,146 @@
+SESSION_START source_commit=053e8f4d269e93276020a7937587762303e0104b cpu=0 blocks=12 modes=6
+PROCESS_START run_id=b01-p1 block=1 position=1 mode=pow2-naive
+PROCESS_END run_id=b01-p1 external_wall_ns=170056598
+PROCESS_START run_id=b01-p2 block=1 position=2 mode=pow2-tiled
+PROCESS_END run_id=b01-p2 external_wall_ns=148930003
+PROCESS_START run_id=b01-p3 block=1 position=3 mode=pow2-recursive
+PROCESS_END run_id=b01-p3 external_wall_ns=148032648
+PROCESS_START run_id=b01-p4 block=1 position=4 mode=padded-naive
+PROCESS_END run_id=b01-p4 external_wall_ns=138352926
+PROCESS_START run_id=b01-p5 block=1 position=5 mode=padded-tiled
+PROCESS_END run_id=b01-p5 external_wall_ns=134921807
+PROCESS_START run_id=b01-p6 block=1 position=6 mode=padded-recursive
+PROCESS_END run_id=b01-p6 external_wall_ns=135889194
+PROCESS_START run_id=b02-p1 block=2 position=1 mode=pow2-tiled
+PROCESS_END run_id=b02-p1 external_wall_ns=146806632
+PROCESS_START run_id=b02-p2 block=2 position=2 mode=pow2-recursive
+PROCESS_END run_id=b02-p2 external_wall_ns=148340120
+PROCESS_START run_id=b02-p3 block=2 position=3 mode=padded-naive
+PROCESS_END run_id=b02-p3 external_wall_ns=137421710
+PROCESS_START run_id=b02-p4 block=2 position=4 mode=padded-tiled
+PROCESS_END run_id=b02-p4 external_wall_ns=136095035
+PROCESS_START run_id=b02-p5 block=2 position=5 mode=padded-recursive
+PROCESS_END run_id=b02-p5 external_wall_ns=139355711
+PROCESS_START run_id=b02-p6 block=2 position=6 mode=pow2-naive
+PROCESS_END run_id=b02-p6 external_wall_ns=164469887
+PROCESS_START run_id=b03-p1 block=3 position=1 mode=pow2-recursive
+PROCESS_END run_id=b03-p1 external_wall_ns=148312921
+PROCESS_START run_id=b03-p2 block=3 position=2 mode=padded-naive
+PROCESS_END run_id=b03-p2 external_wall_ns=138060015
+PROCESS_START run_id=b03-p3 block=3 position=3 mode=padded-tiled
+PROCESS_END run_id=b03-p3 external_wall_ns=136843957
+PROCESS_START run_id=b03-p4 block=3 position=4 mode=padded-recursive
+PROCESS_END run_id=b03-p4 external_wall_ns=138344997
+PROCESS_START run_id=b03-p5 block=3 position=5 mode=pow2-naive
+PROCESS_END run_id=b03-p5 external_wall_ns=164101355
+PROCESS_START run_id=b03-p6 block=3 position=6 mode=pow2-tiled
+PROCESS_END run_id=b03-p6 external_wall_ns=148916814
+PROCESS_START run_id=b04-p1 block=4 position=1 mode=padded-naive
+PROCESS_END run_id=b04-p1 external_wall_ns=137220329
+PROCESS_START run_id=b04-p2 block=4 position=2 mode=padded-tiled
+PROCESS_END run_id=b04-p2 external_wall_ns=135063949
+PROCESS_START run_id=b04-p3 block=4 position=3 mode=padded-recursive
+PROCESS_END run_id=b04-p3 external_wall_ns=136857557
+PROCESS_START run_id=b04-p4 block=4 position=4 mode=pow2-naive
+PROCESS_END run_id=b04-p4 external_wall_ns=165526083
+PROCESS_START run_id=b04-p5 block=4 position=5 mode=pow2-tiled
+PROCESS_END run_id=b04-p5 external_wall_ns=149390576
+PROCESS_START run_id=b04-p6 block=4 position=6 mode=pow2-recursive
+PROCESS_END run_id=b04-p6 external_wall_ns=149622837
+PROCESS_START run_id=b05-p1 block=5 position=1 mode=padded-tiled
+PROCESS_END run_id=b05-p1 external_wall_ns=137490652
+PROCESS_START run_id=b05-p2 block=5 position=2 mode=padded-recursive
+PROCESS_END run_id=b05-p2 external_wall_ns=137076938
+PROCESS_START run_id=b05-p3 block=5 position=3 mode=pow2-naive
+PROCESS_END run_id=b05-p3 external_wall_ns=165008610
+PROCESS_START run_id=b05-p4 block=5 position=4 mode=pow2-tiled
+PROCESS_END run_id=b05-p4 external_wall_ns=148678242
+PROCESS_START run_id=b05-p5 block=5 position=5 mode=pow2-recursive
+PROCESS_END run_id=b05-p5 external_wall_ns=149335736
+PROCESS_START run_id=b05-p6 block=5 position=6 mode=padded-naive
+PROCESS_END run_id=b05-p6 external_wall_ns=139522862
+PROCESS_START run_id=b06-p1 block=6 position=1 mode=padded-recursive
+PROCESS_END run_id=b06-p1 external_wall_ns=138446517
+PROCESS_START run_id=b06-p2 block=6 position=2 mode=pow2-naive
+PROCESS_END run_id=b06-p2 external_wall_ns=166614438
+PROCESS_START run_id=b06-p3 block=6 position=3 mode=pow2-tiled
+PROCESS_END run_id=b06-p3 external_wall_ns=148363711
+PROCESS_START run_id=b06-p4 block=6 position=4 mode=pow2-recursive
+PROCESS_END run_id=b06-p4 external_wall_ns=148787442
+PROCESS_START run_id=b06-p5 block=6 position=5 mode=padded-naive
+PROCESS_END run_id=b06-p5 external_wall_ns=138545747
+PROCESS_START run_id=b06-p6 block=6 position=6 mode=padded-tiled
+PROCESS_END run_id=b06-p6 external_wall_ns=136582787
+PROCESS_START run_id=b07-p1 block=7 position=1 mode=padded-recursive
+PROCESS_END run_id=b07-p1 external_wall_ns=137139349
+PROCESS_START run_id=b07-p2 block=7 position=2 mode=padded-tiled
+PROCESS_END run_id=b07-p2 external_wall_ns=137128940
+PROCESS_START run_id=b07-p3 block=7 position=3 mode=padded-naive
+PROCESS_END run_id=b07-p3 external_wall_ns=137516442
+PROCESS_START run_id=b07-p4 block=7 position=4 mode=pow2-recursive
+PROCESS_END run_id=b07-p4 external_wall_ns=148611501
+PROCESS_START run_id=b07-p5 block=7 position=5 mode=pow2-tiled
+PROCESS_END run_id=b07-p5 external_wall_ns=147869147
+PROCESS_START run_id=b07-p6 block=7 position=6 mode=pow2-naive
+PROCESS_END run_id=b07-p6 external_wall_ns=165372462
+PROCESS_START run_id=b08-p1 block=8 position=1 mode=padded-tiled
+PROCESS_END run_id=b08-p1 external_wall_ns=137571512
+PROCESS_START run_id=b08-p2 block=8 position=2 mode=padded-naive
+PROCESS_END run_id=b08-p2 external_wall_ns=137744143
+PROCESS_START run_id=b08-p3 block=8 position=3 mode=pow2-recursive
+PROCESS_END run_id=b08-p3 external_wall_ns=148897023
+PROCESS_START run_id=b08-p4 block=8 position=4 mode=pow2-tiled
+PROCESS_END run_id=b08-p4 external_wall_ns=147598626
+PROCESS_START run_id=b08-p5 block=8 position=5 mode=pow2-naive
+PROCESS_END run_id=b08-p5 external_wall_ns=164014574
+PROCESS_START run_id=b08-p6 block=8 position=6 mode=padded-recursive
+PROCESS_END run_id=b08-p6 external_wall_ns=136540297
+PROCESS_START run_id=b09-p1 block=9 position=1 mode=padded-naive
+PROCESS_END run_id=b09-p1 external_wall_ns=136620736
+PROCESS_START run_id=b09-p2 block=9 position=2 mode=pow2-recursive
+PROCESS_END run_id=b09-p2 external_wall_ns=148419541
+PROCESS_START run_id=b09-p3 block=9 position=3 mode=pow2-tiled
+PROCESS_END run_id=b09-p3 external_wall_ns=147806698
+PROCESS_START run_id=b09-p4 block=9 position=4 mode=pow2-naive
+PROCESS_END run_id=b09-p4 external_wall_ns=165548553
+PROCESS_START run_id=b09-p5 block=9 position=5 mode=padded-recursive
+PROCESS_END run_id=b09-p5 external_wall_ns=136993998
+PROCESS_START run_id=b09-p6 block=9 position=6 mode=padded-tiled
+PROCESS_END run_id=b09-p6 external_wall_ns=135318701
+PROCESS_START run_id=b10-p1 block=10 position=1 mode=pow2-recursive
+PROCESS_END run_id=b10-p1 external_wall_ns=148410840
+PROCESS_START run_id=b10-p2 block=10 position=2 mode=pow2-tiled
+PROCESS_END run_id=b10-p2 external_wall_ns=148055948
+PROCESS_START run_id=b10-p3 block=10 position=3 mode=pow2-naive
+PROCESS_END run_id=b10-p3 external_wall_ns=164961201
+PROCESS_START run_id=b10-p4 block=10 position=4 mode=padded-recursive
+PROCESS_END run_id=b10-p4 external_wall_ns=137624302
+PROCESS_START run_id=b10-p5 block=10 position=5 mode=padded-tiled
+PROCESS_END run_id=b10-p5 external_wall_ns=137689223
+PROCESS_START run_id=b10-p6 block=10 position=6 mode=padded-naive
+PROCESS_END run_id=b10-p6 external_wall_ns=135979303
+PROCESS_START run_id=b11-p1 block=11 position=1 mode=pow2-tiled
+PROCESS_END run_id=b11-p1 external_wall_ns=147739028
+PROCESS_START run_id=b11-p2 block=11 position=2 mode=pow2-naive
+PROCESS_END run_id=b11-p2 external_wall_ns=164368406
+PROCESS_START run_id=b11-p3 block=11 position=3 mode=padded-recursive
+PROCESS_END run_id=b11-p3 external_wall_ns=136835919
+PROCESS_START run_id=b11-p4 block=11 position=4 mode=padded-tiled
+PROCESS_END run_id=b11-p4 external_wall_ns=135531501
+PROCESS_START run_id=b11-p5 block=11 position=5 mode=padded-naive
+PROCESS_END run_id=b11-p5 external_wall_ns=138250227
+PROCESS_START run_id=b11-p6 block=11 position=6 mode=pow2-recursive
+PROCESS_END run_id=b11-p6 external_wall_ns=148845423
+PROCESS_START run_id=b12-p1 block=12 position=1 mode=pow2-naive
+PROCESS_END run_id=b12-p1 external_wall_ns=164805768
+PROCESS_START run_id=b12-p2 block=12 position=2 mode=padded-recursive
+PROCESS_END run_id=b12-p2 external_wall_ns=136709347
+PROCESS_START run_id=b12-p3 block=12 position=3 mode=padded-tiled
+PROCESS_END run_id=b12-p3 external_wall_ns=135421741
+PROCESS_START run_id=b12-p4 block=12 position=4 mode=padded-naive
+PROCESS_END run_id=b12-p4 external_wall_ns=138178194
+PROCESS_START run_id=b12-p5 block=12 position=5 mode=pow2-recursive
+PROCESS_END run_id=b12-p5 external_wall_ns=149254485
+PROCESS_START run_id=b12-p6 block=12 position=6 mode=pow2-tiled
+PROCESS_END run_id=b12-p6 external_wall_ns=147929068
+SESSION_END processes=72
