@@ -1,0 +1,46 @@
+measurement_boundary=timed-dispatch-and-kernel replication_unit=fresh-pinned-process pairing_unit=six-mode-block blocks=12 processes_per_mode=12
+dispersion_boundary=observed_process_runs quartiles=statistics.quantiles-inclusive interval=descriptive-IQR
+source_commit=053e8f4d269e93276020a7937587762303e0104b
+MODE pow2-naive
+kernel_ms n=12 median=19.963515ms q1=19.790534ms q3=19.989266ms iqr=0.198731ms sample_sd=0.168407ms range=[19.568450,20.091767]ms
+setup_ms n=12 median=62.671368ms q1=62.614497ms q3=62.834661ms iqr=0.220164ms sample_sd=1.532941ms range=[62.492425,67.971654]ms
+verify_ms n=12 median=22.114154ms q1=22.035589ms q3=22.184277ms iqr=0.148688ms sample_sd=0.244274ms range=[21.525466,22.562451]ms
+external_wall_ms n=12 median=124.226050ms q1=123.951504ms q3=124.539473ms iqr=0.587969ms sample_sd=1.689127ms range=[123.031708,129.757354]ms
+virtual_placement unique_source_bases=12 unique_destination_bases=12 source_mod64=[16] destination_mod64=[16] source_page_offsets=[16] destination_page_offsets=[16]
+MODE pow2-tiled
+kernel_ms n=12 median=8.763907ms q1=8.754564ms q3=8.782560ms iqr=0.027995ms sample_sd=0.032894ms range=[8.697041,8.815516]ms
+setup_ms n=12 median=62.671602ms q1=62.483183ms q3=62.877143ms iqr=0.393959ms sample_sd=0.315751ms range=[62.333560,63.465162]ms
+verify_ms n=12 median=22.557975ms q1=22.091215ms q3=22.625757ms iqr=0.534542ms sample_sd=0.293832ms range=[21.979035,22.715794]ms
+external_wall_ms n=12 median=113.161589ms q1=112.837076ms q3=113.463583ms iqr=0.626507ms sample_sd=0.774994ms range=[112.489332,115.433354]ms
+virtual_placement unique_source_bases=12 unique_destination_bases=12 source_mod64=[16] destination_mod64=[16] source_page_offsets=[16] destination_page_offsets=[16]
+MODE pow2-recursive
+kernel_ms n=12 median=9.836988ms q1=9.784642ms q3=9.859580ms iqr=0.074937ms sample_sd=0.071782ms range=[9.705660,9.948446]ms
+setup_ms n=12 median=62.631960ms q1=62.483047ms q3=62.872359ms iqr=0.389312ms sample_sd=0.263228ms range=[62.447066,63.224635]ms
+verify_ms n=12 median=22.680363ms q1=22.598488ms q3=22.734167ms iqr=0.135680ms sample_sd=0.077733ms range=[22.550533,22.786624]ms
+external_wall_ms n=12 median=114.541703ms q1=114.279705ms q3=114.878691ms iqr=0.598986ms sample_sd=0.420987ms range=[114.119214,115.415237]ms
+virtual_placement unique_source_bases=12 unique_destination_bases=12 source_mod64=[16] destination_mod64=[16] source_page_offsets=[16] destination_page_offsets=[16]
+MODE padded-naive
+kernel_ms n=12 median=7.217866ms q1=7.190889ms q3=7.267161ms iqr=0.076271ms sample_sd=0.071256ms range=[7.070791,7.293808]ms
+setup_ms n=12 median=62.781267ms q1=62.751178ms q3=62.976657ms iqr=0.225480ms sample_sd=0.298260ms range=[62.657717,63.505190]ms
+verify_ms n=12 median=14.769813ms q1=14.694543ms q3=14.884023ms iqr=0.189480ms sample_sd=0.137340ms range=[14.586215,15.025945]ms
+external_wall_ms n=12 median=104.007249ms q1=103.745766ms q3=104.209081ms iqr=0.463315ms sample_sd=0.462946ms range=[103.282187,104.864641]ms
+virtual_placement unique_source_bases=12 unique_destination_bases=12 source_mod64=[16] destination_mod64=[16] source_page_offsets=[16] destination_page_offsets=[16]
+MODE padded-tiled
+kernel_ms n=12 median=6.654559ms q1=6.579842ms q3=6.679490ms iqr=0.099648ms sample_sd=0.060631ms range=[6.520053,6.699821]ms
+setup_ms n=12 median=62.776782ms q1=62.637375ms q3=62.884883ms iqr=0.247508ms sample_sd=0.332856ms range=[62.541376,63.782910]ms
+verify_ms n=12 median=14.546339ms q1=14.513716ms q3=14.580815ms iqr=0.067098ms sample_sd=0.082704ms range=[14.405129,14.693590]ms
+external_wall_ms n=12 median=103.113246ms q1=102.827881ms q3=103.321469ms iqr=0.493588ms sample_sd=0.449003ms range=[102.425981,104.168156]ms
+virtual_placement unique_source_bases=12 unique_destination_bases=12 source_mod64=[16] destination_mod64=[16] source_page_offsets=[16] destination_page_offsets=[16]
+MODE padded-recursive
+kernel_ms n=12 median=6.185996ms q1=6.166957ms q3=6.221654ms iqr=0.054697ms sample_sd=0.059679ms range=[6.058862,6.313021]ms
+setup_ms n=12 median=62.732664ms q1=62.682995ms q3=62.901614ms iqr=0.218619ms sample_sd=0.306274ms range=[62.616096,63.537503]ms
+verify_ms n=12 median=14.759711ms q1=14.722182ms q3=14.826845ms iqr=0.104663ms sample_sd=0.086304ms range=[14.645877,14.916424]ms
+external_wall_ms n=12 median=102.731272ms q1=102.537988ms q3=103.054992ms iqr=0.517005ms sample_sd=0.472352ms range=[102.387981,103.979244]ms
+virtual_placement unique_source_bases=12 unique_destination_bases=12 source_mod64=[16] destination_mod64=[16] source_page_offsets=[16] destination_page_offsets=[16]
+PAIRED pow2_naive_over_tiled geometric_mean=2.270563x n=12 median=2.278091x q1=2.256209x q3=2.285341x iqr=0.029132x sample_sd=0.024506x range=[2.226933,2.306268]x
+PAIRED pow2_naive_over_recursive geometric_mean=2.024506x n=12 median=2.021363x q1=2.009180x q3=2.035847x iqr=0.026667x sample_sd=0.017857x range=[2.004128,2.055397]x
+PAIRED padded_naive_over_tiled geometric_mean=1.087029x n=12 median=1.084643x q1=1.078231x q3=1.095054x iqr=0.016824x sample_sd=0.013455x range=[1.065566,1.109548]x
+PAIRED padded_naive_over_recursive geometric_mean=1.164511x n=12 median=1.167675x q1=1.157004x q3=1.171593x iqr=0.014589x sample_sd=0.013169x range=[1.137139,1.183257]x
+PAIRED naive_pow2_over_padded geometric_mean=2.759456x n=12 median=2.759214x q1=2.741062x q3=2.772253x iqr=0.031192x sample_sd=0.020511x range=[2.729520,2.791965]x
+PAIRED tiled_pow2_over_padded geometric_mean=1.321087x n=12 median=1.317856x q1=1.313405x q3=1.327344x iqr=0.013939x sample_sd=0.012198x range=[1.306098,1.344824]x
+PAIRED recursive_pow2_over_padded geometric_mean=1.587260x n=12 median=1.586054x q1=1.581461x q3=1.596548x iqr=0.015087x sample_sd=0.010213x range=[1.569279,1.601895]x

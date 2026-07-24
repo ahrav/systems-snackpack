@@ -1,0 +1,197 @@
+0000000000018020 <systems_snackpack_topic_013::transpose_tiled>:
+   18020:	push   rbp
+   18021:	push   r15
+   18023:	push   r14
+   18025:	push   r13
+   18027:	push   r12
+   18029:	push   rbx
+   1802a:	sub    rsp,0x98
+   18031:	mov    rbx,QWORD PTR [rsp+0xd8]
+   18039:	test   rbx,rbx
+   1803c:	je     1804f <systems_snackpack_topic_013::transpose_tiled+0x2f>
+   1803e:	mov    r11,QWORD PTR [rsp+0xd0]
+   18046:	cmp    r11,r9
+   18049:	jae    18058 <systems_snackpack_topic_013::transpose_tiled+0x38>
+   1804b:	xor    edx,edx
+   1804d:	jmp    18086 <systems_snackpack_topic_013::transpose_tiled+0x66>
+   1804f:	mov    QWORD PTR [rdi],0x4
+   18056:	jmp    18091 <systems_snackpack_topic_013::transpose_tiled+0x71>
+   18058:	mov    r10,rdx
+   1805b:	mov    rax,r9
+   1805e:	mul    r11
+   18061:	jo     18333 <systems_snackpack_topic_013::transpose_tiled+0x313>
+   18067:	mov    edx,0x2
+   1806c:	cmp    r10,rax
+   1806f:	jae    18076 <systems_snackpack_topic_013::transpose_tiled+0x56>
+   18071:	mov    r11,r10
+   18074:	jmp    18083 <systems_snackpack_topic_013::transpose_tiled+0x63>
+   18076:	mov    edx,0x3
+   1807b:	cmp    r8,rax
+   1807e:	jae    180a6 <systems_snackpack_topic_013::transpose_tiled+0x86>
+   18080:	mov    r11,r8
+   18083:	mov    r9,rax
+   18086:	mov    QWORD PTR [rdi],rdx
+   18089:	mov    QWORD PTR [rdi+0x8],r9
+   1808d:	mov    QWORD PTR [rdi+0x10],r11
+   18091:	mov    rax,rdi
+   18094:	add    rsp,0x98
+   1809b:	pop    rbx
+   1809c:	pop    r12
+   1809e:	pop    r13
+   180a0:	pop    r14
+   180a2:	pop    r15
+   180a4:	pop    rbp
+   180a5:	ret
+   180a6:	mov    rax,r9
+   180a9:	or     rax,rbx
+   180ac:	mov    QWORD PTR [rsp+0x68],rdi
+   180b1:	shr    rax,0x20
+   180b5:	je     180c1 <systems_snackpack_topic_013::transpose_tiled+0xa1>
+   180b7:	mov    rax,r9
+   180ba:	xor    edx,edx
+   180bc:	div    rbx
+   180bf:	jmp    180c8 <systems_snackpack_topic_013::transpose_tiled+0xa8>
+   180c1:	mov    eax,r9d
+   180c4:	xor    edx,edx
+   180c6:	div    ebx
+   180c8:	xor    edi,edi
+   180ca:	test   rdx,rdx
+   180cd:	setne  dil
+   180d1:	add    rdi,rax
+   180d4:	mov    QWORD PTR [rsp+0x20],rdi
+   180d9:	je     182fc <systems_snackpack_topic_013::transpose_tiled+0x2dc>
+   180df:	lea    rdx,[rbx*8+0x0]
+   180e7:	mov    rax,rbx
+   180ea:	not    rax
+   180ed:	lea    rbp,[r11*8+0x0]
+   180f5:	mov    QWORD PTR [rsp],0x0
+   180fd:	mov    QWORD PTR [rsp+0x80],r9
+   18105:	mov    QWORD PTR [rsp+0x88],rax
+   1810d:	mov    rax,rbx
+   18110:	imul   rax,r11
+   18114:	mov    QWORD PTR [rsp+0x48],rdx
+   18119:	mov    rdx,QWORD PTR [rsp+0x20]
+   1811e:	mov    QWORD PTR [rsp+0x50],rax
+   18123:	lea    rax,[rax*8+0x0]
+   1812b:	mov    QWORD PTR [rsp+0x40],rax
+   18130:	xor    eax,eax
+   18132:	jmp    18177 <systems_snackpack_topic_013::transpose_tiled+0x157>
+   18134:	data16 data16 cs nop WORD PTR [rax+rax*1+0x0]
+   18140:	mov    rax,QWORD PTR [rsp]
+   18144:	mov    rdx,QWORD PTR [rsp+0x78]
+   18149:	mov    rcx,QWORD PTR [rsp+0x30]
+   1814e:	mov    rsi,QWORD PTR [rsp+0x28]
+   18153:	add    rax,QWORD PTR [rsp+0x50]
+   18158:	add    rcx,QWORD PTR [rsp+0x48]
+   1815d:	add    rsi,QWORD PTR [rsp+0x40]
+   18162:	dec    rdx
+   18165:	mov    QWORD PTR [rsp],rax
+   18169:	mov    rax,QWORD PTR [rsp+0x70]
+   1816e:	test   rdx,rdx
+   18171:	je     182fc <systems_snackpack_topic_013::transpose_tiled+0x2dc>
+   18177:	mov    rdi,rax
+   1817a:	mov    QWORD PTR [rsp+0x78],rdx
+   1817f:	add    rax,rbx
+   18182:	mov    rdx,0xffffffffffffffff
+   18189:	mov    QWORD PTR [rsp+0x28],rsi
+   1818e:	mov    QWORD PTR [rsp+0x30],rcx
+   18193:	mov    QWORD PTR [rsp+0x38],rdi
+   18198:	mov    rsi,rax
+   1819b:	cmovb  rsi,rdx
+   1819f:	mov    QWORD PTR [rsp+0x70],rax
+   181a4:	cmp    r9,rsi
+   181a7:	cmovb  rsi,r9
+   181ab:	cmp    rdi,rsi
+   181ae:	jae    18140 <systems_snackpack_topic_013::transpose_tiled+0x120>
+   181b0:	mov    rdx,QWORD PTR [rsp]
+   181b4:	mov    rax,QWORD PTR [rsp+0x28]
+   181b9:	mov    rdi,QWORD PTR [rsp+0x30]
+   181be:	mov    r15,QWORD PTR [rsp+0x20]
+   181c3:	xor    ecx,ecx
+   181c5:	mov    QWORD PTR [rsp+0x58],0x0
+   181ce:	mov    QWORD PTR [rsp+0x60],rdx
+   181d3:	mov    rdx,QWORD PTR [rsp+0x38]
+   181d8:	mov    QWORD PTR [rsp+0x18],rax
+   181dd:	mov    QWORD PTR [rsp+0x10],rdi
+   181e2:	mov    QWORD PTR [rsp+0x8],rdx
+   181e7:	jmp    1824b <systems_snackpack_topic_013::transpose_tiled+0x22b>
+   181e9:	nop    DWORD PTR [rax+0x0]
+   181f0:	mov    rcx,QWORD PTR [rsp+0x18]
+   181f5:	mov    rbx,QWORD PTR [rsp+0xd8]
+   181fd:	mov    rax,QWORD PTR [rsp+0x8]
+   18202:	mov    rdx,QWORD PTR [rsp+0x10]
+   18207:	mov    r9,QWORD PTR [rsp+0x80]
+   1820f:	dec    r15
+   18212:	add    rcx,QWORD PTR [rsp+0x48]
+   18217:	add    rax,QWORD PTR [rsp+0x50]
+   1821c:	add    rdx,QWORD PTR [rsp+0x40]
+   18221:	sub    QWORD PTR [rsp+0x58],rbx
+   18226:	add    QWORD PTR [rsp+0x60],rbx
+   1822b:	mov    QWORD PTR [rsp+0x18],rcx
+   18230:	mov    rcx,QWORD PTR [rsp+0x90]
+   18238:	mov    QWORD PTR [rsp+0x8],rax
+   1823d:	mov    QWORD PTR [rsp+0x10],rdx
+   18242:	test   r15,r15
+   18245:	je     18140 <systems_snackpack_topic_013::transpose_tiled+0x120>
+   1824b:	mov    rdx,QWORD PTR [rsp+0x88]
+   18253:	mov    rax,rcx
+   18256:	mov    rdi,0xffffffffffffffff
+   1825d:	cmp    rcx,rdx
+   18260:	cmovb  rdx,rcx
+   18264:	add    rdx,rbx
+   18267:	cmp    r9,rdx
+   1826a:	cmovb  rdx,r9
+   1826e:	add    rcx,rbx
+   18271:	mov    QWORD PTR [rsp+0x90],rcx
+   18279:	cmovb  rcx,rdi
+   1827d:	cmp    r9,rcx
+   18280:	cmovb  rcx,r9
+   18284:	cmp    rax,rcx
+   18287:	jae    181f0 <systems_snackpack_topic_013::transpose_tiled+0x1d0>
+   1828d:	add    rdx,QWORD PTR [rsp+0x58]
+   18292:	mov    rdi,QWORD PTR [rsp+0x18]
+   18297:	mov    r14,QWORD PTR [rsp+0x60]
+   1829c:	mov    rcx,QWORD PTR [rsp+0x10]
+   182a1:	mov    r12,QWORD PTR [rsp+0x8]
+   182a6:	mov    rbx,QWORD PTR [rsp+0x38]
+   182ab:	nop    DWORD PTR [rax+rax*1+0x0]
+   182b0:	inc    rbx
+   182b3:	xor    r13d,r13d
+   182b6:	xor    r9d,r9d
+   182b9:	nop    DWORD PTR [rax+0x0]
+   182c0:	lea    rax,[r14+r9*1]
+   182c4:	cmp    rax,r10
+   182c7:	jae    18320 <systems_snackpack_topic_013::transpose_tiled+0x300>
+   182c9:	lea    rax,[r12+r13*1]
+   182cd:	cmp    rax,r8
+   182d0:	jae    1830d <systems_snackpack_topic_013::transpose_tiled+0x2ed>
+   182d2:	mov    rax,QWORD PTR [rdi+r9*8]
+   182d6:	inc    r9
+   182d9:	mov    QWORD PTR [rcx+r13*8],rax
+   182dd:	add    r13,r11
+   182e0:	cmp    rdx,r9
+   182e3:	jne    182c0 <systems_snackpack_topic_013::transpose_tiled+0x2a0>
+   182e5:	inc    r12
+   182e8:	add    rcx,0x8
+   182ec:	add    r14,r11
+   182ef:	add    rdi,rbp
+   182f2:	cmp    rbx,rsi
+   182f5:	jne    182b0 <systems_snackpack_topic_013::transpose_tiled+0x290>
+   182f7:	jmp    181f0 <systems_snackpack_topic_013::transpose_tiled+0x1d0>
+   182fc:	mov    rdi,QWORD PTR [rsp+0x68]
+   18301:	mov    QWORD PTR [rdi],0x5
+   18308:	jmp    18091 <systems_snackpack_topic_013::transpose_tiled+0x71>
+   1830d:	lea    rdx,[rip+0x4192c]        # 59c40 <__dso_handle+0x150>
+   18314:	mov    rdi,rax
+   18317:	mov    rsi,r8
+   1831a:	call   QWORD PTR [rip+0x43af8]        # 5be18 <_DYNAMIC+0x230>
+   18320:	lea    rdx,[rip+0x41901]        # 59c28 <__dso_handle+0x138>
+   18327:	mov    rdi,rax
+   1832a:	mov    rsi,r10
+   1832d:	call   QWORD PTR [rip+0x43ae5]        # 5be18 <_DYNAMIC+0x230>
+   18333:	mov    edx,0x1
+   18338:	jmp    18086 <systems_snackpack_topic_013::transpose_tiled+0x66>
+   1833d:	int3
+   1833e:	int3
+   1833f:	int3
+

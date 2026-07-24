@@ -1,0 +1,59 @@
+0000000000018340 <systems_snackpack_topic_013::transpose_recursive>:
+   18340:	push   rbx
+   18341:	mov    r10,r8
+   18344:	mov    r8,QWORD PTR [rsp+0x10]
+   18349:	mov    rbx,rdi
+   1834c:	cmp    r8,r9
+   1834f:	jae    18355 <systems_snackpack_topic_013::transpose_recursive+0x15>
+   18351:	xor    edx,edx
+   18353:	jmp    1837f <systems_snackpack_topic_013::transpose_recursive+0x3f>
+   18355:	mov    r11,rdx
+   18358:	mov    rax,r9
+   1835b:	mul    r8
+   1835e:	jo     183be <systems_snackpack_topic_013::transpose_recursive+0x7e>
+   18360:	mov    edx,0x2
+   18365:	cmp    r11,rax
+   18368:	jae    1836f <systems_snackpack_topic_013::transpose_recursive+0x2f>
+   1836a:	mov    r8,r11
+   1836d:	jmp    1837c <systems_snackpack_topic_013::transpose_recursive+0x3c>
+   1836f:	mov    edx,0x3
+   18374:	cmp    r10,rax
+   18377:	jae    1838f <systems_snackpack_topic_013::transpose_recursive+0x4f>
+   18379:	mov    r8,r10
+   1837c:	mov    r9,rax
+   1837f:	mov    QWORD PTR [rbx],rdx
+   18382:	mov    QWORD PTR [rbx+0x8],r9
+   18386:	mov    QWORD PTR [rbx+0x10],r8
+   1838a:	mov    rax,rbx
+   1838d:	pop    rbx
+   1838e:	ret
+   1838f:	sub    rsp,0x8
+   18393:	mov    rax,r9
+   18396:	mov    rdi,rsi
+   18399:	mov    rdx,rcx
+   1839c:	mov    rsi,r11
+   1839f:	mov    rcx,r10
+   183a2:	xor    r9d,r9d
+   183a5:	push   rax
+   183a6:	push   0x0
+   183a8:	push   rax
+   183a9:	call   183d0 <systems_snackpack_topic_013::transpose_recursive_region>
+   183ae:	add    rsp,0x20
+   183b2:	mov    QWORD PTR [rbx],0x5
+   183b9:	mov    rax,rbx
+   183bc:	pop    rbx
+   183bd:	ret
+   183be:	mov    edx,0x1
+   183c3:	jmp    1837f <systems_snackpack_topic_013::transpose_recursive+0x3f>
+   183c5:	int3
+   183c6:	int3
+   183c7:	int3
+   183c8:	int3
+   183c9:	int3
+   183ca:	int3
+   183cb:	int3
+   183cc:	int3
+   183cd:	int3
+   183ce:	int3
+   183cf:	int3
+
