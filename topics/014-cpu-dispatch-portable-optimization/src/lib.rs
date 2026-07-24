@@ -232,6 +232,7 @@ pub fn count_eq_neon_checked(input: &[u8], needle: u8) -> Option<usize> {
 ///
 /// The ordering is a policy choice, not a speed measurement. Each SIMD choice
 /// is guarded by the runtime feature check required by its unsafe callee.
+#[inline(never)]
 #[must_use]
 pub fn resolve_best() -> ResolvedKernel {
     #[cfg(target_arch = "x86_64")]
