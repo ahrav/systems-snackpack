@@ -88,12 +88,12 @@ This crate provides three square transpose kernels:
 - `transpose_recursive` bisects the larger region until a fixed leaf area, then
   executes the same scalar operation.
 
-All kernels accept a leading dimension greater than the logical matrix size.
-This declares `ld = 2048` versus `ld = 2049` as the layout perturbation while
-holding logical element count constant. Separate processes still vary
-allocation placement, so the ratios are not identical-placement pairs. The
-correctness oracle compares every logical element and verifies that the
-recorded padded mode leaves each destination padding element untouched.
+All kernels accept a leading dimension greater than or equal to the logical
+matrix size. This declares `ld = 2048` versus `ld = 2049` as the layout
+perturbation while holding logical element count constant. Separate processes
+still vary allocation placement, so the ratios are not identical-placement
+pairs. The correctness oracle compares every logical element and verifies that
+the recorded padded mode leaves each destination padding element untouched.
 
 ```bash
 cargo run -p systems-snackpack-topic-013 --example check_contracts

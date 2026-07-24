@@ -52,7 +52,7 @@ confidence interval.
 The paired ratios compare nearby processes within each six-mode block. They
 pair time and order, not allocator or physical-page placement.
 
-| Paired kernel ratio | Median | Process IQR |
+| Paired kernel ratio | Median | Paired-ratio IQR (12 blocks) |
 | --- | ---: | ---: |
 | power-of-two naive / tiled | 2.278091x | 2.256209–2.285341x |
 | power-of-two naive / recursive | 2.021363x | 2.009180–2.035847x |
