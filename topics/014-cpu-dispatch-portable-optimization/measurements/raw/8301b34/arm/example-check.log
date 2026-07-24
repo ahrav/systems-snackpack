@@ -1,0 +1,4 @@
+   Compiling systems-snackpack-topic-014 v0.1.0 (/tmp/tmp.f26Jcir92E/topics/014-cpu-dispatch-portable-optimization)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.19s
+     Running `target/debug/examples/check_contracts`
+validated scalar, neon, cached, and chunked dispatch contracts

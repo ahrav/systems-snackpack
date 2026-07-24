@@ -1,0 +1,6 @@
+0000000000016bc0 <systems_snackpack_topic_014::resolve_best>:
+   16bc0:	adrp	x0, 16000 <cpu_dispatch::main+0xcd0>
+   16bc4:	add	x0, x0, #0xda0
+   16bc8:	mov	w1, #0x1                   	// #1
+   16bcc:	ret
+

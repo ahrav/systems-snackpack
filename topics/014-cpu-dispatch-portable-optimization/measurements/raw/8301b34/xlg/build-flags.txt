@@ -1,0 +1,4 @@
+RUSTFLAGS=-C target-cpu=x86-64 -C debuginfo=1 -C codegen-units=1 -C llvm-args=-vectorize-loops=false -C llvm-args=-vectorize-slp=false
+TOPIC14_SOURCE_COMMIT=8301b344287c674f559dbbd22718a7c6cd49921d
+architecture=x86_64
+expected_variant=avx2

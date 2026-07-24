@@ -1,0 +1,30 @@
+00000000000187f0 <systems_snackpack_topic_014::count_eq_dispatch_once>:
+   187f0:	push   r15
+   187f2:	push   r14
+   187f4:	push   rbx
+   187f5:	mov    ebx,edx
+   187f7:	mov    r14,rsi
+   187fa:	mov    r15,rdi
+   187fd:	call   QWORD PTR [rip+0x44125]        # 5c928 <_DYNAMIC+0x2b0>
+   18803:	mov    rdi,r15
+   18806:	mov    rsi,r14
+   18809:	mov    edx,ebx
+   1880b:	pop    rbx
+   1880c:	pop    r14
+   1880e:	pop    r15
+   18810:	jmp    rax
+   18812:	int3
+   18813:	int3
+   18814:	int3
+   18815:	int3
+   18816:	int3
+   18817:	int3
+   18818:	int3
+   18819:	int3
+   1881a:	int3
+   1881b:	int3
+   1881c:	int3
+   1881d:	int3
+   1881e:	int3
+   1881f:	int3
+

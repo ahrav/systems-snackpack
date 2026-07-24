@@ -1,0 +1,14 @@
+0000000000016c1c <systems_snackpack_topic_014::count_eq_scalar>:
+   16c1c:	cbz	x1, 16c44 <systems_snackpack_topic_014::count_eq_scalar+0x28>
+   16c20:	mov	x8, x0
+   16c24:	mov	x0, xzr
+   16c28:	and	w9, w2, #0xff
+   16c2c:	ldrb	w10, [x8], #1
+   16c30:	cmp	w10, w9
+   16c34:	cinc	x0, x0, eq	// eq = none
+   16c38:	subs	x1, x1, #0x1
+   16c3c:	b.ne	16c2c <systems_snackpack_topic_014::count_eq_scalar+0x10>  // b.any
+   16c40:	ret
+   16c44:	mov	x0, xzr
+   16c48:	ret
+

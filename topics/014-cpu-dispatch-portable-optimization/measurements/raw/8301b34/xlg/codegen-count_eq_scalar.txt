@@ -1,0 +1,56 @@
+0000000000018640 <systems_snackpack_topic_014::count_eq_scalar>:
+   18640:	test   rsi,rsi
+   18643:	je     18654 <systems_snackpack_topic_014::count_eq_scalar+0x14>
+   18645:	mov    ecx,esi
+   18647:	and    ecx,0x3
+   1864a:	cmp    rsi,0x4
+   1864e:	jae    18657 <systems_snackpack_topic_014::count_eq_scalar+0x17>
+   18650:	xor    eax,eax
+   18652:	jmp    186a9 <systems_snackpack_topic_014::count_eq_scalar+0x69>
+   18654:	xor    eax,eax
+   18656:	ret
+   18657:	movabs rax,0x7ffffffffffffffc
+   18661:	and    rsi,rax
+   18664:	xor    eax,eax
+   18666:	cs nop WORD PTR [rax+rax*1+0x0]
+   18670:	xor    r8d,r8d
+   18673:	cmp    BYTE PTR [rdi],dl
+   18675:	sete   r8b
+   18679:	add    r8,rax
+   1867c:	xor    eax,eax
+   1867e:	cmp    BYTE PTR [rdi+0x1],dl
+   18681:	sete   al
+   18684:	xor    r9d,r9d
+   18687:	cmp    BYTE PTR [rdi+0x2],dl
+   1868a:	sete   r9b
+   1868e:	add    r9,rax
+   18691:	add    r9,r8
+   18694:	xor    eax,eax
+   18696:	cmp    BYTE PTR [rdi+0x3],dl
+   18699:	lea    rdi,[rdi+0x4]
+   1869d:	sete   al
+   186a0:	add    rax,r9
+   186a3:	add    rsi,0xfffffffffffffffc
+   186a7:	jne    18670 <systems_snackpack_topic_014::count_eq_scalar+0x30>
+   186a9:	test   rcx,rcx
+   186ac:	je     186c5 <systems_snackpack_topic_014::count_eq_scalar+0x85>
+   186ae:	xor    esi,esi
+   186b0:	xor    r8d,r8d
+   186b3:	cmp    BYTE PTR [rdi+rsi*1],dl
+   186b6:	sete   r8b
+   186ba:	add    rax,r8
+   186bd:	inc    rsi
+   186c0:	cmp    rcx,rsi
+   186c3:	jne    186b0 <systems_snackpack_topic_014::count_eq_scalar+0x70>
+   186c5:	ret
+   186c6:	int3
+   186c7:	int3
+   186c8:	int3
+   186c9:	int3
+   186ca:	int3
+   186cb:	int3
+   186cc:	int3
+   186cd:	int3
+   186ce:	int3
+   186cf:	int3
+

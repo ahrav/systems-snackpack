@@ -43,3 +43,16 @@ the recorded experiment does not use `target-cpu=native`.
 Host notes and raw evidence are added only after the same committed archive
 passes the full experiment on both required Linux hosts. A failure on either
 host invalidates the topic completion gate.
+
+## Completed record set
+
+The 2026-07-24 run used commit
+`8301b344287c674f559dbbd22718a7c6cd49921d` and archive SHA-256
+`9af2fe9e343353f3086d4c57f499f5ac19f722f5cfa0bc19d31a8d276db5d59b`.
+Both hosts passed the full runner, and both relocated evidence manifests passed
+`sha256sum -c`.
+
+- [AArch64 host record](2026-07-24-dev-dsk-ahrav-2b.md)
+- [x86-64 xlg host record](2026-07-24-xlg.md)
+- [Cross-host interpretation](2026-07-24-cross-host.md)
+- [Raw evidence](raw/8301b34/)

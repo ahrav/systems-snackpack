@@ -168,6 +168,26 @@ evaluation, and final verification. External process time includes startup and
 runner overhead; the residual is mixed and is not reported as pure startup
 latency.
 
+## Recorded result
+
+Commit `8301b344287c674f559dbbd22718a7c6cd49921d` passed the full experiment
+on both required Linux hosts. The table reports median paired steady-time
+ratios with descriptive IQRs across 12 process pairs:
+
+| First mode / second mode | AArch64 2b median [IQR] | x86-64 xlg median [IQR] |
+| --- | ---: | ---: |
+| scalar whole / SIMD whole | 5.110466 [5.094078–5.114599]x | 6.018989 [6.015627–6.023344]x |
+| dispatch once / cached chunks | 0.970531 [0.970156–0.971282]x | 0.897286 [0.896360–0.898409]x |
+| cached chunks / detect chunks | 1.001167 [1.000839–1.001327]x | 0.974973 [0.973987–0.975473]x |
+
+The selected SIMD path was faster than the controlled scalar path on both
+hosts. Dispatching once per whole buffer was faster than a cached indirect
+call per 256-byte chunk on both. Repeated detection was slightly faster than
+cached chunk dispatch on the AArch64 host in this run, where the linked NEON
+resolver was a constant return; it was slower on xlg, where the resolver
+checked Rust's feature cache and branched. These are host- and binary-scoped
+measurements, not ISA-family claims.
+
 Read the [first-visit note](rounds/01.md), [primary-source
-ledger](references.md), and [measurement contract](measurements/README.md)
-before recording host results.
+ledger](references.md), [measurement records](measurements/README.md), and
+[cross-host interpretation](measurements/2026-07-24-cross-host.md).

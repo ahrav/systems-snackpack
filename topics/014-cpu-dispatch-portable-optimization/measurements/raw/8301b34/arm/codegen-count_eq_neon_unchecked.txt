@@ -1,0 +1,39 @@
+0000000000016da4 <systems_snackpack_topic_014::aarch64::count_eq_neon_unchecked>:
+   16da4:	stp	x29, x30, [sp, #-32]!
+   16da8:	str	x19, [sp, #16]
+   16dac:	mov	x29, sp
+   16db0:	cmp	x1, #0x10
+   16db4:	b.cs	16dc4 <systems_snackpack_topic_014::aarch64::count_eq_neon_unchecked+0x20>  // b.hs, b.nlast
+   16db8:	mov	x19, xzr
+   16dbc:	mov	x8, xzr
+   16dc0:	b	16e1c <systems_snackpack_topic_014::aarch64::count_eq_neon_unchecked+0x78>
+   16dc4:	dup	v0.16b, w2
+   16dc8:	adrp	x8, 52000 <_fini+0x6308>
+   16dcc:	mov	x19, xzr
+   16dd0:	ldr	q1, [x8, #832]
+   16dd4:	mov	w8, #0x10                  	// #16
+   16dd8:	mov	x9, x0
+   16ddc:	ldr	q2, [x9], #16
+   16de0:	add	x8, x8, #0x10
+   16de4:	cmp	x8, x1
+   16de8:	cmeq	v2.16b, v2.16b, v0.16b
+   16dec:	and	v2.16b, v2.16b, v1.16b
+   16df0:	ext	v3.16b, v2.16b, v2.16b, #8
+   16df4:	zip1	v2.16b, v2.16b, v3.16b
+   16df8:	addv	h2, v2.8h
+   16dfc:	fmov	w10, s2
+   16e00:	fmov	s2, w10
+   16e04:	cnt	v2.8b, v2.8b
+   16e08:	addv	b2, v2.8b
+   16e0c:	fmov	w10, s2
+   16e10:	add	x19, x19, x10
+   16e14:	b.ls	16ddc <systems_snackpack_topic_014::aarch64::count_eq_neon_unchecked+0x38>  // b.plast
+   16e18:	and	x8, x1, #0x7ffffffffffffff0
+   16e1c:	sub	x1, x1, x8
+   16e20:	add	x0, x0, x8
+   16e24:	bl	16c1c <systems_snackpack_topic_014::count_eq_scalar>
+   16e28:	add	x0, x0, x19
+   16e2c:	ldr	x19, [sp, #16]
+   16e30:	ldp	x29, x30, [sp], #32
+   16e34:	ret
+

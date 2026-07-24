@@ -1,0 +1,146 @@
+SESSION_START source_commit=8301b344287c674f559dbbd22718a7c6cd49921d cpu=0 pairs=12 comparisons=3 processes=72
+PROCESS_START run_id=scalar_simd-p01-1 comparison=scalar-vs-simd pair=1 position=1 order=ab mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p01-1 external_wall_ns=507469370
+PROCESS_START run_id=scalar_simd-p01-2 comparison=scalar-vs-simd pair=1 position=2 order=ab mode=simd_whole
+PROCESS_END run_id=scalar_simd-p01-2 external_wall_ns=222100004
+PROCESS_START run_id=scalar_simd-p02-1 comparison=scalar-vs-simd pair=2 position=1 order=ba mode=simd_whole
+PROCESS_END run_id=scalar_simd-p02-1 external_wall_ns=221718673
+PROCESS_START run_id=scalar_simd-p02-2 comparison=scalar-vs-simd pair=2 position=2 order=ba mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p02-2 external_wall_ns=507494893
+PROCESS_START run_id=scalar_simd-p03-1 comparison=scalar-vs-simd pair=3 position=1 order=ab mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p03-1 external_wall_ns=507242101
+PROCESS_START run_id=scalar_simd-p03-2 comparison=scalar-vs-simd pair=3 position=2 order=ab mode=simd_whole
+PROCESS_END run_id=scalar_simd-p03-2 external_wall_ns=221723485
+PROCESS_START run_id=scalar_simd-p04-1 comparison=scalar-vs-simd pair=4 position=1 order=ba mode=simd_whole
+PROCESS_END run_id=scalar_simd-p04-1 external_wall_ns=221873431
+PROCESS_START run_id=scalar_simd-p04-2 comparison=scalar-vs-simd pair=4 position=2 order=ba mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p04-2 external_wall_ns=507710205
+PROCESS_START run_id=scalar_simd-p05-1 comparison=scalar-vs-simd pair=5 position=1 order=ab mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p05-1 external_wall_ns=501393244
+PROCESS_START run_id=scalar_simd-p05-2 comparison=scalar-vs-simd pair=5 position=2 order=ab mode=simd_whole
+PROCESS_END run_id=scalar_simd-p05-2 external_wall_ns=222019240
+PROCESS_START run_id=scalar_simd-p06-1 comparison=scalar-vs-simd pair=6 position=1 order=ba mode=simd_whole
+PROCESS_END run_id=scalar_simd-p06-1 external_wall_ns=222117462
+PROCESS_START run_id=scalar_simd-p06-2 comparison=scalar-vs-simd pair=6 position=2 order=ba mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p06-2 external_wall_ns=507803107
+PROCESS_START run_id=scalar_simd-p07-1 comparison=scalar-vs-simd pair=7 position=1 order=ab mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p07-1 external_wall_ns=506962901
+PROCESS_START run_id=scalar_simd-p07-2 comparison=scalar-vs-simd pair=7 position=2 order=ab mode=simd_whole
+PROCESS_END run_id=scalar_simd-p07-2 external_wall_ns=221453495
+PROCESS_START run_id=scalar_simd-p08-1 comparison=scalar-vs-simd pair=8 position=1 order=ba mode=simd_whole
+PROCESS_END run_id=scalar_simd-p08-1 external_wall_ns=221579837
+PROCESS_START run_id=scalar_simd-p08-2 comparison=scalar-vs-simd pair=8 position=2 order=ba mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p08-2 external_wall_ns=502133759
+PROCESS_START run_id=scalar_simd-p09-1 comparison=scalar-vs-simd pair=9 position=1 order=ab mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p09-1 external_wall_ns=507299025
+PROCESS_START run_id=scalar_simd-p09-2 comparison=scalar-vs-simd pair=9 position=2 order=ab mode=simd_whole
+PROCESS_END run_id=scalar_simd-p09-2 external_wall_ns=221492434
+PROCESS_START run_id=scalar_simd-p10-1 comparison=scalar-vs-simd pair=10 position=1 order=ba mode=simd_whole
+PROCESS_END run_id=scalar_simd-p10-1 external_wall_ns=221408267
+PROCESS_START run_id=scalar_simd-p10-2 comparison=scalar-vs-simd pair=10 position=2 order=ba mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p10-2 external_wall_ns=507789174
+PROCESS_START run_id=scalar_simd-p11-1 comparison=scalar-vs-simd pair=11 position=1 order=ab mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p11-1 external_wall_ns=507360990
+PROCESS_START run_id=scalar_simd-p11-2 comparison=scalar-vs-simd pair=11 position=2 order=ab mode=simd_whole
+PROCESS_END run_id=scalar_simd-p11-2 external_wall_ns=221064128
+PROCESS_START run_id=scalar_simd-p12-1 comparison=scalar-vs-simd pair=12 position=1 order=ba mode=simd_whole
+PROCESS_END run_id=scalar_simd-p12-1 external_wall_ns=222010491
+PROCESS_START run_id=scalar_simd-p12-2 comparison=scalar-vs-simd pair=12 position=2 order=ba mode=scalar_whole
+PROCESS_END run_id=scalar_simd-p12-2 external_wall_ns=507696803
+PROCESS_START run_id=whole_chunks-p01-1 comparison=whole-vs-chunks pair=1 position=1 order=ab mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p01-1 external_wall_ns=221217386
+PROCESS_START run_id=whole_chunks-p01-2 comparison=whole-vs-chunks pair=1 position=2 order=ab mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p01-2 external_wall_ns=223884217
+PROCESS_START run_id=whole_chunks-p02-1 comparison=whole-vs-chunks pair=2 position=1 order=ba mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p02-1 external_wall_ns=223905281
+PROCESS_START run_id=whole_chunks-p02-2 comparison=whole-vs-chunks pair=2 position=2 order=ba mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p02-2 external_wall_ns=221618890
+PROCESS_START run_id=whole_chunks-p03-1 comparison=whole-vs-chunks pair=3 position=1 order=ab mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p03-1 external_wall_ns=221727946
+PROCESS_START run_id=whole_chunks-p03-2 comparison=whole-vs-chunks pair=3 position=2 order=ab mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p03-2 external_wall_ns=223731324
+PROCESS_START run_id=whole_chunks-p04-1 comparison=whole-vs-chunks pair=4 position=1 order=ba mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p04-1 external_wall_ns=223755297
+PROCESS_START run_id=whole_chunks-p04-2 comparison=whole-vs-chunks pair=4 position=2 order=ba mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p04-2 external_wall_ns=221933602
+PROCESS_START run_id=whole_chunks-p05-1 comparison=whole-vs-chunks pair=5 position=1 order=ab mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p05-1 external_wall_ns=221849485
+PROCESS_START run_id=whole_chunks-p05-2 comparison=whole-vs-chunks pair=5 position=2 order=ab mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p05-2 external_wall_ns=224092329
+PROCESS_START run_id=whole_chunks-p06-1 comparison=whole-vs-chunks pair=6 position=1 order=ba mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p06-1 external_wall_ns=224103310
+PROCESS_START run_id=whole_chunks-p06-2 comparison=whole-vs-chunks pair=6 position=2 order=ba mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p06-2 external_wall_ns=222129162
+PROCESS_START run_id=whole_chunks-p07-1 comparison=whole-vs-chunks pair=7 position=1 order=ab mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p07-1 external_wall_ns=221526581
+PROCESS_START run_id=whole_chunks-p07-2 comparison=whole-vs-chunks pair=7 position=2 order=ab mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p07-2 external_wall_ns=223803504
+PROCESS_START run_id=whole_chunks-p08-1 comparison=whole-vs-chunks pair=8 position=1 order=ba mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p08-1 external_wall_ns=223771526
+PROCESS_START run_id=whole_chunks-p08-2 comparison=whole-vs-chunks pair=8 position=2 order=ba mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p08-2 external_wall_ns=221809200
+PROCESS_START run_id=whole_chunks-p09-1 comparison=whole-vs-chunks pair=9 position=1 order=ab mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p09-1 external_wall_ns=221884757
+PROCESS_START run_id=whole_chunks-p09-2 comparison=whole-vs-chunks pair=9 position=2 order=ab mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p09-2 external_wall_ns=224135499
+PROCESS_START run_id=whole_chunks-p10-1 comparison=whole-vs-chunks pair=10 position=1 order=ba mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p10-1 external_wall_ns=223623242
+PROCESS_START run_id=whole_chunks-p10-2 comparison=whole-vs-chunks pair=10 position=2 order=ba mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p10-2 external_wall_ns=222034023
+PROCESS_START run_id=whole_chunks-p11-1 comparison=whole-vs-chunks pair=11 position=1 order=ab mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p11-1 external_wall_ns=221401024
+PROCESS_START run_id=whole_chunks-p11-2 comparison=whole-vs-chunks pair=11 position=2 order=ab mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p11-2 external_wall_ns=223962206
+PROCESS_START run_id=whole_chunks-p12-1 comparison=whole-vs-chunks pair=12 position=1 order=ba mode=cached_chunks
+PROCESS_END run_id=whole_chunks-p12-1 external_wall_ns=223793494
+PROCESS_START run_id=whole_chunks-p12-2 comparison=whole-vs-chunks pair=12 position=2 order=ba mode=dispatch_once
+PROCESS_END run_id=whole_chunks-p12-2 external_wall_ns=221529143
+PROCESS_START run_id=cached_detect-p01-1 comparison=cached-vs-detect pair=1 position=1 order=ab mode=cached_chunks
+PROCESS_END run_id=cached_detect-p01-1 external_wall_ns=223964974
+PROCESS_START run_id=cached_detect-p01-2 comparison=cached-vs-detect pair=1 position=2 order=ab mode=detect_chunks
+PROCESS_END run_id=cached_detect-p01-2 external_wall_ns=223642236
+PROCESS_START run_id=cached_detect-p02-1 comparison=cached-vs-detect pair=2 position=1 order=ba mode=detect_chunks
+PROCESS_END run_id=cached_detect-p02-1 external_wall_ns=223322153
+PROCESS_START run_id=cached_detect-p02-2 comparison=cached-vs-detect pair=2 position=2 order=ba mode=cached_chunks
+PROCESS_END run_id=cached_detect-p02-2 external_wall_ns=224069900
+PROCESS_START run_id=cached_detect-p03-1 comparison=cached-vs-detect pair=3 position=1 order=ab mode=cached_chunks
+PROCESS_END run_id=cached_detect-p03-1 external_wall_ns=223997391
+PROCESS_START run_id=cached_detect-p03-2 comparison=cached-vs-detect pair=3 position=2 order=ab mode=detect_chunks
+PROCESS_END run_id=cached_detect-p03-2 external_wall_ns=224265848
+PROCESS_START run_id=cached_detect-p04-1 comparison=cached-vs-detect pair=4 position=1 order=ba mode=detect_chunks
+PROCESS_END run_id=cached_detect-p04-1 external_wall_ns=222974936
+PROCESS_START run_id=cached_detect-p04-2 comparison=cached-vs-detect pair=4 position=2 order=ba mode=cached_chunks
+PROCESS_END run_id=cached_detect-p04-2 external_wall_ns=223855774
+PROCESS_START run_id=cached_detect-p05-1 comparison=cached-vs-detect pair=5 position=1 order=ab mode=cached_chunks
+PROCESS_END run_id=cached_detect-p05-1 external_wall_ns=224375924
+PROCESS_START run_id=cached_detect-p05-2 comparison=cached-vs-detect pair=5 position=2 order=ab mode=detect_chunks
+PROCESS_END run_id=cached_detect-p05-2 external_wall_ns=224462701
+PROCESS_START run_id=cached_detect-p06-1 comparison=cached-vs-detect pair=6 position=1 order=ba mode=detect_chunks
+PROCESS_END run_id=cached_detect-p06-1 external_wall_ns=223915396
+PROCESS_START run_id=cached_detect-p06-2 comparison=cached-vs-detect pair=6 position=2 order=ba mode=cached_chunks
+PROCESS_END run_id=cached_detect-p06-2 external_wall_ns=224099285
+PROCESS_START run_id=cached_detect-p07-1 comparison=cached-vs-detect pair=7 position=1 order=ab mode=cached_chunks
+PROCESS_END run_id=cached_detect-p07-1 external_wall_ns=223979277
+PROCESS_START run_id=cached_detect-p07-2 comparison=cached-vs-detect pair=7 position=2 order=ab mode=detect_chunks
+PROCESS_END run_id=cached_detect-p07-2 external_wall_ns=223881053
+PROCESS_START run_id=cached_detect-p08-1 comparison=cached-vs-detect pair=8 position=1 order=ba mode=detect_chunks
+PROCESS_END run_id=cached_detect-p08-1 external_wall_ns=224231968
+PROCESS_START run_id=cached_detect-p08-2 comparison=cached-vs-detect pair=8 position=2 order=ba mode=cached_chunks
+PROCESS_END run_id=cached_detect-p08-2 external_wall_ns=224118589
+PROCESS_START run_id=cached_detect-p09-1 comparison=cached-vs-detect pair=9 position=1 order=ab mode=cached_chunks
+PROCESS_END run_id=cached_detect-p09-1 external_wall_ns=224183323
+PROCESS_START run_id=cached_detect-p09-2 comparison=cached-vs-detect pair=9 position=2 order=ab mode=detect_chunks
+PROCESS_END run_id=cached_detect-p09-2 external_wall_ns=223760829
+PROCESS_START run_id=cached_detect-p10-1 comparison=cached-vs-detect pair=10 position=1 order=ba mode=detect_chunks
+PROCESS_END run_id=cached_detect-p10-1 external_wall_ns=223807938
+PROCESS_START run_id=cached_detect-p10-2 comparison=cached-vs-detect pair=10 position=2 order=ba mode=cached_chunks
+PROCESS_END run_id=cached_detect-p10-2 external_wall_ns=223468773
+PROCESS_START run_id=cached_detect-p11-1 comparison=cached-vs-detect pair=11 position=1 order=ab mode=cached_chunks
+PROCESS_END run_id=cached_detect-p11-1 external_wall_ns=223815028
+PROCESS_START run_id=cached_detect-p11-2 comparison=cached-vs-detect pair=11 position=2 order=ab mode=detect_chunks
+PROCESS_END run_id=cached_detect-p11-2 external_wall_ns=223868590
+PROCESS_START run_id=cached_detect-p12-1 comparison=cached-vs-detect pair=12 position=1 order=ba mode=detect_chunks
+PROCESS_END run_id=cached_detect-p12-1 external_wall_ns=223970082
+PROCESS_START run_id=cached_detect-p12-2 comparison=cached-vs-detect pair=12 position=2 order=ba mode=cached_chunks
+PROCESS_END run_id=cached_detect-p12-2 external_wall_ns=224414167
+SESSION_END processes=72

@@ -1,0 +1,56 @@
+0000000000018830 <systems_snackpack_topic_014::x86_64::count_eq_avx2_unchecked>:
+   18830:	push   rbx
+   18831:	cmp    rsi,0x20
+   18835:	jae    1883d <systems_snackpack_topic_014::x86_64::count_eq_avx2_unchecked+0xd>
+   18837:	xor    ebx,ebx
+   18839:	xor    ecx,ecx
+   1883b:	jmp    188ad <systems_snackpack_topic_014::x86_64::count_eq_avx2_unchecked+0x7d>
+   1883d:	vmovd  xmm0,edx
+   18841:	vpbroadcastb ymm0,xmm0
+   18846:	xor    eax,eax
+   18848:	xor    ebx,ebx
+   1884a:	nop    WORD PTR [rax+rax*1+0x0]
+   18850:	vpcmpeqb ymm1,ymm0,YMMWORD PTR [rdi+rax*1]
+   18855:	vpmovmskb ecx,ymm1
+   18859:	mov    r8d,ecx
+   1885c:	shr    r8d,1
+   1885f:	and    r8d,0x55555555
+   18866:	sub    ecx,r8d
+   18869:	mov    r8d,ecx
+   1886c:	and    r8d,0x33333333
+   18873:	shr    ecx,0x2
+   18876:	and    ecx,0x33333333
+   1887c:	add    ecx,r8d
+   1887f:	mov    r8d,ecx
+   18882:	shr    r8d,0x4
+   18886:	add    r8d,ecx
+   18889:	and    r8d,0xf0f0f0f
+   18890:	imul   ecx,r8d,0x1010101
+   18897:	shr    ecx,0x18
+   1889a:	add    rbx,rcx
+   1889d:	lea    rcx,[rax+0x20]
+   188a1:	add    rax,0x40
+   188a5:	cmp    rax,rsi
+   188a8:	mov    rax,rcx
+   188ab:	jbe    18850 <systems_snackpack_topic_014::x86_64::count_eq_avx2_unchecked+0x20>
+   188ad:	sub    rsi,rcx
+   188b0:	add    rdi,rcx
+   188b3:	movzx  edx,dl
+   188b6:	vzeroupper
+   188b9:	call   QWORD PTR [rip+0x44061]        # 5c920 <_DYNAMIC+0x2a8>
+   188bf:	add    rax,rbx
+   188c2:	pop    rbx
+   188c3:	ret
+   188c4:	int3
+   188c5:	int3
+   188c6:	int3
+   188c7:	int3
+   188c8:	int3
+   188c9:	int3
+   188ca:	int3
+   188cb:	int3
+   188cc:	int3
+   188cd:	int3
+   188ce:	int3
+   188cf:	int3
+
