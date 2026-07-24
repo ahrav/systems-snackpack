@@ -41,7 +41,7 @@ The order-balanced paired ratios expose the result more directly:
 Measured elapsed time shows the same qualitative result on these two hosts:
 the power-of-two naive traversal was slower than either locality-preserving
 kernel, and changing only `ld` from 2,048 to 2,049 sharply reduced every
-power-of-two mode's time. On xlg, the padded naive/tiled process IQR crosses
+power-of-two mode's time. On xlg, the padded naive/tiled paired-ratio IQR crosses
 `1.0x`; on the AArch64 host, the padded tiled and recursive variants retained
 larger advantages.
 

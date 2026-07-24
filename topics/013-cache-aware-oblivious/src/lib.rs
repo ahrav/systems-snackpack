@@ -509,6 +509,15 @@ mod tests {
                 );
             }
         }
+        for row in 0..n {
+            for column in n..ld {
+                assert_eq!(
+                    destination[row * ld + column],
+                    u64::MAX,
+                    "padding overwritten at destination ({row}, {column})"
+                );
+            }
+        }
     }
 
     #[test]
