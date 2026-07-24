@@ -174,7 +174,14 @@ fn main() -> ExitCode {
     {
         return fail("simd_whole requires a supported architecture-specific kernel");
     }
-    let mut pass_results = vec![0_usize; passes];
+    // A fallible reservation keeps oversized TOPIC14_PASSES values on the
+    // controlled exit path instead of a capacity-overflow panic or an
+    // allocation abort.
+    let mut pass_results: Vec<usize> = Vec::new();
+    if pass_results.try_reserve_exact(passes).is_err() {
+        return fail("TOPIC14_PASSES is too large to buffer per-pass results");
+    }
+    pass_results.resize(passes, 0);
     let setup_ns = setup_started.elapsed().as_nanos();
 
     let steady_started = Instant::now();
