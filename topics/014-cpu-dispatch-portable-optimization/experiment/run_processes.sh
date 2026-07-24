@@ -75,6 +75,11 @@ if [[ $observed_archive_sha != "$source_archive_sha256" ]]; then
   exit 2
 fi
 gzip -dc "$archive_gz" >"$archive_tar"
+# The embedded commit ID is a self-attested PAX header, a guard against
+# mismatched SOURCE_COMMIT/archive arguments rather than authentication.
+# Content identity is the archive digest checked above; commit attribution is
+# verified against the repository by comparing the recorded per-file hashes
+# with the named commit's tree.
 archive_commit=$(git get-tar-commit-id <"$archive_tar")
 if [[ $archive_commit != "$source_commit" ]]; then
   echo "source archive embedded commit differs from SOURCE_COMMIT" >&2
@@ -144,9 +149,16 @@ if [[ $output_dir == "$repo_root" || $output_dir == "$repo_root"/* ]]; then
 fi
 cd -- "$repo_root"
 
-rg --files -uu -0 \
-  Cargo.toml Cargo.lock rust-toolchain.toml topics/014-cpu-dispatch-portable-optimization \
-  | sort -z | xargs -0 sha256sum >"$output_dir/source-files.before.sha256"
+# The workspace gates below build and test every workspace member, so the
+# immutability manifest must cover the whole extracted tree. `target/` is
+# Cargo build output and `.git/` is the temporary index for the whitespace
+# gate; both are generated during the run and excluded from the comparison.
+manifest_source_files() {
+  rg --files -uu -0 -g '!target' -g '!.git' \
+    | sort -z | xargs -0 sha256sum
+}
+
+manifest_source_files >"$output_dir/source-files.before.sha256"
 printf '%s  source-archive.tar.gz\n' "$source_archive_sha256" \
   >"$output_dir/source-archive.sha256"
 
@@ -171,6 +183,8 @@ esac
   printf 'TOPIC14_SOURCE_COMMIT=%s\n' "$source_commit"
   printf 'architecture=%s\n' "$architecture"
   printf 'expected_variant=%s\n' "$expected_variant"
+  printf 'rustc_resolved=%s\n' "$(command -v rustc)"
+  printf 'cargo_resolved=%s\n' "$(command -v cargo)"
 } >"$output_dir/build-flags.txt"
 
 bash "$script_root/probe_remote.sh" "$host_alias" "$cpu" >"$output_dir/host.txt"
@@ -181,7 +195,42 @@ rustc \
   -C "target-cpu=$target_cpu" \
   --print target-features >"$output_dir/rustc-target-features.txt"
 
-unset CARGO_BUILD_TARGET CARGO_ENCODED_RUSTFLAGS RUSTC_WORKSPACE_WRAPPER RUSTC_WRAPPER
+# The recorded `rustc -vV` provenance only describes the compiler Cargo
+# invokes when no environment variable or Cargo configuration redirects the
+# compiler, wrapper, flags, or profile. Unset every documented redirect and
+# fail closed on config files that could substitute another compiler.
+unset CARGO_BUILD_TARGET CARGO_ENCODED_RUSTFLAGS RUSTC_WORKSPACE_WRAPPER RUSTC_WRAPPER \
+  RUSTC RUSTDOC RUSTC_BOOTSTRAP RUSTDOCFLAGS \
+  CARGO_BUILD_RUSTC CARGO_BUILD_RUSTC_WRAPPER CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER \
+  CARGO_BUILD_RUSTDOC CARGO_BUILD_RUSTFLAGS CARGO_BUILD_RUSTDOCFLAGS
+while IFS= read -r profile_variable; do
+  unset "$profile_variable"
+done < <(compgen -e | rg '^CARGO_PROFILE_' || true)
+
+cargo_config_candidates=(
+  "${CARGO_HOME:-$HOME/.cargo}/config.toml"
+  "${CARGO_HOME:-$HOME/.cargo}/config"
+)
+config_scan_dir=$repo_root
+while :; do
+  cargo_config_candidates+=(
+    "$config_scan_dir/.cargo/config.toml"
+    "$config_scan_dir/.cargo/config"
+  )
+  if [[ $config_scan_dir == / ]]; then
+    break
+  fi
+  config_scan_dir=$(dirname -- "$config_scan_dir")
+done
+for cargo_config in "${cargo_config_candidates[@]}"; do
+  if [[ -f $cargo_config ]] \
+    && rg -q '^[[:space:]]*(rustc|rustdoc)(-wrapper|-workspace-wrapper)?[[:space:]]*=' \
+      "$cargo_config"; then
+    echo "Cargo configuration may redirect the recorded compiler: $cargo_config" >&2
+    exit 2
+  fi
+done
+
 export CARGO_TARGET_DIR="$repo_root/target"
 export TOPIC14_SOURCE_COMMIT="$source_commit"
 export RUSTFLAGS="-C target-cpu=$target_cpu -C debuginfo=1 -C codegen-units=1 -C llvm-args=-vectorize-loops=false -C llvm-args=-vectorize-slp=false"
@@ -298,9 +347,7 @@ if [[ $observed_rows != "$expected_rows" ]]; then
   exit 2
 fi
 
-rg --files -uu -0 \
-  Cargo.toml Cargo.lock rust-toolchain.toml topics/014-cpu-dispatch-portable-optimization \
-  | sort -z | xargs -0 sha256sum >"$output_dir/source-files.after.sha256"
+manifest_source_files >"$output_dir/source-files.after.sha256"
 if ! cmp -s \
   "$output_dir/source-files.before.sha256" \
   "$output_dir/source-files.after.sha256"; then
@@ -308,6 +355,11 @@ if ! cmp -s \
   exit 2
 fi
 cp -- "$output_dir/source-files.after.sha256" "$output_dir/source-files.sha256"
+
+# The schedule executed $output_dir/cpu-dispatch-bench dozens of times after
+# its hash was recorded. Reverifying here proves the timed binary still
+# matches the recorded checksum before the manifest freezes the evidence.
+(cd -- "$output_dir" && sha256sum --quiet -c cpu-dispatch-bench.sha256)
 
 evidence_manifest_tmp=$(mktemp)
 (cd -- "$output_dir" && \

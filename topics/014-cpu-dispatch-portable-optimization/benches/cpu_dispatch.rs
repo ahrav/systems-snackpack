@@ -174,16 +174,28 @@ fn main() -> ExitCode {
     {
         return fail("simd_whole requires a supported architecture-specific kernel");
     }
+    let mut pass_results = vec![0_usize; passes];
     let setup_ns = setup_started.elapsed().as_nanos();
 
     let steady_started = Instant::now();
-    let mut checksum = 0_usize;
-    for _ in 0..passes {
-        checksum = checksum.wrapping_add(run_pass(mode, selected, black_box(&input), chunk_bytes));
+    for result in pass_results.iter_mut() {
+        *result = run_pass(mode, selected, black_box(&input), chunk_bytes);
     }
     let steady_ns = steady_started.elapsed().as_nanos();
 
     let verify_started = Instant::now();
+    // Comparing every pass against the oracle fails closed: a wrong per-pass
+    // count cannot hide behind modular wraparound or compensating errors in an
+    // accumulated total.
+    if pass_results
+        .iter()
+        .any(|&result| result != expected_per_pass)
+    {
+        return fail("a timed pass differs from the scalar oracle");
+    }
+    // Every element equals `expected_per_pass`, so this sum reproduces the
+    // overflow-checked `expected_checksum` without wrapping.
+    let checksum: usize = pass_results.iter().sum();
     if checksum != expected_checksum {
         return fail("timed result differs from the scalar oracle");
     }

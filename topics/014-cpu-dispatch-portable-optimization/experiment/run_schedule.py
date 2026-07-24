@@ -10,6 +10,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import NoReturn
 
 
 COMPARISONS = (
@@ -44,7 +45,7 @@ HEADER = (
 )
 
 
-def fail(message: str) -> None:
+def fail(message: str) -> NoReturn:
     raise SystemExit(message)
 
 
@@ -74,8 +75,8 @@ def integer(row: dict[str, str], field: str) -> int:
         fail(f"{row.get('run_id', '<unknown>')}: {field} is not an integer")
 
 
-def validate_row(
-    fields: list[str],
+def validate_row_invariants(
+    row: dict[str, str],
     *,
     source_commit: str,
     comparison: str,
@@ -83,13 +84,13 @@ def validate_row(
     position: int,
     order: str,
     mode: str,
-) -> None:
-    if len(fields) != len(HEADER) - 1:
-        fail(
-            f"{comparison} pair {pair} position {position}: benchmark emitted "
-            f"{len(fields)} fields, expected {len(HEADER) - 1}"
-        )
-    row = dict(zip(HEADER[:-1], fields))
+) -> str:
+    """Check the per-row invariants shared with summarize.py.
+
+    Covers identity text fields, variant legality, the recorded fixed
+    configuration, and the scalar-oracle checksum contract. Returns the row's
+    run ID so callers can label their own additional checks.
+    """
     run_id = f"{comparison.replace('-vs-', '_')}-p{pair:02}-{position}"
     expected_text = {
         "run_id": run_id,
@@ -130,6 +131,34 @@ def validate_row(
         fail(f"{run_id}: setup and steady timing must be positive")
     if integer(row, "verify_ns") < 0:
         fail(f"{run_id}: verification timing must be nonnegative")
+    return run_id
+
+
+def validate_row(
+    fields: list[str],
+    *,
+    source_commit: str,
+    comparison: str,
+    pair: int,
+    position: int,
+    order: str,
+    mode: str,
+) -> None:
+    if len(fields) != len(HEADER) - 1:
+        fail(
+            f"{comparison} pair {pair} position {position}: benchmark emitted "
+            f"{len(fields)} fields, expected {len(HEADER) - 1}"
+        )
+    row: dict[str, str] = dict(zip(HEADER[:-1], fields))
+    validate_row_invariants(
+        row,
+        source_commit=source_commit,
+        comparison=comparison,
+        pair=pair,
+        position=position,
+        order=order,
+        mode=mode,
+    )
 
 
 def run(

@@ -57,7 +57,7 @@ Paired ratios divide the first named mode's steady time by the second's:
 | dispatch once / cached chunks | 0.970531x | 0.970156–0.971282x |
 | cached chunks / detect chunks | 1.001167x | 1.000839–1.001327x |
 
-The selected Advanced SIMD path took about one fifth of the scalar path's
+The selected Advanced SIMD path took about one-fifth of the scalar path's
 steady time in this workload. Dispatching once per 64 MiB buffer was faster
 than invoking the cached function pointer for each 256-byte chunk.
 

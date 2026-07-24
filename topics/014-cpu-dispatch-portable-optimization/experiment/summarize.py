@@ -9,7 +9,7 @@ import re
 import statistics
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import NoReturn, Optional
 
 from run_schedule import (
     CHUNK_BYTES,
@@ -19,10 +19,11 @@ from run_schedule import (
     PAIRS,
     PASSES,
     schedule,
+    validate_row_invariants,
 )
 
 
-def fail(message: str) -> None:
+def fail(message: str) -> NoReturn:
     raise SystemExit(message)
 
 
@@ -61,32 +62,15 @@ def validate(
     fixture: Optional[tuple[int, int]] = None
 
     for row, (comparison, pair, position, order, mode) in zip(rows, expected_records):
-        run_id = f"{comparison.replace('-vs-', '_')}-p{pair:02}-{position}"
-        expected_text = {
-            "run_id": run_id,
-            "comparison": comparison,
-            "pair": str(pair),
-            "position": str(position),
-            "order": order,
-            "mode": mode,
-            "source_commit": source_commit,
-        }
-        for field, expected in expected_text.items():
-            if row[field] != expected:
-                fail(f"{run_id}: {field}={row[field]!r}, expected {expected!r}")
-        if mode == "scalar_whole":
-            if row["variant"] != "scalar":
-                fail(f"{run_id}: scalar mode reported {row['variant']!r}")
-        elif row["variant"] not in {"avx2", "neon"}:
-            fail(f"{run_id}: selected mode reported {row['variant']!r}")
-        expected_config = {
-            "input_bytes": INPUT_BYTES,
-            "passes": PASSES,
-            "chunk_bytes": CHUNK_BYTES,
-        }
-        for field, expected in expected_config.items():
-            if integer(row, field) != expected:
-                fail(f"{run_id}: {field} differs from the recorded configuration")
+        run_id = validate_row_invariants(
+            row,
+            source_commit=source_commit,
+            comparison=comparison,
+            pair=pair,
+            position=position,
+            order=order,
+            mode=mode,
+        )
         current_fixture = (
             integer(row, "input_checksum"),
             integer(row, "expected_per_pass"),
@@ -95,16 +79,11 @@ def validate(
             fixture = current_fixture
         elif current_fixture != fixture:
             fail(f"{run_id}: deterministic fixture checksums changed between processes")
-        checksum = integer(row, "checksum")
-        if checksum != integer(row, "expected_checksum"):
-            fail(f"{run_id}: checksum differs from expected_checksum")
-        if checksum != current_fixture[1] * PASSES:
-            fail(f"{run_id}: checksum differs from scalar oracle times passes")
         setup_ns = integer(row, "setup_ns")
         steady_ns = integer(row, "steady_ns")
         verify_ns = integer(row, "verify_ns")
         external_ns = integer(row, "external_wall_ns")
-        if min(setup_ns, steady_ns, external_ns) <= 0 or verify_ns < 0:
+        if external_ns <= 0:
             fail(f"{run_id}: timing fields are outside their valid range")
         if external_ns < setup_ns + steady_ns + verify_ns:
             fail(f"{run_id}: external wall time does not cover internal phases")
