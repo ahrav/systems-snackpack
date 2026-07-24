@@ -42,7 +42,11 @@ the recorded experiment does not use `target-cpu=native`.
 
 Host notes and raw evidence are added only after the same committed archive
 passes the full experiment on both required Linux hosts. A failure on either
-host invalidates the topic completion gate.
+host invalidates the topic completion gate. The archive's embedded commit ID
+is self-attested, so commit attribution is verified in the repository before
+a record set is accepted: extract the named commit (`git archive <commit> |
+tar -x`) and check the recorded per-file hashes against it
+(`sha256sum -c source-files.sha256`).
 
 ## Completed record set
 

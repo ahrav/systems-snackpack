@@ -198,7 +198,10 @@ rustc \
 # The recorded `rustc -vV` provenance only describes the compiler Cargo
 # invokes when no environment variable or Cargo configuration redirects the
 # compiler, wrapper, flags, or profile. Unset every documented redirect and
-# fail closed on config files that could substitute another compiler.
+# fail closed on discoverable Cargo config files: TOML admits section, dotted,
+# and inline spellings for `build.rustc*` and `profile.*` overrides, so any
+# config content is an unrecorded build input rather than something a pattern
+# scan can whitelist.
 unset CARGO_BUILD_TARGET CARGO_ENCODED_RUSTFLAGS RUSTC_WORKSPACE_WRAPPER RUSTC_WRAPPER \
   RUSTC RUSTDOC RUSTC_BOOTSTRAP RUSTDOCFLAGS \
   CARGO_BUILD_RUSTC CARGO_BUILD_RUSTC_WRAPPER CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER \
@@ -223,10 +226,8 @@ while :; do
   config_scan_dir=$(dirname -- "$config_scan_dir")
 done
 for cargo_config in "${cargo_config_candidates[@]}"; do
-  if [[ -f $cargo_config ]] \
-    && rg -q '^[[:space:]]*(rustc|rustdoc)(-wrapper|-workspace-wrapper)?[[:space:]]*=' \
-      "$cargo_config"; then
-    echo "Cargo configuration may redirect the recorded compiler: $cargo_config" >&2
+  if [[ -f $cargo_config ]]; then
+    echo "Cargo configuration is an unrecorded build input: $cargo_config" >&2
     exit 2
   fi
 done
