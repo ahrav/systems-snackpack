@@ -160,6 +160,11 @@ SOURCE_ARCHIVE=/tmp/topic13.tar.gz \
   /absolute/output requested-host "$commit" "$archive_sha" 0 12
 ```
 
+The output directory must be absolute, absent or empty, and outside the
+extracted source tree; the runner rejects a nested location before any gate
+runs because generated evidence would otherwise enter the immutable source
+manifest.
+
 The runner:
 
 1. verifies the archive bytes and embedded commit;

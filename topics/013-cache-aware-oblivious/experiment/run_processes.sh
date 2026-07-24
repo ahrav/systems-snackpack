@@ -178,6 +178,16 @@ if [[ -d $output_dir ]]; then
 fi
 mkdir -p -- "$output_dir/gates"
 output_dir=$(cd -- "$output_dir" && pwd)
+# The source manifest below hashes the extracted tree recursively, and the
+# cleanup trap removes that tree on exit; an OUTPUT_DIR inside it would
+# contaminate source-files.sha256 (failing verification only after the full
+# schedule) and lose the evidence when the trap fires.
+output_dir_real=$(cd -- "$output_dir" && pwd -P)
+repo_root_real=$(cd -- "$repo_root" && pwd -P)
+if [[ $output_dir_real == "$repo_root_real" || $output_dir_real == "$repo_root_real"/* ]]; then
+  echo "OUTPUT_DIR must be outside the extracted source tree" >&2
+  exit 2
+fi
 cd -- "$repo_root"
 
 rg --files -uu -0 \
