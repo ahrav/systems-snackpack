@@ -14,6 +14,17 @@ gates_dir="$output_dir/gates"
 cpu="${3:-0}"
 
 mkdir -p "$gates_dir"
+output_dir="$(cd -- "$output_dir" && pwd)"
+
+# The source manifest scans the topic tree, and the shell creates a redirection
+# target before the command it redirects runs. An output directory inside the
+# repository would therefore hash generated evidence as source input and record
+# a checksum for the manifest itself that is stale the moment it is written.
+# Evidence is collected outside the repository and copied in afterwards.
+if [[ "$output_dir" == "$repo_root" || "$output_dir" == "$repo_root"/* ]]; then
+    printf 'OUTPUT_DIRECTORY must be outside the repository: %s\n' "$output_dir" >&2
+    exit 2
+fi
 
 # The focused build goes to a private directory so the measured artifact is
 # never a stale binary from an earlier build and never disappears into a
