@@ -49,10 +49,13 @@ fresh processes. The 48 timed calls are not 48 independent replicates.
 - Raw records remain available beside each summary.
 
 `order_bias.sha256` is a digest-only record. The measured binary is not
-retained, so the digest cannot be re-verified with `sha256sum -c`; the retained
-code-generation evidence is `codegen-full.txt.gz` and
-`order_bias.symbols.txt`. Runs before this contract recorded the digest against
-an absolute build path, which those snapshots preserve unchanged.
+retained, so the digest cannot be re-verified with `sha256sum -c`. The
+`95bd13b` snapshots retain curated code-generation excerpts —
+`codegen-checksum.txt`, and `codegen-measure-pair.txt` on the x86-64 host — not
+a full disassembly, so the linked image cannot be re-inspected beyond those
+excerpts. Runs from this contract onward retain `codegen-full.txt.gz` and
+`order_bias.symbols.txt` as well. Those snapshots also recorded the digest
+against an absolute build path, which they preserve unchanged.
 
 The result applies to the recorded source, linked image, host, toolchain,
 flags, workload, affinity boundary, and run window. The affinity boundary is

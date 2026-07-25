@@ -6,15 +6,26 @@ if (($# < 2 || $# > 3)); then
     exit 2
 fi
 
-repo_root="$(cd -- "$1" && pwd)"
+repo_root="$(cd -- "$1" && pwd -P)"
 output_dir="$2"
 topic_rel="topics/015-advanced-benchmarking-methodology"
 topic_dir="$repo_root/$topic_rel"
 gates_dir="$output_dir/gates"
-cpu="${3:-0}"
+# The runner's fallback to the first allowed CPU depends on the argument being
+# absent, so an omitted CPU must stay omitted rather than become an explicit 0.
+if (($# >= 3)); then
+    cpu_args=("$3")
+    cpu_requested="$3"
+else
+    cpu_args=()
+    cpu_requested="default"
+fi
 
 mkdir -p "$gates_dir"
-output_dir="$(cd -- "$output_dir" && pwd)"
+# Physical resolution on both sides: a logical path can point through a symlink
+# into the repository, which the prefix comparison below would then accept.
+output_dir="$(cd -- "$output_dir" && pwd -P)"
+gates_dir="$output_dir/gates"
 
 # The source manifest scans the topic tree, and the shell creates a redirection
 # target before the command it redirects runs. An output directory inside the
@@ -28,21 +39,34 @@ fi
 
 # The focused build goes to a private directory so the measured artifact is
 # never a stale binary from an earlier build and never disappears into a
-# caller-configured CARGO_TARGET_DIR. It is not evidence, so it stays outside
-# the output tree that evidence.sha256 walks.
-build_dir="$(mktemp -d)"
+# caller-configured target directory. It must also stay outside the output tree:
+# evidence.sha256 walks that tree, and the exit trap would delete the Cargo
+# artifacts the walk had just hashed.
+build_dir="$(cd -- "$(mktemp -d)" && pwd -P)"
 trap 'rm -rf -- "$build_dir"' EXIT
-
-# Cargo honours only the first rustflags source it finds, and
-# CARGO_ENCODED_RUSTFLAGS outranks the RUSTFLAGS assignment below. An inherited
-# encoded value would build without the recorded flags while build-flags.txt
-# still claimed them, and would break the gates' compiler-defaults claim too.
-if [[ -n "${CARGO_ENCODED_RUSTFLAGS+set}" ]]; then
-    encoded_rustflags="cleared"
-else
-    encoded_rustflags="unset"
+if [[ "$build_dir" == "$output_dir" || "$build_dir" == "$output_dir"/* ]]; then
+    printf 'temporary build directory %s falls inside OUTPUT_DIRECTORY %s; set TMPDIR elsewhere\n' \
+        "$build_dir" "$output_dir" >&2
+    exit 2
 fi
-unset CARGO_ENCODED_RUSTFLAGS
+
+# The recorded `rustc -vV` provenance and flags only describe the build when no
+# environment variable redirects the compiler, wrapper, flags, profile, target
+# overrides, or incremental mode. Enumerating dangerous names loses to Cargo's
+# namespace (CARGO_BUILD_*, CARGO_PROFILE_*, CARGO_TARGET_<TRIPLE>_*,
+# CARGO_ENCODED_*, and additions), so sweep every exported
+# CARGO_*/RUSTC*/RUSTDOC*/RUSTFLAGS variable before probing, gating, or
+# building, and re-export only the recorded values. CARGO_HOME survives because
+# it locates the registry cache, and any Cargo configuration file it finds is
+# hashed into the source manifest. RUSTUP_* survives so the build resolves the
+# same toolchain the probe records.
+swept_variables=()
+while IFS= read -r swept_variable; do
+    if [[ $swept_variable != CARGO_HOME ]]; then
+        swept_variables+=("$swept_variable")
+        unset "$swept_variable"
+    fi
+done < <(compgen -e | rg '^(CARGO_|RUSTC|RUSTDOC|RUSTFLAGS)' || true)
 
 if ! command -v taskset >/dev/null 2>&1; then
     printf 'taskset is required for remote evidence collection\n' >&2
@@ -77,8 +101,8 @@ native_rustflags="-C target-cpu=native -C codegen-units=1"
 printf '%s\n' \
     "workspace_gates=compiler defaults" \
     "focused_build=--release ${native_rustflags}" \
-    "focused_rustflags_encoded=${encoded_rustflags}" \
-    "focused_affinity_requested=taskset -c ${cpu}" \
+    "swept_build_environment=${swept_variables[*]:-none}" \
+    "focused_affinity_requested=taskset -c ${cpu_requested}" \
     "source_commit=${SOURCE_COMMIT:-unknown}" \
     "source_archive_sha256=${SOURCE_ARCHIVE_SHA256:-unknown}" \
     >"$output_dir/build-flags.txt"
@@ -160,7 +184,7 @@ nm -C "$binary" >"$output_dir/order_bias.symbols.txt"
     "$output_dir/raw.csv" \
     "$output_dir/summary.csv" \
     12 \
-    "$cpu" \
+    "${cpu_args[@]+"${cpu_args[@]}"}" \
     >"$output_dir/process.log" 2>&1
 
 # The runner resolves and probes its own CPU, so the branch it reports is the
