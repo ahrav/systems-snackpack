@@ -86,6 +86,11 @@ def main() -> None:
 
     raw_path = Path(sys.argv[1])
     summary_path = Path(sys.argv[2])
+    # The raw file is fully read and closed before the summary is opened, so a
+    # collision truncates the validated process records and still exits zero.
+    # Resolving both paths catches aliases such as symlinks and `./` prefixes.
+    if raw_path.resolve() == summary_path.resolve():
+        raise SystemExit("RAW.csv and SUMMARY.csv must name different files")
     runs: dict[int, Run] = {}
     block_runs: dict[int, dict[str, int]] = defaultdict(dict)
     block_launches: dict[int, dict[int, str]] = defaultdict(dict)

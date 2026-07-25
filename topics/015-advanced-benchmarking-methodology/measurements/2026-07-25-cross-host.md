@@ -40,8 +40,11 @@ blocks are enough for a production decision.
 
 The AArch64 native binary used an SVE checksum loop. The x86-64 native binary
 used an AVX-512 checksum loop with AVX2 and scalar remainder paths. These are
-linked-image observations. The two binaries, CPU products, compiler versions,
-and host states differ.
+linked-image observations. The two binaries, CPU products, and host states
+differ. Whether the compilers differed is unverified: each host record's
+toolchain probe ran in the caller's directory rather than the repository, so the
+two recorded versions describe caller defaults, not the pinned toolchain the
+builds resolved.
 
 The x86-64 second position was much faster than its first position. The
 AArch64 position difference was smaller and reversed. The experiment did not

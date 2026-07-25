@@ -10,7 +10,6 @@ repo_root="$(cd -- "$1" && pwd -P)"
 output_dir="$2"
 topic_rel="topics/015-advanced-benchmarking-methodology"
 topic_dir="$repo_root/$topic_rel"
-gates_dir="$output_dir/gates"
 # The runner's fallback to the first allowed CPU depends on the argument being
 # absent, so an omitted CPU must stay omitted rather than become an explicit 0.
 if (($# >= 3)); then
@@ -21,11 +20,26 @@ else
     cpu_requested="default"
 fi
 
-mkdir -p "$gates_dir"
+# evidence.sha256 authenticates every file it finds under the output directory,
+# so a pre-existing file this run does not overwrite would be signed as though
+# it belonged to this collection. Require a dedicated, empty destination.
+if [[ -e "$output_dir" ]]; then
+    if [[ ! -d "$output_dir" ]]; then
+        printf 'OUTPUT_DIRECTORY exists and is not a directory: %s\n' "$output_dir" >&2
+        exit 2
+    fi
+    if [[ -n "$(ls -A -- "$output_dir")" ]]; then
+        printf 'OUTPUT_DIRECTORY must be empty; evidence.sha256 would authenticate its existing files: %s\n' \
+            "$output_dir" >&2
+        exit 2
+    fi
+fi
+mkdir -p "$output_dir"
 # Physical resolution on both sides: a logical path can point through a symlink
 # into the repository, which the prefix comparison below would then accept.
 output_dir="$(cd -- "$output_dir" && pwd -P)"
 gates_dir="$output_dir/gates"
+mkdir -p "$gates_dir"
 
 # The source manifest scans the topic tree, and the shell creates a redirection
 # target before the command it redirects runs. An output directory inside the
@@ -68,6 +82,67 @@ while IFS= read -r swept_variable; do
     fi
 done < <(compgen -e | rg '^(CARGO_|RUSTC|RUSTDOC|RUSTFLAGS)' || true)
 
+# Cargo discovers configuration hierarchically from the invocation directory up
+# through its parents and from CARGO_HOME, and TOML admits section, dotted, and
+# inline spellings for `build.rustc*`, `profile.*`, and `target.*` overrides. A
+# discoverable file can therefore redirect the compiler, wrapper, linker, target,
+# or profile in a way no pattern scan can whitelist, so any such file is an
+# unrecorded build input. The builds run from repo_root, so that is where
+# discovery starts.
+cargo_config_candidates=(
+    "${CARGO_HOME:-$HOME/.cargo}/config.toml"
+    "${CARGO_HOME:-$HOME/.cargo}/config"
+)
+config_scan_dir=$repo_root
+while :; do
+    cargo_config_candidates+=(
+        "$config_scan_dir/.cargo/config.toml"
+        "$config_scan_dir/.cargo/config"
+    )
+    if [[ $config_scan_dir == / ]]; then
+        break
+    fi
+    config_scan_dir=$(dirname -- "$config_scan_dir")
+done
+for cargo_config in "${cargo_config_candidates[@]}"; do
+    if [[ -f $cargo_config ]]; then
+        printf 'Cargo configuration is an unrecorded build input: %s\n' "$cargo_config" >&2
+        exit 2
+    fi
+done
+
+# A caller-declared source identity that nothing checks can attribute the
+# measured binary to source it did not come from. Derive the commit where it is
+# derivable, refuse a declaration that disagrees, and refuse a dirty tree
+# because no commit describes it. The archive digest stays declared: the archive
+# is not present here to hash.
+if git -C "$repo_root" rev-parse --git-dir >/dev/null 2>&1; then
+    source_commit="$(git -C "$repo_root" rev-parse HEAD)"
+    if [[ -n "${SOURCE_COMMIT:-}" ]]; then
+        declared_commit="$(
+            git -C "$repo_root" rev-parse --verify --quiet "${SOURCE_COMMIT}^{commit}" || true
+        )"
+        if [[ "$declared_commit" != "$source_commit" ]]; then
+            printf 'SOURCE_COMMIT %s does not name the checked-out commit %s\n' \
+                "${SOURCE_COMMIT}" "$source_commit" >&2
+            exit 2
+        fi
+    fi
+    if [[ -n "$(git -C "$repo_root" status --porcelain)" ]]; then
+        printf 'the checkout at %s has uncommitted changes; no commit describes the measured source\n' \
+            "$repo_root" >&2
+        exit 2
+    fi
+    source_commit_verification="git-checkout"
+else
+    if [[ -z "${SOURCE_COMMIT:-}" ]]; then
+        printf 'SOURCE_COMMIT is required because %s is not a git checkout\n' "$repo_root" >&2
+        exit 2
+    fi
+    source_commit="${SOURCE_COMMIT}"
+    source_commit_verification="declared"
+fi
+
 if ! command -v taskset >/dev/null 2>&1; then
     printf 'taskset is required for remote evidence collection\n' >&2
     exit 2
@@ -103,8 +178,10 @@ printf '%s\n' \
     "focused_build=--release ${native_rustflags}" \
     "swept_build_environment=${swept_variables[*]:-none}" \
     "focused_affinity_requested=taskset -c ${cpu_requested}" \
-    "source_commit=${SOURCE_COMMIT:-unknown}" \
+    "source_commit=${source_commit}" \
+    "source_commit_verification=${source_commit_verification}" \
     "source_archive_sha256=${SOURCE_ARCHIVE_SHA256:-unknown}" \
+    "source_archive_verification=declared" \
     >"$output_dir/build-flags.txt"
 
 # The measured binary is determined by more than the topic directory: the
