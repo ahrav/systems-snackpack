@@ -1,0 +1,4 @@
+RUSTFLAGS=-C target-cpu=generic -C debuginfo=1 -C codegen-units=1 -C llvm-args=-vectorize-loops=false -C llvm-args=-vectorize-slp=false
+TOPIC14_SOURCE_COMMIT=8301b344287c674f559dbbd22718a7c6cd49921d
+architecture=aarch64
+expected_variant=neon

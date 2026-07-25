@@ -1,0 +1,26 @@
+00000000000185c0 <systems_snackpack_topic_014::resolve_best>:
+   185c0:	push   rax
+   185c1:	mov    rax,QWORD PTR [rip+0x44408]        # 5c9d0 <_DYNAMIC+0x358>
+   185c8:	mov    rax,QWORD PTR [rax]
+   185cb:	test   rax,rax
+   185ce:	je     185e3 <systems_snackpack_topic_014::resolve_best+0x23>
+   185d0:	movzx  edx,ax
+   185d3:	shr    edx,0xf
+   185d6:	test   dl,dl
+   185d8:	jne    185f3 <systems_snackpack_topic_014::resolve_best+0x33>
+   185da:	mov    rax,QWORD PTR [rip+0x4433f]        # 5c920 <_DYNAMIC+0x2a8>
+   185e1:	pop    rcx
+   185e2:	ret
+   185e3:	call   QWORD PTR [rip+0x443ef]        # 5c9d8 <_DYNAMIC+0x360>
+   185e9:	movzx  edx,ax
+   185ec:	shr    edx,0xf
+   185ef:	test   dl,dl
+   185f1:	je     185da <systems_snackpack_topic_014::resolve_best+0x1a>
+   185f3:	lea    rax,[rip+0x226]        # 18820 <systems_snackpack_topic_014::x86_64::count_eq_avx2_proven>
+   185fa:	pop    rcx
+   185fb:	ret
+   185fc:	int3
+   185fd:	int3
+   185fe:	int3
+   185ff:	int3
+

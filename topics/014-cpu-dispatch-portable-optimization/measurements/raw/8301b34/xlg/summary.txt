@@ -1,0 +1,51 @@
+measurement_boundary=steady-kernel-invocations replication_unit=fresh-pinned-process pairing_unit=ab-ba-process-pair pairs_per_comparison=12
+dispersion_boundary=paired-process-ratios quartiles=statistics.quantiles-inclusive interval=descriptive-IQR
+configuration input_bytes=67108864 passes=8 chunk_bytes=256 source_commit=8301b344287c674f559dbbd22718a7c6cd49921d
+COMPARISON scalar-vs-simd
+MODE scalar_whole
+steady_ms n=12 median=160.821941ms q1=160.718337ms q3=160.918346ms iqr=0.200009ms sample_sd=0.133077ms range=[160.641199,161.032981]ms
+throughput_gib_s n=12 median=3.109029GiB/s q1=3.107166GiB/s q3=3.111033GiB/s iqr=0.003867GiB/s sample_sd=0.002573GiB/s range=[3.104954,3.112527]GiB/s
+setup_ms n=12 median=122.836825ms q1=122.660408ms q3=122.891716ms iqr=0.231308ms sample_sd=0.773843ms range=[122.570015,125.399047]ms
+verify_ms n=12 median=0.000535ms q1=0.000327ms q3=0.000617ms iqr=0.000290ms sample_sd=0.000223ms range=[0.000050,0.000830]ms
+external_wall_ms n=12 median=293.462008ms q1=293.214844ms q3=293.646919ms iqr=0.432075ms sample_sd=0.713086ms range=[292.903771,295.633183]ms
+process_wrapper_residual_ms n=12 median=9.642722ms q1=9.490069ms q3=9.887125ms iqr=0.397056ms sample_sd=0.325629ms range=[9.437405,10.417259]ms
+MODE simd_whole
+steady_ms n=12 median=26.716179ms q1=26.708616ms q3=26.719455ms iqr=0.010838ms sample_sd=0.008933ms range=[26.702550,26.731610]ms
+throughput_gib_s n=12 median=18.715251GiB/s q1=18.712957GiB/s q3=18.720550GiB/s iqr=0.007593GiB/s sample_sd=0.006257GiB/s range=[18.704448,18.724803]GiB/s
+setup_ms n=12 median=122.837841ms q1=122.679489ms q3=122.979049ms iqr=0.299560ms sample_sd=0.532181ms range=[121.208218,123.228137]ms
+verify_ms n=12 median=0.000320ms q1=0.000250ms q3=0.000475ms iqr=0.000225ms sample_sd=0.000190ms range=[0.000040,0.000680]ms
+external_wall_ms n=12 median=159.226628ms q1=159.011887ms q3=159.450338ms iqr=0.438451ms sample_sd=0.658973ms range=[157.530594,160.139116]ms
+process_wrapper_residual_ms n=12 median=9.659587ms q1=9.604096ms q3=9.723683ms iqr=0.119587ms sample_sd=0.267795ms range=[9.510015,10.501071]ms
+PAIRED scalar_whole_over_simd_whole geometric_mean=6.019721x n=12 median=6.018989x q1=6.015627x q3=6.023344x iqr=0.007716x sample_sd=0.005713x range=[6.011003,6.030010]x
+COMPARISON whole-vs-chunks
+MODE dispatch_once
+steady_ms n=12 median=26.713255ms q1=26.690742ms q3=26.730298ms iqr=0.039555ms sample_sd=0.037719ms range=[26.676660,26.792839]ms
+throughput_gib_s n=12 median=18.717300GiB/s q1=18.705371GiB/s q3=18.733087GiB/s iqr=0.027717GiB/s sample_sd=0.026386GiB/s range=[18.661703,18.742976]GiB/s
+setup_ms n=12 median=122.724086ms q1=122.537489ms q3=122.791335ms iqr=0.253846ms sample_sd=0.259689ms range=[122.496314,123.438139]ms
+verify_ms n=12 median=0.000595ms q1=0.000402ms q3=0.000740ms iqr=0.000338ms sample_sd=0.000231ms range=[0.000260,0.001000]ms
+external_wall_ms n=12 median=159.035265ms q1=158.939728ms q3=159.147492ms iqr=0.207764ms sample_sd=0.294138ms range=[158.637640,159.751845]ms
+process_wrapper_residual_ms n=12 median=9.546126ms q1=9.475606ms q3=9.657825ms iqr=0.182218ms sample_sd=0.159967ms range=[9.423756,9.898079]ms
+MODE cached_chunks
+steady_ms n=12 median=29.773919ms q1=29.758079ms q3=29.788809ms iqr=0.030730ms sample_sd=0.028745ms range=[29.743684,29.844195]ms
+throughput_gib_s n=12 median=16.793221GiB/s q1=16.784828GiB/s q3=16.802160GiB/s iqr=0.017331GiB/s sample_sd=0.016195GiB/s range=[16.753677,16.810292]GiB/s
+setup_ms n=12 median=122.628405ms q1=122.541124ms q3=122.684559ms iqr=0.143436ms sample_sd=0.491528ms range=[121.094787,122.931856]ms
+verify_ms n=12 median=0.000750ms q1=0.000660ms q3=0.000880ms iqr=0.000220ms sample_sd=0.000313ms range=[0.000250,0.001580]ms
+external_wall_ms n=12 median=162.098001ms q1=161.965633ms q3=162.301765ms iqr=0.336132ms sample_sd=0.563168ms range=[160.587499,162.602168]ms
+process_wrapper_residual_ms n=12 median=9.702542ms q1=9.612369ms q3=9.844145ms iqr=0.231776ms sample_sd=0.202891ms range=[9.522307,10.204149]ms
+PAIRED dispatch_once_over_cached_chunks geometric_mean=0.897271x n=12 median=0.897286x q1=0.896360x q3=0.898409x iqr=0.002049x sample_sd=0.001650x range=[0.894161,0.899798]x
+COMPARISON cached-vs-detect
+MODE cached_chunks
+steady_ms n=12 median=29.754029ms q1=29.741345ms q3=29.783443ms iqr=0.042098ms sample_sd=0.025101ms range=[29.715854,29.788545]ms
+throughput_gib_s n=12 median=16.804447GiB/s q1=16.787851GiB/s q3=16.811615GiB/s iqr=0.023764GiB/s sample_sd=0.014175GiB/s range=[16.784976,16.826035]GiB/s
+setup_ms n=12 median=122.814312ms q1=122.558807ms q3=122.908984ms iqr=0.350177ms sample_sd=0.232910ms range=[122.434504,123.069447]ms
+verify_ms n=12 median=0.000895ms q1=0.000695ms q3=0.001000ms iqr=0.000305ms sample_sd=0.000336ms range=[0.000250,0.001390]ms
+external_wall_ms n=12 median=162.142715ms q1=161.967158ms q3=162.251524ms iqr=0.284366ms sample_sd=0.349588ms range=[161.756895,162.949360]ms
+process_wrapper_residual_ms n=12 median=9.632578ms q1=9.579147ms q3=9.736009ms iqr=0.156862ms sample_sd=0.183148ms range=[9.506786,10.090428]ms
+MODE detect_chunks
+steady_ms n=12 median=30.538368ms q1=30.497955ms q3=30.556370ms iqr=0.058415ms sample_sd=0.032153ms range=[30.490343,30.579715]ms
+throughput_gib_s n=12 median=16.372846GiB/s q1=16.363200GiB/s q3=16.394542GiB/s iqr=0.031342GiB/s sample_sd=0.017246GiB/s range=[16.350708,16.398635]GiB/s
+setup_ms n=12 median=122.722601ms q1=122.677505ms q3=122.808412ms iqr=0.130907ms sample_sd=0.155434ms range=[122.591684,123.093036]ms
+verify_ms n=12 median=0.000510ms q1=0.000310ms q3=0.000643ms iqr=0.000333ms sample_sd=0.000228ms range=[0.000260,0.000940]ms
+external_wall_ms n=12 median=162.961883ms q1=162.822208ms q3=163.069516ms iqr=0.247308ms sample_sd=0.182024ms range=[162.605748,163.129631]ms
+process_wrapper_residual_ms n=12 median=9.556330ms q1=9.486249ms q3=9.746794ms iqr=0.260546ms sample_sd=0.171894ms range=[9.422155,9.926608]ms
+PAIRED cached_chunks_over_detect_chunks geometric_mean=0.974578x n=12 median=0.974973x q1=0.973987x q3=0.975473x iqr=0.001487x sample_sd=0.001223x range=[0.972330,0.975965]x
