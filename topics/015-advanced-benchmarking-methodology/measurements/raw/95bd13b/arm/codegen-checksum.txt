@@ -1,0 +1,124 @@
+5834-00000000000155c0 <advanced_benchmarking_methodology::measure_pair>:
+5835-   155c0:	d10203ff 	sub	sp, sp, #0x80
+5836-   155c4:	a9047bfd 	stp	x29, x30, [sp, #64]
+5837-   155c8:	a9055ff8 	stp	x24, x23, [sp, #80]
+5838-   155cc:	a90657f6 	stp	x22, x21, [sp, #96]
+5839-   155d0:	a9074ff4 	stp	x20, x19, [sp, #112]
+5840-   155d4:	910103fd 	add	x29, sp, #0x40
+5841-   155d8:	aa0103f7 	mov	x23, x1
+5842-   155dc:	aa0003f8 	mov	x24, x0
+5843-   155e0:	aa0803f3 	mov	x19, x8
+5844-   155e4:	94003949 	bl	23b08 <std::time::Instant::now>
+5845-   155e8:	f90003e0 	str	x0, [sp]
+5846-   155ec:	b9000be1 	str	w1, [sp, #8]
+5847-   155f0:	d10043a8 	sub	x8, x29, #0x10
+5848-   155f4:	a93f5fb8 	stp	x24, x23, [x29, #-16]
+5849-   155f8:	a97f07a0 	ldp	x0, x1, [x29, #-16]
+5850:   155fc:	94000031 	bl	156c0 <advanced_benchmarking_methodology::checksum>
+5851-   15600:	aa0003f4 	mov	x20, x0
+5852-   15604:	f9000be0 	str	x0, [sp, #16]
+5853-   15608:	910003e0 	mov	x0, sp
+5854-   1560c:	94003941 	bl	23b10 <std::time::Instant::elapsed>
+5855-   15610:	aa0003f5 	mov	x21, x0
+5856-   15614:	2a0103f6 	mov	w22, w1
+5857-   15618:	9400393c 	bl	23b08 <std::time::Instant::now>
+5858-   1561c:	f9000fe0 	str	x0, [sp, #24]
+5859-   15620:	b90023e1 	str	w1, [sp, #32]
+5860-   15624:	d10043a8 	sub	x8, x29, #0x10
+5861-   15628:	a93f5fb8 	stp	x24, x23, [x29, #-16]
+5862-   1562c:	a97f07a0 	ldp	x0, x1, [x29, #-16]
+5863:   15630:	94000024 	bl	156c0 <advanced_benchmarking_methodology::checksum>
+5864-   15634:	aa0003f7 	mov	x23, x0
+5865-   15638:	f81e83a0 	stur	x0, [x29, #-24]
+5866-   1563c:	910063e0 	add	x0, sp, #0x18
+5867-   15640:	94003934 	bl	23b10 <std::time::Instant::elapsed>
+5868-   15644:	eb17029f 	cmp	x20, x23
+5869-   15648:	540002e1 	b.ne	156a4 <advanced_benchmarking_methodology::measure_pair+0xe4>  // b.any
+5870-   1564c:	52994008 	mov	w8, #0xca00                	// #51712
+5871-   15650:	f81f03b4 	stur	x20, [x29, #-16]
+5872-   15654:	d10043ac 	sub	x12, x29, #0x10
+5873-   15658:	72a77348 	movk	w8, #0x3b9a, lsl #16
+5874-   1565c:	9bc87c09 	umulh	x9, x0, x8
+5875-   15660:	9b087c0a 	mul	x10, x0, x8
+5876-   15664:	9bc87eab 	umulh	x11, x21, x8
+5877-   15668:	9b087ea8 	mul	x8, x21, x8
+5878-   1566c:	ab21414a 	adds	x10, x10, w1, uxtw
+5879-   15670:	9a893529 	cinc	x9, x9, cs	// cs = hs, nlast
+--
+5884-   15684:	f85f03a8 	ldur	x8, [x29, #-16]
+5885-   15688:	f9001268 	str	x8, [x19, #32]
+5886-   1568c:	a9474ff4 	ldp	x20, x19, [sp, #112]
+5887-   15690:	a94657f6 	ldp	x22, x21, [sp, #96]
+5888-   15694:	a9455ff8 	ldp	x24, x23, [sp, #80]
+5889-   15698:	a9447bfd 	ldp	x29, x30, [sp, #64]
+5890-   1569c:	910203ff 	add	sp, sp, #0x80
+5891-   156a0:	d65f03c0 	ret
+5892-   156a4:	900002c5 	adrp	x5, 6d000 <GCC_except_table0+0xd0fc>
+5893-   156a8:	913180a5 	add	x5, x5, #0xc60
+5894-   156ac:	910043e1 	add	x1, sp, #0x10
+5895-   156b0:	d10063a2 	sub	x2, x29, #0x18
+5896-   156b4:	2a1f03e0 	mov	w0, wzr
+5897-   156b8:	aa1f03e3 	mov	x3, xzr
+5898-   156bc:	97fffc6a 	bl	14864 <core::panicking::assert_failed>
+5899-
+5900:00000000000156c0 <advanced_benchmarking_methodology::checksum>:
+5901:   156c0:	b4000161 	cbz	x1, 156ec <advanced_benchmarking_methodology::checksum+0x2c>
+5902-   156c4:	d37df028 	lsl	x8, x1, #3
+5903-   156c8:	d1002108 	sub	x8, x8, #0x8
+5904-   156cc:	d343fd08 	lsr	x8, x8, #3
+5905-   156d0:	91000509 	add	x9, x8, #0x1
+5906-   156d4:	04a0e3e8 	cntw	x8
+5907-   156d8:	eb08013f 	cmp	x9, x8
+5908:   156dc:	540000e2 	b.cs	156f8 <advanced_benchmarking_methodology::checksum+0x38>  // b.hs, b.nlast
+5909-   156e0:	aa1f03e8 	mov	x8, xzr
+5910-   156e4:	aa0003e9 	mov	x9, x0
+5911:   156e8:	1400001a 	b	15750 <advanced_benchmarking_methodology::checksum+0x90>
+5912-   156ec:	aa1f03e8 	mov	x8, xzr
+5913-   156f0:	aa0803e0 	mov	x0, x8
+5914-   156f4:	d65f03c0 	ret
+5915-   156f8:	d100050a 	sub	x10, x8, #0x1
+5916-   156fc:	6f00e400 	movi	v0.2d, #0x0
+5917-   15700:	04bf504c 	rdvl	x12, #2
+5918-   15704:	6f00e401 	movi	v1.2d, #0x0
+5919-   15708:	aa0003ed 	mov	x13, x0
+5920-   1570c:	8a0a012a 	and	x10, x9, x10
+5921-   15710:	cb0a012b 	sub	x11, x9, x10
+5922-   15714:	8b0b0c09 	add	x9, x0, x11, lsl #3
+5923-   15718:	d503201f 	nop
+5924-   1571c:	d503201f 	nop
+5925-   15720:	858041a2 	ldr	z2, [x13]
+5926-   15724:	858045a3 	ldr	z3, [x13, #1, mul vl]
+5927-   15728:	8b0c01ad 	add	x13, x13, x12
+5928-   1572c:	eb08016b 	subs	x11, x11, x8
+5929-   15730:	04e00040 	add	z0.d, z2.d, z0.d
+5930-   15734:	04e10061 	add	z1.d, z3.d, z1.d
+5931:   15738:	54ffff41 	b.ne	15720 <advanced_benchmarking_methodology::checksum+0x60>  // b.any
+5932-   1573c:	04e00020 	add	z0.d, z1.d, z0.d
+5933-   15740:	25d8e3e0 	ptrue	p0.d
+5934-   15744:	04c12000 	uaddv	d0, p0, z0.d
+5935-   15748:	9e660008 	fmov	x8, d0
+5936:   1574c:	b400012a 	cbz	x10, 15770 <advanced_benchmarking_methodology::checksum+0xb0>
+5937-   15750:	8b010c0a 	add	x10, x0, x1, lsl #3
+5938-   15754:	d503201f 	nop
+5939-   15758:	d503201f 	nop
+5940-   1575c:	d503201f 	nop
+5941-   15760:	f840852b 	ldr	x11, [x9], #8
+5942-   15764:	eb0a013f 	cmp	x9, x10
+5943-   15768:	8b080168 	add	x8, x11, x8
+5944:   1576c:	54ffffa1 	b.ne	15760 <advanced_benchmarking_methodology::checksum+0xa0>  // b.any
+5945-   15770:	aa0803e0 	mov	x0, x8
+5946-   15774:	d65f03c0 	ret
+5947-
+5948-0000000000015778 <__rustc::__rdl_alloc>:
+5949-   15778:	f100403f 	cmp	x1, #0x10
+5950-   1577c:	aa0003e2 	mov	x2, x0
+5951-   15780:	540000a8 	b.hi	15794 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+5952-   15784:	eb02003f 	cmp	x1, x2
+5953-   15788:	54000068 	b.hi	15794 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+5954-   1578c:	aa0203e0 	mov	x0, x2
+5955-   15790:	17ffea88 	b	101b0 <malloc@plt>
+5956-   15794:	d10083ff 	sub	sp, sp, #0x20
+5957-   15798:	a9017bfd 	stp	x29, x30, [sp, #16]
+5958-   1579c:	910043fd 	add	x29, sp, #0x10
+5959-   157a0:	f100203f 	cmp	x1, #0x8
+5960-   157a4:	52800108 	mov	w8, #0x8                   	// #8

@@ -54,12 +54,14 @@ topics/015-advanced-benchmarking-methodology/experiment/run_processes.sh \
   /tmp/topic15-summary.csv
 ```
 
-On Linux, the runner pins each process to CPU 0 with `taskset`. Affinity limits
-eligible CPUs; it does not isolate the CPU from interrupts or other work.
+On Linux, the runner uses `taskset -c 0` when `taskset` is available. Affinity
+limits eligible CPUs; it does not isolate the CPU from interrupts or other
+work. Record which runner branch executed when affinity is part of the claim.
 
 The timer includes only the checksum calls. Process startup, allocation,
 initialization, and the eviction-buffer traversal remain outside the timed
 regions. Preserve the raw process rows and inspect the exact linked binary.
 
-See [measurement contract](measurements/README.md), [first round](rounds/01.md),
-and [primary sources](references.md).
+See the [measurement contract](measurements/README.md),
+[cross-host record](measurements/2026-07-25-cross-host.md),
+[first round](rounds/01.md), and [primary sources](references.md).

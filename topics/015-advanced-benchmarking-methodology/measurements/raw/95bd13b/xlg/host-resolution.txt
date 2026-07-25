@@ -1,0 +1,7 @@
+former_host_probe_local_time=2026-07-25T10:22:59-07:00
+former_host=dev-dsk-ahrav-2c-b89a08b3.us-west-2.amazon.com
+former_host_exit_status=255
+former_host_observation=WSSH Proxy returned code 403 and could not resolve the specified host
+xlg_probe_utc=2026-07-25T17:23:17Z
+xlg_resolved_host=dev-dsk-ahrav-2c-a9191cb6.us-west-2.amazon.com
+xlg_resolved_architecture=x86_64

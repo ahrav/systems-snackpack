@@ -28,8 +28,9 @@ working sets. Records include both byte counts.
 - One order-cancelled label ratio per block.
 - Median and type-7 interquartile range across the twelve block ratios.
 
-The twelve blocks are the analysis units. The 48 timed calls are not 48
-independent replicates.
+The twelve blocks are the nominal analysis units. Treating their contrasts as
+independent is an experimental assumption, not a property established by
+fresh processes. The 48 timed calls are not 48 independent replicates.
 
 ## Acceptance checks
 
@@ -41,3 +42,10 @@ independent replicates.
 
 The result applies to the recorded source, linked image, host, toolchain,
 flags, workload, affinity, and run window.
+
+## Retained records
+
+- [AArch64 host record](2026-07-25-dev-dsk-ahrav-2b.md)
+- [x86-64 host record](2026-07-25-xlg.md)
+- [cross-host comparison](2026-07-25-cross-host.md)
+- [raw process and code-generation evidence](raw/95bd13b/)
