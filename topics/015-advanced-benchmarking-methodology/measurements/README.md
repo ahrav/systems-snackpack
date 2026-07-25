@@ -45,7 +45,7 @@ flags, workload, affinity, and run window.
 
 ## Retained records
 
-- [AArch64 host record](2026-07-25-dev-dsk-ahrav-2b.md)
+- [AArch64 host record](2026-07-25-arm.md)
 - [x86-64 host record](2026-07-25-xlg.md)
 - [cross-host comparison](2026-07-25-cross-host.md)
 - [raw process and code-generation evidence](raw/95bd13b/)

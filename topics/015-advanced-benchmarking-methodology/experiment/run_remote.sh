@@ -11,9 +11,18 @@ output_dir="$2"
 topic_rel="topics/015-advanced-benchmarking-methodology"
 topic_dir="$repo_root/$topic_rel"
 gates_dir="$output_dir/gates"
+cpu=0
 
 mkdir -p "$gates_dir"
 
+if ! command -v taskset >/dev/null 2>&1; then
+    printf 'taskset is required for remote evidence collection\n' >&2
+    exit 2
+fi
+
+# The captured host record must not leak the machine identity into shared
+# evidence; every occurrence of the local hostname is replaced before writing.
+host_name="$(uname -n)"
 {
     date -u '+utc=%Y-%m-%dT%H:%M:%SZ'
     uname -a
@@ -25,12 +34,16 @@ mkdir -p "$gates_dir"
     cargo -V
     cc --version
     rustc --print cfg -C target-cpu=native
-} >"$output_dir/host.txt" 2>&1
+} 2>&1 | sed "s/${host_name}/redacted-host/g" >"$output_dir/host.txt"
+
+# One definition feeds both the provenance record and the build so the
+# recorded flags cannot diverge from the flags the measured binary used.
+native_rustflags="-C target-cpu=native -C codegen-units=1"
 
 printf '%s\n' \
     "workspace_gates=compiler defaults" \
-    "focused_build=--release -C target-cpu=native -C codegen-units=1" \
-    "focused_affinity=taskset -c 0" \
+    "focused_build=--release ${native_rustflags}" \
+    "focused_affinity=taskset -c ${cpu}" \
     "source_commit=${SOURCE_COMMIT:-unknown}" \
     "source_archive_sha256=${SOURCE_ARCHIVE_SHA256:-unknown}" \
     >"$output_dir/build-flags.txt"
@@ -67,7 +80,7 @@ printf '%s\n' \
 
 (
     cd "$repo_root"
-    RUSTFLAGS="-C target-cpu=native -C codegen-units=1" \
+    RUSTFLAGS="$native_rustflags" \
         cargo build --release \
         -p advanced-benchmarking-methodology \
         --example order_bias
@@ -82,7 +95,7 @@ nm -C "$binary" >"$output_dir/order_bias.symbols.txt"
     "$output_dir/raw.csv" \
     "$output_dir/summary.csv" \
     12 \
-    0 \
+    "$cpu" \
     >"$output_dir/process.log" 2>&1
 
 objdump -d -C "$binary" >"$output_dir/codegen-full.txt"

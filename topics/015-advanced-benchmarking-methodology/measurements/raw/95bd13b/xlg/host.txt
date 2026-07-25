@@ -1,5 +1,5 @@
 utc=2026-07-25T16:50:38Z
-Linux dev-dsk-ahrav-2c-a9191cb6.us-west-2.amazon.com 6.12.94-123.180.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Thu Jul  9 21:10:41 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+Linux redacted-xlg-host 6.12.94-123.180.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Thu Jul  9 21:10:41 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
 architecture=x86_64
 kernel=6.12.94-123.180.amzn2023.x86_64
 online_cpus=128

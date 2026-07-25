@@ -36,6 +36,12 @@ fresh `BA` process. The blockwise order-cancelled ratio is:
 sqrt((A/B in the AB process) * (A/B in the BA process))
 ```
 
+`order_cancelled_ratio` in `src/lib.rs` is the reference implementation of
+this contrast: it averages the two ratios in log space and rejects
+non-positive or non-finite inputs. `experiment/summarize.py` computes the
+same log-space mean for each block after validating that every timed
+interval is strictly positive.
+
 A fixed order can name opposite winners when the second position inherits
 cache or machine state. Identical labels under a reciprocal multiplicative
 position effect cancel to `1`. A large residual rejects the measurement design

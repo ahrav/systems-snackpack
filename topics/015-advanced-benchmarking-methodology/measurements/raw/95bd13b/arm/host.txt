@@ -1,5 +1,5 @@
 utc=2026-07-25T16:50:37Z
-Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.94-123.180.amzn2023.aarch64 #1 SMP Thu Jul  9 21:13:38 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+Linux redacted-arm-host 6.12.94-123.180.amzn2023.aarch64 #1 SMP Thu Jul  9 21:13:38 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
 architecture=aarch64
 kernel=6.12.94-123.180.amzn2023.aarch64
 online_cpus=64

@@ -22,18 +22,23 @@ if ! [[ "$blocks" =~ ^[1-9][0-9]*$ ]]; then
     exit 2
 fi
 
+if command -v taskset >/dev/null 2>&1; then
+    affinity="taskset -c $cpu"
+else
+    affinity="none"
+fi
+
 run_binary() {
     local order="$1"
-    if command -v taskset >/dev/null 2>&1; then
+    if [[ "$affinity" != "none" ]]; then
         taskset -c "$cpu" "$binary" "$order"
     else
         "$binary" "$order"
     fi
 }
 
-printf '%s\n' \
-    "block,launch,run,pid,order,position,label,elapsed_ns,checksum,target_bytes,thrash_bytes" \
-    >"$results"
+expected="pid,order,position,label,elapsed_ns,checksum,target_bytes,thrash_bytes"
+printf 'block,launch,run,%s\n' "$expected" >"$results"
 
 run=0
 for ((block = 1; block <= blocks; block++)); do
@@ -48,7 +53,6 @@ for ((block = 1; block <= blocks; block++)); do
         run=$((run + 1))
         output="$(run_binary "${orders[$index]}")"
         header="${output%%$'\n'*}"
-        expected="pid,order,position,label,elapsed_ns,checksum,target_bytes,thrash_bytes"
         if [[ "$header" != "$expected" ]]; then
             printf 'unexpected output header: %s\n' "$header" >&2
             exit 1
@@ -67,5 +71,5 @@ if [[ "$(wc -l <"$results")" -ne "$expected_lines" ]]; then
 fi
 
 python3 "$script_dir/summarize.py" "$results" "$summary"
-printf 'raw=%s\nsummary=%s\n' "$results" "$summary"
+printf 'affinity=%s\nraw=%s\nsummary=%s\n' "$affinity" "$results" "$summary"
 cat "$summary"

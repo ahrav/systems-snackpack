@@ -50,6 +50,6 @@ concurrent host load. A cache-state explanation for the x86-64 result is
 plausible but remains inferred. No absolute time or position-effect difference
 should be generalized to an ISA, vendor, or CPU family.
 
-Read the [AArch64 record](2026-07-25-dev-dsk-ahrav-2b.md), the
+Read the [AArch64 record](2026-07-25-arm.md), the
 [xlg record](2026-07-25-xlg.md), and the
 [retained raw evidence](raw/95bd13b/).
