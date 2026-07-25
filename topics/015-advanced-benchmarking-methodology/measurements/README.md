@@ -37,7 +37,12 @@ fresh processes. The 48 timed calls are not 48 independent replicates.
 - Every process emits both labels and both positions.
 - Every process returns matching checksums.
 - Every block contains one `AB` and one `BA` process.
+- Duplicate rows, duplicate block orders, and non-positive intervals are
+  rejected rather than overwritten.
 - The linked image contains the intended checksum symbol and call sites.
+- The retained source manifest covers the topic tree and the workspace build
+  inputs the measured binary inherits.
+- The affinity branch that executed is recorded, not assumed.
 - Raw records remain available beside each summary.
 
 The result applies to the recorded source, linked image, host, toolchain,

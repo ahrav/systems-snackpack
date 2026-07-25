@@ -60,9 +60,15 @@ topics/015-advanced-benchmarking-methodology/experiment/run_processes.sh \
   /tmp/topic15-summary.csv
 ```
 
-On Linux, the runner uses `taskset -c 0` when `taskset` is available. Affinity
-limits eligible CPUs; it does not isolate the CPU from interrupts or other
-work. Record which runner branch executed when affinity is part of the claim.
+On Linux, the runner pins each process with `taskset` when `taskset` is
+available. It first checks the requested CPU against `Cpus_allowed_list` and
+probes it, so a CPU that a cgroup cpuset or an inherited mask excludes fails
+before the first measurement instead of truncating the run. Without an explicit
+CPU argument it falls back to the first allowed CPU; an explicitly requested CPU
+is never substituted. The runner prints the branch that executed as
+`affinity=`, and `experiment/run_remote.sh` retains that line in
+`affinity-resolved.txt`. Affinity limits eligible CPUs; it does not isolate the
+CPU from interrupts or other work.
 
 The timer includes only the checksum calls. Process startup, allocation,
 initialization, and the eviction-buffer traversal remain outside the timed
