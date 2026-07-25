@@ -36,7 +36,10 @@ fresh processes. The 48 timed calls are not 48 independent replicates.
 
 - Every process emits both labels and both positions.
 - Every process returns matching checksums.
-- Every block contains one `AB` and one `BA` process.
+- Every process records the same target and eviction-buffer sizes.
+- Every process places its labels in the order its `order` column declares.
+- Every block contains one `AB` and one `BA` process, at launches 1 and 2, with
+  the first launch alternating between blocks.
 - Duplicate rows, duplicate block orders, and non-positive intervals are
   rejected rather than overwritten.
 - The linked image contains the intended checksum symbol and call sites.
@@ -45,8 +48,16 @@ fresh processes. The 48 timed calls are not 48 independent replicates.
 - The affinity branch that executed is recorded, not assumed.
 - Raw records remain available beside each summary.
 
+`order_bias.sha256` is a digest-only record. The measured binary is not
+retained, so the digest cannot be re-verified with `sha256sum -c`; the retained
+code-generation evidence is `codegen-full.txt.gz` and
+`order_bias.symbols.txt`. Runs before this contract recorded the digest against
+an absolute build path, which those snapshots preserve unchanged.
+
 The result applies to the recorded source, linked image, host, toolchain,
-flags, workload, affinity, and run window.
+flags, workload, affinity boundary, and run window. The affinity boundary is
+the runner branch that executed; raw rows do not record the CPU each timed call
+actually ran on.
 
 ## Retained records
 

@@ -22,6 +22,17 @@ mkdir -p "$gates_dir"
 build_dir="$(mktemp -d)"
 trap 'rm -rf -- "$build_dir"' EXIT
 
+# Cargo honours only the first rustflags source it finds, and
+# CARGO_ENCODED_RUSTFLAGS outranks the RUSTFLAGS assignment below. An inherited
+# encoded value would build without the recorded flags while build-flags.txt
+# still claimed them, and would break the gates' compiler-defaults claim too.
+if [[ -n "${CARGO_ENCODED_RUSTFLAGS+set}" ]]; then
+    encoded_rustflags="cleared"
+else
+    encoded_rustflags="unset"
+fi
+unset CARGO_ENCODED_RUSTFLAGS
+
 if ! command -v taskset >/dev/null 2>&1; then
     printf 'taskset is required for remote evidence collection\n' >&2
     exit 2
@@ -30,7 +41,12 @@ fi
 # The captured host record must not leak the machine identity into shared
 # evidence; every occurrence of the local hostname is replaced before writing.
 host_name="$(uname -n)"
-{
+(
+    # The toolchain probes run from the repository so they observe the same
+    # rust-toolchain.toml override every build below uses. Probing from the
+    # caller's directory would attribute the measured binary to whichever
+    # toolchain the caller defaults to.
+    cd "$repo_root"
     date -u '+utc=%Y-%m-%dT%H:%M:%SZ'
     uname -a
     printf 'architecture=%s\n' "$(uname -m)"
@@ -41,7 +57,7 @@ host_name="$(uname -n)"
     cargo -V
     cc --version
     rustc --print cfg -C target-cpu=native
-} 2>&1 | sed "s/${host_name}/redacted-host/g" >"$output_dir/host.txt"
+) 2>&1 | sed "s/${host_name}/redacted-host/g" >"$output_dir/host.txt"
 
 # One definition feeds both the provenance record and the build so the
 # recorded flags cannot diverge from the flags the measured binary used.
@@ -50,6 +66,7 @@ native_rustflags="-C target-cpu=native -C codegen-units=1"
 printf '%s\n' \
     "workspace_gates=compiler defaults" \
     "focused_build=--release ${native_rustflags}" \
+    "focused_rustflags_encoded=${encoded_rustflags}" \
     "focused_affinity_requested=taskset -c ${cpu}" \
     "source_commit=${SOURCE_COMMIT:-unknown}" \
     "source_archive_sha256=${SOURCE_ARCHIVE_SHA256:-unknown}" \
@@ -150,7 +167,11 @@ fi
 printf 'focused_affinity_actual=%s\n' "$resolved_affinity" \
     >"$output_dir/affinity-resolved.txt"
 
-objdump -d -C "$binary" >"$output_dir/codegen-full.txt"
+# objdump prints the path it was given as a header, so it is invoked the same
+# way as sha256sum above: from the build directory with a bare artifact name.
+# That keeps the ephemeral build path out of retained code-generation evidence.
+(cd -- "$(dirname -- "$binary")" && objdump -d -C "$(basename -- "$binary")") \
+    >"$output_dir/codegen-full.txt"
 rg -n -C 16 "advanced_benchmarking_methodology::checksum" \
     "$output_dir/codegen-full.txt" \
     >"$output_dir/codegen-checksum.txt"
