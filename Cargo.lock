@@ -7,6 +7,10 @@ name = "advanced-benchmarking-methodology"
 version = "0.1.0"
 
 [[package]]
+name = "compiler-optimization-boundaries"
+version = "0.1.0"
+
+[[package]]
 name = "systems-snackpack-topic-001"
 version = "0.1.0"
 

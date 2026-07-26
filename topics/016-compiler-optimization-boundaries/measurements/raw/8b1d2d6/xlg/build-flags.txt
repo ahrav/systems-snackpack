@@ -1,0 +1,8 @@
+source_commit=8b1d2d65f188a0329937789a310dca5b379e3d8f
+source_commit_verification=git-checkout
+source_archive_sha256=unknown
+workspace_gates=compiler defaults with --locked
+focused_build=--release RUSTFLAGS=-C target-cpu=native -C codegen-units=1 -C lto=off
+focused_affinity=taskset -c 0
+focused_workload=binary defaults; TOPIC16_ELEMENTS and TOPIC16_ROUNDS unset
+swept_build_environment=none

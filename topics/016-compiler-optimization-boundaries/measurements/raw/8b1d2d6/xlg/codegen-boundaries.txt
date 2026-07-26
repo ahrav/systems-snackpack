@@ -1,0 +1,1647 @@
+
+===== topic16_opaque_mix address=0x0000000000016a80 =====
+
+boundary_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000016a80 <topic16_opaque_mix>:
+   16a80:	31 f7                	xor    %esi,%edi
+   16a82:	c4 e3 7b f0 c7 1b    	rorx   $0x1b,%edi,%eax
+   16a88:	81 f7 b9 79 37 9e    	xor    $0x9e3779b9,%edi
+   16a8e:	01 f8                	add    %edi,%eax
+   16a90:	c3                   	ret
+   16a91:	cc                   	int3
+   16a92:	cc                   	int3
+   16a93:	cc                   	int3
+   16a94:	cc                   	int3
+   16a95:	cc                   	int3
+   16a96:	cc                   	int3
+   16a97:	cc                   	int3
+   16a98:	cc                   	int3
+   16a99:	cc                   	int3
+   16a9a:	cc                   	int3
+   16a9b:	cc                   	int3
+   16a9c:	cc                   	int3
+   16a9d:	cc                   	int3
+   16a9e:	cc                   	int3
+   16a9f:	cc                   	int3
+
+0000000000016aa0 <__rustc::rust_panic>:
+   16aa0:	55                   	push   %rbp
+   16aa1:	48 89 e5             	mov    %rsp,%rbp
+   16aa4:	48 83 ec 20          	sub    $0x20,%rsp
+   16aa8:	ff 15 ea 36 04 00    	call   *0x436ea(%rip)        # 5a198 <_DYNAMIC+0x220>
+   16aae:	89 45 f8             	mov    %eax,-0x8(%rbp)
+   16ab1:	48 8d 45 f8          	lea    -0x8(%rbp),%rax
+   16ab5:	48 89 45 e0          	mov    %rax,-0x20(%rbp)
+   16ab9:	48 8b 05 48 37 04 00 	mov    0x43748(%rip),%rax        # 5a208 <_DYNAMIC+0x290>
+   16ac0:	48 89 45 e8          	mov    %rax,-0x18(%rbp)
+   16ac4:	48 8d 35 26 20 ff ff 	lea    -0xdfda(%rip),%rsi        # 8af1 <GCC_except_table386+0xa91>
+   16acb:	48 8d 7d ff          	lea    -0x1(%rbp),%rdi
+   16acf:	48 8d 55 e0          	lea    -0x20(%rbp),%rdx
+   16ad3:	e8 f8 b1 00 00       	call   21cd0 <std::io::Write::write_fmt>
+   16ad8:	48 89 45 f0          	mov    %rax,-0x10(%rbp)
+   16adc:	48 8d 7d f0          	lea    -0x10(%rbp),%rdi
+   16ae0:	e8 eb 4b 01 00       	call   2b6d0 <core::ptr::drop_in_place<core::result::Result<(),std::io::error::Error>>>
+   16ae5:	ff 15 7d 37 04 00    	call   *0x4377d(%rip)        # 5a268 <_DYNAMIC+0x2f0>
+   16aeb:	cc                   	int3
+   16aec:	cc                   	int3
+   16aed:	cc                   	int3
+   16aee:	cc                   	int3
+   16aef:	cc                   	int3
+
+0000000000016af0 <__rustc::__rdl_alloc>:
+   16af0:	48 89 fa             	mov    %rdi,%rdx
+   16af3:	48 83 fe 11          	cmp    $0x11,%rsi
+   16af7:	0f 92 c0             	setb   %al
+   16afa:	48 39 fe             	cmp    %rdi,%rsi
+   16afd:	0f 96 c1             	setbe  %cl
+   16b00:	84 c8                	test   %cl,%al
+   16b02:	74 09                	je     16b0d <__rustc::__rdl_alloc+0x1d>
+   16b04:	48 89 d7             	mov    %rdx,%rdi
+   16b07:	ff 25 63 37 04 00    	jmp    *0x43763(%rip)        # 5a270 <malloc@GLIBC_2.2.5>
+   16b0d:	55                   	push   %rbp
+   16b0e:	48 89 e5             	mov    %rsp,%rbp
+   16b11:	48 83 ec 10          	sub    $0x10,%rsp
+   16b15:	48 c7 45 f8 00 00 00 	movq   $0x0,-0x8(%rbp)
+   16b1c:	00 
+   16b1d:	48 83 fe 09          	cmp    $0x9,%rsi
+   16b21:	b8 08 00 00 00       	mov    $0x8,%eax
+   16b26:	48 0f 43 c6          	cmovae %rsi,%rax
+   16b2a:	48 8d 7d f8          	lea    -0x8(%rbp),%rdi
+   16b2e:	48 89 c6             	mov    %rax,%rsi
+   16b31:	ff 15 41 37 04 00    	call   *0x43741(%rip)        # 5a278 <posix_memalign@GLIBC_2.2.5>
+   16b37:	85 c0                	test   %eax,%eax
+   16b39:	75 0a                	jne    16b45 <__rustc::__rdl_alloc+0x55>
+   16b3b:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+   16b3f:	48 83 c4 10          	add    $0x10,%rsp
+   16b43:	5d                   	pop    %rbp
+   16b44:	c3                   	ret
+   16b45:	31 c0                	xor    %eax,%eax
+   16b47:	48 83 c4 10          	add    $0x10,%rsp
+   16b4b:	5d                   	pop    %rbp
+   16b4c:	c3                   	ret
+   16b4d:	cc                   	int3
+   16b4e:	cc                   	int3
+   16b4f:	cc                   	int3
+
+0000000000016b50 <__rustc::__rdl_dealloc>:
+   16b50:	ff 25 2a 37 04 00    	jmp    *0x4372a(%rip)        # 5a280 <free@GLIBC_2.2.5>
+   16b56:	cc                   	int3
+   16b57:	cc                   	int3
+   16b58:	cc                   	int3
+   16b59:	cc                   	int3
+   16b5a:	cc                   	int3
+   16b5b:	cc                   	int3
+   16b5c:	cc                   	int3
+   16b5d:	cc                   	int3
+   16b5e:	cc                   	int3
+   16b5f:	cc                   	int3
+
+0000000000016b60 <__rustc::__rdl_realloc>:
+   16b60:	55                   	push   %rbp
+   16b61:	48 89 e5             	mov    %rsp,%rbp
+   16b64:	41 57                	push   %r15
+   16b66:	41 56                	push   %r14
+   16b68:	41 54                	push   %r12
+   16b6a:	53                   	push   %rbx
+   16b6b:	48 83 ec 10          	sub    $0x10,%rsp
+   16b6f:	48 89 cb             	mov    %rcx,%rbx
+   16b72:	48 83 fa 11          	cmp    $0x11,%rdx
+   16b76:	0f 92 c0             	setb   %al
+   16b79:	48 39 ca             	cmp    %rcx,%rdx
+   16b7c:	0f 96 c1             	setbe  %cl
+   16b7f:	84 c8                	test   %cl,%al
+   16b81:	74 15                	je     16b98 <__rustc::__rdl_realloc+0x38>
+   16b83:	48 89 de             	mov    %rbx,%rsi
+   16b86:	48 83 c4 10          	add    $0x10,%rsp
+   16b8a:	5b                   	pop    %rbx
+   16b8b:	41 5c                	pop    %r12
+   16b8d:	41 5e                	pop    %r14
+   16b8f:	41 5f                	pop    %r15
+   16b91:	5d                   	pop    %rbp
+   16b92:	ff 25 f0 36 04 00    	jmp    *0x436f0(%rip)        # 5a288 <realloc@GLIBC_2.2.5>
+   16b98:	49 89 f6             	mov    %rsi,%r14
+   16b9b:	49 89 fc             	mov    %rdi,%r12
+   16b9e:	48 c7 45 d8 00 00 00 	movq   $0x0,-0x28(%rbp)
+   16ba5:	00 
+   16ba6:	48 83 fa 09          	cmp    $0x9,%rdx
+   16baa:	be 08 00 00 00       	mov    $0x8,%esi
+   16baf:	48 0f 43 f2          	cmovae %rdx,%rsi
+   16bb3:	48 8d 7d d8          	lea    -0x28(%rbp),%rdi
+   16bb7:	48 89 da             	mov    %rbx,%rdx
+   16bba:	ff 15 b8 36 04 00    	call   *0x436b8(%rip)        # 5a278 <posix_memalign@GLIBC_2.2.5>
+   16bc0:	85 c0                	test   %eax,%eax
+   16bc2:	0f 95 c0             	setne  %al
+   16bc5:	4c 8b 7d d8          	mov    -0x28(%rbp),%r15
+   16bc9:	4d 85 ff             	test   %r15,%r15
+   16bcc:	0f 94 c1             	sete   %cl
+   16bcf:	08 c1                	or     %al,%cl
+   16bd1:	74 05                	je     16bd8 <__rustc::__rdl_realloc+0x78>
+   16bd3:	45 31 ff             	xor    %r15d,%r15d
+   16bd6:	eb 1f                	jmp    16bf7 <__rustc::__rdl_realloc+0x97>
+   16bd8:	4c 39 f3             	cmp    %r14,%rbx
+   16bdb:	4c 0f 42 f3          	cmovb  %rbx,%r14
+   16bdf:	4c 89 ff             	mov    %r15,%rdi
+   16be2:	4c 89 e6             	mov    %r12,%rsi
+   16be5:	4c 89 f2             	mov    %r14,%rdx
+   16be8:	ff 15 a2 36 04 00    	call   *0x436a2(%rip)        # 5a290 <memcpy@GLIBC_2.14>
+   16bee:	4c 89 e7             	mov    %r12,%rdi
+   16bf1:	ff 15 89 36 04 00    	call   *0x43689(%rip)        # 5a280 <free@GLIBC_2.2.5>
+   16bf7:	4c 89 f8             	mov    %r15,%rax
+   16bfa:	48 83 c4 10          	add    $0x10,%rsp
+   16bfe:	5b                   	pop    %rbx
+   16bff:	41 5c                	pop    %r12
+   16c01:	41 5e                	pop    %r14
+   16c03:	41 5f                	pop    %r15
+   16c05:	5d                   	pop    %rbp
+   16c06:	c3                   	ret
+   16c07:	cc                   	int3
+   16c08:	cc                   	int3
+   16c09:	cc                   	int3
+   16c0a:	cc                   	int3
+   16c0b:	cc                   	int3
+   16c0c:	cc                   	int3
+   16c0d:	cc                   	int3
+   16c0e:	cc                   	int3
+   16c0f:	cc                   	int3
+
+0000000000016c10 <__rustc::__rust_drop_panic>:
+   16c10:	55                   	push   %rbp
+   16c11:	48 89 e5             	mov    %rsp,%rbp
+   16c14:	41 57                	push   %r15
+   16c16:	41 56                	push   %r14
+   16c18:	41 54                	push   %r12
+   16c1a:	53                   	push   %rbx
+   16c1b:	bb 3c 00 00 00       	mov    $0x3c,%ebx
+   16c20:	4c 8d 35 b5 41 ff ff 	lea    -0xbe4b(%rip),%r14        # addc <GCC_except_table386+0x2d7c>
+   16c27:	4c 8b 3d 6a 36 04 00 	mov    0x4366a(%rip),%r15        # 5a298 <write@GLIBC_2.2.5>
+   16c2e:	4c 8b 25 6b 36 04 00 	mov    0x4366b(%rip),%r12        # 5a2a0 <__errno_location@GLIBC_2.2.5>
+   16c35:	eb 1a                	jmp    16c51 <__rustc::__rust_drop_panic+0x41>
+   16c37:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+   16c3e:	00 00 
+   16c40:	41 ff d4             	call   *%r12
+   16c43:	48 63 00             	movslq (%rax),%rax
+   16c46:	48 83 f8 04          	cmp    $0x4,%rax
+   16c4a:	75 54                	jne    16ca0 <__rustc::__rust_drop_panic+0x90>
+   16c4c:	48 85 db             	test   %rbx,%rbx
+   16c4f:	74 61                	je     16cb2 <__rustc::__rust_drop_panic+0xa2>
+   16c51:	bf 02 00 00 00       	mov    $0x2,%edi
+   16c56:	4c 89 f6             	mov    %r14,%rsi
+   16c59:	48 89 da             	mov    %rbx,%rdx
+   16c5c:	41 ff d7             	call   *%r15
+   16c5f:	48 83 f8 ff          	cmp    $0xffffffffffffffff,%rax
+   16c63:	74 db                	je     16c40 <__rustc::__rust_drop_panic+0x30>
+   16c65:	48 85 c0             	test   %rax,%rax
+   16c68:	74 2d                	je     16c97 <__rustc::__rust_drop_panic+0x87>
+   16c6a:	48 89 d9             	mov    %rbx,%rcx
+   16c6d:	48 29 c1             	sub    %rax,%rcx
+   16c70:	72 0d                	jb     16c7f <__rustc::__rust_drop_panic+0x6f>
+   16c72:	49 01 c6             	add    %rax,%r14
+   16c75:	48 89 cb             	mov    %rcx,%rbx
+   16c78:	48 85 db             	test   %rbx,%rbx
+   16c7b:	75 d4                	jne    16c51 <__rustc::__rust_drop_panic+0x41>
+   16c7d:	eb 33                	jmp    16cb2 <__rustc::__rust_drop_panic+0xa2>
+   16c7f:	48 8d 0d ca 15 04 00 	lea    0x415ca(%rip),%rcx        # 58250 <__dso_handle+0x2c0>
+   16c86:	48 89 c7             	mov    %rax,%rdi
+   16c89:	48 89 de             	mov    %rbx,%rsi
+   16c8c:	48 89 da             	mov    %rbx,%rdx
+   16c8f:	ff 15 13 36 04 00    	call   *0x43613(%rip)        # 5a2a8 <_DYNAMIC+0x330>
+   16c95:	0f 0b                	ud2
+   16c97:	48 8d 05 9a 15 04 00 	lea    0x4159a(%rip),%rax        # 58238 <__dso_handle+0x2a8>
+   16c9e:	eb 08                	jmp    16ca8 <__rustc::__rust_drop_panic+0x98>
+   16ca0:	48 c1 e0 20          	shl    $0x20,%rax
+   16ca4:	48 83 c8 02          	or     $0x2,%rax
+   16ca8:	89 c1                	mov    %eax,%ecx
+   16caa:	83 e1 03             	and    $0x3,%ecx
+   16cad:	83 f9 01             	cmp    $0x1,%ecx
+   16cb0:	74 06                	je     16cb8 <__rustc::__rust_drop_panic+0xa8>
+   16cb2:	ff 15 b0 35 04 00    	call   *0x435b0(%rip)        # 5a268 <_DYNAMIC+0x2f0>
+   16cb8:	48 8d 58 ff          	lea    -0x1(%rax),%rbx
+   16cbc:	4c 8b 70 ff          	mov    -0x1(%rax),%r14
+   16cc0:	4c 8b 78 07          	mov    0x7(%rax),%r15
+   16cc4:	49 8b 07             	mov    (%r15),%rax
+   16cc7:	48 85 c0             	test   %rax,%rax
+   16cca:	74 05                	je     16cd1 <__rustc::__rust_drop_panic+0xc1>
+   16ccc:	4c 89 f7             	mov    %r14,%rdi
+   16ccf:	ff d0                	call   *%rax
+   16cd1:	49 8b 77 08          	mov    0x8(%r15),%rsi
+   16cd5:	48 85 f6             	test   %rsi,%rsi
+   16cd8:	74 0d                	je     16ce7 <__rustc::__rust_drop_panic+0xd7>
+   16cda:	49 8b 57 10          	mov    0x10(%r15),%rdx
+   16cde:	4c 89 f7             	mov    %r14,%rdi
+   16ce1:	ff 15 d9 34 04 00    	call   *0x434d9(%rip)        # 5a1c0 <_DYNAMIC+0x248>
+   16ce7:	be 18 00 00 00       	mov    $0x18,%esi
+   16cec:	ba 08 00 00 00       	mov    $0x8,%edx
+   16cf1:	48 89 df             	mov    %rbx,%rdi
+   16cf4:	ff 15 c6 34 04 00    	call   *0x434c6(%rip)        # 5a1c0 <_DYNAMIC+0x248>
+   16cfa:	ff 15 68 35 04 00    	call   *0x43568(%rip)        # 5a268 <_DYNAMIC+0x2f0>
+   16d00:	49 8b 77 08          	mov    0x8(%r15),%rsi
+   16d04:	48 85 f6             	test   %rsi,%rsi
+   16d07:	74 0d                	je     16d16 <__rustc::__rust_drop_panic+0x106>
+   16d09:	49 8b 57 10          	mov    0x10(%r15),%rdx
+   16d0d:	4c 89 f7             	mov    %r14,%rdi
+   16d10:	ff 15 aa 34 04 00    	call   *0x434aa(%rip)        # 5a1c0 <_DYNAMIC+0x248>
+   16d16:	be 18 00 00 00       	mov    $0x18,%esi
+   16d1b:	ba 08 00 00 00       	mov    $0x8,%edx
+   16d20:	48 89 df             	mov    %rbx,%rdi
+   16d23:	ff 15 97 34 04 00    	call   *0x43497(%rip)        # 5a1c0 <_DYNAMIC+0x248>
+   16d29:	ff 15 81 35 04 00    	call   *0x43581(%rip)        # 5a2b0 <_DYNAMIC+0x338>
+   16d2f:	ff 15 7b 35 04 00    	call   *0x4357b(%rip)        # 5a2b0 <_DYNAMIC+0x338>
+   16d35:	cc                   	int3
+   16d36:	cc                   	int3
+   16d37:	cc                   	int3
+   16d38:	cc                   	int3
+   16d39:	cc                   	int3
+   16d3a:	cc                   	int3
+   16d3b:	cc                   	int3
+   16d3c:	cc                   	int3
+   16d3d:	cc                   	int3
+   16d3e:	cc                   	int3
+   16d3f:	cc                   	int3
+
+0000000000016d40 <__rustc::rust_begin_unwind>:
+   16d40:	55                   	push   %rbp
+   16d41:	48 89 e5             	mov    %rsp,%rbp
+   16d44:	48 83 ec 20          	sub    $0x20,%rsp
+   16d48:	0f 10 07             	movups (%rdi),%xmm0
+   16d4b:	0f 11 45 e8          	movups %xmm0,-0x18(%rbp)
+   16d4f:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+   16d53:	48 8d 7d e8          	lea    -0x18(%rbp),%rdi
+   16d57:	ff 15 5b 35 04 00    	call   *0x4355b(%rip)        # 5a2b8 <_DYNAMIC+0x340>
+   16d5d:	cc                   	int3
+   16d5e:	cc                   	int3
+   16d5f:	cc                   	int3
+
+0000000000016d60 <__rustc::__rdl_alloc_zeroed>:
+   16d60:	55                   	push   %rbp
+   16d61:	48 89 e5             	mov    %rsp,%rbp
+   16d64:	41 56                	push   %r14
+   16d66:	53                   	push   %rbx
+   16d67:	48 83 ec 10          	sub    $0x10,%rsp
+   16d6b:	48 89 fb             	mov    %rdi,%rbx
+   16d6e:	48 83 fe 11          	cmp    $0x11,%rsi
+   16d72:	0f 92 c0             	setb   %al
+   16d75:	48 39 fe             	cmp    %rdi,%rsi
+   16d78:	0f 96 c1             	setbe  %cl
+   16d7b:	84 c8                	test   %cl,%al
+   16d7d:	74 16                	je     16d95 <__rustc::__rdl_alloc_zeroed+0x35>
+   16d7f:	be 01 00 00 00       	mov    $0x1,%esi
+   16d84:	48 89 df             	mov    %rbx,%rdi
+   16d87:	48 83 c4 10          	add    $0x10,%rsp
+   16d8b:	5b                   	pop    %rbx
+   16d8c:	41 5e                	pop    %r14
+   16d8e:	5d                   	pop    %rbp
+   16d8f:	ff 25 2b 35 04 00    	jmp    *0x4352b(%rip)        # 5a2c0 <calloc@GLIBC_2.2.5>
+   16d95:	48 c7 45 e8 00 00 00 	movq   $0x0,-0x18(%rbp)
+   16d9c:	00 
+   16d9d:	48 83 fe 09          	cmp    $0x9,%rsi
+   16da1:	b8 08 00 00 00       	mov    $0x8,%eax
+   16da6:	48 0f 43 c6          	cmovae %rsi,%rax
+   16daa:	48 8d 7d e8          	lea    -0x18(%rbp),%rdi
+   16dae:	48 89 c6             	mov    %rax,%rsi
+   16db1:	48 89 da             	mov    %rbx,%rdx
+   16db4:	ff 15 be 34 04 00    	call   *0x434be(%rip)        # 5a278 <posix_memalign@GLIBC_2.2.5>
+   16dba:	85 c0                	test   %eax,%eax
+   16dbc:	0f 95 c0             	setne  %al
+   16dbf:	4c 8b 75 e8          	mov    -0x18(%rbp),%r14
+   16dc3:	4d 85 f6             	test   %r14,%r14
+   16dc6:	0f 94 c1             	sete   %cl
+   16dc9:	08 c1                	or     %al,%cl
+   16dcb:	74 05                	je     16dd2 <__rustc::__rdl_alloc_zeroed+0x72>
+   16dcd:	45 31 f6             	xor    %r14d,%r14d
+   16dd0:	eb 0e                	jmp    16de0 <__rustc::__rdl_alloc_zeroed+0x80>
+   16dd2:	4c 89 f7             	mov    %r14,%rdi
+   16dd5:	31 f6                	xor    %esi,%esi
+   16dd7:	48 89 da             	mov    %rbx,%rdx
+   16dda:	ff 15 e8 34 04 00    	call   *0x434e8(%rip)        # 5a2c8 <memset@GLIBC_2.2.5>
+   16de0:	4c 89 f0             	mov    %r14,%rax
+   16de3:	48 83 c4 10          	add    $0x10,%rsp
+   16de7:	5b                   	pop    %rbx
+   16de8:	41 5e                	pop    %r14
+   16dea:	5d                   	pop    %rbp
+   16deb:	c3                   	ret
+   16dec:	cc                   	int3
+   16ded:	cc                   	int3
+   16dee:	cc                   	int3
+   16def:	cc                   	int3
+
+0000000000016df0 <__rustc::__rust_foreign_exception>:
+   16df0:	55                   	push   %rbp
+   16df1:	48 89 e5             	mov    %rsp,%rbp
+   16df4:	41 57                	push   %r15
+   16df6:	41 56                	push   %r14
+   16df8:	41 54                	push   %r12
+   16dfa:	53                   	push   %rbx
+   16dfb:	bb 44 00 00 00       	mov    $0x44,%ebx
+   16e00:	4c 8d 35 11 40 ff ff 	lea    -0xbfef(%rip),%r14        # ae18 <GCC_except_table386+0x2db8>
+   16e07:	4c 8b 3d 8a 34 04 00 	mov    0x4348a(%rip),%r15        # 5a298 <write@GLIBC_2.2.5>
+   16e0e:	4c 8b 25 8b 34 04 00 	mov    0x4348b(%rip),%r12        # 5a2a0 <__errno_location@GLIBC_2.2.5>
+   16e15:	eb 1a                	jmp    16e31 <__rustc::__rust_foreign_exception+0x41>
+   16e17:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+   16e1e:	00 00 
+   16e20:	41 ff d4             	call   *%r12
+   16e23:	48 63 00             	movslq (%rax),%rax
+   16e26:	48 83 f8 04          	cmp    $0x4,%rax
+   16e2a:	75 54                	jne    16e80 <__rustc::__rust_foreign_exception+0x90>
+   16e2c:	48 85 db             	test   %rbx,%rbx
+   16e2f:	74 61                	je     16e92 <__rustc::__rust_foreign_exception+0xa2>
+   16e31:	bf 02 00 00 00       	mov    $0x2,%edi
+   16e36:	4c 89 f6             	mov    %r14,%rsi
+   16e39:	48 89 da             	mov    %rbx,%rdx
+   16e3c:	41 ff d7             	call   *%r15
+   16e3f:	48 83 f8 ff          	cmp    $0xffffffffffffffff,%rax
+   16e43:	74 db                	je     16e20 <__rustc::__rust_foreign_exception+0x30>
+   16e45:	48 85 c0             	test   %rax,%rax
+   16e48:	74 2d                	je     16e77 <__rustc::__rust_foreign_exception+0x87>
+   16e4a:	48 89 d9             	mov    %rbx,%rcx
+   16e4d:	48 29 c1             	sub    %rax,%rcx
+   16e50:	72 0d                	jb     16e5f <__rustc::__rust_foreign_exception+0x6f>
+   16e52:	49 01 c6             	add    %rax,%r14
+   16e55:	48 89 cb             	mov    %rcx,%rbx
+   16e58:	48 85 db             	test   %rbx,%rbx
+   16e5b:	75 d4                	jne    16e31 <__rustc::__rust_foreign_exception+0x41>
+   16e5d:	eb 33                	jmp    16e92 <__rustc::__rust_foreign_exception+0xa2>
+   16e5f:	48 8d 0d ea 13 04 00 	lea    0x413ea(%rip),%rcx        # 58250 <__dso_handle+0x2c0>
+   16e66:	48 89 c7             	mov    %rax,%rdi
+   16e69:	48 89 de             	mov    %rbx,%rsi
+   16e6c:	48 89 da             	mov    %rbx,%rdx
+   16e6f:	ff 15 33 34 04 00    	call   *0x43433(%rip)        # 5a2a8 <_DYNAMIC+0x330>
+   16e75:	0f 0b                	ud2
+   16e77:	48 8d 05 ba 13 04 00 	lea    0x413ba(%rip),%rax        # 58238 <__dso_handle+0x2a8>
+   16e7e:	eb 08                	jmp    16e88 <__rustc::__rust_foreign_exception+0x98>
+
+===== run_local address=0x0000000000016790 =====
+
+boundary_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000016790 <run_imported>:
+   16790:	48 85 f6             	test   %rsi,%rsi
+   16793:	74 0f                	je     167a4 <run_imported+0x14>
+   16795:	48 83 fe 08          	cmp    $0x8,%rsi
+   16799:	73 0c                	jae    167a7 <run_imported+0x17>
+   1679b:	31 c9                	xor    %ecx,%ecx
+   1679d:	31 c0                	xor    %eax,%eax
+   1679f:	e9 b3 01 00 00       	jmp    16957 <run_imported+0x1c7>
+   167a4:	31 c0                	xor    %eax,%eax
+   167a6:	c3                   	ret
+   167a7:	49 b8 c0 ff ff ff ff 	movabs $0x1fffffffffffffc0,%r8
+   167ae:	ff ff 1f 
+   167b1:	48 83 fe 40          	cmp    $0x40,%rsi
+   167b5:	73 09                	jae    167c0 <run_imported+0x30>
+   167b7:	31 c9                	xor    %ecx,%ecx
+   167b9:	31 c0                	xor    %eax,%eax
+   167bb:	e9 21 01 00 00       	jmp    168e1 <run_imported+0x151>
+   167c0:	62 f2 7d 48 58 15 de 	vpbroadcastd -0xe722(%rip),%zmm2        # 80a8 <GCC_except_table386+0x48>
+   167c7:	18 ff ff 
+   167ca:	48 89 f0             	mov    %rsi,%rax
+   167cd:	48 c1 e8 06          	shr    $0x6,%rax
+   167d1:	48 89 f1             	mov    %rsi,%rcx
+   167d4:	4c 21 c1             	and    %r8,%rcx
+   167d7:	62 f2 7d 48 7c c2    	vpbroadcastd %edx,%zmm0
+   167dd:	c5 f1 ef c9          	vpxor  %xmm1,%xmm1,%xmm1
+   167e1:	45 31 c9             	xor    %r9d,%r9d
+   167e4:	c5 e1 ef db          	vpxor  %xmm3,%xmm3,%xmm3
+   167e8:	c5 d9 ef e4          	vpxor  %xmm4,%xmm4,%xmm4
+   167ec:	c5 d1 ef ed          	vpxor  %xmm5,%xmm5,%xmm5
+   167f0:	48 c1 e0 08          	shl    $0x8,%rax
+   167f4:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+   167fb:	00 00 00 00 00 
+   16800:	62 b1 7d 48 ef 7c 0f 	vpxord 0x40(%rdi,%r9,1),%zmm0,%zmm7
+   16807:	01 
+   16808:	62 b1 7d 48 ef 34 0f 	vpxord (%rdi,%r9,1),%zmm0,%zmm6
+   1680f:	62 31 7d 48 ef 44 0f 	vpxord 0x80(%rdi,%r9,1),%zmm0,%zmm8
+   16816:	02 
+   16817:	62 31 7d 48 ef 4c 0f 	vpxord 0xc0(%rdi,%r9,1),%zmm0,%zmm9
+   1681e:	03 
+   1681f:	49 81 c1 00 01 00 00 	add    $0x100,%r9
+   16826:	62 f1 25 48 72 cf 05 	vprold $0x5,%zmm7,%zmm11
+   1682d:	62 f1 45 48 ef fa    	vpxord %zmm2,%zmm7,%zmm7
+   16833:	62 f1 2d 48 72 ce 05 	vprold $0x5,%zmm6,%zmm10
+   1683a:	62 d1 1d 48 72 c8 05 	vprold $0x5,%zmm8,%zmm12
+   16841:	62 f1 4d 48 ef f2    	vpxord %zmm2,%zmm6,%zmm6
+   16847:	62 71 3d 48 ef c2    	vpxord %zmm2,%zmm8,%zmm8
+   1684d:	62 d1 15 48 72 c9 05 	vprold $0x5,%zmm9,%zmm13
+   16854:	62 f1 45 48 fe db    	vpaddd %zmm3,%zmm7,%zmm3
+   1685a:	62 f1 35 48 ef fa    	vpxord %zmm2,%zmm9,%zmm7
+   16860:	62 f1 4d 48 fe c9    	vpaddd %zmm1,%zmm6,%zmm1
+   16866:	62 f1 3d 48 fe e4    	vpaddd %zmm4,%zmm8,%zmm4
+   1686c:	62 f1 45 48 fe ed    	vpaddd %zmm5,%zmm7,%zmm5
+   16872:	62 d1 75 48 fe ca    	vpaddd %zmm10,%zmm1,%zmm1
+   16878:	62 d1 65 48 fe db    	vpaddd %zmm11,%zmm3,%zmm3
+   1687e:	62 d1 5d 48 fe e4    	vpaddd %zmm12,%zmm4,%zmm4
+   16884:	62 d1 55 48 fe ed    	vpaddd %zmm13,%zmm5,%zmm5
+   1688a:	4c 39 c8             	cmp    %r9,%rax
+   1688d:	0f 85 6d ff ff ff    	jne    16800 <run_imported+0x70>
+   16893:	62 f1 65 48 fe c1    	vpaddd %zmm1,%zmm3,%zmm0
+   16899:	62 f1 5d 48 fe c0    	vpaddd %zmm0,%zmm4,%zmm0
+   1689f:	62 f1 55 48 fe c0    	vpaddd %zmm0,%zmm5,%zmm0
+   168a5:	62 f3 fd 48 3b c1 01 	vextracti64x4 $0x1,%zmm0,%ymm1
+   168ac:	62 f1 7d 48 fe c1    	vpaddd %zmm1,%zmm0,%zmm0
+   168b2:	c4 e3 7d 39 c1 01    	vextracti128 $0x1,%ymm0,%xmm1
+   168b8:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   168bc:	c5 f9 70 c8 ee       	vpshufd $0xee,%xmm0,%xmm1
+   168c1:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   168c5:	c5 f9 70 c8 55       	vpshufd $0x55,%xmm0,%xmm1
+   168ca:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   168ce:	c5 f9 7e c0          	vmovd  %xmm0,%eax
+   168d2:	48 39 ce             	cmp    %rcx,%rsi
+   168d5:	0f 84 a6 00 00 00    	je     16981 <run_imported+0x1f1>
+   168db:	40 f6 c6 38          	test   $0x38,%sil
+   168df:	74 76                	je     16957 <run_imported+0x1c7>
+   168e1:	c4 e2 7d 58 15 be 17 	vpbroadcastd -0xe842(%rip),%ymm2        # 80a8 <GCC_except_table386+0x48>
+   168e8:	ff ff 
+   168ea:	49 83 c0 38          	add    $0x38,%r8
+   168ee:	49 89 c9             	mov    %rcx,%r9
+   168f1:	c5 f9 6e c0          	vmovd  %eax,%xmm0
+   168f5:	62 f2 7d 28 7c ca    	vpbroadcastd %edx,%ymm1
+   168fb:	4c 89 c1             	mov    %r8,%rcx
+   168fe:	48 21 f1             	and    %rsi,%rcx
+   16901:	66 66 66 66 66 66 2e 	data16 data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+   16908:	0f 1f 84 00 00 00 00 
+   1690f:	00 
+   16910:	c4 a1 75 ef 1c 8f    	vpxor  (%rdi,%r9,4),%ymm1,%ymm3
+   16916:	49 83 c1 08          	add    $0x8,%r9
+   1691a:	62 f1 5d 28 72 cb 05 	vprold $0x5,%ymm3,%ymm4
+   16921:	c5 e5 ef da          	vpxor  %ymm2,%ymm3,%ymm3
+   16925:	c5 e5 fe c0          	vpaddd %ymm0,%ymm3,%ymm0
+   16929:	c5 fd fe c4          	vpaddd %ymm4,%ymm0,%ymm0
+   1692d:	4c 39 c9             	cmp    %r9,%rcx
+   16930:	75 de                	jne    16910 <run_imported+0x180>
+   16932:	c4 e3 7d 39 c1 01    	vextracti128 $0x1,%ymm0,%xmm1
+   16938:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   1693c:	c5 f9 70 c8 ee       	vpshufd $0xee,%xmm0,%xmm1
+   16941:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   16945:	c5 f9 70 c8 55       	vpshufd $0x55,%xmm0,%xmm1
+   1694a:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   1694e:	c5 f9 7e c0          	vmovd  %xmm0,%eax
+   16952:	48 39 ce             	cmp    %rcx,%rsi
+   16955:	74 2a                	je     16981 <run_imported+0x1f1>
+   16957:	41 89 c0             	mov    %eax,%r8d
+   1695a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+   16960:	8b 04 8f             	mov    (%rdi,%rcx,4),%eax
+   16963:	48 ff c1             	inc    %rcx
+   16966:	31 d0                	xor    %edx,%eax
+   16968:	c4 63 7b f0 c8 1b    	rorx   $0x1b,%eax,%r9d
+   1696e:	35 b9 79 37 9e       	xor    $0x9e3779b9,%eax
+   16973:	44 01 c0             	add    %r8d,%eax
+   16976:	44 01 c8             	add    %r9d,%eax
+   16979:	41 89 c0             	mov    %eax,%r8d
+   1697c:	48 39 ce             	cmp    %rcx,%rsi
+   1697f:	75 df                	jne    16960 <run_imported+0x1d0>
+   16981:	c5 f8 77             	vzeroupper
+   16984:	c3                   	ret
+   16985:	cc                   	int3
+   16986:	cc                   	int3
+   16987:	cc                   	int3
+   16988:	cc                   	int3
+   16989:	cc                   	int3
+   1698a:	cc                   	int3
+   1698b:	cc                   	int3
+   1698c:	cc                   	int3
+   1698d:	cc                   	int3
+   1698e:	cc                   	int3
+   1698f:	cc                   	int3
+
+0000000000016990 <run_opaque>:
+   16990:	55                   	push   %rbp
+   16991:	41 57                	push   %r15
+   16993:	41 56                	push   %r14
+   16995:	41 55                	push   %r13
+   16997:	41 54                	push   %r12
+   16999:	53                   	push   %rbx
+   1699a:	50                   	push   %rax
+   1699b:	48 85 f6             	test   %rsi,%rsi
+   1699e:	74 35                	je     169d5 <run_opaque+0x45>
+   169a0:	4c 8b 2d 01 38 04 00 	mov    0x43801(%rip),%r13        # 5a1a8 <_DYNAMIC+0x230>
+   169a7:	89 d3                	mov    %edx,%ebx
+   169a9:	49 89 f6             	mov    %rsi,%r14
+   169ac:	49 89 ff             	mov    %rdi,%r15
+   169af:	45 31 e4             	xor    %r12d,%r12d
+   169b2:	31 ed                	xor    %ebp,%ebp
+   169b4:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+   169bb:	00 00 00 00 00 
+   169c0:	43 8b 3c a7          	mov    (%r15,%r12,4),%edi
+   169c4:	89 de                	mov    %ebx,%esi
+   169c6:	41 ff d5             	call   *%r13
+   169c9:	01 c5                	add    %eax,%ebp
+   169cb:	49 ff c4             	inc    %r12
+   169ce:	4d 39 e6             	cmp    %r12,%r14
+   169d1:	75 ed                	jne    169c0 <run_opaque+0x30>
+   169d3:	eb 02                	jmp    169d7 <run_opaque+0x47>
+   169d5:	31 ed                	xor    %ebp,%ebp
+   169d7:	89 e8                	mov    %ebp,%eax
+   169d9:	48 83 c4 08          	add    $0x8,%rsp
+   169dd:	5b                   	pop    %rbx
+   169de:	41 5c                	pop    %r12
+   169e0:	41 5d                	pop    %r13
+   169e2:	41 5e                	pop    %r14
+   169e4:	41 5f                	pop    %r15
+   169e6:	5d                   	pop    %rbp
+   169e7:	c3                   	ret
+   169e8:	cc                   	int3
+   169e9:	cc                   	int3
+   169ea:	cc                   	int3
+   169eb:	cc                   	int3
+   169ec:	cc                   	int3
+   169ed:	cc                   	int3
+   169ee:	cc                   	int3
+   169ef:	cc                   	int3
+
+00000000000169f0 <main>:
+   169f0:	50                   	push   %rax
+   169f1:	48 89 f1             	mov    %rsi,%rcx
+   169f4:	48 63 d7             	movslq %edi,%rdx
+   169f7:	48 8d 05 32 ec ff ff 	lea    -0x13ce(%rip),%rax        # 15630 <boundary_probe::main>
+   169fe:	48 8d 35 c3 15 04 00 	lea    0x415c3(%rip),%rsi        # 57fc8 <__dso_handle+0x38>
+   16a05:	48 89 e7             	mov    %rsp,%rdi
+   16a08:	45 31 c0             	xor    %r8d,%r8d
+   16a0b:	48 89 04 24          	mov    %rax,(%rsp)
+   16a0f:	ff 15 0b 38 04 00    	call   *0x4380b(%rip)        # 5a220 <_DYNAMIC+0x2a8>
+   16a15:	59                   	pop    %rcx
+   16a16:	c3                   	ret
+   16a17:	cc                   	int3
+   16a18:	cc                   	int3
+   16a19:	cc                   	int3
+   16a1a:	cc                   	int3
+   16a1b:	cc                   	int3
+   16a1c:	cc                   	int3
+   16a1d:	cc                   	int3
+   16a1e:	cc                   	int3
+   16a1f:	cc                   	int3
+
+0000000000016a20 <__rustc::__rust_alloc>:
+   16a20:	e9 cb 00 00 00       	jmp    16af0 <__rustc::__rdl_alloc>
+   16a25:	cc                   	int3
+   16a26:	cc                   	int3
+   16a27:	cc                   	int3
+   16a28:	cc                   	int3
+   16a29:	cc                   	int3
+   16a2a:	cc                   	int3
+   16a2b:	cc                   	int3
+   16a2c:	cc                   	int3
+   16a2d:	cc                   	int3
+   16a2e:	cc                   	int3
+   16a2f:	cc                   	int3
+
+0000000000016a30 <__rustc::__rust_dealloc>:
+   16a30:	e9 1b 01 00 00       	jmp    16b50 <__rustc::__rdl_dealloc>
+   16a35:	cc                   	int3
+   16a36:	cc                   	int3
+   16a37:	cc                   	int3
+   16a38:	cc                   	int3
+   16a39:	cc                   	int3
+   16a3a:	cc                   	int3
+   16a3b:	cc                   	int3
+   16a3c:	cc                   	int3
+   16a3d:	cc                   	int3
+   16a3e:	cc                   	int3
+   16a3f:	cc                   	int3
+
+0000000000016a40 <__rustc::__rust_realloc>:
+   16a40:	e9 1b 01 00 00       	jmp    16b60 <__rustc::__rdl_realloc>
+   16a45:	cc                   	int3
+   16a46:	cc                   	int3
+   16a47:	cc                   	int3
+   16a48:	cc                   	int3
+   16a49:	cc                   	int3
+   16a4a:	cc                   	int3
+   16a4b:	cc                   	int3
+   16a4c:	cc                   	int3
+   16a4d:	cc                   	int3
+   16a4e:	cc                   	int3
+   16a4f:	cc                   	int3
+
+0000000000016a50 <__rustc::__rust_alloc_zeroed>:
+   16a50:	e9 0b 03 00 00       	jmp    16d60 <__rustc::__rdl_alloc_zeroed>
+   16a55:	cc                   	int3
+   16a56:	cc                   	int3
+   16a57:	cc                   	int3
+   16a58:	cc                   	int3
+   16a59:	cc                   	int3
+   16a5a:	cc                   	int3
+   16a5b:	cc                   	int3
+   16a5c:	cc                   	int3
+   16a5d:	cc                   	int3
+   16a5e:	cc                   	int3
+   16a5f:	cc                   	int3
+
+0000000000016a60 <__rustc::__rust_alloc_error_handler_should_panic_v2>:
+   16a60:	31 c0                	xor    %eax,%eax
+   16a62:	c3                   	ret
+   16a63:	cc                   	int3
+   16a64:	cc                   	int3
+   16a65:	cc                   	int3
+   16a66:	cc                   	int3
+   16a67:	cc                   	int3
+   16a68:	cc                   	int3
+   16a69:	cc                   	int3
+   16a6a:	cc                   	int3
+   16a6b:	cc                   	int3
+   16a6c:	cc                   	int3
+   16a6d:	cc                   	int3
+   16a6e:	cc                   	int3
+   16a6f:	cc                   	int3
+
+0000000000016a70 <__rustc::__rust_no_alloc_shim_is_unstable_v2>:
+   16a70:	c3                   	ret
+   16a71:	cc                   	int3
+   16a72:	cc                   	int3
+   16a73:	cc                   	int3
+   16a74:	cc                   	int3
+   16a75:	cc                   	int3
+   16a76:	cc                   	int3
+   16a77:	cc                   	int3
+   16a78:	cc                   	int3
+   16a79:	cc                   	int3
+   16a7a:	cc                   	int3
+   16a7b:	cc                   	int3
+   16a7c:	cc                   	int3
+   16a7d:	cc                   	int3
+   16a7e:	cc                   	int3
+   16a7f:	cc                   	int3
+
+0000000000016a80 <topic16_opaque_mix>:
+   16a80:	31 f7                	xor    %esi,%edi
+   16a82:	c4 e3 7b f0 c7 1b    	rorx   $0x1b,%edi,%eax
+   16a88:	81 f7 b9 79 37 9e    	xor    $0x9e3779b9,%edi
+   16a8e:	01 f8                	add    %edi,%eax
+   16a90:	c3                   	ret
+   16a91:	cc                   	int3
+   16a92:	cc                   	int3
+   16a93:	cc                   	int3
+   16a94:	cc                   	int3
+   16a95:	cc                   	int3
+   16a96:	cc                   	int3
+   16a97:	cc                   	int3
+   16a98:	cc                   	int3
+   16a99:	cc                   	int3
+   16a9a:	cc                   	int3
+   16a9b:	cc                   	int3
+   16a9c:	cc                   	int3
+   16a9d:	cc                   	int3
+   16a9e:	cc                   	int3
+   16a9f:	cc                   	int3
+
+0000000000016aa0 <__rustc::rust_panic>:
+   16aa0:	55                   	push   %rbp
+   16aa1:	48 89 e5             	mov    %rsp,%rbp
+   16aa4:	48 83 ec 20          	sub    $0x20,%rsp
+   16aa8:	ff 15 ea 36 04 00    	call   *0x436ea(%rip)        # 5a198 <_DYNAMIC+0x220>
+   16aae:	89 45 f8             	mov    %eax,-0x8(%rbp)
+   16ab1:	48 8d 45 f8          	lea    -0x8(%rbp),%rax
+   16ab5:	48 89 45 e0          	mov    %rax,-0x20(%rbp)
+   16ab9:	48 8b 05 48 37 04 00 	mov    0x43748(%rip),%rax        # 5a208 <_DYNAMIC+0x290>
+   16ac0:	48 89 45 e8          	mov    %rax,-0x18(%rbp)
+   16ac4:	48 8d 35 26 20 ff ff 	lea    -0xdfda(%rip),%rsi        # 8af1 <GCC_except_table386+0xa91>
+   16acb:	48 8d 7d ff          	lea    -0x1(%rbp),%rdi
+   16acf:	48 8d 55 e0          	lea    -0x20(%rbp),%rdx
+   16ad3:	e8 f8 b1 00 00       	call   21cd0 <std::io::Write::write_fmt>
+   16ad8:	48 89 45 f0          	mov    %rax,-0x10(%rbp)
+   16adc:	48 8d 7d f0          	lea    -0x10(%rbp),%rdi
+   16ae0:	e8 eb 4b 01 00       	call   2b6d0 <core::ptr::drop_in_place<core::result::Result<(),std::io::error::Error>>>
+   16ae5:	ff 15 7d 37 04 00    	call   *0x4377d(%rip)        # 5a268 <_DYNAMIC+0x2f0>
+   16aeb:	cc                   	int3
+   16aec:	cc                   	int3
+   16aed:	cc                   	int3
+   16aee:	cc                   	int3
+   16aef:	cc                   	int3
+
+0000000000016af0 <__rustc::__rdl_alloc>:
+   16af0:	48 89 fa             	mov    %rdi,%rdx
+   16af3:	48 83 fe 11          	cmp    $0x11,%rsi
+   16af7:	0f 92 c0             	setb   %al
+   16afa:	48 39 fe             	cmp    %rdi,%rsi
+   16afd:	0f 96 c1             	setbe  %cl
+   16b00:	84 c8                	test   %cl,%al
+   16b02:	74 09                	je     16b0d <__rustc::__rdl_alloc+0x1d>
+   16b04:	48 89 d7             	mov    %rdx,%rdi
+   16b07:	ff 25 63 37 04 00    	jmp    *0x43763(%rip)        # 5a270 <malloc@GLIBC_2.2.5>
+   16b0d:	55                   	push   %rbp
+   16b0e:	48 89 e5             	mov    %rsp,%rbp
+   16b11:	48 83 ec 10          	sub    $0x10,%rsp
+   16b15:	48 c7 45 f8 00 00 00 	movq   $0x0,-0x8(%rbp)
+   16b1c:	00 
+   16b1d:	48 83 fe 09          	cmp    $0x9,%rsi
+   16b21:	b8 08 00 00 00       	mov    $0x8,%eax
+   16b26:	48 0f 43 c6          	cmovae %rsi,%rax
+   16b2a:	48 8d 7d f8          	lea    -0x8(%rbp),%rdi
+   16b2e:	48 89 c6             	mov    %rax,%rsi
+   16b31:	ff 15 41 37 04 00    	call   *0x43741(%rip)        # 5a278 <posix_memalign@GLIBC_2.2.5>
+   16b37:	85 c0                	test   %eax,%eax
+   16b39:	75 0a                	jne    16b45 <__rustc::__rdl_alloc+0x55>
+   16b3b:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+   16b3f:	48 83 c4 10          	add    $0x10,%rsp
+   16b43:	5d                   	pop    %rbp
+   16b44:	c3                   	ret
+   16b45:	31 c0                	xor    %eax,%eax
+   16b47:	48 83 c4 10          	add    $0x10,%rsp
+   16b4b:	5d                   	pop    %rbp
+   16b4c:	c3                   	ret
+   16b4d:	cc                   	int3
+   16b4e:	cc                   	int3
+   16b4f:	cc                   	int3
+
+0000000000016b50 <__rustc::__rdl_dealloc>:
+   16b50:	ff 25 2a 37 04 00    	jmp    *0x4372a(%rip)        # 5a280 <free@GLIBC_2.2.5>
+   16b56:	cc                   	int3
+   16b57:	cc                   	int3
+   16b58:	cc                   	int3
+   16b59:	cc                   	int3
+   16b5a:	cc                   	int3
+   16b5b:	cc                   	int3
+   16b5c:	cc                   	int3
+   16b5d:	cc                   	int3
+   16b5e:	cc                   	int3
+   16b5f:	cc                   	int3
+
+0000000000016b60 <__rustc::__rdl_realloc>:
+   16b60:	55                   	push   %rbp
+   16b61:	48 89 e5             	mov    %rsp,%rbp
+   16b64:	41 57                	push   %r15
+   16b66:	41 56                	push   %r14
+   16b68:	41 54                	push   %r12
+   16b6a:	53                   	push   %rbx
+   16b6b:	48 83 ec 10          	sub    $0x10,%rsp
+   16b6f:	48 89 cb             	mov    %rcx,%rbx
+   16b72:	48 83 fa 11          	cmp    $0x11,%rdx
+   16b76:	0f 92 c0             	setb   %al
+   16b79:	48 39 ca             	cmp    %rcx,%rdx
+   16b7c:	0f 96 c1             	setbe  %cl
+   16b7f:	84 c8                	test   %cl,%al
+   16b81:	74 15                	je     16b98 <__rustc::__rdl_realloc+0x38>
+   16b83:	48 89 de             	mov    %rbx,%rsi
+   16b86:	48 83 c4 10          	add    $0x10,%rsp
+   16b8a:	5b                   	pop    %rbx
+   16b8b:	41 5c                	pop    %r12
+   16b8d:	41 5e                	pop    %r14
+   16b8f:	41                   	rex.B
+
+===== run_imported address=0x0000000000016790 =====
+
+boundary_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000016790 <run_imported>:
+   16790:	48 85 f6             	test   %rsi,%rsi
+   16793:	74 0f                	je     167a4 <run_imported+0x14>
+   16795:	48 83 fe 08          	cmp    $0x8,%rsi
+   16799:	73 0c                	jae    167a7 <run_imported+0x17>
+   1679b:	31 c9                	xor    %ecx,%ecx
+   1679d:	31 c0                	xor    %eax,%eax
+   1679f:	e9 b3 01 00 00       	jmp    16957 <run_imported+0x1c7>
+   167a4:	31 c0                	xor    %eax,%eax
+   167a6:	c3                   	ret
+   167a7:	49 b8 c0 ff ff ff ff 	movabs $0x1fffffffffffffc0,%r8
+   167ae:	ff ff 1f 
+   167b1:	48 83 fe 40          	cmp    $0x40,%rsi
+   167b5:	73 09                	jae    167c0 <run_imported+0x30>
+   167b7:	31 c9                	xor    %ecx,%ecx
+   167b9:	31 c0                	xor    %eax,%eax
+   167bb:	e9 21 01 00 00       	jmp    168e1 <run_imported+0x151>
+   167c0:	62 f2 7d 48 58 15 de 	vpbroadcastd -0xe722(%rip),%zmm2        # 80a8 <GCC_except_table386+0x48>
+   167c7:	18 ff ff 
+   167ca:	48 89 f0             	mov    %rsi,%rax
+   167cd:	48 c1 e8 06          	shr    $0x6,%rax
+   167d1:	48 89 f1             	mov    %rsi,%rcx
+   167d4:	4c 21 c1             	and    %r8,%rcx
+   167d7:	62 f2 7d 48 7c c2    	vpbroadcastd %edx,%zmm0
+   167dd:	c5 f1 ef c9          	vpxor  %xmm1,%xmm1,%xmm1
+   167e1:	45 31 c9             	xor    %r9d,%r9d
+   167e4:	c5 e1 ef db          	vpxor  %xmm3,%xmm3,%xmm3
+   167e8:	c5 d9 ef e4          	vpxor  %xmm4,%xmm4,%xmm4
+   167ec:	c5 d1 ef ed          	vpxor  %xmm5,%xmm5,%xmm5
+   167f0:	48 c1 e0 08          	shl    $0x8,%rax
+   167f4:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+   167fb:	00 00 00 00 00 
+   16800:	62 b1 7d 48 ef 7c 0f 	vpxord 0x40(%rdi,%r9,1),%zmm0,%zmm7
+   16807:	01 
+   16808:	62 b1 7d 48 ef 34 0f 	vpxord (%rdi,%r9,1),%zmm0,%zmm6
+   1680f:	62 31 7d 48 ef 44 0f 	vpxord 0x80(%rdi,%r9,1),%zmm0,%zmm8
+   16816:	02 
+   16817:	62 31 7d 48 ef 4c 0f 	vpxord 0xc0(%rdi,%r9,1),%zmm0,%zmm9
+   1681e:	03 
+   1681f:	49 81 c1 00 01 00 00 	add    $0x100,%r9
+   16826:	62 f1 25 48 72 cf 05 	vprold $0x5,%zmm7,%zmm11
+   1682d:	62 f1 45 48 ef fa    	vpxord %zmm2,%zmm7,%zmm7
+   16833:	62 f1 2d 48 72 ce 05 	vprold $0x5,%zmm6,%zmm10
+   1683a:	62 d1 1d 48 72 c8 05 	vprold $0x5,%zmm8,%zmm12
+   16841:	62 f1 4d 48 ef f2    	vpxord %zmm2,%zmm6,%zmm6
+   16847:	62 71 3d 48 ef c2    	vpxord %zmm2,%zmm8,%zmm8
+   1684d:	62 d1 15 48 72 c9 05 	vprold $0x5,%zmm9,%zmm13
+   16854:	62 f1 45 48 fe db    	vpaddd %zmm3,%zmm7,%zmm3
+   1685a:	62 f1 35 48 ef fa    	vpxord %zmm2,%zmm9,%zmm7
+   16860:	62 f1 4d 48 fe c9    	vpaddd %zmm1,%zmm6,%zmm1
+   16866:	62 f1 3d 48 fe e4    	vpaddd %zmm4,%zmm8,%zmm4
+   1686c:	62 f1 45 48 fe ed    	vpaddd %zmm5,%zmm7,%zmm5
+   16872:	62 d1 75 48 fe ca    	vpaddd %zmm10,%zmm1,%zmm1
+   16878:	62 d1 65 48 fe db    	vpaddd %zmm11,%zmm3,%zmm3
+   1687e:	62 d1 5d 48 fe e4    	vpaddd %zmm12,%zmm4,%zmm4
+   16884:	62 d1 55 48 fe ed    	vpaddd %zmm13,%zmm5,%zmm5
+   1688a:	4c 39 c8             	cmp    %r9,%rax
+   1688d:	0f 85 6d ff ff ff    	jne    16800 <run_imported+0x70>
+   16893:	62 f1 65 48 fe c1    	vpaddd %zmm1,%zmm3,%zmm0
+   16899:	62 f1 5d 48 fe c0    	vpaddd %zmm0,%zmm4,%zmm0
+   1689f:	62 f1 55 48 fe c0    	vpaddd %zmm0,%zmm5,%zmm0
+   168a5:	62 f3 fd 48 3b c1 01 	vextracti64x4 $0x1,%zmm0,%ymm1
+   168ac:	62 f1 7d 48 fe c1    	vpaddd %zmm1,%zmm0,%zmm0
+   168b2:	c4 e3 7d 39 c1 01    	vextracti128 $0x1,%ymm0,%xmm1
+   168b8:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   168bc:	c5 f9 70 c8 ee       	vpshufd $0xee,%xmm0,%xmm1
+   168c1:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   168c5:	c5 f9 70 c8 55       	vpshufd $0x55,%xmm0,%xmm1
+   168ca:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   168ce:	c5 f9 7e c0          	vmovd  %xmm0,%eax
+   168d2:	48 39 ce             	cmp    %rcx,%rsi
+   168d5:	0f 84 a6 00 00 00    	je     16981 <run_imported+0x1f1>
+   168db:	40 f6 c6 38          	test   $0x38,%sil
+   168df:	74 76                	je     16957 <run_imported+0x1c7>
+   168e1:	c4 e2 7d 58 15 be 17 	vpbroadcastd -0xe842(%rip),%ymm2        # 80a8 <GCC_except_table386+0x48>
+   168e8:	ff ff 
+   168ea:	49 83 c0 38          	add    $0x38,%r8
+   168ee:	49 89 c9             	mov    %rcx,%r9
+   168f1:	c5 f9 6e c0          	vmovd  %eax,%xmm0
+   168f5:	62 f2 7d 28 7c ca    	vpbroadcastd %edx,%ymm1
+   168fb:	4c 89 c1             	mov    %r8,%rcx
+   168fe:	48 21 f1             	and    %rsi,%rcx
+   16901:	66 66 66 66 66 66 2e 	data16 data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+   16908:	0f 1f 84 00 00 00 00 
+   1690f:	00 
+   16910:	c4 a1 75 ef 1c 8f    	vpxor  (%rdi,%r9,4),%ymm1,%ymm3
+   16916:	49 83 c1 08          	add    $0x8,%r9
+   1691a:	62 f1 5d 28 72 cb 05 	vprold $0x5,%ymm3,%ymm4
+   16921:	c5 e5 ef da          	vpxor  %ymm2,%ymm3,%ymm3
+   16925:	c5 e5 fe c0          	vpaddd %ymm0,%ymm3,%ymm0
+   16929:	c5 fd fe c4          	vpaddd %ymm4,%ymm0,%ymm0
+   1692d:	4c 39 c9             	cmp    %r9,%rcx
+   16930:	75 de                	jne    16910 <run_imported+0x180>
+   16932:	c4 e3 7d 39 c1 01    	vextracti128 $0x1,%ymm0,%xmm1
+   16938:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   1693c:	c5 f9 70 c8 ee       	vpshufd $0xee,%xmm0,%xmm1
+   16941:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   16945:	c5 f9 70 c8 55       	vpshufd $0x55,%xmm0,%xmm1
+   1694a:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   1694e:	c5 f9 7e c0          	vmovd  %xmm0,%eax
+   16952:	48 39 ce             	cmp    %rcx,%rsi
+   16955:	74 2a                	je     16981 <run_imported+0x1f1>
+   16957:	41 89 c0             	mov    %eax,%r8d
+   1695a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+   16960:	8b 04 8f             	mov    (%rdi,%rcx,4),%eax
+   16963:	48 ff c1             	inc    %rcx
+   16966:	31 d0                	xor    %edx,%eax
+   16968:	c4 63 7b f0 c8 1b    	rorx   $0x1b,%eax,%r9d
+   1696e:	35 b9 79 37 9e       	xor    $0x9e3779b9,%eax
+   16973:	44 01 c0             	add    %r8d,%eax
+   16976:	44 01 c8             	add    %r9d,%eax
+   16979:	41 89 c0             	mov    %eax,%r8d
+   1697c:	48 39 ce             	cmp    %rcx,%rsi
+   1697f:	75 df                	jne    16960 <run_imported+0x1d0>
+   16981:	c5 f8 77             	vzeroupper
+   16984:	c3                   	ret
+   16985:	cc                   	int3
+   16986:	cc                   	int3
+   16987:	cc                   	int3
+   16988:	cc                   	int3
+   16989:	cc                   	int3
+   1698a:	cc                   	int3
+   1698b:	cc                   	int3
+   1698c:	cc                   	int3
+   1698d:	cc                   	int3
+   1698e:	cc                   	int3
+   1698f:	cc                   	int3
+
+0000000000016990 <run_opaque>:
+   16990:	55                   	push   %rbp
+   16991:	41 57                	push   %r15
+   16993:	41 56                	push   %r14
+   16995:	41 55                	push   %r13
+   16997:	41 54                	push   %r12
+   16999:	53                   	push   %rbx
+   1699a:	50                   	push   %rax
+   1699b:	48 85 f6             	test   %rsi,%rsi
+   1699e:	74 35                	je     169d5 <run_opaque+0x45>
+   169a0:	4c 8b 2d 01 38 04 00 	mov    0x43801(%rip),%r13        # 5a1a8 <_DYNAMIC+0x230>
+   169a7:	89 d3                	mov    %edx,%ebx
+   169a9:	49 89 f6             	mov    %rsi,%r14
+   169ac:	49 89 ff             	mov    %rdi,%r15
+   169af:	45 31 e4             	xor    %r12d,%r12d
+   169b2:	31 ed                	xor    %ebp,%ebp
+   169b4:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+   169bb:	00 00 00 00 00 
+   169c0:	43 8b 3c a7          	mov    (%r15,%r12,4),%edi
+   169c4:	89 de                	mov    %ebx,%esi
+   169c6:	41 ff d5             	call   *%r13
+   169c9:	01 c5                	add    %eax,%ebp
+   169cb:	49 ff c4             	inc    %r12
+   169ce:	4d 39 e6             	cmp    %r12,%r14
+   169d1:	75 ed                	jne    169c0 <run_opaque+0x30>
+   169d3:	eb 02                	jmp    169d7 <run_opaque+0x47>
+   169d5:	31 ed                	xor    %ebp,%ebp
+   169d7:	89 e8                	mov    %ebp,%eax
+   169d9:	48 83 c4 08          	add    $0x8,%rsp
+   169dd:	5b                   	pop    %rbx
+   169de:	41 5c                	pop    %r12
+   169e0:	41 5d                	pop    %r13
+   169e2:	41 5e                	pop    %r14
+   169e4:	41 5f                	pop    %r15
+   169e6:	5d                   	pop    %rbp
+   169e7:	c3                   	ret
+   169e8:	cc                   	int3
+   169e9:	cc                   	int3
+   169ea:	cc                   	int3
+   169eb:	cc                   	int3
+   169ec:	cc                   	int3
+   169ed:	cc                   	int3
+   169ee:	cc                   	int3
+   169ef:	cc                   	int3
+
+00000000000169f0 <main>:
+   169f0:	50                   	push   %rax
+   169f1:	48 89 f1             	mov    %rsi,%rcx
+   169f4:	48 63 d7             	movslq %edi,%rdx
+   169f7:	48 8d 05 32 ec ff ff 	lea    -0x13ce(%rip),%rax        # 15630 <boundary_probe::main>
+   169fe:	48 8d 35 c3 15 04 00 	lea    0x415c3(%rip),%rsi        # 57fc8 <__dso_handle+0x38>
+   16a05:	48 89 e7             	mov    %rsp,%rdi
+   16a08:	45 31 c0             	xor    %r8d,%r8d
+   16a0b:	48 89 04 24          	mov    %rax,(%rsp)
+   16a0f:	ff 15 0b 38 04 00    	call   *0x4380b(%rip)        # 5a220 <_DYNAMIC+0x2a8>
+   16a15:	59                   	pop    %rcx
+   16a16:	c3                   	ret
+   16a17:	cc                   	int3
+   16a18:	cc                   	int3
+   16a19:	cc                   	int3
+   16a1a:	cc                   	int3
+   16a1b:	cc                   	int3
+   16a1c:	cc                   	int3
+   16a1d:	cc                   	int3
+   16a1e:	cc                   	int3
+   16a1f:	cc                   	int3
+
+0000000000016a20 <__rustc::__rust_alloc>:
+   16a20:	e9 cb 00 00 00       	jmp    16af0 <__rustc::__rdl_alloc>
+   16a25:	cc                   	int3
+   16a26:	cc                   	int3
+   16a27:	cc                   	int3
+   16a28:	cc                   	int3
+   16a29:	cc                   	int3
+   16a2a:	cc                   	int3
+   16a2b:	cc                   	int3
+   16a2c:	cc                   	int3
+   16a2d:	cc                   	int3
+   16a2e:	cc                   	int3
+   16a2f:	cc                   	int3
+
+0000000000016a30 <__rustc::__rust_dealloc>:
+   16a30:	e9 1b 01 00 00       	jmp    16b50 <__rustc::__rdl_dealloc>
+   16a35:	cc                   	int3
+   16a36:	cc                   	int3
+   16a37:	cc                   	int3
+   16a38:	cc                   	int3
+   16a39:	cc                   	int3
+   16a3a:	cc                   	int3
+   16a3b:	cc                   	int3
+   16a3c:	cc                   	int3
+   16a3d:	cc                   	int3
+   16a3e:	cc                   	int3
+   16a3f:	cc                   	int3
+
+0000000000016a40 <__rustc::__rust_realloc>:
+   16a40:	e9 1b 01 00 00       	jmp    16b60 <__rustc::__rdl_realloc>
+   16a45:	cc                   	int3
+   16a46:	cc                   	int3
+   16a47:	cc                   	int3
+   16a48:	cc                   	int3
+   16a49:	cc                   	int3
+   16a4a:	cc                   	int3
+   16a4b:	cc                   	int3
+   16a4c:	cc                   	int3
+   16a4d:	cc                   	int3
+   16a4e:	cc                   	int3
+   16a4f:	cc                   	int3
+
+0000000000016a50 <__rustc::__rust_alloc_zeroed>:
+   16a50:	e9 0b 03 00 00       	jmp    16d60 <__rustc::__rdl_alloc_zeroed>
+   16a55:	cc                   	int3
+   16a56:	cc                   	int3
+   16a57:	cc                   	int3
+   16a58:	cc                   	int3
+   16a59:	cc                   	int3
+   16a5a:	cc                   	int3
+   16a5b:	cc                   	int3
+   16a5c:	cc                   	int3
+   16a5d:	cc                   	int3
+   16a5e:	cc                   	int3
+   16a5f:	cc                   	int3
+
+0000000000016a60 <__rustc::__rust_alloc_error_handler_should_panic_v2>:
+   16a60:	31 c0                	xor    %eax,%eax
+   16a62:	c3                   	ret
+   16a63:	cc                   	int3
+   16a64:	cc                   	int3
+   16a65:	cc                   	int3
+   16a66:	cc                   	int3
+   16a67:	cc                   	int3
+   16a68:	cc                   	int3
+   16a69:	cc                   	int3
+   16a6a:	cc                   	int3
+   16a6b:	cc                   	int3
+   16a6c:	cc                   	int3
+   16a6d:	cc                   	int3
+   16a6e:	cc                   	int3
+   16a6f:	cc                   	int3
+
+0000000000016a70 <__rustc::__rust_no_alloc_shim_is_unstable_v2>:
+   16a70:	c3                   	ret
+   16a71:	cc                   	int3
+   16a72:	cc                   	int3
+   16a73:	cc                   	int3
+   16a74:	cc                   	int3
+   16a75:	cc                   	int3
+   16a76:	cc                   	int3
+   16a77:	cc                   	int3
+   16a78:	cc                   	int3
+   16a79:	cc                   	int3
+   16a7a:	cc                   	int3
+   16a7b:	cc                   	int3
+   16a7c:	cc                   	int3
+   16a7d:	cc                   	int3
+   16a7e:	cc                   	int3
+   16a7f:	cc                   	int3
+
+0000000000016a80 <topic16_opaque_mix>:
+   16a80:	31 f7                	xor    %esi,%edi
+   16a82:	c4 e3 7b f0 c7 1b    	rorx   $0x1b,%edi,%eax
+   16a88:	81 f7 b9 79 37 9e    	xor    $0x9e3779b9,%edi
+   16a8e:	01 f8                	add    %edi,%eax
+   16a90:	c3                   	ret
+   16a91:	cc                   	int3
+   16a92:	cc                   	int3
+   16a93:	cc                   	int3
+   16a94:	cc                   	int3
+   16a95:	cc                   	int3
+   16a96:	cc                   	int3
+   16a97:	cc                   	int3
+   16a98:	cc                   	int3
+   16a99:	cc                   	int3
+   16a9a:	cc                   	int3
+   16a9b:	cc                   	int3
+   16a9c:	cc                   	int3
+   16a9d:	cc                   	int3
+   16a9e:	cc                   	int3
+   16a9f:	cc                   	int3
+
+0000000000016aa0 <__rustc::rust_panic>:
+   16aa0:	55                   	push   %rbp
+   16aa1:	48 89 e5             	mov    %rsp,%rbp
+   16aa4:	48 83 ec 20          	sub    $0x20,%rsp
+   16aa8:	ff 15 ea 36 04 00    	call   *0x436ea(%rip)        # 5a198 <_DYNAMIC+0x220>
+   16aae:	89 45 f8             	mov    %eax,-0x8(%rbp)
+   16ab1:	48 8d 45 f8          	lea    -0x8(%rbp),%rax
+   16ab5:	48 89 45 e0          	mov    %rax,-0x20(%rbp)
+   16ab9:	48 8b 05 48 37 04 00 	mov    0x43748(%rip),%rax        # 5a208 <_DYNAMIC+0x290>
+   16ac0:	48 89 45 e8          	mov    %rax,-0x18(%rbp)
+   16ac4:	48 8d 35 26 20 ff ff 	lea    -0xdfda(%rip),%rsi        # 8af1 <GCC_except_table386+0xa91>
+   16acb:	48 8d 7d ff          	lea    -0x1(%rbp),%rdi
+   16acf:	48 8d 55 e0          	lea    -0x20(%rbp),%rdx
+   16ad3:	e8 f8 b1 00 00       	call   21cd0 <std::io::Write::write_fmt>
+   16ad8:	48 89 45 f0          	mov    %rax,-0x10(%rbp)
+   16adc:	48 8d 7d f0          	lea    -0x10(%rbp),%rdi
+   16ae0:	e8 eb 4b 01 00       	call   2b6d0 <core::ptr::drop_in_place<core::result::Result<(),std::io::error::Error>>>
+   16ae5:	ff 15 7d 37 04 00    	call   *0x4377d(%rip)        # 5a268 <_DYNAMIC+0x2f0>
+   16aeb:	cc                   	int3
+   16aec:	cc                   	int3
+   16aed:	cc                   	int3
+   16aee:	cc                   	int3
+   16aef:	cc                   	int3
+
+0000000000016af0 <__rustc::__rdl_alloc>:
+   16af0:	48 89 fa             	mov    %rdi,%rdx
+   16af3:	48 83 fe 11          	cmp    $0x11,%rsi
+   16af7:	0f 92 c0             	setb   %al
+   16afa:	48 39 fe             	cmp    %rdi,%rsi
+   16afd:	0f 96 c1             	setbe  %cl
+   16b00:	84 c8                	test   %cl,%al
+   16b02:	74 09                	je     16b0d <__rustc::__rdl_alloc+0x1d>
+   16b04:	48 89 d7             	mov    %rdx,%rdi
+   16b07:	ff 25 63 37 04 00    	jmp    *0x43763(%rip)        # 5a270 <malloc@GLIBC_2.2.5>
+   16b0d:	55                   	push   %rbp
+   16b0e:	48 89 e5             	mov    %rsp,%rbp
+   16b11:	48 83 ec 10          	sub    $0x10,%rsp
+   16b15:	48 c7 45 f8 00 00 00 	movq   $0x0,-0x8(%rbp)
+   16b1c:	00 
+   16b1d:	48 83 fe 09          	cmp    $0x9,%rsi
+   16b21:	b8 08 00 00 00       	mov    $0x8,%eax
+   16b26:	48 0f 43 c6          	cmovae %rsi,%rax
+   16b2a:	48 8d 7d f8          	lea    -0x8(%rbp),%rdi
+   16b2e:	48 89 c6             	mov    %rax,%rsi
+   16b31:	ff 15 41 37 04 00    	call   *0x43741(%rip)        # 5a278 <posix_memalign@GLIBC_2.2.5>
+   16b37:	85 c0                	test   %eax,%eax
+   16b39:	75 0a                	jne    16b45 <__rustc::__rdl_alloc+0x55>
+   16b3b:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+   16b3f:	48 83 c4 10          	add    $0x10,%rsp
+   16b43:	5d                   	pop    %rbp
+   16b44:	c3                   	ret
+   16b45:	31 c0                	xor    %eax,%eax
+   16b47:	48 83 c4 10          	add    $0x10,%rsp
+   16b4b:	5d                   	pop    %rbp
+   16b4c:	c3                   	ret
+   16b4d:	cc                   	int3
+   16b4e:	cc                   	int3
+   16b4f:	cc                   	int3
+
+0000000000016b50 <__rustc::__rdl_dealloc>:
+   16b50:	ff 25 2a 37 04 00    	jmp    *0x4372a(%rip)        # 5a280 <free@GLIBC_2.2.5>
+   16b56:	cc                   	int3
+   16b57:	cc                   	int3
+   16b58:	cc                   	int3
+   16b59:	cc                   	int3
+   16b5a:	cc                   	int3
+   16b5b:	cc                   	int3
+   16b5c:	cc                   	int3
+   16b5d:	cc                   	int3
+   16b5e:	cc                   	int3
+   16b5f:	cc                   	int3
+
+0000000000016b60 <__rustc::__rdl_realloc>:
+   16b60:	55                   	push   %rbp
+   16b61:	48 89 e5             	mov    %rsp,%rbp
+   16b64:	41 57                	push   %r15
+   16b66:	41 56                	push   %r14
+   16b68:	41 54                	push   %r12
+   16b6a:	53                   	push   %rbx
+   16b6b:	48 83 ec 10          	sub    $0x10,%rsp
+   16b6f:	48 89 cb             	mov    %rcx,%rbx
+   16b72:	48 83 fa 11          	cmp    $0x11,%rdx
+   16b76:	0f 92 c0             	setb   %al
+   16b79:	48 39 ca             	cmp    %rcx,%rdx
+   16b7c:	0f 96 c1             	setbe  %cl
+   16b7f:	84 c8                	test   %cl,%al
+   16b81:	74 15                	je     16b98 <__rustc::__rdl_realloc+0x38>
+   16b83:	48 89 de             	mov    %rbx,%rsi
+   16b86:	48 83 c4 10          	add    $0x10,%rsp
+   16b8a:	5b                   	pop    %rbx
+   16b8b:	41 5c                	pop    %r12
+   16b8d:	41 5e                	pop    %r14
+   16b8f:	41                   	rex.B
+
+===== run_opaque address=0x0000000000016990 =====
+
+boundary_probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000016990 <run_opaque>:
+   16990:	55                   	push   %rbp
+   16991:	41 57                	push   %r15
+   16993:	41 56                	push   %r14
+   16995:	41 55                	push   %r13
+   16997:	41 54                	push   %r12
+   16999:	53                   	push   %rbx
+   1699a:	50                   	push   %rax
+   1699b:	48 85 f6             	test   %rsi,%rsi
+   1699e:	74 35                	je     169d5 <run_opaque+0x45>
+   169a0:	4c 8b 2d 01 38 04 00 	mov    0x43801(%rip),%r13        # 5a1a8 <_DYNAMIC+0x230>
+   169a7:	89 d3                	mov    %edx,%ebx
+   169a9:	49 89 f6             	mov    %rsi,%r14
+   169ac:	49 89 ff             	mov    %rdi,%r15
+   169af:	45 31 e4             	xor    %r12d,%r12d
+   169b2:	31 ed                	xor    %ebp,%ebp
+   169b4:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+   169bb:	00 00 00 00 00 
+   169c0:	43 8b 3c a7          	mov    (%r15,%r12,4),%edi
+   169c4:	89 de                	mov    %ebx,%esi
+   169c6:	41 ff d5             	call   *%r13
+   169c9:	01 c5                	add    %eax,%ebp
+   169cb:	49 ff c4             	inc    %r12
+   169ce:	4d 39 e6             	cmp    %r12,%r14
+   169d1:	75 ed                	jne    169c0 <run_opaque+0x30>
+   169d3:	eb 02                	jmp    169d7 <run_opaque+0x47>
+   169d5:	31 ed                	xor    %ebp,%ebp
+   169d7:	89 e8                	mov    %ebp,%eax
+   169d9:	48 83 c4 08          	add    $0x8,%rsp
+   169dd:	5b                   	pop    %rbx
+   169de:	41 5c                	pop    %r12
+   169e0:	41 5d                	pop    %r13
+   169e2:	41 5e                	pop    %r14
+   169e4:	41 5f                	pop    %r15
+   169e6:	5d                   	pop    %rbp
+   169e7:	c3                   	ret
+   169e8:	cc                   	int3
+   169e9:	cc                   	int3
+   169ea:	cc                   	int3
+   169eb:	cc                   	int3
+   169ec:	cc                   	int3
+   169ed:	cc                   	int3
+   169ee:	cc                   	int3
+   169ef:	cc                   	int3
+
+00000000000169f0 <main>:
+   169f0:	50                   	push   %rax
+   169f1:	48 89 f1             	mov    %rsi,%rcx
+   169f4:	48 63 d7             	movslq %edi,%rdx
+   169f7:	48 8d 05 32 ec ff ff 	lea    -0x13ce(%rip),%rax        # 15630 <boundary_probe::main>
+   169fe:	48 8d 35 c3 15 04 00 	lea    0x415c3(%rip),%rsi        # 57fc8 <__dso_handle+0x38>
+   16a05:	48 89 e7             	mov    %rsp,%rdi
+   16a08:	45 31 c0             	xor    %r8d,%r8d
+   16a0b:	48 89 04 24          	mov    %rax,(%rsp)
+   16a0f:	ff 15 0b 38 04 00    	call   *0x4380b(%rip)        # 5a220 <_DYNAMIC+0x2a8>
+   16a15:	59                   	pop    %rcx
+   16a16:	c3                   	ret
+   16a17:	cc                   	int3
+   16a18:	cc                   	int3
+   16a19:	cc                   	int3
+   16a1a:	cc                   	int3
+   16a1b:	cc                   	int3
+   16a1c:	cc                   	int3
+   16a1d:	cc                   	int3
+   16a1e:	cc                   	int3
+   16a1f:	cc                   	int3
+
+0000000000016a20 <__rustc::__rust_alloc>:
+   16a20:	e9 cb 00 00 00       	jmp    16af0 <__rustc::__rdl_alloc>
+   16a25:	cc                   	int3
+   16a26:	cc                   	int3
+   16a27:	cc                   	int3
+   16a28:	cc                   	int3
+   16a29:	cc                   	int3
+   16a2a:	cc                   	int3
+   16a2b:	cc                   	int3
+   16a2c:	cc                   	int3
+   16a2d:	cc                   	int3
+   16a2e:	cc                   	int3
+   16a2f:	cc                   	int3
+
+0000000000016a30 <__rustc::__rust_dealloc>:
+   16a30:	e9 1b 01 00 00       	jmp    16b50 <__rustc::__rdl_dealloc>
+   16a35:	cc                   	int3
+   16a36:	cc                   	int3
+   16a37:	cc                   	int3
+   16a38:	cc                   	int3
+   16a39:	cc                   	int3
+   16a3a:	cc                   	int3
+   16a3b:	cc                   	int3
+   16a3c:	cc                   	int3
+   16a3d:	cc                   	int3
+   16a3e:	cc                   	int3
+   16a3f:	cc                   	int3
+
+0000000000016a40 <__rustc::__rust_realloc>:
+   16a40:	e9 1b 01 00 00       	jmp    16b60 <__rustc::__rdl_realloc>
+   16a45:	cc                   	int3
+   16a46:	cc                   	int3
+   16a47:	cc                   	int3
+   16a48:	cc                   	int3
+   16a49:	cc                   	int3
+   16a4a:	cc                   	int3
+   16a4b:	cc                   	int3
+   16a4c:	cc                   	int3
+   16a4d:	cc                   	int3
+   16a4e:	cc                   	int3
+   16a4f:	cc                   	int3
+
+0000000000016a50 <__rustc::__rust_alloc_zeroed>:
+   16a50:	e9 0b 03 00 00       	jmp    16d60 <__rustc::__rdl_alloc_zeroed>
+   16a55:	cc                   	int3
+   16a56:	cc                   	int3
+   16a57:	cc                   	int3
+   16a58:	cc                   	int3
+   16a59:	cc                   	int3
+   16a5a:	cc                   	int3
+   16a5b:	cc                   	int3
+   16a5c:	cc                   	int3
+   16a5d:	cc                   	int3
+   16a5e:	cc                   	int3
+   16a5f:	cc                   	int3
+
+0000000000016a60 <__rustc::__rust_alloc_error_handler_should_panic_v2>:
+   16a60:	31 c0                	xor    %eax,%eax
+   16a62:	c3                   	ret
+   16a63:	cc                   	int3
+   16a64:	cc                   	int3
+   16a65:	cc                   	int3
+   16a66:	cc                   	int3
+   16a67:	cc                   	int3
+   16a68:	cc                   	int3
+   16a69:	cc                   	int3
+   16a6a:	cc                   	int3
+   16a6b:	cc                   	int3
+   16a6c:	cc                   	int3
+   16a6d:	cc                   	int3
+   16a6e:	cc                   	int3
+   16a6f:	cc                   	int3
+
+0000000000016a70 <__rustc::__rust_no_alloc_shim_is_unstable_v2>:
+   16a70:	c3                   	ret
+   16a71:	cc                   	int3
+   16a72:	cc                   	int3
+   16a73:	cc                   	int3
+   16a74:	cc                   	int3
+   16a75:	cc                   	int3
+   16a76:	cc                   	int3
+   16a77:	cc                   	int3
+   16a78:	cc                   	int3
+   16a79:	cc                   	int3
+   16a7a:	cc                   	int3
+   16a7b:	cc                   	int3
+   16a7c:	cc                   	int3
+   16a7d:	cc                   	int3
+   16a7e:	cc                   	int3
+   16a7f:	cc                   	int3
+
+0000000000016a80 <topic16_opaque_mix>:
+   16a80:	31 f7                	xor    %esi,%edi
+   16a82:	c4 e3 7b f0 c7 1b    	rorx   $0x1b,%edi,%eax
+   16a88:	81 f7 b9 79 37 9e    	xor    $0x9e3779b9,%edi
+   16a8e:	01 f8                	add    %edi,%eax
+   16a90:	c3                   	ret
+   16a91:	cc                   	int3
+   16a92:	cc                   	int3
+   16a93:	cc                   	int3
+   16a94:	cc                   	int3
+   16a95:	cc                   	int3
+   16a96:	cc                   	int3
+   16a97:	cc                   	int3
+   16a98:	cc                   	int3
+   16a99:	cc                   	int3
+   16a9a:	cc                   	int3
+   16a9b:	cc                   	int3
+   16a9c:	cc                   	int3
+   16a9d:	cc                   	int3
+   16a9e:	cc                   	int3
+   16a9f:	cc                   	int3
+
+0000000000016aa0 <__rustc::rust_panic>:
+   16aa0:	55                   	push   %rbp
+   16aa1:	48 89 e5             	mov    %rsp,%rbp
+   16aa4:	48 83 ec 20          	sub    $0x20,%rsp
+   16aa8:	ff 15 ea 36 04 00    	call   *0x436ea(%rip)        # 5a198 <_DYNAMIC+0x220>
+   16aae:	89 45 f8             	mov    %eax,-0x8(%rbp)
+   16ab1:	48 8d 45 f8          	lea    -0x8(%rbp),%rax
+   16ab5:	48 89 45 e0          	mov    %rax,-0x20(%rbp)
+   16ab9:	48 8b 05 48 37 04 00 	mov    0x43748(%rip),%rax        # 5a208 <_DYNAMIC+0x290>
+   16ac0:	48 89 45 e8          	mov    %rax,-0x18(%rbp)
+   16ac4:	48 8d 35 26 20 ff ff 	lea    -0xdfda(%rip),%rsi        # 8af1 <GCC_except_table386+0xa91>
+   16acb:	48 8d 7d ff          	lea    -0x1(%rbp),%rdi
+   16acf:	48 8d 55 e0          	lea    -0x20(%rbp),%rdx
+   16ad3:	e8 f8 b1 00 00       	call   21cd0 <std::io::Write::write_fmt>
+   16ad8:	48 89 45 f0          	mov    %rax,-0x10(%rbp)
+   16adc:	48 8d 7d f0          	lea    -0x10(%rbp),%rdi
+   16ae0:	e8 eb 4b 01 00       	call   2b6d0 <core::ptr::drop_in_place<core::result::Result<(),std::io::error::Error>>>
+   16ae5:	ff 15 7d 37 04 00    	call   *0x4377d(%rip)        # 5a268 <_DYNAMIC+0x2f0>
+   16aeb:	cc                   	int3
+   16aec:	cc                   	int3
+   16aed:	cc                   	int3
+   16aee:	cc                   	int3
+   16aef:	cc                   	int3
+
+0000000000016af0 <__rustc::__rdl_alloc>:
+   16af0:	48 89 fa             	mov    %rdi,%rdx
+   16af3:	48 83 fe 11          	cmp    $0x11,%rsi
+   16af7:	0f 92 c0             	setb   %al
+   16afa:	48 39 fe             	cmp    %rdi,%rsi
+   16afd:	0f 96 c1             	setbe  %cl
+   16b00:	84 c8                	test   %cl,%al
+   16b02:	74 09                	je     16b0d <__rustc::__rdl_alloc+0x1d>
+   16b04:	48 89 d7             	mov    %rdx,%rdi
+   16b07:	ff 25 63 37 04 00    	jmp    *0x43763(%rip)        # 5a270 <malloc@GLIBC_2.2.5>
+   16b0d:	55                   	push   %rbp
+   16b0e:	48 89 e5             	mov    %rsp,%rbp
+   16b11:	48 83 ec 10          	sub    $0x10,%rsp
+   16b15:	48 c7 45 f8 00 00 00 	movq   $0x0,-0x8(%rbp)
+   16b1c:	00 
+   16b1d:	48 83 fe 09          	cmp    $0x9,%rsi
+   16b21:	b8 08 00 00 00       	mov    $0x8,%eax
+   16b26:	48 0f 43 c6          	cmovae %rsi,%rax
+   16b2a:	48 8d 7d f8          	lea    -0x8(%rbp),%rdi
+   16b2e:	48 89 c6             	mov    %rax,%rsi
+   16b31:	ff 15 41 37 04 00    	call   *0x43741(%rip)        # 5a278 <posix_memalign@GLIBC_2.2.5>
+   16b37:	85 c0                	test   %eax,%eax
+   16b39:	75 0a                	jne    16b45 <__rustc::__rdl_alloc+0x55>
+   16b3b:	48 8b 45 f8          	mov    -0x8(%rbp),%rax
+   16b3f:	48 83 c4 10          	add    $0x10,%rsp
+   16b43:	5d                   	pop    %rbp
+   16b44:	c3                   	ret
+   16b45:	31 c0                	xor    %eax,%eax
+   16b47:	48 83 c4 10          	add    $0x10,%rsp
+   16b4b:	5d                   	pop    %rbp
+   16b4c:	c3                   	ret
+   16b4d:	cc                   	int3
+   16b4e:	cc                   	int3
+   16b4f:	cc                   	int3
+
+0000000000016b50 <__rustc::__rdl_dealloc>:
+   16b50:	ff 25 2a 37 04 00    	jmp    *0x4372a(%rip)        # 5a280 <free@GLIBC_2.2.5>
+   16b56:	cc                   	int3
+   16b57:	cc                   	int3
+   16b58:	cc                   	int3
+   16b59:	cc                   	int3
+   16b5a:	cc                   	int3
+   16b5b:	cc                   	int3
+   16b5c:	cc                   	int3
+   16b5d:	cc                   	int3
+   16b5e:	cc                   	int3
+   16b5f:	cc                   	int3
+
+0000000000016b60 <__rustc::__rdl_realloc>:
+   16b60:	55                   	push   %rbp
+   16b61:	48 89 e5             	mov    %rsp,%rbp
+   16b64:	41 57                	push   %r15
+   16b66:	41 56                	push   %r14
+   16b68:	41 54                	push   %r12
+   16b6a:	53                   	push   %rbx
+   16b6b:	48 83 ec 10          	sub    $0x10,%rsp
+   16b6f:	48 89 cb             	mov    %rcx,%rbx
+   16b72:	48 83 fa 11          	cmp    $0x11,%rdx
+   16b76:	0f 92 c0             	setb   %al
+   16b79:	48 39 ca             	cmp    %rcx,%rdx
+   16b7c:	0f 96 c1             	setbe  %cl
+   16b7f:	84 c8                	test   %cl,%al
+   16b81:	74 15                	je     16b98 <__rustc::__rdl_realloc+0x38>
+   16b83:	48 89 de             	mov    %rbx,%rsi
+   16b86:	48 83 c4 10          	add    $0x10,%rsp
+   16b8a:	5b                   	pop    %rbx
+   16b8b:	41 5c                	pop    %r12
+   16b8d:	41 5e                	pop    %r14
+   16b8f:	41 5f                	pop    %r15
+   16b91:	5d                   	pop    %rbp
+   16b92:	ff 25 f0 36 04 00    	jmp    *0x436f0(%rip)        # 5a288 <realloc@GLIBC_2.2.5>
+   16b98:	49 89 f6             	mov    %rsi,%r14
+   16b9b:	49 89 fc             	mov    %rdi,%r12
+   16b9e:	48 c7 45 d8 00 00 00 	movq   $0x0,-0x28(%rbp)
+   16ba5:	00 
+   16ba6:	48 83 fa 09          	cmp    $0x9,%rdx
+   16baa:	be 08 00 00 00       	mov    $0x8,%esi
+   16baf:	48 0f 43 f2          	cmovae %rdx,%rsi
+   16bb3:	48 8d 7d d8          	lea    -0x28(%rbp),%rdi
+   16bb7:	48 89 da             	mov    %rbx,%rdx
+   16bba:	ff 15 b8 36 04 00    	call   *0x436b8(%rip)        # 5a278 <posix_memalign@GLIBC_2.2.5>
+   16bc0:	85 c0                	test   %eax,%eax
+   16bc2:	0f 95 c0             	setne  %al
+   16bc5:	4c 8b 7d d8          	mov    -0x28(%rbp),%r15
+   16bc9:	4d 85 ff             	test   %r15,%r15
+   16bcc:	0f 94 c1             	sete   %cl
+   16bcf:	08 c1                	or     %al,%cl
+   16bd1:	74 05                	je     16bd8 <__rustc::__rdl_realloc+0x78>
+   16bd3:	45 31 ff             	xor    %r15d,%r15d
+   16bd6:	eb 1f                	jmp    16bf7 <__rustc::__rdl_realloc+0x97>
+   16bd8:	4c 39 f3             	cmp    %r14,%rbx
+   16bdb:	4c 0f 42 f3          	cmovb  %rbx,%r14
+   16bdf:	4c 89 ff             	mov    %r15,%rdi
+   16be2:	4c 89 e6             	mov    %r12,%rsi
+   16be5:	4c 89 f2             	mov    %r14,%rdx
+   16be8:	ff 15 a2 36 04 00    	call   *0x436a2(%rip)        # 5a290 <memcpy@GLIBC_2.14>
+   16bee:	4c 89 e7             	mov    %r12,%rdi
+   16bf1:	ff 15 89 36 04 00    	call   *0x43689(%rip)        # 5a280 <free@GLIBC_2.2.5>
+   16bf7:	4c 89 f8             	mov    %r15,%rax
+   16bfa:	48 83 c4 10          	add    $0x10,%rsp
+   16bfe:	5b                   	pop    %rbx
+   16bff:	41 5c                	pop    %r12
+   16c01:	41 5e                	pop    %r14
+   16c03:	41 5f                	pop    %r15
+   16c05:	5d                   	pop    %rbp
+   16c06:	c3                   	ret
+   16c07:	cc                   	int3
+   16c08:	cc                   	int3
+   16c09:	cc                   	int3
+   16c0a:	cc                   	int3
+   16c0b:	cc                   	int3
+   16c0c:	cc                   	int3
+   16c0d:	cc                   	int3
+   16c0e:	cc                   	int3
+   16c0f:	cc                   	int3
+
+0000000000016c10 <__rustc::__rust_drop_panic>:
+   16c10:	55                   	push   %rbp
+   16c11:	48 89 e5             	mov    %rsp,%rbp
+   16c14:	41 57                	push   %r15
+   16c16:	41 56                	push   %r14
+   16c18:	41 54                	push   %r12
+   16c1a:	53                   	push   %rbx
+   16c1b:	bb 3c 00 00 00       	mov    $0x3c,%ebx
+   16c20:	4c 8d 35 b5 41 ff ff 	lea    -0xbe4b(%rip),%r14        # addc <GCC_except_table386+0x2d7c>
+   16c27:	4c 8b 3d 6a 36 04 00 	mov    0x4366a(%rip),%r15        # 5a298 <write@GLIBC_2.2.5>
+   16c2e:	4c 8b 25 6b 36 04 00 	mov    0x4366b(%rip),%r12        # 5a2a0 <__errno_location@GLIBC_2.2.5>
+   16c35:	eb 1a                	jmp    16c51 <__rustc::__rust_drop_panic+0x41>
+   16c37:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+   16c3e:	00 00 
+   16c40:	41 ff d4             	call   *%r12
+   16c43:	48 63 00             	movslq (%rax),%rax
+   16c46:	48 83 f8 04          	cmp    $0x4,%rax
+   16c4a:	75 54                	jne    16ca0 <__rustc::__rust_drop_panic+0x90>
+   16c4c:	48 85 db             	test   %rbx,%rbx
+   16c4f:	74 61                	je     16cb2 <__rustc::__rust_drop_panic+0xa2>
+   16c51:	bf 02 00 00 00       	mov    $0x2,%edi
+   16c56:	4c 89 f6             	mov    %r14,%rsi
+   16c59:	48 89 da             	mov    %rbx,%rdx
+   16c5c:	41 ff d7             	call   *%r15
+   16c5f:	48 83 f8 ff          	cmp    $0xffffffffffffffff,%rax
+   16c63:	74 db                	je     16c40 <__rustc::__rust_drop_panic+0x30>
+   16c65:	48 85 c0             	test   %rax,%rax
+   16c68:	74 2d                	je     16c97 <__rustc::__rust_drop_panic+0x87>
+   16c6a:	48 89 d9             	mov    %rbx,%rcx
+   16c6d:	48 29 c1             	sub    %rax,%rcx
+   16c70:	72 0d                	jb     16c7f <__rustc::__rust_drop_panic+0x6f>
+   16c72:	49 01 c6             	add    %rax,%r14
+   16c75:	48 89 cb             	mov    %rcx,%rbx
+   16c78:	48 85 db             	test   %rbx,%rbx
+   16c7b:	75 d4                	jne    16c51 <__rustc::__rust_drop_panic+0x41>
+   16c7d:	eb 33                	jmp    16cb2 <__rustc::__rust_drop_panic+0xa2>
+   16c7f:	48 8d 0d ca 15 04 00 	lea    0x415ca(%rip),%rcx        # 58250 <__dso_handle+0x2c0>
+   16c86:	48 89 c7             	mov    %rax,%rdi
+   16c89:	48 89 de             	mov    %rbx,%rsi
+   16c8c:	48 89 da             	mov    %rbx,%rdx
+   16c8f:	ff 15 13 36 04 00    	call   *0x43613(%rip)        # 5a2a8 <_DYNAMIC+0x330>
+   16c95:	0f 0b                	ud2
+   16c97:	48 8d 05 9a 15 04 00 	lea    0x4159a(%rip),%rax        # 58238 <__dso_handle+0x2a8>
+   16c9e:	eb 08                	jmp    16ca8 <__rustc::__rust_drop_panic+0x98>
+   16ca0:	48 c1 e0 20          	shl    $0x20,%rax
+   16ca4:	48 83 c8 02          	or     $0x2,%rax
+   16ca8:	89 c1                	mov    %eax,%ecx
+   16caa:	83 e1 03             	and    $0x3,%ecx
+   16cad:	83 f9 01             	cmp    $0x1,%ecx
+   16cb0:	74 06                	je     16cb8 <__rustc::__rust_drop_panic+0xa8>
+   16cb2:	ff 15 b0 35 04 00    	call   *0x435b0(%rip)        # 5a268 <_DYNAMIC+0x2f0>
+   16cb8:	48 8d 58 ff          	lea    -0x1(%rax),%rbx
+   16cbc:	4c 8b 70 ff          	mov    -0x1(%rax),%r14
+   16cc0:	4c 8b 78 07          	mov    0x7(%rax),%r15
+   16cc4:	49 8b 07             	mov    (%r15),%rax
+   16cc7:	48 85 c0             	test   %rax,%rax
+   16cca:	74 05                	je     16cd1 <__rustc::__rust_drop_panic+0xc1>
+   16ccc:	4c 89 f7             	mov    %r14,%rdi
+   16ccf:	ff d0                	call   *%rax
+   16cd1:	49 8b 77 08          	mov    0x8(%r15),%rsi
+   16cd5:	48 85 f6             	test   %rsi,%rsi
+   16cd8:	74 0d                	je     16ce7 <__rustc::__rust_drop_panic+0xd7>
+   16cda:	49 8b 57 10          	mov    0x10(%r15),%rdx
+   16cde:	4c 89 f7             	mov    %r14,%rdi
+   16ce1:	ff 15 d9 34 04 00    	call   *0x434d9(%rip)        # 5a1c0 <_DYNAMIC+0x248>
+   16ce7:	be 18 00 00 00       	mov    $0x18,%esi
+   16cec:	ba 08 00 00 00       	mov    $0x8,%edx
+   16cf1:	48 89 df             	mov    %rbx,%rdi
+   16cf4:	ff 15 c6 34 04 00    	call   *0x434c6(%rip)        # 5a1c0 <_DYNAMIC+0x248>
+   16cfa:	ff 15 68 35 04 00    	call   *0x43568(%rip)        # 5a268 <_DYNAMIC+0x2f0>
+   16d00:	49 8b 77 08          	mov    0x8(%r15),%rsi
+   16d04:	48 85 f6             	test   %rsi,%rsi
+   16d07:	74 0d                	je     16d16 <__rustc::__rust_drop_panic+0x106>
+   16d09:	49 8b 57 10          	mov    0x10(%r15),%rdx
+   16d0d:	4c 89 f7             	mov    %r14,%rdi
+   16d10:	ff 15 aa 34 04 00    	call   *0x434aa(%rip)        # 5a1c0 <_DYNAMIC+0x248>
+   16d16:	be 18 00 00 00       	mov    $0x18,%esi
+   16d1b:	ba 08 00 00 00       	mov    $0x8,%edx
+   16d20:	48 89 df             	mov    %rbx,%rdi
+   16d23:	ff 15 97 34 04 00    	call   *0x43497(%rip)        # 5a1c0 <_DYNAMIC+0x248>
+   16d29:	ff 15 81 35 04 00    	call   *0x43581(%rip)        # 5a2b0 <_DYNAMIC+0x338>
+   16d2f:	ff 15 7b 35 04 00    	call   *0x4357b(%rip)        # 5a2b0 <_DYNAMIC+0x338>
+   16d35:	cc                   	int3
+   16d36:	cc                   	int3
+   16d37:	cc                   	int3
+   16d38:	cc                   	int3
+   16d39:	cc                   	int3
+   16d3a:	cc                   	int3
+   16d3b:	cc                   	int3
+   16d3c:	cc                   	int3
+   16d3d:	cc                   	int3
+   16d3e:	cc                   	int3
+   16d3f:	cc                   	int3
+
+0000000000016d40 <__rustc::rust_begin_unwind>:
+   16d40:	55                   	push   %rbp
+   16d41:	48 89 e5             	mov    %rsp,%rbp
+   16d44:	48 83 ec 20          	sub    $0x20,%rsp
+   16d48:	0f 10 07             	movups (%rdi),%xmm0
+   16d4b:	0f 11 45 e8          	movups %xmm0,-0x18(%rbp)
+   16d4f:	48 89 7d f8          	mov    %rdi,-0x8(%rbp)
+   16d53:	48 8d 7d e8          	lea    -0x18(%rbp),%rdi
+   16d57:	ff 15 5b 35 04 00    	call   *0x4355b(%rip)        # 5a2b8 <_DYNAMIC+0x340>
+   16d5d:	cc                   	int3
+   16d5e:	cc                   	int3
+   16d5f:	cc                   	int3
+
+0000000000016d60 <__rustc::__rdl_alloc_zeroed>:
+   16d60:	55                   	push   %rbp
+   16d61:	48 89 e5             	mov    %rsp,%rbp
+   16d64:	41 56                	push   %r14
+   16d66:	53                   	push   %rbx
+   16d67:	48 83 ec 10          	sub    $0x10,%rsp
+   16d6b:	48 89 fb             	mov    %rdi,%rbx
+   16d6e:	48 83 fe 11          	cmp    $0x11,%rsi
+   16d72:	0f 92 c0             	setb   %al
+   16d75:	48 39 fe             	cmp    %rdi,%rsi
+   16d78:	0f 96 c1             	setbe  %cl
+   16d7b:	84 c8                	test   %cl,%al
+   16d7d:	74 16                	je     16d95 <__rustc::__rdl_alloc_zeroed+0x35>
+   16d7f:	be 01 00 00 00       	mov    $0x1,%esi
+   16d84:	48 89 df             	mov    %rbx,%rdi
+   16d87:	48 83 c4 10          	add    $0x10,%rsp
+   16d8b:	5b                   	pop    %rbx
+   16d8c:	41 5e                	pop    %r14
+   16d8e:	5d                   	pop    %rbp
+   16d8f:	ff                   	.byte 0xff
