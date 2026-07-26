@@ -152,9 +152,14 @@ source_file_scan=(rg --files -uu -g '!.git' -g '!target')
 manifest_source_files() {
     (
         cd "$repo_root"
+        # `rg --files` emits bare relative paths, so a repository file named
+        # like an option would be consumed as one. `sha256sum --help` in
+        # particular prints usage and exits 0, which would put help text in
+        # both manifests, satisfy the before/after `cmp`, and leave `set -e`
+        # nothing to catch. Terminate options first.
         "${source_file_scan[@]}" -0 \
             | sort -z \
-            | xargs -0 sha256sum
+            | xargs -0 sha256sum --
     )
 }
 
@@ -165,6 +170,33 @@ manifest_source_files() {
 # a `git-checkout` source that cannot reproduce it. Require every manifested
 # path to be described by the commit.
 if [[ "$source_commit_verification" == git-checkout ]]; then
+    # `rg --files -uu` lists regular files: it does not follow symbolic links
+    # and cannot descend into a submodule, while Cargo does both. Such an entry
+    # is absent from the manifest and from the tracked-path loop below, which
+    # iterates the scan's own output and so cannot observe its own omissions.
+    unmanifestable_entry="$(
+        git -C "$repo_root" ls-files -s | rg -m 1 -v '^(100644|100755) ' || true
+    )"
+    if [[ -n "$unmanifestable_entry" ]]; then
+        printf 'tracked entry cannot be manifested (symbolic link or submodule): %s\n' \
+            "$unmanifestable_entry" >&2
+        exit 2
+    fi
+
+    # The index can be told to lie about the working tree:
+    # `git update-index --assume-unchanged` leaves `git status --porcelain`
+    # empty after an edit while `git ls-files` still calls the path tracked, so
+    # the bundle would attribute edited bytes to HEAD. `ls-files -v` lowercases
+    # the tag letter for assume-unchanged and reports `S` for skip-worktree.
+    flagged_index_entry="$(
+        git -C "$repo_root" ls-files -v | rg -m 1 '^[a-zS] ' || true
+    )"
+    if [[ -n "$flagged_index_entry" ]]; then
+        printf 'index flag hides working-tree state from the cleanliness gate: %s\n' \
+            "$flagged_index_entry" >&2
+        exit 2
+    fi
+
     declare -A tracked_source_files=()
     while IFS= read -r -d '' tracked_path; do
         tracked_source_files["$tracked_path"]=1
@@ -362,7 +394,7 @@ if [[ -n "$(find "$output_dir" -type l -print -quit)" ]]; then
 fi
 (
     cd "$output_dir"
-    rg --files -uu -0 . | sort -z | xargs -0 sha256sum
+    rg --files -uu -0 . | sort -z | xargs -0 sha256sum --
 ) >"$evidence_manifest_tmp"
 mv -- "$evidence_manifest_tmp" "$output_dir/evidence.sha256"
 

@@ -16,6 +16,12 @@ if [[ ! -x "$binary" ]]; then
     printf 'binary is not executable: %s\n' "$binary" >&2
     exit 2
 fi
+# `subprocess.run` execs through PATH when the program name contains no slash,
+# so a bare basename that satisfies the check above would either fail to spawn
+# or measure a different same-named program found on PATH. Anchor it.
+if [[ "$binary" != /* ]]; then
+    binary="$(cd -- "$(dirname -- "$binary")" && pwd -P)/$(basename -- "$binary")"
+fi
 
 cpus_allowed() {
     awk '/^Cpus_allowed_list:/ {print $2; exit}' /proc/self/status 2>/dev/null
