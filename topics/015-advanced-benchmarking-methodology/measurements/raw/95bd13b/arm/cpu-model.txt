@@ -1,0 +1,7 @@
+utc=2026-07-25T16:54:15Z
+product_name=c7g.16xlarge
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x1
+CPU part	: 0xd40
+CPU revision	: 1

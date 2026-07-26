@@ -1,0 +1,7 @@
+utc=2026-07-25T16:54:16Z
+product_name=c7a.32xlarge
+vendor_id	: AuthenticAMD
+cpu family	: 25
+model		: 17
+model name	: AMD EPYC 9R14
+stepping	: 1

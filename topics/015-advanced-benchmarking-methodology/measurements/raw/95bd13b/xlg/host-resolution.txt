@@ -1,0 +1,7 @@
+former_host_probe_local_time=2026-07-25T10:22:59-07:00
+former_host=redacted-former-xlg-host
+former_host_exit_status=255
+former_host_observation=remote-access proxy refused the connection and could not resolve the specified host
+xlg_probe_utc=2026-07-25T17:23:17Z
+xlg_resolved_host=redacted-xlg-host
+xlg_resolved_architecture=x86_64

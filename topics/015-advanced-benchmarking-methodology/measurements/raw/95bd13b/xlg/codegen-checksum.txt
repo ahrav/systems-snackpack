@@ -1,0 +1,113 @@
+1062-   1630a:	41 5e                	pop    %r14
+1063-   1630c:	41 5f                	pop    %r15
+1064-   1630e:	5d                   	pop    %rbp
+1065-   1630f:	c3                   	ret
+1066-   16310:	4c 8d 0d c1 13 04 00 	lea    0x413c1(%rip),%r9        # 576d8 <__dso_handle+0x38>
+1067-   16317:	48 8d 74 24 18       	lea    0x18(%rsp),%rsi
+1068-   1631c:	48 8d 54 24 20       	lea    0x20(%rsp),%rdx
+1069-   16321:	31 ff                	xor    %edi,%edi
+1070-   16323:	31 c9                	xor    %ecx,%ecx
+1071-   16325:	ff 15 ad 35 04 00    	call   *0x435ad(%rip)        # 598d8 <_DYNAMIC+0x2f0>
+1072-   1632b:	cc                   	int3
+1073-   1632c:	cc                   	int3
+1074-   1632d:	cc                   	int3
+1075-   1632e:	cc                   	int3
+1076-   1632f:	cc                   	int3
+1077-
+1078:0000000000016330 <advanced_benchmarking_methodology::checksum>:
+1079-   16330:	48 85 f6             	test   %rsi,%rsi
+1080:   16333:	74 1c                	je     16351 <advanced_benchmarking_methodology::checksum+0x21>
+1081-   16335:	48 8d 04 f5 00 00 00 	lea    0x0(,%rsi,8),%rax
+1082-   1633c:	00
+1083-   1633d:	48 83 c0 f8          	add    $0xfffffffffffffff8,%rax
+1084-   16341:	48 83 f8 18          	cmp    $0x18,%rax
+1085:   16345:	73 0d                	jae    16354 <advanced_benchmarking_methodology::checksum+0x24>
+1086-   16347:	31 c0                	xor    %eax,%eax
+1087-   16349:	49 89 f9             	mov    %rdi,%r9
+1088:   1634c:	e9 01 01 00 00       	jmp    16452 <advanced_benchmarking_methodology::checksum+0x122>
+1089-   16351:	31 c0                	xor    %eax,%eax
+1090-   16353:	c3                   	ret
+1091-   16354:	48 89 c1             	mov    %rax,%rcx
+1092-   16357:	48 c1 e9 03          	shr    $0x3,%rcx
+1093-   1635b:	48 ba e0 ff ff ff ff 	movabs $0x3fffffffffffffe0,%rdx
+1094-   16362:	ff ff 3f
+1095-   16365:	48 ff c1             	inc    %rcx
+1096-   16368:	48 3d f8 00 00 00    	cmp    $0xf8,%rax
+1097:   1636e:	73 0a                	jae    1637a <advanced_benchmarking_methodology::checksum+0x4a>
+1098-   16370:	45 31 c0             	xor    %r8d,%r8d
+1099-   16373:	31 c0                	xor    %eax,%eax
+1100:   16375:	e9 8f 00 00 00       	jmp    16409 <advanced_benchmarking_methodology::checksum+0xd9>
+1101-   1637a:	49 89 c8             	mov    %rcx,%r8
+1102-   1637d:	49 21 d0             	and    %rdx,%r8
+1103-   16380:	c5 f9 ef c0          	vpxor  %xmm0,%xmm0,%xmm0
+1104-   16384:	31 c0                	xor    %eax,%eax
+1105-   16386:	c5 f1 ef c9          	vpxor  %xmm1,%xmm1,%xmm1
+1106-   1638a:	c5 e9 ef d2          	vpxor  %xmm2,%xmm2,%xmm2
+1107-   1638e:	c5 e1 ef db          	vpxor  %xmm3,%xmm3,%xmm3
+1108-   16392:	66 66 66 66 66 2e 0f 	data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+1109-   16399:	1f 84 00 00 00 00 00
+1110-   163a0:	62 f1 fd 48 d4 04 c7 	vpaddq (%rdi,%rax,8),%zmm0,%zmm0
+1111-   163a7:	62 f1 f5 48 d4 4c c7 	vpaddq 0x40(%rdi,%rax,8),%zmm1,%zmm1
+1112-   163ae:	01
+1113-   163af:	62 f1 ed 48 d4 54 c7 	vpaddq 0x80(%rdi,%rax,8),%zmm2,%zmm2
+1114-   163b6:	02
+1115-   163b7:	62 f1 e5 48 d4 5c c7 	vpaddq 0xc0(%rdi,%rax,8),%zmm3,%zmm3
+1116-   163be:	03
+1117-   163bf:	48 83 c0 20          	add    $0x20,%rax
+1118-   163c3:	49 39 c0             	cmp    %rax,%r8
+1119:   163c6:	75 d8                	jne    163a0 <advanced_benchmarking_methodology::checksum+0x70>
+1120-   163c8:	62 f1 f5 48 d4 c0    	vpaddq %zmm0,%zmm1,%zmm0
+1121-   163ce:	62 f1 e5 48 d4 d2    	vpaddq %zmm2,%zmm3,%zmm2
+1122-   163d4:	62 f1 ed 48 d4 c0    	vpaddq %zmm0,%zmm2,%zmm0
+1123-   163da:	62 f3 fd 48 3b c1 01 	vextracti64x4 $0x1,%zmm0,%ymm1
+1124-   163e1:	62 f1 fd 48 d4 c1    	vpaddq %zmm1,%zmm0,%zmm0
+1125-   163e7:	c4 e3 7d 39 c1 01    	vextracti128 $0x1,%ymm0,%xmm1
+1126-   163ed:	c5 f9 d4 c1          	vpaddq %xmm1,%xmm0,%xmm0
+1127-   163f1:	c5 f9 70 c8 ee       	vpshufd $0xee,%xmm0,%xmm1
+1128-   163f6:	c5 f9 d4 c1          	vpaddq %xmm1,%xmm0,%xmm0
+1129-   163fa:	c4 e1 f9 7e c0       	vmovq  %xmm0,%rax
+1130-   163ff:	4c 39 c1             	cmp    %r8,%rcx
+1131:   16402:	74 68                	je     1646c <advanced_benchmarking_methodology::checksum+0x13c>
+1132-   16404:	f6 c1 1c             	test   $0x1c,%cl
+1133:   16407:	74 45                	je     1644e <advanced_benchmarking_methodology::checksum+0x11e>
+1134-   16409:	48 83 c2 1c          	add    $0x1c,%rdx
+1135-   1640d:	c4 e1 f9 6e c0       	vmovq  %rax,%xmm0
+1136-   16412:	48 21 ca             	and    %rcx,%rdx
+1137-   16415:	4c 8d 0c d7          	lea    (%rdi,%rdx,8),%r9
+1138-   16419:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+1139-   16420:	c4 a1 7d d4 04 c7    	vpaddq (%rdi,%r8,8),%ymm0,%ymm0
+1140-   16426:	49 83 c0 04          	add    $0x4,%r8
+1141-   1642a:	4c 39 c2             	cmp    %r8,%rdx
+1142:   1642d:	75 f1                	jne    16420 <advanced_benchmarking_methodology::checksum+0xf0>
+1143-   1642f:	c4 e3 7d 39 c1 01    	vextracti128 $0x1,%ymm0,%xmm1
+1144-   16435:	c5 f9 d4 c1          	vpaddq %xmm1,%xmm0,%xmm0
+1145-   16439:	c5 f9 70 c8 ee       	vpshufd $0xee,%xmm0,%xmm1
+1146-   1643e:	c5 f9 d4 c1          	vpaddq %xmm1,%xmm0,%xmm0
+1147-   16442:	c4 e1 f9 7e c0       	vmovq  %xmm0,%rax
+1148-   16447:	48 39 d1             	cmp    %rdx,%rcx
+1149:   1644a:	75 06                	jne    16452 <advanced_benchmarking_methodology::checksum+0x122>
+1150:   1644c:	eb 1e                	jmp    1646c <advanced_benchmarking_methodology::checksum+0x13c>
+1151-   1644e:	4e 8d 0c c7          	lea    (%rdi,%r8,8),%r9
+1152-   16452:	48 8d 0c f7          	lea    (%rdi,%rsi,8),%rcx
+1153-   16456:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+1154-   1645d:	00 00 00
+1155-   16460:	49 03 01             	add    (%r9),%rax
+1156-   16463:	49 83 c1 08          	add    $0x8,%r9
+1157-   16467:	49 39 c9             	cmp    %rcx,%r9
+1158:   1646a:	75 f4                	jne    16460 <advanced_benchmarking_methodology::checksum+0x130>
+1159-   1646c:	c5 f8 77             	vzeroupper
+1160-   1646f:	c3                   	ret
+1161-
+1162-0000000000016470 <__rustc::rust_panic>:
+1163-   16470:	55                   	push   %rbp
+1164-   16471:	48 89 e5             	mov    %rsp,%rbp
+1165-   16474:	48 83 ec 20          	sub    $0x20,%rsp
+1166-   16478:	ff 15 8a 33 04 00    	call   *0x4338a(%rip)        # 59808 <_DYNAMIC+0x220>
+1167-   1647e:	89 45 f8             	mov    %eax,-0x8(%rbp)
+1168-   16481:	48 8d 45 f8          	lea    -0x8(%rbp),%rax
+1169-   16485:	48 89 45 e0          	mov    %rax,-0x20(%rbp)
+1170-   16489:	48 8b 05 f0 33 04 00 	mov    0x433f0(%rip),%rax        # 59880 <_DYNAMIC+0x298>
+1171-   16490:	48 89 45 e8          	mov    %rax,-0x18(%rbp)
+1172-   16494:	48 8d 35 de 26 ff ff 	lea    -0xd922(%rip),%rsi        # 8b79 <GCC_except_table386+0xb6d>
+1173-   1649b:	48 8d 7d ff          	lea    -0x1(%rbp),%rdi
+1174-   1649f:	48 8d 55 e0          	lea    -0x20(%rbp),%rdx

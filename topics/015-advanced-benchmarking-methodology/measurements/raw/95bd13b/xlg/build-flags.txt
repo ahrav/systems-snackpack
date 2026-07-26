@@ -1,0 +1,5 @@
+workspace_gates=compiler defaults
+focused_build=--release -C target-cpu=native -C codegen-units=1
+focused_affinity=taskset -c 0
+source_commit=95bd13b16011d38ee325e49eeef196d03db6611e
+source_archive_sha256=ea398c0ef816f0c43d40162ee6f2c827232791817c3c9a1b083a21c03c85eece

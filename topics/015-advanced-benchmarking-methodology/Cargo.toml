@@ -1,0 +1,12 @@
+[package]
+name = "advanced-benchmarking-methodology"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[[bench]]
+name = "checksum"
+harness = false

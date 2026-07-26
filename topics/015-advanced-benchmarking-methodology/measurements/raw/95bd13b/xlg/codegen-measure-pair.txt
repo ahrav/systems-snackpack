@@ -1,0 +1,46 @@
+GOT relocation resolving both call slots:
+00000000000598c8  0000000000000008 R_X86_64_RELATIVE 16330
+
+996:0000000000016210 <advanced_benchmarking_methodology::measure_pair>:
+997-   16210:	55                   	push   %rbp
+998-   16211:	41 57                	push   %r15
+999-   16213:	41 56                	push   %r14
+1000-   16215:	41 55                	push   %r13
+1001-   16217:	41 54                	push   %r12
+1002-   16219:	53                   	push   %rbx
+1003-   1621a:	48 83 ec 48          	sub    $0x48,%rsp
+1004-   1621e:	49 89 d4             	mov    %rdx,%r12
+1005-   16221:	49 89 f5             	mov    %rsi,%r13
+1006-   16224:	48 89 fb             	mov    %rdi,%rbx
+1007-   16227:	ff 15 93 36 04 00    	call   *0x43693(%rip)        # 598c0 <_DYNAMIC+0x2d8>
+1008-   1622d:	48 89 44 24 28       	mov    %rax,0x28(%rsp)
+1009-   16232:	4c 89 6c 24 08       	mov    %r13,0x8(%rsp)
+1010-   16237:	89 54 24 30          	mov    %edx,0x30(%rsp)
+1011-   1623b:	4c 89 64 24 10       	mov    %r12,0x10(%rsp)
+1012-   16240:	48 8d 44 24 08       	lea    0x8(%rsp),%rax
+1013-   16245:	48 8b 7c 24 08       	mov    0x8(%rsp),%rdi
+1014-   1624a:	48 8b 74 24 10       	mov    0x10(%rsp),%rsi
+1015-   1624f:	ff 15 73 36 04 00    	call   *0x43673(%rip)        # 598c8 <_DYNAMIC+0x2e0>
+1016-   16255:	48 8d 7c 24 28       	lea    0x28(%rsp),%rdi
+1017-   1625a:	49 89 c6             	mov    %rax,%r14
+1018-   1625d:	48 89 44 24 18       	mov    %rax,0x18(%rsp)
+1019-   16262:	ff 15 68 36 04 00    	call   *0x43668(%rip)        # 598d0 <_DYNAMIC+0x2e8>
+1020-   16268:	49 89 c7             	mov    %rax,%r15
+1021-   1626b:	89 d5                	mov    %edx,%ebp
+1022-   1626d:	ff 15 4d 36 04 00    	call   *0x4364d(%rip)        # 598c0 <_DYNAMIC+0x2d8>
+1023-   16273:	48 89 44 24 38       	mov    %rax,0x38(%rsp)
+1024-   16278:	4c 89 6c 24 08       	mov    %r13,0x8(%rsp)
+1025-   1627d:	89 54 24 40          	mov    %edx,0x40(%rsp)
+1026-   16281:	4c 89 64 24 10       	mov    %r12,0x10(%rsp)
+1027-   16286:	48 8d 44 24 08       	lea    0x8(%rsp),%rax
+1028-   1628b:	48 8b 7c 24 08       	mov    0x8(%rsp),%rdi
+1029-   16290:	48 8b 74 24 10       	mov    0x10(%rsp),%rsi
+1030-   16295:	ff 15 2d 36 04 00    	call   *0x4362d(%rip)        # 598c8 <_DYNAMIC+0x2e0>
+1031-   1629b:	48 8d 7c 24 38       	lea    0x38(%rsp),%rdi
+1032-   162a0:	49 89 c4             	mov    %rax,%r12
+1033-   162a3:	48 89 44 24 20       	mov    %rax,0x20(%rsp)
+1034-   162a8:	ff 15 22 36 04 00    	call   *0x43622(%rip)        # 598d0 <_DYNAMIC+0x2e8>
+1035-   162ae:	4d 39 e6             	cmp    %r12,%r14
+1036-   162b1:	75 5d                	jne    16310 <advanced_benchmarking_methodology::measure_pair+0x100>
+1037-   162b3:	be 00 ca 9a 3b       	mov    $0x3b9aca00,%esi
+1038-   162b8:	89 d1                	mov    %edx,%ecx
