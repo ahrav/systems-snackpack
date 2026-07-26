@@ -69,6 +69,10 @@ if command -v taskset >/dev/null 2>&1; then
     fi
     affinity="taskset -c $cpu"
 else
+    if ((cpu_was_requested)); then
+        printf 'CPU pinning was requested but taskset is unavailable\n' >&2
+        exit 2
+    fi
     affinity="none"
 fi
 

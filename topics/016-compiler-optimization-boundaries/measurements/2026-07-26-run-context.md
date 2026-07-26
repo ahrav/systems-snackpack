@@ -30,8 +30,7 @@ literal status output.
 The requested literal target was reprobed:
 
 ```bash
-ssh -o ConnectTimeout=10 \
-  dev-dsk-ahrav-2c-b89a08b3.us-west-2.amazon.com true
+ssh -o ConnectTimeout=10 redacted-host-x86-requested true
 ```
 
 It exited 255. The substantive proxy response was:
@@ -48,8 +47,12 @@ ssh -G xlg | rg '^hostname '
 ```
 
 ```text
-hostname dev-dsk-ahrav-2c-a9191cb6.us-west-2.amazon.com
+hostname redacted-host-x86-alias
 ```
 
 The host bundle redacts the hostname but records the x86 architecture, CPU,
-kernel, toolchain, features, and run window from that session.
+kernel, toolchain, features, and run window from that session. Literal
+hostnames are redacted throughout these records for the same reason the
+collector rewrites them in `host.txt`: they are not part of the measured
+evidence. `redacted-host-x86-requested` and `redacted-host-x86-alias` denote
+two distinct hosts.

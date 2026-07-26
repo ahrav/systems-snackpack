@@ -12,8 +12,8 @@ topic_rel="topics/016-compiler-optimization-boundaries"
 topic_dir="$repo_root/$topic_rel"
 
 for tool in \
-    awk cargo cmp date dirname getconf git gzip lscpu mkdir mktemp mv nm objdump \
-    python3 rg rustc sed sha256sum sort tail taskset uname xargs; do
+    awk cargo cmp date dirname find getconf git gzip lscpu mkdir mktemp mv nm \
+    objdump python3 rg rustc sed sha256sum sort tail taskset uname wc xargs; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         printf 'required tool is unavailable: %s\n' "$tool" >&2
         exit 2
@@ -47,7 +47,15 @@ if [[ -e "$output_dir" ]]; then
         printf 'OUTPUT_DIRECTORY exists and is not a directory: %s\n' "$output_dir" >&2
         exit 2
     fi
-    if [[ -n "$(rg --files -uu "$output_dir")" ]]; then
+    # `rg --files` does not follow symbolic links, and `-uu` does not change
+    # that, so a link such as `gates -> /tmp/gates` reads as an empty tree.
+    # The gate-log redirections below would then write through that link while
+    # the evidence manifest, which walks with the same `rg` semantics, omits
+    # it. Inspect directory entries directly instead.
+    shopt -s nullglob dotglob
+    existing_entries=("$output_dir"/*)
+    shopt -u nullglob dotglob
+    if ((${#existing_entries[@]} > 0)); then
         printf 'OUTPUT_DIRECTORY must be empty: %s\n' "$output_dir" >&2
         exit 2
     fi
@@ -116,7 +124,11 @@ else
     cargo_home="$repo_root/$cargo_home_declared"
 fi
 cargo_config_candidates=("$cargo_home/config.toml" "$cargo_home/config")
-config_scan_dir="$(dirname -- "$repo_root")"
+# Every Cargo invocation below runs with the repository root as its working
+# directory, so `$repo_root/.cargo/config.toml` is consumed too. Start the walk
+# at the root rather than its parent; build-flags.txt records only the flags
+# this script sets, so any config file would alter the build unrecorded.
+config_scan_dir="$repo_root"
 while :; do
     cargo_config_candidates+=(
         "$config_scan_dir/.cargo/config.toml"
@@ -129,20 +141,42 @@ while :; do
 done
 for cargo_config in "${cargo_config_candidates[@]}"; do
     if [[ -f "$cargo_config" ]]; then
-        printf 'external Cargo configuration is an unrecorded build input: %s\n' \
+        printf 'Cargo configuration is an unrecorded build input: %s\n' \
             "$cargo_config" >&2
         exit 2
     fi
 done
 
+source_file_scan=(rg --files -uu -g '!.git' -g '!target')
+
 manifest_source_files() {
     (
         cd "$repo_root"
-        rg --files -uu -0 -g '!.git' -g '!target' \
+        "${source_file_scan[@]}" -0 \
             | sort -z \
             | xargs -0 sha256sum
     )
 }
+
+# The manifest hashes ignored files but the bundle retains only their hashes,
+# and `git status --porcelain` reports untracked entries while staying silent
+# about ignored ones. An ignored build input -- a `.git/info/exclude`d
+# `.cargo/config.toml`, say -- would therefore be manifested and named part of
+# a `git-checkout` source that cannot reproduce it. Require every manifested
+# path to be described by the commit.
+if [[ "$source_commit_verification" == git-checkout ]]; then
+    declare -A tracked_source_files=()
+    while IFS= read -r -d '' tracked_path; do
+        tracked_source_files["$tracked_path"]=1
+    done < <(git -C "$repo_root" ls-files -z)
+    while IFS= read -r -d '' manifested_path; do
+        if [[ -z "${tracked_source_files[$manifested_path]:-}" ]]; then
+            printf 'manifested source input is not tracked by %s: %s\n' \
+                "$source_commit" "$manifested_path" >&2
+            exit 2
+        fi
+    done < <(cd "$repo_root" && "${source_file_scan[@]}" -0)
+fi
 
 manifest_source_files >"$output_dir/source-files.before.sha256"
 native_rustflags="-C target-cpu=native -C codegen-units=1 -C lto=off"
@@ -319,11 +353,40 @@ if ! cmp -s \
 fi
 
 evidence_manifest_tmp="$(mktemp)"
+# The walk below shares `rg`'s no-follow semantics, so a symbolic link anywhere
+# in the bundle would be hashed nowhere while still resolving to bytes a reader
+# would treat as evidence.
+if [[ -n "$(find "$output_dir" -type l -print -quit)" ]]; then
+    printf 'evidence bundle contains a symbolic link; the manifest would omit it\n' >&2
+    exit 1
+fi
 (
     cd "$output_dir"
     rg --files -uu -0 . | sort -z | xargs -0 sha256sum
 ) >"$evidence_manifest_tmp"
 mv -- "$evidence_manifest_tmp" "$output_dir/evidence.sha256"
 
-printf 'source_commit=%s\noutput=%s\nraw_rows=48\npairs_per_comparison=12\n' \
-    "$source_commit" "$output_dir"
+raw_rows=$(($(wc -l <"$output_dir/raw.csv") - 1))
+pairs_per_comparison="$(
+    sed -n 's/^pairs_per_comparison=//p' "$output_dir/process.log" | tail -1
+)"
+if ! [[ "$pairs_per_comparison" =~ ^[1-9][0-9]*$ ]]; then
+    printf 'runner did not report pairs_per_comparison\n' >&2
+    exit 1
+fi
+comparisons_measured="$(
+    awk -F, 'NR > 1 { print $1 }' "$output_dir/raw.csv" | sort -u | wc -l
+)"
+# The AB/BA design measures both modes once per pair, so each pair contributes
+# two rows. Deriving the total from the runner's own report keeps this summary
+# from drifting when the pair count changes.
+expected_rows=$((comparisons_measured * pairs_per_comparison * 2))
+if ((raw_rows != expected_rows)); then
+    printf 'raw record holds %d rows; %d comparisons x %d pairs x 2 implies %d\n' \
+        "$raw_rows" "$comparisons_measured" "$pairs_per_comparison" \
+        "$expected_rows" >&2
+    exit 1
+fi
+
+printf 'source_commit=%s\noutput=%s\nraw_rows=%d\npairs_per_comparison=%d\n' \
+    "$source_commit" "$output_dir" "$raw_rows" "$pairs_per_comparison"
