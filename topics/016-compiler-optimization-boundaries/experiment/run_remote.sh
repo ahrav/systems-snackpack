@@ -110,12 +110,18 @@ else
 fi
 
 swept_variables=()
+# `LD_*` is swept alongside the Cargo and Rust variables because a dynamic
+# loader override interposes arbitrary code: `LD_PRELOAD` reaches Cargo, rustc,
+# the linker, and every measured process, so a preloaded allocator or clock
+# shim can change both the linked artifact and the reported `steady_ns`.
+# build-flags.txt names each swept variable, so an override stays visible to a
+# reader instead of silently conditioning the numbers.
 while IFS= read -r swept_variable; do
     if [[ "$swept_variable" != CARGO_HOME ]]; then
         swept_variables+=("$swept_variable")
         unset "$swept_variable"
     fi
-done < <(compgen -e | rg '^(CARGO_|RUSTC|RUSTDOC|RUSTFLAGS)' || true)
+done < <(compgen -e | rg '^(CARGO_|RUSTC|RUSTDOC|RUSTFLAGS|LD_)' || true)
 
 cargo_home_declared="${CARGO_HOME:-$HOME/.cargo}"
 if [[ "$cargo_home_declared" == /* ]]; then
@@ -147,7 +153,13 @@ for cargo_config in "${cargo_config_candidates[@]}"; do
     fi
 done
 
-source_file_scan=(rg --files -uu -g '!.git' -g '!target')
+# The exclusions are anchored to the repository root. A bare `!target` excludes
+# every directory of that name at any depth, including a tracked input a
+# package consumes through `include_bytes!`; only the workspace gates' own
+# Cargo output directory at the root needs excluding, since the focused build
+# writes to a separate `--target-dir` outside the repository.
+source_file_scan=(rg --files -uu -g '!/.git/' -g '!/target/')
+source_scan_excluded_prefixes=(.git/ target/)
 
 manifest_source_files() {
     (
@@ -163,17 +175,32 @@ manifest_source_files() {
     )
 }
 
+# `rg --files -uu` lists regular files and does not follow symbolic links,
+# while Cargo does. A symlinked build input is therefore absent from both
+# manifests, which then match while the binary depends on target bytes nothing
+# authenticated. This applies to a `declared` source tree as well as a Git
+# checkout, so it is checked against the filesystem rather than the index.
+source_symlink="$(
+    find "$repo_root" \
+        -path "$repo_root/.git" -prune -o \
+        -path "$repo_root/target" -prune -o \
+        -type l -print -quit
+)"
+if [[ -n "$source_symlink" ]]; then
+    printf 'source tree contains a symbolic link the manifest cannot record: %s\n' \
+        "$source_symlink" >&2
+    exit 2
+fi
+
 # The manifest hashes ignored files but the bundle retains only their hashes,
 # and `git status --porcelain` reports untracked entries while staying silent
 # about ignored ones. An ignored build input -- a `.git/info/exclude`d
 # `.cargo/config.toml`, say -- would therefore be manifested and named part of
-# a `git-checkout` source that cannot reproduce it. Require every manifested
-# path to be described by the commit.
+# a `git-checkout` source that cannot reproduce it. Require the manifested set
+# and the tracked set to agree in both directions.
 if [[ "$source_commit_verification" == git-checkout ]]; then
-    # `rg --files -uu` lists regular files: it does not follow symbolic links
-    # and cannot descend into a submodule, while Cargo does both. Such an entry
-    # is absent from the manifest and from the tracked-path loop below, which
-    # iterates the scan's own output and so cannot observe its own omissions.
+    # A submodule is a real directory, so the symlink check above cannot see
+    # it, but `rg` still will not descend into one while Cargo will.
     unmanifestable_entry="$(
         git -C "$repo_root" ls-files -s | rg -m 1 -v '^(100644|100755) ' || true
     )"
@@ -197,6 +224,11 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
         exit 2
     fi
 
+    declare -A manifested_source_files=()
+    while IFS= read -r -d '' manifested_path; do
+        manifested_source_files["$manifested_path"]=1
+    done < <(cd "$repo_root" && "${source_file_scan[@]}" -0)
+
     declare -A tracked_source_files=()
     while IFS= read -r -d '' tracked_path; do
         tracked_source_files["$tracked_path"]=1
@@ -208,6 +240,30 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
             exit 2
         fi
     done < <(cd "$repo_root" && "${source_file_scan[@]}" -0)
+
+    # The reverse direction. Checking only that manifested paths are tracked
+    # asks the scan to report its own omissions, which it cannot do: whatever
+    # `rg` skips is missing from both sides of that comparison. Assert instead
+    # that every tracked path outside the anchored exclusions was manifested,
+    # so a future gap in the scan's coverage fails the run rather than
+    # producing two matching manifests over an incomplete file set.
+    for tracked_path in "${!tracked_source_files[@]}"; do
+        if [[ -n "${manifested_source_files[$tracked_path]:-}" ]]; then
+            continue
+        fi
+        excluded=0
+        for excluded_prefix in "${source_scan_excluded_prefixes[@]}"; do
+            if [[ "$tracked_path" == "$excluded_prefix"* ]]; then
+                excluded=1
+                break
+            fi
+        done
+        if ((!excluded)); then
+            printf 'tracked source input is missing from the manifest: %s\n' \
+                "$tracked_path" >&2
+            exit 2
+        fi
+    done
 fi
 
 manifest_source_files >"$output_dir/source-files.before.sha256"
