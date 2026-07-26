@@ -88,8 +88,14 @@ def main() -> None:
     summary_path = Path(sys.argv[2])
     # The raw file is fully read and closed before the summary is opened, so a
     # collision truncates the validated process records and still exits zero.
-    # Resolving both paths catches aliases such as symlinks and `./` prefixes.
-    if raw_path.resolve() == summary_path.resolve():
+    # resolve() catches aliases such as symlinks and `./` prefixes; samefile()
+    # additionally catches hard links, which resolve to distinct names while
+    # sharing an inode.
+    if raw_path.resolve() == summary_path.resolve() or (
+        raw_path.exists()
+        and summary_path.exists()
+        and raw_path.samefile(summary_path)
+    ):
         raise SystemExit("RAW.csv and SUMMARY.csv must name different files")
     runs: dict[int, Run] = {}
     block_runs: dict[int, dict[str, int]] = defaultdict(dict)
@@ -102,6 +108,14 @@ def main() -> None:
         if reader.fieldnames != EXPECTED_FIELDS:
             raise SystemExit(f"unexpected header: {reader.fieldnames}")
         for row in reader:
+            # A matching header does not constrain the data rows. DictReader
+            # collects surplus columns under the restkey and pads short rows with
+            # None, so an undeclared producer schema would otherwise be accepted
+            # and summarized as though it were the declared one.
+            if None in row:
+                raise SystemExit(f"row has more columns than the header: {row[None]}")
+            if any(value is None for value in row.values()):
+                raise SystemExit("row has fewer columns than the header")
             run = int(row["run"])
             block = int(row["block"])
             launch = int(row["launch"])

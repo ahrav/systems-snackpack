@@ -57,7 +57,14 @@ fi
 # evidence.sha256 walks that tree, and the exit trap would delete the Cargo
 # artifacts the walk had just hashed.
 build_dir="$(cd -- "$(mktemp -d)" && pwd -P)"
-trap 'rm -rf -- "$build_dir"' EXIT
+evidence_manifest_tmp=
+cleanup() {
+    rm -rf -- "$build_dir"
+    if [[ -n $evidence_manifest_tmp ]]; then
+        rm -f -- "$evidence_manifest_tmp"
+    fi
+}
+trap cleanup EXIT
 if [[ "$build_dir" == "$output_dir" || "$build_dir" == "$output_dir"/* ]]; then
     printf 'temporary build directory %s falls inside OUTPUT_DIRECTORY %s; set TMPDIR elsewhere\n' \
         "$build_dir" "$output_dir" >&2
@@ -88,10 +95,18 @@ done < <(compgen -e | rg '^(CARGO_|RUSTC|RUSTDOC|RUSTFLAGS)' || true)
 # discoverable file can therefore redirect the compiler, wrapper, linker, target,
 # or profile in a way no pattern scan can whitelist, so any such file is an
 # unrecorded build input. The builds run from repo_root, so that is where
-# discovery starts.
+# discovery starts. A relative CARGO_HOME resolves against each Cargo command's
+# working directory, which is also repo_root, so it is canonicalized the same way
+# rather than against the caller's directory.
+cargo_home_declared="${CARGO_HOME:-$HOME/.cargo}"
+if [[ $cargo_home_declared == /* ]]; then
+    cargo_home=$cargo_home_declared
+else
+    cargo_home=$repo_root/$cargo_home_declared
+fi
 cargo_config_candidates=(
-    "${CARGO_HOME:-$HOME/.cargo}/config.toml"
-    "${CARGO_HOME:-$HOME/.cargo}/config"
+    "$cargo_home/config.toml"
+    "$cargo_home/config"
 )
 config_scan_dir=$repo_root
 while :; do
@@ -289,10 +304,15 @@ rg -n -C 16 "advanced_benchmarking_methodology::checksum" \
     >"$output_dir/codegen-checksum.txt"
 gzip -9 "$output_dir/codegen-full.txt"
 
+# The default walk honours .gitignore, .ignore, and .rgignore from the output
+# directory's parents and skips hidden files, so a parent rule as ordinary as
+# `*.log` would drop the build and gate logs from the manifest that is supposed
+# to authenticate them. `-uu` disables that filtering, and the NUL-delimited
+# pipeline survives whitespace in names. Building the manifest outside the tree
+# and moving it in keeps it from having to exclude itself.
+evidence_manifest_tmp="$(mktemp)"
 (
-    cd "$output_dir"
-    rg --files . |
-        sort |
-        rg -v '^\./evidence\.sha256$' |
-        xargs sha256sum
-) >"$output_dir/evidence.sha256"
+    cd -- "$output_dir"
+    rg --files -uu -0 . | sort -z | xargs -0 sha256sum
+) >"$evidence_manifest_tmp"
+mv -- "$evidence_manifest_tmp" "$output_dir/evidence.sha256"
