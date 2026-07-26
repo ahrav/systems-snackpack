@@ -1,0 +1,1158 @@
+
+===== topic16_opaque_mix address=0x0000000000015af0 =====
+
+boundary_probe:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+0000000000015af0 <topic16_opaque_mix>:
+   15af0:	528f372a 	mov	w10, #0x79b9                	// #31161
+   15af4:	4a000028 	eor	w8, w1, w0
+   15af8:	72b3c6ea 	movk	w10, #0x9e37, lsl #16
+   15afc:	13886d09 	ror	w9, w8, #27
+   15b00:	4a0a0108 	eor	w8, w8, w10
+   15b04:	0b080120 	add	w0, w9, w8
+   15b08:	d65f03c0 	ret
+
+0000000000015b0c <__rustc::__rdl_alloc>:
+   15b0c:	f100403f 	cmp	x1, #0x10
+   15b10:	aa0003e2 	mov	x2, x0
+   15b14:	540000a8 	b.hi	15b28 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+   15b18:	eb02003f 	cmp	x1, x2
+   15b1c:	54000068 	b.hi	15b28 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+   15b20:	aa0203e0 	mov	x0, x2
+   15b24:	17ffe99b 	b	10190 <malloc@plt>
+   15b28:	d10083ff 	sub	sp, sp, #0x20
+   15b2c:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15b30:	910043fd 	add	x29, sp, #0x10
+   15b34:	f100203f 	cmp	x1, #0x8
+   15b38:	52800108 	mov	w8, #0x8                   	// #8
+   15b3c:	910023e0 	add	x0, sp, #0x8
+   15b40:	9a888021 	csel	x1, x1, x8, hi	// hi = pmore
+   15b44:	f90007ff 	str	xzr, [sp, #8]
+   15b48:	97ffe9b2 	bl	10210 <posix_memalign@plt>
+   15b4c:	f94007e8 	ldr	x8, [sp, #8]
+   15b50:	7100001f 	cmp	w0, #0x0
+   15b54:	9a9f0100 	csel	x0, x8, xzr, eq	// eq = none
+   15b58:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15b5c:	910083ff 	add	sp, sp, #0x20
+   15b60:	d65f03c0 	ret
+
+0000000000015b64 <__rustc::__rdl_dealloc>:
+   15b64:	17ffe9e7 	b	10300 <free@plt>
+
+0000000000015b68 <__rustc::__rdl_realloc>:
+   15b68:	d10103ff 	sub	sp, sp, #0x40
+   15b6c:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15b70:	a90257f6 	stp	x22, x21, [sp, #32]
+   15b74:	a9034ff4 	stp	x20, x19, [sp, #48]
+   15b78:	910043fd 	add	x29, sp, #0x10
+   15b7c:	aa0303f3 	mov	x19, x3
+   15b80:	aa0103f4 	mov	x20, x1
+   15b84:	f100405f 	cmp	x2, #0x10
+   15b88:	54000128 	b.hi	15bac <__rustc::__rdl_realloc+0x44>  // b.pmore
+   15b8c:	eb13005f 	cmp	x2, x19
+   15b90:	540000e8 	b.hi	15bac <__rustc::__rdl_realloc+0x44>  // b.pmore
+   15b94:	aa1303e1 	mov	x1, x19
+   15b98:	a9434ff4 	ldp	x20, x19, [sp, #48]
+   15b9c:	a94257f6 	ldp	x22, x21, [sp, #32]
+   15ba0:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15ba4:	910103ff 	add	sp, sp, #0x40
+   15ba8:	17ffe9ae 	b	10260 <realloc@plt>
+   15bac:	f100205f 	cmp	x2, #0x8
+   15bb0:	52800108 	mov	w8, #0x8                   	// #8
+   15bb4:	aa0003f6 	mov	x22, x0
+   15bb8:	9a888041 	csel	x1, x2, x8, hi	// hi = pmore
+   15bbc:	910023e0 	add	x0, sp, #0x8
+   15bc0:	aa1303e2 	mov	x2, x19
+   15bc4:	f90007ff 	str	xzr, [sp, #8]
+   15bc8:	97ffe992 	bl	10210 <posix_memalign@plt>
+   15bcc:	2a0003e8 	mov	w8, w0
+   15bd0:	aa1f03e0 	mov	x0, xzr
+   15bd4:	35000168 	cbnz	w8, 15c00 <__rustc::__rdl_realloc+0x98>
+   15bd8:	f94007f5 	ldr	x21, [sp, #8]
+   15bdc:	b4000135 	cbz	x21, 15c00 <__rustc::__rdl_realloc+0x98>
+   15be0:	eb14027f 	cmp	x19, x20
+   15be4:	aa1503e0 	mov	x0, x21
+   15be8:	aa1603e1 	mov	x1, x22
+   15bec:	9a943262 	csel	x2, x19, x20, cc	// cc = lo, ul, last
+   15bf0:	97ffe914 	bl	10040 <memcpy@plt>
+   15bf4:	aa1603e0 	mov	x0, x22
+   15bf8:	97ffe9c2 	bl	10300 <free@plt>
+   15bfc:	aa1503e0 	mov	x0, x21
+   15c00:	a9434ff4 	ldp	x20, x19, [sp, #48]
+   15c04:	a94257f6 	ldp	x22, x21, [sp, #32]
+   15c08:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15c0c:	910103ff 	add	sp, sp, #0x40
+   15c10:	d65f03c0 	ret
+
+0000000000015c14 <__rustc::__rust_drop_panic>:
+   15c14:	a9bd7bfd 	stp	x29, x30, [sp, #-48]!
+   15c18:	f9000bf5 	str	x21, [sp, #16]
+   15c1c:	a9024ff4 	stp	x20, x19, [sp, #32]
+   15c20:	910003fd 	mov	x29, sp
+   15c24:	b00001f3 	adrp	x19, 52000 <_fini+0x7648>
+   15c28:	912ee273 	add	x19, x19, #0xbb8
+   15c2c:	52800794 	mov	w20, #0x3c                  	// #60
+   15c30:	52800040 	mov	w0, #0x2                   	// #2
+   15c34:	aa1303e1 	mov	x1, x19
+   15c38:	aa1403e2 	mov	x2, x20
+   15c3c:	97ffe99d 	bl	102b0 <write@plt>
+   15c40:	b100041f 	cmn	x0, #0x1
+   15c44:	54000100 	b.eq	15c64 <__rustc::__rust_drop_panic+0x50>  // b.none
+   15c48:	b4000260 	cbz	x0, 15c94 <__rustc::__rust_drop_panic+0x80>
+   15c4c:	eb000288 	subs	x8, x20, x0
+   15c50:	54000163 	b.cc	15c7c <__rustc::__rust_drop_panic+0x68>  // b.lo, b.ul, b.last
+   15c54:	8b000273 	add	x19, x19, x0
+   15c58:	aa0803f4 	mov	x20, x8
+   15c5c:	b5fffea8 	cbnz	x8, 15c30 <__rustc::__rust_drop_panic+0x1c>
+   15c60:	14000015 	b	15cb4 <__rustc::__rust_drop_panic+0xa0>
+   15c64:	97ffe9df 	bl	103e0 <__errno_location@plt>
+   15c68:	b9800008 	ldrsw	x8, [x0]
+   15c6c:	7100111f 	cmp	w8, #0x4
+   15c70:	54000181 	b.ne	15ca0 <__rustc::__rust_drop_panic+0x8c>  // b.any
+   15c74:	b5fffdf4 	cbnz	x20, 15c30 <__rustc::__rust_drop_panic+0x1c>
+   15c78:	1400000f 	b	15cb4 <__rustc::__rust_drop_panic+0xa0>
+   15c7c:	90000343 	adrp	x3, 7d000 <GCC_except_table0+0x1d00c>
+   15c80:	91396063 	add	x3, x3, #0xe58
+   15c84:	aa1403e1 	mov	x1, x20
+   15c88:	aa1403e2 	mov	x2, x20
+   15c8c:	97fffa94 	bl	146dc <core::slice::index::slice_index_fail>
+   15c90:	d4200020 	brk	#0x1
+   15c94:	90000353 	adrp	x19, 7d000 <GCC_except_table0+0x1d00c>
+   15c98:	91390273 	add	x19, x19, #0xe40
+   15c9c:	14000003 	b	15ca8 <__rustc::__rust_drop_panic+0x94>
+   15ca0:	52800049 	mov	w9, #0x2                   	// #2
+   15ca4:	aa088133 	orr	x19, x9, x8, lsl #32
+   15ca8:	92400668 	and	x8, x19, #0x3
+   15cac:	f100051f 	cmp	x8, #0x1
+   15cb0:	54000040 	b.eq	15cb8 <__rustc::__rust_drop_panic+0xa4>  // b.none
+   15cb4:	97ffed0f 	bl	110f0 <std::process::abort>
+   15cb8:	f85ffe74 	ldr	x20, [x19, #-1]!
+   15cbc:	f9400675 	ldr	x21, [x19, #8]
+   15cc0:	f94002a8 	ldr	x8, [x21]
+   15cc4:	b4000068 	cbz	x8, 15cd0 <__rustc::__rust_drop_panic+0xbc>
+   15cc8:	aa1403e0 	mov	x0, x20
+   15ccc:	d63f0100 	blr	x8
+   15cd0:	f94006a1 	ldr	x1, [x21, #8]
+   15cd4:	b4000081 	cbz	x1, 15ce4 <__rustc::__rust_drop_panic+0xd0>
+   15cd8:	f9400aa2 	ldr	x2, [x21, #16]
+   15cdc:	aa1403e0 	mov	x0, x20
+   15ce0:	97ffff70 	bl	15aa0 <__rustc::__rust_dealloc>
+   15ce4:	aa1303e0 	mov	x0, x19
+   15ce8:	52800301 	mov	w1, #0x18                  	// #24
+   15cec:	52800102 	mov	w2, #0x8                   	// #8
+   15cf0:	97ffff6c 	bl	15aa0 <__rustc::__rust_dealloc>
+   15cf4:	97ffecff 	bl	110f0 <std::process::abort>
+   15cf8:	f94006a1 	ldr	x1, [x21, #8]
+   15cfc:	b4000081 	cbz	x1, 15d0c <__rustc::__rust_drop_panic+0xf8>
+   15d00:	f9400aa2 	ldr	x2, [x21, #16]
+   15d04:	aa1403e0 	mov	x0, x20
+   15d08:	97ffff66 	bl	15aa0 <__rustc::__rust_dealloc>
+   15d0c:	aa1303e0 	mov	x0, x19
+   15d10:	52800301 	mov	w1, #0x18                  	// #24
+   15d14:	52800102 	mov	w2, #0x8                   	// #8
+   15d18:	97ffff62 	bl	15aa0 <__rustc::__rust_dealloc>
+   15d1c:	97fffb3e 	bl	14a14 <core::panicking::panic_cannot_unwind>
+   15d20:	97fffb3d 	bl	14a14 <core::panicking::panic_cannot_unwind>
+
+0000000000015d24 <__rustc::rust_begin_unwind>:
+   15d24:	d100c3ff 	sub	sp, sp, #0x30
+   15d28:	a9027bfd 	stp	x29, x30, [sp, #32]
+   15d2c:	910083fd 	add	x29, sp, #0x20
+   15d30:	a9402408 	ldp	x8, x9, [x0]
+   15d34:	f9000fe0 	str	x0, [sp, #24]
+   15d38:	910023e0 	add	x0, sp, #0x8
+   15d3c:	a900a7e8 	stp	x8, x9, [sp, #8]
+   15d40:	94003433 	bl	22e0c <std::sys::backtrace::__rust_end_short_backtrace>
+
+0000000000015d44 <__rustc::__rdl_alloc_zeroed>:
+   15d44:	d100c3ff 	sub	sp, sp, #0x30
+   15d48:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15d4c:	a9024ff4 	stp	x20, x19, [sp, #32]
+   15d50:	910043fd 	add	x29, sp, #0x10
+   15d54:	f100403f 	cmp	x1, #0x10
+   15d58:	aa0003f3 	mov	x19, x0
+   15d5c:	54000128 	b.hi	15d80 <__rustc::__rdl_alloc_zeroed+0x3c>  // b.pmore
+   15d60:	eb13003f 	cmp	x1, x19
+   15d64:	540000e8 	b.hi	15d80 <__rustc::__rdl_alloc_zeroed+0x3c>  // b.pmore
+   15d68:	aa1303e0 	mov	x0, x19
+   15d6c:	52800021 	mov	w1, #0x1                   	// #1
+   15d70:	a9424ff4 	ldp	x20, x19, [sp, #32]
+   15d74:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15d78:	9100c3ff 	add	sp, sp, #0x30
+   15d7c:	17ffe92d 	b	10230 <calloc@plt>
+   15d80:	f100203f 	cmp	x1, #0x8
+   15d84:	52800108 	mov	w8, #0x8                   	// #8
+   15d88:	910023e0 	add	x0, sp, #0x8
+   15d8c:	9a888021 	csel	x1, x1, x8, hi	// hi = pmore
+   15d90:	aa1303e2 	mov	x2, x19
+   15d94:	f90007ff 	str	xzr, [sp, #8]
+   15d98:	97ffe91e 	bl	10210 <posix_memalign@plt>
+   15d9c:	2a0003e8 	mov	w8, w0
+   15da0:	aa1f03e0 	mov	x0, xzr
+   15da4:	35000108 	cbnz	w8, 15dc4 <__rustc::__rdl_alloc_zeroed+0x80>
+   15da8:	f94007f4 	ldr	x20, [sp, #8]
+   15dac:	b40000d4 	cbz	x20, 15dc4 <__rustc::__rdl_alloc_zeroed+0x80>
+   15db0:	aa1403e0 	mov	x0, x20
+   15db4:	2a1f03e1 	mov	w1, wzr
+   15db8:	aa1303e2 	mov	x2, x19
+   15dbc:	97ffe909 	bl	101e0 <memset@plt>
+   15dc0:	aa1403e0 	mov	x0, x20
+   15dc4:	a9424ff4 	ldp	x20, x19, [sp, #32]
+   15dc8:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15dcc:	9100c3ff 	add	sp, sp, #0x30
+   15dd0:	d65f03c0 	ret
+
+0000000000015dd4 <__rustc::__rust_foreign_exception>:
+   15dd4:	a9bd7bfd 	stp	x29, x30, [sp, #-48]!
+   15dd8:	f9000bf5 	str	x21, [sp, #16]
+   15ddc:	a9024ff4 	stp	x20, x19, [sp, #32]
+   15de0:	910003fd 	mov	x29, sp
+   15de4:	b00001f3 	adrp	x19, 52000 <_fini+0x7648>
+   15de8:	912fd273 	add	x19, x19, #0xbf4
+   15dec:	52800894 	mov	w20, #0x44                  	// #68
+   15df0:	52800040 	mov	w0, #0x2                   	// #2
+   15df4:	aa1303e1 	mov	x1, x19
+   15df8:	aa1403e2 	mov	x2, x20
+   15dfc:	97ffe92d 	bl	102b0 <write@plt>
+   15e00:	b100041f 	cmn	x0, #0x1
+   15e04:	54000100 	b.eq	15e24 <__rustc::__rust_foreign_exception+0x50>  // b.none
+   15e08:	b4000260 	cbz	x0, 15e54 <__rustc::__rust_foreign_exception+0x80>
+   15e0c:	eb000288 	subs	x8, x20, x0
+   15e10:	54000163 	b.cc	15e3c <__rustc::__rust_foreign_exception+0x68>  // b.lo, b.ul, b.last
+   15e14:	8b000273 	add	x19, x19, x0
+   15e18:	aa0803f4 	mov	x20, x8
+   15e1c:	b5fffea8 	cbnz	x8, 15df0 <__rustc::__rust_foreign_exception+0x1c>
+   15e20:	14000015 	b	15e74 <__rustc::__rust_foreign_exception+0xa0>
+   15e24:	97ffe96f 	bl	103e0 <__errno_location@plt>
+   15e28:	b9800008 	ldrsw	x8, [x0]
+   15e2c:	7100111f 	cmp	w8, #0x4
+   15e30:	54000181 	b.ne	15e60 <__rustc::__rust_foreign_exception+0x8c>  // b.any
+   15e34:	b5fffdf4 	cbnz	x20, 15df0 <__rustc::__rust_foreign_exception+0x1c>
+   15e38:	1400000f 	b	15e74 <__rustc::__rust_foreign_exception+0xa0>
+   15e3c:	90000343 	adrp	x3, 7d000 <GCC_except_table0+0x1d00c>
+   15e40:	91396063 	add	x3, x3, #0xe58
+   15e44:	aa1403e1 	mov	x1, x20
+   15e48:	aa1403e2 	mov	x2, x20
+   15e4c:	97fffa24 	bl	146dc <core::slice::index::slice_index_fail>
+   15e50:	d4200020 	brk	#0x1
+   15e54:	90000353 	adrp	x19, 7d000 <GCC_except_table0+0x1d00c>
+   15e58:	91390273 	add	x19, x19, #0xe40
+   15e5c:	14000003 	b	15e68 <__rustc::__rust_foreign_exception+0x94>
+   15e60:	52800049 	mov	w9, #0x2                   	// #2
+   15e64:	aa088133 	orr	x19, x9, x8, lsl #32
+   15e68:	92400668 	and	x8, x19, #0x3
+   15e6c:	f100051f 	cmp	x8, #0x1
+   15e70:	54000040 	b.eq	15e78 <__rustc::__rust_foreign_exception+0xa4>  // b.none
+   15e74:	97ffec9f 	bl	110f0 <std::process::abort>
+   15e78:	f85ffe74 	ldr	x20, [x19, #-1]!
+   15e7c:	f9400675 	ldr	x21, [x19, #8]
+   15e80:	f94002a8 	ldr	x8, [x21]
+   15e84:	b4000068 	cbz	x8, 15e90 <__rustc::__rust_foreign_exception+0xbc>
+   15e88:	aa1403e0 	mov	x0, x20
+   15e8c:	d63f0100 	blr	x8
+   15e90:	f94006a1 	ldr	x1, [x21, #8]
+   15e94:	b4000081 	cbz	x1, 15ea4 <__rustc::__rust_foreign_exception+0xd0>
+   15e98:	f9400aa2 	ldr	x2, [x21, #16]
+   15e9c:	aa1403e0 	mov	x0, x20
+   15ea0:	97ffff00 	bl	15aa0 <__rustc::__rust_dealloc>
+   15ea4:	aa1303e0 	mov	x0, x19
+   15ea8:	52800301 	mov	w1, #0x18                  	// #24
+   15eac:	52800102 	mov	w2, #0x8                   	// #8
+   15eb0:	97fffefc 	bl	15aa0 <__rustc::__rust_dealloc>
+   15eb4:	97ffec8f 	bl	110f0 <std::process::abort>
+   15eb8:	f94006a1 	ldr	x1, [x21, #8]
+   15ebc:	b4000081 	cbz	x1, 15ecc <__rustc::__rust_foreign_exception+0xf8>
+   15ec0:	f9400aa2 	ldr	x2, [x21, #16]
+   15ec4:	aa1403e0 	mov	x0, x20
+   15ec8:	97fffef6 	bl	15aa0 <__rustc::__rust_dealloc>
+   15ecc:	aa1303e0 	mov	x0, x19
+   15ed0:	52800301 	mov	w1, #0x18                  	// #24
+   15ed4:	52800102 	mov	w2, #0x8                   	// #8
+   15ed8:	97fffef2 	bl	15aa0 <__rustc::__rust_dealloc>
+   15edc:	97ffface 	bl	14a14 <core::panicking::panic_cannot_unwind>
+   15ee0:	97fffacd 	bl	14a14 <core::panicking::panic_cannot_unwind>
+
+0000000000015ee4 <<std::backtrace_rs::symbolize::gimli::parse_running_mmaps::MapsEntry as core::str::traits::FromStr>::from_str>:
+   15ee4:	d10343ff 	sub	sp, sp, #0xd0
+   15ee8:	a9077bfd 	stp	x29, x30, [sp, #112]
+   15eec:	a9086ffc 	stp	x28, x27, [sp, #128]
+
+===== run_local address=0x00000000000158c0 =====
+
+boundary_probe:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+00000000000158c0 <run_imported>:
+   158c0:	b40000e1 	cbz	x1, 158dc <run_imported+0x1c>
+   158c4:	0460e3e8 	cnth	x8
+   158c8:	eb08003f 	cmp	x1, x8
+   158cc:	540000e2 	b.cs	158e8 <run_imported+0x28>  // b.hs, b.nlast
+   158d0:	aa1f03e9 	mov	x9, xzr
+   158d4:	2a1f03e8 	mov	w8, wzr
+   158d8:	1400002a 	b	15980 <run_imported+0xc0>
+   158dc:	2a1f03e8 	mov	w8, wzr
+   158e0:	2a0803e0 	mov	w0, w8
+   158e4:	d65f03c0 	ret
+   158e8:	528f372b 	mov	w11, #0x79b9                	// #31161
+   158ec:	d1000509 	sub	x9, x8, #0x1
+   158f0:	05a03841 	mov	z1.s, w2
+   158f4:	6f00e400 	movi	v0.2d, #0x0
+   158f8:	6f00e403 	movi	v3.2d, #0x0
+   158fc:	aa0003ec 	mov	x12, x0
+   15900:	72b3c6eb 	movk	w11, #0x9e37, lsl #16
+   15904:	8a09002a 	and	x10, x1, x9
+   15908:	05a03962 	mov	z2.s, w11
+   1590c:	cb0a0029 	sub	x9, x1, x10
+   15910:	04bf504b 	rdvl	x11, #2
+   15914:	aa0903ed 	mov	x13, x9
+   15918:	d503201f 	nop
+   1591c:	d503201f 	nop
+   15920:	85804184 	ldr	z4, [x12]
+   15924:	85804585 	ldr	z5, [x12, #1, mul vl]
+   15928:	eb0801ad 	subs	x13, x13, x8
+   1592c:	8b0b018c 	add	x12, x12, x11
+   15930:	04a13084 	eor	z4.d, z4.d, z1.d
+   15934:	04a130a5 	eor	z5.d, z5.d, z1.d
+   15938:	04659486 	lsr	z6.s, z4.s, #27
+   1593c:	04659c87 	lsl	z7.s, z4.s, #5
+   15940:	04659cb0 	lsl	z16.s, z5.s, #5
+   15944:	04a23084 	eor	z4.d, z4.d, z2.d
+   15948:	046630e6 	orr	z6.d, z7.d, z6.d
+   1594c:	046594a7 	lsr	z7.s, z5.s, #27
+   15950:	04a230a5 	eor	z5.d, z5.d, z2.d
+   15954:	04a00080 	add	z0.s, z4.s, z0.s
+   15958:	04673207 	orr	z7.d, z16.d, z7.d
+   1595c:	04a300a3 	add	z3.s, z5.s, z3.s
+   15960:	04a60000 	add	z0.s, z0.s, z6.s
+   15964:	04a70063 	add	z3.s, z3.s, z7.s
+   15968:	54fffdc1 	b.ne	15920 <run_imported+0x60>  // b.any
+   1596c:	04a00060 	add	z0.s, z3.s, z0.s
+   15970:	2598e3e0 	ptrue	p0.s
+   15974:	04812000 	uaddv	d0, p0, z0.s
+   15978:	1e260008 	fmov	w8, s0
+   1597c:	b400022a 	cbz	x10, 159c0 <run_imported+0x100>
+   15980:	528f372b 	mov	w11, #0x79b9                	// #31161
+   15984:	cb09002a 	sub	x10, x1, x9
+   15988:	8b090809 	add	x9, x0, x9, lsl #2
+   1598c:	72b3c6eb 	movk	w11, #0x9e37, lsl #16
+   15990:	d503201f 	nop
+   15994:	d503201f 	nop
+   15998:	d503201f 	nop
+   1599c:	d503201f 	nop
+   159a0:	b840452c 	ldr	w12, [x9], #4
+   159a4:	f100054a 	subs	x10, x10, #0x1
+   159a8:	4a02018c 	eor	w12, w12, w2
+   159ac:	138c6d8d 	ror	w13, w12, #27
+   159b0:	4a0b018c 	eor	w12, w12, w11
+   159b4:	0b080188 	add	w8, w12, w8
+   159b8:	0b0d0108 	add	w8, w8, w13
+   159bc:	54ffff21 	b.ne	159a0 <run_imported+0xe0>  // b.any
+   159c0:	2a0803e0 	mov	w0, w8
+   159c4:	d65f03c0 	ret
+   159c8:	d503201f 	nop
+   159cc:	d503201f 	nop
+   159d0:	d503201f 	nop
+   159d4:	d503201f 	nop
+   159d8:	d503201f 	nop
+   159dc:	d503201f 	nop
+
+00000000000159e0 <run_opaque>:
+   159e0:	a9bd7bfd 	stp	x29, x30, [sp, #-48]!
+   159e4:	a90157f6 	stp	x22, x21, [sp, #16]
+   159e8:	a9024ff4 	stp	x20, x19, [sp, #32]
+   159ec:	910003fd 	mov	x29, sp
+   159f0:	b4000201 	cbz	x1, 15a30 <run_opaque+0x50>
+   159f4:	2a0203f3 	mov	w19, w2
+   159f8:	aa0103f4 	mov	x20, x1
+   159fc:	aa0003f5 	mov	x21, x0
+   15a00:	2a1f03f6 	mov	w22, wzr
+   15a04:	b84046a0 	ldr	w0, [x21], #4
+   15a08:	2a1303e1 	mov	w1, w19
+   15a0c:	94000039 	bl	15af0 <topic16_opaque_mix>
+   15a10:	0b160016 	add	w22, w0, w22
+   15a14:	f1000694 	subs	x20, x20, #0x1
+   15a18:	54ffff61 	b.ne	15a04 <run_opaque+0x24>  // b.any
+   15a1c:	2a1603e0 	mov	w0, w22
+   15a20:	a9424ff4 	ldp	x20, x19, [sp, #32]
+   15a24:	a94157f6 	ldp	x22, x21, [sp, #16]
+   15a28:	a8c37bfd 	ldp	x29, x30, [sp], #48
+   15a2c:	d65f03c0 	ret
+   15a30:	2a1f03f6 	mov	w22, wzr
+   15a34:	2a1603e0 	mov	w0, w22
+   15a38:	a9424ff4 	ldp	x20, x19, [sp, #32]
+   15a3c:	a94157f6 	ldp	x22, x21, [sp, #16]
+   15a40:	a8c37bfd 	ldp	x29, x30, [sp], #48
+   15a44:	d65f03c0 	ret
+   15a48:	d503201f 	nop
+   15a4c:	d503201f 	nop
+
+0000000000015a50 <main>:
+   15a50:	d10083ff 	sub	sp, sp, #0x20
+   15a54:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15a58:	910043fd 	add	x29, sp, #0x10
+   15a5c:	aa0103e3 	mov	x3, x1
+   15a60:	93407c02 	sxtw	x2, w0
+   15a64:	f0ffffe8 	adrp	x8, 14000 <alloc::raw_vec::RawVec<T,A>::grow_one+0x14>
+   15a68:	91300108 	add	x8, x8, #0xc00
+   15a6c:	f90007e8 	str	x8, [sp, #8]
+   15a70:	90000341 	adrp	x1, 7d000 <GCC_except_table0+0x1d00c>
+   15a74:	912f4021 	add	x1, x1, #0xbd0
+   15a78:	910023e0 	add	x0, sp, #0x8
+   15a7c:	2a1f03e4 	mov	w4, wzr
+   15a80:	9400260a 	bl	1f2a8 <std::rt::lang_start_internal>
+   15a84:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15a88:	910083ff 	add	sp, sp, #0x20
+   15a8c:	d65f03c0 	ret
+
+0000000000015a90 <__rustc::__rust_alloc>:
+   15a90:	1400001f 	b	15b0c <__rustc::__rdl_alloc>
+   15a94:	d503201f 	nop
+   15a98:	d503201f 	nop
+   15a9c:	d503201f 	nop
+
+0000000000015aa0 <__rustc::__rust_dealloc>:
+   15aa0:	14000031 	b	15b64 <__rustc::__rdl_dealloc>
+   15aa4:	d503201f 	nop
+   15aa8:	d503201f 	nop
+   15aac:	d503201f 	nop
+
+0000000000015ab0 <__rustc::__rust_realloc>:
+   15ab0:	1400002e 	b	15b68 <__rustc::__rdl_realloc>
+   15ab4:	d503201f 	nop
+   15ab8:	d503201f 	nop
+   15abc:	d503201f 	nop
+
+0000000000015ac0 <__rustc::__rust_alloc_zeroed>:
+   15ac0:	140000a1 	b	15d44 <__rustc::__rdl_alloc_zeroed>
+   15ac4:	d503201f 	nop
+   15ac8:	d503201f 	nop
+   15acc:	d503201f 	nop
+
+0000000000015ad0 <__rustc::__rust_alloc_error_handler_should_panic_v2>:
+   15ad0:	2a1f03e0 	mov	w0, wzr
+   15ad4:	d65f03c0 	ret
+   15ad8:	d503201f 	nop
+   15adc:	d503201f 	nop
+
+0000000000015ae0 <__rustc::__rust_no_alloc_shim_is_unstable_v2>:
+   15ae0:	d65f03c0 	ret
+   15ae4:	d503201f 	nop
+   15ae8:	d503201f 	nop
+   15aec:	d503201f 	nop
+
+0000000000015af0 <topic16_opaque_mix>:
+   15af0:	528f372a 	mov	w10, #0x79b9                	// #31161
+   15af4:	4a000028 	eor	w8, w1, w0
+   15af8:	72b3c6ea 	movk	w10, #0x9e37, lsl #16
+   15afc:	13886d09 	ror	w9, w8, #27
+   15b00:	4a0a0108 	eor	w8, w8, w10
+   15b04:	0b080120 	add	w0, w9, w8
+   15b08:	d65f03c0 	ret
+
+0000000000015b0c <__rustc::__rdl_alloc>:
+   15b0c:	f100403f 	cmp	x1, #0x10
+   15b10:	aa0003e2 	mov	x2, x0
+   15b14:	540000a8 	b.hi	15b28 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+   15b18:	eb02003f 	cmp	x1, x2
+   15b1c:	54000068 	b.hi	15b28 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+   15b20:	aa0203e0 	mov	x0, x2
+   15b24:	17ffe99b 	b	10190 <malloc@plt>
+   15b28:	d10083ff 	sub	sp, sp, #0x20
+   15b2c:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15b30:	910043fd 	add	x29, sp, #0x10
+   15b34:	f100203f 	cmp	x1, #0x8
+   15b38:	52800108 	mov	w8, #0x8                   	// #8
+   15b3c:	910023e0 	add	x0, sp, #0x8
+   15b40:	9a888021 	csel	x1, x1, x8, hi	// hi = pmore
+   15b44:	f90007ff 	str	xzr, [sp, #8]
+   15b48:	97ffe9b2 	bl	10210 <posix_memalign@plt>
+   15b4c:	f94007e8 	ldr	x8, [sp, #8]
+   15b50:	7100001f 	cmp	w0, #0x0
+   15b54:	9a9f0100 	csel	x0, x8, xzr, eq	// eq = none
+   15b58:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15b5c:	910083ff 	add	sp, sp, #0x20
+   15b60:	d65f03c0 	ret
+
+0000000000015b64 <__rustc::__rdl_dealloc>:
+   15b64:	17ffe9e7 	b	10300 <free@plt>
+
+0000000000015b68 <__rustc::__rdl_realloc>:
+   15b68:	d10103ff 	sub	sp, sp, #0x40
+   15b6c:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15b70:	a90257f6 	stp	x22, x21, [sp, #32]
+   15b74:	a9034ff4 	stp	x20, x19, [sp, #48]
+   15b78:	910043fd 	add	x29, sp, #0x10
+   15b7c:	aa0303f3 	mov	x19, x3
+   15b80:	aa0103f4 	mov	x20, x1
+   15b84:	f100405f 	cmp	x2, #0x10
+   15b88:	54000128 	b.hi	15bac <__rustc::__rdl_realloc+0x44>  // b.pmore
+   15b8c:	eb13005f 	cmp	x2, x19
+   15b90:	540000e8 	b.hi	15bac <__rustc::__rdl_realloc+0x44>  // b.pmore
+   15b94:	aa1303e1 	mov	x1, x19
+   15b98:	a9434ff4 	ldp	x20, x19, [sp, #48]
+   15b9c:	a94257f6 	ldp	x22, x21, [sp, #32]
+   15ba0:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15ba4:	910103ff 	add	sp, sp, #0x40
+   15ba8:	17ffe9ae 	b	10260 <realloc@plt>
+   15bac:	f100205f 	cmp	x2, #0x8
+   15bb0:	52800108 	mov	w8, #0x8                   	// #8
+   15bb4:	aa0003f6 	mov	x22, x0
+   15bb8:	9a888041 	csel	x1, x2, x8, hi	// hi = pmore
+   15bbc:	910023e0 	add	x0, sp, #0x8
+   15bc0:	aa1303e2 	mov	x2, x19
+   15bc4:	f90007ff 	str	xzr, [sp, #8]
+   15bc8:	97ffe992 	bl	10210 <posix_memalign@plt>
+   15bcc:	2a0003e8 	mov	w8, w0
+   15bd0:	aa1f03e0 	mov	x0, xzr
+   15bd4:	35000168 	cbnz	w8, 15c00 <__rustc::__rdl_realloc+0x98>
+   15bd8:	f94007f5 	ldr	x21, [sp, #8]
+   15bdc:	b4000135 	cbz	x21, 15c00 <__rustc::__rdl_realloc+0x98>
+   15be0:	eb14027f 	cmp	x19, x20
+   15be4:	aa1503e0 	mov	x0, x21
+   15be8:	aa1603e1 	mov	x1, x22
+   15bec:	9a943262 	csel	x2, x19, x20, cc	// cc = lo, ul, last
+   15bf0:	97ffe914 	bl	10040 <memcpy@plt>
+   15bf4:	aa1603e0 	mov	x0, x22
+   15bf8:	97ffe9c2 	bl	10300 <free@plt>
+   15bfc:	aa1503e0 	mov	x0, x21
+   15c00:	a9434ff4 	ldp	x20, x19, [sp, #48]
+   15c04:	a94257f6 	ldp	x22, x21, [sp, #32]
+   15c08:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15c0c:	910103ff 	add	sp, sp, #0x40
+   15c10:	d65f03c0 	ret
+
+0000000000015c14 <__rustc::__rust_drop_panic>:
+   15c14:	a9bd7bfd 	stp	x29, x30, [sp, #-48]!
+   15c18:	f9000bf5 	str	x21, [sp, #16]
+   15c1c:	a9024ff4 	stp	x20, x19, [sp, #32]
+   15c20:	910003fd 	mov	x29, sp
+   15c24:	b00001f3 	adrp	x19, 52000 <_fini+0x7648>
+   15c28:	912ee273 	add	x19, x19, #0xbb8
+   15c2c:	52800794 	mov	w20, #0x3c                  	// #60
+   15c30:	52800040 	mov	w0, #0x2                   	// #2
+   15c34:	aa1303e1 	mov	x1, x19
+   15c38:	aa1403e2 	mov	x2, x20
+   15c3c:	97ffe99d 	bl	102b0 <write@plt>
+   15c40:	b100041f 	cmn	x0, #0x1
+   15c44:	54000100 	b.eq	15c64 <__rustc::__rust_drop_panic+0x50>  // b.none
+   15c48:	b4000260 	cbz	x0, 15c94 <__rustc::__rust_drop_panic+0x80>
+   15c4c:	eb000288 	subs	x8, x20, x0
+   15c50:	54000163 	b.cc	15c7c <__rustc::__rust_drop_panic+0x68>  // b.lo, b.ul, b.last
+   15c54:	8b000273 	add	x19, x19, x0
+   15c58:	aa0803f4 	mov	x20, x8
+   15c5c:	b5fffea8 	cbnz	x8, 15c30 <__rustc::__rust_drop_panic+0x1c>
+   15c60:	14000015 	b	15cb4 <__rustc::__rust_drop_panic+0xa0>
+   15c64:	97ffe9df 	bl	103e0 <__errno_location@plt>
+   15c68:	b9800008 	ldrsw	x8, [x0]
+   15c6c:	7100111f 	cmp	w8, #0x4
+   15c70:	54000181 	b.ne	15ca0 <__rustc::__rust_drop_panic+0x8c>  // b.any
+   15c74:	b5fffdf4 	cbnz	x20, 15c30 <__rustc::__rust_drop_panic+0x1c>
+   15c78:	1400000f 	b	15cb4 <__rustc::__rust_drop_panic+0xa0>
+   15c7c:	90000343 	adrp	x3, 7d000 <GCC_except_table0+0x1d00c>
+   15c80:	91396063 	add	x3, x3, #0xe58
+   15c84:	aa1403e1 	mov	x1, x20
+   15c88:	aa1403e2 	mov	x2, x20
+   15c8c:	97fffa94 	bl	146dc <core::slice::index::slice_index_fail>
+   15c90:	d4200020 	brk	#0x1
+   15c94:	90000353 	adrp	x19, 7d000 <GCC_except_table0+0x1d00c>
+   15c98:	91390273 	add	x19, x19, #0xe40
+   15c9c:	14000003 	b	15ca8 <__rustc::__rust_drop_panic+0x94>
+   15ca0:	52800049 	mov	w9, #0x2                   	// #2
+   15ca4:	aa088133 	orr	x19, x9, x8, lsl #32
+   15ca8:	92400668 	and	x8, x19, #0x3
+   15cac:	f100051f 	cmp	x8, #0x1
+   15cb0:	54000040 	b.eq	15cb8 <__rustc::__rust_drop_panic+0xa4>  // b.none
+   15cb4:	97ffed0f 	bl	110f0 <std::process::abort>
+   15cb8:	f85ffe74 	ldr	x20, [x19, #-1]!
+   15cbc:	f9400675 	ldr	x21, [x19, #8]
+
+===== run_imported address=0x00000000000158c0 =====
+
+boundary_probe:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+00000000000158c0 <run_imported>:
+   158c0:	b40000e1 	cbz	x1, 158dc <run_imported+0x1c>
+   158c4:	0460e3e8 	cnth	x8
+   158c8:	eb08003f 	cmp	x1, x8
+   158cc:	540000e2 	b.cs	158e8 <run_imported+0x28>  // b.hs, b.nlast
+   158d0:	aa1f03e9 	mov	x9, xzr
+   158d4:	2a1f03e8 	mov	w8, wzr
+   158d8:	1400002a 	b	15980 <run_imported+0xc0>
+   158dc:	2a1f03e8 	mov	w8, wzr
+   158e0:	2a0803e0 	mov	w0, w8
+   158e4:	d65f03c0 	ret
+   158e8:	528f372b 	mov	w11, #0x79b9                	// #31161
+   158ec:	d1000509 	sub	x9, x8, #0x1
+   158f0:	05a03841 	mov	z1.s, w2
+   158f4:	6f00e400 	movi	v0.2d, #0x0
+   158f8:	6f00e403 	movi	v3.2d, #0x0
+   158fc:	aa0003ec 	mov	x12, x0
+   15900:	72b3c6eb 	movk	w11, #0x9e37, lsl #16
+   15904:	8a09002a 	and	x10, x1, x9
+   15908:	05a03962 	mov	z2.s, w11
+   1590c:	cb0a0029 	sub	x9, x1, x10
+   15910:	04bf504b 	rdvl	x11, #2
+   15914:	aa0903ed 	mov	x13, x9
+   15918:	d503201f 	nop
+   1591c:	d503201f 	nop
+   15920:	85804184 	ldr	z4, [x12]
+   15924:	85804585 	ldr	z5, [x12, #1, mul vl]
+   15928:	eb0801ad 	subs	x13, x13, x8
+   1592c:	8b0b018c 	add	x12, x12, x11
+   15930:	04a13084 	eor	z4.d, z4.d, z1.d
+   15934:	04a130a5 	eor	z5.d, z5.d, z1.d
+   15938:	04659486 	lsr	z6.s, z4.s, #27
+   1593c:	04659c87 	lsl	z7.s, z4.s, #5
+   15940:	04659cb0 	lsl	z16.s, z5.s, #5
+   15944:	04a23084 	eor	z4.d, z4.d, z2.d
+   15948:	046630e6 	orr	z6.d, z7.d, z6.d
+   1594c:	046594a7 	lsr	z7.s, z5.s, #27
+   15950:	04a230a5 	eor	z5.d, z5.d, z2.d
+   15954:	04a00080 	add	z0.s, z4.s, z0.s
+   15958:	04673207 	orr	z7.d, z16.d, z7.d
+   1595c:	04a300a3 	add	z3.s, z5.s, z3.s
+   15960:	04a60000 	add	z0.s, z0.s, z6.s
+   15964:	04a70063 	add	z3.s, z3.s, z7.s
+   15968:	54fffdc1 	b.ne	15920 <run_imported+0x60>  // b.any
+   1596c:	04a00060 	add	z0.s, z3.s, z0.s
+   15970:	2598e3e0 	ptrue	p0.s
+   15974:	04812000 	uaddv	d0, p0, z0.s
+   15978:	1e260008 	fmov	w8, s0
+   1597c:	b400022a 	cbz	x10, 159c0 <run_imported+0x100>
+   15980:	528f372b 	mov	w11, #0x79b9                	// #31161
+   15984:	cb09002a 	sub	x10, x1, x9
+   15988:	8b090809 	add	x9, x0, x9, lsl #2
+   1598c:	72b3c6eb 	movk	w11, #0x9e37, lsl #16
+   15990:	d503201f 	nop
+   15994:	d503201f 	nop
+   15998:	d503201f 	nop
+   1599c:	d503201f 	nop
+   159a0:	b840452c 	ldr	w12, [x9], #4
+   159a4:	f100054a 	subs	x10, x10, #0x1
+   159a8:	4a02018c 	eor	w12, w12, w2
+   159ac:	138c6d8d 	ror	w13, w12, #27
+   159b0:	4a0b018c 	eor	w12, w12, w11
+   159b4:	0b080188 	add	w8, w12, w8
+   159b8:	0b0d0108 	add	w8, w8, w13
+   159bc:	54ffff21 	b.ne	159a0 <run_imported+0xe0>  // b.any
+   159c0:	2a0803e0 	mov	w0, w8
+   159c4:	d65f03c0 	ret
+   159c8:	d503201f 	nop
+   159cc:	d503201f 	nop
+   159d0:	d503201f 	nop
+   159d4:	d503201f 	nop
+   159d8:	d503201f 	nop
+   159dc:	d503201f 	nop
+
+00000000000159e0 <run_opaque>:
+   159e0:	a9bd7bfd 	stp	x29, x30, [sp, #-48]!
+   159e4:	a90157f6 	stp	x22, x21, [sp, #16]
+   159e8:	a9024ff4 	stp	x20, x19, [sp, #32]
+   159ec:	910003fd 	mov	x29, sp
+   159f0:	b4000201 	cbz	x1, 15a30 <run_opaque+0x50>
+   159f4:	2a0203f3 	mov	w19, w2
+   159f8:	aa0103f4 	mov	x20, x1
+   159fc:	aa0003f5 	mov	x21, x0
+   15a00:	2a1f03f6 	mov	w22, wzr
+   15a04:	b84046a0 	ldr	w0, [x21], #4
+   15a08:	2a1303e1 	mov	w1, w19
+   15a0c:	94000039 	bl	15af0 <topic16_opaque_mix>
+   15a10:	0b160016 	add	w22, w0, w22
+   15a14:	f1000694 	subs	x20, x20, #0x1
+   15a18:	54ffff61 	b.ne	15a04 <run_opaque+0x24>  // b.any
+   15a1c:	2a1603e0 	mov	w0, w22
+   15a20:	a9424ff4 	ldp	x20, x19, [sp, #32]
+   15a24:	a94157f6 	ldp	x22, x21, [sp, #16]
+   15a28:	a8c37bfd 	ldp	x29, x30, [sp], #48
+   15a2c:	d65f03c0 	ret
+   15a30:	2a1f03f6 	mov	w22, wzr
+   15a34:	2a1603e0 	mov	w0, w22
+   15a38:	a9424ff4 	ldp	x20, x19, [sp, #32]
+   15a3c:	a94157f6 	ldp	x22, x21, [sp, #16]
+   15a40:	a8c37bfd 	ldp	x29, x30, [sp], #48
+   15a44:	d65f03c0 	ret
+   15a48:	d503201f 	nop
+   15a4c:	d503201f 	nop
+
+0000000000015a50 <main>:
+   15a50:	d10083ff 	sub	sp, sp, #0x20
+   15a54:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15a58:	910043fd 	add	x29, sp, #0x10
+   15a5c:	aa0103e3 	mov	x3, x1
+   15a60:	93407c02 	sxtw	x2, w0
+   15a64:	f0ffffe8 	adrp	x8, 14000 <alloc::raw_vec::RawVec<T,A>::grow_one+0x14>
+   15a68:	91300108 	add	x8, x8, #0xc00
+   15a6c:	f90007e8 	str	x8, [sp, #8]
+   15a70:	90000341 	adrp	x1, 7d000 <GCC_except_table0+0x1d00c>
+   15a74:	912f4021 	add	x1, x1, #0xbd0
+   15a78:	910023e0 	add	x0, sp, #0x8
+   15a7c:	2a1f03e4 	mov	w4, wzr
+   15a80:	9400260a 	bl	1f2a8 <std::rt::lang_start_internal>
+   15a84:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15a88:	910083ff 	add	sp, sp, #0x20
+   15a8c:	d65f03c0 	ret
+
+0000000000015a90 <__rustc::__rust_alloc>:
+   15a90:	1400001f 	b	15b0c <__rustc::__rdl_alloc>
+   15a94:	d503201f 	nop
+   15a98:	d503201f 	nop
+   15a9c:	d503201f 	nop
+
+0000000000015aa0 <__rustc::__rust_dealloc>:
+   15aa0:	14000031 	b	15b64 <__rustc::__rdl_dealloc>
+   15aa4:	d503201f 	nop
+   15aa8:	d503201f 	nop
+   15aac:	d503201f 	nop
+
+0000000000015ab0 <__rustc::__rust_realloc>:
+   15ab0:	1400002e 	b	15b68 <__rustc::__rdl_realloc>
+   15ab4:	d503201f 	nop
+   15ab8:	d503201f 	nop
+   15abc:	d503201f 	nop
+
+0000000000015ac0 <__rustc::__rust_alloc_zeroed>:
+   15ac0:	140000a1 	b	15d44 <__rustc::__rdl_alloc_zeroed>
+   15ac4:	d503201f 	nop
+   15ac8:	d503201f 	nop
+   15acc:	d503201f 	nop
+
+0000000000015ad0 <__rustc::__rust_alloc_error_handler_should_panic_v2>:
+   15ad0:	2a1f03e0 	mov	w0, wzr
+   15ad4:	d65f03c0 	ret
+   15ad8:	d503201f 	nop
+   15adc:	d503201f 	nop
+
+0000000000015ae0 <__rustc::__rust_no_alloc_shim_is_unstable_v2>:
+   15ae0:	d65f03c0 	ret
+   15ae4:	d503201f 	nop
+   15ae8:	d503201f 	nop
+   15aec:	d503201f 	nop
+
+0000000000015af0 <topic16_opaque_mix>:
+   15af0:	528f372a 	mov	w10, #0x79b9                	// #31161
+   15af4:	4a000028 	eor	w8, w1, w0
+   15af8:	72b3c6ea 	movk	w10, #0x9e37, lsl #16
+   15afc:	13886d09 	ror	w9, w8, #27
+   15b00:	4a0a0108 	eor	w8, w8, w10
+   15b04:	0b080120 	add	w0, w9, w8
+   15b08:	d65f03c0 	ret
+
+0000000000015b0c <__rustc::__rdl_alloc>:
+   15b0c:	f100403f 	cmp	x1, #0x10
+   15b10:	aa0003e2 	mov	x2, x0
+   15b14:	540000a8 	b.hi	15b28 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+   15b18:	eb02003f 	cmp	x1, x2
+   15b1c:	54000068 	b.hi	15b28 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+   15b20:	aa0203e0 	mov	x0, x2
+   15b24:	17ffe99b 	b	10190 <malloc@plt>
+   15b28:	d10083ff 	sub	sp, sp, #0x20
+   15b2c:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15b30:	910043fd 	add	x29, sp, #0x10
+   15b34:	f100203f 	cmp	x1, #0x8
+   15b38:	52800108 	mov	w8, #0x8                   	// #8
+   15b3c:	910023e0 	add	x0, sp, #0x8
+   15b40:	9a888021 	csel	x1, x1, x8, hi	// hi = pmore
+   15b44:	f90007ff 	str	xzr, [sp, #8]
+   15b48:	97ffe9b2 	bl	10210 <posix_memalign@plt>
+   15b4c:	f94007e8 	ldr	x8, [sp, #8]
+   15b50:	7100001f 	cmp	w0, #0x0
+   15b54:	9a9f0100 	csel	x0, x8, xzr, eq	// eq = none
+   15b58:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15b5c:	910083ff 	add	sp, sp, #0x20
+   15b60:	d65f03c0 	ret
+
+0000000000015b64 <__rustc::__rdl_dealloc>:
+   15b64:	17ffe9e7 	b	10300 <free@plt>
+
+0000000000015b68 <__rustc::__rdl_realloc>:
+   15b68:	d10103ff 	sub	sp, sp, #0x40
+   15b6c:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15b70:	a90257f6 	stp	x22, x21, [sp, #32]
+   15b74:	a9034ff4 	stp	x20, x19, [sp, #48]
+   15b78:	910043fd 	add	x29, sp, #0x10
+   15b7c:	aa0303f3 	mov	x19, x3
+   15b80:	aa0103f4 	mov	x20, x1
+   15b84:	f100405f 	cmp	x2, #0x10
+   15b88:	54000128 	b.hi	15bac <__rustc::__rdl_realloc+0x44>  // b.pmore
+   15b8c:	eb13005f 	cmp	x2, x19
+   15b90:	540000e8 	b.hi	15bac <__rustc::__rdl_realloc+0x44>  // b.pmore
+   15b94:	aa1303e1 	mov	x1, x19
+   15b98:	a9434ff4 	ldp	x20, x19, [sp, #48]
+   15b9c:	a94257f6 	ldp	x22, x21, [sp, #32]
+   15ba0:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15ba4:	910103ff 	add	sp, sp, #0x40
+   15ba8:	17ffe9ae 	b	10260 <realloc@plt>
+   15bac:	f100205f 	cmp	x2, #0x8
+   15bb0:	52800108 	mov	w8, #0x8                   	// #8
+   15bb4:	aa0003f6 	mov	x22, x0
+   15bb8:	9a888041 	csel	x1, x2, x8, hi	// hi = pmore
+   15bbc:	910023e0 	add	x0, sp, #0x8
+   15bc0:	aa1303e2 	mov	x2, x19
+   15bc4:	f90007ff 	str	xzr, [sp, #8]
+   15bc8:	97ffe992 	bl	10210 <posix_memalign@plt>
+   15bcc:	2a0003e8 	mov	w8, w0
+   15bd0:	aa1f03e0 	mov	x0, xzr
+   15bd4:	35000168 	cbnz	w8, 15c00 <__rustc::__rdl_realloc+0x98>
+   15bd8:	f94007f5 	ldr	x21, [sp, #8]
+   15bdc:	b4000135 	cbz	x21, 15c00 <__rustc::__rdl_realloc+0x98>
+   15be0:	eb14027f 	cmp	x19, x20
+   15be4:	aa1503e0 	mov	x0, x21
+   15be8:	aa1603e1 	mov	x1, x22
+   15bec:	9a943262 	csel	x2, x19, x20, cc	// cc = lo, ul, last
+   15bf0:	97ffe914 	bl	10040 <memcpy@plt>
+   15bf4:	aa1603e0 	mov	x0, x22
+   15bf8:	97ffe9c2 	bl	10300 <free@plt>
+   15bfc:	aa1503e0 	mov	x0, x21
+   15c00:	a9434ff4 	ldp	x20, x19, [sp, #48]
+   15c04:	a94257f6 	ldp	x22, x21, [sp, #32]
+   15c08:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15c0c:	910103ff 	add	sp, sp, #0x40
+   15c10:	d65f03c0 	ret
+
+0000000000015c14 <__rustc::__rust_drop_panic>:
+   15c14:	a9bd7bfd 	stp	x29, x30, [sp, #-48]!
+   15c18:	f9000bf5 	str	x21, [sp, #16]
+   15c1c:	a9024ff4 	stp	x20, x19, [sp, #32]
+   15c20:	910003fd 	mov	x29, sp
+   15c24:	b00001f3 	adrp	x19, 52000 <_fini+0x7648>
+   15c28:	912ee273 	add	x19, x19, #0xbb8
+   15c2c:	52800794 	mov	w20, #0x3c                  	// #60
+   15c30:	52800040 	mov	w0, #0x2                   	// #2
+   15c34:	aa1303e1 	mov	x1, x19
+   15c38:	aa1403e2 	mov	x2, x20
+   15c3c:	97ffe99d 	bl	102b0 <write@plt>
+   15c40:	b100041f 	cmn	x0, #0x1
+   15c44:	54000100 	b.eq	15c64 <__rustc::__rust_drop_panic+0x50>  // b.none
+   15c48:	b4000260 	cbz	x0, 15c94 <__rustc::__rust_drop_panic+0x80>
+   15c4c:	eb000288 	subs	x8, x20, x0
+   15c50:	54000163 	b.cc	15c7c <__rustc::__rust_drop_panic+0x68>  // b.lo, b.ul, b.last
+   15c54:	8b000273 	add	x19, x19, x0
+   15c58:	aa0803f4 	mov	x20, x8
+   15c5c:	b5fffea8 	cbnz	x8, 15c30 <__rustc::__rust_drop_panic+0x1c>
+   15c60:	14000015 	b	15cb4 <__rustc::__rust_drop_panic+0xa0>
+   15c64:	97ffe9df 	bl	103e0 <__errno_location@plt>
+   15c68:	b9800008 	ldrsw	x8, [x0]
+   15c6c:	7100111f 	cmp	w8, #0x4
+   15c70:	54000181 	b.ne	15ca0 <__rustc::__rust_drop_panic+0x8c>  // b.any
+   15c74:	b5fffdf4 	cbnz	x20, 15c30 <__rustc::__rust_drop_panic+0x1c>
+   15c78:	1400000f 	b	15cb4 <__rustc::__rust_drop_panic+0xa0>
+   15c7c:	90000343 	adrp	x3, 7d000 <GCC_except_table0+0x1d00c>
+   15c80:	91396063 	add	x3, x3, #0xe58
+   15c84:	aa1403e1 	mov	x1, x20
+   15c88:	aa1403e2 	mov	x2, x20
+   15c8c:	97fffa94 	bl	146dc <core::slice::index::slice_index_fail>
+   15c90:	d4200020 	brk	#0x1
+   15c94:	90000353 	adrp	x19, 7d000 <GCC_except_table0+0x1d00c>
+   15c98:	91390273 	add	x19, x19, #0xe40
+   15c9c:	14000003 	b	15ca8 <__rustc::__rust_drop_panic+0x94>
+   15ca0:	52800049 	mov	w9, #0x2                   	// #2
+   15ca4:	aa088133 	orr	x19, x9, x8, lsl #32
+   15ca8:	92400668 	and	x8, x19, #0x3
+   15cac:	f100051f 	cmp	x8, #0x1
+   15cb0:	54000040 	b.eq	15cb8 <__rustc::__rust_drop_panic+0xa4>  // b.none
+   15cb4:	97ffed0f 	bl	110f0 <std::process::abort>
+   15cb8:	f85ffe74 	ldr	x20, [x19, #-1]!
+   15cbc:	f9400675 	ldr	x21, [x19, #8]
+
+===== run_opaque address=0x00000000000159e0 =====
+
+boundary_probe:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+00000000000159e0 <run_opaque>:
+   159e0:	a9bd7bfd 	stp	x29, x30, [sp, #-48]!
+   159e4:	a90157f6 	stp	x22, x21, [sp, #16]
+   159e8:	a9024ff4 	stp	x20, x19, [sp, #32]
+   159ec:	910003fd 	mov	x29, sp
+   159f0:	b4000201 	cbz	x1, 15a30 <run_opaque+0x50>
+   159f4:	2a0203f3 	mov	w19, w2
+   159f8:	aa0103f4 	mov	x20, x1
+   159fc:	aa0003f5 	mov	x21, x0
+   15a00:	2a1f03f6 	mov	w22, wzr
+   15a04:	b84046a0 	ldr	w0, [x21], #4
+   15a08:	2a1303e1 	mov	w1, w19
+   15a0c:	94000039 	bl	15af0 <topic16_opaque_mix>
+   15a10:	0b160016 	add	w22, w0, w22
+   15a14:	f1000694 	subs	x20, x20, #0x1
+   15a18:	54ffff61 	b.ne	15a04 <run_opaque+0x24>  // b.any
+   15a1c:	2a1603e0 	mov	w0, w22
+   15a20:	a9424ff4 	ldp	x20, x19, [sp, #32]
+   15a24:	a94157f6 	ldp	x22, x21, [sp, #16]
+   15a28:	a8c37bfd 	ldp	x29, x30, [sp], #48
+   15a2c:	d65f03c0 	ret
+   15a30:	2a1f03f6 	mov	w22, wzr
+   15a34:	2a1603e0 	mov	w0, w22
+   15a38:	a9424ff4 	ldp	x20, x19, [sp, #32]
+   15a3c:	a94157f6 	ldp	x22, x21, [sp, #16]
+   15a40:	a8c37bfd 	ldp	x29, x30, [sp], #48
+   15a44:	d65f03c0 	ret
+   15a48:	d503201f 	nop
+   15a4c:	d503201f 	nop
+
+0000000000015a50 <main>:
+   15a50:	d10083ff 	sub	sp, sp, #0x20
+   15a54:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15a58:	910043fd 	add	x29, sp, #0x10
+   15a5c:	aa0103e3 	mov	x3, x1
+   15a60:	93407c02 	sxtw	x2, w0
+   15a64:	f0ffffe8 	adrp	x8, 14000 <alloc::raw_vec::RawVec<T,A>::grow_one+0x14>
+   15a68:	91300108 	add	x8, x8, #0xc00
+   15a6c:	f90007e8 	str	x8, [sp, #8]
+   15a70:	90000341 	adrp	x1, 7d000 <GCC_except_table0+0x1d00c>
+   15a74:	912f4021 	add	x1, x1, #0xbd0
+   15a78:	910023e0 	add	x0, sp, #0x8
+   15a7c:	2a1f03e4 	mov	w4, wzr
+   15a80:	9400260a 	bl	1f2a8 <std::rt::lang_start_internal>
+   15a84:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15a88:	910083ff 	add	sp, sp, #0x20
+   15a8c:	d65f03c0 	ret
+
+0000000000015a90 <__rustc::__rust_alloc>:
+   15a90:	1400001f 	b	15b0c <__rustc::__rdl_alloc>
+   15a94:	d503201f 	nop
+   15a98:	d503201f 	nop
+   15a9c:	d503201f 	nop
+
+0000000000015aa0 <__rustc::__rust_dealloc>:
+   15aa0:	14000031 	b	15b64 <__rustc::__rdl_dealloc>
+   15aa4:	d503201f 	nop
+   15aa8:	d503201f 	nop
+   15aac:	d503201f 	nop
+
+0000000000015ab0 <__rustc::__rust_realloc>:
+   15ab0:	1400002e 	b	15b68 <__rustc::__rdl_realloc>
+   15ab4:	d503201f 	nop
+   15ab8:	d503201f 	nop
+   15abc:	d503201f 	nop
+
+0000000000015ac0 <__rustc::__rust_alloc_zeroed>:
+   15ac0:	140000a1 	b	15d44 <__rustc::__rdl_alloc_zeroed>
+   15ac4:	d503201f 	nop
+   15ac8:	d503201f 	nop
+   15acc:	d503201f 	nop
+
+0000000000015ad0 <__rustc::__rust_alloc_error_handler_should_panic_v2>:
+   15ad0:	2a1f03e0 	mov	w0, wzr
+   15ad4:	d65f03c0 	ret
+   15ad8:	d503201f 	nop
+   15adc:	d503201f 	nop
+
+0000000000015ae0 <__rustc::__rust_no_alloc_shim_is_unstable_v2>:
+   15ae0:	d65f03c0 	ret
+   15ae4:	d503201f 	nop
+   15ae8:	d503201f 	nop
+   15aec:	d503201f 	nop
+
+0000000000015af0 <topic16_opaque_mix>:
+   15af0:	528f372a 	mov	w10, #0x79b9                	// #31161
+   15af4:	4a000028 	eor	w8, w1, w0
+   15af8:	72b3c6ea 	movk	w10, #0x9e37, lsl #16
+   15afc:	13886d09 	ror	w9, w8, #27
+   15b00:	4a0a0108 	eor	w8, w8, w10
+   15b04:	0b080120 	add	w0, w9, w8
+   15b08:	d65f03c0 	ret
+
+0000000000015b0c <__rustc::__rdl_alloc>:
+   15b0c:	f100403f 	cmp	x1, #0x10
+   15b10:	aa0003e2 	mov	x2, x0
+   15b14:	540000a8 	b.hi	15b28 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+   15b18:	eb02003f 	cmp	x1, x2
+   15b1c:	54000068 	b.hi	15b28 <__rustc::__rdl_alloc+0x1c>  // b.pmore
+   15b20:	aa0203e0 	mov	x0, x2
+   15b24:	17ffe99b 	b	10190 <malloc@plt>
+   15b28:	d10083ff 	sub	sp, sp, #0x20
+   15b2c:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15b30:	910043fd 	add	x29, sp, #0x10
+   15b34:	f100203f 	cmp	x1, #0x8
+   15b38:	52800108 	mov	w8, #0x8                   	// #8
+   15b3c:	910023e0 	add	x0, sp, #0x8
+   15b40:	9a888021 	csel	x1, x1, x8, hi	// hi = pmore
+   15b44:	f90007ff 	str	xzr, [sp, #8]
+   15b48:	97ffe9b2 	bl	10210 <posix_memalign@plt>
+   15b4c:	f94007e8 	ldr	x8, [sp, #8]
+   15b50:	7100001f 	cmp	w0, #0x0
+   15b54:	9a9f0100 	csel	x0, x8, xzr, eq	// eq = none
+   15b58:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15b5c:	910083ff 	add	sp, sp, #0x20
+   15b60:	d65f03c0 	ret
+
+0000000000015b64 <__rustc::__rdl_dealloc>:
+   15b64:	17ffe9e7 	b	10300 <free@plt>
+
+0000000000015b68 <__rustc::__rdl_realloc>:
+   15b68:	d10103ff 	sub	sp, sp, #0x40
+   15b6c:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15b70:	a90257f6 	stp	x22, x21, [sp, #32]
+   15b74:	a9034ff4 	stp	x20, x19, [sp, #48]
+   15b78:	910043fd 	add	x29, sp, #0x10
+   15b7c:	aa0303f3 	mov	x19, x3
+   15b80:	aa0103f4 	mov	x20, x1
+   15b84:	f100405f 	cmp	x2, #0x10
+   15b88:	54000128 	b.hi	15bac <__rustc::__rdl_realloc+0x44>  // b.pmore
+   15b8c:	eb13005f 	cmp	x2, x19
+   15b90:	540000e8 	b.hi	15bac <__rustc::__rdl_realloc+0x44>  // b.pmore
+   15b94:	aa1303e1 	mov	x1, x19
+   15b98:	a9434ff4 	ldp	x20, x19, [sp, #48]
+   15b9c:	a94257f6 	ldp	x22, x21, [sp, #32]
+   15ba0:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15ba4:	910103ff 	add	sp, sp, #0x40
+   15ba8:	17ffe9ae 	b	10260 <realloc@plt>
+   15bac:	f100205f 	cmp	x2, #0x8
+   15bb0:	52800108 	mov	w8, #0x8                   	// #8
+   15bb4:	aa0003f6 	mov	x22, x0
+   15bb8:	9a888041 	csel	x1, x2, x8, hi	// hi = pmore
+   15bbc:	910023e0 	add	x0, sp, #0x8
+   15bc0:	aa1303e2 	mov	x2, x19
+   15bc4:	f90007ff 	str	xzr, [sp, #8]
+   15bc8:	97ffe992 	bl	10210 <posix_memalign@plt>
+   15bcc:	2a0003e8 	mov	w8, w0
+   15bd0:	aa1f03e0 	mov	x0, xzr
+   15bd4:	35000168 	cbnz	w8, 15c00 <__rustc::__rdl_realloc+0x98>
+   15bd8:	f94007f5 	ldr	x21, [sp, #8]
+   15bdc:	b4000135 	cbz	x21, 15c00 <__rustc::__rdl_realloc+0x98>
+   15be0:	eb14027f 	cmp	x19, x20
+   15be4:	aa1503e0 	mov	x0, x21
+   15be8:	aa1603e1 	mov	x1, x22
+   15bec:	9a943262 	csel	x2, x19, x20, cc	// cc = lo, ul, last
+   15bf0:	97ffe914 	bl	10040 <memcpy@plt>
+   15bf4:	aa1603e0 	mov	x0, x22
+   15bf8:	97ffe9c2 	bl	10300 <free@plt>
+   15bfc:	aa1503e0 	mov	x0, x21
+   15c00:	a9434ff4 	ldp	x20, x19, [sp, #48]
+   15c04:	a94257f6 	ldp	x22, x21, [sp, #32]
+   15c08:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15c0c:	910103ff 	add	sp, sp, #0x40
+   15c10:	d65f03c0 	ret
+
+0000000000015c14 <__rustc::__rust_drop_panic>:
+   15c14:	a9bd7bfd 	stp	x29, x30, [sp, #-48]!
+   15c18:	f9000bf5 	str	x21, [sp, #16]
+   15c1c:	a9024ff4 	stp	x20, x19, [sp, #32]
+   15c20:	910003fd 	mov	x29, sp
+   15c24:	b00001f3 	adrp	x19, 52000 <_fini+0x7648>
+   15c28:	912ee273 	add	x19, x19, #0xbb8
+   15c2c:	52800794 	mov	w20, #0x3c                  	// #60
+   15c30:	52800040 	mov	w0, #0x2                   	// #2
+   15c34:	aa1303e1 	mov	x1, x19
+   15c38:	aa1403e2 	mov	x2, x20
+   15c3c:	97ffe99d 	bl	102b0 <write@plt>
+   15c40:	b100041f 	cmn	x0, #0x1
+   15c44:	54000100 	b.eq	15c64 <__rustc::__rust_drop_panic+0x50>  // b.none
+   15c48:	b4000260 	cbz	x0, 15c94 <__rustc::__rust_drop_panic+0x80>
+   15c4c:	eb000288 	subs	x8, x20, x0
+   15c50:	54000163 	b.cc	15c7c <__rustc::__rust_drop_panic+0x68>  // b.lo, b.ul, b.last
+   15c54:	8b000273 	add	x19, x19, x0
+   15c58:	aa0803f4 	mov	x20, x8
+   15c5c:	b5fffea8 	cbnz	x8, 15c30 <__rustc::__rust_drop_panic+0x1c>
+   15c60:	14000015 	b	15cb4 <__rustc::__rust_drop_panic+0xa0>
+   15c64:	97ffe9df 	bl	103e0 <__errno_location@plt>
+   15c68:	b9800008 	ldrsw	x8, [x0]
+   15c6c:	7100111f 	cmp	w8, #0x4
+   15c70:	54000181 	b.ne	15ca0 <__rustc::__rust_drop_panic+0x8c>  // b.any
+   15c74:	b5fffdf4 	cbnz	x20, 15c30 <__rustc::__rust_drop_panic+0x1c>
+   15c78:	1400000f 	b	15cb4 <__rustc::__rust_drop_panic+0xa0>
+   15c7c:	90000343 	adrp	x3, 7d000 <GCC_except_table0+0x1d00c>
+   15c80:	91396063 	add	x3, x3, #0xe58
+   15c84:	aa1403e1 	mov	x1, x20
+   15c88:	aa1403e2 	mov	x2, x20
+   15c8c:	97fffa94 	bl	146dc <core::slice::index::slice_index_fail>
+   15c90:	d4200020 	brk	#0x1
+   15c94:	90000353 	adrp	x19, 7d000 <GCC_except_table0+0x1d00c>
+   15c98:	91390273 	add	x19, x19, #0xe40
+   15c9c:	14000003 	b	15ca8 <__rustc::__rust_drop_panic+0x94>
+   15ca0:	52800049 	mov	w9, #0x2                   	// #2
+   15ca4:	aa088133 	orr	x19, x9, x8, lsl #32
+   15ca8:	92400668 	and	x8, x19, #0x3
+   15cac:	f100051f 	cmp	x8, #0x1
+   15cb0:	54000040 	b.eq	15cb8 <__rustc::__rust_drop_panic+0xa4>  // b.none
+   15cb4:	97ffed0f 	bl	110f0 <std::process::abort>
+   15cb8:	f85ffe74 	ldr	x20, [x19, #-1]!
+   15cbc:	f9400675 	ldr	x21, [x19, #8]
+   15cc0:	f94002a8 	ldr	x8, [x21]
+   15cc4:	b4000068 	cbz	x8, 15cd0 <__rustc::__rust_drop_panic+0xbc>
+   15cc8:	aa1403e0 	mov	x0, x20
+   15ccc:	d63f0100 	blr	x8
+   15cd0:	f94006a1 	ldr	x1, [x21, #8]
+   15cd4:	b4000081 	cbz	x1, 15ce4 <__rustc::__rust_drop_panic+0xd0>
+   15cd8:	f9400aa2 	ldr	x2, [x21, #16]
+   15cdc:	aa1403e0 	mov	x0, x20
+   15ce0:	97ffff70 	bl	15aa0 <__rustc::__rust_dealloc>
+   15ce4:	aa1303e0 	mov	x0, x19
+   15ce8:	52800301 	mov	w1, #0x18                  	// #24
+   15cec:	52800102 	mov	w2, #0x8                   	// #8
+   15cf0:	97ffff6c 	bl	15aa0 <__rustc::__rust_dealloc>
+   15cf4:	97ffecff 	bl	110f0 <std::process::abort>
+   15cf8:	f94006a1 	ldr	x1, [x21, #8]
+   15cfc:	b4000081 	cbz	x1, 15d0c <__rustc::__rust_drop_panic+0xf8>
+   15d00:	f9400aa2 	ldr	x2, [x21, #16]
+   15d04:	aa1403e0 	mov	x0, x20
+   15d08:	97ffff66 	bl	15aa0 <__rustc::__rust_dealloc>
+   15d0c:	aa1303e0 	mov	x0, x19
+   15d10:	52800301 	mov	w1, #0x18                  	// #24
+   15d14:	52800102 	mov	w2, #0x8                   	// #8
+   15d18:	97ffff62 	bl	15aa0 <__rustc::__rust_dealloc>
+   15d1c:	97fffb3e 	bl	14a14 <core::panicking::panic_cannot_unwind>
+   15d20:	97fffb3d 	bl	14a14 <core::panicking::panic_cannot_unwind>
+
+0000000000015d24 <__rustc::rust_begin_unwind>:
+   15d24:	d100c3ff 	sub	sp, sp, #0x30
+   15d28:	a9027bfd 	stp	x29, x30, [sp, #32]
+   15d2c:	910083fd 	add	x29, sp, #0x20
+   15d30:	a9402408 	ldp	x8, x9, [x0]
+   15d34:	f9000fe0 	str	x0, [sp, #24]
+   15d38:	910023e0 	add	x0, sp, #0x8
+   15d3c:	a900a7e8 	stp	x8, x9, [sp, #8]
+   15d40:	94003433 	bl	22e0c <std::sys::backtrace::__rust_end_short_backtrace>
+
+0000000000015d44 <__rustc::__rdl_alloc_zeroed>:
+   15d44:	d100c3ff 	sub	sp, sp, #0x30
+   15d48:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15d4c:	a9024ff4 	stp	x20, x19, [sp, #32]
+   15d50:	910043fd 	add	x29, sp, #0x10
+   15d54:	f100403f 	cmp	x1, #0x10
+   15d58:	aa0003f3 	mov	x19, x0
+   15d5c:	54000128 	b.hi	15d80 <__rustc::__rdl_alloc_zeroed+0x3c>  // b.pmore
+   15d60:	eb13003f 	cmp	x1, x19
+   15d64:	540000e8 	b.hi	15d80 <__rustc::__rdl_alloc_zeroed+0x3c>  // b.pmore
+   15d68:	aa1303e0 	mov	x0, x19
+   15d6c:	52800021 	mov	w1, #0x1                   	// #1
+   15d70:	a9424ff4 	ldp	x20, x19, [sp, #32]
+   15d74:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15d78:	9100c3ff 	add	sp, sp, #0x30
+   15d7c:	17ffe92d 	b	10230 <calloc@plt>
+   15d80:	f100203f 	cmp	x1, #0x8
+   15d84:	52800108 	mov	w8, #0x8                   	// #8
+   15d88:	910023e0 	add	x0, sp, #0x8
+   15d8c:	9a888021 	csel	x1, x1, x8, hi	// hi = pmore
+   15d90:	aa1303e2 	mov	x2, x19
+   15d94:	f90007ff 	str	xzr, [sp, #8]
+   15d98:	97ffe91e 	bl	10210 <posix_memalign@plt>
+   15d9c:	2a0003e8 	mov	w8, w0
+   15da0:	aa1f03e0 	mov	x0, xzr
+   15da4:	35000108 	cbnz	w8, 15dc4 <__rustc::__rdl_alloc_zeroed+0x80>
+   15da8:	f94007f4 	ldr	x20, [sp, #8]
+   15dac:	b40000d4 	cbz	x20, 15dc4 <__rustc::__rdl_alloc_zeroed+0x80>
+   15db0:	aa1403e0 	mov	x0, x20
+   15db4:	2a1f03e1 	mov	w1, wzr
+   15db8:	aa1303e2 	mov	x2, x19
+   15dbc:	97ffe909 	bl	101e0 <memset@plt>
+   15dc0:	aa1403e0 	mov	x0, x20
+   15dc4:	a9424ff4 	ldp	x20, x19, [sp, #32]
+   15dc8:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15dcc:	9100c3ff 	add	sp, sp, #0x30
+   15dd0:	d65f03c0 	ret
+
+0000000000015dd4 <__rustc::__rust_foreign_exception>:
+   15dd4:	a9bd7bfd 	stp	x29, x30, [sp, #-48]!
+   15dd8:	f9000bf5 	str	x21, [sp, #16]
+   15ddc:	a9024ff4 	stp	x20, x19, [sp, #32]

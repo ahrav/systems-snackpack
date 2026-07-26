@@ -1,0 +1,3 @@
+mode=local elements=1048576 rounds=32 checksum=3170936846 steady_ns=1509516
+mode=imported elements=1048576 rounds=32 checksum=3170936846 steady_ns=1508076
+mode=opaque elements=1048576 rounds=32 checksum=3170936846 steady_ns=45763178

@@ -22,8 +22,9 @@ The example keeps the computation fixed and changes body visibility:
 
 The experiment checks correctness, measures fresh processes in balanced `AB`
 and `BA` pairs, and inspects the final linked image. A retained call identifies
-a boundary in this exact build. It does not prove that the attribute is a
-language-level barrier or that call overhead alone explains a timing change.
+a static code-generation boundary in this exact build. It does not prove that
+the attribute is a language-level barrier or that call overhead alone explains
+a timing change.
 
 ```bash
 cargo build --release \
@@ -41,4 +42,6 @@ one untimed warm-up. Each CSV row remains a process observation; loop rounds
 inside one process are subsamples, not independent replicates.
 
 See the [first-round decision record](rounds/01.md), [measurement
-contract](measurements/README.md), and [primary sources](references.md).
+contract](measurements/README.md), [exact-source cross-host
+record](measurements/2026-07-26-cross-host.md), and [primary
+sources](references.md).
