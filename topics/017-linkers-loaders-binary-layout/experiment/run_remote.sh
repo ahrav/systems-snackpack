@@ -75,6 +75,7 @@ if [[ -n "${SOURCE_COMMIT:-}" && "$SOURCE_COMMIT" != "$source_commit" ]]; then
 fi
 
 build_dir="$(mktemp -d)"
+experiment_work_dir="$build_dir/experiment-work"
 cleanup() {
     rm -rf -- "$build_dir"
 }
@@ -176,7 +177,7 @@ fi
 ) >"$gates_dir/script-syntax.log" 2>&1
 
 taskset -c "$cpu" python3 "$topic_dir/experiment/binding_experiment.py" \
-    --work-dir "$build_dir" \
+    --work-dir "$experiment_work_dir" \
     --output-dir "$experiment_dir" \
     --blocks 12 \
     --iterations 25000000 \
