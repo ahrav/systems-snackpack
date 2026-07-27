@@ -2,6 +2,11 @@
 
 Each glibc Linux record applies only to its named source commit, source archive,
 ELF hashes, host, toolchain, flags, workload, CPU affinity, and run window.
+An extracted Git archive has no index or parent tree, so its remote
+`git-diff-check.log` records `not-applicable`. The source commit must pass
+`git diff --check` before archiving as a separate local gate. Archive mode
+requires the declared archive SHA-256; that digest and the before/after
+per-file manifests bind the remote run to the extracted bytes.
 
 The primary treatment uses one lazy-linked ELF. `A` removes `LD_BIND_NOW`; `B`
 sets `LD_BIND_NOW=1`. Each outcome contains 12 complete blocks. Even-numbered

@@ -62,6 +62,10 @@ else
         printf 'SOURCE_COMMIT is required for an archive source tree\n' >&2
         exit 2
     fi
+    if ! [[ "${SOURCE_ARCHIVE_SHA256:-}" =~ ^[0-9a-f]{64}$ ]]; then
+        printf 'SOURCE_ARCHIVE_SHA256 is required for an archive source tree\n' >&2
+        exit 2
+    fi
     source_commit="$SOURCE_COMMIT"
     source_commit_verification=declared-archive
 fi
@@ -127,10 +131,19 @@ manifest_source >"$output_dir/source-files.before.sha256"
     objdump --version
 } >"$output_dir/host.txt" 2>&1
 
-(
-    cd "$repo_root"
-    git diff --check
-) >"$gates_dir/git-diff-check.log" 2>&1
+if [[ "$source_commit_verification" == git-checkout ]]; then
+    (
+        cd "$repo_root"
+        git diff --check
+    ) >"$gates_dir/git-diff-check.log" 2>&1
+else
+    printf '%s\n' \
+        "status=not-applicable" \
+        "reason=Git archives have no index or parent tree." \
+        "source_commit=$source_commit" \
+        "source_archive_sha256=${SOURCE_ARCHIVE_SHA256:-unknown}" \
+        >"$gates_dir/git-diff-check.log"
+fi
 (
     cd "$repo_root"
     cargo fmt --all -- --check
