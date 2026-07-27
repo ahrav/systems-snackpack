@@ -1,0 +1,24 @@
+
+Displaying notes found in: .note.gnu.property
+  Owner                Data size 	Description
+  GNU                  0x00000030	NT_GNU_PROPERTY_TYPE_0	      Properties: x86 ISA needed: x86-64-baseline, x86-64-v2, x86 feature used: x86, x86 ISA used: 
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: 9f90e260151994e75fba650c98f0cdad4c305933
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)	    OS: Linux, ABI: 3.2.0
+
+Displaying notes found in: .gnu.build.attributes
+  Owner                Data size 	Description
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x3e1e0 to 0x3e206
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x3e206 to 0x3e206
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x3e000 to 0x3e016
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x4f308 to 0x4f310
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x3e210 to 0x3e2c9
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x4f307 to 0x4f307
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x4f307 to 0x4f307
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x3e016 to 0x3e01b
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x4f310 to 0x4f315

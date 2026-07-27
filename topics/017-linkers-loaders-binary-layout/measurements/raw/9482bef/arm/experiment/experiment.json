@@ -1,0 +1,11 @@
+{
+  "aa_a": "lazy ELF with LD_BIND_NOW absent",
+  "aa_b": "lazy ELF with LD_BIND_NOW absent",
+  "blocks": 12,
+  "causal_a": "lazy ELF with LD_BIND_NOW absent",
+  "causal_b": "the same lazy ELF with LD_BIND_NOW=1",
+  "iterations": 25000000,
+  "processes_per_outcome": 48,
+  "ratio": "B/A",
+  "symbols": 4096
+}

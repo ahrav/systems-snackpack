@@ -52,4 +52,6 @@ The driver also runs an A/A control through the same process path. It reports
 the control interval but does not enforce an acceptance threshold.
 
 See the [first-round decision record](rounds/01.md), [measurement
-contract](measurements/README.md), and [primary sources](references.md).
+contract](measurements/README.md), [two-host result
+boundary](measurements/2026-07-27-linux-cross-host.md), and [primary
+sources](references.md).

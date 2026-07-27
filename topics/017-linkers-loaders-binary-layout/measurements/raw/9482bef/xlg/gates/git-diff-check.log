@@ -1,0 +1,4 @@
+status=not-applicable
+reason=Git archives have no index or parent tree.
+source_commit=9482befcad700af62e793a7498b7d6c4a71b00d6
+source_archive_sha256=3ec6a9683a086e6b0e119247a26caceb0cd07ca803259033c3cd1d338110f0e0

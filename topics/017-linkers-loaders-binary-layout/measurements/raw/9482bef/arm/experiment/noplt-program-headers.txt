@@ -1,0 +1,33 @@
+
+Elf file type is DYN (Position-Independent Executable file)
+Entry point 0x40240
+There are 11 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x000268 0x000268 R   0x8
+  INTERP         0x0002a8 0x00000000000002a8 0x00000000000002a8 0x00001b 0x00001b R   0x1
+      [Requesting program interpreter: /lib/ld-linux-aarch64.so.1]
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x03d708 0x03d708 R   0x10000
+  LOAD           0x040000 0x0000000000040000 0x0000000000040000 0x0183f0 0x0183f0 R E 0x10000
+  LOAD           0x060000 0x0000000000060000 0x0000000000060000 0x0001cc 0x0001cc R   0x10000
+  LOAD           0x067d48 0x0000000000077d48 0x0000000000077d48 0x0082bc 0x0082c0 RW  0x10000
+  DYNAMIC        0x067d60 0x0000000000077d60 0x0000000000077d60 0x000210 0x000210 RW  0x8
+  NOTE           0x0002c4 0x00000000000002c4 0x00000000000002c4 0x000044 0x000044 R   0x4
+  GNU_EH_FRAME   0x060050 0x0000000000060050 0x0000000000060050 0x00004c 0x00004c R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0x10
+  GNU_RELRO      0x067d48 0x0000000000077d48 0x0000000000077d48 0x0082b8 0x0082b8 R   0x1
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .interp 
+   02     .interp .note.gnu.build-id .note.ABI-tag .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt 
+   03     .init .plt .text .fini 
+   04     .rodata .eh_frame_hdr .eh_frame 
+   05     .init_array .fini_array .data.rel.ro .dynamic .got .data .bss 
+   06     .dynamic 
+   07     .note.gnu.build-id .note.ABI-tag 
+   08     .eh_frame_hdr 
+   09     
+   10     .init_array .fini_array .data.rel.ro .dynamic .got 

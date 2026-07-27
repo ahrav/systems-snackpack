@@ -1,0 +1,18 @@
+{
+  "lazy": {
+    "checksum": 8419328,
+    "elapsed_ns": 1147870
+  },
+  "linked_now": {
+    "checksum": 8419328,
+    "elapsed_ns": 81140
+  },
+  "noplt": {
+    "checksum": 8419328,
+    "elapsed_ns": 56300
+  },
+  "same_image_eager": {
+    "checksum": 8419328,
+    "elapsed_ns": 74910
+  }
+}
