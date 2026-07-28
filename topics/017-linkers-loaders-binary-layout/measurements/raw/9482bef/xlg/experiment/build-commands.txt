@@ -1,0 +1,4 @@
+cc -O2 -fPIC -fno-lto -shared -Wl,-z,defs -Wl,-soname,libmany.so -Wl,--hash-style=gnu -Wl,--build-id=sha1 -o libmany.so libmany.c
+cc -O2 -fPIE -pie -fplt -fno-lto main.c -L. -lmany -Wl,-rpath,$ORIGIN -Wl,--hash-style=gnu -Wl,--build-id=sha1 -Wl,-z,relro -Wl,-z,lazy -o lazy
+cc -O2 -fPIE -pie -fplt -fno-lto main.c -L. -lmany -Wl,-rpath,$ORIGIN -Wl,--hash-style=gnu -Wl,--build-id=sha1 -Wl,-z,relro -Wl,-z,now -o now
+cc -O2 -fPIE -pie -fno-plt -fno-lto main.c -L. -lmany -Wl,-rpath,$ORIGIN -Wl,--hash-style=gnu -Wl,--build-id=sha1 -Wl,-z,relro -Wl,-z,now -o noplt

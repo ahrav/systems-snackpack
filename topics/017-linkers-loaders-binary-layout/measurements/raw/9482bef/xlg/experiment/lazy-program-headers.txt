@@ -1,0 +1,37 @@
+
+Elf file type is DYN (Position-Independent Executable file)
+Entry point 0x4e210
+There are 13 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x0002d8 0x0002d8 R   0x8
+  INTERP         0x000318 0x0000000000000318 0x0000000000000318 0x00001c 0x00001c R   0x1
+      [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x03d760 0x03d760 R   0x1000
+  LOAD           0x03e000 0x000000000003e000 0x000000000003e000 0x020345 0x020345 R E 0x1000
+  LOAD           0x05f000 0x000000000005f000 0x000000000005f000 0x000168 0x000168 R   0x1000
+  LOAD           0x05fda8 0x0000000000060da8 0x0000000000060da8 0x00828c 0x008290 RW  0x1000
+  DYNAMIC        0x05fdc0 0x0000000000060dc0 0x0000000000060dc0 0x000200 0x000200 RW  0x8
+  NOTE           0x000338 0x0000000000000338 0x0000000000000338 0x000040 0x000040 R   0x8
+  NOTE           0x000378 0x0000000000000378 0x0000000000000378 0x000044 0x000044 R   0x4
+  GNU_PROPERTY   0x000338 0x0000000000000338 0x0000000000000338 0x000040 0x000040 R   0x8
+  GNU_EH_FRAME   0x05f03c 0x000000000005f03c 0x000000000005f03c 0x00003c 0x00003c R   0x4
+  GNU_STACK      0x000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000 RW  0x10
+  GNU_RELRO      0x05fda8 0x0000000000060da8 0x0000000000060da8 0x000258 0x000258 R   0x1
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .interp 
+   02     .interp .note.gnu.property .note.gnu.build-id .note.ABI-tag .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt 
+   03     .init .plt .text .fini 
+   04     .rodata .eh_frame_hdr .eh_frame 
+   05     .init_array .fini_array .data.rel.ro .dynamic .got .got.plt .data .bss 
+   06     .dynamic 
+   07     .note.gnu.property 
+   08     .note.gnu.build-id .note.ABI-tag 
+   09     .note.gnu.property 
+   10     .eh_frame_hdr 
+   11     
+   12     .init_array .fini_array .data.rel.ro .dynamic .got 

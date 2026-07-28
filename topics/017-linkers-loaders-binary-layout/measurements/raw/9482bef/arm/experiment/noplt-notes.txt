@@ -1,0 +1,20 @@
+
+Displaying notes found in: .note.gnu.build-id
+  Owner                Data size 	Description
+  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)	    Build ID: e5bcbe822b7831ac6c9c1a7c8b6e16b50716f0fe
+
+Displaying notes found in: .note.ABI-tag
+  Owner                Data size 	Description
+  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)	    OS: Linux, ABI: 3.7.0
+
+Displaying notes found in: .gnu.build.attributes
+  Owner                Data size 	Description
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x40240 to 0x40274
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x40274 to 0x40288
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x40000 to 0x40010
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x583d8 to 0x583e4
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x402a0 to 0x40368
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x583d8 to 0x583d8
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x583d8 to 0x583d8
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x40010 to 0x4001c
+  GA$<version>3a1              0x00000010	OPEN	    Applies to region from 0x583e4 to 0x583f0

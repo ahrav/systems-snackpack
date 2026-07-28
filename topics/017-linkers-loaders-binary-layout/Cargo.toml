@@ -1,0 +1,12 @@
+[package]
+name = "linkers-loaders-binary-layout"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[[bench]]
+name = "block_summary"
+harness = false
