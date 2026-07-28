@@ -1,0 +1,142 @@
+[
+  {
+    "binary": "baseline",
+    "checksum": "738344c7b84fb861",
+    "comparison_mode": "alpha",
+    "elapsed_ns": 69939645,
+    "iterations": 20000000,
+    "mode": "alpha",
+    "process_wall_ns": 72464606,
+    "seed": 2
+  },
+  {
+    "binary": "baseline-copy",
+    "checksum": "738344c7b84fb861",
+    "comparison_mode": "alpha",
+    "elapsed_ns": 69664951,
+    "iterations": 20000000,
+    "mode": "alpha",
+    "process_wall_ns": 72548001,
+    "seed": 2
+  },
+  {
+    "binary": "baseline",
+    "checksum": "0000000000000002",
+    "comparison_mode": "noop",
+    "elapsed_ns": 0,
+    "iterations": 0,
+    "mode": "noop",
+    "process_wall_ns": 2709444,
+    "seed": 2
+  },
+  {
+    "binary": "baseline-copy",
+    "checksum": "0000000000000002",
+    "comparison_mode": "noop",
+    "elapsed_ns": 0,
+    "iterations": 0,
+    "mode": "noop",
+    "process_wall_ns": 2345042,
+    "seed": 2
+  },
+  {
+    "binary": "baseline",
+    "checksum": "738344c7b84fb861",
+    "comparison_mode": "alpha",
+    "elapsed_ns": 69647836,
+    "iterations": 20000000,
+    "mode": "alpha",
+    "process_wall_ns": 72078299,
+    "seed": 2
+  },
+  {
+    "binary": "pgo-alpha",
+    "checksum": "738344c7b84fb861",
+    "comparison_mode": "alpha",
+    "elapsed_ns": 70522607,
+    "iterations": 20000000,
+    "mode": "alpha",
+    "process_wall_ns": 73207941,
+    "seed": 2
+  },
+  {
+    "binary": "baseline",
+    "checksum": "45a6fabf192242a9",
+    "comparison_mode": "beta",
+    "elapsed_ns": 69648390,
+    "iterations": 20000000,
+    "mode": "beta",
+    "process_wall_ns": 72375881,
+    "seed": 2
+  },
+  {
+    "binary": "pgo-alpha",
+    "checksum": "45a6fabf192242a9",
+    "comparison_mode": "beta",
+    "elapsed_ns": 70431940,
+    "iterations": 20000000,
+    "mode": "beta",
+    "process_wall_ns": 73194958,
+    "seed": 2
+  },
+  {
+    "binary": "pgo-beta",
+    "checksum": "738344c7b84fb861",
+    "comparison_mode": "alpha",
+    "elapsed_ns": 70414537,
+    "iterations": 20000000,
+    "mode": "alpha",
+    "process_wall_ns": 73131678,
+    "seed": 2
+  },
+  {
+    "binary": "pgo-alpha",
+    "checksum": "738344c7b84fb861",
+    "comparison_mode": "alpha",
+    "elapsed_ns": 70733343,
+    "iterations": 20000000,
+    "mode": "alpha",
+    "process_wall_ns": 73513358,
+    "seed": 2
+  },
+  {
+    "binary": "pgo-beta",
+    "checksum": "45a6fabf192242a9",
+    "comparison_mode": "beta",
+    "elapsed_ns": 70516802,
+    "iterations": 20000000,
+    "mode": "beta",
+    "process_wall_ns": 73461182,
+    "seed": 2
+  },
+  {
+    "binary": "pgo-alpha",
+    "checksum": "45a6fabf192242a9",
+    "comparison_mode": "beta",
+    "elapsed_ns": 70411521,
+    "iterations": 20000000,
+    "mode": "beta",
+    "process_wall_ns": 73243163,
+    "seed": 2
+  },
+  {
+    "binary": "baseline",
+    "checksum": "0000000000000002",
+    "comparison_mode": "noop",
+    "elapsed_ns": 0,
+    "iterations": 0,
+    "mode": "noop",
+    "process_wall_ns": 2683275,
+    "seed": 2
+  },
+  {
+    "binary": "pgo-alpha",
+    "checksum": "0000000000000002",
+    "comparison_mode": "noop",
+    "elapsed_ns": 0,
+    "iterations": 0,
+    "mode": "noop",
+    "process_wall_ns": 2427320,
+    "seed": 2
+  }
+]

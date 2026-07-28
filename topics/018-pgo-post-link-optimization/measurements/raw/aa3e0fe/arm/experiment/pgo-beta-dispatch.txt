@@ -1,0 +1,21 @@
+0000000000014c30 <pgo_probe::dispatch>:
+   14c30:	sub	sp, sp, #0x20
+   14c34:	stp	x29, x30, [sp, #16]
+   14c38:	add	x29, sp, #0x10
+   14c3c:	str	x0, [sp, #8]
+   14c40:	add	x8, sp, #0x8
+   14c44:	add	x9, sp, #0x8
+   14c48:	ldr	x8, [sp, #8]
+   14c4c:	str	x1, [sp, #8]
+   14c50:	adrp	x9, 14000 <<alloc::raw_vec::RawVec<addr2line::function::InlinedFunction<gimli::read::endian_slice::EndianSlice<gimli::endianity::LittleEndian>>>>::grow_one+0x8>
+   14c54:	add	x9, x9, #0xc10
+   14c58:	ldr	x0, [sp, #8]
+   14c5c:	cmp	x8, x9
+   14c60:	b.ne	14c74 <pgo_probe::dispatch+0x44>  // b.any
+   14c64:	bl	14c10 <pgo_probe::beta>
+   14c68:	ldp	x29, x30, [sp, #16]
+   14c6c:	add	sp, sp, #0x20
+   14c70:	ret
+   14c74:	blr	x8
+   14c78:	b	14c68 <pgo_probe::dispatch+0x38>
+   14c7c:	nop

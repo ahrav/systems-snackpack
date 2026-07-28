@@ -1,5 +1,11 @@
 # Measurement contract
 
+The retained runs are:
+
+- [Linux AArch64, 2026-07-28](2026-07-28-linux-aarch64.md);
+- [Linux x86-64, 2026-07-28](2026-07-28-linux-x86-64.md);
+- [cross-host interpretation](2026-07-28-linux-cross-host.md).
+
 Each record applies only to its named source commit, archive digest, binaries,
 host, toolchain, target features, build flags, inputs, CPU affinity, run window,
 and retained raw process rows.

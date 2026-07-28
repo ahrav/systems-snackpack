@@ -1,0 +1,4 @@
+# Preserve retained tool output byte-for-byte.
+**/* -text -whitespace
+*.profraw binary
+*.profdata binary

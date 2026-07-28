@@ -1,0 +1,18 @@
+{
+  "llvm-bolt": {
+    "path": null,
+    "version": null
+  },
+  "merge-fdata": {
+    "path": null,
+    "version": null
+  },
+  "perf": {
+    "path": "/usr/bin/perf",
+    "version": "perf version 6.1.176-223.369.amzn2023.x86_64"
+  },
+  "perf2bolt": {
+    "path": null,
+    "version": null
+  }
+}
