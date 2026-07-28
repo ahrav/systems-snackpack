@@ -39,13 +39,14 @@ replicates.
 The remote wrapper writes all evidence outside the source tree:
 
 - `host.txt` records `uname`, CPU identity, CPU count, affinity, kernel,
-  toolchain, native Rust target configuration, and available post-link tools;
+  workspace and experiment toolchains, native Rust target configurations, and
+  available post-link tools;
 - `gates/` retains every repository and script validation log;
 - `source-files.before.sha256` and `source-files.after.sha256` prove that the
   included non-`.git`, non-`target` file bytes did not change;
 - `source-provenance.txt` records the verified archive and extracted-manifest
   identities and the immutable source snapshot used by every build and
-  non-Git gate;
+  non-Git gate, plus the selected experiment Rust toolchain;
 - `process.log` retains the complete driver output;
 - `experiment/raw.csv` retains every completed timed process, any failed
   attempt, block order, checksum, and both clocks;

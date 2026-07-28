@@ -119,7 +119,10 @@ def rust_profdata(rustc: str, cwd: Path) -> str:
     bundled = sysroot / "lib" / "rustlib" / host / "bin" / "llvm-profdata"
     if bundled.is_file() and os.access(bundled, os.X_OK):
         return str(bundled)
-    return tool("llvm-profdata")
+    raise RuntimeError(
+        "the selected Rust toolchain lacks its bundled llvm-profdata: "
+        f"{bundled}"
+    )
 
 
 def parse_output(output: str) -> dict[str, int | str]:
@@ -726,6 +729,7 @@ def main() -> None:
         "training_seed": 1,
         "measurement_seed": 2,
         "schedule_seed": SCHEDULE_SEED,
+        "rustup_toolchain_environment": os.environ.get("RUSTUP_TOOLCHAIN"),
         "tools": tools,
         "post_link_tools": postlink,
         "binary_sha256": binary_hashes,

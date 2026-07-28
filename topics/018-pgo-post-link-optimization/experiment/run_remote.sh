@@ -16,14 +16,21 @@ topic_rel="topics/018-pgo-post-link-optimization"
 topic_dir="$repo_root/$topic_rel"
 
 for required in \
-    awk bash cargo cc clippy-driver cmp cp date getconf git ld lscpu mkdir mktemp \
-    mv nm objdump python3 rg rm rustc rustfmt sed sha256sum sort taskset uname xargs; do
+    awk bash cargo cc clippy-driver cmp cp date env getconf git ld lscpu mkdir \
+    mktemp mv nm objdump python3 rg rm rustc rustfmt rustup sed sha256sum sort \
+    taskset uname xargs; do
     if ! command -v "$required" >/dev/null 2>&1; then
         printf 'required executable is unavailable: %s\n' "$required" >&2
         exit 2
     fi
 done
 python3 -c 'import sys; raise SystemExit(sys.version_info < (3, 8))'
+experiment_rustup_toolchain="${EXPERIMENT_RUSTUP_TOOLCHAIN:-stable}"
+if ! RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" rustc -vV >/dev/null 2>&1; then
+    printf 'experiment Rust toolchain is unavailable: %s\n' \
+        "$experiment_rustup_toolchain" >&2
+    exit 2
+fi
 
 if [[ ! -r "$topic_dir/experiment/pgo_experiment.py" ]]; then
     printf 'repository lacks the Topic 18 experiment\n' >&2
@@ -143,6 +150,7 @@ topic_dir="$repo_root/$topic_rel"
     printf 'source_archive_sha256=%s\n' "${SOURCE_ARCHIVE_SHA256:-not-applicable}"
     printf 'source_manifest_sha256=%s\n' "$source_manifest_sha256"
     printf 'immutable_snapshot=%s\n' "$snapshot_root"
+    printf 'experiment_rustup_toolchain=%s\n' "$experiment_rustup_toolchain"
     printf 'expected_source_manifest_sha256=%s\n' \
         "${SOURCE_MANIFEST_SHA256:-not-applicable}"
 } >"$output_dir/source-provenance.txt"
@@ -168,13 +176,24 @@ topic_dir="$repo_root/$topic_rel"
     rg -m 128 \
         '^(model name|vendor_id|cpu family|model|stepping|microcode|Hardware|CPU implementer|CPU architecture|CPU variant|CPU part|CPU revision|Features|flags)' \
         /proc/cpuinfo
-    printf '\nrustc\n'
-    rustc -vV
-    printf '\nnative_target_cfg\n'
-    rustc --print cfg -Ctarget-cpu=native
-    printf '\nllvm_profdata_candidates\n'
-    host="$(rustc -vV | sed -n 's/^host: //p')"
-    sysroot="$(rustc --print sysroot)"
+    printf '\nworkspace_rustc\n'
+    env -u RUSTUP_TOOLCHAIN rustc -vV
+    printf '\nworkspace_native_target_cfg\n'
+    env -u RUSTUP_TOOLCHAIN rustc --print cfg -Ctarget-cpu=native
+    printf '\nexperiment_rustc\n'
+    RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" rustc -vV
+    printf '\nexperiment_native_target_cfg\n'
+    RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
+        rustc --print cfg -Ctarget-cpu=native
+    printf '\nexperiment_llvm_profdata_candidates\n'
+    host="$(
+        RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
+            rustc -vV | sed -n 's/^host: //p'
+    )"
+    sysroot="$(
+        RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
+            rustc --print sysroot
+    )"
     printf 'rust_bundled=%s\n' "$sysroot/lib/rustlib/$host/bin/llvm-profdata"
     command -v llvm-profdata || true
     printf '\nlinker_driver\n'
@@ -210,27 +229,28 @@ else
 fi
 (
     cd "$repo_root"
-    cargo fmt --all -- --check
+    env -u RUSTUP_TOOLCHAIN cargo fmt --all -- --check
 ) >"$gates_dir/cargo-fmt.log" 2>&1
 (
     cd "$repo_root"
-    cargo test --workspace --lib --examples
+    env -u RUSTUP_TOOLCHAIN cargo test --workspace --lib --examples
 ) >"$gates_dir/cargo-test-lib-examples.log" 2>&1
 (
     cd "$repo_root"
-    cargo test --workspace --doc
+    env -u RUSTUP_TOOLCHAIN cargo test --workspace --doc
 ) >"$gates_dir/cargo-test-doc.log" 2>&1
 (
     cd "$repo_root"
-    cargo clippy --workspace --all-targets -- -D warnings
+    env -u RUSTUP_TOOLCHAIN cargo clippy --workspace --all-targets -- -D warnings
 ) >"$gates_dir/cargo-clippy.log" 2>&1
 (
     cd "$repo_root"
-    cargo bench --workspace --no-run
+    env -u RUSTUP_TOOLCHAIN cargo bench --workspace --no-run
 ) >"$gates_dir/cargo-bench-no-run.log" 2>&1
 (
     cd "$repo_root"
-    RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
+    env -u RUSTUP_TOOLCHAIN RUSTDOCFLAGS="-D warnings" \
+        cargo doc --workspace --no-deps
 ) >"$gates_dir/cargo-doc.log" 2>&1
 (
     cd "$repo_root"
@@ -239,7 +259,8 @@ fi
     bash -n "$topic_rel/experiment/run_remote.sh"
 ) >"$gates_dir/script-syntax.log" 2>&1
 
-taskset -c "$cpu" python3 "$topic_dir/experiment/pgo_experiment.py" \
+RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
+    taskset -c "$cpu" python3 "$topic_dir/experiment/pgo_experiment.py" \
     --work-dir "$experiment_work_dir" \
     --output-dir "$experiment_dir" \
     --blocks 12 \

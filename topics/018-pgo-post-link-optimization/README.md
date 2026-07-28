@@ -46,7 +46,11 @@ topics/018-pgo-post-link-optimization/experiment/run_remote.sh \
 ```
 
 The driver selects the first CPU in the process affinity mask unless the command
-passes a third `CPU` argument. It builds with `rustc -O`,
+passes a third `CPU` argument. Cargo gates use the repository-pinned toolchain.
+The PGO build uses `EXPERIMENT_RUSTUP_TOOLCHAIN`, which defaults to `stable`, so
+`rustc` and its bundled `llvm-profdata` share a profile format. The retained
+receipts record the resolved compiler and LLVM versions; the driver fails when
+that toolchain lacks its bundled profiler. The driver builds with `rustc -O`,
 `-Ctarget-cpu=native`, `-Ccodegen-units=1`, debug information, and retained ELF
 relocations. It trains each profile for 5,000,000 iterations, then uses a
 recorded shuffle seed to schedule six `ABBA` and six `BAAB` blocks. Each
