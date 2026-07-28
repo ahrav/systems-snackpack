@@ -24,6 +24,11 @@ A declared commit that does not name the measured tree fails this comparison.
 The retained archive digest identifies the transfer artifact only; the archive
 itself is not retained, so that field carries no independent verification.
 
+The comparison needs the named commit to be reachable in a plain clone, so a
+topic branch carrying evidence must reach the default branch through a merge
+that preserves its commits. Squashing or rewriting a branch discards the named
+commit and leaves its retained manifests unverifiable.
+
 The primary treatment uses one lazy-linked ELF. `A` removes `LD_BIND_NOW`; `B`
 sets `LD_BIND_NOW=1`. Each outcome contains 12 complete blocks. Even-numbered
 blocks use `ABBA`; odd-numbered blocks use `BAAB`. Every letter launches a fresh
