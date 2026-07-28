@@ -88,14 +88,39 @@ gates_dir="$output_dir/gates"
 experiment_dir="$output_dir/experiment"
 mkdir -p -- "$gates_dir"
 
+# Emits NUL-separated paths relative to the caller's directory. Callers sort;
+# `manifest_source` keeps the collation that retained manifests were built under,
+# while the checkout gate below sorts in C to match `git ls-files`.
+scan_source_paths() {
+    rg --files -uu -g '!/.git/' -g '!/target/' -0
+}
 manifest_source() {
     (
         cd "$repo_root"
-        rg --files -uu -g '!/.git/' -g '!/target/' -0 \
+        scan_source_paths \
             | sort -z \
             | xargs -0 sha256sum --
     )
 }
+
+if [[ "$source_commit_verification" == git-checkout ]]; then
+    # `-uu` disables ignore rules and `git status --porcelain` omits ignored
+    # files, so a clean checkout can still carry files absent from the commit.
+    # Such a file enters the manifest and can influence the gates while the run
+    # is attributed to HEAD, and the manifest stops reproducing from
+    # `git archive $source_commit`.
+    untracked_scanned="$(
+        cd "$repo_root"
+        LC_ALL=C comm -23 \
+            <(scan_source_paths | tr '\0' '\n' | LC_ALL=C sort) \
+            <(git ls-files | LC_ALL=C sort)
+    )"
+    if [[ -n "$untracked_scanned" ]]; then
+        printf 'source tree carries files absent from %s:\n%s\n' \
+            "$source_commit" "$untracked_scanned" >&2
+        exit 2
+    fi
+fi
 manifest_source >"$output_dir/source-files.before.sha256"
 
 # Probe from inside the source tree: rustup applies a directory toolchain
