@@ -50,7 +50,11 @@ if ! [[ "$cpu" =~ ^(0|[1-9][0-9]*)$ ]] || ! taskset -c "$cpu" true >/dev/null 2>
     exit 2
 fi
 
-if git -C "$repo_root" rev-parse --git-dir >/dev/null 2>&1; then
+# Compare against the work-tree root rather than testing for repository
+# discovery: `rev-parse --git-dir` walks upward, so an archive extracted beneath
+# an unrelated checkout would otherwise adopt that ancestor's HEAD and status as
+# its own source identity.
+if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$repo_root" ]]; then
     source_commit="$(git -C "$repo_root" rev-parse HEAD)"
     if [[ -n "$(git -C "$repo_root" status --porcelain)" ]]; then
         printf 'repository must be clean\n' >&2
