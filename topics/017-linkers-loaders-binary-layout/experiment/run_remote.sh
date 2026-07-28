@@ -98,7 +98,12 @@ manifest_source() {
 }
 manifest_source >"$output_dir/source-files.before.sha256"
 
-{
+# Probe from inside the source tree: rustup applies a directory toolchain
+# override only to `rustc` and `cargo` invoked at or below the directory holding
+# `rust-toolchain.toml`. Probing from the caller's directory would record an
+# ambient toolchain while every cargo gate below runs under the pinned one.
+(
+    cd "$repo_root"
     printf 'utc=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
     printf 'source_commit=%s\n' "$source_commit"
     printf 'source_commit_verification=%s\n' "$source_commit_verification"
@@ -124,6 +129,8 @@ manifest_source >"$output_dir/source-files.before.sha256"
     cc -dumpmachine
     printf '\nrustc\n'
     rustc -vV
+    printf '\ncargo\n'
+    cargo -vV
     printf '\ntarget_cfg\n'
     rustc --print cfg -C target-cpu=native
     printf '\nlinker\n'
@@ -134,7 +141,7 @@ manifest_source >"$output_dir/source-files.before.sha256"
     printf '\nelf_tools\n'
     readelf --version
     objdump --version
-} >"$output_dir/host.txt" 2>&1
+) >"$output_dir/host.txt" 2>&1
 
 if [[ "$source_commit_verification" == git-checkout ]]; then
     (

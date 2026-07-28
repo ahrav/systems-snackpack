@@ -8,6 +8,22 @@ An extracted Git archive has no index or parent tree, so its remote
 requires the declared archive SHA-256; that digest and the before/after
 per-file manifests bind the remote run to the extracted bytes.
 
+The declared commit is not self-attesting, so check it against the retained
+manifest rather than trusting the recorded value. The manifest reproduces
+byte-exactly from the named commit:
+
+```sh
+tmp="$(mktemp -d)"
+git archive <source_commit> | tar -x -C "$tmp"
+(cd "$tmp" && rg --files -uu -g '!/.git/' -g '!/target/' -0 \
+    | sort -z | xargs -0 sha256sum --) \
+    | cmp - measurements/raw/<commit>/<host>/source-files.before.sha256
+```
+
+A declared commit that does not name the measured tree fails this comparison.
+The retained archive digest identifies the transfer artifact only; the archive
+itself is not retained, so that field carries no independent verification.
+
 The primary treatment uses one lazy-linked ELF. `A` removes `LD_BIND_NOW`; `B`
 sets `LD_BIND_NOW=1`. Each outcome contains 12 complete blocks. Even-numbered
 blocks use `ABBA`; odd-numbered blocks use `BAAB`. Every letter launches a fresh
