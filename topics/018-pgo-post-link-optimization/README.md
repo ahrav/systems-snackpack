@@ -40,28 +40,39 @@ Run the retained check from a clean x86-64 or AArch64 Linux checkout with
 procfs, `taskset`, `lscpu`, GNU `objdump`, `nm`, and `sha256sum`:
 
 ```bash
-env -i PATH="$PATH" HOME="$HOME" bash -p \
+/usr/bin/env -i \
+  PATH="$HOME/.cargo/bin:/usr/bin:/bin" \
+  HOME="$HOME" \
+  /usr/bin/bash -p \
   topics/018-pgo-post-link-optimization/experiment/run_remote.sh \
   "$(pwd)" \
   /tmp/topic18-evidence
 ```
 
+Name `env` and `bash` by absolute path, and give `PATH` explicitly rather than
+passing the caller's through. The launcher runs before the wrapper exists to check
+anything, so resolving either program through an inherited `PATH` means a planted
+`bash` earlier on it is what performs the isolation — which is to say none happens.
+Adjust the two directories to wherever this host keeps its shell and its Rust
+toolchain; the point is that the operator chooses them rather than inheriting them.
+`$HOME/.cargo/bin` is on the list because `cargo`, `rustc`, `rustup`, `rustfmt`,
+`clippy-driver`, and `rg` normally live there, and the run records the resolved path
+and digest of every tool it uses in `tools.txt`.
+
 Start from an empty environment rather than removing named variables. The wrapper
-refuses the startup, loader, and `GIT_*` namespaces it can see, but a rejection is
-too late for anything the dynamic loader has already acted on: an `LD_PRELOAD`
-library's constructor runs before the script's first line, and it can remove its own
-entry from `environ`, so the in-script sweep neither prevents the code nor reliably
-observes the variable. `env -i` means Bash is executed with none of it. `-p` is what
-keeps the caller's exported functions out of the run — privileged mode does not
-inherit functions from the environment — and it has to come from this launcher
-rather than from the wrapper alone, because an exported `exec` function is
+refuses the startup, loader, `GIT_*`, and exported-function namespaces it can see,
+but a rejection is too late for anything the dynamic loader has already acted on: an
+`LD_PRELOAD` library's constructor runs before the script's first line, and it can
+remove its own entry from `environ`, so the in-script sweep neither prevents the code
+nor reliably observes the variable. `env -i` means Bash is executed with none of it.
+`-p` is what keeps the caller's exported functions out of the run — privileged mode
+does not inherit functions from the environment — and it has to come from this
+launcher rather than from the wrapper alone, because an exported `exec` function is
 dispatched ahead of the builtin and would skip the wrapper's own restart.
 
 `PATH` and `HOME` are the two the wrapper needs: `HOME` because rustup resolves
-`RUSTUP_HOME` beneath it, and `PATH` to find the tools, whose resolved paths and
-digests the run records in `tools.txt`. Add `RUSTUP_HOME`,
-`EXPERIMENT_RUSTUP_TOOLCHAIN`, or the `SOURCE_*` variables for an archive handoff
-only when that run needs them.
+`RUSTUP_HOME` beneath it. Add `RUSTUP_HOME`, `EXPERIMENT_RUSTUP_TOOLCHAIN`, or the
+`SOURCE_*` variables for an archive handoff only when that run needs them.
 
 The driver selects the first CPU in the process affinity mask unless the command
 passes a third `CPU` argument. Cargo gates use the repository-pinned toolchain.

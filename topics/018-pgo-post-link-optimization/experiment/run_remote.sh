@@ -340,8 +340,32 @@ elif [[ -e "$output_dir" ]]; then
     printf 'OUTPUT_DIRECTORY must be a directory: %s\n' "$output_dir" >&2
     exit 2
 fi
+# Decide whether the target is inside the repository before creating anything.
+# `mkdir -p` followed by a check leaves the directory behind on the rejection path,
+# because nothing owns it yet — the scratch trap is armed later and covers only the
+# scratch tree — so a refused run would deposit a stray directory in the source tree
+# it was refusing to write into. `pwd -P` needs an existing directory, so resolve the
+# nearest ancestor that does exist and re-attach the components below it; that also
+# catches a symlinked parent, which a textual prefix test on the argument would miss.
+output_probe="$output_dir"
+output_suffix=""
+while [[ ! -d "$output_probe" ]]; do
+    output_suffix="/${output_probe##*/}$output_suffix"
+    case "$output_probe" in
+        */*) output_probe="${output_probe%/*}"; [[ -n "$output_probe" ]] || output_probe=/ ;;
+        *) output_probe=. ;;
+    esac
+done
+output_candidate="$(cd -- "$output_probe" && pwd -P)$output_suffix"
+if [[ "$output_candidate" == "$repo_root" || "$output_candidate" == "$repo_root"/* ]]; then
+    printf 'OUTPUT_DIRECTORY must be outside the repository\n' >&2
+    exit 2
+fi
 mkdir -p -- "$output_dir"
 output_dir="$(cd -- "$output_dir" && pwd -P)"
+# The candidate above resolved the path that did not exist yet. Re-test the created
+# directory: between the two, a component could have been replaced by a symlink
+# pointing back into the repository.
 if [[ "$output_dir" == "$repo_root" || "$output_dir" == "$repo_root"/* ]]; then
     printf 'OUTPUT_DIRECTORY must be outside the repository\n' >&2
     exit 2
@@ -951,7 +975,7 @@ print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
 # bound paths for the programs that inspect and link the measured binaries, plus
 # the optional post-link tools it probes, so `tools.txt` names what actually ran.
 bound_tool_env=()
-for exported_tool in cc nm objdump llvm-bolt perf2bolt merge-fdata perf; do
+for exported_tool in cc ld nm objdump llvm-bolt perf2bolt merge-fdata perf; do
     if [[ -n "${tool_path[$exported_tool]:-}" ]]; then
         bound_tool_env+=(
             "TOPIC18_TOOL_${exported_tool//-/_}=${tool_path[$exported_tool]}"
