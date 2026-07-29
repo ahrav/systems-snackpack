@@ -1105,12 +1105,11 @@ print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
 # recorded and not run — an unbound tool is never executed — so the entry can influence an
 # availability line in `post-link-tools.json` and nothing that produced a measurement.
 #
-# Two further reasons the rewrite stays, neither of them a lookup by name: the driver runs
-# standalone during development, where nothing is bound and `shutil.which` is the only
-# resolution available; and it is the `PATH` that `rustc` and `cc` hand to their own
-# subprocesses, of which only `cc`'s linker child is pinned, by `-B`. The Cargo gates do
-# not run here — they ran earlier through `gate_env`, which prepends the repository
-# toolchain instead.
+# The other consumer is not a lookup by name at all: this is the `PATH` that `rustc` and
+# `cc` hand to their own subprocesses, of which only `cc`'s linker child is pinned, by
+# `-B`. Those two — the availability lookup above and subprocess inheritance — are what
+# the rewrite is for. The Cargo gates do not run here; they ran earlier through
+# `gate_env`, which prepends the repository toolchain instead.
 bound_tool_env=()
 for exported_tool in cc ld nm objdump llvm-bolt perf2bolt merge-fdata perf; do
     if [[ -n "${tool_path[$exported_tool]:-}" ]]; then
