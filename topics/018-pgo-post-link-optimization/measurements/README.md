@@ -131,9 +131,21 @@ build. The archive has no Git index or parent tree, so its remote
 archive=/tmp/topic18-source.tar
 scratch="$(mktemp -d)"
 unset TAR_OPTIONS
+# Clear Git's local repository environment before any command below. `GIT_DIR`,
+# `GIT_WORK_TREE`, `GIT_OBJECT_DIRECTORY`, `GIT_INDEX_FILE`, and the rest of
+# `git rev-parse --local-env-vars` redirect both the archive and the `ls-tree`
+# proof to another object store, so the two would agree with each other while
+# describing a commit that is not the checkout being handed off. The receiver
+# refuses these variables, but it can never recheck the commit-to-bytes binding
+# established here, so this is the only place it can be got right.
+unset $(git rev-parse --local-env-vars)
 GIT_NO_REPLACE_OBJECTS=1 git -c tar.umask=0 archive \
   --format=tar --output="$archive" <source_commit>
-tar -xf "$archive" -C "$scratch"
+# `--same-permissions` because ordinary-user extraction applies the umask, which
+# would strip the executable bits that `git archive -c tar.umask=0` just
+# preserved. The proof below derives `100755` from `-x`, so a sender umask such as
+# `0111` would otherwise make a correct archive fail this comparison.
+tar --same-permissions -xf "$archive" -C "$scratch"
 # The archive must be the whole commit, byte for byte, with its modes.
 # `export-ignore` omits paths and `export-subst` rewrites contents, from a
 # tracked `.gitattributes` or from the sender-local `$GIT_DIR/info/attributes`,

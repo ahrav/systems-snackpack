@@ -145,13 +145,38 @@ done
 # that produced none of the evidence. This pass needs `sha256sum`, which is itself
 # resolved above, so it cannot fold into that loop. The digests are compared again
 # where the receipt is written, and a change between the two reads fails the run.
+#
+# This attestation is self-referential and cannot be made otherwise from inside
+# the run: `sha256sum` and `awk` are resolved the same way as everything else, so
+# a `PATH` that supplies a fake `sha256sum` supplies the program that reports the
+# digests, and it can print the real binaries' digests for itself and for the
+# other fakes. No in-script ordering fixes that, because every candidate anchor is
+# reached through the same lookup. What the receipt gives an auditor is the
+# resolved paths and `PATH` itself, which is why both are recorded verbatim: the
+# digests are checkable only against a trusted copy of those tools obtained
+# outside this run, and a tool resolved from an unexpected directory is visible
+# even when its digest cannot be trusted.
 declare -A tool_digest=()
 for digested_tool in "${!tool_path[@]}"; do
     tool_digest["$digested_tool"]="$(
         sha256sum -- "${tool_path[$digested_tool]}" | awk '{print $1}'
     )"
 done
-python3 -c 'import sys; raise SystemExit(sys.version_info < (3, 8))'
+# Bind a program resolved later than the loop above, before the run uses it. The
+# rustup entries resolved above are the proxies on `PATH`; the gates and the driver
+# execute the toolchain binaries the proxies dispatch to, which are different files
+# with different digests, so recording only the proxies leaves the compiler that
+# validates the snapshot and produces the measured binaries unbound.
+digest_tool() {
+    tool_path["$1"]="$2"
+    tool_digest["$1"]="$(sha256sum -- "$2" | awk '{print $1}')"
+}
+# `-I` isolates the probe from the caller's Python startup environment. A bare
+# `python3` imports `sitecustomize` from a `PYTHONPATH` directory and runs it
+# before this script has checked anything or verified any source, so the hook
+# could edit the checkout, the archive, or the tools with no receipt of it. The
+# gates and the driver already run `-I` for the same reason.
+python3 -I -c 'import sys; raise SystemExit(sys.version_info < (3, 8))'
 # Loader and libc state reaches every timed child through the driver: `LD_PRELOAD`
 # and `LD_AUDIT` can interpose the calls being timed, `LD_DEBUG` adds diagnostic
 # work to each startup, and `GLIBC_TUNABLES` and the older `MALLOC_*` knobs change
@@ -237,6 +262,13 @@ if [[ ! -x "$experiment_rustc" ]]; then
     exit 2
 fi
 experiment_toolchain_bin="${experiment_rustc%/*}"
+# Bind the compiler that builds the measured binaries, not the `PATH` proxy that
+# dispatches to it. `llvm-profdata` ships beside it and merges the profiles the
+# candidates are built from.
+digest_tool experiment_rustc "$experiment_rustc"
+if [[ -x "$experiment_toolchain_bin/cargo" ]]; then
+    digest_tool experiment_cargo "$experiment_toolchain_bin/cargo"
+fi
 
 if [[ ! -r "$topic_dir/experiment/pgo_experiment.py" ]]; then
     printf 'repository lacks the Topic 18 experiment\n' >&2
@@ -276,7 +308,15 @@ else
     first="${allowed%%,*}"
     cpu="${first%%-*}"
 fi
-if ! [[ "$cpu" =~ ^(0|[1-9][0-9]*)$ ]] || ! taskset -c "$cpu" true >/dev/null 2>&1; then
+# `taskset` replaces itself with a command rather than testing affinity, so this
+# probe executes a program, not a shell builtin. Run a resolved and digested one:
+# an unqualified `true` would run whatever `PATH` supplies, before any source
+# provenance is established and without appearing in `tools.txt`. `true` cannot be
+# the required tool here because it is also a Bash builtin, so `command -v` reports
+# the builtin and never yields a path to record; `uname` is already required,
+# already digested, and has no effect beyond its output.
+if ! [[ "$cpu" =~ ^(0|[1-9][0-9]*)$ ]] \
+    || ! taskset -c "$cpu" "${tool_path[uname]}" -m >/dev/null 2>&1; then
     printf 'taskset cannot pin to CPU %s\n' "${cpu:-unknown}" >&2
     exit 2
 fi
@@ -609,6 +649,13 @@ if [[ ! -x "$gate_cargo" ]]; then
     exit 2
 fi
 gate_toolchain_bin="${gate_cargo%/*}"
+# Bind the toolchain that runs the gates, for the same reason: the gates decide
+# whether the snapshot is valid, and they execute these binaries rather than the
+# proxies recorded from `PATH`.
+digest_tool gate_cargo "$gate_cargo"
+if [[ -x "$gate_toolchain_bin/rustc" ]]; then
+    digest_tool gate_rustc "$gate_toolchain_bin/rustc"
+fi
 
 # A checkout run never reads the archive variables, so echoing whatever the
 # caller's shell still exports would record an archive path and digest — and an
@@ -649,19 +696,24 @@ fi
 # since, which is what stops a program from forging the evidence above and then
 # putting the expected bytes back in place before being recorded.
 tool_drift=""
-for recorded_tool in "${!tool_path[@]}"; do
-    current_tool_digest="$(
-        sha256sum -- "${tool_path[$recorded_tool]}" | awk '{print $1}'
-    )"
-    if [[ "$current_tool_digest" != "${tool_digest[$recorded_tool]}" ]]; then
-        tool_drift+="$recorded_tool ${tool_path[$recorded_tool]}"
-        tool_drift+=" ${tool_digest[$recorded_tool]} -> $current_tool_digest"$'\n'
+require_unchanged_tools() {
+    tool_stage="$1"
+    tool_drift=""
+    for recorded_tool in "${!tool_path[@]}"; do
+        current_tool_digest="$(
+            sha256sum -- "${tool_path[$recorded_tool]}" | awk '{print $1}'
+        )"
+        if [[ "$current_tool_digest" != "${tool_digest[$recorded_tool]}" ]]; then
+            tool_drift+="$recorded_tool ${tool_path[$recorded_tool]}"
+            tool_drift+=" ${tool_digest[$recorded_tool]} -> $current_tool_digest"$'\n'
+        fi
+    done
+    if [[ -n "$tool_drift" ]]; then
+        printf 'tool changed on disk %s:\n%s' "$tool_stage" "$tool_drift" >&2
+        exit 2
     fi
-done
-if [[ -n "$tool_drift" ]]; then
-    printf 'tool changed on disk during the run:\n%s' "$tool_drift" >&2
-    exit 2
-fi
+}
+require_unchanged_tools "while establishing source provenance"
 {
     printf 'path=%s\n\n' "$PATH"
     for recorded_tool in "${!tool_path[@]}"; do
@@ -820,6 +872,11 @@ if ! cmp -s \
     printf 'source files changed during evidence collection\n' >&2
     exit 1
 fi
+# The digests in `tools.txt` were taken before the provenance work and checked
+# again when that receipt was written, which leaves the gates and the driver
+# unguarded. Check once more here so the retained digests cover every program for
+# the whole run rather than only its first half.
+require_unchanged_tools "during evidence collection"
 
 manifest_tmp="$scratch_dir/evidence.sha256"
 (
