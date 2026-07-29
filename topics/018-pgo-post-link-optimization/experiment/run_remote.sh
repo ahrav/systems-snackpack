@@ -77,6 +77,10 @@ gate_env() {
 # commit. The manifest would then reproduce from a local rewrite that a clone of
 # `source_commit` does not contain. Read raw objects for every provenance query.
 export GIT_NO_REPLACE_OBJECTS=1
+# `TAR_OPTIONS` is applied to every `tar` invocation, so an ambient
+# `--exclude` or `--strip-components` would silently filter the reference tree
+# this script extracts to verify the measured one against.
+unset TAR_OPTIONS
 experiment_rustup_toolchain="${EXPERIMENT_RUSTUP_TOOLCHAIN:-stable}"
 # Resolve toolchain binaries by path rather than trusting a `PATH` name to be a
 # rustup proxy. A standalone binary earlier on `PATH` ignores rustup, and it can
@@ -128,7 +132,7 @@ if (($# == 3)); then
     cpu="$3"
 else
     allowed="$(
-        rg -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}' || true
+        rg --no-config -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}' || true
     )"
     first="${allowed%%,*}"
     cpu="${first%%-*}"
@@ -230,7 +234,7 @@ mkdir -p -- "$gates_dir"
 # file a linked worktree carries in place of a directory; its contents name an
 # absolute path on the running host, so it is not source.
 scan_source_paths() {
-    rg --files -uu -g '!.git/' -g '!.git' -g '!target/' -0
+    rg --no-config --files -uu -g '!.git/' -g '!.git' -g '!target/' -0
 }
 # `LC_ALL=C` fixes the ordering to bytes. Collation is locale-dependent, so an
 # unpinned sort makes this digest depend on the environment of whoever generated
@@ -285,7 +289,9 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
     # snapshot disagreeing with `source_commit` while the run is attributed to it.
     commit_tree="$scratch_dir/commit-tree"
     mkdir -p -- "$commit_tree"
-    git -C "$input_root" archive --format=tar "$source_commit" \
+    # `tar.umask` restricts the permission bits `git archive` emits, so a local
+    # setting would strip modes from the reference tree itself.
+    git -C "$input_root" -c tar.umask=0 archive --format=tar "$source_commit" \
         | tar -xf - -C "$commit_tree"
     manifest_source "$commit_tree" >"$output_dir/source-files.commit.sha256"
     if ! cmp -s \
@@ -297,7 +303,31 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
             "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
     fi
-    require_matching_modes "$input_root" "$commit_tree" "$source_commit"
+    # Take the commit's modes from the object database rather than from the
+    # extracted tree. `tar.umask` and archive attributes both shape what
+    # `git archive` emits, so a reference tree can agree with a drifted worktree
+    # because the same local configuration reduced both. `ls-tree` reports what
+    # the commit records. Regular blobs only: a symlink's `-x` follows its target
+    # and a gitlink has no worktree file here.
+    mode_drift=""
+    while IFS= read -r -d '' tree_entry; do
+        tree_mode="${tree_entry%% *}"
+        tree_path="${tree_entry#*$'\t'}"
+        case "$tree_mode" in
+            100755)
+                [[ -x "$input_root/$tree_path" ]] \
+                    || mode_drift+="missing executable bit: $tree_path"$'\n'
+                ;;
+            100644)
+                [[ ! -x "$input_root/$tree_path" ]] \
+                    || mode_drift+="unexpectedly executable: $tree_path"$'\n'
+                ;;
+        esac
+    done < <(git -C "$input_root" ls-tree -r -z "$source_commit")
+    if [[ -n "$mode_drift" ]]; then
+        printf 'file modes do not match %s:\n%s' "$source_commit" "$mode_drift" >&2
+        exit 2
+    fi
 else
     # Bind the archive to the tree being measured. The digest check above proves
     # only that the named archive matches its declared hash, and the manifest
@@ -432,7 +462,7 @@ fi
     printf '\nlscpu\n'
     lscpu
     printf '\ncpu_model_and_features\n'
-    rg -m 128 \
+    rg --no-config -m 128 \
         '^(model name|vendor_id|cpu family|model|stepping|microcode|Hardware|CPU implementer|CPU architecture|CPU variant|CPU part|CPU revision|Features|flags)' \
         /proc/cpuinfo || true
     # Probe the same resolved binaries the gates and the driver execute. Reading
@@ -566,7 +596,7 @@ fi
 manifest_tmp="$scratch_dir/evidence.sha256"
 (
     cd "$output_dir"
-    rg --files -uu -0 . | LC_ALL=C sort -z | xargs -0 sha256sum --
+    rg --no-config --files -uu -0 . | LC_ALL=C sort -z | xargs -0 sha256sum --
 ) >"$manifest_tmp"
 mv -- "$manifest_tmp" "$output_dir/evidence.sha256"
 

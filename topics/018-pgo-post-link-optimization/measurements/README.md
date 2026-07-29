@@ -118,9 +118,20 @@ build. The archive has no Git index or parent tree, so its remote
 ```bash
 archive=/tmp/topic18-source.tar
 scratch="$(mktemp -d)"
-GIT_NO_REPLACE_OBJECTS=1 git archive --format=tar --output="$archive" <source_commit>
+unset TAR_OPTIONS
+GIT_NO_REPLACE_OBJECTS=1 git -c tar.umask=0 archive \
+  --format=tar --output="$archive" <source_commit>
 tar -xf "$archive" -C "$scratch"
-(cd "$scratch" && rg --files -uu -g '!.git/' -g '!.git' -g '!target/' -0 \
+# The archive must be the whole commit. `export-ignore` in a tracked
+# `.gitattributes` or in the sender-local `$GIT_DIR/info/attributes` silently
+# omits paths, and the manifest is then computed from the filtered tarball, so
+# the receiver verifies bytes that do not reproduce from <source_commit>. Compare
+# against the object database, which no archive attribute filters.
+LC_ALL=C diff \
+  <(git ls-tree -r --name-only <source_commit> | LC_ALL=C sort) \
+  <(cd "$scratch" && rg --no-config --files -uu -g '!.git/' -g '!.git' \
+      -g '!target/' | LC_ALL=C sort)
+(cd "$scratch" && rg --no-config --files -uu -g '!.git/' -g '!.git' -g '!target/' -0 \
   | LC_ALL=C sort -z | xargs -0 sha256sum --) > /tmp/topic18-source-files.sha256
 sha256sum "$archive" /tmp/topic18-source-files.sha256
 ```
