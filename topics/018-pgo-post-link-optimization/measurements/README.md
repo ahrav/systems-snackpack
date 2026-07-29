@@ -127,7 +127,17 @@ hashes the transferred archive and the extracted per-file manifest before any
 build. The archive has no Git index or parent tree, so its remote
 `git-diff-check.log` records `not-applicable`.
 
+Run this from an environment the sender controls, not an inherited one. The receiver
+can verify the archive and manifest against the digests it is given, but it can never
+recompute `git archive <source_commit>` — it has no object store — so a caller-supplied
+`git`, `tar`, or `sha256sum` here produces a self-consistent handoff for bytes that are
+not the committed ones, and nothing downstream can detect it. Name the programs by
+absolute path or start from a `PATH` chosen for this purpose, for the same reason the
+wrapper is launched that way. Adjust the directories to this host — `rg` normally lives
+under `$HOME/.cargo/bin`, so a bare `/usr/bin:/bin` will not find it:
+
 ```bash
+export PATH="$HOME/.cargo/bin:/usr/bin:/bin"
 archive=/tmp/topic18-source.tar
 scratch="$(mktemp -d)"
 unset TAR_OPTIONS
@@ -157,6 +167,10 @@ tar --same-permissions -xf "$archive" -C "$scratch"
 # attribute touches, with replace refs disabled on both sides. The mode column
 # assumes the tree holds no symlinks; `git ls-tree -r` reporting any `120000`
 # entry means this comparison needs extending before it can be trusted.
+# `--no-filters` because a `filter.<driver>.clean` command selected by tracked
+# `.gitattributes` or by the sender-local `$GIT_DIR/info/attributes` otherwise runs
+# during this hash, and the comparison would then be between the filtered result and
+# the commit blob rather than between the archived bytes and the commit blob.
 LC_ALL=C diff \
   <(GIT_NO_REPLACE_OBJECTS=1 git ls-tree -r \
       --format='%(objectmode) %(objectname) %(path)' <source_commit> \
@@ -166,7 +180,7 @@ LC_ALL=C diff \
       | xargs -0 -n1 sh -c \
           'if [ -x "$0" ]; then mode=100755; else mode=100644; fi
            printf "%s %s %s\n" "$mode" \
-             "$(GIT_NO_REPLACE_OBJECTS=1 git hash-object -- "$0")" "$0"' \
+             "$(GIT_NO_REPLACE_OBJECTS=1 git hash-object --no-filters -- "$0")" "$0"' \
       | LC_ALL=C sort)
 (cd "$scratch" && rg --no-config --files -uu -g '!.git/' -g '!.git' -g '!target/' -0 \
   | LC_ALL=C sort -z | xargs -0 sha256sum --) > /tmp/topic18-source-files.sha256

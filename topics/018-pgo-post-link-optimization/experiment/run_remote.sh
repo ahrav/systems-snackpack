@@ -317,11 +317,25 @@ fi
 experiment_sysroot="$("$experiment_rustc" --print sysroot)"
 experiment_host="$("$experiment_rustc" -vV | "${tool_path[sed]}" -n 's/^host: //p')"
 experiment_rustlib_bin="$experiment_sysroot/lib/rustlib/$experiment_host/bin"
-for bundled_tool in llvm-profdata rust-lld; do
-    if [[ -x "$experiment_rustlib_bin/$bundled_tool" ]]; then
-        digest_tool "experiment_$bundled_tool" "$experiment_rustlib_bin/$bundled_tool"
-    fi
-done
+# `llvm-profdata` is required, not optional: the driver refuses to build without the
+# bundled profiler, so treating it as optional here only meant that a file appearing
+# between this check and the driver would merge the training profiles with no entry in
+# `tools.txt` and no drift check. Failing now costs nothing the run would not lose
+# later, and it fails with the reason rather than deep inside the driver.
+if [[ ! -x "$experiment_rustlib_bin/llvm-profdata" ]]; then
+    printf '%s\n' \
+        "toolchain $experiment_rustup_toolchain lacks its bundled llvm-profdata:" \
+        "$experiment_rustlib_bin/llvm-profdata" \
+        "the driver merges the training profiles with it, so it must be present and" \
+        "recorded before the run starts" >&2
+    exit 2
+fi
+digest_tool experiment_llvm-profdata "$experiment_rustlib_bin/llvm-profdata"
+# `rust-lld` stays optional because a toolchain that links through the system linker
+# ships none, and `cc` and `ld` are bound either way.
+if [[ -x "$experiment_rustlib_bin/rust-lld" ]]; then
+    digest_tool experiment_rust-lld "$experiment_rustlib_bin/rust-lld"
+fi
 
 if [[ ! -r "$topic_dir/experiment/pgo_experiment.py" ]]; then
     printf 'repository lacks the Topic 18 experiment\n' >&2
@@ -681,6 +695,23 @@ else
     # files and directories alone. A tree that needs links has to extend the walker
     # and the manifest format together, which the retained `SOURCE_MANIFEST_SHA256`
     # values depend on.
+    # Require an uncompressed tar. `tar` hands a compressed member to a filter
+    # program — `gzip`, `xz`, `zstd` — resolved from `PATH`, and those helpers are
+    # not in the required-tool set, so they are neither digested nor rechecked: an
+    # unrecorded program would decide what the archive contains during the source
+    # verification that attests to it. Test for the `ustar` magic rather than
+    # enumerating compression signatures, so an unknown container is refused instead
+    # of being assumed safe. The documented handoff writes `--format=tar`.
+    if ! "${tool_path[python3]}" -I -c 'import sys
+with open(sys.argv[1], "rb") as archive:
+    header = archive.read(512)
+raise SystemExit(0 if header[257:262] == b"ustar" else 1)' "$SOURCE_ARCHIVE_PATH"; then
+        printf '%s\n' \
+            "SOURCE_ARCHIVE_PATH must be an uncompressed tar: $SOURCE_ARCHIVE_PATH" \
+            "a compressed archive is expanded by a PATH-resolved filter program that" \
+            "no receipt records" >&2
+        exit 2
+    fi
     archive_entry_drift=""
     while IFS= read -r archive_entry; do
         case "$archive_entry" in
