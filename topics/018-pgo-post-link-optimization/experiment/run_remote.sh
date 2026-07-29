@@ -189,6 +189,34 @@ done
 # execute the toolchain binaries the proxies dispatch to, which are different files
 # with different digests, so recording only the proxies leaves the compiler that
 # validates the snapshot and produces the measured binaries unbound.
+# A `PATH` built from the directories the resolved tools actually live in, and nothing
+# else. Appending the caller's `PATH` would leave every lookup a fallback: `env` resolves
+# the command operand through the `PATH` it is given, and `cc` falls through `-B`, its
+# standard prefixes, and then `PATH` when it looks for `ld` — so a bound program hidden
+# after its digest is taken would be replaced by a later entry rather than failing the run.
+# With only these directories present there is nowhere to fall through to, so a missing
+# program is an error instead of a substitution.
+bound_tool_path() {
+    local -A seen=()
+    local ordered=() directory extra
+    for extra in "$@"; do
+        if [[ -n "$extra" && -z "${seen[$extra]:-}" ]]; then
+            seen["$extra"]=1
+            ordered+=("$extra")
+        fi
+    done
+    for directory in "${tool_path[@]%/*}"; do
+        if [[ -z "${seen[$directory]:-}" ]]; then
+            seen["$directory"]=1
+            ordered+=("$directory")
+        fi
+    done
+    local joined="" entry
+    for entry in "${ordered[@]}"; do
+        joined+="${joined:+:}$entry"
+    done
+    printf '%s' "$joined"
+}
 digest_tool() {
     tool_path["$1"]="$2"
     tool_digest["$1"]="$("${tool_path[sha256sum]}" -- "$2" | "${tool_path[awk]}" '{print $1}')"
@@ -263,7 +291,7 @@ done
 # `cargo test` and `cargo bench --no-run`; `fmt`, `clippy`, and `doc` ignore it.
 gate_env() {
     "${tool_path[env]}" -i \
-        PATH="$gate_toolchain_bin:$PATH" \
+        PATH="$(bound_tool_path "$gate_toolchain_bin")" \
         HOME="$HOME" \
         LC_ALL=C \
         ${RUSTUP_HOME:+RUSTUP_HOME="$RUSTUP_HOME"} \
@@ -446,7 +474,20 @@ fi
 # because the setting is repo-local rather than an environment variable, so disable
 # it per command. `-c` beats the config file for that invocation only, leaving the
 # operator's own repository untouched.
-if [[ "$("${tool_path[git]}" -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$repo_root" ]]; then
+# Supplying the archive variables selects archive mode outright. Detecting a checkout
+# first lets an extra `.git` — a plaintext gitfile naming any repository is enough — take
+# the checkout branch before `SOURCE_ARCHIVE_SHA256` or `SOURCE_MANIFEST_SHA256` is
+# examined, and `scan_source_paths` excludes `.git`, so that pointer is not covered by the
+# supplied manifest either. The caller has then declared archive inputs the run never
+# checked while the receipt reads `git-checkout`.
+if [[ -n "${SOURCE_ARCHIVE_PATH:-}${SOURCE_ARCHIVE_SHA256:-}${SOURCE_MANIFEST_SHA256:-}" ]]; then
+    source_tree_mode=archive
+elif [[ "$("${tool_path[git]}" -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$repo_root" ]]; then
+    source_tree_mode=checkout
+else
+    source_tree_mode=archive
+fi
+if [[ "$source_tree_mode" == checkout ]]; then
     source_commit="$("${tool_path[git]}" -C "$repo_root" rev-parse HEAD)"
     if [[ -n "$("${tool_path[git]}" -C "$repo_root" -c core.fsmonitor=false status --porcelain)" ]]; then
         printf 'repository must be clean\n' >&2
@@ -839,13 +880,19 @@ topic_dir="$repo_root/$topic_rel"
 # them. Pure parameter expansion so this adds no tool dependency.
 config_ancestor="$repo_root"
 while :; do
-    for cargo_config in \
+    # `rustfmt` searches the formatted file's directory and its ancestors for
+    # `rustfmt.toml` or `.rustfmt.toml`, so the `cargo fmt` gate would otherwise run
+    # under a policy from above the snapshot that no manifest covers — the same class
+    # as the Cargo configuration beside it.
+    for ancestor_config in \
         "$config_ancestor/.cargo/config.toml" \
-        "$config_ancestor/.cargo/config"; do
-        if [[ -e "$cargo_config" ]]; then
+        "$config_ancestor/.cargo/config" \
+        "$config_ancestor/rustfmt.toml" \
+        "$config_ancestor/.rustfmt.toml"; do
+        if [[ -e "$ancestor_config" ]]; then
             printf '%s\n' \
-                "Cargo configuration above the snapshot would reach the gates: $cargo_config" \
-                "set TMPDIR to a location with no .cargo configuration above it" >&2
+                "configuration above the snapshot would reach the gates: $ancestor_config" \
+                "set TMPDIR to a location with no Cargo or rustfmt configuration above it" >&2
             exit 2
         fi
     done
@@ -1134,7 +1181,7 @@ for exported_bundled in llvm-profdata rust-lld; do
     fi
 done
 "${tool_path[env]}" -i \
-    PATH="$experiment_toolchain_bin:$PATH" \
+    PATH="$(bound_tool_path "$experiment_toolchain_bin")" \
     HOME="$HOME" \
     LC_ALL=C \
     ${RUSTUP_HOME:+RUSTUP_HOME="$RUSTUP_HOME"} \
