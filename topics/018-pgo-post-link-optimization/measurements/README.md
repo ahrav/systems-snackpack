@@ -10,11 +10,12 @@ Each record applies only to its named source commit, archive digest, binaries,
 host, toolchain, target features, build flags, inputs, CPU affinity, run window,
 and retained raw process rows.
 
-Both retained host runs were taken at source commit `aa3e0fe`, whose wrapper predates
-the current caller-isolation hardening, so every measured row in the two host records
-carries the [pre-hardening caveat](2026-07-28-linux-cross-host.md) recorded with the
-launch command. The cross-host file is their joint interpretation and reports no rows
-of its own.
+Both retained host runs declare source commit `aa3e0fe`. They ran in archive mode, so
+that commit is a sender declaration rather than something either host verified — see the
+archive-mode note below — and the wrapper at that commit predates the current
+caller-isolation hardening. Every measured row in the two host records therefore carries
+the [pre-hardening caveat](2026-07-28-linux-cross-host.md) recorded with the launch
+command. The cross-host file is their joint interpretation and reports no rows of its own.
 
 ## Experimental unit
 

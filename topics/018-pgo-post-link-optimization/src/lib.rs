@@ -118,6 +118,25 @@ mod tests {
     }
 
     #[test]
+    fn extreme_finite_inputs_are_rejected() {
+        // Every input here is finite and positive, so the input guard admits them; the
+        // interval they imply exponentiates to zero and infinity, which are not ratios.
+        assert_eq!(summarize_ratios(&[f64::MIN_POSITIVE, f64::MAX]), None);
+        assert_eq!(summarize_ratios(&[1e-300, 1e300]), None);
+        assert_eq!(summarize_ratios(&[f64::MIN_POSITIVE, f64::MAX, 1.0]), None);
+    }
+
+    #[test]
+    fn wide_but_representable_inputs_are_accepted() {
+        // The guard rejects unrepresentable endpoints, not merely wide ones.
+        let estimate = summarize_ratios(&[0.25, 4.0]).expect("two positive ratios");
+        assert!(estimate.t95_low > 0.0 && estimate.t95_low.is_finite());
+        assert!(estimate.t95_high.is_finite());
+        assert!(estimate.t95_low < estimate.geometric_mean);
+        assert!(estimate.t95_high > estimate.geometric_mean);
+    }
+
+    #[test]
     fn geometric_mean_uses_log_space() {
         let estimate = summarize_ratios(&[0.5, 2.0]).expect("two positive ratios");
         assert!((estimate.geometric_mean - 1.0).abs() < f64::EPSILON);
