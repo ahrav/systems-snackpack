@@ -833,7 +833,7 @@ require_unchanged_tools "while establishing source provenance"
             "$recorded_tool" \
             "${tool_path[$recorded_tool]}" \
             "${tool_digest[$recorded_tool]}"
-    done | LC_ALL=C sort
+    done | LC_ALL=C "${tool_path[sort]}"
 } >"$output_dir/tools.txt"
 
 {
@@ -879,17 +879,17 @@ require_unchanged_tools "while establishing source provenance"
     host="$("$experiment_rustc" -vV | "${tool_path[sed]}" -n 's/^host: //p')"
     sysroot="$("$experiment_rustc" --print sysroot)"
     printf 'rust_bundled=%s\n' "$sysroot/lib/rustlib/$host/bin/llvm-profdata"
-    command -v llvm-profdata || true
+    printf 'bound=%s\n' "${tool_path[experiment_llvm-profdata]:-not-bound}"
     printf '\nlinker_driver\n'
-    command -v cc
-    cc --version
-    cc -dumpmachine
+    printf 'resolved=%s\n' "${tool_path[cc]}"
+    "${tool_path[cc]}" --version
+    "${tool_path[cc]}" -dumpmachine
     printf '\nlinker\n'
-    command -v ld
+    printf 'resolved=%s\n' "${tool_path[ld]}"
     "${tool_path[ld]}" --version
     printf '\npost_link_tools\n'
     for post_link_tool in llvm-bolt perf2bolt merge-fdata perf; do
-        command -v "$post_link_tool" || true
+        printf '%s=%s\n' "$post_link_tool" "${tool_path[$post_link_tool]:-not-bound}"
     done
     printf '\nelf_tools\n'
     "${tool_path[nm]}" --version
