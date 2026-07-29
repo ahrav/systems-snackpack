@@ -259,6 +259,27 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
             "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
     fi
+    # The manifest hashes contents, so it cannot see executable-bit drift, and
+    # `core.fileMode=false` or a filesystem that ignores mode changes hides the
+    # same drift from `git status`. The measured tree carries executable scripts,
+    # so compare bits against the extracted commit rather than widening the
+    # manifest, whose format the retained `SOURCE_MANIFEST_SHA256` values depend
+    # on. Path sets are already known equal from the comparison above.
+    mode_drift=""
+    while IFS= read -r -d '' scanned_path; do
+        if [[ -x "$input_root/$scanned_path" ]] \
+            && [[ ! -x "$commit_tree/$scanned_path" ]]; then
+            mode_drift+="unexpectedly executable: $scanned_path"$'\n'
+        elif [[ ! -x "$input_root/$scanned_path" ]] \
+            && [[ -x "$commit_tree/$scanned_path" ]]; then
+            mode_drift+="missing executable bit: $scanned_path"$'\n'
+        fi
+    done < <(cd "$commit_tree" && scan_source_paths)
+    if [[ -n "$mode_drift" ]]; then
+        printf 'source tree file modes do not match %s:\n%s' \
+            "$source_commit" "$mode_drift" >&2
+        exit 2
+    fi
 else
     # Bind the archive to the tree being measured. The digest check above proves
     # only that the named archive matches its declared hash, and the manifest

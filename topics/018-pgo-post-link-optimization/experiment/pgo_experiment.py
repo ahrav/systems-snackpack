@@ -148,6 +148,21 @@ def rust_profdata(rustc: str, cwd: Path) -> str:
     )
 
 
+def rust_lld(rustc: str, cwd: Path) -> Path | None:
+    """Locate the linker bundled with the active Rust toolchain, if it ships one."""
+    verbose = run([rustc, "-vV"], cwd=cwd)
+    host = next(
+        line.split(": ", 1)[1]
+        for line in verbose.splitlines()
+        if line.startswith("host: ")
+    )
+    sysroot = Path(run([rustc, "--print", "sysroot"], cwd=cwd).strip())
+    bundled = sysroot / "lib" / "rustlib" / host / "bin" / "rust-lld"
+    if bundled.is_file() and os.access(bundled, os.X_OK):
+        return bundled
+    return None
+
+
 def parse_output(output: str) -> dict[str, int | str]:
     """Parse and validate one probe output line."""
     match = OUTPUT_LINE.fullmatch(output.strip())
@@ -371,12 +386,23 @@ def build(
         "objdump": tool("objdump"),
         "nm": tool("nm"),
     }
+    # `cc` is the linker driver, and rustc may hand the link to the toolchain's
+    # bundled `rust-lld` rather than the `ld` on `PATH` — on x86-64 Linux it does
+    # by default. Recording only the `PATH` linker names a tool that never ran,
+    # so name what each entry is and record the bundled linker when present.
+    bundled_lld = rust_lld(rustc, toolchain_cwd)
     tool_versions = {
         "rustc_vv": rustc_verbose,
         "llvm_profdata": run([profdata, "--version"], cwd=work_dir),
         "cc": run([tools["cc"], "--version"], cwd=work_dir),
         "cc_target": run([tools["cc"], "-dumpmachine"], cwd=work_dir),
-        "ld": run([tools["ld"], "--version"], cwd=work_dir),
+        "ld_on_path": run([tools["ld"], "--version"], cwd=work_dir),
+        "rust_lld_path": str(bundled_lld) if bundled_lld else "unavailable",
+        "rust_lld": (
+            run([str(bundled_lld), "-flavor", "gnu", "--version"], cwd=work_dir)
+            if bundled_lld
+            else "unavailable"
+        ),
         "objdump": run([tools["objdump"], "--version"], cwd=work_dir),
         "nm": run([tools["nm"], "--version"], cwd=work_dir),
     }

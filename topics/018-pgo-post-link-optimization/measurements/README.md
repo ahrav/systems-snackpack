@@ -83,14 +83,21 @@ The remote wrapper writes all evidence outside the source tree:
   their hashes;
 - `experiment/*-pgo-build.log`, `experiment/tool-versions.json`, and
   `experiment/build-commands.txt` retain compiler diagnostics, matching tool
-  versions, linker-driver and linker versions, and invocations. A run records the
-  environment assignments each command needs, including `RUSTUP_TOOLCHAIN` and
-  `LLVM_PROFILE_FILE`, so the transcript replays as written. The retained
-  transcripts below predate that and carry bare invocations: replaying them
-  reconstructs neither the training profiles, because no profile destination is
-  set, nor the recorded compiler, because the snapshot's `rust-toolchain.toml`
-  pin applies instead of the experiment toolchain. Read them as a record of what
-  those runs executed, not as a replayable script;
+  versions, linker-driver and linker versions, and invocations. A run records
+  each command with the environment assignments that decide its result,
+  including `RUSTUP_TOOLCHAIN` and `LLVM_PROFILE_FILE`, so the entry is a
+  complete account of what executed. It is a log, not a runnable script: the
+  commands name absolute paths inside the snapshot and work directories, and the
+  wrapper deletes that scratch tree on exit, so replaying one requires
+  reconstructing those paths. The retained transcripts below additionally
+  predate the assignment recording, so they omit the profile destination and the
+  toolchain selection as well;
+- `experiment/tool-versions.json` distinguishes the linker driver (`cc`), the
+  `ld` found on `PATH` (`ld_on_path`), and the toolchain's bundled `rust-lld`
+  (`rust_lld`, `rust_lld_path`), because rustc may hand the link to the bundled
+  linker rather than the one on `PATH`. The retained runs below record only
+  `ld`, which named the `PATH` tool; their x86-64 build logs show `rust-lld`
+  performed the link;
 - `experiment/binary-sha256.before.json` and
   `experiment/binary-sha256.json` bind inspection and measurement to unchanged
   binaries and prove that the identity-control copy has the baseline hash. The
