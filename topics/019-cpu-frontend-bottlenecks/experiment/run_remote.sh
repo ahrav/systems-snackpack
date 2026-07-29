@@ -206,11 +206,11 @@ gcc_flags=(
     printf 'swept_environment=%s\n' "${swept_variables[*]:-none}"
     printf 'gcc_dense='
     printf '%q ' gcc "${gcc_flags[@]}" -DFUNC_ALIGN=16 \
-        '-DVARIANT="dense16"' frontend_layout.c -o dense16
+        frontend_layout.c -o dense16
     printf '\n'
     printf 'gcc_sparse='
     printf '%q ' gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 \
-        '-DVARIANT="sparse4096"' frontend_layout.c -o sparse4096
+        frontend_layout.c -o sparse4096
     printf '\n'
     printf 'timing=12 blocks; odd ABBA; even BAAB; 48 fresh processes; '
     printf 'warm_rounds=512; measure_rounds=8192\n'
@@ -269,10 +269,8 @@ sparse="$frontend_dir/sparse4096"
 aa_a="$frontend_dir/identical-a"
 aa_b="$frontend_dir/identical-b"
 python3 "$topic_dir/experiment/generate.py" "$generated_c"
-gcc "${gcc_flags[@]}" -DFUNC_ALIGN=16 '-DVARIANT="dense16"' \
-    "$generated_c" -o "$dense"
-gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 '-DVARIANT="sparse4096"' \
-    "$generated_c" -o "$sparse"
+gcc "${gcc_flags[@]}" -DFUNC_ALIGN=16 "$generated_c" -o "$dense"
+gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 "$generated_c" -o "$sparse"
 ln "$dense" "$aa_a"
 ln "$dense" "$aa_b"
 {

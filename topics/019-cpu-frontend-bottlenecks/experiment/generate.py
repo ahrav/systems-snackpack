@@ -27,11 +27,8 @@ def main() -> None:
 #error "compile with -DFUNC_ALIGN=<power-of-two>"
 #endif
 
-#ifndef VARIANT
-#error "compile with -DVARIANT=\"name\""
-#endif
-
 #define ATTR __attribute__((noinline, noclone, noipa, used, externally_visible, aligned(FUNC_ALIGN)))
+#define VARIANT "layout"
 
 typedef uint64_t (*leaf_fn)(uint64_t);
 '''

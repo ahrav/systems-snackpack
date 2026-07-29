@@ -1,9 +1,10 @@
 # Focused frontend-layout experiment
 
 The generator emits 512 externally visible leaf functions with identical source
-and control flow. The Linux runner compiles that source twice with the same GCC
-options. `dense16` requests 16-byte function alignment; `sparse4096` requests
-4096-byte alignment.
+and control flow. The Linux runner compiles that source twice. Every compiler
+input is equal except `FUNC_ALIGN`: `dense16` requests 16-byte function
+alignment and `sparse4096` requests 4096-byte alignment. The analysis assigns
+arm labels outside the generated program.
 
 The treatment is intentionally composite. It changes final executable layout,
 instruction footprint, translation footprint, and branch-target spacing. A
