@@ -263,12 +263,27 @@ if [[ ! -x "$experiment_rustc" ]]; then
 fi
 experiment_toolchain_bin="${experiment_rustc%/*}"
 # Bind the compiler that builds the measured binaries, not the `PATH` proxy that
-# dispatches to it. `llvm-profdata` ships beside it and merges the profiles the
-# candidates are built from.
+# dispatches to it.
 digest_tool experiment_rustc "$experiment_rustc"
 if [[ -x "$experiment_toolchain_bin/cargo" ]]; then
     digest_tool experiment_cargo "$experiment_toolchain_bin/cargo"
 fi
+# The driver resolves two more programs out of this toolchain's sysroot and runs
+# them on the measured binaries, so `rustc` alone does not bind what produced them.
+# `llvm-profdata` merges the training profiles that `-Cprofile-use` consumes, so a
+# different profiler shapes the profile while `rustc` reads as unchanged; and
+# `rust-lld` links the candidates on toolchains that default to it, so a swapped
+# linker emits the timed image. The driver records their versions after building,
+# which cannot detect a program restored before that probe. Both are optional
+# components, so bind them when the toolchain ships them.
+experiment_sysroot="$("$experiment_rustc" --print sysroot)"
+experiment_host="$("$experiment_rustc" -vV | sed -n 's/^host: //p')"
+experiment_rustlib_bin="$experiment_sysroot/lib/rustlib/$experiment_host/bin"
+for bundled_tool in llvm-profdata rust-lld; do
+    if [[ -x "$experiment_rustlib_bin/$bundled_tool" ]]; then
+        digest_tool "experiment_$bundled_tool" "$experiment_rustlib_bin/$bundled_tool"
+    fi
+done
 
 if [[ ! -r "$topic_dir/experiment/pgo_experiment.py" ]]; then
     printf 'repository lacks the Topic 18 experiment\n' >&2
@@ -651,11 +666,18 @@ fi
 gate_toolchain_bin="${gate_cargo%/*}"
 # Bind the toolchain that runs the gates, for the same reason: the gates decide
 # whether the snapshot is valid, and they execute these binaries rather than the
-# proxies recorded from `PATH`.
+# proxies recorded from `PATH`. `cargo` and `rustc` are not the whole set — `cargo
+# fmt`, `cargo clippy`, and `cargo doc` dispatch to separate component binaries in
+# this directory, so a swapped `rustfmt`, `clippy-driver`, or `rustdoc` produces the
+# retained gate logs while the `cargo` digest reads as unchanged. Components are
+# installed independently, so bind each one the toolchain ships.
 digest_tool gate_cargo "$gate_cargo"
-if [[ -x "$gate_toolchain_bin/rustc" ]]; then
-    digest_tool gate_rustc "$gate_toolchain_bin/rustc"
-fi
+for gate_component in \
+    rustc rustfmt rustdoc cargo-fmt cargo-clippy clippy-driver; do
+    if [[ -x "$gate_toolchain_bin/$gate_component" ]]; then
+        digest_tool "gate_$gate_component" "$gate_toolchain_bin/$gate_component"
+    fi
+done
 
 # A checkout run never reads the archive variables, so echoing whatever the
 # caller's shell still exports would record an archive path and digest — and an
@@ -851,13 +873,21 @@ print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
 # survive an allowlist because `HOME` must stay for toolchain resolution.
 # `RUSTUP_TOOLCHAIN` still names the toolchain for the receipts and the recorded
 # transcript, while the leading `PATH` entry decides which compiler actually runs.
+#
+# `taskset` and `python3` are given as resolved paths because `env` applies the
+# rewritten `PATH` when it looks up the command it runs. A toolchain `bin` holding
+# a `taskset` or `python3` — a linked or custom toolchain can — would otherwise
+# supply the program that pins the affinity and interprets the driver, ahead of the
+# ones digested for `tools.txt`. The compiler is still resolved through `PATH`,
+# which is the point of prepending the toolchain directory.
 env -i \
     PATH="$experiment_toolchain_bin:$PATH" \
     HOME="$HOME" \
     LC_ALL=C \
     ${RUSTUP_HOME:+RUSTUP_HOME="$RUSTUP_HOME"} \
     RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
-    taskset -c "$cpu" python3 -I "$topic_dir/experiment/pgo_experiment.py" \
+    "${tool_path[taskset]}" -c "$cpu" "${tool_path[python3]}" -I \
+    "$topic_dir/experiment/pgo_experiment.py" \
     --work-dir "$experiment_work_dir" \
     --output-dir "$experiment_dir" \
     --blocks 12 \
@@ -884,6 +914,12 @@ manifest_tmp="$scratch_dir/evidence.sha256"
     rg --no-config --files -uu -0 . | LC_ALL=C sort -z | xargs -0 sha256sum --
 ) >"$manifest_tmp"
 mv -- "$manifest_tmp" "$output_dir/evidence.sha256"
+# The manifest itself is built by `rg`, `sort`, `xargs`, `sha256sum`, and `mv`,
+# which run after the check above, so that check cannot speak for them. Repeat it
+# once the manifest is in place: a program swapped in for this pipeline could
+# otherwise forge `evidence.sha256` or leave files out of it and be restored with
+# nothing left to compare against.
+require_unchanged_tools "while writing the evidence manifest"
 
 printf 'source_commit=%s\noutput=%s\ncpu=%s\n' \
     "$source_commit" "$output_dir" "$cpu"
