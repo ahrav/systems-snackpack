@@ -27,16 +27,16 @@ done
 python3 -c 'import sys; raise SystemExit(sys.version_info < (3, 8))'
 # Loader and libc state reaches every timed child through the driver: `LD_PRELOAD`
 # and `LD_AUDIT` can interpose the calls being timed, `LD_DEBUG` adds diagnostic
-# work to each startup, and `GLIBC_TUNABLES` changes allocator and string-routine
-# behaviour. Nothing in the retained provenance records it, so the rows would be
-# attributed to the binary and host alone. Sweep the namespaces rather than name
-# members: the loader keeps adding variables, and a list is a snapshot of the
-# ones known when it was written. Clearing these could break a toolchain that
-# relies on them, so refuse and let the operator present a controlled
-# environment.
+# work to each startup, and `GLIBC_TUNABLES` and the older `MALLOC_*` knobs change
+# allocator behaviour. Nothing in the retained provenance records it, so the rows
+# would be attributed to the binary and host alone. Sweep the namespaces rather
+# than name members: the loader and libc keep adding variables, and a list is a
+# snapshot of the ones known when it was written. Clearing these could break a
+# toolchain that relies on them, so refuse and let the operator present a
+# controlled environment.
 for loader_variable in $(compgen -e); do
     case "$loader_variable" in
-        LD_* | GLIBC_*)
+        LD_* | GLIBC_* | MALLOC_*)
             printf '%s\n' \
                 "loader environment must be unset for measurement: $loader_variable" \
                 "every timed probe inherits it and no receipt records it" >&2
@@ -69,17 +69,13 @@ gate_env() {
 # `source_commit` does not contain. Read raw objects for every provenance query.
 export GIT_NO_REPLACE_OBJECTS=1
 experiment_rustup_toolchain="${EXPERIMENT_RUSTUP_TOOLCHAIN:-stable}"
-if ! RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" rustc -vV >/dev/null 2>&1; then
-    printf 'experiment Rust toolchain is unavailable: %s\n' \
-        "$experiment_rustup_toolchain" >&2
-    exit 2
-fi
 # Resolve toolchain binaries by path rather than trusting a `PATH` name to be a
 # rustup proxy. A standalone binary earlier on `PATH` ignores rustup, and it can
 # report the version of the toolchain it shadows, so no version comparison
 # separates the two. Prepending the resolved toolchain's own bin directory makes
 # `rustc`, `cargo`, and cargo's subcommand helpers resolve from that toolchain
-# with no proxy involved.
+# with no proxy involved. An uninstalled toolchain resolves to nothing, so this
+# also reports its absence.
 experiment_rustc="$(
     rustup which --toolchain "$experiment_rustup_toolchain" rustc 2>/dev/null || true
 )"
@@ -336,9 +332,12 @@ done
 
 # Resolve the gate toolchain from inside the snapshot, so `rust-toolchain.toml`
 # selects it exactly as the receipts claim, then use that toolchain's own bin
-# directory for the gates instead of whatever `PATH` offers.
+# directory for the gates instead of whatever `PATH` offers. `RUSTUP_TOOLCHAIN`
+# is removed for the query because it outranks the file: with it set the gates
+# would validate against the caller's choice while the receipts named the pin.
 gate_toolchain="$(
-    cd "$repo_root" && rustup show active-toolchain | awk '{print $1}'
+    cd "$repo_root" \
+        && env -u RUSTUP_TOOLCHAIN rustup show active-toolchain | awk '{print $1}'
 )"
 gate_cargo="$(rustup which --toolchain "$gate_toolchain" cargo 2>/dev/null || true)"
 if [[ ! -x "$gate_cargo" ]]; then
@@ -381,24 +380,22 @@ gate_toolchain_bin="${gate_cargo%/*}"
     rg -m 128 \
         '^(model name|vendor_id|cpu family|model|stepping|microcode|Hardware|CPU implementer|CPU architecture|CPU variant|CPU part|CPU revision|Features|flags)' \
         /proc/cpuinfo || true
+    # Probe the same resolved binaries the gates and the driver execute. Reading
+    # these through `PATH` would let a shadowing compiler describe itself in the
+    # receipt while different binaries produced the gate logs and timed rows.
     printf '\nworkspace_rustc\n'
-    env -u RUSTUP_TOOLCHAIN rustc -vV
+    printf 'resolved=%s\n' "$gate_toolchain_bin/rustc"
+    "$gate_toolchain_bin/rustc" -vV
     printf '\nworkspace_native_target_cfg\n'
-    env -u RUSTUP_TOOLCHAIN rustc --print cfg -Ctarget-cpu=native
+    "$gate_toolchain_bin/rustc" --print cfg -Ctarget-cpu=native
     printf '\nexperiment_rustc\n'
-    RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" rustc -vV
+    printf 'resolved=%s\n' "$experiment_rustc"
+    "$experiment_rustc" -vV
     printf '\nexperiment_native_target_cfg\n'
-    RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
-        rustc --print cfg -Ctarget-cpu=native
+    "$experiment_rustc" --print cfg -Ctarget-cpu=native
     printf '\nexperiment_llvm_profdata_candidates\n'
-    host="$(
-        RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
-            rustc -vV | sed -n 's/^host: //p'
-    )"
-    sysroot="$(
-        RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
-            rustc --print sysroot
-    )"
+    host="$("$experiment_rustc" -vV | sed -n 's/^host: //p')"
+    sysroot="$("$experiment_rustc" --print sysroot)"
     printf 'rust_bundled=%s\n' "$sysroot/lib/rustlib/$host/bin/llvm-profdata"
     command -v llvm-profdata || true
     printf '\nlinker_driver\n'
