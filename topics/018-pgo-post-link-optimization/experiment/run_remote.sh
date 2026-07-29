@@ -1099,12 +1099,18 @@ print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
 # version-probed. Each is resolved once and digested before use, so `tools.txt` names the
 # programs that ran rather than the ones a later `PATH` entry could supply.
 #
-# That leaves the prepended entry with no program in this driver resolving through it. It
-# stays for two reasons that are not naming lookups: the driver runs standalone during
-# development, where nothing is bound and `shutil.which` is the only resolution available;
-# and it is the `PATH` that `rustc` and `cc` hand to their own subprocesses, of which only
-# `cc`'s linker child is pinned, by `-B`. The Cargo gates do not run here — they ran
-# earlier through `gate_env`, which prepends the repository toolchain instead.
+# So every program the driver executes is bound, and the prepended entry is left with one
+# naming lookup: an optional post-link tool the wrapper did not bind is still located with
+# `shutil.which`, under this `PATH`, to report whether it is present. That result is
+# recorded and not run — an unbound tool is never executed — so the entry can influence an
+# availability line in `post-link-tools.json` and nothing that produced a measurement.
+#
+# Two further reasons the rewrite stays, neither of them a lookup by name: the driver runs
+# standalone during development, where nothing is bound and `shutil.which` is the only
+# resolution available; and it is the `PATH` that `rustc` and `cc` hand to their own
+# subprocesses, of which only `cc`'s linker child is pinned, by `-B`. The Cargo gates do
+# not run here — they ran earlier through `gate_env`, which prepends the repository
+# toolchain instead.
 bound_tool_env=()
 for exported_tool in cc ld nm objdump llvm-bolt perf2bolt merge-fdata perf; do
     if [[ -n "${tool_path[$exported_tool]:-}" ]]; then
