@@ -209,7 +209,7 @@ done
 # before this script has checked anything or verified any source, so the hook
 # could edit the checkout, the archive, or the tools with no receipt of it. The
 # gates and the driver already run `-I` for the same reason.
-python3 -I -c 'import sys; raise SystemExit(sys.version_info < (3, 8))'
+"${tool_path[python3]}" -I -c 'import sys; raise SystemExit(sys.version_info < (3, 8))'
 # Loader and libc state reaches every timed child through the driver: `LD_PRELOAD`
 # and `LD_AUDIT` can interpose the calls being timed, `LD_DEBUG` adds diagnostic
 # work to each startup, and `GLIBC_TUNABLES` and the older `MALLOC_*` knobs change
@@ -310,7 +310,7 @@ fi
 # which cannot detect a program restored before that probe. Both are optional
 # components, so bind them when the toolchain ships them.
 experiment_sysroot="$("$experiment_rustc" --print sysroot)"
-experiment_host="$("$experiment_rustc" -vV | sed -n 's/^host: //p')"
+experiment_host="$("$experiment_rustc" -vV | "${tool_path[sed]}" -n 's/^host: //p')"
 experiment_rustlib_bin="$experiment_sysroot/lib/rustlib/$experiment_host/bin"
 for bundled_tool in llvm-profdata rust-lld; do
     if [[ -x "$experiment_rustlib_bin/$bundled_tool" ]]; then
@@ -361,7 +361,7 @@ if [[ "$output_candidate" == "$repo_root" || "$output_candidate" == "$repo_root"
     printf 'OUTPUT_DIRECTORY must be outside the repository\n' >&2
     exit 2
 fi
-mkdir -p -- "$output_dir"
+"${tool_path[mkdir]}" -p -- "$output_dir"
 output_dir="$(cd -- "$output_dir" && pwd -P)"
 # The candidate above resolved the path that did not exist yet. Re-test the created
 # directory: between the two, a component could have been replaced by a symlink
@@ -388,7 +388,7 @@ fi
 # the builtin and never yields a path to record; `uname` is already required,
 # already digested, and has no effect beyond its output.
 if ! [[ "$cpu" =~ ^(0|[1-9][0-9]*)$ ]] \
-    || ! taskset -c "$cpu" "${tool_path[uname]}" -m >/dev/null 2>&1; then
+    || ! "${tool_path[taskset]}" -c "$cpu" "${tool_path[uname]}" -m >/dev/null 2>&1; then
     printf 'taskset cannot pin to CPU %s\n' "${cpu:-unknown}" >&2
     exit 2
 fi
@@ -446,7 +446,7 @@ if [[ -n "${SOURCE_COMMIT:-}" && "$SOURCE_COMMIT" != "$source_commit" ]]; then
     exit 2
 fi
 
-scratch_dir="$(mktemp -d)"
+scratch_dir="$("${tool_path[mktemp]}" -d)"
 # Compare physical paths: `mktemp` echoes the spelling it was given, so a
 # `TMPDIR` that is a symlink into one of these trees passes a textual prefix
 # test while the scratch tree is physically inside it.
@@ -456,7 +456,7 @@ scratch_dir="$(cd -- "$scratch_dir" && pwd -P)"
 # directory inside the source tree or the evidence tree that the run reports
 # nothing about.
 cleanup() {
-    rm -rf -- "$scratch_dir"
+    "${tool_path[rm]}" -rf -- "$scratch_dir"
 }
 trap cleanup EXIT
 # `mktemp` places its result under `$TMPDIR`. Inside OUTPUT_DIRECTORY the
@@ -480,7 +480,7 @@ experiment_work_dir="$scratch_dir/experiment-work"
 # reaches the gates. Point them at an empty directory instead. The workspace
 # declares no external dependencies, so no registry is needed.
 gate_cargo_home="$scratch_dir/cargo-home"
-mkdir -p -- "$gate_cargo_home"
+"${tool_path[mkdir]}" -p -- "$gate_cargo_home"
 # Cargo resolves a relative target directory against its working directory,
 # which is the snapshot, and the source walk excludes only `target/`. A caller
 # with `CARGO_TARGET_DIR=build` would drop gate artifacts into the snapshot and
@@ -489,7 +489,7 @@ mkdir -p -- "$gate_cargo_home"
 export CARGO_TARGET_DIR="$scratch_dir/cargo-target"
 gates_dir="$output_dir/gates"
 experiment_dir="$output_dir/experiment"
-mkdir -p -- "$gates_dir"
+"${tool_path[mkdir]}" -p -- "$gates_dir"
 
 # Emits NUL-separated paths relative to the caller's directory, and is the only
 # definition of which files count as source. `!.git` excludes the gitdir pointer
@@ -507,8 +507,8 @@ manifest_source() {
     (
         cd "$manifest_root"
         scan_source_paths \
-            | LC_ALL=C sort -z \
-            | xargs -0 "${tool_path[sha256sum]}" --
+            | LC_ALL=C "${tool_path[sort]}" -z \
+            | "${tool_path[xargs]}" -0 "${tool_path[sha256sum]}" --
     )
 }
 
@@ -550,7 +550,7 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
     # bytes no longer match its blob. Any of those leaves the manifest and the
     # snapshot disagreeing with `source_commit` while the run is attributed to it.
     commit_tree="$scratch_dir/commit-tree"
-    mkdir -p -- "$commit_tree"
+    "${tool_path[mkdir]}" -p -- "$commit_tree"
     # `tar.umask` restricts the permission bits `git archive` emits, so a local
     # setting would strip modes from the reference tree itself.
     "${tool_path[git]}" -C "$input_root" -c tar.umask=0 archive --format=tar "$source_commit" \
@@ -643,7 +643,7 @@ else
     # extracted tree satisfies each independently and the retained provenance
     # records an archive digest that cannot reproduce the measured snapshot.
     archive_tree="$scratch_dir/archive-tree"
-    mkdir -p -- "$archive_tree"
+    "${tool_path[mkdir]}" -p -- "$archive_tree"
     # Every check on this branch runs through `manifest_source` and
     # `require_matching_modes`, which walk with `rg --files`; that omits symlinks and
     # does not follow them. There is no object store here to consult the way the
@@ -697,12 +697,12 @@ if [[ "$source_commit_verification" == verified-archive-and-manifest ]] \
 fi
 
 snapshot_root="$scratch_dir/source"
-mkdir -p -- "$snapshot_root"
+"${tool_path[mkdir]}" -p -- "$snapshot_root"
 (
     cd "$input_root"
     scan_source_paths \
-        | sort -z \
-        | xargs -0 cp --parents --preserve=mode --target-directory="$snapshot_root" --
+        | "${tool_path[sort]}" -z \
+        | "${tool_path[xargs]}" -0 "${tool_path[cp]}" --parents --preserve=mode --target-directory="$snapshot_root" --
 )
 manifest_source "$snapshot_root" >"$output_dir/source-files.before.sha256"
 if ! "${tool_path[cmp]}" -s \
@@ -838,21 +838,21 @@ require_unchanged_tools "while establishing source provenance"
 
 {
     cd "$repo_root"
-    printf 'utc=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+    printf 'utc=%s\n' "$("${tool_path[date]}" -u '+%Y-%m-%dT%H:%M:%SZ')"
     printf 'source_commit=%s\n' "$source_commit"
     printf 'source_commit_verification=%s\n' "$source_commit_verification"
     printf 'source_archive_sha256=%s\n' "$recorded_archive_sha256"
     printf 'source_manifest_sha256=%s\n' "$source_manifest_sha256"
     printf 'selected_cpu=%s\n' "$cpu"
-    uname -a
-    printf 'architecture=%s\n' "$(uname -m)"
-    printf 'kernel=%s\n' "$(uname -r)"
-    printf 'online_cpus=%s\n' "$(getconf _NPROCESSORS_ONLN)"
-    printf 'configured_cpus=%s\n' "$(getconf _NPROCESSORS_CONF)"
+    "${tool_path[uname]}" -a
+    printf 'architecture=%s\n' "$("${tool_path[uname]}" -m)"
+    printf 'kernel=%s\n' "$("${tool_path[uname]}" -r)"
+    printf 'online_cpus=%s\n' "$("${tool_path[getconf]}" _NPROCESSORS_ONLN)"
+    printf 'configured_cpus=%s\n' "$("${tool_path[getconf]}" _NPROCESSORS_CONF)"
     printf '\naffinity\n'
-    taskset --cpu-list --pid "$$"
+    "${tool_path[taskset]}" --cpu-list --pid "$$"
     printf '\nlscpu\n'
-    lscpu
+    "${tool_path[lscpu]}"
     printf '\ncpu_model_and_features\n'
     "${tool_path[rg]}" --no-config -m 128 \
         '^(model name|vendor_id|cpu family|model|stepping|microcode|Hardware|CPU implementer|CPU architecture|CPU variant|CPU part|CPU revision|Features|flags)' \
@@ -869,14 +869,14 @@ require_unchanged_tools "while establishing source provenance"
     # a feature-asymmetric host an unpinned probe would describe a different CPU
     # than the one that built and timed the binaries.
     printf '\nworkspace_native_target_cfg (taskset -c %s)\n' "$cpu"
-    taskset -c "$cpu" "$gate_toolchain_bin/rustc" --print cfg -Ctarget-cpu=native
+    "${tool_path[taskset]}" -c "$cpu" "$gate_toolchain_bin/rustc" --print cfg -Ctarget-cpu=native
     printf '\nexperiment_rustc\n'
     printf 'resolved=%s\n' "$experiment_rustc"
     "$experiment_rustc" -vV
     printf '\nexperiment_native_target_cfg (taskset -c %s)\n' "$cpu"
-    taskset -c "$cpu" "$experiment_rustc" --print cfg -Ctarget-cpu=native
+    "${tool_path[taskset]}" -c "$cpu" "$experiment_rustc" --print cfg -Ctarget-cpu=native
     printf '\nexperiment_llvm_profdata_candidates\n'
-    host="$("$experiment_rustc" -vV | sed -n 's/^host: //p')"
+    host="$("$experiment_rustc" -vV | "${tool_path[sed]}" -n 's/^host: //p')"
     sysroot="$("$experiment_rustc" --print sysroot)"
     printf 'rust_bundled=%s\n' "$sysroot/lib/rustlib/$host/bin/llvm-profdata"
     command -v llvm-profdata || true
@@ -886,16 +886,16 @@ require_unchanged_tools "while establishing source provenance"
     cc -dumpmachine
     printf '\nlinker\n'
     command -v ld
-    ld --version
+    "${tool_path[ld]}" --version
     printf '\npost_link_tools\n'
     for post_link_tool in llvm-bolt perf2bolt merge-fdata perf; do
         command -v "$post_link_tool" || true
     done
     printf '\nelf_tools\n'
-    nm --version
-    objdump --version
+    "${tool_path[nm]}" --version
+    "${tool_path[objdump]}" --version
     printf '\npython\n'
-    python3 --version
+    "${tool_path[python3]}" --version
 } >"$output_dir/host.txt" 2>&1
 
 if [[ "$source_commit_verification" == git-checkout ]]; then
@@ -946,11 +946,11 @@ fi
     # through `py_compile` writes no bytecode, so the gate cannot mutate the
     # snapshot it is checking; `-I` also ignores `PYTHONPYCACHEPREFIX`, which is
     # what a `py_compile` run would need to keep its output out of the tree.
-    python3 -I -c 'import sys
+    "${tool_path[python3]}" -I -c 'import sys
 source = open(sys.argv[1], "rb").read()
 compile(source, sys.argv[1], "exec")
 print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
-    bash -n "$topic_rel/experiment/run_remote.sh"
+    "${tool_path[bash]}" -n "$topic_rel/experiment/run_remote.sh"
 ) >"$gates_dir/script-syntax.log" 2>&1
 
 # Name the driver's environment for the same reason the gates' is named. The
@@ -1015,14 +1015,21 @@ require_unchanged_tools "during evidence collection"
 manifest_tmp="$scratch_dir/evidence.sha256"
 (
     cd "$output_dir"
-    "${tool_path[rg]}" --no-config --files -uu -0 . | LC_ALL=C sort -z | xargs -0 "${tool_path[sha256sum]}" --
+    "${tool_path[rg]}" --no-config --files -uu -0 . | LC_ALL=C "${tool_path[sort]}" -z | "${tool_path[xargs]}" -0 "${tool_path[sha256sum]}" --
 ) >"$manifest_tmp"
-mv -- "$manifest_tmp" "$output_dir/evidence.sha256"
-# The manifest itself is built by `rg`, `sort`, `xargs`, `sha256sum`, and `mv`,
-# which run after the check above, so that check cannot speak for them. Repeat it
-# once the manifest is in place: a program swapped in for this pipeline could
-# otherwise forge `evidence.sha256` or leave files out of it and be restored with
-# nothing left to compare against.
+"${tool_path[mv]}" -- "$manifest_tmp" "$output_dir/evidence.sha256"
+# Remove the scratch tree here and disarm the trap rather than leaving cleanup to
+# run on exit. An EXIT trap fires after the last comparison below, so the `rm` it
+# runs would be the one program in the run that no digest check ever covers.
+# Nothing after this point reads the scratch tree.
+cleanup
+trap - EXIT
+# The manifest itself is built by `rg`, `sort`, `xargs`, `sha256sum`, and `mv`, and
+# the cleanup above runs `rm`, all after the check further up, so that check cannot
+# speak for them. Repeat it once the manifest is in place and the scratch tree is
+# gone: a program swapped in for this pipeline could otherwise forge
+# `evidence.sha256` or leave files out of it and be restored with nothing left to
+# compare against. No program runs after this comparison.
 require_unchanged_tools "while writing the evidence manifest"
 
 printf 'source_commit=%s\noutput=%s\ncpu=%s\n' \
