@@ -40,7 +40,7 @@ Run the retained check from a clean x86-64 or AArch64 Linux checkout with
 procfs, `taskset`, `lscpu`, GNU `objdump`, `nm`, and `sha256sum`:
 
 ```bash
-env -u BASH_ENV -u ENV \
+env -u BASH_ENV -u ENV bash -p \
   topics/018-pgo-post-link-optimization/experiment/run_remote.sh \
   "$(pwd)" \
   /tmp/topic18-evidence
@@ -49,7 +49,13 @@ env -u BASH_ENV -u ENV \
 Clearing the shell startup variables before Bash starts is the only way to be
 certain no hook ran: the wrapper re-execs itself to discard a hook's traps,
 functions, and shell options, and refuses to run when either variable is still
-set, but a hook that unsets them has already executed by then.
+set, but a hook that unsets them has already executed by then. Starting Bash with
+`-p` is what keeps the caller's exported functions out of the run — privileged
+mode does not inherit functions from the environment — and it has to come from
+this launcher rather than from the wrapper alone, because an exported `exec`
+function is dispatched ahead of the builtin and would skip the wrapper's own
+restart. The wrapper also refuses any `GIT_*` variable, which would otherwise
+redirect the provenance queries that establish `source_commit`.
 
 The driver selects the first CPU in the process affinity mask unless the command
 passes a third `CPU` argument. Cargo gates use the repository-pinned toolchain.

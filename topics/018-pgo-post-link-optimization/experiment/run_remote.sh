@@ -9,23 +9,37 @@ set -euo pipefail
 # hook can unset the variable, install traps, define functions, and prepend a
 # directory to `PATH` — so a later test for the variable proves nothing and a
 # `PATH` lookup for the relaunch could find a planted `bash`. Replacing the
-# process image discards traps and shell options; unsetting the exported
-# functions first stops the next shell importing them, which matters because an
-# imported `command` or `git` function answers before any builtin or program;
-# and `/proc/self/exe` is the running interpreter rather than a name resolved
-# through a `PATH` the hook may already own. `unset`, `declare`, and `builtin`
-# are themselves shadowable, so this reduces the surface rather than closing it:
-# the documented invocation clears the variables before Bash starts.
+# process image discards traps and shell options, and `/proc/self/exe` is the
+# running interpreter rather than a name resolved through a `PATH` the hook may
+# already own.
+#
+# `-p` is what stops the next shell importing the caller's functions: privileged
+# mode does not process `BASH_ENV` or `ENV`, does not inherit functions from the
+# environment, and ignores an inherited `SHELLOPTS`, `BASHOPTS`, `CDPATH`, or
+# `GLOBIGNORE`. That matters because an imported `command` or `git` function
+# answers before any builtin or program, so it can forge `rev-parse`, `status`,
+# and `archive` output and with it the source provenance. Stripping the function
+# names cannot substitute for it: the strip reads the list through `builtin
+# declare -F`, and an imported function named `builtin` answers that call, hides
+# every name from both the loop and the survivor check below, and leaves the
+# forging functions defined. The strip stays because it also covers a caller who
+# shadows only `git` or `command`, but `-p` is the part that holds when the
+# shadow reaches the shell's own vocabulary.
+#
+# An imported `exec` function is dispatched ahead of the builtin too, so a caller
+# who shadows `exec` skips this restart entirely and no in-script test placed
+# after it can prove otherwise. Closing that requires a launcher outside this
+# process image, which is why the documented invocation starts Bash with `-p`.
 if [[ -z "${TOPIC18_REEXECED:-}" ]]; then
     unset BASH_ENV ENV
     while read -r _ _ imported_function; do
         unset -f "$imported_function"
     done < <(builtin declare -F)
     export TOPIC18_REEXECED=1
-    exec /proc/self/exe "$0" "$@"
+    exec /proc/self/exe -p -- "$0" "$@"
 fi
 # Nothing should be defined yet; this script declares its own functions further
-# down. A survivor means the strip above did not run as written.
+# down. A survivor means neither `-p` nor the strip above took effect as written.
 if [[ -n "$(builtin declare -F)" ]]; then
     printf '%s\n' \
         "shell functions were imported into this run:" \
@@ -85,12 +99,31 @@ python3 -c 'import sys; raise SystemExit(sys.version_info < (3, 8))'
 # snapshot of the ones known when it was written. Clearing these could break a
 # toolchain that relies on them, so refuse and let the operator present a
 # controlled environment.
-for loader_variable in $(compgen -e); do
-    case "$loader_variable" in
+# Git's own repository environment redirects the provenance queries below. `GIT_DIR`
+# and `GIT_WORK_TREE` are honoured by `git -C`, so a caller can point the object
+# store at one repository while the work tree stays this source tree:
+# `rev-parse --show-toplevel` still prints the given root and passes the check
+# below, `status --porcelain` is clean whenever the bytes match, and `rev-parse
+# HEAD` returns the other store's commit. The run then records
+# `source_commit_verification=git-checkout` for a commit that no clone of this
+# repository contains. `GIT_INDEX_FILE`, `GIT_OBJECT_DIRECTORY`,
+# `GIT_ALTERNATE_OBJECT_DIRECTORIES`, `GIT_GRAFT_FILE`, and the `GIT_CONFIG*`
+# entries redirect the same queries by other routes — `git rev-parse
+# --local-env-vars` lists the current set — so sweep the namespace here for the
+# same reason the loader namespaces are swept. The one member this script relies
+# on is exported below, after this loop.
+for caller_variable in $(compgen -e); do
+    case "$caller_variable" in
         LD_* | GLIBC_* | MALLOC_*)
             printf '%s\n' \
-                "loader environment must be unset for measurement: $loader_variable" \
+                "loader environment must be unset for measurement: $caller_variable" \
                 "every timed probe inherits it and no receipt records it" >&2
+            exit 2
+            ;;
+        GIT_*)
+            printf '%s\n' \
+                "git repository environment must be unset: $caller_variable" \
+                "it redirects the provenance queries below and no receipt records it" >&2
             exit 2
             ;;
     esac
@@ -118,6 +151,8 @@ gate_env() {
 # can emit a replacement tree while `rev-parse HEAD` still reports the original
 # commit. The manifest would then reproduce from a local rewrite that a clone of
 # `source_commit` does not contain. Read raw objects for every provenance query.
+# The sweep above refuses a caller-supplied value, so this assignment is the only
+# one the provenance commands see.
 export GIT_NO_REPLACE_OBJECTS=1
 # `TAR_OPTIONS` is applied to every `tar` invocation, so an ambient
 # `--exclude` or `--strip-components` would silently filter the reference tree
