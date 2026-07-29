@@ -376,16 +376,30 @@ if [[ ! -x "$gate_cargo" ]]; then
 fi
 gate_toolchain_bin="${gate_cargo%/*}"
 
+# A checkout run never reads the archive variables, so echoing whatever the
+# caller's shell still exports would record an archive path and digest — and an
+# expected manifest digest — that nothing verified, beside
+# `source_commit_verification=git-checkout`. Report them only for the branch that
+# checks them.
+if [[ "$source_commit_verification" == verified-archive-and-manifest ]]; then
+    recorded_archive_path="$SOURCE_ARCHIVE_PATH"
+    recorded_archive_sha256="$SOURCE_ARCHIVE_SHA256"
+    recorded_expected_manifest_sha256="$SOURCE_MANIFEST_SHA256"
+else
+    recorded_archive_path=not-applicable
+    recorded_archive_sha256=not-applicable
+    recorded_expected_manifest_sha256=not-applicable
+fi
 {
     printf 'source_commit=%s\n' "$source_commit"
     printf 'source_commit_verification=%s\n' "$source_commit_verification"
-    printf 'source_archive_path=%s\n' "${SOURCE_ARCHIVE_PATH:-not-applicable}"
-    printf 'source_archive_sha256=%s\n' "${SOURCE_ARCHIVE_SHA256:-not-applicable}"
+    printf 'source_archive_path=%s\n' "$recorded_archive_path"
+    printf 'source_archive_sha256=%s\n' "$recorded_archive_sha256"
     printf 'source_manifest_sha256=%s\n' "$source_manifest_sha256"
     printf 'immutable_snapshot=%s\n' "$snapshot_root"
     printf 'experiment_rustup_toolchain=%s\n' "$experiment_rustup_toolchain"
     printf 'expected_source_manifest_sha256=%s\n' \
-        "${SOURCE_MANIFEST_SHA256:-not-applicable}"
+        "$recorded_expected_manifest_sha256"
 } >"$output_dir/source-provenance.txt"
 
 {
@@ -393,7 +407,7 @@ gate_toolchain_bin="${gate_cargo%/*}"
     printf 'utc=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
     printf 'source_commit=%s\n' "$source_commit"
     printf 'source_commit_verification=%s\n' "$source_commit_verification"
-    printf 'source_archive_sha256=%s\n' "${SOURCE_ARCHIVE_SHA256:-unknown}"
+    printf 'source_archive_sha256=%s\n' "$recorded_archive_sha256"
     printf 'source_manifest_sha256=%s\n' "$source_manifest_sha256"
     printf 'selected_cpu=%s\n' "$cpu"
     uname -a
@@ -415,13 +429,18 @@ gate_toolchain_bin="${gate_cargo%/*}"
     printf '\nworkspace_rustc\n'
     printf 'resolved=%s\n' "$gate_toolchain_bin/rustc"
     "$gate_toolchain_bin/rustc" -vV
-    printf '\nworkspace_native_target_cfg\n'
-    "$gate_toolchain_bin/rustc" --print cfg -Ctarget-cpu=native
+    # Pin the native probes to the measured CPU. `-Ctarget-cpu=native` reports
+    # the features of the CPU it runs on, and the driver runs under
+    # `taskset -c "$cpu"` while this block inherits the wrapper's affinity, so on
+    # a feature-asymmetric host an unpinned probe would describe a different CPU
+    # than the one that built and timed the binaries.
+    printf '\nworkspace_native_target_cfg (taskset -c %s)\n' "$cpu"
+    taskset -c "$cpu" "$gate_toolchain_bin/rustc" --print cfg -Ctarget-cpu=native
     printf '\nexperiment_rustc\n'
     printf 'resolved=%s\n' "$experiment_rustc"
     "$experiment_rustc" -vV
-    printf '\nexperiment_native_target_cfg\n'
-    "$experiment_rustc" --print cfg -Ctarget-cpu=native
+    printf '\nexperiment_native_target_cfg (taskset -c %s)\n' "$cpu"
+    taskset -c "$cpu" "$experiment_rustc" --print cfg -Ctarget-cpu=native
     printf '\nexperiment_llvm_profdata_candidates\n'
     host="$("$experiment_rustc" -vV | sed -n 's/^host: //p')"
     sysroot="$("$experiment_rustc" --print sysroot)"
@@ -455,7 +474,7 @@ else
         "status=not-applicable" \
         "reason=Git archives have no index or parent tree." \
         "source_commit=$source_commit" \
-        "source_archive_sha256=${SOURCE_ARCHIVE_SHA256:-unknown}" \
+        "source_archive_sha256=$recorded_archive_sha256" \
         >"$gates_dir/git-diff-check.log"
 fi
 (
@@ -485,8 +504,18 @@ fi
 ) >"$gates_dir/cargo-doc.log" 2>&1
 (
     cd "$repo_root"
-    PYTHONPYCACHEPREFIX="$scratch_dir/pycache" \
-        python3 -m py_compile "$topic_rel/experiment/pgo_experiment.py"
+    # `-I` isolates the interpreter, which matters more than it looks: `-m` puts
+    # the working directory on `sys.path`, and that directory is the snapshot of
+    # the source under test, so a `py_compile.py` beside it — or on a caller's
+    # `PYTHONPATH` — would replace the module that validates it and the gate would
+    # report success without compiling anything. Compiling in-process instead of
+    # through `py_compile` writes no bytecode, so the gate cannot mutate the
+    # snapshot it is checking; `-I` also ignores `PYTHONPYCACHEPREFIX`, which is
+    # what a `py_compile` run would need to keep its output out of the tree.
+    python3 -I -c 'import sys
+source = open(sys.argv[1], "rb").read()
+compile(source, sys.argv[1], "exec")
+print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
     bash -n "$topic_rel/experiment/run_remote.sh"
 ) >"$gates_dir/script-syntax.log" 2>&1
 
