@@ -256,7 +256,11 @@ done
 # grows with Cargo. Start from an empty environment and name what the gates may
 # see instead. `HOME` stays because rustup resolves `RUSTUP_HOME` beneath it;
 # `CARGO_HOME` is redirected because Cargo also merges configuration files that
-# no environment change reaches.
+# no environment change reaches. `RUSTFLAGS` pins the linker driver for the same
+# reason the experiment build passes `-Clinker`: with no flag, rustc links through
+# whatever `cc` the prepended toolchain directory supplies, so a gate log could be
+# produced by a driver the receipt does not name. The gates that link are
+# `cargo test` and `cargo bench --no-run`; `fmt`, `clippy`, and `doc` ignore it.
 gate_env() {
     "${tool_path[env]}" -i \
         PATH="$gate_toolchain_bin:$PATH" \
@@ -265,6 +269,7 @@ gate_env() {
         ${RUSTUP_HOME:+RUSTUP_HOME="$RUSTUP_HOME"} \
         CARGO_HOME="$gate_cargo_home" \
         CARGO_TARGET_DIR="$CARGO_TARGET_DIR" \
+        RUSTFLAGS="-Clinker=${tool_path[cc]}" \
         "$@"
 }
 # `git replace` refs and grafts are honoured by object reads, so `git archive`
@@ -350,7 +355,19 @@ fi
 output_probe="$output_dir"
 output_suffix=""
 while [[ ! -d "$output_probe" ]]; do
-    output_suffix="/${output_probe##*/}$output_suffix"
+    output_component="${output_probe##*/}"
+    # Only the part below the deepest existing directory is handled textually, and a
+    # `..` there is resolved by `mkdir` rather than by this check: the candidate would
+    # read as outside the repository while the directory `mkdir` creates is inside it,
+    # which is the leak this whole block exists to prevent. `pwd -P` has already
+    # resolved any `..` in the part that does exist.
+    if [[ "$output_component" == .. || "$output_component" == . ]]; then
+        printf '%s\n' \
+            "OUTPUT_DIRECTORY must not contain '$output_component' below an existing directory: $output_dir" \
+            "that part of the path cannot be resolved before it is created" >&2
+        exit 2
+    fi
+    output_suffix="/$output_component$output_suffix"
     case "$output_probe" in
         */*) output_probe="${output_probe%/*}"; [[ -n "$output_probe" ]] || output_probe=/ ;;
         *) output_probe=. ;;
@@ -618,9 +635,18 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
     # call covers the whole tree, and it reads the files rather than the index,
     # so `assume-unchanged` cannot hide a difference the way it can from
     # `git status`.
+    #
+    # `--no-filters` because a `filter.<driver>.clean` command selected by
+    # `.gitattributes` or `.git/info/attributes` otherwise runs during this hash,
+    # and `.git` is outside the source manifest, so that is unrecorded code
+    # executing inside the verification it is supposed to be subject to. Hashing
+    # the bytes as they are on disk is also what this comparison means: the
+    # question is whether the worktree file matches the recorded blob, not what a
+    # local filter would turn it into.
     if ((${#blob_paths[@]} > 0)); then
         mapfile -t worktree_objects < <(
-            cd "$input_root" && "${tool_path[git]}" hash-object -- "${blob_paths[@]}"
+            cd "$input_root" \
+                && "${tool_path[git]}" hash-object --no-filters -- "${blob_paths[@]}"
         )
         if ((${#worktree_objects[@]} != ${#blob_paths[@]})); then
             printf 'could not hash every tracked file in %s\n' "$input_root" >&2
