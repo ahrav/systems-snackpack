@@ -214,6 +214,11 @@ def build(
         raise RuntimeError(f"rustc {release} is older than the workspace minimum 1.93")
     profdata = rust_profdata(rustc, toolchain_cwd)
     commands: list[str] = []
+    # `-Cdebuginfo=1` records the paths rustc was given, and both roots are
+    # scratch directories with random names, so without remapping the binary
+    # digests describe the directory the run happened to get rather than the
+    # source, toolchain, and flags. Remapping makes them comparable across runs
+    # and hosts; it rewrites recorded path strings only, not generated code.
     common = [
         rustc,
         "--edition=2024",
@@ -221,6 +226,8 @@ def build(
         "-Ctarget-cpu=native",
         "-Ccodegen-units=1",
         "-Cdebuginfo=1",
+        f"--remap-path-prefix={toolchain_cwd}=/topic18-source",
+        f"--remap-path-prefix={work_dir}=/topic18-work",
         "-Clink-arg=-Wl,--emit-relocs",
         str(source),
     ]

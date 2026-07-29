@@ -79,7 +79,12 @@ The remote wrapper writes all evidence outside the source tree:
   versions, linker-driver and linker versions, and invocations;
 - `experiment/binary-sha256.before.json` and
   `experiment/binary-sha256.json` bind inspection and measurement to unchanged
-  binaries and prove that the identity-control copy has the baseline hash;
+  binaries and prove that the identity-control copy has the baseline hash. The
+  builds pass `--remap-path-prefix` for the snapshot and work directories, so
+  these digests depend on the source, toolchain, and flags rather than on the
+  scratch paths a run happens to receive. The retained runs below predate that
+  flag, so their digests still carry their own scratch paths and compare only
+  within their run;
 - `experiment/post-link-tools.json` records BOLT and `perf` tool availability;
 - `evidence.sha256` covers the retained evidence files.
 

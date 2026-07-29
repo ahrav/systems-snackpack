@@ -54,6 +54,7 @@ gate_env() {
         -u CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER \
         -u CARGO_BUILD_RUSTFLAGS -u CARGO_BUILD_RUSTDOCFLAGS \
         -u CARGO_BUILD_TARGET -u CARGO_BUILD_TARGET_DIR \
+        CARGO_HOME="$gate_cargo_home" \
         "$@"
 }
 experiment_rustup_toolchain="${EXPERIMENT_RUSTUP_TOOLCHAIN:-stable}"
@@ -153,6 +154,10 @@ if [[ -n "${SOURCE_COMMIT:-}" && "$SOURCE_COMMIT" != "$source_commit" ]]; then
 fi
 
 scratch_dir="$(mktemp -d)"
+# Compare physical paths: `mktemp` echoes the spelling it was given, so a
+# `TMPDIR` that is a symlink into one of these trees passes a textual prefix
+# test while the scratch tree is physically inside it.
+scratch_dir="$(cd -- "$scratch_dir" && pwd -P)"
 # `mktemp` places its result under `$TMPDIR`. Inside OUTPUT_DIRECTORY the
 # snapshot, the experiment work directory, and the evidence manifest's own
 # temporary file become files that `evidence.sha256` hashes, and the temporaries
@@ -168,6 +173,13 @@ if [[ "$scratch_dir" == "$input_root" || "$scratch_dir" == "$input_root"/* ]]; t
     exit 2
 fi
 experiment_work_dir="$scratch_dir/experiment-work"
+# Cargo merges configuration from `$CARGO_HOME/config.toml` and every `.cargo/`
+# directory above its working directory, none of which the process environment
+# controls, so a caller-local `[build] rustflags` or linker override still
+# reaches the gates. Point them at an empty directory instead. The workspace
+# declares no external dependencies, so no registry is needed.
+gate_cargo_home="$scratch_dir/cargo-home"
+mkdir -p -- "$gate_cargo_home"
 # Cargo resolves a relative target directory against its working directory,
 # which is the snapshot, and the source walk excludes only `target/`. A caller
 # with `CARGO_TARGET_DIR=build` would drop gate artifacts into the snapshot and
