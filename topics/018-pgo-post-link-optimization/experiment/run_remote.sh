@@ -4,6 +4,21 @@ set -euo pipefail
 # Validates an exact Linux source tree, runs Topic 18, and writes evidence
 # outside the repository.
 
+# Bash sources `BASH_ENV` before the first line of a non-interactive script, so
+# a startup file has already run by the time this check executes. Aborting
+# cannot undo that, but it stops the run from producing evidence gathered under
+# a hook that could have installed traps or functions, or altered the
+# measurement environment, with nothing recording it. Launch through
+# `env -u BASH_ENV bash …` if a login environment sets one.
+for startup_variable in BASH_ENV ENV; do
+    if [[ -n "${!startup_variable:-}" ]]; then
+        printf '%s\n' \
+            "shell startup file must not be set: $startup_variable=${!startup_variable}" \
+            "it is sourced before this script runs and no receipt records it" >&2
+        exit 2
+    fi
+done
+
 if (($# < 2 || $# > 3)); then
     printf 'usage: %s REPOSITORY_ROOT OUTPUT_DIRECTORY [CPU]\n' "$0" >&2
     exit 2
@@ -303,32 +318,61 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
             "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
     fi
-    # Take the commit's path set and modes from the object database rather than
-    # from the extracted tree. `tar.umask` and archive attributes both shape what
-    # `git archive` emits, so a reference tree can agree with a drifted worktree
-    # because the same local configuration reduced both — an `export-ignore` path
-    # that a sparse checkout also lacks is absent from both manifests. `ls-tree`
-    # reports what the commit records, and no archive attribute filters it.
-    # Regular blobs only: a symlink's `-x` follows its target and a gitlink has no
-    # worktree file here.
+    # Take the commit's path set, modes, and blob identities from the object
+    # database rather than from the extracted tree. `tar.umask` and archive
+    # attributes shape what `git archive` emits, so a reference tree can agree
+    # with a drifted worktree because the same local configuration produced both:
+    # an `export-ignore` path a sparse checkout also lacks is absent from both
+    # manifests, and an `export-subst` file copied back into the worktree under
+    # `assume-unchanged` matches the substituted reference byte for byte. No
+    # archive attribute filters `ls-tree`. Regular blobs only: a symlink's `-x`
+    # follows its target and a gitlink has no worktree file here.
     tree_drift=""
+    blob_paths=()
+    blob_objects=()
     while IFS= read -r -d '' tree_entry; do
         tree_mode="${tree_entry%% *}"
-        tree_path="${tree_entry#*$'\t'}"
+        tree_rest="${tree_entry#* }"
+        tree_object="${tree_rest%% *}"
+        tree_path="${tree_rest#* }"
         case "$tree_mode" in
             100644 | 100755)
                 if [[ ! -f "$input_root/$tree_path" ]]; then
                     tree_drift+="missing from the source tree: $tree_path"$'\n'
-                elif [[ "$tree_mode" == 100755 ]]; then
+                    continue
+                fi
+                if [[ "$tree_mode" == 100755 ]]; then
                     [[ -x "$input_root/$tree_path" ]] \
                         || tree_drift+="missing executable bit: $tree_path"$'\n'
                 else
                     [[ ! -x "$input_root/$tree_path" ]] \
                         || tree_drift+="unexpectedly executable: $tree_path"$'\n'
                 fi
+                blob_paths+=("$tree_path")
+                blob_objects+=("$tree_object")
                 ;;
         esac
-    done < <(git -C "$input_root" ls-tree -r -z "$source_commit")
+    done < <(
+        git -C "$input_root" ls-tree -r -z \
+            --format='%(objectmode) %(objectname) %(path)' "$source_commit"
+    )
+    # Hash the worktree files and compare object identities. One `hash-object`
+    # call covers the whole tree, and it reads the files rather than the index,
+    # so `assume-unchanged` cannot hide a difference the way it can from
+    # `git status`.
+    if ((${#blob_paths[@]} > 0)); then
+        mapfile -t worktree_objects < <(
+            cd "$input_root" && git hash-object -- "${blob_paths[@]}"
+        )
+        if ((${#worktree_objects[@]} != ${#blob_paths[@]})); then
+            printf 'could not hash every tracked file in %s\n' "$input_root" >&2
+            exit 2
+        fi
+        for blob_index in "${!blob_paths[@]}"; do
+            [[ "${worktree_objects[blob_index]}" == "${blob_objects[blob_index]}" ]] \
+                || tree_drift+="content differs from the commit blob: ${blob_paths[blob_index]}"$'\n'
+        done
+    fi
     if [[ -n "$tree_drift" ]]; then
         printf 'source tree does not match %s:\n%s' "$source_commit" "$tree_drift" >&2
         exit 2

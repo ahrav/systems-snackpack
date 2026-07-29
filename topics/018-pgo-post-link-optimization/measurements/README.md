@@ -70,7 +70,14 @@ The remote wrapper writes all evidence outside the source tree:
   non-Git gate, plus the selected experiment Rust toolchain;
 - `process.log` retains the complete driver output;
 - `experiment/raw.csv` retains every completed timed process, any failed
-  attempt, block order, checksum, and both clocks;
+  attempt, block order, checksum, and both clocks. A run gives each timed
+  process a fixed empty environment, recorded as `probe_environment` in
+  `experiment.json`, because `execve` copies the environment and the loader walks
+  it, so an inherited `PATH` sits inside `process_wall_ns`. The retained runs
+  below predate that and carry no `probe_environment` field: their
+  `process_wall_ns` and `noop` rows include the launching environment's startup
+  cost, so those values compare within their own run rather than across runs or
+  hosts. The in-process `elapsed_ns` rows are unaffected;
 - `experiment/summary.csv` and `experiment/experiment.json` retain point
   estimates, dispersion, intervals, and experiment parameters;
 - `experiment/correctness.json` and `experiment/discarded-warmups.json` retain
