@@ -118,41 +118,49 @@ experiment_dir="$output_dir/experiment"
 mkdir -p -- "$gates_dir"
 
 # Emits NUL-separated paths relative to the caller's directory, and is the only
-# definition of which files count as source. Callers sort: `manifest_source`
-# keeps the collation the retained manifests were built under, while the
-# checkout gate below sorts in C to match `git ls-files`.
+# definition of which files count as source. `!.git` excludes the gitdir pointer
+# file a linked worktree carries in place of a directory; its contents name an
+# absolute path on the running host, so it is not source.
 scan_source_paths() {
-    rg --files -uu -g '!.git/' -g '!target/' -0
+    rg --files -uu -g '!.git/' -g '!.git' -g '!target/' -0
 }
+# `LC_ALL=C` fixes the ordering to bytes. Collation is locale-dependent, so an
+# unpinned sort makes this digest depend on the environment of whoever generated
+# it: the same extracted tree hashes differently under en_US.UTF-8 than under C,
+# which would reject an archive whose bytes are correct.
 manifest_source() {
     manifest_root="$1"
     (
         cd "$manifest_root"
         scan_source_paths \
-            | sort -z \
+            | LC_ALL=C sort -z \
             | xargs -0 sha256sum --
     )
 }
 
+manifest_source "$input_root" >"$output_dir/source-files.origin.sha256"
 if [[ "$source_commit_verification" == git-checkout ]]; then
-    # `-uu` disables ignore rules and `git status --porcelain` omits ignored
-    # files, so a clean checkout can still carry files absent from the commit.
-    # Such a file enters the manifest and the snapshot, and can influence the
-    # gates, while the run is attributed to HEAD alone; the manifest then stops
-    # reproducing from `git archive $source_commit`.
-    untracked_scanned="$(
-        cd "$input_root"
-        LC_ALL=C comm -23 \
-            <(scan_source_paths | tr '\0' '\n' | LC_ALL=C sort) \
-            <(git ls-files | LC_ALL=C sort)
-    )"
-    if [[ -n "$untracked_scanned" ]]; then
-        printf 'source tree carries files absent from %s:\n%s\n' \
-            "$source_commit" "$untracked_scanned" >&2
+    # Reproduce the manifest from the commit rather than comparing path sets.
+    # The scan passes `-uu` while `git status --porcelain` omits ignored files,
+    # and neither status nor a one-way path comparison sees a sparse or
+    # skip-worktree path missing from the tree, or an assume-unchanged file whose
+    # bytes no longer match its blob. Any of those leaves the manifest and the
+    # snapshot disagreeing with `source_commit` while the run is attributed to it.
+    commit_tree="$scratch_dir/commit-tree"
+    mkdir -p -- "$commit_tree"
+    git -C "$input_root" archive --format=tar "$source_commit" \
+        | tar -xf - -C "$commit_tree"
+    manifest_source "$commit_tree" >"$output_dir/source-files.commit.sha256"
+    if ! cmp -s \
+        "$output_dir/source-files.origin.sha256" \
+        "$output_dir/source-files.commit.sha256"; then
+        printf 'source tree does not reproduce from %s:\n' "$source_commit" >&2
+        LC_ALL=C diff -- \
+            "$output_dir/source-files.commit.sha256" \
+            "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
     fi
 fi
-manifest_source "$input_root" >"$output_dir/source-files.origin.sha256"
 source_manifest_sha256="$(
     sha256sum -- "$output_dir/source-files.origin.sha256" | awk '{print $1}'
 )"

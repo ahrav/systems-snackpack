@@ -50,6 +50,10 @@ The remote wrapper writes all evidence outside the source tree:
 - `gates/` retains every repository and script validation log;
 - `source-files.before.sha256` and `source-files.after.sha256` prove that the
   included non-`.git`, non-`target` file bytes did not change;
+- `source-files.commit.sha256` appears only for a checkout run, where it carries
+  the manifest rebuilt from `git archive <source_commit>`; the run aborts unless
+  it equals `source-files.origin.sha256`, which is what ties a checkout tree to
+  its commit rather than to a clean `git status`;
 - `source-provenance.txt` records the verified archive and extracted-manifest
   identities and the immutable source snapshot used by every build and
   non-Git gate, plus the selected experiment Rust toolchain;
@@ -86,8 +90,8 @@ archive=/tmp/topic18-source.tar
 scratch="$(mktemp -d)"
 git archive --format=tar --output="$archive" <source_commit>
 tar -xf "$archive" -C "$scratch"
-(cd "$scratch" && rg --files -uu -g '!.git/' -g '!target/' -0 \
-  | sort -z | xargs -0 sha256sum --) > /tmp/topic18-source-files.sha256
+(cd "$scratch" && rg --files -uu -g '!.git/' -g '!.git' -g '!target/' -0 \
+  | LC_ALL=C sort -z | xargs -0 sha256sum --) > /tmp/topic18-source-files.sha256
 sha256sum "$archive" /tmp/topic18-source-files.sha256
 ```
 
