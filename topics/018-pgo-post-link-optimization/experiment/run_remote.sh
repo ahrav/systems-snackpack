@@ -4,12 +4,20 @@ set -euo pipefail
 # Validates an exact Linux source tree, runs Topic 18, and writes evidence
 # outside the repository.
 
-# Bash sources `BASH_ENV` before the first line of a non-interactive script, so
-# a startup file has already run by the time this check executes. Aborting
-# cannot undo that, but it stops the run from producing evidence gathered under
-# a hook that could have installed traps or functions, or altered the
-# measurement environment, with nothing recording it. Launch through
-# `env -u BASH_ENV bash …` if a login environment sets one.
+# Re-exec once through a shell that cannot have sourced a startup file. Bash
+# sources `BASH_ENV` before the first line of a non-interactive script, and a
+# hook that unsets the variable defeats any later test for it while its traps,
+# functions, and shell options remain in force. Replacing the process image
+# discards all three; `env -u` stops the second shell sourcing the hook again.
+# What survives is exported state such as `PATH`, which the tool resolution and
+# the gate and driver environments below account for separately.
+if [[ -z "${TOPIC18_REEXECED:-}" ]]; then
+    exec env -u BASH_ENV -u ENV TOPIC18_REEXECED=1 bash "$0" "$@"
+fi
+# The marker only suppresses a second re-exec, so a caller who presets it still
+# meets this check. A hook that both unsets the startup variables and presets
+# the marker is cooperating with this protocol; no in-script test survives that,
+# and the documented invocation is `env -u BASH_ENV -u ENV bash run_remote.sh …`.
 for startup_variable in BASH_ENV ENV; do
     if [[ -n "${!startup_variable:-}" ]]; then
         printf '%s\n' \
@@ -307,7 +315,7 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
     # `tar.umask` restricts the permission bits `git archive` emits, so a local
     # setting would strip modes from the reference tree itself.
     git -C "$input_root" -c tar.umask=0 archive --format=tar "$source_commit" \
-        | tar -xf - -C "$commit_tree"
+        | tar --same-permissions -xf - -C "$commit_tree"
     manifest_source "$commit_tree" >"$output_dir/source-files.commit.sha256"
     if ! cmp -s \
         "$output_dir/source-files.origin.sha256" \
@@ -386,7 +394,11 @@ else
     # records an archive digest that cannot reproduce the measured snapshot.
     archive_tree="$scratch_dir/archive-tree"
     mkdir -p -- "$archive_tree"
-    tar -xf "$SOURCE_ARCHIVE_PATH" -C "$archive_tree"
+    # `--same-permissions` because tar applies the caller's umask for an ordinary
+    # user, so a restrictive umask would strip modes from the reference exactly as
+    # it did from an input tree extracted the same way — leaving the mode
+    # comparison below to agree between two equally stripped trees.
+    tar --same-permissions -xf "$SOURCE_ARCHIVE_PATH" -C "$archive_tree"
     manifest_source "$archive_tree" >"$output_dir/source-files.archive.sha256"
     if ! cmp -s \
         "$output_dir/source-files.origin.sha256" \
