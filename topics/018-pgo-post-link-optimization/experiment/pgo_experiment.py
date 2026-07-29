@@ -22,6 +22,14 @@ import sys
 import time
 
 
+# Variables every recorded command must carry, whether or not the driver set
+# them itself. `RUSTUP_TOOLCHAIN` selects the compiler and is inherited from the
+# wrapper, and the snapshot carries a `rust-toolchain.toml` pin that a rustup
+# proxy applies in its absence, so a replay without it builds with the workspace
+# toolchain rather than the experiment toolchain.
+ALWAYS_RECORDED_ENVIRONMENT = ("RUSTUP_TOOLCHAIN",)
+
+
 T95 = {
     1: 12.706205,
     2: 4.302653,
@@ -70,16 +78,22 @@ def run(
 ) -> str:
     """Run one required command and return merged output."""
     if commands is not None:
-        # Record the assignments that differ from this process's environment, so
-        # the transcript replays as written. `LLVM_PROFILE_FILE` decides where a
-        # training run deposits its raw profile, and without it the recorded
-        # `llvm-profdata merge` reads a directory the replay never populated.
-        overrides = [
-            f"{name}={value}"
-            for name, value in sorted((env or {}).items())
+        # Record the assignments a replay needs. `LLVM_PROFILE_FILE` decides
+        # where a training run deposits its raw profile, and without it the
+        # recorded `llvm-profdata merge` reads a directory the replay never
+        # populated. Only per-command differences would be recorded otherwise,
+        # which is why ALWAYS_RECORDED_ENVIRONMENT exists.
+        effective = {**os.environ, **(env or {})}
+        overrides = {
+            name: value
+            for name, value in (env or {}).items()
             if os.environ.get(name) != value
-        ]
-        commands.append(shlex.join([*overrides, *command]))
+        }
+        for name in ALWAYS_RECORDED_ENVIRONMENT:
+            if name in effective:
+                overrides[name] = effective[name]
+        recorded = [f"{name}={value}" for name, value in sorted(overrides.items())]
+        commands.append(shlex.join([*recorded, *command]))
     completed = subprocess.run(
         command,
         cwd=cwd,

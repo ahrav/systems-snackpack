@@ -59,34 +59,44 @@ gate_env() {
         CARGO_TARGET_DIR="$CARGO_TARGET_DIR" \
         "$@"
 }
+# `git replace` refs and grafts are honoured by object reads, so `git archive`
+# can emit a replacement tree while `rev-parse HEAD` still reports the original
+# commit. The manifest would then reproduce from a local rewrite that a clone of
+# `source_commit` does not contain. Read raw objects for every provenance query.
+export GIT_NO_REPLACE_OBJECTS=1
 experiment_rustup_toolchain="${EXPERIMENT_RUSTUP_TOOLCHAIN:-stable}"
 if ! RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" rustc -vV >/dev/null 2>&1; then
     printf 'experiment Rust toolchain is unavailable: %s\n' \
         "$experiment_rustup_toolchain" >&2
     exit 2
 fi
-# `RUSTUP_TOOLCHAIN` only selects a toolchain for a rustup proxy. A real `rustc`
-# earlier on `PATH` ignores it, so the driver would build with the ambient
-# compiler while the receipts name the requested toolchain. Compare the version
-# the proxy path reports against the one rustup resolves for that toolchain
-# rather than guessing from the resolved path.
-experiment_rustc="$(
-    rustup which --toolchain "$experiment_rustup_toolchain" rustc 2>/dev/null || true
-)"
-if [[ ! -x "$experiment_rustc" ]]; then
-    printf 'rustup cannot resolve rustc for toolchain %s\n' \
-        "$experiment_rustup_toolchain" >&2
-    exit 2
-fi
-if [[ "$(RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" rustc -vV)" \
-    != "$("$experiment_rustc" -vV)" ]]; then
-    printf '%s\n' \
-        "rustc on PATH does not honour RUSTUP_TOOLCHAIN=$experiment_rustup_toolchain" \
-        "PATH rustc: $(command -v rustc)" \
-        "toolchain rustc: $experiment_rustc" \
-        "put the rustup proxies ahead of any real rustc on PATH" >&2
-    exit 2
-fi
+# Only a rustup proxy consults `RUSTUP_TOOLCHAIN` or a `rust-toolchain.toml`
+# pin. A real binary earlier on `PATH` ignores both, so the driver would build
+# the probes with the ambient compiler and the gates would validate against it,
+# while the receipts name the requested toolchain and the repository pin.
+# Compare what the `PATH` name reports under an explicit toolchain against what
+# rustup resolves for it; on a correctly configured host those two paths differ,
+# so a path comparison would reject the working case.
+for proxied_tool in rustc cargo; do
+    resolved_tool="$(
+        rustup which --toolchain "$experiment_rustup_toolchain" "$proxied_tool" \
+            2>/dev/null || true
+    )"
+    if [[ ! -x "$resolved_tool" ]]; then
+        printf 'rustup cannot resolve %s for toolchain %s\n' \
+            "$proxied_tool" "$experiment_rustup_toolchain" >&2
+        exit 2
+    fi
+    if [[ "$(RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" "$proxied_tool" --version)" \
+        != "$("$resolved_tool" --version)" ]]; then
+        printf '%s\n' \
+            "$proxied_tool on PATH ignores RUSTUP_TOOLCHAIN=$experiment_rustup_toolchain" \
+            "PATH $proxied_tool: $(command -v "$proxied_tool")" \
+            "toolchain $proxied_tool: $resolved_tool" \
+            "put the rustup proxies ahead of any real toolchain binary on PATH" >&2
+        exit 2
+    fi
+done
 
 if [[ ! -r "$topic_dir/experiment/pgo_experiment.py" ]]; then
     printf 'repository lacks the Topic 18 experiment\n' >&2
@@ -309,6 +319,28 @@ if ! cmp -s \
 fi
 repo_root="$snapshot_root"
 topic_dir="$repo_root/$topic_rel"
+
+# Cargo merges `.cargo/config.toml` from its working directory and every parent,
+# which no environment change reaches, so a configuration above the snapshot
+# still decides what the gates validate. The snapshot sits under `TMPDIR`, so
+# its ancestors are the caller's choice; refuse rather than validate against
+# them. Pure parameter expansion so this adds no tool dependency.
+config_ancestor="$repo_root"
+while :; do
+    for cargo_config in \
+        "$config_ancestor/.cargo/config.toml" \
+        "$config_ancestor/.cargo/config"; do
+        if [[ -e "$cargo_config" ]]; then
+            printf '%s\n' \
+                "Cargo configuration above the snapshot would reach the gates: $cargo_config" \
+                "set TMPDIR to a location with no .cargo configuration above it" >&2
+            exit 2
+        fi
+    done
+    [[ "$config_ancestor" == "/" ]] && break
+    config_ancestor="${config_ancestor%/*}"
+    [[ -z "$config_ancestor" ]] && config_ancestor=/
+done
 
 {
     printf 'source_commit=%s\n' "$source_commit"
