@@ -303,29 +303,34 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
             "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
     fi
-    # Take the commit's modes from the object database rather than from the
-    # extracted tree. `tar.umask` and archive attributes both shape what
+    # Take the commit's path set and modes from the object database rather than
+    # from the extracted tree. `tar.umask` and archive attributes both shape what
     # `git archive` emits, so a reference tree can agree with a drifted worktree
-    # because the same local configuration reduced both. `ls-tree` reports what
-    # the commit records. Regular blobs only: a symlink's `-x` follows its target
-    # and a gitlink has no worktree file here.
-    mode_drift=""
+    # because the same local configuration reduced both — an `export-ignore` path
+    # that a sparse checkout also lacks is absent from both manifests. `ls-tree`
+    # reports what the commit records, and no archive attribute filters it.
+    # Regular blobs only: a symlink's `-x` follows its target and a gitlink has no
+    # worktree file here.
+    tree_drift=""
     while IFS= read -r -d '' tree_entry; do
         tree_mode="${tree_entry%% *}"
         tree_path="${tree_entry#*$'\t'}"
         case "$tree_mode" in
-            100755)
-                [[ -x "$input_root/$tree_path" ]] \
-                    || mode_drift+="missing executable bit: $tree_path"$'\n'
-                ;;
-            100644)
-                [[ ! -x "$input_root/$tree_path" ]] \
-                    || mode_drift+="unexpectedly executable: $tree_path"$'\n'
+            100644 | 100755)
+                if [[ ! -f "$input_root/$tree_path" ]]; then
+                    tree_drift+="missing from the source tree: $tree_path"$'\n'
+                elif [[ "$tree_mode" == 100755 ]]; then
+                    [[ -x "$input_root/$tree_path" ]] \
+                        || tree_drift+="missing executable bit: $tree_path"$'\n'
+                else
+                    [[ ! -x "$input_root/$tree_path" ]] \
+                        || tree_drift+="unexpectedly executable: $tree_path"$'\n'
+                fi
                 ;;
         esac
     done < <(git -C "$input_root" ls-tree -r -z "$source_commit")
-    if [[ -n "$mode_drift" ]]; then
-        printf 'file modes do not match %s:\n%s' "$source_commit" "$mode_drift" >&2
+    if [[ -n "$tree_drift" ]]; then
+        printf 'source tree does not match %s:\n%s' "$source_commit" "$tree_drift" >&2
         exit 2
     fi
 else

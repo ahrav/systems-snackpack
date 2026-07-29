@@ -122,15 +122,21 @@ unset TAR_OPTIONS
 GIT_NO_REPLACE_OBJECTS=1 git -c tar.umask=0 archive \
   --format=tar --output="$archive" <source_commit>
 tar -xf "$archive" -C "$scratch"
-# The archive must be the whole commit. `export-ignore` in a tracked
-# `.gitattributes` or in the sender-local `$GIT_DIR/info/attributes` silently
-# omits paths, and the manifest is then computed from the filtered tarball, so
-# the receiver verifies bytes that do not reproduce from <source_commit>. Compare
-# against the object database, which no archive attribute filters.
+# The archive must be the whole commit, byte for byte. `export-ignore` omits
+# paths and `export-subst` rewrites contents, from a tracked `.gitattributes` or
+# from the sender-local `$GIT_DIR/info/attributes`, and the manifest is then
+# computed from the filtered or substituted tarball — so the receiver verifies
+# bytes that do not reproduce from <source_commit>. Compare blob identities
+# against the object database, which no archive attribute touches, with replace
+# refs disabled on both sides of the comparison.
 LC_ALL=C diff \
-  <(git ls-tree -r --name-only <source_commit> | LC_ALL=C sort) \
+  <(GIT_NO_REPLACE_OBJECTS=1 git ls-tree -r \
+      --format='%(objectname) %(path)' <source_commit> | LC_ALL=C sort) \
   <(cd "$scratch" && rg --no-config --files -uu -g '!.git/' -g '!.git' \
-      -g '!target/' | LC_ALL=C sort)
+      -g '!target/' -0 \
+      | xargs -0 -n1 sh -c \
+          'printf "%s %s\n" "$(GIT_NO_REPLACE_OBJECTS=1 git hash-object -- "$0")" "$0"' \
+      | LC_ALL=C sort)
 (cd "$scratch" && rg --no-config --files -uu -g '!.git/' -g '!.git' -g '!target/' -0 \
   | LC_ALL=C sort -z | xargs -0 sha256sum --) > /tmp/topic18-source-files.sha256
 sha256sum "$archive" /tmp/topic18-source-files.sha256

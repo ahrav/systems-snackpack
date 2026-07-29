@@ -29,6 +29,14 @@ import time
 # toolchain rather than the experiment toolchain.
 ALWAYS_RECORDED_ENVIRONMENT = ("RUSTUP_TOOLCHAIN",)
 
+# Timed probes run with this environment rather than the driver's. `execve`
+# copies the environment into the new process and the loader walks it, so an
+# inherited `PATH` makes `process_wall_ns` and the `noop` startup comparison
+# depend on how long the caller's environment happens to be. The probe reads its
+# arguments only, so an empty environment removes that term and fixes it across
+# hosts; `experiment.json` records it.
+PROBE_ENVIRONMENT: dict[str, str] = {}
+
 
 T95 = {
     1: 12.706205,
@@ -187,6 +195,7 @@ def timed_probe(binary: Path, mode: str, iterations: int, seed: int) -> dict[str
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        env=PROBE_ENVIRONMENT,
     )
     process_wall_ns = time.perf_counter_ns() - started
     parsed = parse_output(completed.stdout)
@@ -794,6 +803,7 @@ def main() -> None:
         "measurement_seed": 2,
         "schedule_seed": SCHEDULE_SEED,
         "rustup_toolchain_environment": os.environ.get("RUSTUP_TOOLCHAIN"),
+        "probe_environment": PROBE_ENVIRONMENT,
         "tools": tools,
         "post_link_tools": postlink,
         "binary_sha256": binary_hashes,
