@@ -61,7 +61,11 @@ if ! [[ "$cpu" =~ ^(0|[1-9][0-9]*)$ ]] || ! taskset -c "$cpu" true >/dev/null 2>
     exit 2
 fi
 
-if git -C "$repo_root" rev-parse --git-dir >/dev/null 2>&1; then
+# Compare against the work-tree root rather than testing for repository
+# discovery: `rev-parse --git-dir` walks upward, so an archive extracted beneath
+# an unrelated checkout would otherwise adopt that ancestor's HEAD and status as
+# its own source identity and skip the archive checks below.
+if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$repo_root" ]]; then
     source_commit="$(git -C "$repo_root" rev-parse HEAD)"
     if [[ -n "$(git -C "$repo_root" status --porcelain)" ]]; then
         printf 'repository must be clean\n' >&2
@@ -91,6 +95,11 @@ else
         exit 2
     fi
     source_commit="$SOURCE_COMMIT"
+    # The digests above bind the transferred bytes, not the commit id: an
+    # extracted archive carries no object store, so nothing on this host can
+    # recompute `git archive $SOURCE_COMMIT`. The label names what is verified
+    # here — archive and manifest — and `source_commit` remains a caller
+    # declaration whose binding to these bytes is established by the sender.
     source_commit_verification=verified-archive-and-manifest
 fi
 if [[ -n "${SOURCE_COMMIT:-}" && "$SOURCE_COMMIT" != "$source_commit" ]]; then
@@ -108,15 +117,41 @@ gates_dir="$output_dir/gates"
 experiment_dir="$output_dir/experiment"
 mkdir -p -- "$gates_dir"
 
+# Emits NUL-separated paths relative to the caller's directory, and is the only
+# definition of which files count as source. Callers sort: `manifest_source`
+# keeps the collation the retained manifests were built under, while the
+# checkout gate below sorts in C to match `git ls-files`.
+scan_source_paths() {
+    rg --files -uu -g '!.git/' -g '!target/' -0
+}
 manifest_source() {
     manifest_root="$1"
     (
         cd "$manifest_root"
-        rg --files -uu -g '!.git/' -g '!target/' -0 \
+        scan_source_paths \
             | sort -z \
             | xargs -0 sha256sum --
     )
 }
+
+if [[ "$source_commit_verification" == git-checkout ]]; then
+    # `-uu` disables ignore rules and `git status --porcelain` omits ignored
+    # files, so a clean checkout can still carry files absent from the commit.
+    # Such a file enters the manifest and the snapshot, and can influence the
+    # gates, while the run is attributed to HEAD alone; the manifest then stops
+    # reproducing from `git archive $source_commit`.
+    untracked_scanned="$(
+        cd "$input_root"
+        LC_ALL=C comm -23 \
+            <(scan_source_paths | tr '\0' '\n' | LC_ALL=C sort) \
+            <(git ls-files | LC_ALL=C sort)
+    )"
+    if [[ -n "$untracked_scanned" ]]; then
+        printf 'source tree carries files absent from %s:\n%s\n' \
+            "$source_commit" "$untracked_scanned" >&2
+        exit 2
+    fi
+fi
 manifest_source "$input_root" >"$output_dir/source-files.origin.sha256"
 source_manifest_sha256="$(
     sha256sum -- "$output_dir/source-files.origin.sha256" | awk '{print $1}'
@@ -131,7 +166,7 @@ snapshot_root="$scratch_dir/source"
 mkdir -p -- "$snapshot_root"
 (
     cd "$input_root"
-    rg --files -uu -g '!.git/' -g '!target/' -0 \
+    scan_source_paths \
         | sort -z \
         | xargs -0 cp --parents --target-directory="$snapshot_root" --
 )

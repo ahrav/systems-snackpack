@@ -761,6 +761,11 @@ def parse_args() -> argparse.Namespace:
     arguments = parser.parse_args()
     if arguments.blocks < 2 or arguments.blocks > 31:
         parser.error("--blocks must be between 2 and 31")
+    # The schedule alternates ABBA and BAAB across `range(blocks)`, so an odd
+    # count leaves one comparison order with an extra block and folds position
+    # effects into the reported ratios.
+    if arguments.blocks % 2 != 0:
+        parser.error("--blocks must be even so each comparison is order-balanced")
     if arguments.iterations <= 0 or arguments.training_iterations <= 0:
         parser.error("iteration counts must be positive")
     return arguments

@@ -86,13 +86,19 @@ archive=/tmp/topic18-source.tar
 scratch="$(mktemp -d)"
 git archive --format=tar --output="$archive" <source_commit>
 tar -xf "$archive" -C "$scratch"
-(cd "$scratch" && rg --files -uu -g '!/.git/' -g '!/target/' -0 \
+(cd "$scratch" && rg --files -uu -g '!.git/' -g '!target/' -0 \
   | sort -z | xargs -0 sha256sum --) > /tmp/topic18-source-files.sha256
 sha256sum "$archive" /tmp/topic18-source-files.sha256
 ```
 
 The retained archive and manifest digests bind the transferred archive and
-extracted bytes to the source-candidate receipts.
+extracted bytes to the source-candidate receipts. They do not bind those bytes
+to the commit id: an extracted archive carries no object store, so the receiving
+host cannot recompute `git archive <source_commit>`. In archive mode
+`source_commit` is therefore a sender declaration, and
+`source_commit_verification=verified-archive-and-manifest` names the archive and
+manifest digests it does verify. A checkout run establishes the commit directly
+and additionally rejects any scanned file absent from `git ls-files`.
 
 ## Measured and inferred claims
 
