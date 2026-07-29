@@ -181,7 +181,7 @@ done
 declare -A tool_digest=()
 for digested_tool in "${!tool_path[@]}"; do
     tool_digest["$digested_tool"]="$(
-        "${tool_path[sha256sum]}" -- "${tool_path[$digested_tool]}" | awk '{print $1}'
+        "${tool_path[sha256sum]}" -- "${tool_path[$digested_tool]}" | "${tool_path[awk]}" '{print $1}'
     )"
 done
 # Bind a program resolved later than the loop above, before the run uses it. The
@@ -191,7 +191,7 @@ done
 # validates the snapshot and produces the measured binaries unbound.
 digest_tool() {
     tool_path["$1"]="$2"
-    tool_digest["$1"]="$("${tool_path[sha256sum]}" -- "$2" | awk '{print $1}')"
+    tool_digest["$1"]="$("${tool_path[sha256sum]}" -- "$2" | "${tool_path[awk]}" '{print $1}')"
 }
 # The driver probes these after the timings but before it writes
 # `binary-sha256.json`, so executing one taken from `PATH` runs unrecorded code
@@ -258,7 +258,7 @@ done
 # `CARGO_HOME` is redirected because Cargo also merges configuration files that
 # no environment change reaches.
 gate_env() {
-    env -i \
+    "${tool_path[env]}" -i \
         PATH="$gate_toolchain_bin:$PATH" \
         HOME="$HOME" \
         LC_ALL=C \
@@ -287,7 +287,7 @@ experiment_rustup_toolchain="${EXPERIMENT_RUSTUP_TOOLCHAIN:-stable}"
 # with no proxy involved. An uninstalled toolchain resolves to nothing, so this
 # also reports its absence.
 experiment_rustc="$(
-    rustup which --toolchain "$experiment_rustup_toolchain" rustc 2>/dev/null || true
+    "${tool_path[rustup]}" which --toolchain "$experiment_rustup_toolchain" rustc 2>/dev/null || true
 )"
 if [[ ! -x "$experiment_rustc" ]]; then
     printf 'rustup cannot resolve rustc for toolchain %s\n' \
@@ -375,7 +375,7 @@ if (($# == 3)); then
     cpu="$3"
 else
     allowed="$(
-        "${tool_path[rg]}" --no-config -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}' || true
+        "${tool_path[rg]}" --no-config -m 1 '^Cpus_allowed_list:' /proc/self/status | "${tool_path[awk]}" '{print $2}' || true
     )"
     first="${allowed%%,*}"
     cpu="${first%%-*}"
@@ -428,7 +428,7 @@ else
         printf 'SOURCE_ARCHIVE_PATH must name the transferred archive\n' >&2
         exit 2
     fi
-    actual_archive_sha256="$("${tool_path[sha256sum]}" -- "$SOURCE_ARCHIVE_PATH" | awk '{print $1}')"
+    actual_archive_sha256="$("${tool_path[sha256sum]}" -- "$SOURCE_ARCHIVE_PATH" | "${tool_path[awk]}" '{print $1}')"
     if [[ "$actual_archive_sha256" != "$SOURCE_ARCHIVE_SHA256" ]]; then
         printf 'transferred archive digest does not match SOURCE_ARCHIVE_SHA256\n' >&2
         exit 2
@@ -556,7 +556,7 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
     "${tool_path[git]}" -C "$input_root" -c tar.umask=0 archive --format=tar "$source_commit" \
         | "${tool_path[tar]}" --same-permissions -xf - -C "$commit_tree"
     manifest_source "$commit_tree" >"$output_dir/source-files.commit.sha256"
-    if ! cmp -s \
+    if ! "${tool_path[cmp]}" -s \
         "$output_dir/source-files.origin.sha256" \
         "$output_dir/source-files.commit.sha256"; then
         printf 'source tree does not reproduce from %s:\n' "$source_commit" >&2
@@ -675,7 +675,7 @@ else
     # comparison below to agree between two equally stripped trees.
     "${tool_path[tar]}" --same-permissions -xf "$SOURCE_ARCHIVE_PATH" -C "$archive_tree"
     manifest_source "$archive_tree" >"$output_dir/source-files.archive.sha256"
-    if ! cmp -s \
+    if ! "${tool_path[cmp]}" -s \
         "$output_dir/source-files.origin.sha256" \
         "$output_dir/source-files.archive.sha256"; then
         printf 'source tree does not reproduce from %s:\n' \
@@ -688,7 +688,7 @@ else
     require_matching_modes "$input_root" "$archive_tree" "$SOURCE_ARCHIVE_PATH"
 fi
 source_manifest_sha256="$(
-    "${tool_path[sha256sum]}" -- "$output_dir/source-files.origin.sha256" | awk '{print $1}'
+    "${tool_path[sha256sum]}" -- "$output_dir/source-files.origin.sha256" | "${tool_path[awk]}" '{print $1}'
 )"
 if [[ "$source_commit_verification" == verified-archive-and-manifest ]] \
     && [[ "$source_manifest_sha256" != "$SOURCE_MANIFEST_SHA256" ]]; then
@@ -705,7 +705,7 @@ mkdir -p -- "$snapshot_root"
         | xargs -0 cp --parents --preserve=mode --target-directory="$snapshot_root" --
 )
 manifest_source "$snapshot_root" >"$output_dir/source-files.before.sha256"
-if ! cmp -s \
+if ! "${tool_path[cmp]}" -s \
     "$output_dir/source-files.origin.sha256" \
     "$output_dir/source-files.before.sha256"; then
     printf 'immutable source snapshot does not match the verified input\n' >&2
@@ -744,9 +744,10 @@ done
 # would validate against the caller's choice while the receipts named the pin.
 gate_toolchain="$(
     cd "$repo_root" \
-        && env -u RUSTUP_TOOLCHAIN rustup show active-toolchain | awk '{print $1}'
+        && "${tool_path[env]}" -u RUSTUP_TOOLCHAIN "${tool_path[rustup]}" show active-toolchain \
+            | "${tool_path[awk]}" '{print $1}'
 )"
-gate_cargo="$(rustup which --toolchain "$gate_toolchain" cargo 2>/dev/null || true)"
+gate_cargo="$("${tool_path[rustup]}" which --toolchain "$gate_toolchain" cargo 2>/dev/null || true)"
 if [[ ! -x "$gate_cargo" ]]; then
     printf 'rustup cannot resolve cargo for the repository toolchain %s\n' \
         "$gate_toolchain" >&2
@@ -812,7 +813,7 @@ require_unchanged_tools() {
     tool_drift=""
     for recorded_tool in "${!tool_path[@]}"; do
         current_tool_digest="$(
-            "${tool_path[sha256sum]}" -- "${tool_path[$recorded_tool]}" | awk '{print $1}'
+            "${tool_path[sha256sum]}" -- "${tool_path[$recorded_tool]}" | "${tool_path[awk]}" '{print $1}'
         )"
         if [[ "$current_tool_digest" != "${tool_digest[$recorded_tool]}" ]]; then
             tool_drift+="$recorded_tool ${tool_path[$recorded_tool]}"
@@ -982,7 +983,7 @@ for exported_tool in cc ld nm objdump llvm-bolt perf2bolt merge-fdata perf; do
         )
     fi
 done
-env -i \
+"${tool_path[env]}" -i \
     PATH="$experiment_toolchain_bin:$PATH" \
     HOME="$HOME" \
     LC_ALL=C \
@@ -999,7 +1000,7 @@ env -i \
     >"$output_dir/process.log" 2>&1
 
 manifest_source "$repo_root" >"$output_dir/source-files.after.sha256"
-if ! cmp -s \
+if ! "${tool_path[cmp]}" -s \
     "$output_dir/source-files.before.sha256" \
     "$output_dir/source-files.after.sha256"; then
     printf 'source files changed during evidence collection\n' >&2

@@ -278,6 +278,14 @@ def build(
         raise RuntimeError(f"rustc {release} is older than the workspace minimum 1.93")
     profdata = rust_profdata(rustc, toolchain_cwd)
     commands: list[str] = []
+    # The `gcc` linker flavor invokes `cc` from `PATH`, and the wrapper prepends the
+    # selected toolchain's directory, so a toolchain-local `cc` would link the
+    # measured binaries while the receipt named the one the wrapper resolved.
+    # Recording `cc` for the version probe does not constrain what rustc links with,
+    # so name it. When the wrapper did not bind one, leave the flag off and let rustc
+    # resolve as before rather than guessing a path.
+    bound_cc = bound_tool("cc")
+    linker_options = [f"-Clinker={bound_cc}"] if bound_cc is not None else []
     # `-Cdebuginfo=1` records the paths rustc was given, and both roots are
     # scratch directories with random names, so without remapping the binary
     # digests describe the directory the run happened to get rather than the
@@ -290,6 +298,7 @@ def build(
         "-Ctarget-cpu=native",
         "-Ccodegen-units=1",
         "-Cdebuginfo=1",
+        *linker_options,
         f"--remap-path-prefix={toolchain_cwd}=/topic18-source",
         f"--remap-path-prefix={work_dir}=/topic18-work",
         "-Clink-arg=-Wl,--emit-relocs",
