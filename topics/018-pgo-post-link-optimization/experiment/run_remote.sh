@@ -1114,6 +1114,12 @@ done
 # the driver locates them itself from `rustc`. Export them so it uses the bound paths:
 # otherwise a file appearing after the binding — `rust-lld` is optional, so its absence
 # is not an error — would be executed by the version probe with no digest behind it.
+# The compiler itself, for the same reason: the driver resolves `rustc` through the
+# rewritten `PATH`, so a lookup that misses the toolchain copy falls through to a later
+# entry, and every measured binary would then be built by a program absent from the
+# receipt. The wrapper already resolved this path through `rustup which`, so exporting it
+# pins the same toolchain the prepended directory selects instead of re-deriving it.
+bound_tool_env+=("TOPIC18_TOOL_rustc=$experiment_rustc")
 for exported_bundled in llvm-profdata rust-lld; do
     if [[ -n "${tool_path[experiment_$exported_bundled]:-}" ]]; then
         bound_tool_env+=(

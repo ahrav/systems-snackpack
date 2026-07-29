@@ -40,7 +40,7 @@ Run the retained check from a clean x86-64 or AArch64 Linux checkout with
 procfs, `taskset`, `lscpu`, GNU `objdump`, `nm`, and `sha256sum`:
 
 ```bash
-unset $(env | sed -n 's/^\(LD_[A-Z_]*\|GLIBC_[A-Z_]*\|MALLOC_[A-Z_]*\)=.*/\1/p')
+for loader_variable in ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}; do unset "$loader_variable"; done
 /usr/bin/env -i \
   PATH="/usr/bin:/bin:$HOME/.cargo/bin" \
   HOME="$HOME" \
@@ -55,8 +55,14 @@ the environment for the shell it starts, but `env` itself is executed with whate
 caller had, so the dynamic loader processes an inherited `LD_PRELOAD` or `LD_AUDIT` and
 runs that library's constructor inside `env` — before `-i` clears anything and before
 `bash -p` or any of the wrapper's refusals exist. The wrapper cannot see this: the
-variable is gone from the child by then. Launching from a shell that never had them set
-is equivalent and preferable; the `unset` above is for a shell that did.
+variable is gone from the child by then.
+
+The clearing loop uses only shell builtins for that same reason. `${!LD_@}` expands to
+the names currently set with that prefix, so no external program runs and there is no
+process for an inherited library to be loaded into; discovering the names by piping
+`env` through `sed` would execute two of them first. Launching from a shell that never
+had the loader namespace set is equivalent and preferable — the loop is for a shell that
+did.
 
 Name `env` and `bash` by absolute path, and give `PATH` explicitly rather than
 passing the caller's through. The launcher runs before the wrapper exists to check

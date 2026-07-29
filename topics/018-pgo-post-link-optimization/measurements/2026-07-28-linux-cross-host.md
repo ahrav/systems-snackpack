@@ -1,8 +1,14 @@
 # Linux cross-host note: 2026-07-28
 
-Both current dev machines ran the same source commit, transferred archive,
-extracted-file manifest, Rust source, compiler flags, training inputs,
-measurement inputs, CPU-0 affinity, and process schedule. Each host independently
+Both current dev machines ran the same declared source commit, transferred archive,
+extracted-file manifest, Rust source, compiler flags, training inputs, measurement
+inputs, CPU-0 affinity, and process schedule. Both runs record
+`source_commit_verification=verified-archive-and-manifest`, so what each host checked is
+the archive and manifest digests it was given; neither can recompute
+`git archive <source_commit>` from an extracted tree, and the commit id is a sender
+declaration on both sides. The cross-host agreement below is therefore agreement about
+the same archive bytes, which is what makes it a comparison of hosts rather than of
+source. Each host independently
 verified the archive, all 993 extracted source files, and every retained
 file listed in `evidence.sha256`.
 
