@@ -41,7 +41,7 @@ procfs, `taskset`, `lscpu`, GNU `objdump`, `nm`, and `sha256sum`:
 
 ```bash
 /usr/bin/env -i \
-  PATH="$HOME/.cargo/bin:/usr/bin:/bin" \
+  PATH="/usr/bin:/bin:$HOME/.cargo/bin" \
   HOME="$HOME" \
   /usr/bin/bash -p \
   topics/018-pgo-post-link-optimization/experiment/run_remote.sh \

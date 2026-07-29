@@ -697,30 +697,54 @@ else
     # values depend on.
     # Require an uncompressed tar. `tar` hands a compressed member to a filter
     # program — `gzip`, `xz`, `zstd` — resolved from `PATH`, and those helpers are
-    # not in the required-tool set, so they are neither digested nor rechecked: an
-    # unrecorded program would decide what the archive contains during the source
-    # verification that attests to it. Test for the `ustar` magic rather than
-    # enumerating compression signatures, so an unknown container is refused instead
-    # of being assumed safe. The documented handoff writes `--format=tar`.
-    if ! "${tool_path[python3]}" -I -c 'import sys
+# not in the required-tool set, so they are neither digested nor rechecked: an
+# unrecorded program would decide what the archive contains during the source
+# verification that attests to it. The documented handoff writes `--format=tar`.
+#
+# Both directions are needed. Requiring the `ustar` magic alone is not sufficient:
+# the bytes at offset 257 are read without decompressing, so a compressed stream can
+# be made to carry `ustar` there — a gzip member whose stored filename field spans
+# that offset does it. Refusing known compression signatures alone is not sufficient
+# either, because it accepts any container it does not know. So refuse a recognised
+# compression header and require the tar magic.
+if ! "${tool_path[python3]}" -I -c 'import sys
+COMPRESSED = (
+    b"\x1f\x8b",              # gzip
+    b"\x1f\x9d",              # compress
+    b"\x1f\xa0",              # pack/lzh
+    b"BZh",                   # bzip2
+    b"\xfd7zXZ\x00",          # xz
+    b"\x5d\x00\x00",          # lzma
+    b"\x04\x22\x4d\x18",      # lz4
+    b"\x28\xb5\x2f\xfd",      # zstd
+    b"LZIP",                  # lzip
+    b"\x89LZO",               # lzop
+    b"PK\x03\x04",            # zip
+)
 with open(sys.argv[1], "rb") as archive:
     header = archive.read(512)
+if any(header.startswith(magic) for magic in COMPRESSED):
+    raise SystemExit(1)
 raise SystemExit(0 if header[257:262] == b"ustar" else 1)' "$SOURCE_ARCHIVE_PATH"; then
-        printf '%s\n' \
-            "SOURCE_ARCHIVE_PATH must be an uncompressed tar: $SOURCE_ARCHIVE_PATH" \
-            "a compressed archive is expanded by a PATH-resolved filter program that" \
-            "no receipt records" >&2
-        exit 2
-    fi
-    archive_entry_drift=""
-    while IFS= read -r archive_entry; do
-        case "$archive_entry" in
-            -* | d*) ;;
-            *)
-                archive_entry_drift+="unsupported archive entry: $archive_entry"$'\n'
-                ;;
-        esac
-    done < <(LC_ALL=C "${tool_path[tar]}" -tvf "$SOURCE_ARCHIVE_PATH")
+    printf '%s\n' \
+        "SOURCE_ARCHIVE_PATH must be an uncompressed tar: $SOURCE_ARCHIVE_PATH" \
+        "a compressed archive is expanded by a PATH-resolved filter program that" \
+        "no receipt records" >&2
+    exit 2
+fi
+archive_entry_drift=""
+while IFS= read -r archive_entry; do
+    case "$archive_entry" in
+        -* | d*) ;;
+        *)
+            archive_entry_drift+="unsupported archive entry: $archive_entry"$'\n'
+            ;;
+    esac
+    # `--force-local` because GNU tar reads `host:path` as a remote archive over
+    # `rsh`, while the digest and magic checks above and `sha256sum` all read the
+    # local file of that name. Without it a name containing a colon lets `tar` list
+    # and extract different bytes from the ones `source_archive_sha256` records.
+done < <(LC_ALL=C "${tool_path[tar]}" --force-local -tvf "$SOURCE_ARCHIVE_PATH")
     if [[ -n "$archive_entry_drift" ]]; then
         printf 'archive holds entries this comparison cannot verify:\n%s' \
             "$archive_entry_drift" >&2
@@ -730,7 +754,8 @@ raise SystemExit(0 if header[257:262] == b"ustar" else 1)' "$SOURCE_ARCHIVE_PATH
     # user, so a restrictive umask would strip modes from the reference exactly as
     # it did from an input tree extracted the same way — leaving the mode
     # comparison below to agree between two equally stripped trees.
-    "${tool_path[tar]}" --same-permissions -xf "$SOURCE_ARCHIVE_PATH" -C "$archive_tree"
+    "${tool_path[tar]}" --force-local --same-permissions -xf "$SOURCE_ARCHIVE_PATH" \
+        -C "$archive_tree"
     manifest_source "$archive_tree" >"$output_dir/source-files.archive.sha256"
     if ! "${tool_path[cmp]}" -s \
         "$output_dir/source-files.origin.sha256" \

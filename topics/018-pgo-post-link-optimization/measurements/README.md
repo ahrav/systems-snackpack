@@ -133,11 +133,17 @@ recompute `git archive <source_commit>` — it has no object store — so a call
 `git`, `tar`, or `sha256sum` here produces a self-consistent handoff for bytes that are
 not the committed ones, and nothing downstream can detect it. Name the programs by
 absolute path or start from a `PATH` chosen for this purpose, for the same reason the
-wrapper is launched that way. Adjust the directories to this host — `rg` normally lives
-under `$HOME/.cargo/bin`, so a bare `/usr/bin:/bin` will not find it:
+wrapper is launched that way. Order matters: the system directories come first so that
+`git`, `tar`, `sha256sum`, `sort`, `xargs`, and `sh` resolve from them, and the
+user-writable Cargo directory comes last because `rg` normally lives there and nothing
+else in this recipe should. Adjust the directories to this host. `set -euo pipefail`
+so that a failing proof stops the recipe: without it an interactive shell carries on
+past a mismatched `diff` and prints digests a receiver would accept, and the receiver
+cannot recheck the commit binding those digests are standing in for:
 
 ```bash
-export PATH="$HOME/.cargo/bin:/usr/bin:/bin"
+set -euo pipefail
+export PATH="/usr/bin:/bin:$HOME/.cargo/bin"
 archive=/tmp/topic18-source.tar
 scratch="$(mktemp -d)"
 unset TAR_OPTIONS
