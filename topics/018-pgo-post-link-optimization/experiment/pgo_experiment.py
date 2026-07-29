@@ -70,7 +70,16 @@ def run(
 ) -> str:
     """Run one required command and return merged output."""
     if commands is not None:
-        commands.append(shlex.join(command))
+        # Record the assignments that differ from this process's environment, so
+        # the transcript replays as written. `LLVM_PROFILE_FILE` decides where a
+        # training run deposits its raw profile, and without it the recorded
+        # `llvm-profdata merge` reads a directory the replay never populated.
+        overrides = [
+            f"{name}={value}"
+            for name, value in sorted((env or {}).items())
+            if os.environ.get(name) != value
+        ]
+        commands.append(shlex.join([*overrides, *command]))
     completed = subprocess.run(
         command,
         cwd=cwd,

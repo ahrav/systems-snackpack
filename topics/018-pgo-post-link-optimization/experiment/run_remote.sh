@@ -41,26 +41,50 @@ for loader_variable in \
     fi
 done
 # The gates exist to validate the repository against its pinned toolchain, so
-# they must not honour a compiler, flag set, or wrapper chosen by the caller;
-# `env -u RUSTUP_TOOLCHAIN` alone leaves all of those in place. Unlike loader
-# state these affect only the gates, never a measured binary, so clearing them
-# is safe and keeps the gate logs describing the pin recorded in `host.txt`.
+# they must not honour a compiler, flag set, or wrapper chosen by the caller.
+# Naming the variables to remove cannot work: Cargo derives an environment
+# variable from every configuration key, so `CARGO_TARGET_<TRIPLE>_RUSTFLAGS`
+# and `CARGO_TARGET_<TRIPLE>_LINKER` exist for each target triple and the list
+# grows with Cargo. Start from an empty environment and name what the gates may
+# see instead. `HOME` stays because rustup resolves `RUSTUP_HOME` beneath it;
+# `CARGO_HOME` is redirected because Cargo also merges configuration files that
+# no environment change reaches.
 gate_env() {
-    env \
-        -u RUSTUP_TOOLCHAIN \
-        -u RUSTC -u RUSTC_WRAPPER -u RUSTC_WORKSPACE_WRAPPER -u RUSTC_BOOTSTRAP \
-        -u RUSTFLAGS -u CARGO_ENCODED_RUSTFLAGS -u RUSTDOCFLAGS \
-        -u CARGO_BUILD_RUSTC -u CARGO_BUILD_RUSTC_WRAPPER \
-        -u CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER \
-        -u CARGO_BUILD_RUSTFLAGS -u CARGO_BUILD_RUSTDOCFLAGS \
-        -u CARGO_BUILD_TARGET -u CARGO_BUILD_TARGET_DIR \
+    env -i \
+        PATH="$PATH" \
+        HOME="$HOME" \
+        LC_ALL=C \
+        ${RUSTUP_HOME:+RUSTUP_HOME="$RUSTUP_HOME"} \
         CARGO_HOME="$gate_cargo_home" \
+        CARGO_TARGET_DIR="$CARGO_TARGET_DIR" \
         "$@"
 }
 experiment_rustup_toolchain="${EXPERIMENT_RUSTUP_TOOLCHAIN:-stable}"
 if ! RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" rustc -vV >/dev/null 2>&1; then
     printf 'experiment Rust toolchain is unavailable: %s\n' \
         "$experiment_rustup_toolchain" >&2
+    exit 2
+fi
+# `RUSTUP_TOOLCHAIN` only selects a toolchain for a rustup proxy. A real `rustc`
+# earlier on `PATH` ignores it, so the driver would build with the ambient
+# compiler while the receipts name the requested toolchain. Compare the version
+# the proxy path reports against the one rustup resolves for that toolchain
+# rather than guessing from the resolved path.
+experiment_rustc="$(
+    rustup which --toolchain "$experiment_rustup_toolchain" rustc 2>/dev/null || true
+)"
+if [[ ! -x "$experiment_rustc" ]]; then
+    printf 'rustup cannot resolve rustc for toolchain %s\n' \
+        "$experiment_rustup_toolchain" >&2
+    exit 2
+fi
+if [[ "$(RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" rustc -vV)" \
+    != "$("$experiment_rustc" -vV)" ]]; then
+    printf '%s\n' \
+        "rustc on PATH does not honour RUSTUP_TOOLCHAIN=$experiment_rustup_toolchain" \
+        "PATH rustc: $(command -v rustc)" \
+        "toolchain rustc: $experiment_rustc" \
+        "put the rustup proxies ahead of any real rustc on PATH" >&2
     exit 2
 fi
 
