@@ -54,6 +54,10 @@ The remote wrapper writes all evidence outside the source tree:
   the manifest rebuilt from `git archive <source_commit>`; the run aborts unless
   it equals `source-files.origin.sha256`, which is what ties a checkout tree to
   its commit rather than to a clean `git status`;
+- `source-files.archive.sha256` is the archive-mode counterpart, carrying the
+  manifest rebuilt from the extracted `SOURCE_ARCHIVE_PATH`; it ties the measured
+  tree to the archive whose digest is retained, which the two independent digest
+  comparisons alone do not establish;
 - `source-provenance.txt` records the verified archive and extracted-manifest
   identities and the immutable source snapshot used by every build and
   non-Git gate, plus the selected experiment Rust toolchain;
@@ -96,13 +100,15 @@ sha256sum "$archive" /tmp/topic18-source-files.sha256
 ```
 
 The retained archive and manifest digests bind the transferred archive and
-extracted bytes to the source-candidate receipts. They do not bind those bytes
-to the commit id: an extracted archive carries no object store, so the receiving
-host cannot recompute `git archive <source_commit>`. In archive mode
+extracted bytes to the source-candidate receipts, and the run additionally
+rebuilds the manifest from the extracted archive so the measured tree is tied to
+the archive rather than only to its own declared digest. They do not bind those
+bytes to the commit id: an extracted archive carries no object store, so the
+receiving host cannot recompute `git archive <source_commit>`. In archive mode
 `source_commit` is therefore a sender declaration, and
 `source_commit_verification=verified-archive-and-manifest` names the archive and
 manifest digests it does verify. A checkout run establishes the commit directly
-and additionally rejects any scanned file absent from `git ls-files`.
+and additionally rejects any tree that does not reproduce from it.
 
 ## Measured and inferred claims
 

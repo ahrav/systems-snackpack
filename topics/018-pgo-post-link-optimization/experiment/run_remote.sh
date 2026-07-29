@@ -18,13 +18,44 @@ topic_dir="$repo_root/$topic_rel"
 for required in \
     awk bash cargo cc clippy-driver cmp cp date env getconf git ld lscpu mkdir \
     mktemp mv nm objdump python3 rg rm rustc rustfmt rustup sed sha256sum sort \
-    taskset uname xargs; do
+    tar taskset uname xargs; do
     if ! command -v "$required" >/dev/null 2>&1; then
         printf 'required executable is unavailable: %s\n' "$required" >&2
         exit 2
     fi
 done
 python3 -c 'import sys; raise SystemExit(sys.version_info < (3, 8))'
+# Loader state reaches every timed child through the driver: `LD_PRELOAD` and
+# `LD_AUDIT` can interpose the calls being timed, `GLIBC_TUNABLES` can change
+# allocator and string-routine behaviour, and `LD_BIND_NOW` moves symbol binding
+# into startup, which the parent-process clock includes. Nothing in the retained
+# provenance would record it, so the rows would be attributed to the binary and
+# host alone. Clearing these could break a toolchain that relies on them, so
+# refuse and let the operator present a controlled environment.
+for loader_variable in \
+    LD_PRELOAD LD_AUDIT LD_LIBRARY_PATH LD_BIND_NOW GLIBC_TUNABLES; do
+    if [[ -n "${!loader_variable:-}" ]]; then
+        printf 'loader environment must be unset for measurement: %s\n' \
+            "$loader_variable" >&2
+        exit 2
+    fi
+done
+# The gates exist to validate the repository against its pinned toolchain, so
+# they must not honour a compiler, flag set, or wrapper chosen by the caller;
+# `env -u RUSTUP_TOOLCHAIN` alone leaves all of those in place. Unlike loader
+# state these affect only the gates, never a measured binary, so clearing them
+# is safe and keeps the gate logs describing the pin recorded in `host.txt`.
+gate_env() {
+    env \
+        -u RUSTUP_TOOLCHAIN \
+        -u RUSTC -u RUSTC_WRAPPER -u RUSTC_WORKSPACE_WRAPPER -u RUSTC_BOOTSTRAP \
+        -u RUSTFLAGS -u CARGO_ENCODED_RUSTFLAGS -u RUSTDOCFLAGS \
+        -u CARGO_BUILD_RUSTC -u CARGO_BUILD_RUSTC_WRAPPER \
+        -u CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER \
+        -u CARGO_BUILD_RUSTFLAGS -u CARGO_BUILD_RUSTDOCFLAGS \
+        -u CARGO_BUILD_TARGET -u CARGO_BUILD_TARGET_DIR \
+        "$@"
+}
 experiment_rustup_toolchain="${EXPERIMENT_RUSTUP_TOOLCHAIN:-stable}"
 if ! RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" rustc -vV >/dev/null 2>&1; then
     printf 'experiment Rust toolchain is unavailable: %s\n' \
@@ -122,12 +153,18 @@ if [[ -n "${SOURCE_COMMIT:-}" && "$SOURCE_COMMIT" != "$source_commit" ]]; then
 fi
 
 scratch_dir="$(mktemp -d)"
-# `mktemp` places its result under `$TMPDIR`, so a `TMPDIR` inside the evidence
-# tree would put the snapshot, the experiment work directory, and the evidence
-# manifest's own temporary file among the files `evidence.sha256` hashes — and
-# the temporaries are then removed, so verifying that manifest would fail.
+# `mktemp` places its result under `$TMPDIR`. Inside OUTPUT_DIRECTORY the
+# snapshot, the experiment work directory, and the evidence manifest's own
+# temporary file become files that `evidence.sha256` hashes, and the temporaries
+# are then removed, so verifying it fails. Inside the source tree the scratch
+# contents fall within the source walk, so the snapshot copy picks up transient
+# files that the origin manifest never listed and the run aborts on itself.
 if [[ "$scratch_dir" == "$output_dir" || "$scratch_dir" == "$output_dir"/* ]]; then
     printf 'TMPDIR must resolve outside OUTPUT_DIRECTORY: %s\n' "$scratch_dir" >&2
+    exit 2
+fi
+if [[ "$scratch_dir" == "$input_root" || "$scratch_dir" == "$input_root"/* ]]; then
+    printf 'TMPDIR must resolve outside REPOSITORY_ROOT: %s\n' "$scratch_dir" >&2
     exit 2
 fi
 experiment_work_dir="$scratch_dir/experiment-work"
@@ -185,6 +222,27 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
         printf 'source tree does not reproduce from %s:\n' "$source_commit" >&2
         LC_ALL=C diff -- \
             "$output_dir/source-files.commit.sha256" \
+            "$output_dir/source-files.origin.sha256" >&2 || true
+        exit 2
+    fi
+else
+    # Bind the archive to the tree being measured. The digest check above proves
+    # only that the named archive matches its declared hash, and the manifest
+    # check below proves only that this tree matches its declared hash; both are
+    # caller-supplied constants, so a stale archive paired with an unrelated
+    # extracted tree satisfies each independently and the retained provenance
+    # records an archive digest that cannot reproduce the measured snapshot.
+    archive_tree="$scratch_dir/archive-tree"
+    mkdir -p -- "$archive_tree"
+    tar -xf "$SOURCE_ARCHIVE_PATH" -C "$archive_tree"
+    manifest_source "$archive_tree" >"$output_dir/source-files.archive.sha256"
+    if ! cmp -s \
+        "$output_dir/source-files.origin.sha256" \
+        "$output_dir/source-files.archive.sha256"; then
+        printf 'source tree does not reproduce from %s:\n' \
+            "$SOURCE_ARCHIVE_PATH" >&2
+        LC_ALL=C diff -- \
+            "$output_dir/source-files.archive.sha256" \
             "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
     fi
@@ -302,27 +360,27 @@ else
 fi
 (
     cd "$repo_root"
-    env -u RUSTUP_TOOLCHAIN cargo fmt --all -- --check
+    gate_env cargo fmt --all -- --check
 ) >"$gates_dir/cargo-fmt.log" 2>&1
 (
     cd "$repo_root"
-    env -u RUSTUP_TOOLCHAIN cargo test --workspace --lib --examples
+    gate_env cargo test --workspace --lib --examples
 ) >"$gates_dir/cargo-test-lib-examples.log" 2>&1
 (
     cd "$repo_root"
-    env -u RUSTUP_TOOLCHAIN cargo test --workspace --doc
+    gate_env cargo test --workspace --doc
 ) >"$gates_dir/cargo-test-doc.log" 2>&1
 (
     cd "$repo_root"
-    env -u RUSTUP_TOOLCHAIN cargo clippy --workspace --all-targets -- -D warnings
+    gate_env cargo clippy --workspace --all-targets -- -D warnings
 ) >"$gates_dir/cargo-clippy.log" 2>&1
 (
     cd "$repo_root"
-    env -u RUSTUP_TOOLCHAIN cargo bench --workspace --no-run
+    gate_env cargo bench --workspace --no-run
 ) >"$gates_dir/cargo-bench-no-run.log" 2>&1
 (
     cd "$repo_root"
-    env -u RUSTUP_TOOLCHAIN RUSTDOCFLAGS="-D warnings" \
+    gate_env RUSTDOCFLAGS="-D warnings" \
         cargo doc --workspace --no-deps
 ) >"$gates_dir/cargo-doc.log" 2>&1
 (
