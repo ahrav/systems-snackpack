@@ -64,6 +64,28 @@ if [[ -n "$(builtin declare -F)" ]]; then
         "tool resolution and provenance commands below" >&2
     exit 2
 fi
+# Privileged mode declines to import the caller's functions, but the
+# `BASH_FUNC_name%%` entries carrying them stay in this process's environment and
+# are inherited by everything it runs. `compgen -e` cannot report them — the names
+# are not valid shell identifiers — so the namespace sweep below never sees them,
+# and any tool that is itself a Bash script starts a non-privileged shell that
+# imports them: a wrapper `git` delegating to `git "$@"` would answer from the
+# caller's function while this run recorded only the wrapper's digest. Read the raw
+# environment instead, which is the only place these are visible.
+raw_environment_functions=()
+while IFS= read -r -d '' raw_environment_entry; do
+    case "$raw_environment_entry" in
+        BASH_FUNC_*) raw_environment_functions+=("${raw_environment_entry%%=*}") ;;
+    esac
+done <"/proc/$$/environ"
+if ((${#raw_environment_functions[@]} > 0)); then
+    printf '%s\n' \
+        "exported shell functions remain in the environment:" \
+        "${raw_environment_functions[@]}" \
+        "privileged mode does not import them here, but any tool that is a Bash" \
+        "script starts a shell that does, and no receipt records them" >&2
+    exit 2
+fi
 # Reaching here means the shell is privileged, so `BASH_ENV` and `ENV` were never
 # processed by it. They can still be set in the environment, and a launcher that
 # started an unprivileged shell earlier would have sourced them before this script
@@ -159,7 +181,7 @@ done
 declare -A tool_digest=()
 for digested_tool in "${!tool_path[@]}"; do
     tool_digest["$digested_tool"]="$(
-        sha256sum -- "${tool_path[$digested_tool]}" | awk '{print $1}'
+        "${tool_path[sha256sum]}" -- "${tool_path[$digested_tool]}" | awk '{print $1}'
     )"
 done
 # Bind a program resolved later than the loop above, before the run uses it. The
@@ -169,8 +191,19 @@ done
 # validates the snapshot and produces the measured binaries unbound.
 digest_tool() {
     tool_path["$1"]="$2"
-    tool_digest["$1"]="$(sha256sum -- "$2" | awk '{print $1}')"
+    tool_digest["$1"]="$("${tool_path[sha256sum]}" -- "$2" | awk '{print $1}')"
 }
+# The driver probes these after the timings but before it writes
+# `binary-sha256.json`, so executing one taken from `PATH` runs unrecorded code
+# while the retained files are still being produced. They are genuinely optional, so
+# bind the ones that resolve to a program and leave the rest unbound; the driver
+# records availability for an unbound tool without executing it.
+for optional_tool in llvm-bolt perf2bolt merge-fdata perf; do
+    resolved_optional="$(command -v "$optional_tool" || true)"
+    if [[ "$resolved_optional" == /* ]]; then
+        digest_tool "$optional_tool" "$resolved_optional"
+    fi
+done
 # `-I` isolates the probe from the caller's Python startup environment. A bare
 # `python3` imports `sitecustomize` from a `PYTHONPATH` directory and runs it
 # before this script has checked anything or verified any source, so the hook
@@ -318,7 +351,7 @@ if (($# == 3)); then
     cpu="$3"
 else
     allowed="$(
-        rg --no-config -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}' || true
+        "${tool_path[rg]}" --no-config -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}' || true
     )"
     first="${allowed%%,*}"
     cpu="${first%%-*}"
@@ -347,9 +380,9 @@ fi
 # because the setting is repo-local rather than an environment variable, so disable
 # it per command. `-c` beats the config file for that invocation only, leaving the
 # operator's own repository untouched.
-if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$repo_root" ]]; then
-    source_commit="$(git -C "$repo_root" rev-parse HEAD)"
-    if [[ -n "$(git -C "$repo_root" -c core.fsmonitor=false status --porcelain)" ]]; then
+if [[ "$("${tool_path[git]}" -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$repo_root" ]]; then
+    source_commit="$("${tool_path[git]}" -C "$repo_root" rev-parse HEAD)"
+    if [[ -n "$("${tool_path[git]}" -C "$repo_root" -c core.fsmonitor=false status --porcelain)" ]]; then
         printf 'repository must be clean\n' >&2
         exit 2
     fi
@@ -371,7 +404,7 @@ else
         printf 'SOURCE_ARCHIVE_PATH must name the transferred archive\n' >&2
         exit 2
     fi
-    actual_archive_sha256="$(sha256sum -- "$SOURCE_ARCHIVE_PATH" | awk '{print $1}')"
+    actual_archive_sha256="$("${tool_path[sha256sum]}" -- "$SOURCE_ARCHIVE_PATH" | awk '{print $1}')"
     if [[ "$actual_archive_sha256" != "$SOURCE_ARCHIVE_SHA256" ]]; then
         printf 'transferred archive digest does not match SOURCE_ARCHIVE_SHA256\n' >&2
         exit 2
@@ -439,7 +472,7 @@ mkdir -p -- "$gates_dir"
 # file a linked worktree carries in place of a directory; its contents name an
 # absolute path on the running host, so it is not source.
 scan_source_paths() {
-    rg --no-config --files -uu -g '!.git/' -g '!.git' -g '!target/' -0
+    "${tool_path[rg]}" --no-config --files -uu -g '!.git/' -g '!.git' -g '!target/' -0
 }
 # `LC_ALL=C` fixes the ordering to bytes. Collation is locale-dependent, so an
 # unpinned sort makes this digest depend on the environment of whoever generated
@@ -451,7 +484,7 @@ manifest_source() {
         cd "$manifest_root"
         scan_source_paths \
             | LC_ALL=C sort -z \
-            | xargs -0 sha256sum --
+            | xargs -0 "${tool_path[sha256sum]}" --
     )
 }
 
@@ -496,8 +529,8 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
     mkdir -p -- "$commit_tree"
     # `tar.umask` restricts the permission bits `git archive` emits, so a local
     # setting would strip modes from the reference tree itself.
-    git -C "$input_root" -c tar.umask=0 archive --format=tar "$source_commit" \
-        | tar --same-permissions -xf - -C "$commit_tree"
+    "${tool_path[git]}" -C "$input_root" -c tar.umask=0 archive --format=tar "$source_commit" \
+        | "${tool_path[tar]}" --same-permissions -xf - -C "$commit_tree"
     manifest_source "$commit_tree" >"$output_dir/source-files.commit.sha256"
     if ! cmp -s \
         "$output_dir/source-files.origin.sha256" \
@@ -554,7 +587,7 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
             ;;
         esac
     done < <(
-        git -C "$input_root" ls-tree -r -z \
+        "${tool_path[git]}" -C "$input_root" ls-tree -r -z \
             --format='%(objectmode) %(objectname) %(path)' "$source_commit"
     )
     # Hash the worktree files and compare object identities. One `hash-object`
@@ -563,7 +596,7 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
     # `git status`.
     if ((${#blob_paths[@]} > 0)); then
         mapfile -t worktree_objects < <(
-            cd "$input_root" && git hash-object -- "${blob_paths[@]}"
+            cd "$input_root" && "${tool_path[git]}" hash-object -- "${blob_paths[@]}"
         )
         if ((${#worktree_objects[@]} != ${#blob_paths[@]})); then
             printf 'could not hash every tracked file in %s\n' "$input_root" >&2
@@ -606,7 +639,7 @@ else
                 archive_entry_drift+="unsupported archive entry: $archive_entry"$'\n'
                 ;;
         esac
-    done < <(LC_ALL=C tar -tvf "$SOURCE_ARCHIVE_PATH")
+    done < <(LC_ALL=C "${tool_path[tar]}" -tvf "$SOURCE_ARCHIVE_PATH")
     if [[ -n "$archive_entry_drift" ]]; then
         printf 'archive holds entries this comparison cannot verify:\n%s' \
             "$archive_entry_drift" >&2
@@ -616,7 +649,7 @@ else
     # user, so a restrictive umask would strip modes from the reference exactly as
     # it did from an input tree extracted the same way — leaving the mode
     # comparison below to agree between two equally stripped trees.
-    tar --same-permissions -xf "$SOURCE_ARCHIVE_PATH" -C "$archive_tree"
+    "${tool_path[tar]}" --same-permissions -xf "$SOURCE_ARCHIVE_PATH" -C "$archive_tree"
     manifest_source "$archive_tree" >"$output_dir/source-files.archive.sha256"
     if ! cmp -s \
         "$output_dir/source-files.origin.sha256" \
@@ -631,7 +664,7 @@ else
     require_matching_modes "$input_root" "$archive_tree" "$SOURCE_ARCHIVE_PATH"
 fi
 source_manifest_sha256="$(
-    sha256sum -- "$output_dir/source-files.origin.sha256" | awk '{print $1}'
+    "${tool_path[sha256sum]}" -- "$output_dir/source-files.origin.sha256" | awk '{print $1}'
 )"
 if [[ "$source_commit_verification" == verified-archive-and-manifest ]] \
     && [[ "$source_manifest_sha256" != "$SOURCE_MANIFEST_SHA256" ]]; then
@@ -755,7 +788,7 @@ require_unchanged_tools() {
     tool_drift=""
     for recorded_tool in "${!tool_path[@]}"; do
         current_tool_digest="$(
-            sha256sum -- "${tool_path[$recorded_tool]}" | awk '{print $1}'
+            "${tool_path[sha256sum]}" -- "${tool_path[$recorded_tool]}" | awk '{print $1}'
         )"
         if [[ "$current_tool_digest" != "${tool_digest[$recorded_tool]}" ]]; then
             tool_drift+="$recorded_tool ${tool_path[$recorded_tool]}"
@@ -796,7 +829,7 @@ require_unchanged_tools "while establishing source provenance"
     printf '\nlscpu\n'
     lscpu
     printf '\ncpu_model_and_features\n'
-    rg --no-config -m 128 \
+    "${tool_path[rg]}" --no-config -m 128 \
         '^(model name|vendor_id|cpu family|model|stepping|microcode|Hardware|CPU implementer|CPU architecture|CPU variant|CPU part|CPU revision|Features|flags)' \
         /proc/cpuinfo || true
     # Probe the same resolved binaries the gates and the driver execute. Reading
@@ -843,7 +876,7 @@ require_unchanged_tools "while establishing source provenance"
 if [[ "$source_commit_verification" == git-checkout ]]; then
     (
     cd "$input_root"
-    git -c core.fsmonitor=false diff --check
+    "${tool_path[git]}" -c core.fsmonitor=false diff --check
     ) >"$gates_dir/git-diff-check.log" 2>&1
 else
     printf '%s\n' \
@@ -912,12 +945,26 @@ print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
 # supply the program that pins the affinity and interprets the driver, ahead of the
 # ones digested for `tools.txt`. The compiler is still resolved through `PATH`,
 # which is the point of prepending the toolchain directory.
+#
+# The driver resolves its own helpers too, with `shutil.which`, and that lookup
+# sees the rewritten `PATH` rather than the one the digests describe. Hand it the
+# bound paths for the programs that inspect and link the measured binaries, plus
+# the optional post-link tools it probes, so `tools.txt` names what actually ran.
+bound_tool_env=()
+for exported_tool in cc nm objdump llvm-bolt perf2bolt merge-fdata perf; do
+    if [[ -n "${tool_path[$exported_tool]:-}" ]]; then
+        bound_tool_env+=(
+            "TOPIC18_TOOL_${exported_tool//-/_}=${tool_path[$exported_tool]}"
+        )
+    fi
+done
 env -i \
     PATH="$experiment_toolchain_bin:$PATH" \
     HOME="$HOME" \
     LC_ALL=C \
     ${RUSTUP_HOME:+RUSTUP_HOME="$RUSTUP_HOME"} \
     RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
+    "${bound_tool_env[@]}" \
     "${tool_path[taskset]}" -c "$cpu" "${tool_path[python3]}" -I \
     "$topic_dir/experiment/pgo_experiment.py" \
     --work-dir "$experiment_work_dir" \
@@ -943,7 +990,7 @@ require_unchanged_tools "during evidence collection"
 manifest_tmp="$scratch_dir/evidence.sha256"
 (
     cd "$output_dir"
-    rg --no-config --files -uu -0 . | LC_ALL=C sort -z | xargs -0 sha256sum --
+    "${tool_path[rg]}" --no-config --files -uu -0 . | LC_ALL=C sort -z | xargs -0 "${tool_path[sha256sum]}" --
 ) >"$manifest_tmp"
 mv -- "$manifest_tmp" "$output_dir/evidence.sha256"
 # The manifest itself is built by `rg`, `sort`, `xargs`, `sha256sum`, and `mv`,

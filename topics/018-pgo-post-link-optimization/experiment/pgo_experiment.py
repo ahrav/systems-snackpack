@@ -130,9 +130,26 @@ def require_empty(path: Path, name: str) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
+def bound_tool(name: str) -> str | None:
+    """Return the wrapper-bound path for one executable, or None.
+
+    The wrapper resolves and digests its tools before any of them runs, then
+    prepends the selected toolchain to `PATH` for this driver. A `shutil.which`
+    lookup therefore searches a different `PATH` than the one those digests
+    describe, and a toolchain `bin` holding a `cc`, `nm`, or `objdump` would
+    supply a program that no receipt names. Prefer the path the wrapper bound.
+    """
+    bound = os.environ.get("TOPIC18_TOOL_" + name.replace("-", "_"))
+    if bound is None:
+        return None
+    if not os.path.isabs(bound) or not os.access(bound, os.X_OK):
+        raise RuntimeError(f"bound tool path is not an executable: {name}={bound}")
+    return bound
+
+
 def tool(name: str) -> str:
     """Resolve one required executable."""
-    resolved = shutil.which(name)
+    resolved = bound_tool(name) or shutil.which(name)
     if resolved is None:
         raise RuntimeError(f"required executable is unavailable: {name}")
     return resolved
@@ -733,20 +750,31 @@ def measure(
 
 
 def post_link_tools(output_dir: Path) -> dict[str, dict[str, str | None]]:
-    """Record availability and version output for post-link tools."""
+    """Record availability and version output for post-link tools.
+
+    These are optional, so a missing one is recorded rather than fatal. Running
+    one is still an execution: the version probe happens after the timings but
+    before `binary-sha256.json` and `evidence.sha256` are written, so a program
+    taken from a caller-writable `PATH` entry could mutate retained files here.
+    Only execute a path the wrapper bound and digested; when it did not bind one,
+    record availability from the lookup without running it.
+    """
     result: dict[str, dict[str, str | None]] = {}
     for name in ("llvm-bolt", "perf2bolt", "merge-fdata", "perf"):
-        path = shutil.which(name)
+        bound = bound_tool(name)
+        path = bound or shutil.which(name)
         version: str | None = None
-        if path is not None:
+        if bound is not None:
             completed = subprocess.run(
-                [path, "--version"],
+                [bound, "--version"],
                 text=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 check=False,
             )
             version = completed.stdout.splitlines()[0] if completed.stdout else None
+        elif path is not None:
+            version = "not-recorded: tool is not bound by the wrapper"
         result[name] = {"path": path, "version": version}
     (output_dir / "post-link-tools.json").write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n",
