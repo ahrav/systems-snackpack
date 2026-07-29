@@ -19,8 +19,17 @@ for required in \
     awk bash cargo cc clippy-driver cmp cp date env getconf git ld lscpu mkdir \
     mktemp mv nm objdump python3 rg rm rustc rustfmt rustup sed sha256sum sort \
     tar taskset uname xargs; do
-    if ! command -v "$required" >/dev/null 2>&1; then
-        printf 'required executable is unavailable: %s\n' "$required" >&2
+    # Require a program, not merely a name that resolves. An exported shell
+    # function — `export -f git` arrives as a `BASH_FUNC_git%%` environment entry
+    # — satisfies a bare `command -v` and then answers every unqualified call, so
+    # a caller could forge `rev-parse`, `status`, or `archive` output and with it
+    # the whole source provenance. Aliases and builtins shadow the same way. Only
+    # a program resolves to an absolute path.
+    resolved_required="$(command -v "$required" || true)"
+    if [[ "$resolved_required" != /* ]]; then
+        printf '%s\n' \
+            "required executable is not a program: $required -> ${resolved_required:-not found}" \
+            "a shell function, alias, or builtin shadowing a tool would forge its output" >&2
         exit 2
     fi
 done
@@ -239,26 +248,28 @@ manifest_source() {
 
 # The manifest hashes contents, so it cannot see executable-bit drift. In a
 # checkout `core.fileMode=false` or a mode-blind filesystem hides that drift from
-# `git status`; in an extracted archive a later `chmod` leaves the digests intact.
-# The measured tree carries executable scripts, so compare bits against the
-# reference tree rather than widening the manifest, whose format the retained
-# `SOURCE_MANIFEST_SHA256` values depend on. Each caller compares manifests
-# first, so the path sets are already known equal.
+# `git status`; in an extracted archive a later `chmod` leaves the digests intact;
+# and a snapshot copy takes its modes from the caller's umask. The measured tree
+# carries executable scripts, so compare bits between trees rather than widening
+# the manifest, whose format the retained `SOURCE_MANIFEST_SHA256` values depend
+# on. Each caller compares manifests first, so the path sets are already known
+# equal.
 require_matching_modes() {
-    reference_tree="$1"
-    reference_name="$2"
+    subject_tree="$1"
+    reference_tree="$2"
+    reference_name="$3"
     mode_drift=""
     while IFS= read -r -d '' scanned_path; do
-        if [[ -x "$input_root/$scanned_path" ]] \
+        if [[ -x "$subject_tree/$scanned_path" ]] \
             && [[ ! -x "$reference_tree/$scanned_path" ]]; then
             mode_drift+="unexpectedly executable: $scanned_path"$'\n'
-        elif [[ ! -x "$input_root/$scanned_path" ]] \
+        elif [[ ! -x "$subject_tree/$scanned_path" ]] \
             && [[ -x "$reference_tree/$scanned_path" ]]; then
             mode_drift+="missing executable bit: $scanned_path"$'\n'
         fi
     done < <(cd "$reference_tree" && scan_source_paths)
     if [[ -n "$mode_drift" ]]; then
-        printf 'source tree file modes do not match %s:\n%s' \
+        printf 'file modes do not match %s:\n%s' \
             "$reference_name" "$mode_drift" >&2
         exit 2
     fi
@@ -286,7 +297,7 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
             "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
     fi
-    require_matching_modes "$commit_tree" "$source_commit"
+    require_matching_modes "$input_root" "$commit_tree" "$source_commit"
 else
     # Bind the archive to the tree being measured. The digest check above proves
     # only that the named archive matches its declared hash, and the manifest
@@ -308,7 +319,7 @@ else
             "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
     fi
-    require_matching_modes "$archive_tree" "$SOURCE_ARCHIVE_PATH"
+    require_matching_modes "$input_root" "$archive_tree" "$SOURCE_ARCHIVE_PATH"
 fi
 source_manifest_sha256="$(
     sha256sum -- "$output_dir/source-files.origin.sha256" | awk '{print $1}'
@@ -325,7 +336,7 @@ mkdir -p -- "$snapshot_root"
     cd "$input_root"
     scan_source_paths \
         | sort -z \
-        | xargs -0 cp --parents --target-directory="$snapshot_root" --
+        | xargs -0 cp --parents --preserve=mode --target-directory="$snapshot_root" --
 )
 manifest_source "$snapshot_root" >"$output_dir/source-files.before.sha256"
 if ! cmp -s \
@@ -334,6 +345,7 @@ if ! cmp -s \
     printf 'immutable source snapshot does not match the verified input\n' >&2
     exit 1
 fi
+require_matching_modes "$snapshot_root" "$input_root" "the verified input"
 repo_root="$snapshot_root"
 topic_dir="$repo_root/$topic_rel"
 

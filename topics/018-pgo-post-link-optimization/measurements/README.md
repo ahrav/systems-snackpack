@@ -118,7 +118,7 @@ build. The archive has no Git index or parent tree, so its remote
 ```bash
 archive=/tmp/topic18-source.tar
 scratch="$(mktemp -d)"
-git archive --format=tar --output="$archive" <source_commit>
+GIT_NO_REPLACE_OBJECTS=1 git archive --format=tar --output="$archive" <source_commit>
 tar -xf "$archive" -C "$scratch"
 (cd "$scratch" && rg --files -uu -g '!.git/' -g '!.git' -g '!target/' -0 \
   | LC_ALL=C sort -z | xargs -0 sha256sum --) > /tmp/topic18-source-files.sha256
