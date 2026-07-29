@@ -36,8 +36,22 @@ if [[ ! -r "$topic_dir/experiment/pgo_experiment.py" ]]; then
     printf 'repository lacks the Topic 18 experiment\n' >&2
     exit 2
 fi
-if [[ -e "$output_dir" ]] && [[ -n "$(rg --files -uu "$output_dir" 2>/dev/null || true)" ]]; then
-    printf 'OUTPUT_DIRECTORY must be empty: %s\n' "$output_dir" >&2
+if [[ -d "$output_dir" ]]; then
+    # `rg --files` lists regular files and does not follow symlinks, so a
+    # pre-existing entry such as `gates -> /elsewhere` read as an empty
+    # directory. The gate logs would then be written through it, land outside
+    # this tree, and be omitted from `evidence.sha256`, leaving a run that
+    # reports success while retaining none of the gate output it authenticates.
+    # A glob sees every entry, including symlinks and dot-prefixed names.
+    shopt -s dotglob nullglob
+    output_dir_entries=("$output_dir"/*)
+    shopt -u dotglob nullglob
+    if ((${#output_dir_entries[@]} > 0)); then
+        printf 'OUTPUT_DIRECTORY must be empty: %s\n' "$output_dir" >&2
+        exit 2
+    fi
+elif [[ -e "$output_dir" ]]; then
+    printf 'OUTPUT_DIRECTORY must be a directory: %s\n' "$output_dir" >&2
     exit 2
 fi
 mkdir -p -- "$output_dir"
@@ -108,7 +122,21 @@ if [[ -n "${SOURCE_COMMIT:-}" && "$SOURCE_COMMIT" != "$source_commit" ]]; then
 fi
 
 scratch_dir="$(mktemp -d)"
+# `mktemp` places its result under `$TMPDIR`, so a `TMPDIR` inside the evidence
+# tree would put the snapshot, the experiment work directory, and the evidence
+# manifest's own temporary file among the files `evidence.sha256` hashes — and
+# the temporaries are then removed, so verifying that manifest would fail.
+if [[ "$scratch_dir" == "$output_dir" || "$scratch_dir" == "$output_dir"/* ]]; then
+    printf 'TMPDIR must resolve outside OUTPUT_DIRECTORY: %s\n' "$scratch_dir" >&2
+    exit 2
+fi
 experiment_work_dir="$scratch_dir/experiment-work"
+# Cargo resolves a relative target directory against its working directory,
+# which is the snapshot, and the source walk excludes only `target/`. A caller
+# with `CARGO_TARGET_DIR=build` would drop gate artifacts into the snapshot and
+# fail the post-experiment mutation check after every measurement had been
+# taken. Keep gate artifacts out of the snapshot entirely.
+export CARGO_TARGET_DIR="$scratch_dir/cargo-target"
 cleanup() {
     rm -rf -- "$scratch_dir"
 }
@@ -321,10 +349,10 @@ if ! cmp -s \
     exit 1
 fi
 
-manifest_tmp="$(mktemp)"
+manifest_tmp="$scratch_dir/evidence.sha256"
 (
     cd "$output_dir"
-    rg --files -uu -0 . | sort -z | xargs -0 sha256sum --
+    rg --files -uu -0 . | LC_ALL=C sort -z | xargs -0 sha256sum --
 ) >"$manifest_tmp"
 mv -- "$manifest_tmp" "$output_dir/evidence.sha256"
 
