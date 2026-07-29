@@ -10,10 +10,11 @@ Each record applies only to its named source commit, archive digest, binaries,
 host, toolchain, target features, build flags, inputs, CPU affinity, run window,
 and retained raw process rows.
 
-All three runs share source commit `aa3e0fe`, whose wrapper predates the current
-caller-isolation hardening, so every row above carries the
-[pre-hardening caveat](2026-07-28-linux-cross-host.md) recorded with the launch
-command.
+Both retained host runs were taken at source commit `aa3e0fe`, whose wrapper predates
+the current caller-isolation hardening, so every measured row in the two host records
+carries the [pre-hardening caveat](2026-07-28-linux-cross-host.md) recorded with the
+launch command. The cross-host file is their joint interpretation and reports no rows
+of its own.
 
 ## Experimental unit
 
@@ -119,7 +120,11 @@ The remote wrapper writes all evidence outside the source tree:
   flag, so their digests still carry their own scratch paths and compare only
   within their run;
 - `experiment/post-link-tools.json` records BOLT and `perf` tool availability;
-- `evidence.sha256` covers the retained evidence files.
+- `evidence.sha256` covers the retained evidence files of the run that wrote it,
+  which is the files under that run's own directory. `raw/aa3e0fe/host-resolution.txt`
+  sits beside those directories and is therefore in neither manifest, so the host
+  records cite a receipt that neither advertised verification covers; read it as an
+  operator note rather than as authenticated evidence.
 
 For an extracted Git archive, `SOURCE_COMMIT`, `SOURCE_ARCHIVE_PATH`,
 `SOURCE_ARCHIVE_SHA256`, and `SOURCE_MANIFEST_SHA256` are required. The wrapper

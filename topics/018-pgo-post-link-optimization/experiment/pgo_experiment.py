@@ -224,6 +224,19 @@ def timed_probe(binary: Path, mode: str, iterations: int, seed: int) -> dict[str
     )
     process_wall_ns = time.perf_counter_ns() - started
     parsed = parse_output(completed.stdout)
+    # The child reports its own mode, iteration count, and seed, and the caller later
+    # overwrites those fields with the requested metadata, so a binary that ran a
+    # different workload than it was asked for would be recorded under the requested
+    # label. Checksum comparison does not catch it either: the checksums agree whenever
+    # every binary is wrong the same way. Compare what it reports with what it was
+    # given. The probe reports `iterations=0` for `noop`, and the caller passes 0 for
+    # that mode, so this is a straight equality.
+    requested = {"mode": mode, "iterations": iterations, "seed": seed}
+    reported = {field: parsed[field] for field in requested}
+    if reported != requested:
+        raise RuntimeError(
+            f"probe {binary} reported {reported} for an invocation of {requested}"
+        )
     parsed["process_wall_ns"] = process_wall_ns
     return parsed
 

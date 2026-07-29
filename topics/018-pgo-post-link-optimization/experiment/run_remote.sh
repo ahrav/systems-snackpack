@@ -131,7 +131,7 @@ done
 
 declare -A tool_path=()
 for required in \
-    awk bash cargo cc clippy-driver cmp cp date env getconf git ld lscpu mkdir \
+    awk bash cargo cc clippy-driver cmp cp date diff env getconf git ld lscpu mkdir \
     mktemp mv nm objdump python3 rg rm rustc rustfmt rustup sed sha256sum sort \
     tar taskset uname xargs; do
     # Require a program, not merely a name that resolves. An exported shell
@@ -317,11 +317,9 @@ fi
 experiment_sysroot="$("$experiment_rustc" --print sysroot)"
 experiment_host="$("$experiment_rustc" -vV | "${tool_path[sed]}" -n 's/^host: //p')"
 experiment_rustlib_bin="$experiment_sysroot/lib/rustlib/$experiment_host/bin"
-# `llvm-profdata` is required, not optional: the driver refuses to build without the
-# bundled profiler, so treating it as optional here only meant that a file appearing
-# between this check and the driver would merge the training profiles with no entry in
-# `tools.txt` and no drift check. Failing now costs nothing the run would not lose
-# later, and it fails with the reason rather than deep inside the driver.
+# Profile merging requires the bundled `llvm-profdata`, so its absence is a refusal
+# here rather than something the driver discovers later. Binding it before anything runs
+# is also what makes the digest cover the profiler that produced the PGO inputs.
 if [[ ! -x "$experiment_rustlib_bin/llvm-profdata" ]]; then
     printf '%s\n' \
         "toolchain $experiment_rustup_toolchain lacks its bundled llvm-profdata:" \
@@ -331,8 +329,8 @@ if [[ ! -x "$experiment_rustlib_bin/llvm-profdata" ]]; then
     exit 2
 fi
 digest_tool experiment_llvm-profdata "$experiment_rustlib_bin/llvm-profdata"
-# `rust-lld` stays optional because a toolchain that links through the system linker
-# ships none, and `cc` and `ld` are bound either way.
+# `rust-lld` is optional: a toolchain that links through the system linker ships none,
+# and `cc` and `ld` are bound either way. Bind it when present.
 if [[ -x "$experiment_rustlib_bin/rust-lld" ]]; then
     digest_tool experiment_rust-lld "$experiment_rustlib_bin/rust-lld"
 fi
@@ -402,6 +400,19 @@ if [[ "$output_dir" == "$repo_root" || "$output_dir" == "$repo_root"/* ]]; then
     exit 2
 fi
 
+# Claim the directory with one atomic `mkdir`. The emptiness test above and the
+# creation below do not establish ownership, so two runs aimed at the same absent or
+# empty directory could both proceed and interleave gate logs, provenance files, and
+# experiment output — and either could then authenticate the mixture. `mkdir` without
+# `-p` fails when the name exists, so exactly one run takes it. The lock holds for the
+# whole run; `rg --files` lists files, so an empty directory never enters
+# `evidence.sha256`.
+if ! "${tool_path[mkdir]}" -- "$output_dir/.topic18-run-lock" 2>/dev/null; then
+    printf '%s\n' \
+        "OUTPUT_DIRECTORY is already claimed: $output_dir/.topic18-run-lock" \
+        "another run holds it, or a previous run did not remove it" >&2
+    exit 2
+fi
 if (($# == 3)); then
     cpu="$3"
 else
@@ -601,12 +612,14 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
     # setting would strip modes from the reference tree itself.
     "${tool_path[git]}" -C "$input_root" -c tar.umask=0 archive --format=tar "$source_commit" \
         | "${tool_path[tar]}" --same-permissions -xf - -C "$commit_tree"
+    verified_reference_tree="$commit_tree"
+    verified_reference_name="$source_commit"
     manifest_source "$commit_tree" >"$output_dir/source-files.commit.sha256"
     if ! "${tool_path[cmp]}" -s \
         "$output_dir/source-files.origin.sha256" \
         "$output_dir/source-files.commit.sha256"; then
         printf 'source tree does not reproduce from %s:\n' "$source_commit" >&2
-        LC_ALL=C diff -- \
+        LC_ALL=C "${tool_path[diff]}" -- \
             "$output_dir/source-files.commit.sha256" \
             "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
@@ -777,12 +790,14 @@ done < <(LC_ALL=C "${tool_path[tar]}" --force-local -tvf "$archive_snapshot")
         "$output_dir/source-files.archive.sha256"; then
         printf 'source tree does not reproduce from %s:\n' \
             "$SOURCE_ARCHIVE_PATH" >&2
-        LC_ALL=C diff -- \
+        LC_ALL=C "${tool_path[diff]}" -- \
             "$output_dir/source-files.archive.sha256" \
             "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
     fi
     require_matching_modes "$input_root" "$archive_tree" "$SOURCE_ARCHIVE_PATH"
+    verified_reference_tree="$archive_tree"
+    verified_reference_name="$SOURCE_ARCHIVE_PATH"
 fi
 source_manifest_sha256="$(
     "${tool_path[sha256sum]}" -- "$output_dir/source-files.origin.sha256" | "${tool_path[awk]}" '{print $1}'
@@ -808,7 +823,12 @@ if ! "${tool_path[cmp]}" -s \
     printf 'immutable source snapshot does not match the verified input\n' >&2
     exit 1
 fi
-require_matching_modes "$snapshot_root" "$input_root" "the verified input"
+# Compare against the commit or archive reference, not the input tree. `cp
+# --preserve=mode` copies whatever bit the input carries now, and the input tree stays
+# mutable, so checking the snapshot against it would agree on a bit that has drifted
+# from the reference provenance was established against.
+require_matching_modes "$snapshot_root" "$verified_reference_tree" \
+    "$verified_reference_name"
 repo_root="$snapshot_root"
 topic_dir="$repo_root/$topic_rel"
 
@@ -903,11 +923,10 @@ fi
         "$recorded_expected_manifest_sha256"
 } >"$output_dir/source-provenance.txt"
 
-# The provenance and evidence commands — `git`, `tar`, `rg`, `sha256sum` — are
-# called unqualified, so `PATH` decides which programs produced `source_commit`,
-# the extracted reference tree, and `evidence.sha256`. The checks above prove each
-# name reached a program, not that it reached the expected one. Name the resolved
-# binaries and their digests here so the retained evidence identifies what ran:
+# `PATH` decides each name's one absolute resolution above; every call after that uses
+# the saved path, so the lookup cannot drift to another directory mid-run. What `PATH`
+# chose is still a choice, and resolving to a program is not resolving to the expected
+# one, so name the resolved binaries and their digests here:
 # a tool resolved out of a caller-writable directory is visible in this receipt
 # even though no path rule can reject it, since the toolchain programs legitimately
 # live under a user-owned prefix. `PATH` is recorded verbatim for the same reason.
@@ -1129,7 +1148,8 @@ fi
 # driver changed, and the mode comparisons all ran before those steps. Compare modes
 # against the verified input again, so the retained evidence covers the modes the run
 # actually finished with rather than the ones it started from.
-require_matching_modes "$snapshot_root" "$input_root" "the verified input"
+require_matching_modes "$snapshot_root" "$verified_reference_tree" \
+    "$verified_reference_name"
 # The digests in `tools.txt` were taken before the provenance work and checked
 # again when that receipt was written, which leaves the gates and the driver
 # unguarded. Check once more here so the retained digests cover every program for
@@ -1146,6 +1166,7 @@ manifest_tmp="$scratch_dir/evidence.sha256"
 # run on exit. An EXIT trap fires after the last comparison below, so the `rm` it
 # runs would be the one program in the run that no digest check ever covers.
 # Nothing after this point reads the scratch tree.
+"${tool_path[rm]}" -rf -- "$output_dir/.topic18-run-lock"
 cleanup
 trap - EXIT
 # The manifest itself is built by `rg`, `sort`, `xargs`, `sha256sum`, and `mv`, and

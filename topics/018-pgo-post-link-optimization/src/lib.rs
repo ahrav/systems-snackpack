@@ -33,8 +33,9 @@ pub struct RatioEstimate {
 /// assert!((estimate.geometric_mean - 1.02).abs() < 1e-12);
 /// ```
 ///
-/// Returns `None` outside the supported range of 2 through 31 blocks or for any
-/// non-positive or non-finite ratio.
+/// Returns `None` outside the supported range of 2 through 31 blocks, for any
+/// non-positive or non-finite ratio, and when the resulting geometric mean or
+/// interval endpoints are not themselves positive and finite.
 pub fn summarize_ratios(ratios: &[f64]) -> Option<RatioEstimate> {
     if !(2..=31).contains(&ratios.len())
         || ratios
@@ -58,12 +59,27 @@ pub fn summarize_ratios(ratios: &[f64]) -> Option<RatioEstimate> {
     let log_ratio_sd = variance.sqrt();
     let half_width = t95_critical(blocks - 1) * log_ratio_sd / (blocks as f64).sqrt();
 
+    // Validating the inputs does not bound the outputs: exponentiating a wide interval
+    // over finite positive ratios can underflow the lower endpoint to zero and overflow
+    // the upper one to infinity, which are not ratios. Report an estimate only when
+    // every field it carries is one.
+    let geometric_mean = mean.exp();
+    let t95_low = (mean - half_width).exp();
+    let t95_high = (mean + half_width).exp();
+    if !log_ratio_sd.is_finite()
+        || [geometric_mean, t95_low, t95_high]
+            .iter()
+            .any(|value| !value.is_finite() || *value <= 0.0)
+    {
+        return None;
+    }
+
     Some(RatioEstimate {
         blocks,
-        geometric_mean: mean.exp(),
+        geometric_mean,
         log_ratio_sd,
-        t95_low: (mean - half_width).exp(),
-        t95_high: (mean + half_width).exp(),
+        t95_low,
+        t95_high,
     })
 }
 
