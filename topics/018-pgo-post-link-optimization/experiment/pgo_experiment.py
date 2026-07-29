@@ -156,7 +156,15 @@ def tool(name: str) -> str:
 
 
 def rust_profdata(rustc: str, cwd: Path) -> str:
-    """Resolve the llvm-profdata bundled with the active Rust toolchain."""
+    """Resolve the llvm-profdata bundled with the active Rust toolchain.
+
+    Prefer the path the wrapper bound: it requires this program and digests it before
+    anything runs, so using its answer keeps the profiler that merges the training
+    profiles the one the receipt names.
+    """
+    bound = bound_tool("llvm-profdata")
+    if bound is not None:
+        return bound
     verbose = run([rustc, "-vV"], cwd=cwd)
     host = next(
         line.split(": ", 1)[1]
@@ -426,17 +434,22 @@ def build(
     # by default. Recording only the `PATH` linker names a tool that never ran,
     # so name what each entry is and record the bundled linker when present.
     bundled_lld = rust_lld(rustc, toolchain_cwd)
+    bound_lld = bound_tool("rust-lld")
     tool_versions = {
         "rustc_vv": rustc_verbose,
         "llvm_profdata": run([profdata, "--version"], cwd=work_dir),
         "cc": run([tools["cc"], "--version"], cwd=work_dir),
         "cc_target": run([tools["cc"], "-dumpmachine"], cwd=work_dir),
         "ld_on_path": run([tools["ld"], "--version"], cwd=work_dir),
-        "rust_lld_path": str(bundled_lld) if bundled_lld else "unavailable",
+        # Probe only a path the wrapper bound. `rust-lld` is optional, so the
+        # wrapper does not fail when the toolchain ships none; that means a file
+        # appearing after the binding would otherwise be executed here — after the
+        # timings, before the manifest — with no digest covering it.
+        "rust_lld_path": (bound_lld or (str(bundled_lld) if bundled_lld else "unavailable")),
         "rust_lld": (
-            run([str(bundled_lld), "-flavor", "gnu", "--version"], cwd=work_dir)
-            if bundled_lld
-            else "unavailable"
+            run([bound_lld, "-flavor", "gnu", "--version"], cwd=work_dir)
+            if bound_lld
+            else "not-recorded: linker is not bound by the wrapper"
         ),
         "objdump": run([tools["objdump"], "--version"], cwd=work_dir),
         "nm": run([tools["nm"], "--version"], cwd=work_dir),

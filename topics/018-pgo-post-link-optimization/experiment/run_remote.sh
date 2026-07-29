@@ -269,7 +269,7 @@ gate_env() {
         ${RUSTUP_HOME:+RUSTUP_HOME="$RUSTUP_HOME"} \
         CARGO_HOME="$gate_cargo_home" \
         CARGO_TARGET_DIR="$CARGO_TARGET_DIR" \
-        RUSTFLAGS="-Clinker=${tool_path[cc]}" \
+        CARGO_ENCODED_RUSTFLAGS="-Clinker=${tool_path[cc]}" \
         "$@"
 }
 # `git replace` refs and grafts are honoured by object reads, so `git archive`
@@ -459,11 +459,11 @@ else
         printf 'SOURCE_ARCHIVE_PATH must name the transferred archive\n' >&2
         exit 2
     fi
-    actual_archive_sha256="$("${tool_path[sha256sum]}" -- "$SOURCE_ARCHIVE_PATH" | "${tool_path[awk]}" '{print $1}')"
-    if [[ "$actual_archive_sha256" != "$SOURCE_ARCHIVE_SHA256" ]]; then
-        printf 'transferred archive digest does not match SOURCE_ARCHIVE_SHA256\n' >&2
-        exit 2
-    fi
+    # The digest, the container check, the header listing, and the extraction are
+    # four separate opens of this path. A caller-writable location or a mutable
+    # symlink lets them see different files, so the run could record the digest of
+    # one archive while the measured snapshot came from another. Copy it once below,
+    # after the scratch tree exists, and verify and read only that copy.
     source_commit="$SOURCE_COMMIT"
     # The digests above bind the transferred bytes, not the commit id: an
     # extracted archive carries no object store, so nothing on this host can
@@ -503,6 +503,21 @@ fi
 if [[ "$scratch_dir" == "$input_root" || "$scratch_dir" == "$input_root"/* ]]; then
     printf 'TMPDIR must resolve outside REPOSITORY_ROOT: %s\n' "$scratch_dir" >&2
     exit 2
+fi
+# Take the archive out of reach before anything reads it twice. Every later check —
+# digest, container magic, header listing, extraction — runs against this private
+# copy, so they cannot disagree about which bytes the run verified. The recorded
+# `source_archive_path` still names what the caller supplied.
+if [[ "$source_commit_verification" == verified-archive-and-manifest ]]; then
+    archive_snapshot="$scratch_dir/source-archive.tar"
+    "${tool_path[cp]}" -- "$SOURCE_ARCHIVE_PATH" "$archive_snapshot"
+    actual_archive_sha256="$(
+        "${tool_path[sha256sum]}" -- "$archive_snapshot" | "${tool_path[awk]}" '{print $1}'
+    )"
+    if [[ "$actual_archive_sha256" != "$SOURCE_ARCHIVE_SHA256" ]]; then
+        printf 'transferred archive digest does not match SOURCE_ARCHIVE_SHA256\n' >&2
+        exit 2
+    fi
 fi
 experiment_work_dir="$scratch_dir/experiment-work"
 # Cargo merges configuration from `$CARGO_HOME/config.toml` and every `.cargo/`
@@ -725,7 +740,7 @@ with open(sys.argv[1], "rb") as archive:
     header = archive.read(512)
 if any(header.startswith(magic) for magic in COMPRESSED):
     raise SystemExit(1)
-raise SystemExit(0 if header[257:262] == b"ustar" else 1)' "$SOURCE_ARCHIVE_PATH"; then
+raise SystemExit(0 if header[257:262] == b"ustar" else 1)' "$archive_snapshot"; then
     printf '%s\n' \
         "SOURCE_ARCHIVE_PATH must be an uncompressed tar: $SOURCE_ARCHIVE_PATH" \
         "a compressed archive is expanded by a PATH-resolved filter program that" \
@@ -744,7 +759,7 @@ while IFS= read -r archive_entry; do
     # `rsh`, while the digest and magic checks above and `sha256sum` all read the
     # local file of that name. Without it a name containing a colon lets `tar` list
     # and extract different bytes from the ones `source_archive_sha256` records.
-done < <(LC_ALL=C "${tool_path[tar]}" --force-local -tvf "$SOURCE_ARCHIVE_PATH")
+done < <(LC_ALL=C "${tool_path[tar]}" --force-local -tvf "$archive_snapshot")
     if [[ -n "$archive_entry_drift" ]]; then
         printf 'archive holds entries this comparison cannot verify:\n%s' \
             "$archive_entry_drift" >&2
@@ -754,7 +769,7 @@ done < <(LC_ALL=C "${tool_path[tar]}" --force-local -tvf "$SOURCE_ARCHIVE_PATH")
     # user, so a restrictive umask would strip modes from the reference exactly as
     # it did from an input tree extracted the same way — leaving the mode
     # comparison below to agree between two equally stripped trees.
-    "${tool_path[tar]}" --force-local --same-permissions -xf "$SOURCE_ARCHIVE_PATH" \
+    "${tool_path[tar]}" --force-local --same-permissions -xf "$archive_snapshot" \
         -C "$archive_tree"
     manifest_source "$archive_tree" >"$output_dir/source-files.archive.sha256"
     if ! "${tool_path[cmp]}" -s \
@@ -844,11 +859,22 @@ gate_toolchain_bin="${gate_cargo%/*}"
 # retained gate logs while the `cargo` digest reads as unchanged. Components are
 # installed independently, so bind each one the toolchain ships.
 digest_tool gate_cargo "$gate_cargo"
+# Required, not optional. `cargo fmt`, `cargo clippy`, and `cargo doc` are translated
+# into external `cargo-<command>` helpers found on the gate `PATH`, so binding these
+# only when present meant a component appearing between this check and its gate would
+# produce that gate's log with no digest and no drift check. Every gate this script
+# runs needs one of these, so absence is a refusal rather than something to skip.
 for gate_component in \
     rustc rustfmt rustdoc cargo-fmt cargo-clippy clippy-driver; do
-    if [[ -x "$gate_toolchain_bin/$gate_component" ]]; then
-        digest_tool "gate_$gate_component" "$gate_toolchain_bin/$gate_component"
+    if [[ ! -x "$gate_toolchain_bin/$gate_component" ]]; then
+        printf '%s\n' \
+            "toolchain $gate_toolchain lacks a component the gates need:" \
+            "$gate_toolchain_bin/$gate_component" \
+            "the gates run cargo fmt, test, clippy, bench, and doc, which dispatch to" \
+            "these programs, so each must be present and recorded before they run" >&2
+        exit 2
     fi
+    digest_tool "gate_$gate_component" "$gate_toolchain_bin/$gate_component"
 done
 
 # A checkout run never reads the archive variables, so echoing whatever the
@@ -1062,6 +1088,17 @@ for exported_tool in cc ld nm objdump llvm-bolt perf2bolt merge-fdata perf; do
     if [[ -n "${tool_path[$exported_tool]:-}" ]]; then
         bound_tool_env+=(
             "TOPIC18_TOOL_${exported_tool//-/_}=${tool_path[$exported_tool]}"
+        )
+    fi
+done
+# The two sysroot-bundled programs are bound under `experiment_`-prefixed keys, and
+# the driver locates them itself from `rustc`. Export them so it uses the bound paths:
+# otherwise a file appearing after the binding — `rust-lld` is optional, so its absence
+# is not an error — would be executed by the version probe with no digest behind it.
+for exported_bundled in llvm-profdata rust-lld; do
+    if [[ -n "${tool_path[experiment_$exported_bundled]:-}" ]]; then
+        bound_tool_env+=(
+            "TOPIC18_TOOL_${exported_bundled//-/_}=${tool_path[experiment_$exported_bundled]}"
         )
     fi
 done
