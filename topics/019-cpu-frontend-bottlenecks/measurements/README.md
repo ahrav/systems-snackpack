@@ -40,3 +40,10 @@ The retained records use runtime aliases and resolved host identities:
 
 Neither result generalizes to an ISA, processor vendor, instance family, or
 future host state.
+
+Records:
+
+- [`xxl` x86-64](2026-07-29-linux-x86-64.md)
+- [`alg` AArch64](2026-07-29-linux-aarch64.md)
+- [Cross-host summary](2026-07-29-linux-cross-host.md)
+- [Raw archive identities](raw/cf1b205/README.md)

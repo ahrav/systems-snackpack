@@ -75,3 +75,8 @@ See the [first-round decision record](rounds/01.md) and [primary
 sources](references.md). The [focused Linux experiment](experiment/README.md)
 and [measurement contract](measurements/README.md) add final-image, timing, and
 counter evidence without changing these architecture boundaries.
+
+The exact-source records cover
+[`xxl` x86-64](measurements/2026-07-29-linux-x86-64.md),
+[`alg` AArch64](measurements/2026-07-29-linux-aarch64.md), and the
+[cross-host boundary](measurements/2026-07-29-linux-cross-host.md).
