@@ -292,8 +292,17 @@ def build(
     # Recording `cc` for the version probe does not constrain what rustc links with,
     # so name it. When the wrapper did not bind one, leave the flag off and let rustc
     # resolve as before rather than guessing a path.
+    # `cc` resolves its own child `ld` through `PATH`, and the wrapper prepends the
+    # selected toolchain directory, so pinning the driver alone still let a
+    # toolchain-local `ld` link the measured binaries. `-B<dir>/` makes `cc` look for
+    # its subprograms there first, which pins the linker the receipt names.
     bound_cc = bound_tool("cc")
-    linker_options = [f"-Clinker={bound_cc}"] if bound_cc is not None else []
+    bound_ld = bound_tool("ld")
+    linker_options: list[str] = []
+    if bound_cc is not None:
+        linker_options.append(f"-Clinker={bound_cc}")
+        if bound_ld is not None:
+            linker_options.append(f"-Clink-arg=-B{os.path.dirname(bound_ld)}/")
     # `-Cdebuginfo=1` records the paths rustc was given, and both roots are
     # scratch directories with random names, so without remapping the binary
     # digests describe the directory the run happened to get rather than the
@@ -521,10 +530,27 @@ def inspect_codegen(
             rf"\b(?:callq?|jmpq?|bl|b)\s+(?!\*)[^\n]*<pgo_probe::{target}>"
         )
 
-    baseline_has_indirect = indirect.search(dispatch_bodies["baseline"]) is not None
+    baseline_body = dispatch_bodies["baseline"]
+    baseline_has_indirect = indirect.search(baseline_body) is not None
     if not baseline_has_indirect:
         raise RuntimeError("baseline dispatch lacks an inspected indirect call")
-    verification: dict[str, object] = {"baseline_indirect": True}
+    # Requiring only that an indirect call survives is not enough to call the
+    # promotion profile-conditioned: a toolchain that emits a guarded direct call in
+    # the unprofiled build keeps its indirect fallback too, so the candidate check
+    # below would pass on a shape the control already has. Reject a direct call to
+    # either target in the baseline, so the comparison rests on a difference.
+    baseline_direct = [
+        target for target in ("alpha", "beta") if direct(target).search(baseline_body)
+    ]
+    if baseline_direct:
+        raise RuntimeError(
+            "baseline dispatch already contains a direct call to "
+            f"{', '.join(baseline_direct)}, so promotion is not profile-conditioned"
+        )
+    verification: dict[str, object] = {
+        "baseline_indirect": True,
+        "baseline_direct_targets": [],
+    }
     for mode in ("alpha", "beta"):
         body = dispatch_bodies[f"pgo-{mode}"]
         candidate = {

@@ -269,7 +269,7 @@ gate_env() {
         ${RUSTUP_HOME:+RUSTUP_HOME="$RUSTUP_HOME"} \
         CARGO_HOME="$gate_cargo_home" \
         CARGO_TARGET_DIR="$CARGO_TARGET_DIR" \
-        CARGO_ENCODED_RUSTFLAGS="-Clinker=${tool_path[cc]}" \
+        CARGO_ENCODED_RUSTFLAGS="-Clinker=${tool_path[cc]}"$'\x1f'"-Clink-arg=-B${tool_path[ld]%/*}/" \
         "$@"
 }
 # `git replace` refs and grafts are honoured by object reads, so `git archive`
@@ -1125,6 +1125,11 @@ if ! "${tool_path[cmp]}" -s \
     printf 'source files changed during evidence collection\n' >&2
     exit 1
 fi
+# The manifests hash contents, so they cannot see an executable bit that a gate or the
+# driver changed, and the mode comparisons all ran before those steps. Compare modes
+# against the verified input again, so the retained evidence covers the modes the run
+# actually finished with rather than the ones it started from.
+require_matching_modes "$snapshot_root" "$input_root" "the verified input"
 # The digests in `tools.txt` were taken before the provenance work and checked
 # again when that receipt was written, which leaves the gates and the driver
 # unguarded. Check once more here so the retained digests cover every program for
