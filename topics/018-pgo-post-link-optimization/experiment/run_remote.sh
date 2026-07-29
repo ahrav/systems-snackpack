@@ -883,12 +883,20 @@ while :; do
     # `rustfmt` searches the formatted file's directory and its ancestors for
     # `rustfmt.toml` or `.rustfmt.toml`, so the `cargo fmt` gate would otherwise run
     # under a policy from above the snapshot that no manifest covers — the same class
-    # as the Cargo configuration beside it.
-    for ancestor_config in \
-        "$config_ancestor/.cargo/config.toml" \
-        "$config_ancestor/.cargo/config" \
-        "$config_ancestor/rustfmt.toml" \
-        "$config_ancestor/.rustfmt.toml"; do
+    # as the Cargo configuration beside it. The snapshot itself is exempt: a
+    # repository-owned formatting policy is inside the verified tree and is what the gate
+    # is supposed to check the repository against.
+    ancestor_configs=(
+        "$config_ancestor/.cargo/config.toml"
+        "$config_ancestor/.cargo/config"
+    )
+    if [[ "$config_ancestor" != "$repo_root" ]]; then
+        ancestor_configs+=(
+            "$config_ancestor/rustfmt.toml"
+            "$config_ancestor/.rustfmt.toml"
+        )
+    fi
+    for ancestor_config in "${ancestor_configs[@]}"; do
         if [[ -e "$ancestor_config" ]]; then
             printf '%s\n' \
                 "configuration above the snapshot would reach the gates: $ancestor_config" \
