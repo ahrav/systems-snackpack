@@ -4,20 +4,39 @@ set -euo pipefail
 # Validates an exact Linux source tree, runs Topic 18, and writes evidence
 # outside the repository.
 
-# Re-exec once through a shell that cannot have sourced a startup file. Bash
+# Restart once in a shell that carries none of the caller's shell state. Bash
 # sources `BASH_ENV` before the first line of a non-interactive script, and a
-# hook that unsets the variable defeats any later test for it while its traps,
-# functions, and shell options remain in force. Replacing the process image
-# discards all three; `env -u` stops the second shell sourcing the hook again.
-# What survives is exported state such as `PATH`, which the tool resolution and
-# the gate and driver environments below account for separately.
+# hook can unset the variable, install traps, define functions, and prepend a
+# directory to `PATH` — so a later test for the variable proves nothing and a
+# `PATH` lookup for the relaunch could find a planted `bash`. Replacing the
+# process image discards traps and shell options; unsetting the exported
+# functions first stops the next shell importing them, which matters because an
+# imported `command` or `git` function answers before any builtin or program;
+# and `/proc/self/exe` is the running interpreter rather than a name resolved
+# through a `PATH` the hook may already own. `unset`, `declare`, and `builtin`
+# are themselves shadowable, so this reduces the surface rather than closing it:
+# the documented invocation clears the variables before Bash starts.
 if [[ -z "${TOPIC18_REEXECED:-}" ]]; then
-    exec env -u BASH_ENV -u ENV TOPIC18_REEXECED=1 bash "$0" "$@"
+    unset BASH_ENV ENV
+    while read -r _ _ imported_function; do
+        unset -f "$imported_function"
+    done < <(builtin declare -F)
+    export TOPIC18_REEXECED=1
+    exec /proc/self/exe "$0" "$@"
 fi
-# The marker only suppresses a second re-exec, so a caller who presets it still
-# meets this check. A hook that both unsets the startup variables and presets
-# the marker is cooperating with this protocol; no in-script test survives that,
-# and the documented invocation is `env -u BASH_ENV -u ENV bash run_remote.sh …`.
+# Nothing should be defined yet; this script declares its own functions further
+# down. A survivor means the strip above did not run as written.
+if [[ -n "$(builtin declare -F)" ]]; then
+    printf '%s\n' \
+        "shell functions were imported into this run:" \
+        "$(builtin declare -F)" \
+        "an imported function answers before a builtin or program, including the" \
+        "tool resolution and provenance commands below" >&2
+    exit 2
+fi
+# The marker only suppresses a second restart, so a caller who presets it still
+# meets the checks above and below. A hook that presets it and unsets the startup
+# variables is cooperating with this protocol; no in-script test survives that.
 for startup_variable in BASH_ENV ENV; do
     if [[ -n "${!startup_variable:-}" ]]; then
         printf '%s\n' \
@@ -216,6 +235,14 @@ scratch_dir="$(mktemp -d)"
 # `TMPDIR` that is a symlink into one of these trees passes a textual prefix
 # test while the scratch tree is physically inside it.
 scratch_dir="$(cd -- "$scratch_dir" && pwd -P)"
+# Arm the removal before the guards below, which exit: `mktemp -d` has already
+# created the tree, so a rejected `TMPDIR` would otherwise leave a stray `tmp.*`
+# directory inside the source tree or the evidence tree that the run reports
+# nothing about.
+cleanup() {
+    rm -rf -- "$scratch_dir"
+}
+trap cleanup EXIT
 # `mktemp` places its result under `$TMPDIR`. Inside OUTPUT_DIRECTORY the
 # snapshot, the experiment work directory, and the evidence manifest's own
 # temporary file become files that `evidence.sha256` hashes, and the temporaries
@@ -244,10 +271,6 @@ mkdir -p -- "$gate_cargo_home"
 # fail the post-experiment mutation check after every measurement had been
 # taken. Keep gate artifacts out of the snapshot entirely.
 export CARGO_TARGET_DIR="$scratch_dir/cargo-target"
-cleanup() {
-    rm -rf -- "$scratch_dir"
-}
-trap cleanup EXIT
 gates_dir="$output_dir/gates"
 experiment_dir="$output_dir/experiment"
 mkdir -p -- "$gates_dir"
