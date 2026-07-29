@@ -50,7 +50,9 @@ fi
 if (($# == 3)); then
     cpu="$3"
 else
-    allowed="$(rg -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}')"
+    allowed="$(
+        rg -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}' || true
+    )"
     first="${allowed%%,*}"
     cpu="${first%%-*}"
 fi
@@ -110,7 +112,7 @@ manifest_source() {
     manifest_root="$1"
     (
         cd "$manifest_root"
-        rg --files -uu -g '!/.git/' -g '!/target/' -0 \
+        rg --files -uu -g '!.git/' -g '!target/' -0 \
             | sort -z \
             | xargs -0 sha256sum --
     )
@@ -129,7 +131,7 @@ snapshot_root="$scratch_dir/source"
 mkdir -p -- "$snapshot_root"
 (
     cd "$input_root"
-    rg --files -uu -g '!/.git/' -g '!/target/' -0 \
+    rg --files -uu -g '!.git/' -g '!target/' -0 \
         | sort -z \
         | xargs -0 cp --parents --target-directory="$snapshot_root" --
 )
@@ -175,7 +177,7 @@ topic_dir="$repo_root/$topic_rel"
     printf '\ncpu_model_and_features\n'
     rg -m 128 \
         '^(model name|vendor_id|cpu family|model|stepping|microcode|Hardware|CPU implementer|CPU architecture|CPU variant|CPU part|CPU revision|Features|flags)' \
-        /proc/cpuinfo
+        /proc/cpuinfo || true
     printf '\nworkspace_rustc\n'
     env -u RUSTUP_TOOLCHAIN rustc -vV
     printf '\nworkspace_native_target_cfg\n'

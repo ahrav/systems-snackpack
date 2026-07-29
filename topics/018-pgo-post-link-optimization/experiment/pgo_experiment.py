@@ -406,9 +406,17 @@ def inspect_codegen(
         encoding="utf-8",
     )
     indirect = re.compile(r"\b(?:callq?|jmpq?)\s+\*|\b(?:blr|br)\s+x")
-    direct = lambda target: re.compile(
-        rf"\b(?:callq?|jmpq?|bl|b)\s+(?!\*)[^\n]*<pgo_probe::{target}>"
-    )
+    # objdump interpolates demangled symbol names into operand comments, so a
+    # substring search for "cmp" is also satisfied by a neighbouring
+    # `core::cmp::*` symbol with no compare instruction present. Anchoring to
+    # the address-then-mnemonic column admits only a real compare.
+    comparison = re.compile(r"^\s*[0-9a-f]+:\s+cmp", re.MULTILINE)
+
+    def direct(target: str) -> re.Pattern[str]:
+        return re.compile(
+            rf"\b(?:callq?|jmpq?|bl|b)\s+(?!\*)[^\n]*<pgo_probe::{target}>"
+        )
+
     baseline_has_indirect = indirect.search(dispatch_bodies["baseline"]) is not None
     if not baseline_has_indirect:
         raise RuntimeError("baseline dispatch lacks an inspected indirect call")
@@ -416,7 +424,7 @@ def inspect_codegen(
     for mode in ("alpha", "beta"):
         body = dispatch_bodies[f"pgo-{mode}"]
         candidate = {
-            "comparison": "cmp" in body,
+            "comparison": comparison.search(body) is not None,
             "direct_trained_target": direct(mode).search(body) is not None,
             "indirect_fallback": indirect.search(body) is not None,
         }
