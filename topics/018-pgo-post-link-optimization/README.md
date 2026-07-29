@@ -50,19 +50,25 @@ for loader_variable in ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}; do unset "$loader_vari
   /tmp/topic18-evidence
 ```
 
-Clear the loader namespace in the calling shell first, before `env` runs. `env -i` builds
-the environment for the shell it starts, but `env` itself is executed with whatever the
-caller had, so the dynamic loader processes an inherited `LD_PRELOAD` or `LD_AUDIT` and
-runs that library's constructor inside `env` — before `-i` clears anything and before
-`bash -p` or any of the wrapper's refusals exist. The wrapper cannot see this: the
-variable is gone from the child by then.
+Launch from a shell that never inherited the loader namespace. That is a requirement, not
+a preference, and the loop above does not substitute for it: if this shell was itself
+started with `LD_PRELOAD` or `LD_AUDIT`, that library's constructor has already run inside
+it and the library is still mapped, so it can have altered shell state or can interpose
+the very `unset` and `exec` that follow. Enumerating and clearing names cannot make such a
+shell trustworthy — nothing running inside it can.
 
-The clearing loop uses only shell builtins for that same reason. `${!LD_@}` expands to
-the names currently set with that prefix, so no external program runs and there is no
-process for an inherited library to be loaded into; discovering the names by piping
-`env` through `sed` would execute two of them first. Launching from a shell that never
-had the loader namespace set is equivalent and preferable — the loop is for a shell that
-did.
+What the loop does is stop the variables propagating from a clean shell that merely has
+them set — exported by a profile, say, without any library having been loaded into this
+process. Without it, `env -i` would still be too late: `env` itself is executed with
+whatever the caller had, so the loader would process the variable and run the constructor
+inside `env`, before `-i` clears anything and before `bash -p` or any of the wrapper's
+refusals exist. The wrapper cannot detect that, because the variable is gone from the
+child by then.
+
+The loop uses only shell builtins for the same reason. `${!LD_@}` expands to the names
+currently set with that prefix, so no external program runs and there is no process for an
+inherited library to be loaded into; discovering the names by piping `env` through `sed`
+would execute two of them first.
 
 Name `env` and `bash` by absolute path, and give `PATH` explicitly rather than
 passing the caller's through. The launcher runs before the wrapper exists to check

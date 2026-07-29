@@ -1088,20 +1088,19 @@ print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
 # replace the modules that schedule the probes and summarise the ratios. Neither
 # appears in any receipt. `-I` additionally drops user site-packages, which
 # survive an allowlist because `HOME` must stay for toolchain resolution.
-# `RUSTUP_TOOLCHAIN` still names the toolchain for the receipts and the recorded
-# transcript, while the leading `PATH` entry decides which compiler actually runs.
+# `RUSTUP_TOOLCHAIN` names the toolchain for the receipts and the recorded transcript.
+# The prepended `PATH` entry is what selects that toolchain's programs, and it still
+# decides `cargo` and the component helpers `cargo` dispatches to, which have to be
+# found the way `cargo` finds them.
 #
-# `taskset` and `python3` are given as resolved paths because `env` applies the
-# rewritten `PATH` when it looks up the command it runs. A toolchain `bin` holding
-# a `taskset` or `python3` — a linked or custom toolchain can — would otherwise
-# supply the program that pins the affinity and interprets the driver, ahead of the
-# ones digested for `tools.txt`. The compiler is still resolved through `PATH`,
-# which is the point of prepending the toolchain directory.
-#
-# The driver resolves its own helpers too, with `shutil.which`, and that lookup
-# sees the rewritten `PATH` rather than the one the digests describe. Hand it the
-# bound paths for the programs that inspect and link the measured binaries, plus
-# the optional post-link tools it probes, so `tools.txt` names what actually ran.
+# Everything else is passed as a bound absolute path, because `env` and the driver both
+# apply the rewritten `PATH` when they look up a command, and a linked or custom
+# toolchain `bin` can hold a program of the same name. `taskset` and `python3` pin the
+# affinity and interpret the driver; `rustc` builds every measured binary; `cc`, `ld`,
+# `nm`, and `objdump` link and inspect them; the sysroot-bundled `llvm-profdata` and
+# `rust-lld` merge the profiles and link the candidates; and the optional post-link
+# tools are probed. Each is resolved once and digested before use, so `tools.txt` names
+# the programs that ran rather than the ones a later `PATH` entry could supply.
 bound_tool_env=()
 for exported_tool in cc ld nm objdump llvm-bolt perf2bolt merge-fdata perf; do
     if [[ -n "${tool_path[$exported_tool]:-}" ]]; then
@@ -1110,15 +1109,13 @@ for exported_tool in cc ld nm objdump llvm-bolt perf2bolt merge-fdata perf; do
         )
     fi
 done
-# The two sysroot-bundled programs are bound under `experiment_`-prefixed keys, and
-# the driver locates them itself from `rustc`. Export them so it uses the bound paths:
-# otherwise a file appearing after the binding — `rust-lld` is optional, so its absence
-# is not an error — would be executed by the version probe with no digest behind it.
-# The compiler itself, for the same reason: the driver resolves `rustc` through the
-# rewritten `PATH`, so a lookup that misses the toolchain copy falls through to a later
-# entry, and every measured binary would then be built by a program absent from the
-# receipt. The wrapper already resolved this path through `rustup which`, so exporting it
-# pins the same toolchain the prepended directory selects instead of re-deriving it.
+# `rustc` and the two sysroot-bundled programs are bound under keys the driver does not
+# use, and it derives all three itself. Export them under the names it looks up. Without
+# this, `rustc` resolves through the rewritten `PATH` and a lookup that misses the
+# toolchain copy falls through to a later entry, and `rust-lld` — optional, so its
+# absence is not an error — could be a file that appeared after the binding. Each
+# exported path is the one `rustup which` and the sysroot already gave, so this pins the
+# toolchain the prepended directory selects rather than choosing a different one.
 bound_tool_env+=("TOPIC18_TOOL_rustc=$experiment_rustc")
 for exported_bundled in llvm-profdata rust-lld; do
     if [[ -n "${tool_path[experiment_$exported_bundled]:-}" ]]; then
