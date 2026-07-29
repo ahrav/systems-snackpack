@@ -30,7 +30,23 @@ set -euo pipefail
 # who shadows `exec` skips this restart entirely and no in-script test placed
 # after it can prove otherwise. Closing that requires a launcher outside this
 # process image, which is why the documented invocation starts Bash with `-p`.
-if [[ -z "${TOPIC18_REEXECED:-}" ]]; then
+# Branch on privileged mode itself, not on the marker. A caller who exports
+# `TOPIC18_REEXECED=1` would otherwise skip the only `exec ... -p` and run the
+# whole body in an ordinary shell, where an imported `builtin` hides
+# `builtin declare -F` from the survivor check below and an imported `git`
+# answers the provenance commands. `[[ -o privileged ]]` reads the option the
+# restart exists to obtain, and `[[` is a shell keyword rather than a builtin, so
+# no imported function can answer it. The marker now only prevents a restart loop:
+# reaching this point unprivileged after a restart means `-p` did not take, which
+# is a refusal rather than a second attempt.
+if [[ ! -o privileged ]]; then
+    if [[ -n "${TOPIC18_REEXECED:-}" ]]; then
+        printf '%s\n' \
+            "restarted without privileged mode" \
+            "TOPIC18_REEXECED is set but this shell is not privileged, so the" \
+            "caller's shell functions and startup files were not excluded" >&2
+        exit 2
+    fi
     unset BASH_ENV ENV
     while read -r _ _ imported_function; do
         unset -f "$imported_function"
@@ -48,9 +64,10 @@ if [[ -n "$(builtin declare -F)" ]]; then
         "tool resolution and provenance commands below" >&2
     exit 2
 fi
-# The marker only suppresses a second restart, so a caller who presets it still
-# meets the checks above and below. A hook that presets it and unsets the startup
-# variables is cooperating with this protocol; no in-script test survives that.
+# Reaching here means the shell is privileged, so `BASH_ENV` and `ENV` were never
+# processed by it. They can still be set in the environment, and a launcher that
+# started an unprivileged shell earlier would have sourced them before this script
+# began, so refuse rather than infer from the current shell's own immunity.
 for startup_variable in BASH_ENV ENV; do
     if [[ -n "${!startup_variable:-}" ]]; then
         printf '%s\n' \
@@ -120,6 +137,19 @@ for required in \
         exit 2
     fi
     tool_path["$required"]="$resolved_required"
+done
+# Digest every resolved tool before any of them runs. Hashing at receipt time
+# instead would record whatever the file holds after the provenance work: a
+# script `git` could forge `rev-parse`, `status`, and `archive`, then be replaced
+# by the real program, and the receipt would attest a benign digest for a binary
+# that produced none of the evidence. This pass needs `sha256sum`, which is itself
+# resolved above, so it cannot fold into that loop. The digests are compared again
+# where the receipt is written, and a change between the two reads fails the run.
+declare -A tool_digest=()
+for digested_tool in "${!tool_path[@]}"; do
+    tool_digest["$digested_tool"]="$(
+        sha256sum -- "${tool_path[$digested_tool]}" | awk '{print $1}'
+    )"
 done
 python3 -c 'import sys; raise SystemExit(sys.version_info < (3, 8))'
 # Loader and libc state reaches every timed child through the driver: `LD_PRELOAD`
@@ -446,9 +476,20 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
                     [[ ! -x "$input_root/$tree_path" ]] \
                         || tree_drift+="unexpectedly executable: $tree_path"$'\n'
                 fi
-                blob_paths+=("$tree_path")
-                blob_objects+=("$tree_object")
-                ;;
+            blob_paths+=("$tree_path")
+            blob_objects+=("$tree_object")
+            ;;
+        *)
+            # Any other mode is unverifiable here, and silently skipping it hides
+            # the entry from every check: `rg --files` omits a symlink, so a
+            # `120000` path is absent from the origin, commit, before, and after
+            # manifests and from the snapshot copy, and all of them agree while
+            # the tree the run attests to contains a link the snapshot does not.
+            # A `160000` gitlink has no worktree file to hash. Neither exists in
+            # this repository, so refuse and make adding one a decision rather
+            # than a silent gap in the provenance.
+            tree_drift+="unsupported tree entry mode $tree_mode: $tree_path"$'\n'
+            ;;
         esac
     done < <(
         git -C "$input_root" ls-tree -r -z \
@@ -603,13 +644,31 @@ fi
 # a tool resolved out of a caller-writable directory is visible in this receipt
 # even though no path rule can reject it, since the toolchain programs legitimately
 # live under a user-owned prefix. `PATH` is recorded verbatim for the same reason.
+#
+# Report the digests taken before the tools ran, and refuse if any file changed
+# since, which is what stops a program from forging the evidence above and then
+# putting the expected bytes back in place before being recorded.
+tool_drift=""
+for recorded_tool in "${!tool_path[@]}"; do
+    current_tool_digest="$(
+        sha256sum -- "${tool_path[$recorded_tool]}" | awk '{print $1}'
+    )"
+    if [[ "$current_tool_digest" != "${tool_digest[$recorded_tool]}" ]]; then
+        tool_drift+="$recorded_tool ${tool_path[$recorded_tool]}"
+        tool_drift+=" ${tool_digest[$recorded_tool]} -> $current_tool_digest"$'\n'
+    fi
+done
+if [[ -n "$tool_drift" ]]; then
+    printf 'tool changed on disk during the run:\n%s' "$tool_drift" >&2
+    exit 2
+fi
 {
     printf 'path=%s\n\n' "$PATH"
     for recorded_tool in "${!tool_path[@]}"; do
         printf '%s\t%s\t%s\n' \
             "$recorded_tool" \
             "${tool_path[$recorded_tool]}" \
-            "$(sha256sum -- "${tool_path[$recorded_tool]}" | awk '{print $1}')"
+            "${tool_digest[$recorded_tool]}"
     done | LC_ALL=C sort
 } >"$output_dir/tools.txt"
 
