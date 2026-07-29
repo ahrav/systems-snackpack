@@ -1089,18 +1089,22 @@ print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
 # appears in any receipt. `-I` additionally drops user site-packages, which
 # survive an allowlist because `HOME` must stay for toolchain resolution.
 # `RUSTUP_TOOLCHAIN` names the toolchain for the receipts and the recorded transcript.
-# The prepended `PATH` entry is what selects that toolchain's programs, and it still
-# decides `cargo` and the component helpers `cargo` dispatches to, which have to be
-# found the way `cargo` finds them.
 #
-# Everything else is passed as a bound absolute path, because `env` and the driver both
-# apply the rewritten `PATH` when they look up a command, and a linked or custom
-# toolchain `bin` can hold a program of the same name. `taskset` and `python3` pin the
-# affinity and interpret the driver; `rustc` builds every measured binary; `cc`, `ld`,
-# `nm`, and `objdump` link and inspect them; the sysroot-bundled `llvm-profdata` and
-# `rust-lld` merge the profiles and link the candidates; and the optional post-link
-# tools are probed. Each is resolved once and digested before use, so `tools.txt` names
-# the programs that ran rather than the ones a later `PATH` entry could supply.
+# Every program this driver names is passed as a bound absolute path, because `env` and
+# the driver both apply the rewritten `PATH` when they look up a command and a linked or
+# custom toolchain `bin` can hold a program of the same name. `taskset` and `python3` pin
+# the affinity and interpret the driver; `rustc` builds every measured binary; `cc` links
+# them and `ld` is the linker it is pointed at; `nm` and `objdump` inspect them;
+# `llvm-profdata` merges the training profiles; `rust-lld` and the post-link tools are
+# version-probed. Each is resolved once and digested before use, so `tools.txt` names the
+# programs that ran rather than the ones a later `PATH` entry could supply.
+#
+# That leaves the prepended entry with no program in this driver resolving through it. It
+# stays for two reasons that are not naming lookups: the driver runs standalone during
+# development, where nothing is bound and `shutil.which` is the only resolution available;
+# and it is the `PATH` that `rustc` and `cc` hand to their own subprocesses, of which only
+# `cc`'s linker child is pinned, by `-B`. The Cargo gates do not run here — they ran
+# earlier through `gate_env`, which prepends the repository toolchain instead.
 bound_tool_env=()
 for exported_tool in cc ld nm objdump llvm-bolt perf2bolt merge-fdata perf; do
     if [[ -n "${tool_path[$exported_tool]:-}" ]]; then
