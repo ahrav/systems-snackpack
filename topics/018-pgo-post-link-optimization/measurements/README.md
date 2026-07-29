@@ -10,6 +10,11 @@ Each record applies only to its named source commit, archive digest, binaries,
 host, toolchain, target features, build flags, inputs, CPU affinity, run window,
 and retained raw process rows.
 
+All three runs share source commit `aa3e0fe`, whose wrapper predates the current
+caller-isolation hardening, so every row above carries the
+[pre-hardening caveat](2026-07-28-linux-cross-host.md) recorded with the launch
+command.
+
 ## Experimental unit
 
 Each comparison contains six `ABBA` and six `BAAB` blocks scheduled by a fixed,

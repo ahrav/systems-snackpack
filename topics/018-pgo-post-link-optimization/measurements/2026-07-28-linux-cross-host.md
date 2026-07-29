@@ -18,6 +18,20 @@ bash /tmp/topic18-retained-aa3e0fe2872072f40d45a1dd211f5c69bf72dc65/source/topic
   /tmp/topic18-retained-aa3e0fe2872072f40d45a1dd211f5c69bf72dc65/evidence
 ```
 
+That command launched the wrapper with plain `bash`, and the wrapper at
+`aa3e0fe` predates the current caller-isolation hardening: it did not start the
+run in privileged mode, so an exported shell function or a `BASH_ENV` hook on
+either host would have run before the first retained receipt and could have
+answered the provenance commands. It also predates the `GIT_*` refusal and the
+`tools.txt` receipt, so neither the repository environment nor the resolved paths
+of `git`, `tar`, `rg`, and `sha256sum` are recorded for these runs. Nothing
+indicates that happened — both hosts verified the archive, all 993 extracted
+files, and every file in `evidence.sha256` — but the retained receipts cannot
+exclude it, so read these rows as conditional on the two hosts having had no
+startup hook, exported function, or `GIT_*` override set. Regenerating them with
+the documented isolated launcher is what would remove the caveat rather than
+narrow it.
+
 At the `2026-07-28T15:03:24Z` probe, the requested historical x86 hostname,
 `dev-dsk-ahrav-2c-b89a08b3.us-west-2.amazon.com`, returned a WSSH 403 because
 it no longer resolved. The current `xlg` alias resolved to

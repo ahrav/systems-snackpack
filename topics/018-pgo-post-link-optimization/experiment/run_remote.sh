@@ -71,6 +71,26 @@ output_dir="$2"
 topic_rel="topics/018-pgo-post-link-optimization"
 topic_dir="$repo_root/$topic_rel"
 
+# A `PATH` entry that is empty, `.`, or otherwise relative names the current
+# directory, so an unqualified `git` or `tar` would resolve against whatever
+# directory this script happens to be in — including the source tree it is about
+# to attest to. `command -v` reports such a hit as a real program. Split with
+# parameter expansion rather than a here-string, which would append a newline and
+# report a trailing entry the variable does not contain.
+path_remainder="$PATH"
+while :; do
+    path_entry="${path_remainder%%:*}"
+    if [[ "$path_entry" != /* ]]; then
+        printf '%s\n' \
+            "PATH entry is not absolute: ${path_entry:-<empty>}" \
+            "a relative or empty entry resolves tools against the current directory" >&2
+        exit 2
+    fi
+    [[ "$path_remainder" == *:* ]] || break
+    path_remainder="${path_remainder#*:}"
+done
+
+declare -A tool_path=()
 for required in \
     awk bash cargo cc clippy-driver cmp cp date env getconf git ld lscpu mkdir \
     mktemp mv nm objdump python3 rg rm rustc rustfmt rustup sed sha256sum sort \
@@ -81,6 +101,17 @@ for required in \
     # a caller could forge `rev-parse`, `status`, or `archive` output and with it
     # the whole source provenance. Aliases and builtins shadow the same way. Only
     # a program resolves to an absolute path.
+    #
+    # Resolving to a program is not the same as resolving to a trusted one:
+    # `command -v` reports the command lookup path, so a caller-writable `PATH`
+    # entry holding an executable `git` satisfies this check and then answers
+    # `rev-parse`, `status`, `archive`, and `ls-tree`. No path test separates that
+    # from a legitimate tool, because the toolchain programs themselves live
+    # outside the system directories — `cargo`, `rustc`, `rustup`, `rustfmt`,
+    # `clippy-driver`, and `rg` normally resolve under a user-owned `~/.cargo/bin`.
+    # Record the resolved path and digest of every tool instead, so the retained
+    # evidence names the binaries that produced it and an auditor can compare them
+    # against the host rather than trusting the run's own `PATH`.
     resolved_required="$(command -v "$required" || true)"
     if [[ "$resolved_required" != /* ]]; then
         printf '%s\n' \
@@ -88,6 +119,7 @@ for required in \
             "a shell function, alias, or builtin shadowing a tool would forge its output" >&2
         exit 2
     fi
+    tool_path["$required"]="$resolved_required"
 done
 python3 -c 'import sys; raise SystemExit(sys.version_info < (3, 8))'
 # Loader and libc state reaches every timed child through the driver: `LD_PRELOAD`
@@ -562,6 +594,24 @@ fi
     printf 'expected_source_manifest_sha256=%s\n' \
         "$recorded_expected_manifest_sha256"
 } >"$output_dir/source-provenance.txt"
+
+# The provenance and evidence commands — `git`, `tar`, `rg`, `sha256sum` — are
+# called unqualified, so `PATH` decides which programs produced `source_commit`,
+# the extracted reference tree, and `evidence.sha256`. The checks above prove each
+# name reached a program, not that it reached the expected one. Name the resolved
+# binaries and their digests here so the retained evidence identifies what ran:
+# a tool resolved out of a caller-writable directory is visible in this receipt
+# even though no path rule can reject it, since the toolchain programs legitimately
+# live under a user-owned prefix. `PATH` is recorded verbatim for the same reason.
+{
+    printf 'path=%s\n\n' "$PATH"
+    for recorded_tool in "${!tool_path[@]}"; do
+        printf '%s\t%s\t%s\n' \
+            "$recorded_tool" \
+            "${tool_path[$recorded_tool]}" \
+            "$(sha256sum -- "${tool_path[$recorded_tool]}" | awk '{print $1}')"
+    done | LC_ALL=C sort
+} >"$output_dir/tools.txt"
 
 {
     cd "$repo_root"
