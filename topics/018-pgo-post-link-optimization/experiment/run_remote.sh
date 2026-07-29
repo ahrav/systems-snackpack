@@ -340,9 +340,16 @@ fi
 # discovery: `rev-parse --git-dir` walks upward, so an archive extracted beneath
 # an unrelated checkout would otherwise adopt that ancestor's HEAD and status as
 # its own source identity and skip the archive checks below.
+# `core.fsmonitor` in the repository's own `.git/config` names an executable that
+# `git status` runs, and `.git` is excluded from the source manifest, so that hook
+# is arbitrary code with no receipt — running during the very check that decides the
+# tree is clean, before `tools.txt` exists. The environment sweep cannot reach it
+# because the setting is repo-local rather than an environment variable, so disable
+# it per command. `-c` beats the config file for that invocation only, leaving the
+# operator's own repository untouched.
 if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$repo_root" ]]; then
     source_commit="$(git -C "$repo_root" rev-parse HEAD)"
-    if [[ -n "$(git -C "$repo_root" status --porcelain)" ]]; then
+    if [[ -n "$(git -C "$repo_root" -c core.fsmonitor=false status --porcelain)" ]]; then
         printf 'repository must be clean\n' >&2
         exit 2
     fi
@@ -580,6 +587,31 @@ else
     # records an archive digest that cannot reproduce the measured snapshot.
     archive_tree="$scratch_dir/archive-tree"
     mkdir -p -- "$archive_tree"
+    # Every check on this branch runs through `manifest_source` and
+    # `require_matching_modes`, which walk with `rg --files`; that omits symlinks and
+    # does not follow them. There is no object store here to consult the way the
+    # checkout branch consults `ls-tree`, so a link inside the archive is absent
+    # from the archive, origin, before, and after manifests and from the snapshot
+    # copy, all of them agree, and the run still records
+    # `verified-archive-and-manifest`. The tar headers are the only authority for
+    # what the archive holds, so read the entry types from them and accept regular
+    # files and directories alone. A tree that needs links has to extend the walker
+    # and the manifest format together, which the retained `SOURCE_MANIFEST_SHA256`
+    # values depend on.
+    archive_entry_drift=""
+    while IFS= read -r archive_entry; do
+        case "$archive_entry" in
+            -* | d*) ;;
+            *)
+                archive_entry_drift+="unsupported archive entry: $archive_entry"$'\n'
+                ;;
+        esac
+    done < <(LC_ALL=C tar -tvf "$SOURCE_ARCHIVE_PATH")
+    if [[ -n "$archive_entry_drift" ]]; then
+        printf 'archive holds entries this comparison cannot verify:\n%s' \
+            "$archive_entry_drift" >&2
+        exit 2
+    fi
     # `--same-permissions` because tar applies the caller's umask for an ordinary
     # user, so a restrictive umask would strip modes from the reference exactly as
     # it did from an input tree extracted the same way — leaving the mode
@@ -810,8 +842,8 @@ require_unchanged_tools "while establishing source provenance"
 
 if [[ "$source_commit_verification" == git-checkout ]]; then
     (
-        cd "$input_root"
-        git diff --check
+    cd "$input_root"
+    git -c core.fsmonitor=false diff --check
     ) >"$gates_dir/git-diff-check.log" 2>&1
 else
     printf '%s\n' \

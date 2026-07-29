@@ -40,22 +40,28 @@ Run the retained check from a clean x86-64 or AArch64 Linux checkout with
 procfs, `taskset`, `lscpu`, GNU `objdump`, `nm`, and `sha256sum`:
 
 ```bash
-env -u BASH_ENV -u ENV bash -p \
+env -i PATH="$PATH" HOME="$HOME" bash -p \
   topics/018-pgo-post-link-optimization/experiment/run_remote.sh \
   "$(pwd)" \
   /tmp/topic18-evidence
 ```
 
-Clearing the shell startup variables before Bash starts is the only way to be
-certain no hook ran: the wrapper re-execs itself to discard a hook's traps,
-functions, and shell options, and refuses to run when either variable is still
-set, but a hook that unsets them has already executed by then. Starting Bash with
-`-p` is what keeps the caller's exported functions out of the run — privileged
-mode does not inherit functions from the environment — and it has to come from
-this launcher rather than from the wrapper alone, because an exported `exec`
-function is dispatched ahead of the builtin and would skip the wrapper's own
-restart. The wrapper also refuses any `GIT_*` variable, which would otherwise
-redirect the provenance queries that establish `source_commit`.
+Start from an empty environment rather than removing named variables. The wrapper
+refuses the startup, loader, and `GIT_*` namespaces it can see, but a rejection is
+too late for anything the dynamic loader has already acted on: an `LD_PRELOAD`
+library's constructor runs before the script's first line, and it can remove its own
+entry from `environ`, so the in-script sweep neither prevents the code nor reliably
+observes the variable. `env -i` means Bash is executed with none of it. `-p` is what
+keeps the caller's exported functions out of the run — privileged mode does not
+inherit functions from the environment — and it has to come from this launcher
+rather than from the wrapper alone, because an exported `exec` function is
+dispatched ahead of the builtin and would skip the wrapper's own restart.
+
+`PATH` and `HOME` are the two the wrapper needs: `HOME` because rustup resolves
+`RUSTUP_HOME` beneath it, and `PATH` to find the tools, whose resolved paths and
+digests the run records in `tools.txt`. Add `RUSTUP_HOME`,
+`EXPERIMENT_RUSTUP_TOOLCHAIN`, or the `SOURCE_*` variables for an archive handoff
+only when that run needs them.
 
 The driver selects the first CPU in the process affinity mask unless the command
 passes a third `CPU` argument. Cargo gates use the repository-pinned toolchain.
