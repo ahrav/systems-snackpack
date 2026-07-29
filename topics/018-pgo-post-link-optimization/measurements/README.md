@@ -129,20 +129,27 @@ unset TAR_OPTIONS
 GIT_NO_REPLACE_OBJECTS=1 git -c tar.umask=0 archive \
   --format=tar --output="$archive" <source_commit>
 tar -xf "$archive" -C "$scratch"
-# The archive must be the whole commit, byte for byte. `export-ignore` omits
-# paths and `export-subst` rewrites contents, from a tracked `.gitattributes` or
-# from the sender-local `$GIT_DIR/info/attributes`, and the manifest is then
-# computed from the filtered or substituted tarball — so the receiver verifies
-# bytes that do not reproduce from <source_commit>. Compare blob identities
-# against the object database, which no archive attribute touches, with replace
-# refs disabled on both sides of the comparison.
+# The archive must be the whole commit, byte for byte, with its modes.
+# `export-ignore` omits paths and `export-subst` rewrites contents, from a
+# tracked `.gitattributes` or from the sender-local `$GIT_DIR/info/attributes`,
+# and repacking an extracted tree can store an executable as `0644` — while the
+# manifest is computed from the filtered, substituted, or repacked tarball. The
+# receiver can only compare the measured tree against the archive, never back to
+# <source_commit>, so this is the only place those three are checkable. Compare
+# mode, blob identity, and path against the object database, which no archive
+# attribute touches, with replace refs disabled on both sides. The mode column
+# assumes the tree holds no symlinks; `git ls-tree -r` reporting any `120000`
+# entry means this comparison needs extending before it can be trusted.
 LC_ALL=C diff \
   <(GIT_NO_REPLACE_OBJECTS=1 git ls-tree -r \
-      --format='%(objectname) %(path)' <source_commit> | LC_ALL=C sort) \
+      --format='%(objectmode) %(objectname) %(path)' <source_commit> \
+      | LC_ALL=C sort) \
   <(cd "$scratch" && rg --no-config --files -uu -g '!.git/' -g '!.git' \
       -g '!target/' -0 \
       | xargs -0 -n1 sh -c \
-          'printf "%s %s\n" "$(GIT_NO_REPLACE_OBJECTS=1 git hash-object -- "$0")" "$0"' \
+          'if [ -x "$0" ]; then mode=100755; else mode=100644; fi
+           printf "%s %s %s\n" "$mode" \
+             "$(GIT_NO_REPLACE_OBJECTS=1 git hash-object -- "$0")" "$0"' \
       | LC_ALL=C sort)
 (cd "$scratch" && rg --no-config --files -uu -g '!.git/' -g '!.git' -g '!target/' -0 \
   | LC_ALL=C sort -z | xargs -0 sha256sum --) > /tmp/topic18-source-files.sha256
