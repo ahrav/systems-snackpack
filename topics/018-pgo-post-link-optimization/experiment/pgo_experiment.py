@@ -229,13 +229,19 @@ def timed_probe(binary: Path, mode: str, iterations: int, seed: int) -> dict[str
     # different workload than it was asked for would be recorded under the requested
     # label. Checksum comparison does not catch it either: the checksums agree whenever
     # every binary is wrong the same way. Compare what it reports with what it was
-    # given. The probe reports `iterations=0` for `noop`, and the caller passes 0 for
-    # that mode, so this is a straight equality.
-    requested = {"mode": mode, "iterations": iterations, "seed": seed}
-    reported = {field: parsed[field] for field in requested}
-    if reported != requested:
+    # given.
+    # `noop` performs no work and reports `iterations=0` whatever it was asked for, so
+    # the expected count comes from the probe's contract rather than from the argument.
+    # Keeping that rule here means no caller has to remember it.
+    expected = {
+        "mode": mode,
+        "iterations": 0 if mode == "noop" else iterations,
+        "seed": seed,
+    }
+    reported = {field: parsed[field] for field in expected}
+    if reported != expected:
         raise RuntimeError(
-            f"probe {binary} reported {reported} for an invocation of {requested}"
+            f"probe {binary} reported {reported} for an invocation of {expected}"
         )
     parsed["process_wall_ns"] = process_wall_ns
     return parsed
@@ -375,6 +381,17 @@ def build(
             env=training_environment,
         )
         parsed_training = parse_output(training_output)
+        # The training run is parsed directly rather than through `timed_probe`, so it
+        # needs the same identity check: the merged profile builds `pgo-{mode}` and the
+        # retained labels describe the requested training identity, so a run that
+        # executed a different workload would be recorded as this one.
+        expected_training = {"mode": mode, "iterations": ARGS.training_iterations, "seed": 1}
+        reported_training = {field: parsed_training[field] for field in expected_training}
+        if reported_training != expected_training:
+            raise RuntimeError(
+                f"training probe reported {reported_training} for an invocation of "
+                f"{expected_training}"
+            )
         if parsed_training["elapsed_ns"] <= 0:
             raise RuntimeError(f"{mode} training interval was not positive")
         raw_profiles = sorted(profile_dir.glob("*.profraw"))
@@ -566,13 +583,20 @@ def inspect_codegen(
     }
     for mode in ("alpha", "beta"):
         body = dispatch_bodies[f"pgo-{mode}"]
+        other_mode = "beta" if mode == "alpha" else "alpha"
+        # Requiring the trained target admits a toolchain that direct-calls both, and
+        # then the dispatch shape is not evidence that this profile chose this target.
+        # The untrained target must stay behind the indirect call.
         candidate = {
             "comparison": comparison.search(body) is not None,
             "direct_trained_target": direct(mode).search(body) is not None,
             "indirect_fallback": indirect.search(body) is not None,
+            "no_direct_untrained_target": direct(other_mode).search(body) is None,
         }
         if not all(candidate.values()):
-            raise RuntimeError(f"pgo-{mode} dispatch lacks guarded {mode} promotion")
+            raise RuntimeError(
+                f"pgo-{mode} dispatch lacks guarded {mode} promotion: {candidate}"
+            )
         verification[f"pgo_{mode}"] = candidate
     (output_dir / "codegen-verification.json").write_text(
         json.dumps(verification, indent=2, sort_keys=True) + "\n",

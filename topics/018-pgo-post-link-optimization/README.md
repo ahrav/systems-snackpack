@@ -40,6 +40,7 @@ Run the retained check from a clean x86-64 or AArch64 Linux checkout with
 procfs, `taskset`, `lscpu`, GNU `objdump`, `nm`, and `sha256sum`:
 
 ```bash
+unset $(env | sed -n 's/^\(LD_[A-Z_]*\|GLIBC_[A-Z_]*\|MALLOC_[A-Z_]*\)=.*/\1/p')
 /usr/bin/env -i \
   PATH="/usr/bin:/bin:$HOME/.cargo/bin" \
   HOME="$HOME" \
@@ -48,6 +49,14 @@ procfs, `taskset`, `lscpu`, GNU `objdump`, `nm`, and `sha256sum`:
   "$(pwd)" \
   /tmp/topic18-evidence
 ```
+
+Clear the loader namespace in the calling shell first, before `env` runs. `env -i` builds
+the environment for the shell it starts, but `env` itself is executed with whatever the
+caller had, so the dynamic loader processes an inherited `LD_PRELOAD` or `LD_AUDIT` and
+runs that library's constructor inside `env` — before `-i` clears anything and before
+`bash -p` or any of the wrapper's refusals exist. The wrapper cannot see this: the
+variable is gone from the child by then. Launching from a shell that never had them set
+is equivalent and preferable; the `unset` above is for a shell that did.
 
 Name `env` and `bash` by absolute path, and give `PATH` explicitly rather than
 passing the caller's through. The launcher runs before the wrapper exists to check
