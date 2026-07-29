@@ -47,7 +47,13 @@ The remote wrapper writes all evidence outside the source tree:
 - `host.txt` records `uname`, CPU identity, CPU count, affinity, kernel,
   workspace and experiment toolchains, native Rust target configurations, and
   available post-link tools;
-- `gates/` retains every repository and script validation log;
+- `gates/` retains every repository and script validation log. A run executes the
+  gates from an empty environment with the repository toolchain's own binaries
+  first, a scratch `CARGO_HOME`, a scratch target directory, and no Cargo
+  configuration above the snapshot. The retained logs below predate that
+  isolation: their wrapper removed only `RUSTUP_TOOLCHAIN`, so they record a gate
+  result obtained under whatever Cargo environment and configuration the operator
+  had, not one established against the pinned source and toolchain alone;
 - `source-files.before.sha256` and `source-files.after.sha256` prove that the
   included non-`.git`, non-`target` file bytes did not change;
 - `source-files.commit.sha256` appears only for a checkout run, where it carries
@@ -77,7 +83,14 @@ The remote wrapper writes all evidence outside the source tree:
   their hashes;
 - `experiment/*-pgo-build.log`, `experiment/tool-versions.json`, and
   `experiment/build-commands.txt` retain compiler diagnostics, matching tool
-  versions, linker-driver and linker versions, and invocations;
+  versions, linker-driver and linker versions, and invocations. A run records the
+  environment assignments each command needs, including `RUSTUP_TOOLCHAIN` and
+  `LLVM_PROFILE_FILE`, so the transcript replays as written. The retained
+  transcripts below predate that and carry bare invocations: replaying them
+  reconstructs neither the training profiles, because no profile destination is
+  set, nor the recorded compiler, because the snapshot's `rust-toolchain.toml`
+  pin applies instead of the experiment toolchain. Read them as a record of what
+  those runs executed, not as a replayable script;
 - `experiment/binary-sha256.before.json` and
   `experiment/binary-sha256.json` bind inspection and measurement to unchanged
   binaries and prove that the identity-control copy has the baseline hash. The

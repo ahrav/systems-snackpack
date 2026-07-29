@@ -25,20 +25,24 @@ for required in \
     fi
 done
 python3 -c 'import sys; raise SystemExit(sys.version_info < (3, 8))'
-# Loader state reaches every timed child through the driver: `LD_PRELOAD` and
-# `LD_AUDIT` can interpose the calls being timed, `GLIBC_TUNABLES` can change
-# allocator and string-routine behaviour, and `LD_BIND_NOW` moves symbol binding
-# into startup, which the parent-process clock includes. Nothing in the retained
-# provenance would record it, so the rows would be attributed to the binary and
-# host alone. Clearing these could break a toolchain that relies on them, so
-# refuse and let the operator present a controlled environment.
-for loader_variable in \
-    LD_PRELOAD LD_AUDIT LD_LIBRARY_PATH LD_BIND_NOW GLIBC_TUNABLES; do
-    if [[ -n "${!loader_variable:-}" ]]; then
-        printf 'loader environment must be unset for measurement: %s\n' \
-            "$loader_variable" >&2
-        exit 2
-    fi
+# Loader and libc state reaches every timed child through the driver: `LD_PRELOAD`
+# and `LD_AUDIT` can interpose the calls being timed, `LD_DEBUG` adds diagnostic
+# work to each startup, and `GLIBC_TUNABLES` changes allocator and string-routine
+# behaviour. Nothing in the retained provenance records it, so the rows would be
+# attributed to the binary and host alone. Sweep the namespaces rather than name
+# members: the loader keeps adding variables, and a list is a snapshot of the
+# ones known when it was written. Clearing these could break a toolchain that
+# relies on them, so refuse and let the operator present a controlled
+# environment.
+for loader_variable in $(compgen -e); do
+    case "$loader_variable" in
+        LD_* | GLIBC_*)
+            printf '%s\n' \
+                "loader environment must be unset for measurement: $loader_variable" \
+                "every timed probe inherits it and no receipt records it" >&2
+            exit 2
+            ;;
+    esac
 done
 # The gates exist to validate the repository against its pinned toolchain, so
 # they must not honour a compiler, flag set, or wrapper chosen by the caller.
@@ -51,7 +55,7 @@ done
 # no environment change reaches.
 gate_env() {
     env -i \
-        PATH="$PATH" \
+        PATH="$gate_toolchain_bin:$PATH" \
         HOME="$HOME" \
         LC_ALL=C \
         ${RUSTUP_HOME:+RUSTUP_HOME="$RUSTUP_HOME"} \
@@ -70,33 +74,21 @@ if ! RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" rustc -vV >/dev/null 2>&1; 
         "$experiment_rustup_toolchain" >&2
     exit 2
 fi
-# Only a rustup proxy consults `RUSTUP_TOOLCHAIN` or a `rust-toolchain.toml`
-# pin. A real binary earlier on `PATH` ignores both, so the driver would build
-# the probes with the ambient compiler and the gates would validate against it,
-# while the receipts name the requested toolchain and the repository pin.
-# Compare what the `PATH` name reports under an explicit toolchain against what
-# rustup resolves for it; on a correctly configured host those two paths differ,
-# so a path comparison would reject the working case.
-for proxied_tool in rustc cargo; do
-    resolved_tool="$(
-        rustup which --toolchain "$experiment_rustup_toolchain" "$proxied_tool" \
-            2>/dev/null || true
-    )"
-    if [[ ! -x "$resolved_tool" ]]; then
-        printf 'rustup cannot resolve %s for toolchain %s\n' \
-            "$proxied_tool" "$experiment_rustup_toolchain" >&2
-        exit 2
-    fi
-    if [[ "$(RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" "$proxied_tool" --version)" \
-        != "$("$resolved_tool" --version)" ]]; then
-        printf '%s\n' \
-            "$proxied_tool on PATH ignores RUSTUP_TOOLCHAIN=$experiment_rustup_toolchain" \
-            "PATH $proxied_tool: $(command -v "$proxied_tool")" \
-            "toolchain $proxied_tool: $resolved_tool" \
-            "put the rustup proxies ahead of any real toolchain binary on PATH" >&2
-        exit 2
-    fi
-done
+# Resolve toolchain binaries by path rather than trusting a `PATH` name to be a
+# rustup proxy. A standalone binary earlier on `PATH` ignores rustup, and it can
+# report the version of the toolchain it shadows, so no version comparison
+# separates the two. Prepending the resolved toolchain's own bin directory makes
+# `rustc`, `cargo`, and cargo's subcommand helpers resolve from that toolchain
+# with no proxy involved.
+experiment_rustc="$(
+    rustup which --toolchain "$experiment_rustup_toolchain" rustc 2>/dev/null || true
+)"
+if [[ ! -x "$experiment_rustc" ]]; then
+    printf 'rustup cannot resolve rustc for toolchain %s\n' \
+        "$experiment_rustup_toolchain" >&2
+    exit 2
+fi
+experiment_toolchain_bin="${experiment_rustc%/*}"
 
 if [[ ! -r "$topic_dir/experiment/pgo_experiment.py" ]]; then
     printf 'repository lacks the Topic 18 experiment\n' >&2
@@ -342,6 +334,20 @@ while :; do
     [[ -z "$config_ancestor" ]] && config_ancestor=/
 done
 
+# Resolve the gate toolchain from inside the snapshot, so `rust-toolchain.toml`
+# selects it exactly as the receipts claim, then use that toolchain's own bin
+# directory for the gates instead of whatever `PATH` offers.
+gate_toolchain="$(
+    cd "$repo_root" && rustup show active-toolchain | awk '{print $1}'
+)"
+gate_cargo="$(rustup which --toolchain "$gate_toolchain" cargo 2>/dev/null || true)"
+if [[ ! -x "$gate_cargo" ]]; then
+    printf 'rustup cannot resolve cargo for the repository toolchain %s\n' \
+        "$gate_toolchain" >&2
+    exit 2
+fi
+gate_toolchain_bin="${gate_cargo%/*}"
+
 {
     printf 'source_commit=%s\n' "$source_commit"
     printf 'source_commit_verification=%s\n' "$source_commit_verification"
@@ -458,7 +464,12 @@ fi
     bash -n "$topic_rel/experiment/run_remote.sh"
 ) >"$gates_dir/script-syntax.log" 2>&1
 
-RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
+# `RUSTUP_TOOLCHAIN` still names the toolchain for the receipts and the recorded
+# transcript, but the driver resolves `rustc` through `PATH`, so the experiment
+# toolchain's own bin directory leads: the compiler that builds the probes is the
+# resolved binary rather than whatever proxy or standalone tool `PATH` offered.
+PATH="$experiment_toolchain_bin:$PATH" \
+    RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
     taskset -c "$cpu" python3 "$topic_dir/experiment/pgo_experiment.py" \
     --work-dir "$experiment_work_dir" \
     --output-dir "$experiment_dir" \
