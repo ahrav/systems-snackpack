@@ -237,6 +237,33 @@ manifest_source() {
     )
 }
 
+# The manifest hashes contents, so it cannot see executable-bit drift. In a
+# checkout `core.fileMode=false` or a mode-blind filesystem hides that drift from
+# `git status`; in an extracted archive a later `chmod` leaves the digests intact.
+# The measured tree carries executable scripts, so compare bits against the
+# reference tree rather than widening the manifest, whose format the retained
+# `SOURCE_MANIFEST_SHA256` values depend on. Each caller compares manifests
+# first, so the path sets are already known equal.
+require_matching_modes() {
+    reference_tree="$1"
+    reference_name="$2"
+    mode_drift=""
+    while IFS= read -r -d '' scanned_path; do
+        if [[ -x "$input_root/$scanned_path" ]] \
+            && [[ ! -x "$reference_tree/$scanned_path" ]]; then
+            mode_drift+="unexpectedly executable: $scanned_path"$'\n'
+        elif [[ ! -x "$input_root/$scanned_path" ]] \
+            && [[ -x "$reference_tree/$scanned_path" ]]; then
+            mode_drift+="missing executable bit: $scanned_path"$'\n'
+        fi
+    done < <(cd "$reference_tree" && scan_source_paths)
+    if [[ -n "$mode_drift" ]]; then
+        printf 'source tree file modes do not match %s:\n%s' \
+            "$reference_name" "$mode_drift" >&2
+        exit 2
+    fi
+}
+
 manifest_source "$input_root" >"$output_dir/source-files.origin.sha256"
 if [[ "$source_commit_verification" == git-checkout ]]; then
     # Reproduce the manifest from the commit rather than comparing path sets.
@@ -259,27 +286,7 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
             "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
     fi
-    # The manifest hashes contents, so it cannot see executable-bit drift, and
-    # `core.fileMode=false` or a filesystem that ignores mode changes hides the
-    # same drift from `git status`. The measured tree carries executable scripts,
-    # so compare bits against the extracted commit rather than widening the
-    # manifest, whose format the retained `SOURCE_MANIFEST_SHA256` values depend
-    # on. Path sets are already known equal from the comparison above.
-    mode_drift=""
-    while IFS= read -r -d '' scanned_path; do
-        if [[ -x "$input_root/$scanned_path" ]] \
-            && [[ ! -x "$commit_tree/$scanned_path" ]]; then
-            mode_drift+="unexpectedly executable: $scanned_path"$'\n'
-        elif [[ ! -x "$input_root/$scanned_path" ]] \
-            && [[ -x "$commit_tree/$scanned_path" ]]; then
-            mode_drift+="missing executable bit: $scanned_path"$'\n'
-        fi
-    done < <(cd "$commit_tree" && scan_source_paths)
-    if [[ -n "$mode_drift" ]]; then
-        printf 'source tree file modes do not match %s:\n%s' \
-            "$source_commit" "$mode_drift" >&2
-        exit 2
-    fi
+    require_matching_modes "$commit_tree" "$source_commit"
 else
     # Bind the archive to the tree being measured. The digest check above proves
     # only that the named archive matches its declared hash, and the manifest
@@ -301,6 +308,7 @@ else
             "$output_dir/source-files.origin.sha256" >&2 || true
         exit 2
     fi
+    require_matching_modes "$archive_tree" "$SOURCE_ARCHIVE_PATH"
 fi
 source_manifest_sha256="$(
     sha256sum -- "$output_dir/source-files.origin.sha256" | awk '{print $1}'
@@ -482,13 +490,23 @@ fi
     bash -n "$topic_rel/experiment/run_remote.sh"
 ) >"$gates_dir/script-syntax.log" 2>&1
 
+# Name the driver's environment for the same reason the gates' is named. The
+# probe builds link through `cc`, which reads `LIBRARY_PATH`, `COMPILER_PATH`,
+# and `GCC_EXEC_PREFIX` — a wrong `GCC_EXEC_PREFIX` fails the link outright and a
+# wrong `LIBRARY_PATH` silently changes library resolution — and Python prefixes
+# `PYTHONPATH` to `sys.path`, where a local `random.py` or `statistics.py` would
+# replace the modules that schedule the probes and summarise the ratios. Neither
+# appears in any receipt. `-I` additionally drops user site-packages, which
+# survive an allowlist because `HOME` must stay for toolchain resolution.
 # `RUSTUP_TOOLCHAIN` still names the toolchain for the receipts and the recorded
-# transcript, but the driver resolves `rustc` through `PATH`, so the experiment
-# toolchain's own bin directory leads: the compiler that builds the probes is the
-# resolved binary rather than whatever proxy or standalone tool `PATH` offered.
-PATH="$experiment_toolchain_bin:$PATH" \
+# transcript, while the leading `PATH` entry decides which compiler actually runs.
+env -i \
+    PATH="$experiment_toolchain_bin:$PATH" \
+    HOME="$HOME" \
+    LC_ALL=C \
+    ${RUSTUP_HOME:+RUSTUP_HOME="$RUSTUP_HOME"} \
     RUSTUP_TOOLCHAIN="$experiment_rustup_toolchain" \
-    taskset -c "$cpu" python3 "$topic_dir/experiment/pgo_experiment.py" \
+    taskset -c "$cpu" python3 -I "$topic_dir/experiment/pgo_experiment.py" \
     --work-dir "$experiment_work_dir" \
     --output-dir "$experiment_dir" \
     --blocks 12 \
