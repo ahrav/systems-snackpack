@@ -198,15 +198,36 @@ done
 # program is an error instead of a substitution.
 bound_tool_path() {
     local -A seen=()
-    local ordered=() directory extra
+    local ordered=() directory extra key
+    local -a prefixes=() keys=()
+    local collecting=prefixes
     for extra in "$@"; do
+        if [[ "$extra" == -- ]]; then
+            collecting=keys
+            continue
+        fi
+        if [[ "$collecting" == prefixes ]]; then
+            prefixes+=("$extra")
+        else
+            keys+=("$extra")
+        fi
+    done
+    for extra in "${prefixes[@]}"; do
         if [[ -n "$extra" && -z "${seen[$extra]:-}" ]]; then
             seen["$extra"]=1
             ordered+=("$extra")
         fi
     done
-    for directory in "${tool_path[@]%/*}"; do
-        if [[ -z "${seen[$directory]:-}" ]]; then
+    # Naming keys restricts the directories to the tools a caller actually needs. The
+    # rustup proxies resolve under a user-owned prefix, and the gates use the toolchain's
+    # own bin directory instead, so including that prefix would leave `cargo fmt` and
+    # `cargo clippy` a fall-through for their `cargo-*` helpers.
+    if ((${#keys[@]} == 0)); then
+        keys=("${!tool_path[@]}")
+    fi
+    for key in "${keys[@]}"; do
+        directory="${tool_path[$key]%/*}"
+        if [[ -n "$directory" && -z "${seen[$directory]:-}" ]]; then
             seen["$directory"]=1
             ordered+=("$directory")
         fi
@@ -291,13 +312,15 @@ done
 # `cargo test` and `cargo bench --no-run`; `fmt`, `clippy`, and `doc` ignore it.
 gate_env() {
     "${tool_path[env]}" -i \
-        PATH="$(bound_tool_path "$gate_toolchain_bin")" \
+        PATH="$(bound_tool_path "$gate_toolchain_bin" -- \
+            awk bash cc cmp cp date diff env getconf ld mkdir mktemp mv nm \
+            objdump python3 rm sed sha256sum sort tar taskset uname xargs)" \
         HOME="$HOME" \
         LC_ALL=C \
         ${RUSTUP_HOME:+RUSTUP_HOME="$RUSTUP_HOME"} \
         CARGO_HOME="$gate_cargo_home" \
         CARGO_TARGET_DIR="$CARGO_TARGET_DIR" \
-        CARGO_ENCODED_RUSTFLAGS="-Clinker=${tool_path[cc]}"$'\x1f'"-Clink-arg=-B${tool_path[ld]%/*}/" \
+        CARGO_ENCODED_RUSTFLAGS="-Clinker=${tool_path[cc]}"$'\x1f'"-Clink-arg=-B$pinned_linker_dir/" \
         "$@"
 }
 # `git replace` refs and grafts are honoured by object reads, so `git archive`
@@ -488,6 +511,24 @@ else
     source_tree_mode=archive
 fi
 if [[ "$source_tree_mode" == checkout ]]; then
+    # `objects/info/alternates` lets this repository borrow objects from another store, so
+    # `rev-parse HEAD`, `archive`, and `ls-tree` can all read a commit and tree that exist
+    # only there. `.git` is excluded from every source manifest, so neither the pointer nor
+    # the borrowed objects are covered, and a worktree matching them reads as clean. The
+    # `GIT_*` sweep refuses the environment form of this; the file needs its own check.
+    checkout_alternates="$(
+        "${tool_path[git]}" -C "$repo_root" rev-parse --git-path objects/info/alternates
+    )"
+    if [[ "$checkout_alternates" != /* ]]; then
+        checkout_alternates="$repo_root/$checkout_alternates"
+    fi
+    if [[ -e "$checkout_alternates" ]]; then
+        printf '%s\n' \
+            "repository borrows objects from an alternate store: $checkout_alternates" \
+            "the borrowed objects are outside every source manifest, so a commit that" \
+            "exists only there cannot be called verified" >&2
+        exit 2
+    fi
     source_commit="$("${tool_path[git]}" -C "$repo_root" rev-parse HEAD)"
     if [[ -n "$("${tool_path[git]}" -C "$repo_root" -c core.fsmonitor=false status --porcelain)" ]]; then
         printf 'repository must be clean\n' >&2
@@ -570,6 +611,23 @@ if [[ "$source_commit_verification" == verified-archive-and-manifest ]]; then
         printf 'transferred archive digest does not match SOURCE_ARCHIVE_SHA256\n' >&2
         exit 2
     fi
+fi
+# `-B` is a search prefix: gcc tries it, then its standard prefixes, then `PATH`. Pointing
+# it at the recorded linker's own directory therefore only reorders the search, and hiding
+# that file still lets another `ld` on any remaining entry link the measured binaries. Give
+# `cc` a directory this run owns, holding one program named `ld`, and verify the copy
+# against the digest taken before anything ran. The scratch tree is created by `mktemp -d`
+# and checked to lie outside the repository and the output directory, so nothing the caller
+# controls can empty it mid-run — the copy is there or the link fails.
+pinned_linker_dir="$scratch_dir/pinned-linker"
+"${tool_path[mkdir]}" -p -- "$pinned_linker_dir"
+"${tool_path[cp]}" -- "${tool_path[ld]}" "$pinned_linker_dir/ld"
+pinned_linker_digest="$(
+    "${tool_path[sha256sum]}" -- "$pinned_linker_dir/ld" | "${tool_path[awk]}" '{print $1}'
+)"
+if [[ "$pinned_linker_digest" != "${tool_digest[ld]}" ]]; then
+    printf '%s\n'         "pinned linker copy does not match the recorded linker:"         "${tool_digest[ld]} -> $pinned_linker_digest" >&2
+    exit 2
 fi
 experiment_work_dir="$scratch_dir/experiment-work"
 # Cargo merges configuration from `$CARGO_HOME/config.toml` and every `.cargo/`
@@ -1181,6 +1239,7 @@ done
 # exported path is the one `rustup which` and the sysroot already gave, so this pins the
 # toolchain the prepended directory selects rather than choosing a different one.
 bound_tool_env+=("TOPIC18_TOOL_rustc=$experiment_rustc")
+bound_tool_env+=("TOPIC18_LINKER_DIR=$pinned_linker_dir")
 for exported_bundled in llvm-profdata rust-lld; do
     if [[ -n "${tool_path[experiment_$exported_bundled]:-}" ]]; then
         bound_tool_env+=(

@@ -40,13 +40,13 @@ Run the retained check from a clean x86-64 or AArch64 Linux checkout with
 procfs, `taskset`, `lscpu`, GNU `objdump`, `nm`, and `sha256sum`:
 
 ```bash
-for loader_variable in ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}; do unset "$loader_variable"; done
+for loader_variable in ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}; do builtin unset "$loader_variable"; done
 /usr/bin/env -i \
   PATH="/usr/bin:/bin:$HOME/.cargo/bin" \
   HOME="$HOME" \
   /usr/bin/bash -p \
   topics/018-pgo-post-link-optimization/experiment/run_remote.sh \
-  "$(pwd)" \
+  "$(/usr/bin/pwd -P)" \
   /tmp/topic18-evidence
 ```
 
@@ -68,7 +68,16 @@ child by then.
 The loop uses only shell builtins for the same reason. `${!LD_@}` expands to the names
 currently set with that prefix, so no external program runs and there is no process for an
 inherited library to be loaded into; discovering the names by piping `env` through `sed`
-would execute two of them first.
+would execute two of them first. `builtin unset` rather than `unset`, because a shell
+function of that name would otherwise answer and leave the variable in place — one more
+reason the requirement above is a shell with no functions either, since `builtin` is
+shadowable in turn and nothing inside the shell can settle it.
+
+`REPOSITORY_ROOT` is `$(/usr/bin/pwd -P)` rather than `$(pwd)` for the same reason: the
+shell builtin can be shadowed by a function, which would hand the wrapper a different tree
+to attest to and run unrecorded code while doing it. The absolute program also resolves
+symlinks, so the wrapper receives the physical path its own containment checks compare
+against.
 
 Name `env` and `bash` by absolute path, and give `PATH` explicitly rather than
 passing the caller's through. The launcher runs before the wrapper exists to check

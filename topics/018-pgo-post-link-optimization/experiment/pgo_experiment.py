@@ -316,11 +316,22 @@ def build(
     # toolchain-local `ld` link the measured binaries. `-B<dir>/` makes `cc` look for
     # its subprograms there first, which pins the linker the receipt names.
     bound_cc = bound_tool("cc")
+    # The wrapper builds a directory it owns holding one program named `ld`, verified
+    # against the digest taken before anything ran. Pointing `-B` at the recorded linker's
+    # own directory would only reorder gcc's search — prefix, standard prefixes, then
+    # `PATH` — and hiding that file would still let another `ld` link the binaries.
+    linker_directory = os.environ.get("TOPIC18_LINKER_DIR")
     bound_ld = bound_tool("ld")
     linker_options: list[str] = []
     if bound_cc is not None:
         linker_options.append(f"-Clinker={bound_cc}")
-        if bound_ld is not None:
+        if linker_directory is not None:
+            if not os.path.isdir(linker_directory):
+                raise RuntimeError(
+                    f"bound linker directory is not a directory: {linker_directory}"
+                )
+            linker_options.append(f"-Clink-arg=-B{linker_directory}/")
+        elif bound_ld is not None:
             linker_options.append(f"-Clink-arg=-B{os.path.dirname(bound_ld)}/")
     # `-Cdebuginfo=1` records the paths rustc was given, and both roots are
     # scratch directories with random names, so without remapping the binary
