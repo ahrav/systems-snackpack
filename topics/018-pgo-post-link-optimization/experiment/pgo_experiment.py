@@ -439,6 +439,23 @@ def build(
             pgo_build_output,
             encoding="utf-8",
         )
+        # `-pgo-warn-missing-function` is passed above precisely so this is
+        # observable: LLVM is otherwise silent when it finds no profile data for a
+        # function it is compiling. A warning here means the merged profile did not
+        # cover code this candidate is about to be measured as profile-conditioned, so
+        # retaining the text and continuing would report a claim the profile does not
+        # support. Refuse before the candidate is measured or kept.
+        missing_profile = [
+            line
+            for line in pgo_build_output.splitlines()
+            if "no profile data available for function" in line
+        ]
+        if missing_profile:
+            raise RuntimeError(
+                f"{mode} profile-use build reports functions with no profile data, so "
+                "the candidate is not profile-conditioned: "
+                + "; ".join(missing_profile[:5])
+            )
 
         mode_profiles = retained_profiles / mode
         mode_profiles.mkdir()
@@ -590,6 +607,11 @@ def inspect_codegen(
         r")$"
     )
 
+    # `cbz`, `cbnz`, `tbz`, and `tbnz` carry their own test, so a guard built from one of
+    # them has no preceding compare to find. Requiring a separate compare would reject
+    # exactly the forms listed as conditional above.
+    self_testing_mnemonic = re.compile(r"^(?:cbz|cbnz|tbz|tbnz)$")
+
     def branch_destination(operands: str) -> int | None:
         """Return a conditional branch's destination address, or None."""
         # objdump appends a `<symbol+offset>` comment; the destination is the last
@@ -602,14 +624,23 @@ def inspect_codegen(
         return None
 
     def guarded_promotion(body: str, target: str) -> bool:
-        """Report whether a compare and branch make the direct call conditional.
+        """Report whether a branch makes the direct call to `target` conditional.
 
-        A promoted call is guarded when a conditional branch placed before it
-        jumps past it, so the call runs only on the not-taken edge, and a compare
-        precedes that branch. Merely finding a compare somewhere in the function
-        does not establish either: an unconditional direct call to the trained
-        target next to an unrelated compare satisfies that and is not a guarded
-        promotion at all.
+        The promoted call is guarded when a conditional branch placed before it puts
+        it on one edge of that branch and not the other, and the test driving the
+        branch is present. Merely finding a compare somewhere in the function
+        establishes neither: an unconditional direct call to the trained target next
+        to an unrelated compare satisfies that and is not a guarded promotion.
+
+        Two layouts qualify, because block order is the compiler's choice:
+
+        * the branch jumps past the call, so the call is on the not-taken edge;
+        * the branch jumps to the call, so the call is on the taken edge and the
+          fallthrough reaches the indirect path instead.
+
+        A branch to the immediately following instruction is neither. Both of its
+        edges arrive at the call, so the call is unconditional however the branch
+        resolves.
         """
         decoded = [
             match
@@ -626,8 +657,14 @@ def inspect_codegen(
                 if not conditional_mnemonic.match(branch.group(2)):
                     continue
                 destination = branch_destination(branch.group(3))
-                if destination is None or destination <= call_address:
+                if destination is None:
                     continue
+                jumps_past = destination > call_address
+                jumps_to_call = destination == call_address and branch_index != index - 1
+                if not (jumps_past or jumps_to_call):
+                    continue
+                if self_testing_mnemonic.match(branch.group(2)):
+                    return True
                 if any(
                     compare_mnemonic.match(decoded[before].group(2))
                     for before in range(branch_index)

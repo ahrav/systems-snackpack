@@ -149,6 +149,26 @@ cannot recheck the commit binding those digests are standing in for:
 
 ```bash
 set -euo pipefail
+# Refuse an inherited loader or libc namespace before running anything. `LD_PRELOAD`
+# and `LD_AUDIT` interpose on every process below, including the `git` that produces
+# the archive and the `git`, `tar`, `rg`, and `sha256sum` that prove it matches the
+# commit — so a preload can forge an archive and a manifest that agree with each
+# other. The receiver refuses these variables for its own run, but archive mode can
+# only take the commit-to-bytes binding on the sender's word, so this is the one place
+# it can be established. `GLIBC_TUNABLES` and the `MALLOC_*` knobs are swept for the
+# same reason the wrapper sweeps them. Refuse rather than clear: a value here means
+# something already chose it, and that choice is not recorded anywhere.
+for loader_variable in $(env | sed -n 's/^\(LD_[A-Z_]*\|GLIBC_[A-Z_]*\|MALLOC_[A-Z_]*\)=.*/\1/p'); do
+  printf 'loader environment must be unset for the handoff proof: %s\n' \
+    "$loader_variable" >&2
+  exit 2
+done
+# Start Bash privileged for the same reason the wrapper does: privileged mode does not
+# process `BASH_ENV` or `ENV` and does not import the caller's shell functions, and an
+# imported `git` or `command` function answers ahead of the program and can forge
+# `archive`, `rev-parse`, and `ls-tree` output. Run this recipe as
+# `bash -p handoff.sh`, not by pasting it into an interactive shell.
+[[ -o privileged ]] || { printf 'run this recipe with bash -p\n' >&2; exit 2; }
 export PATH="/usr/bin:/bin:$HOME/.cargo/bin"
 archive=/tmp/topic18-source.tar
 scratch="$(mktemp -d)"

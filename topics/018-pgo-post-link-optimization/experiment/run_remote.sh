@@ -1362,7 +1362,15 @@ require_unchanged_tools "while establishing source provenance"
 if [[ "$source_commit_verification" == git-checkout ]]; then
     (
     cd "$input_root"
-    "${tool_path[git]}" -c core.fsmonitor=false diff --check
+    # `--check` reports the errors named by `core.whitespace`, which lives in the
+    # repository's own `.git/config` and is outside every source manifest — so a
+    # local `-blank-at-eol,-blank-at-eof,-space-before-tab` would make this gate
+    # pass on a tree it should reject, and the retained log would record that pass.
+    # Name the value here instead. These three are git's own defaults, so pinning
+    # them changes nothing except who decides them.
+    "${tool_path[git]}" -c core.fsmonitor=false \
+        -c core.whitespace=blank-at-eol,space-before-tab,blank-at-eof \
+        diff --check
     ) >"$gates_dir/git-diff-check.log" 2>&1
 else
     printf '%s\n' \
@@ -1582,6 +1590,40 @@ if ! "${tool_path[cmp]}" -s "$experiment_paths_driver" "$experiment_paths_manife
     printf 'evidence manifest does not cover what the driver left under experiment/:\n' >&2
     LC_ALL=C "${tool_path[diff]}" -- \
         "$experiment_paths_driver" "$experiment_paths_manifest" >&2 || true
+    exit 1
+fi
+# The receipts at the top level are covered by the same reasoning as the two
+# subdirectories: they are written by this script, so the manifest can be held to the
+# set rather than trusted to have found them. Without this, deleting or replacing
+# `tools.txt`, `host.txt`, `process.log`, or a `source-files.*.sha256` before the walk
+# leaves a manifest that authenticates the omission. Compared as a subset rather than
+# an exact set, because which `source-files.*.sha256` files exist depends on the source
+# mode — `.commit` on the checkout branch, `.archive` on the other — and `evidence.sha256`
+# itself is not in the walk that produces it.
+expected_top_level=(
+    host.txt
+    process.log
+    source-files.after.sha256
+    source-files.before.sha256
+    source-files.origin.sha256
+    source-provenance.txt
+    tools.txt
+)
+if [[ "$source_commit_verification" == git-checkout ]]; then
+    expected_top_level+=(source-files.commit.sha256)
+else
+    expected_top_level+=(source-files.archive.sha256)
+fi
+top_level_missing=""
+for expected_receipt in "${expected_top_level[@]}"; do
+    if ! "${tool_path[rg]}" --no-config -qF "  ./$expected_receipt" "$manifest_tmp"; then
+        top_level_missing+="$expected_receipt"$'\n'
+    fi
+done
+if [[ -n "$top_level_missing" ]]; then
+    printf '%s\n%s' \
+        "evidence manifest does not cover receipts this run writes:" \
+        "$top_level_missing" >&2
     exit 1
 fi
 "${tool_path[mv]}" -- "$manifest_tmp" "$output_dir/evidence.sha256"
