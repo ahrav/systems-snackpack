@@ -621,12 +621,23 @@ fi
 # controls can empty it mid-run — the copy is there or the link fails.
 pinned_linker_dir="$scratch_dir/pinned-linker"
 "${tool_path[mkdir]}" -p -- "$pinned_linker_dir"
-"${tool_path[cp]}" -- "${tool_path[ld]}" "$pinned_linker_dir/ld"
+# `-p` because a plain copy applies the caller's umask, and gcc falls through `-B` when
+# the program there is not executable — so a `umask 0111` would leave a byte-identical
+# copy that cc silently declines to use. A digest cannot see a mode, so test the bit.
+"${tool_path[cp]}" -p -- "${tool_path[ld]}" "$pinned_linker_dir/ld"
+if [[ ! -x "$pinned_linker_dir/ld" ]]; then
+    printf '%s\n' \
+        "pinned linker copy is not executable: $pinned_linker_dir/ld" \
+        "gcc falls through -B when the prefixed program cannot be executed" >&2
+    exit 2
+fi
 pinned_linker_digest="$(
     "${tool_path[sha256sum]}" -- "$pinned_linker_dir/ld" | "${tool_path[awk]}" '{print $1}'
 )"
 if [[ "$pinned_linker_digest" != "${tool_digest[ld]}" ]]; then
-    printf '%s\n'         "pinned linker copy does not match the recorded linker:"         "${tool_digest[ld]} -> $pinned_linker_digest" >&2
+    printf '%s\n' \
+        "pinned linker copy does not match the recorded linker:" \
+        "${tool_digest[ld]} -> $pinned_linker_digest" >&2
     exit 2
 fi
 experiment_work_dir="$scratch_dir/experiment-work"
@@ -984,6 +995,26 @@ if [[ ! -x "$gate_cargo" ]]; then
     exit 2
 fi
 gate_toolchain_bin="${gate_cargo%/*}"
+# `cargo <command>` is translated into an external `cargo-<command>` found on `PATH`, so a
+# second directory on the gate `PATH` holding any `cargo`-prefixed program would be a
+# fall-through for `cargo fmt` and `cargo clippy` if the toolchain's own helper were hidden
+# after being digested. The gate `PATH` puts the toolchain first, so refuse when any other
+# directory on it could answer instead.
+for gate_path_directory in $(bound_tool_path -- \
+    awk bash cc cmp cp date diff env getconf ld mkdir mktemp mv nm \
+    objdump python3 rm sed sha256sum sort tar taskset uname xargs | tr : ' '); do
+    shopt -s nullglob
+    gate_shadowing_helpers=("$gate_path_directory"/cargo*)
+    shopt -u nullglob
+    if ((${#gate_shadowing_helpers[@]} > 0)); then
+        printf '%s\n' \
+            "a gate PATH directory supplies Cargo programs: $gate_path_directory" \
+            "${gate_shadowing_helpers[@]}" \
+            "cargo resolves its subcommand helpers through PATH, so this directory could" \
+            "answer for a hidden toolchain helper" >&2
+        exit 2
+    fi
+done
 # Bind the toolchain that runs the gates, for the same reason: the gates decide
 # whether the snapshot is valid, and they execute these binaries rather than the
 # proxies recorded from `PATH`. `cargo` and `rustc` are not the whole set — `cargo
