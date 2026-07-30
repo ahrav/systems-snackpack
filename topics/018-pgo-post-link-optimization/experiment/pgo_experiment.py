@@ -584,21 +584,15 @@ def inspect_codegen(
         )
 
     instruction = re.compile(r"^\s*([0-9a-f]+):\s+(\S+)\s*(.*)$")
-    # Anchored to the mnemonic column that `instruction` captures. A substring search for
-    # "cmp" over the raw disassembly is also satisfied by a neighbouring `core::cmp::*`
-    # symbol that objdump interpolated into an operand comment, with no compare present.
-    compare_mnemonic = re.compile(
-        r"^(?:cmp|cmpb|cmpw|cmpl|cmpq|test|testb|testw|testl|testq|subs|cmn)$"
-    )
     # x86 is handled by excluding a prefix rather than enumerating: `jmp` and its `jmpq`,
     # `jmpl`, and `jmpw` spellings are the only unconditional jumps, and every conditional
     # form — Jcc plus `jcxz`/`jecxz`/`jrcxz` — begins with something else. `j(?!mp$)`
-    # would exclude only the bare spelling and let `jmpq` through as a guard.
+    # would exclude only the bare spelling and let `jmpq` through as a conditional branch.
     #
     # AArch64 has to be enumerated, because `al` and `nv` are conditions in the same
     # `b.<cond>` syntax as the real ones and both execute unconditionally, so a suffix
-    # wildcard would accept `b.al` jumping past the call as a guard. `bc.<cond>` is the
-    # FEAT_HBC hinted form of the same branch and takes the same condition set.
+    # wildcard would treat `b.al` as a branch with two edges. `bc.<cond>` is the FEAT_HBC
+    # hinted form of the same branch and takes the same condition set.
     conditional_mnemonic = re.compile(
         r"^(?:"
         r"j(?!mp)[a-z]+"
@@ -606,25 +600,18 @@ def inspect_codegen(
         r"|cbz|cbnz|tbz|tbnz"
         r")$"
     )
-
-    # `cbz`, `cbnz`, `tbz`, and `tbnz` carry their own test, so a guard built from one of
-    # them has no preceding compare to find. Requiring a separate compare would reject
-    # exactly the forms listed as conditional above.
-    # Mnemonics that end a straight-line path without naming a destination: control does
-    # not continue here whatever the operands say.
+    # Instructions after which control does not continue to the next address and which
+    # name no destination in this function.
     path_terminator = re.compile(r"^(?:ret[q]?|hlt|ud2|brk|udf)$")
-    # Unconditional jumps. Where the destination is concrete it has to be beyond the
-    # promoted call to count as leaving — a forward jump to an address still short of the
-    # call lands back on the path that reaches it. Only a jump whose target is not in the
-    # disassembly, an indirect tail transfer, is accepted without one. `call` and `blr`
-    # appear in neither set because they return to the following instruction.
+    # Unconditional transfers. `call`, `bl`, and `blr` are absent because they return to
+    # the following instruction, so they do continue.
     jump_transfer = re.compile(r"^(?:jmp[qlw]?|b|br)$")
-    self_testing_mnemonic = re.compile(r"^(?:cbz|cbnz|tbz|tbnz)$")
 
     def branch_destination(operands: str) -> int | None:
-        """Return a conditional branch's destination address, or None."""
+        """Return a transfer's destination address, or None when it is not concrete."""
         # objdump appends a `<symbol+offset>` comment; the destination is the last
-        # bare hex operand before it.
+        # bare hex operand before it. An indirect operand such as `*%rax` or `x8`
+        # parses as nothing, which is how an unknown target is reported.
         for token in reversed(operands.split("<")[0].replace(",", " ").split()):
             try:
                 return int(token, 16)
@@ -633,73 +620,90 @@ def inspect_codegen(
         return None
 
     def guarded_promotion(body: str, target: str) -> bool:
-        """Report whether a branch makes the direct call to `target` conditional.
+        """Report whether the promoted call sits on exactly one edge of a branch.
 
-        The promoted call is guarded when a conditional branch placed before it puts
-        it on one edge of that branch and not the other, and the test driving the
-        branch is present. Merely finding a compare somewhere in the function
-        establishes neither: an unconditional direct call to the trained target next
-        to an unrelated compare satisfies that and is not a guarded promotion.
+        This is a reachability question and is answered as one. Comparing addresses
+        cannot decide it: a transfer that leaves before the call can land past the call
+        and come back to it, a conditional branch's two edges can rejoin ahead of it,
+        and either makes both outcomes execute the call while every ordering test says
+        otherwise. So build the successor graph the disassembly describes and ask
+        directly whether some conditional branch has one edge that reaches the call and
+        one that does not.
 
-        Two layouts qualify, because block order is the compiler's choice:
+        No separate compare is required. A conditional branch tests something by
+        construction, and demanding a particular compare mnemonic rejects the flag
+        producers that are not on the list — `cbz` and friends carry their own test, and
+        `adds`, `ands`, `tst`, and `fcmp` set flags without being a compare. What the
+        claim rests on is the edge asymmetry, which is what this measures.
 
-        * the branch jumps past the call, so the call is on the not-taken edge;
-        * the branch jumps to the call **and** the fallthrough path between the two
-          transfers control away before reaching it, so the call is on the taken edge
-          only.
-
-        The second condition is what an intervening-instruction test cannot establish.
-        A fallthrough made of ordinary instructions, or of an indirect call that
-        returns, arrives at the direct call as well, and then both edges execute it and
-        the promotion is not guarded at all.
+        What it does not establish is that the branch tests the trained target's
+        address. That operand is usually materialised into a register first, so the
+        disassembly does not carry it; `no_direct_untrained_target` and the baseline
+        check cover that ground instead.
         """
         decoded = [
             match
             for match in (instruction.match(line) for line in body.splitlines())
             if match is not None
         ]
+        if not decoded:
+            return False
+        index_of_address = {
+            int(match.group(1), 16): position for position, match in enumerate(decoded)
+        }
 
-        def fallthrough_leaves(branch_index: int, call_index: int, call_address: int) -> bool:
-            """Report whether the not-taken path departs before the direct call."""
-            for between in range(branch_index + 1, call_index):
-                mnemonic = decoded[between].group(2)
-                if path_terminator.match(mnemonic):
-                    return True
-                if not jump_transfer.match(mnemonic):
-                    continue
-                destination = branch_destination(decoded[between].group(3))
-                if destination is None or destination > call_address:
-                    return True
-                # The jump lands at or before the call, so the path it leads to is not
-                # this span and cannot be followed from here. Refuse rather than keep
-                # reading instructions that are no longer on the path.
+        def target_index(operands: str) -> int | None:
+            """Resolve a transfer's destination to an index in this listing."""
+            # A destination outside the listing — an indirect operand, or a branch out
+            # of this function — is an edge that leaves, reported as None.
+            destination = branch_destination(operands)
+            if destination is None:
+                return None
+            return index_of_address.get(destination)
+
+        def edges(position: int) -> tuple[int | None, ...]:
+            """Return the successors of one instruction, `None` for an edge that leaves."""
+            mnemonic = decoded[position].group(2)
+            operands = decoded[position].group(3)
+            following = position + 1 if position + 1 < len(decoded) else None
+            if path_terminator.match(mnemonic):
+                return ()
+            if conditional_mnemonic.match(mnemonic):
+                return (following, target_index(operands))
+            if jump_transfer.match(mnemonic):
+                return (target_index(operands),)
+            return (following,)
+
+        def reaches(start: int | None, goal: int) -> bool:
+            """Report whether `goal` is reachable from `start` along those successors."""
+            if start is None:
                 return False
+            seen = set()
+            pending = [start]
+            while pending:
+                position = pending.pop()
+                if position == goal:
+                    return True
+                if position in seen:
+                    continue
+                seen.add(position)
+                pending.extend(
+                    successor for successor in edges(position) if successor is not None
+                )
             return False
 
         direct_pattern = direct(target)
-        for index, match in enumerate(decoded):
-            if not direct_pattern.search(match.group(0)):
-                continue
-            call_address = int(match.group(1), 16)
-            for branch_index in range(index - 1, -1, -1):
-                branch = decoded[branch_index]
-                if not conditional_mnemonic.match(branch.group(2)):
+        promoted = [
+            position
+            for position, match in enumerate(decoded)
+            if direct_pattern.search(match.group(0))
+        ]
+        for call_index in promoted:
+            for position, match in enumerate(decoded):
+                if not conditional_mnemonic.match(match.group(2)):
                     continue
-                destination = branch_destination(branch.group(3))
-                if destination is None:
-                    continue
-                jumps_past = destination > call_address
-                jumps_to_call = destination == call_address and fallthrough_leaves(
-                    branch_index, index, call_address
-                )
-                if not (jumps_past or jumps_to_call):
-                    continue
-                if self_testing_mnemonic.match(branch.group(2)):
-                    return True
-                if any(
-                    compare_mnemonic.match(decoded[before].group(2))
-                    for before in range(branch_index)
-                ):
+                not_taken, taken = edges(position)
+                if reaches(not_taken, call_index) != reaches(taken, call_index):
                     return True
         return False
 
