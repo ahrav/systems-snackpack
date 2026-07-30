@@ -614,8 +614,11 @@ def inspect_codegen(
         r")$"
     )
     # Instructions after which control does not continue to the next address and which
-    # name no destination in this function.
-    path_terminator = re.compile(r"^(?:ret[q]?|hlt|ud2|brk|udf)$")
+    # name no destination in this function. The trap forms matter as much as `ret`: objdump
+    # leaves `int3`, `ud0`, `ud1`, and `ud2` as inter-block padding, and treating one as an
+    # ordinary instruction invents a fall-through edge into whatever bytes follow it — which
+    # could make a call the code would never reach look like the guarded one.
+    path_terminator = re.compile(r"^(?:ret[q]?|hlt|int3|ud0|ud1|ud2|brk|udf)$")
     # Unconditional transfers. `call`, `bl`, and `blr` are absent because they return to
     # the following instruction, so they do continue. `b.al` and `b.nv` belong here rather
     # than with the conditional branches: they use the conditional encoding but always

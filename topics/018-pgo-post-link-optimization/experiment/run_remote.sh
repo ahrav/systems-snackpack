@@ -251,6 +251,18 @@ digest_tool() {
     tool_path["$1"]="$2"
     tool_digest["$1"]="$("${tool_path[sha256sum]}" -- "$2" | "${tool_path[awk]}" '{print $1}')"
 }
+# Bind the interpreter that is actually running this script. The restart at the top execs
+# `/proc/self/exe`, which is deliberately not a `PATH` lookup, so the Bash whose builtins,
+# privileged mode, and startup behaviour established everything above need not be the `bash`
+# resolved from `PATH` and digested with the rest — launching with `/tmp/bash -p` while `PATH`
+# resolves `bash` to `/usr/bin/bash` leaves the receipts naming a binary that ran none of this.
+# `/proc/$$/exe` is this shell rather than a child's, the same reason `/proc/$$/environ` is read
+# above, and `python3` resolves the link because no bound tool reads one.
+wrapper_interpreter="$(
+    "${tool_path[python3]}" -I -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' \
+        "/proc/$$/exe"
+)"
+digest_tool wrapper_interpreter "$wrapper_interpreter"
 # The driver probes these after the timings but before it writes
 # `binary-sha256.json`, so executing one taken from `PATH` runs unrecorded code
 # while the retained files are still being produced. They are genuinely optional, so
