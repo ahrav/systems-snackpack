@@ -159,20 +159,25 @@ set -euo pipefail
 # same reason the wrapper sweeps them. Refuse rather than clear: a value here means
 # something already chose it, and that choice is not recorded anywhere.
 #
-# `${!LD_@}` and `printf` are a shell expansion and a builtin, so this check starts no
-# process. Reaching for `env | sed` here would run two programs under the very loader
-# state being refused, which is the situation the check exists to prevent.
+# `${!LD_@}` is a shell expansion, so this check starts no process. Reaching for
+# `env | sed` here would run two programs under the very loader state being refused,
+# which is the situation the check exists to prevent.
+#
+# `builtin printf` and `builtin exit`, not the bare names: these refusals run before
+# `bash -p` has been established, so an exported function named `exit` or `printf` is
+# imported and answers ahead of the builtin — and an `exit` that returns instead of
+# exiting turns every refusal below into a warning that the recipe continues past.
 for loader_variable in ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}; do
-  printf 'loader environment must be unset for the handoff proof: %s\n' \
+  builtin printf 'loader environment must be unset for the handoff proof: %s\n' \
     "$loader_variable" >&2
-  exit 2
+  builtin exit 2
 done
 # Start Bash privileged for the same reason the wrapper does: privileged mode does not
 # process `BASH_ENV` or `ENV` and does not import the caller's shell functions, and an
 # imported `git` or `command` function answers ahead of the program and can forge
 # `archive`, `rev-parse`, and `ls-tree` output. Run this recipe as
 # `bash -p handoff.sh`, not by pasting it into an interactive shell.
-[[ -o privileged ]] || { printf 'run this recipe with bash -p\n' >&2; exit 2; }
+[[ -o privileged ]] || { builtin printf 'run this recipe with bash -p\n' >&2; builtin exit 2; }
 # `bash -p` declines to import the caller's functions into *this* shell, but the
 # `BASH_FUNC_name%%` entries carrying them stay in the environment and are inherited by
 # every child. The per-file hash below runs `sh -c`, and where `sh` is Bash that shell
@@ -183,9 +188,9 @@ done
 while IFS= read -r -d '' environment_entry; do
   case "$environment_entry" in
     BASH_FUNC_*)
-      printf 'exported shell function must not be set: %s\n' \
+      builtin printf 'exported shell function must not be set: %s\n' \
         "${environment_entry%%=*}" >&2
-      exit 2
+      builtin exit 2
       ;;
   esac
 done <"/proc/$$/environ"
@@ -228,6 +233,7 @@ manifest="$scratch/topic18-source-files.sha256"
 extracted="$scratch/extracted"
 mkdir -p "$extracted"
 unset TAR_OPTIONS
+source_commit=<source_commit>
 # Clear Git's local repository environment before any command below. `GIT_DIR`,
 # `GIT_WORK_TREE`, `GIT_OBJECT_DIRECTORY`, `GIT_INDEX_FILE`, and the rest of
 # `git rev-parse --local-env-vars` redirect both the archive and the `ls-tree`
@@ -236,8 +242,51 @@ unset TAR_OPTIONS
 # refuses these variables, but it can never recheck the commit-to-bytes binding
 # established here, so this is the only place it can be got right.
 unset $(git rev-parse --local-env-vars)
+# Refuse a selected filter driver before archiving. `git archive` runs a `filter.<driver>`
+# smudge command while it emits the tree — from the tree's own `.gitattributes` and from
+# `$GIT_DIR/info/attributes` alike — so unrecorded code would execute inside the proof that
+# establishes this handoff's trust root, before anything has been compared with the commit. A
+# filter that emits identical bytes still runs, and can alter the tools or artifacts the rest
+# of this recipe uses. The receiver refuses selected filters for the same reason; in archive
+# mode it cannot recheck this, so it has to be refused here.
+#
+# Two attribute views: `archive` resolves from the tree it archives, while
+# `$GIT_DIR/info/attributes` and `core.attributesFile` are worktree state layered on top.
+# `check-attr` reports the effective value and runs no filter itself, and neither do
+# `ls-files` and `ls-tree`. An explicit `-filter` is an unset, not a selection.
+filter_selection=""
+for attribute_view in worktree "$source_commit"; do
+  if [ "$attribute_view" = worktree ]; then
+    paths_command="git ls-files -z"
+    attr_command="git check-attr -z --stdin filter"
+  else
+    paths_command="git ls-tree -r --name-only -z $attribute_view"
+    attr_command="git check-attr -z --stdin --source=$attribute_view filter"
+  fi
+  while IFS= read -r -d '' attribute_path \
+    && IFS= read -r -d '' _attribute_name \
+    && IFS= read -r -d '' attribute_value; do
+    case "$attribute_value" in
+      unspecified | unset) ;;
+      *) filter_selection="$filter_selection$attribute_view: $attribute_path -> $attribute_value
+" ;;
+    esac
+  done < <(
+    # In band, because the reader cannot see this substitution's exit status: a failing
+    # `ls-files`, `ls-tree`, or `check-attr` would otherwise leave the scan empty and the
+    # archive would be taken having checked nothing.
+    if ! $paths_command | $attr_command; then
+      builtin printf '/attribute-scan-failed\0filter\0scan-error\0'
+    fi
+  )
+done
+if [ -n "$filter_selection" ]; then
+  builtin printf 'attributes select a filter driver, so archiving would run it:\n%s' \
+    "$filter_selection" >&2
+  builtin exit 2
+fi
 GIT_NO_REPLACE_OBJECTS=1 git -c tar.umask=0 archive \
-  --format=tar --output="$archive" <source_commit>
+  --format=tar --output="$archive" "$source_commit"
 # `--same-permissions` because ordinary-user extraction applies the umask, which
 # would strip the executable bits that `git archive -c tar.umask=0` just
 # preserved. The proof below derives `100755` from `-x`, so a sender umask such as
@@ -260,7 +309,7 @@ tar --same-permissions -xf "$archive" -C "$extracted"
 # the commit blob rather than between the archived bytes and the commit blob.
 LC_ALL=C diff \
   <(GIT_NO_REPLACE_OBJECTS=1 git ls-tree -r \
-      --format='%(objectmode) %(objectname) %(path)' <source_commit> \
+      --format='%(objectmode) %(objectname) %(path)' "$source_commit" \
       | LC_ALL=C sort) \
   <(cd "$extracted" && rg --no-config --files -uu -g '!.git/' -g '!.git' \
       -g '!target/' -0 \

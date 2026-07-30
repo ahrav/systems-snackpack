@@ -20,7 +20,16 @@ import statistics
 import subprocess
 import sys
 import time
-from typing import NamedTuple
+from typing import Callable, NamedTuple
+
+
+class DispatchGraph(NamedTuple):
+    """One `dispatch` body's instructions and the reachability questions over them."""
+
+    decoded: list[re.Match[str]]
+    edges: Callable[[int], tuple[int | None, ...]]
+    reaches: Callable[..., bool]
+    reaches_indirect: Callable[..., bool]
 
 
 class GuardShape(NamedTuple):
@@ -458,16 +467,26 @@ def build(
         # cover code this candidate is about to be measured as profile-conditioned, so
         # retaining the text and continuing would report a claim the profile does not
         # support. Refuse before the candidate is measured or kept.
-        missing_profile = [
+        #
+        # Two diagnostics, not one. Absent profile data is the obvious case; a CFG hash
+        # mismatch is the same failure with data present — LLVM found a record for the
+        # function and discarded it because the function has changed shape since the
+        # profile was written, so the compiled code is again unprofiled while the run
+        # would still call it profile-conditioned.
+        PROFILE_DIAGNOSTICS = (
+            "no profile data available for function",
+            "function control flow change detected (hash mismatch)",
+        )
+        unprofiled = [
             line
             for line in pgo_build_output.splitlines()
-            if "no profile data available for function" in line
+            if any(marker in line.lower() for marker in PROFILE_DIAGNOSTICS)
         ]
-        if missing_profile:
+        if unprofiled:
             raise RuntimeError(
-                f"{mode} profile-use build reports functions with no profile data, so "
-                "the candidate is not profile-conditioned: "
-                + "; ".join(missing_profile[:5])
+                f"{mode} profile-use build reports functions the profile does not "
+                "describe, so the candidate is not profile-conditioned: "
+                + "; ".join(unprofiled[:5])
             )
 
         mode_profiles = retained_profiles / mode
@@ -638,39 +657,18 @@ def inspect_codegen(
                 continue
         return None
 
-    def guarded_promotion(body: str, target: str) -> GuardShape:
-        """Describe the promoted call's position in the dispatch control flow.
+    def dispatch_graph(body: str) -> DispatchGraph:
+        """Build the successor graph the disassembly of one `dispatch` body describes.
 
-        This is a reachability question and is answered as one. Comparing addresses
-        cannot decide it: a transfer that leaves before the call can land past the call
-        and come back to it, a conditional branch's two edges can rejoin ahead of it,
-        and either makes both outcomes execute the call while every ordering test says
-        otherwise. So build the successor graph the disassembly describes and ask
-        directly whether some conditional branch has one edge that reaches the call and
-        one that does not.
-
-        No separate compare is required. A conditional branch tests something by
-        construction, and demanding a particular compare mnemonic rejects the flag
-        producers that are not on the list — `cbz` and friends carry their own test, and
-        `adds`, `ands`, `tst`, and `fcmp` set flags without being a compare. What the
-        claim rests on is the edge asymmetry, which is what this measures.
-
-        The fallback is answered on the same graph: the guard edge that does not reach
-        the promoted call must reach an indirect transfer, so the shape recorded is one
-        the candidate actually has rather than one assembled from separate searches.
-
-        What it does not establish is that the branch tests the trained target's
-        address. That operand is usually materialised into a register first, so the
-        disassembly does not carry it; `no_direct_untrained_target` and the baseline
-        check cover that ground instead.
+        Shared by every structural question asked below, so that the promoted call, its
+        fallback, and the baseline's indirect dispatch are all decided against the same
+        model of what the code can reach rather than against separate text searches.
         """
         decoded = [
             match
             for match in (instruction.match(line) for line in body.splitlines())
             if match is not None
         ]
-        if not decoded:
-            return GuardShape(False, False)
         index_of_address = {
             int(match.group(1), 16): position for position, match in enumerate(decoded)
         }
@@ -700,7 +698,7 @@ def inspect_codegen(
         def reaches(start: int | None, goal: int, blocked: int | None = None) -> bool:
             """Report whether `goal` is reachable from `start` along those successors.
 
-            `blocked` removes one instruction from the graph, which is how the guard's
+            `blocked` removes one instruction from the graph, which is how a guard's
             position relative to the entry is established: if deleting a branch makes the
             call unreachable from the entry, every path to the call runs through it.
             """
@@ -720,7 +718,7 @@ def inspect_codegen(
                 )
             return False
 
-        def reaches_indirect(start: int | None, avoid: int) -> bool:
+        def reaches_indirect(start: int | None, avoid: int | None = None) -> bool:
             """Report whether an indirect transfer is reachable without reaching `avoid`."""
             if start is None:
                 return False
@@ -738,10 +736,43 @@ def inspect_codegen(
                 )
             return False
 
+        return DispatchGraph(decoded, edges, reaches, reaches_indirect)
+
+    def guarded_promotion(body: str, target: str) -> GuardShape:
+        """Describe the promoted call's position in the dispatch control flow.
+
+        This is a reachability question and is answered as one. Comparing addresses
+        cannot decide it: a transfer that leaves before the call can land past the call
+        and come back to it, a conditional branch's two edges can rejoin ahead of it,
+        and either makes both outcomes execute the call while every ordering test says
+        otherwise. So ask the graph directly whether some conditional branch has one edge
+        that reaches the call and one that does not.
+
+        The branch must also lie on every path from the entry to the call. Successor
+        asymmetry alone is satisfied by a branch no invocation consults before the call —
+        an unreachable one, or one after it whose taken edge is a back edge to it.
+
+        The fallback is answered on the same graph: the guard edge that does not reach the
+        promoted call must reach an indirect transfer, so the shape recorded is one the
+        candidate actually has rather than one assembled from separate searches.
+
+        No separate compare is required. A conditional branch tests something by
+        construction, and demanding a particular compare mnemonic rejects the flag
+        producers that are not on the list — `cbz` and friends carry their own test, and
+        `adds`, `ands`, `tst`, and `fcmp` set flags without being a compare.
+
+        What it does not establish is that the branch tests the trained target's address.
+        That operand is usually materialised into a register first, so the disassembly
+        does not carry it; `no_direct_untrained_target` and the baseline check cover that
+        ground instead.
+        """
+        graph = dispatch_graph(body)
+        if not graph.decoded:
+            return GuardShape(False, False)
         direct_pattern = direct(target)
         promoted = [
             position
-            for position, match in enumerate(decoded)
+            for position, match in enumerate(graph.decoded)
             if direct_pattern.search(match.group(0))
         ]
         # The listing starts at the function entry, so index 0 is where every invocation
@@ -757,35 +788,39 @@ def inspect_codegen(
         for call_index in promoted:
             # A call the entry cannot reach is not the one being measured, and asymmetry
             # around it says nothing about the shape that runs.
-            if not reaches(entry, call_index):
+            if not graph.reaches(entry, call_index):
                 continue
-            for position, match in enumerate(decoded):
+            for position, match in enumerate(graph.decoded):
                 if not conditional_mnemonic.match(match.group(2)):
                     continue
-                # Successor asymmetry on its own is satisfied by branches that no
-                # invocation consults before the call — an unreachable one, or one placed
-                # after it whose taken edge is a back edge to it. Require the branch to
-                # sit on every path from the entry to the call, so that whether the call
-                # runs is actually this branch's decision.
-                if reaches(entry, call_index, blocked=position):
+                if graph.reaches(entry, call_index, blocked=position):
                     continue
-                not_taken, taken = edges(position)
-                promoted_edge_reaches = reaches(not_taken, call_index)
-                if promoted_edge_reaches == reaches(taken, call_index):
+                not_taken, taken = graph.edges(position)
+                promoted_edge_reaches = graph.reaches(not_taken, call_index)
+                if promoted_edge_reaches == graph.reaches(taken, call_index):
                     continue
-                # The other edge has to arrive somewhere that dispatches indirectly.
-                # Searching the whole body for an indirect instruction instead would count
-                # one sitting in a block this guard never reaches, and then the retained
-                # shape claims a fallback the candidate does not have.
                 other_edge = taken if promoted_edge_reaches else not_taken
-                shape = GuardShape(True, reaches_indirect(other_edge, call_index))
+                shape = GuardShape(True, graph.reaches_indirect(other_edge, call_index))
                 if shape.fallback_reachable:
                     return shape
                 best = shape
         return best
 
+    def dispatches_indirectly(body: str) -> bool:
+        """Report whether an invocation of this `dispatch` can reach an indirect transfer.
+
+        A whole-body search answers a different question: objdump leaves indirect
+        instructions in dead blocks and after terminators, and one of those says nothing
+        about what the measured entry path does. The baseline claim is that the unprofiled
+        build dispatches indirectly, so it has to be reachability from the entry.
+        """
+        graph = dispatch_graph(body)
+        if not graph.decoded:
+            return False
+        return graph.reaches_indirect(0)
+
     baseline_body = dispatch_bodies["baseline"]
-    baseline_has_indirect = indirect.search(baseline_body) is not None
+    baseline_has_indirect = dispatches_indirectly(baseline_body)
     if not baseline_has_indirect:
         raise RuntimeError("baseline dispatch lacks an inspected indirect call")
     # Requiring only that an indirect call survives is not enough to call the
