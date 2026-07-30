@@ -320,6 +320,13 @@ done
 # produced by a driver the receipt does not name. The gates that link are
 # `cargo test` and `cargo bench --no-run`; `fmt`, `clippy`, and `doc` ignore it.
 gate_env() {
+    # Rescan here, not only once before the gates. Every gate resolves `cargo` — and
+    # `cargo fmt` and `cargo clippy` additionally resolve an external
+    # `cargo-<command>` helper — through the `PATH` built below, so a program placed
+    # in one of these directories after the earlier scan would answer for a bound
+    # name. `require_unshadowed_gate_path` is defined further down but is only ever
+    # called from here and from that scan, both of which run after its definition.
+    require_unshadowed_gate_path
     "${tool_path[env]}" -i \
         PATH="$(bound_tool_path "$gate_toolchain_bin" -- \
             awk bash cc cmp cp date diff env getconf ld mkdir mktemp mv nm \
@@ -736,7 +743,21 @@ gate_cargo_home="$scratch_dir/cargo-home"
 export CARGO_TARGET_DIR="$scratch_dir/cargo-target"
 gates_dir="$output_dir/gates"
 experiment_dir="$output_dir/experiment"
-"${tool_path[mkdir]}" -p -- "$gates_dir"
+# Plain `mkdir`, and both names here rather than one. `-p` accepts a path that
+# already resolves to a directory, so an entry inserted after the emptiness test
+# further up would be adopted instead of refused — and the run lock does not cover
+# that, because it stops another copy of this script rather than an unrelated
+# writer who can write the output directory. A `gates` symlink is enough on its
+# own: the logs are then written through it, land outside this tree, and
+# `rg --files` does not follow symlinks, so they are omitted from
+# `evidence.sha256` and the run reports success while retaining none of the gate
+# output it authenticates. Plain `mkdir` fails on a name that exists, so this run
+# either owns both directories or stops before any gate writes into one.
+#
+# `experiment_dir` is created here rather than left to the driver for the same
+# reason: the driver accepts an existing empty directory, and that test resolves a
+# symlink as readily as `mkdir -p` does.
+"${tool_path[mkdir]}" -- "$gates_dir" "$experiment_dir"
 
 # Emits NUL-separated paths relative to the caller's directory, and is the only
 # definition of which files count as source. `!.git` excludes the gitdir pointer
@@ -1093,30 +1114,43 @@ gate_toolchain_bin="${gate_cargo%/*}"
 # execute bit, so matching by prefix would refuse runs over programs that could never
 # answer. Split with parameter expansion rather than `tr`, which is not in the digested set
 # and could otherwise empty the very list this guard iterates.
-gate_path_remainder="$(bound_tool_path -- \
-    awk bash cc cmp cp date diff env getconf ld mkdir mktemp mv nm \
-    objdump python3 rm sed sha256sum sort tar taskset uname xargs)"
-while :; do
-    gate_path_directory="${gate_path_remainder%%:*}"
-    gate_shadowing_programs=()
-    for gate_shadowing_name in \
-        cargo cargo-fmt cargo-clippy rustc rustfmt rustdoc rustup clippy-driver; do
-        if [[ -f "$gate_path_directory/$gate_shadowing_name" ]] \
-            && [[ -x "$gate_path_directory/$gate_shadowing_name" ]]; then
-            gate_shadowing_programs+=("$gate_path_directory/$gate_shadowing_name")
+#
+# A function, because one scan before the gates only describes the directories as they
+# were at that moment. `gate_env` calls it again immediately before each gate execs, so a
+# program created after the first scan is refused rather than resolved. That narrows the
+# window to the gap between this check and the `execvp` that follows it; it does not close
+# it, and nothing inside this process can — a name resolved by `env` is looked up after
+# this shell has stopped observing. What does close it for a *bound* program is the digest
+# recheck where the receipt is written, which fails the run if one changed underneath it.
+require_unshadowed_gate_path() {
+    gate_path_remainder="$(bound_tool_path -- \
+        awk bash cc cmp cp date diff env getconf ld mkdir mktemp mv nm \
+        objdump python3 rm sed sha256sum sort tar taskset uname xargs)"
+    while :; do
+        gate_path_directory="${gate_path_remainder%%:*}"
+        gate_shadowing_programs=()
+        for gate_shadowing_name in \
+            cargo cargo-fmt cargo-clippy rustc rustfmt rustdoc rustup clippy-driver; do
+            if [[ -f "$gate_path_directory/$gate_shadowing_name" ]] \
+                && [[ -x "$gate_path_directory/$gate_shadowing_name" ]]; then
+                gate_shadowing_programs+=("$gate_path_directory/$gate_shadowing_name")
+            fi
+        done
+        if ((${#gate_shadowing_programs[@]} > 0)); then
+            printf '%s\n' \
+                "a gate PATH directory supplies toolchain programs: $gate_path_directory" \
+                "${gate_shadowing_programs[@]}" \
+                "the gates resolve cargo and its subcommand helpers through PATH, so this" \
+                "directory could answer for a hidden toolchain program" >&2
+            exit 2
         fi
+        [[ "$gate_path_remainder" == *:* ]] || break
+        gate_path_remainder="${gate_path_remainder#*:}"
     done
-    if ((${#gate_shadowing_programs[@]} > 0)); then
-        printf '%s\n' \
-            "a gate PATH directory supplies toolchain programs: $gate_path_directory" \
-            "${gate_shadowing_programs[@]}" \
-            "the gates resolve cargo and its subcommand helpers through PATH, so this" \
-            "directory could answer for a hidden toolchain program" >&2
-        exit 2
-    fi
-    [[ "$gate_path_remainder" == *:* ]] || break
-    gate_path_remainder="${gate_path_remainder#*:}"
-done
+}
+# Scan once here as well, so a host that cannot host the gates at all is refused before
+# the snapshot, the receipts, and the host probe are built rather than after.
+require_unshadowed_gate_path
 # Bind the toolchain that runs the gates, for the same reason: the gates decide
 # whether the snapshot is valid, and they execute these binaries rather than the
 # proxies recorded from `PATH`. `cargo` and `rustc` are not the whole set — `cargo
