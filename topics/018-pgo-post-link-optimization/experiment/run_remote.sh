@@ -1465,6 +1465,19 @@ done
     --training-iterations 5000000 \
     >"$output_dir/process.log" 2>&1
 
+# Record the driver's path set now. The wrapper does not choose these names, so the
+# manifest cannot be held to a fixed list the way the gate logs below are; holding it
+# to a listing taken at a different moment is what remains. A replacement between here
+# and the walk changes the set and is caught; one still in place at the walk is caught
+# by the identity test instead. A swap and restore that spans the driver's own writes
+# is outside what this can see — the wrapper never learns what the driver meant to
+# write.
+experiment_paths_driver="$scratch_dir/experiment-paths.driver"
+(
+    cd "$experiment_dir"
+    "${tool_path[rg]}" --no-config --files -uu | LC_ALL=C "${tool_path[sort]}"
+) >"$experiment_paths_driver"
+
 manifest_source "$repo_root" >"$output_dir/source-files.after.sha256"
 if ! "${tool_path[cmp]}" -s \
     "$output_dir/source-files.before.sha256" \
@@ -1506,16 +1519,41 @@ manifest_tmp="$scratch_dir/evidence.sha256"
     cd "$output_dir"
     "${tool_path[rg]}" --no-config --files -uu -0 . | LC_ALL=C "${tool_path[sort]}" -z | "${tool_path[xargs]}" -0 "${tool_path[sha256sum]}" --
 ) >"$manifest_tmp"
-# Both trees hold files on every completed run — the gate logs and the driver's
-# output — so a manifest naming neither means the walk did not reach them.
-for retained_rel in gates experiment; do
-    if ! "${tool_path[rg]}" --no-config -qF "./$retained_rel/" "$manifest_tmp"; then
-        printf '%s\n' \
-            "evidence manifest covers no files under $retained_rel/" \
-            "the retained output for it is not inside the tree this manifest hashes" >&2
-        exit 1
-    fi
-done
+# These log names are this script's own, so the manifest is held to exactly that set
+# rather than to "at least one entry under gates/" — a partially replaced tree leaves
+# some writes inside and some outside, and any test satisfied by one surviving file
+# accepts it. Both directions matter: a name missing from the manifest means that write
+# landed somewhere the manifest does not cover, and an unexpected name means a gate was
+# added without extending this list, which would put the new log outside this check.
+expected_gate_logs=(
+    cargo-bench-no-run.log
+    cargo-clippy.log
+    cargo-doc.log
+    cargo-fmt.log
+    cargo-test-doc.log
+    cargo-test-lib-examples.log
+    git-diff-check.log
+    script-syntax.log
+)
+gate_logs_expected="$scratch_dir/gate-logs.expected"
+gate_logs_manifest="$scratch_dir/gate-logs.manifest"
+printf '%s\n' "${expected_gate_logs[@]}" | LC_ALL=C "${tool_path[sort]}" >"$gate_logs_expected"
+"${tool_path[sed]}" -n 's|^[0-9a-f]\{64\}  \./gates/||p' "$manifest_tmp" \
+    | LC_ALL=C "${tool_path[sort]}" >"$gate_logs_manifest"
+if ! "${tool_path[cmp]}" -s "$gate_logs_expected" "$gate_logs_manifest"; then
+    printf 'evidence manifest does not cover exactly the gate logs this run writes:\n' >&2
+    LC_ALL=C "${tool_path[diff]}" -- "$gate_logs_expected" "$gate_logs_manifest" >&2 || true
+    exit 1
+fi
+experiment_paths_manifest="$scratch_dir/experiment-paths.manifest"
+"${tool_path[sed]}" -n 's|^[0-9a-f]\{64\}  \./experiment/||p' "$manifest_tmp" \
+    | LC_ALL=C "${tool_path[sort]}" >"$experiment_paths_manifest"
+if ! "${tool_path[cmp]}" -s "$experiment_paths_driver" "$experiment_paths_manifest"; then
+    printf 'evidence manifest does not cover what the driver left under experiment/:\n' >&2
+    LC_ALL=C "${tool_path[diff]}" -- \
+        "$experiment_paths_driver" "$experiment_paths_manifest" >&2 || true
+    exit 1
+fi
 "${tool_path[mv]}" -- "$manifest_tmp" "$output_dir/evidence.sha256"
 # Remove the scratch tree here and disarm the trap rather than leaving cleanup to
 # run on exit. An EXIT trap fires after the last comparison below, so the `rm` it
