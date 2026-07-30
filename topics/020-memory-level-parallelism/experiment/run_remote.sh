@@ -108,14 +108,16 @@ else
         printf 'source archive digest mismatch\n' >&2
         exit 2
     fi
-    embedded_commit="$(gzip -dc "$SOURCE_ARCHIVE_PATH" | git get-tar-commit-id)"
+    archive_tar="$build_dir/source.tar"
+    gzip -dc "$SOURCE_ARCHIVE_PATH" >"$archive_tar"
+    embedded_commit="$(git get-tar-commit-id <"$archive_tar")"
     if [[ "$embedded_commit" != "$SOURCE_COMMIT" ]]; then
         printf 'Git archive commit differs from SOURCE_COMMIT\n' >&2
         exit 2
     fi
     archive_reference="$build_dir/archive-reference"
     mkdir -p -- "$archive_reference"
-    tar -xzf "$SOURCE_ARCHIVE_PATH" -C "$archive_reference"
+    tar -xf "$archive_tar" -C "$archive_reference"
     manifest_tree "$archive_reference" >"$build_dir/archive-reference.sha256"
     manifest_source >"$build_dir/archive-source.sha256"
     if ! cmp -s "$build_dir/archive-reference.sha256" "$build_dir/archive-source.sha256"; then
