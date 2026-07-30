@@ -20,16 +20,167 @@ import statistics
 import subprocess
 import sys
 import time
-from typing import Callable, NamedTuple
+from typing import NamedTuple
 
 
-class DispatchGraph(NamedTuple):
-    """One `dispatch` body's instructions and the reachability questions over them."""
+class DispatchGraph:
+    """The instructions of one `dispatch` body and the control flow between them.
 
-    decoded: list[re.Match[str]]
-    edges: Callable[[int], tuple[int | None, ...]]
-    reaches: Callable[..., bool]
-    reaches_indirect: Callable[..., bool]
+    Its data is the decoded instructions and their address index; every question asked
+    of it is a method over that data. The patterns are class attributes rather than
+    captured variables so the graph can be constructed and exercised from a body alone.
+    """
+
+    # objdump lines are `<address>: <mnemonic> <operands>`; anchoring the mnemonic to its
+    # own column is what keeps a demangled symbol interpolated into an operand comment —
+    # `core::cmp::*`, say — from satisfying a mnemonic test.
+    INSTRUCTION = re.compile(r"^\s*([0-9a-f]+):\s+(\S+)\s*(.*)$")
+    # x86 excludes a prefix rather than enumerating: `jmp` and its `jmpq`, `jmpl`, and
+    # `jmpw` spellings are the only unconditional jumps, and every conditional form — Jcc
+    # plus `jcxz`/`jecxz`/`jrcxz` — begins with something else. `j(?!mp$)` would exclude
+    # only the bare spelling and let `jmpq` through as a conditional branch.
+    #
+    # AArch64 has to be enumerated, because `al` and `nv` are conditions in the same
+    # `b.<cond>` syntax as the real ones and both execute unconditionally, so a suffix
+    # wildcard would treat `b.al` as a branch with two edges. `bc.<cond>` is the FEAT_HBC
+    # hinted form of the same branch and takes the same condition set.
+    CONDITIONAL = re.compile(
+        r"^(?:"
+        r"j(?!mp)[a-z]+"
+        r"|bc?\.(?:eq|ne|cs|hs|cc|lo|mi|pl|vs|vc|hi|ls|ge|lt|gt|le)"
+        r"|cbz|cbnz|tbz|tbnz"
+        r")$"
+    )
+    # Instructions after which control does not continue to the next address and which
+    # name no destination in this function. The trap forms matter as much as `ret`:
+    # objdump leaves `int3`, `ud0`, `ud1`, and `ud2` as inter-block padding, and treating
+    # one as an ordinary instruction invents a fall-through edge into whatever bytes
+    # follow it — which could make a call the code would never reach look like the
+    # guarded one.
+    TERMINATOR = re.compile(r"^(?:ret[q]?|hlt|int3|ud0|ud1|ud2|brk|udf)$")
+    # Unconditional transfers. `call`, `bl`, and `blr` are absent because they return to
+    # the following instruction, so they do continue. `b.al` and `b.nv` belong here rather
+    # than with the conditional branches: they use the conditional encoding but always
+    # execute, so modelling them as fall-through would give the following instruction an
+    # edge it does not have and could make an unreachable call look guarded.
+    JUMP = re.compile(r"^(?:jmp[qlw]?|b|br|bc?\.(?:al|nv))$")
+    # Dispatch through a register, on either architecture.
+    INDIRECT = re.compile(r"\b(?:callq?|jmpq?)\s+\*|\b(?:blr|br)\s+x")
+
+    # Every invocation begins at the first instruction of the extracted listing.
+    ENTRY = 0
+
+    def __init__(self, body: str) -> None:
+        self.decoded = [
+            match
+            for match in (self.INSTRUCTION.match(line) for line in body.splitlines())
+            if match is not None
+        ]
+        self.index_of_address = {
+            int(match.group(1), 16): position
+            for position, match in enumerate(self.decoded)
+        }
+
+    def __bool__(self) -> bool:
+        """A body that decoded to nothing answers no question."""
+        return bool(self.decoded)
+
+    @staticmethod
+    def destination(operands: str) -> int | None:
+        """Return a transfer's destination address, or None when it is not concrete."""
+        # objdump appends a `<symbol+offset>` comment; the destination is the last bare
+        # hex operand before it. An indirect operand such as `*%rax` or `x8` parses as
+        # nothing, which is how an unknown target is reported.
+        for token in reversed(operands.split("<")[0].replace(",", " ").split()):
+            try:
+                return int(token, 16)
+            except ValueError:
+                continue
+        return None
+
+    def _target(self, operands: str) -> int | None:
+        """Resolve a transfer's destination to an index in this listing."""
+        # A destination outside the listing — an indirect operand, or a branch out of this
+        # function — is an edge that leaves, reported as None.
+        destination = self.destination(operands)
+        if destination is None:
+            return None
+        return self.index_of_address.get(destination)
+
+    def edges(self, position: int) -> tuple[int | None, ...]:
+        """Return the successors of one instruction, `None` for an edge that leaves.
+
+        A conditional branch always returns two, in `(not_taken, taken)` order, so a
+        caller can name the edges without re-deciding which is which.
+        """
+        mnemonic = self.decoded[position].group(2)
+        operands = self.decoded[position].group(3)
+        following = position + 1 if position + 1 < len(self.decoded) else None
+        if self.TERMINATOR.match(mnemonic):
+            return ()
+        if self.CONDITIONAL.match(mnemonic):
+            return (following, self._target(operands))
+        if self.JUMP.match(mnemonic):
+            return (self._target(operands),)
+        return (following,)
+
+    def reaches(
+        self, start: int | None, goal: int, blocked: int | None = None
+    ) -> bool:
+        """Report whether `goal` is reachable from `start`.
+
+        `blocked` removes one instruction from the graph, which is how a guard's position
+        relative to the entry is established: if deleting a branch makes the call
+        unreachable from the entry, every path to the call runs through it.
+        """
+        if start is None or start == blocked:
+            return False
+        seen: set[int] = set()
+        pending = [start]
+        while pending:
+            position = pending.pop()
+            if position == goal:
+                return True
+            if position in seen or position == blocked:
+                continue
+            seen.add(position)
+            pending.extend(
+                successor for successor in self.edges(position) if successor is not None
+            )
+        return False
+
+    def reaches_indirect(self, start: int | None, avoid: int | None = None) -> bool:
+        """Report whether an indirect transfer is reachable from `start`.
+
+        `avoid` excludes one instruction from the walk, so a guard edge can be asked what
+        it reaches other than the promoted call.
+        """
+        if start is None:
+            return False
+        seen: set[int] = set()
+        pending = [start]
+        while pending:
+            position = pending.pop()
+            if position == avoid or position in seen:
+                continue
+            seen.add(position)
+            if self.INDIRECT.search(self.decoded[position].group(0)):
+                return True
+            pending.extend(
+                successor for successor in self.edges(position) if successor is not None
+            )
+        return False
+
+    def promoted_calls(self, target: str) -> list[int]:
+        """Return the positions of direct calls to `pgo_probe::<target>`."""
+        pattern = re.compile(
+            rf"\b(?:callq?|jmpq?|bl|b)\s+(?!\*)[^\n]*<pgo_probe::{target}>"
+        )
+        return [
+            position
+            for position, match in enumerate(self.decoded)
+            if pattern.search(match.group(0))
+        ]
 
 
 class GuardShape(NamedTuple):
@@ -608,145 +759,15 @@ def inspect_codegen(
         "\n".join(symbol_lines) + "\n",
         encoding="utf-8",
     )
-    indirect = re.compile(r"\b(?:callq?|jmpq?)\s+\*|\b(?:blr|br)\s+x")
-
-    def direct(target: str) -> re.Pattern[str]:
-        return re.compile(
-            rf"\b(?:callq?|jmpq?|bl|b)\s+(?!\*)[^\n]*<pgo_probe::{target}>"
-        )
-
-    instruction = re.compile(r"^\s*([0-9a-f]+):\s+(\S+)\s*(.*)$")
-    # x86 is handled by excluding a prefix rather than enumerating: `jmp` and its `jmpq`,
-    # `jmpl`, and `jmpw` spellings are the only unconditional jumps, and every conditional
-    # form — Jcc plus `jcxz`/`jecxz`/`jrcxz` — begins with something else. `j(?!mp$)`
-    # would exclude only the bare spelling and let `jmpq` through as a conditional branch.
-    #
-    # AArch64 has to be enumerated, because `al` and `nv` are conditions in the same
-    # `b.<cond>` syntax as the real ones and both execute unconditionally, so a suffix
-    # wildcard would treat `b.al` as a branch with two edges. `bc.<cond>` is the FEAT_HBC
-    # hinted form of the same branch and takes the same condition set.
-    conditional_mnemonic = re.compile(
-        r"^(?:"
-        r"j(?!mp)[a-z]+"
-        r"|bc?\.(?:eq|ne|cs|hs|cc|lo|mi|pl|vs|vc|hi|ls|ge|lt|gt|le)"
-        r"|cbz|cbnz|tbz|tbnz"
-        r")$"
-    )
-    # Instructions after which control does not continue to the next address and which
-    # name no destination in this function. The trap forms matter as much as `ret`: objdump
-    # leaves `int3`, `ud0`, `ud1`, and `ud2` as inter-block padding, and treating one as an
-    # ordinary instruction invents a fall-through edge into whatever bytes follow it — which
-    # could make a call the code would never reach look like the guarded one.
-    path_terminator = re.compile(r"^(?:ret[q]?|hlt|int3|ud0|ud1|ud2|brk|udf)$")
-    # Unconditional transfers. `call`, `bl`, and `blr` are absent because they return to
-    # the following instruction, so they do continue. `b.al` and `b.nv` belong here rather
-    # than with the conditional branches: they use the conditional encoding but always
-    # execute, so modelling them as fall-through would give the following instruction an
-    # edge it does not have and could make an unreachable call look guarded.
-    jump_transfer = re.compile(r"^(?:jmp[qlw]?|b|br|bc?\.(?:al|nv))$")
-
-    def branch_destination(operands: str) -> int | None:
-        """Return a transfer's destination address, or None when it is not concrete."""
-        # objdump appends a `<symbol+offset>` comment; the destination is the last
-        # bare hex operand before it. An indirect operand such as `*%rax` or `x8`
-        # parses as nothing, which is how an unknown target is reported.
-        for token in reversed(operands.split("<")[0].replace(",", " ").split()):
-            try:
-                return int(token, 16)
-            except ValueError:
-                continue
-        return None
-
-    def dispatch_graph(body: str) -> DispatchGraph:
-        """Build the successor graph the disassembly of one `dispatch` body describes.
-
-        Shared by every structural question asked below, so that the promoted call, its
-        fallback, and the baseline's indirect dispatch are all decided against the same
-        model of what the code can reach rather than against separate text searches.
-        """
-        decoded = [
-            match
-            for match in (instruction.match(line) for line in body.splitlines())
-            if match is not None
-        ]
-        index_of_address = {
-            int(match.group(1), 16): position for position, match in enumerate(decoded)
-        }
-
-        def target_index(operands: str) -> int | None:
-            """Resolve a transfer's destination to an index in this listing."""
-            # A destination outside the listing — an indirect operand, or a branch out
-            # of this function — is an edge that leaves, reported as None.
-            destination = branch_destination(operands)
-            if destination is None:
-                return None
-            return index_of_address.get(destination)
-
-        def edges(position: int) -> tuple[int | None, ...]:
-            """Return the successors of one instruction, `None` for an edge that leaves."""
-            mnemonic = decoded[position].group(2)
-            operands = decoded[position].group(3)
-            following = position + 1 if position + 1 < len(decoded) else None
-            if path_terminator.match(mnemonic):
-                return ()
-            if conditional_mnemonic.match(mnemonic):
-                return (following, target_index(operands))
-            if jump_transfer.match(mnemonic):
-                return (target_index(operands),)
-            return (following,)
-
-        def reaches(start: int | None, goal: int, blocked: int | None = None) -> bool:
-            """Report whether `goal` is reachable from `start` along those successors.
-
-            `blocked` removes one instruction from the graph, which is how a guard's
-            position relative to the entry is established: if deleting a branch makes the
-            call unreachable from the entry, every path to the call runs through it.
-            """
-            if start is None or start == blocked:
-                return False
-            seen = set()
-            pending = [start]
-            while pending:
-                position = pending.pop()
-                if position == goal:
-                    return True
-                if position in seen or position == blocked:
-                    continue
-                seen.add(position)
-                pending.extend(
-                    successor for successor in edges(position) if successor is not None
-                )
-            return False
-
-        def reaches_indirect(start: int | None, avoid: int | None = None) -> bool:
-            """Report whether an indirect transfer is reachable without reaching `avoid`."""
-            if start is None:
-                return False
-            seen = set()
-            pending = [start]
-            while pending:
-                position = pending.pop()
-                if position == avoid or position in seen:
-                    continue
-                seen.add(position)
-                if indirect.search(decoded[position].group(0)):
-                    return True
-                pending.extend(
-                    successor for successor in edges(position) if successor is not None
-                )
-            return False
-
-        return DispatchGraph(decoded, edges, reaches, reaches_indirect)
-
     def guarded_promotion(body: str, target: str) -> GuardShape:
         """Describe the promoted call's position in the dispatch control flow.
 
-        This is a reachability question and is answered as one. Comparing addresses
-        cannot decide it: a transfer that leaves before the call can land past the call
-        and come back to it, a conditional branch's two edges can rejoin ahead of it,
-        and either makes both outcomes execute the call while every ordering test says
-        otherwise. So ask the graph directly whether some conditional branch has one edge
-        that reaches the call and one that does not.
+        This is a reachability question and is answered as one. Comparing addresses cannot
+        decide it: a transfer that leaves before the call can land past the call and come
+        back to it, a conditional branch's two edges can rejoin ahead of it, and either
+        makes both outcomes execute the call while every ordering test says otherwise. So
+        ask the graph whether some conditional branch has one edge that reaches the call
+        and one that does not.
 
         The branch must also lie on every path from the entry to the call. Successor
         asymmetry alone is satisfied by a branch no invocation consults before the call —
@@ -762,38 +783,29 @@ def inspect_codegen(
         `adds`, `ands`, `tst`, and `fcmp` set flags without being a compare.
 
         What it does not establish is that the branch tests the trained target's address.
-        That operand is usually materialised into a register first, so the disassembly
-        does not carry it; `no_direct_untrained_target` and the baseline check cover that
-        ground instead.
+        That operand is usually materialised into a register first, so the disassembly does
+        not carry it; `no_direct_untrained_target` and the baseline check cover that ground
+        instead.
         """
-        graph = dispatch_graph(body)
-        if not graph.decoded:
+        graph = DispatchGraph(body)
+        if not graph:
             return GuardShape(False, False)
-        direct_pattern = direct(target)
-        promoted = [
-            position
-            for position, match in enumerate(graph.decoded)
-            if direct_pattern.search(match.group(0))
-        ]
-        # The listing starts at the function entry, so index 0 is where every invocation
-        # begins.
-        entry = 0
         # An outer branch can dominate the promoted call and split on it without being the
         # branch that chooses between the direct call and the indirect fallback — an early
         # return on a null pointer, say. Returning that branch's shape would report
         # `guarded` with no reachable fallback and abort the run over a layout that is
-        # correct. So keep looking, take the first complete shape, and fall back to the best
-        # partial one so the failure still says which half was missing.
+        # correct. So keep looking, take the first complete shape, and fall back to the
+        # best partial one so the failure still says which half was missing.
         best = GuardShape(False, False)
-        for call_index in promoted:
+        for call_index in graph.promoted_calls(target):
             # A call the entry cannot reach is not the one being measured, and asymmetry
             # around it says nothing about the shape that runs.
-            if not graph.reaches(entry, call_index):
+            if not graph.reaches(graph.ENTRY, call_index):
                 continue
             for position, match in enumerate(graph.decoded):
-                if not conditional_mnemonic.match(match.group(2)):
+                if not graph.CONDITIONAL.match(match.group(2)):
                     continue
-                if graph.reaches(entry, call_index, blocked=position):
+                if graph.reaches(graph.ENTRY, call_index, blocked=position):
                     continue
                 not_taken, taken = graph.edges(position)
                 promoted_edge_reaches = graph.reaches(not_taken, call_index)
@@ -814,10 +826,14 @@ def inspect_codegen(
         about what the measured entry path does. The baseline claim is that the unprofiled
         build dispatches indirectly, so it has to be reachability from the entry.
         """
-        graph = dispatch_graph(body)
-        if not graph.decoded:
-            return False
-        return graph.reaches_indirect(0)
+        graph = DispatchGraph(body)
+        return bool(graph) and graph.reaches_indirect(graph.ENTRY)
+
+    def direct(target: str) -> re.Pattern[str]:
+        """Match a direct call or tail jump to `pgo_probe::<target>`."""
+        return re.compile(
+            rf"\b(?:callq?|jmpq?|bl|b)\s+(?!\*)[^\n]*<pgo_probe::{target}>"
+        )
 
     baseline_body = dispatch_bodies["baseline"]
     baseline_has_indirect = dispatches_indirectly(baseline_body)

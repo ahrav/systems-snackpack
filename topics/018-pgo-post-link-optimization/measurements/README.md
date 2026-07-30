@@ -242,6 +242,15 @@ source_commit=<source_commit>
 # refuses these variables, but it can never recheck the commit-to-bytes binding
 # established here, so this is the only place it can be got right.
 unset $(git rev-parse --local-env-vars)
+# Then set the one member this proof relies on, once, so every git command below inherits
+# it. `GIT_NO_REPLACE_OBJECTS` is itself in `--local-env-vars` and was therefore cleared by
+# the line above, which is why it used to be prefixed per command — and a per-command
+# prefix is a rule each new command has to remember. The filter scan below is exactly what
+# that costs: without it the scan resolves a replacement tree and sees no selected filter
+# while `git archive` reads the original tree and runs one. `git replace` refs and grafts
+# are honoured by object reads, so the archive, the `ls-tree` proof, and the attribute scan
+# must all read raw objects or they are not describing the same commit.
+export GIT_NO_REPLACE_OBJECTS=1
 # Refuse a selected filter driver before archiving. `git archive` runs a `filter.<driver>`
 # smudge command while it emits the tree — from the tree's own `.gitattributes` and from
 # `$GIT_DIR/info/attributes` alike — so unrecorded code would execute inside the proof that
@@ -285,7 +294,7 @@ if [ -n "$filter_selection" ]; then
     "$filter_selection" >&2
   builtin exit 2
 fi
-GIT_NO_REPLACE_OBJECTS=1 git -c tar.umask=0 archive \
+git -c tar.umask=0 archive \
   --format=tar --output="$archive" "$source_commit"
 # `--same-permissions` because ordinary-user extraction applies the umask, which
 # would strip the executable bits that `git archive -c tar.umask=0` just
@@ -308,7 +317,7 @@ tar --same-permissions -xf "$archive" -C "$extracted"
 # during this hash, and the comparison would then be between the filtered result and
 # the commit blob rather than between the archived bytes and the commit blob.
 LC_ALL=C diff \
-  <(GIT_NO_REPLACE_OBJECTS=1 git ls-tree -r \
+  <(git ls-tree -r \
       --format='%(objectmode) %(objectname) %(path)' "$source_commit" \
       | LC_ALL=C sort) \
   <(cd "$extracted" && rg --no-config --files -uu -g '!.git/' -g '!.git' \
@@ -316,7 +325,7 @@ LC_ALL=C diff \
       | xargs -0 -n1 sh -c \
           'if [ -x "$0" ]; then mode=100755; else mode=100644; fi
            printf "%s %s %s\n" "$mode" \
-             "$(GIT_NO_REPLACE_OBJECTS=1 git hash-object --no-filters -- "$0")" "$0"' \
+             "$(git hash-object --no-filters -- "$0")" "$0"' \
       | LC_ALL=C sort)
 (cd "$extracted" && rg --no-config --files -uu -g '!.git/' -g '!.git' -g '!target/' -0 \
   | LC_ALL=C sort -z | xargs -0 sha256sum --) > "$manifest"
