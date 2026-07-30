@@ -1001,19 +1001,22 @@ gate_toolchain_bin="${gate_cargo%/*}"
 # than fail — and `cargo <command>` is translated into an external `cargo-<command>` found
 # on `PATH`, so the helpers matter as much as `cargo` itself. Refuse when any directory
 # other than the toolchain's own could answer for one of these names.
-for gate_path_directory in $(bound_tool_path -- \
+#
+# Exact names, and executable regular files only: a `cargo-audit` or `rust-gdb` cannot
+# satisfy any lookup the gates perform, and neither can a directory or a file without the
+# execute bit, so matching by prefix would refuse runs over programs that could never
+# answer. Split with parameter expansion rather than `tr`, which is not in the digested set
+# and could otherwise empty the very list this guard iterates.
+gate_path_remainder="$(bound_tool_path -- \
     awk bash cc cmp cp date diff env getconf ld mkdir mktemp mv nm \
-    objdump python3 rm sed sha256sum sort tar taskset uname xargs | tr : ' '); do
-    # Only the patterns go through `nullglob`; a word with no metacharacter is not a glob
-    # and would survive as a literal, matching every directory.
-    shopt -s nullglob
-    gate_shadowing_programs=(
-        "$gate_path_directory"/cargo*
-        "$gate_path_directory"/rust-*
-    )
-    shopt -u nullglob
-    for gate_shadowing_name in rustc rustfmt rustdoc rustup clippy-driver; do
-        if [[ -e "$gate_path_directory/$gate_shadowing_name" ]]; then
+    objdump python3 rm sed sha256sum sort tar taskset uname xargs)"
+while :; do
+    gate_path_directory="${gate_path_remainder%%:*}"
+    gate_shadowing_programs=()
+    for gate_shadowing_name in \
+        cargo cargo-fmt cargo-clippy rustc rustfmt rustdoc rustup clippy-driver; do
+        if [[ -f "$gate_path_directory/$gate_shadowing_name" ]] \
+            && [[ -x "$gate_path_directory/$gate_shadowing_name" ]]; then
             gate_shadowing_programs+=("$gate_path_directory/$gate_shadowing_name")
         fi
     done
@@ -1025,6 +1028,8 @@ for gate_path_directory in $(bound_tool_path -- \
             "directory could answer for a hidden toolchain program" >&2
         exit 2
     fi
+    [[ "$gate_path_remainder" == *:* ]] || break
+    gate_path_remainder="${gate_path_remainder#*:}"
 done
 # Bind the toolchain that runs the gates, for the same reason: the gates decide
 # whether the snapshot is valid, and they execute these binaries rather than the
