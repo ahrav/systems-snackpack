@@ -190,12 +190,30 @@ while IFS= read -r -d '' environment_entry; do
   esac
 done <"/proc/$$/environ"
 export PATH="/usr/bin:/bin:$HOME/.cargo/bin"
-# Both retained artifacts live inside the private `mktemp -d` tree, not in `/tmp`
+# Both retained artifacts live inside a private `mktemp -d` tree, not in `/tmp`
 # directly. On a world-writable `/tmp` another local process can replace the archive or
 # the manifest after the proof below has checked the extraction and before the final
 # `sha256sum` prints the digests — the receiver would then hold a self-consistent pair
 # that was never compared with the commit, and archive mode gives it no way to notice.
-# `mktemp -d` creates at mode 0700, so digest and transfer from there.
+#
+# Mode 0700 on the tree is not enough on its own, and `mktemp -d` honours an inherited
+# `TMPDIR`, so pin the parent and hold it to the same requirement the receiver applies to
+# its own snapshot and output directories: every ancestor writable only by its owner. A
+# world-writable parent lets another user rename the 0700 child out of the way whatever
+# its mode says. This leaves the same-uid residue the receiver documents; run the handoff
+# on a host where nothing else is acting as this user.
+export TMPDIR="$HOME/topic18-handoff"
+mkdir -p -m 700 "$TMPDIR"
+python3 -I -c 'import os, stat, sys
+path = os.path.realpath(sys.argv[1])
+while True:
+    entry = os.stat(path)
+    if entry.st_mode & (stat.S_IWGRP | stat.S_IWOTH) or entry.st_uid not in (os.getuid(), 0):
+        raise SystemExit(f"handoff scratch parent is writable by another user: {path}")
+    parent = os.path.dirname(path)
+    if parent == path:
+        break
+    path = parent' "$TMPDIR"
 scratch="$(mktemp -d)"
 archive="$scratch/topic18-source.tar"
 manifest="$scratch/topic18-source-files.sha256"

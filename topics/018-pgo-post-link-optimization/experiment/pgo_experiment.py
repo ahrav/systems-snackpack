@@ -747,6 +747,13 @@ def inspect_codegen(
         # The listing starts at the function entry, so index 0 is where every invocation
         # begins.
         entry = 0
+        # An outer branch can dominate the promoted call and split on it without being the
+        # branch that chooses between the direct call and the indirect fallback — an early
+        # return on a null pointer, say. Returning that branch's shape would report
+        # `guarded` with no reachable fallback and abort the run over a layout that is
+        # correct. So keep looking, take the first complete shape, and fall back to the best
+        # partial one so the failure still says which half was missing.
+        best = GuardShape(False, False)
         for call_index in promoted:
             # A call the entry cannot reach is not the one being measured, and asymmetry
             # around it says nothing about the shape that runs.
@@ -771,8 +778,11 @@ def inspect_codegen(
                 # one sitting in a block this guard never reaches, and then the retained
                 # shape claims a fallback the candidate does not have.
                 other_edge = taken if promoted_edge_reaches else not_taken
-                return GuardShape(True, reaches_indirect(other_edge, call_index))
-        return GuardShape(False, False)
+                shape = GuardShape(True, reaches_indirect(other_edge, call_index))
+                if shape.fallback_reachable:
+                    return shape
+                best = shape
+        return best
 
     baseline_body = dispatch_bodies["baseline"]
     baseline_has_indirect = indirect.search(baseline_body) is not None
