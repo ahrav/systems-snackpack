@@ -42,7 +42,7 @@ procfs, `taskset`, `lscpu`, GNU `objdump`, `nm`, and `sha256sum`:
 ```bash
 for loader_variable in ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}; do builtin unset "$loader_variable"; done
 [ -z "${!LD_@}${!GLIBC_@}${!MALLOC_@}" ] || { echo "loader variables survived: ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}" >&2; return 1 2>/dev/null || exit 1; }
-mkdir -p -m 700 "$HOME/topic18-scratch"
+/usr/bin/mkdir -p -m 700 "$HOME/topic18-scratch"
 /usr/bin/env -i \
   PATH="/usr/bin:/bin:$HOME/.cargo/bin" \
   HOME="$HOME" \
@@ -59,10 +59,16 @@ its owner. For `TMPDIR` that is because the immutable source snapshot lives bene
 Cargo, rustfmt, and Clippy resolve their configuration by walking from that snapshot to the
 filesystem root while the gates run. For the output directory it is because every retained
 file is authenticated by `evidence.sha256`, and no check can cover the interval between a file
-being written and the manifest hashing it — so the guarantee has to come from there being no
-other writer rather than from checking for one. A default `/tmp` is mode 1777 and fails both:
-the sticky bit prevents deleting another user's files, not creating new ones. A directory under
+being written and the manifest hashing it. A default `/tmp` is mode 1777 and fails both: the
+sticky bit prevents deleting another user's files, not creating new ones. A directory under
 `$HOME` normally satisfies it, and the run refuses with the offending path if it does not.
+
+What that requirement buys is the removal of writers under *other* user ids. It does not make
+the chain immutable: a concurrent process under the same uid can still place a file on it, and
+no in-process check closes that. The scans that remain — before the snapshot, before each gate,
+after the gates, and the retained-evidence comparisons at the end — are what cover that
+residue, and they narrow it rather than eliminate it. Run this on a host where nothing else is
+acting as the same user.
 
 Launch from a shell that never inherited the loader namespace. That is a requirement, not
 a preference, and the loop above does not substitute for it: if this shell was itself

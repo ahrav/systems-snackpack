@@ -327,6 +327,13 @@ gate_env() {
     # name. `require_unshadowed_gate_path` is defined further down but is only ever
     # called from here and from that scan, both of which run after its definition.
     require_unshadowed_gate_path
+    # Same treatment for the configuration these tools look up rather than the programs
+    # they resolve. `require_private_ancestors` removes writers under other user ids from
+    # the chain, which is not the same as freezing it: a concurrent process under this uid
+    # can still place a `clippy.toml` or `rustfmt.toml` on it while a gate is resolving,
+    # and let it disappear again. This narrows that interval to the gap between the check
+    # and the tool's own lookup; it does not close it.
+    require_no_ancestor_gate_config
     "${tool_path[env]}" -i \
         PATH="$(bound_tool_path "$gate_toolchain_bin" -- \
             awk bash cc cmp cp date diff env getconf ld mkdir mktemp mv nm \
@@ -464,12 +471,16 @@ fi
 # before the next one — every scan passes and the retained log was produced under policy no
 # receipt names. Rechecking narrows that window and never closes it.
 #
-# What closes it is a chain no other user can write. If every directory from the snapshot to
-# the filesystem root is writable only by its owner, the set of configuration files on the
-# search path is fixed for the run, and the sweep below becomes a statement about contents
-# rather than a race. A default `TMPDIR` of `/tmp` is mode 1777 and fails this: the sticky bit
-# stops deletion of another user's files, not creation of new ones. So `TMPDIR` has to be
-# chosen — a directory under `$HOME` normally satisfies it already.
+# Requiring every directory from the snapshot to the filesystem root to be writable only by
+# its owner removes one whole class of writer: no other user id can place a file on the
+# search path. A default `TMPDIR` of `/tmp` is mode 1777 and fails this — the sticky bit
+# stops deletion of another user's files, not creation of new ones — so `TMPDIR` has to be
+# chosen, and a directory under `$HOME` normally satisfies it already.
+#
+# It does not make the chain immutable, and the comments here must not claim it does. A
+# concurrent process under this same uid can create a file, let a gate read it, and remove
+# it before any later scan runs. Nothing in this process closes that; the repeated scans are
+# what narrow it, which is why they are kept rather than replaced by this check.
 #
 # Ownership is checked alongside the mode because a directory owned by a third user is
 # writable by them whatever its mode currently says: they can change it.
@@ -1220,10 +1231,11 @@ require_no_ancestor_gate_config() {
     done
 }
 # The snapshot's own parent is the `mktemp -d` tree at mode 0700, and
-# `require_private_ancestors` has established that nothing above it is writable by another
-# user, so the configuration on the search path cannot change under the gates. This sweep is
-# therefore about what is there, not a race: it refuses a configuration the owner themselves
-# placed above the snapshot, which is unrecorded policy even when it cannot be swapped.
+# `require_private_ancestors` has excluded other user ids from everything above it. What is
+# left is this uid, so this sweep is a function called at three points rather than a
+# straight-line check: here, from `gate_env` before each gate, and once more after the gates.
+# Its first job is the one that always held — refusing a configuration the operator placed
+# above the snapshot, which is unrecorded policy however it got there.
 require_no_ancestor_gate_config
 
 # Resolve the gate toolchain from inside the snapshot, so `rust-toolchain.toml`
@@ -1508,10 +1520,11 @@ compile(source, sys.argv[1], "exec")
 print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
     "${tool_path[bash]}" -n "$topic_rel/experiment/run_remote.sh"
 ) >"$gates_dir/script-syntax.log" 2>&1
-# Sweep once more now that the gates have run. Only the chain's owner — this user or root —
-# can add a configuration file to it, so this covers the one writer the privacy invariant
-# permits rather than an arbitrary one, and it makes the gate logs above answerable for the
-# policy in force when they were produced rather than only when the run started.
+# Sweep once more now that the gates have run. The pre-gate checks cannot cover the interval
+# in which each tool performs its own lookup, and the privacy invariant does not cover this
+# uid, so a file that appeared and vanished during the gates would have applied. Finding one
+# still present here does not undo that, but it turns the run into a failure rather than a
+# receipt, which is the most this level can do.
 require_no_ancestor_gate_config
 
 # Name the driver's environment for the same reason the gates' is named. The
