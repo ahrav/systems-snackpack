@@ -42,14 +42,24 @@ procfs, `taskset`, `lscpu`, GNU `objdump`, `nm`, and `sha256sum`:
 ```bash
 for loader_variable in ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}; do builtin unset "$loader_variable"; done
 [ -z "${!LD_@}${!GLIBC_@}${!MALLOC_@}" ] || { echo "loader variables survived: ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}" >&2; return 1 2>/dev/null || exit 1; }
+mkdir -p -m 700 "$HOME/topic18-scratch"
 /usr/bin/env -i \
   PATH="/usr/bin:/bin:$HOME/.cargo/bin" \
   HOME="$HOME" \
+  TMPDIR="$HOME/topic18-scratch" \
   /usr/bin/bash -p \
   topics/018-pgo-post-link-optimization/experiment/run_remote.sh \
   "$(/usr/bin/pwd -P)" \
   /tmp/topic18-evidence
 ```
+
+`TMPDIR` is named rather than defaulted because the immutable source snapshot is created
+beneath it, and Cargo, rustfmt, and Clippy resolve their configuration by walking from that
+snapshot to the filesystem root while the gates run. The run therefore requires every
+directory on that chain to be writable only by its owner, so the configuration on the search
+path cannot change under the gates. A default `/tmp` is mode 1777 and fails that: the sticky
+bit prevents deleting another user's files, not creating new ones. A directory under `$HOME`
+normally satisfies it, and the run refuses with the offending path if it does not.
 
 Launch from a shell that never inherited the loader namespace. That is a requirement, not
 a preference, and the loop above does not substitute for it: if this shell was itself

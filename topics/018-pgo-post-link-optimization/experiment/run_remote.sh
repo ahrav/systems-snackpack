@@ -327,10 +327,6 @@ gate_env() {
     # name. `require_unshadowed_gate_path` is defined further down but is only ever
     # called from here and from that scan, both of which run after its definition.
     require_unshadowed_gate_path
-    # Same reason, for the configuration these tools look up rather than the programs:
-    # rustfmt and Clippy walk to the filesystem root when they run, and `TMPDIR`'s
-    # ancestors stay writable after the sweep further down passes.
-    require_no_ancestor_gate_config
     "${tool_path[env]}" -i \
         PATH="$(bound_tool_path "$gate_toolchain_bin" -- \
             awk bash cc cmp cp date diff env getconf ld mkdir mktemp mv nm \
@@ -1113,6 +1109,60 @@ topic_dir="$repo_root/$topic_rel"
 # still decides what the gates validate. The snapshot sits under `TMPDIR`, so
 # its ancestors are the caller's choice; refuse rather than validate against
 # them. Pure parameter expansion so this adds no tool dependency.
+# Establish the invariant the sweep below depends on. Existence scans describe the chain at
+# the moment they run; Cargo, rustfmt, and Clippy open their ancestor configuration later, so
+# a concurrent writer can create a file after any scan, let the tool read it, and remove it
+# before the next one — every scan passes and the retained log was produced under policy no
+# receipt names. Rechecking narrows that window and never closes it.
+#
+# What closes it is a chain no other user can write. If every directory from the snapshot to
+# the filesystem root is writable only by its owner, the set of configuration files on the
+# search path is fixed for the run, and the sweep below becomes a statement about contents
+# rather than a race. A default `TMPDIR` of `/tmp` is mode 1777 and fails this: the sticky bit
+# stops deletion of another user's files, not creation of new ones. So `TMPDIR` has to be
+# chosen — a directory under `$HOME` normally satisfies it already.
+#
+# Ownership is checked alongside the mode because a directory owned by a third user is
+# writable by them whatever its mode currently says: they can change it.
+require_private_ancestors() {
+    "${tool_path[python3]}" -I -c '
+import os, stat, sys
+
+path = os.path.realpath(sys.argv[1])
+allowed_owners = {os.getuid(), 0}
+problems = []
+while True:
+    try:
+        entry = os.stat(path)
+    except OSError as error:
+        sys.stderr.write(f"cannot inspect the gate configuration chain: {error}\n")
+        raise SystemExit(2)
+    if entry.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+        problems.append(
+            f"{path}: mode {stat.filemode(entry.st_mode)} is writable beyond its owner"
+        )
+    elif entry.st_uid not in allowed_owners:
+        problems.append(
+            f"{path}: owned by uid {entry.st_uid}, which can change its mode"
+        )
+    parent = os.path.dirname(path)
+    if parent == path:
+        break
+    path = parent
+if problems:
+    sys.stderr.write(
+        "gate configuration lookups walk a chain another user can write:\n"
+    )
+    for problem in problems:
+        sys.stderr.write(f"  {problem}\n")
+    sys.stderr.write(
+        "set TMPDIR to a directory whose every ancestor is writable only by its owner\n"
+    )
+    raise SystemExit(2)
+' "$1"
+}
+require_private_ancestors "$repo_root"
+
 require_no_ancestor_gate_config() {
     config_ancestor="$repo_root"
     while :; do
@@ -1153,12 +1203,11 @@ require_no_ancestor_gate_config() {
         [[ -z "$config_ancestor" ]] && config_ancestor=/
     done
 }
-# The snapshot's own parent is the `mktemp -d` tree at mode 0700, but `TMPDIR` and the
-# directories above it are not, and these tools walk to the filesystem root at use time.
-# So this is a function rather than a straight-line sweep: `gate_env` calls it again
-# before each gate execs, and it runs once more after the gates, which turns a file that
-# appears mid-run from unrecorded policy into a failed run. The window between the last
-# check and the tool's own lookup stays open, exactly as it does for the gate `PATH`.
+# The snapshot's own parent is the `mktemp -d` tree at mode 0700, and
+# `require_private_ancestors` has established that nothing above it is writable by another
+# user, so the configuration on the search path cannot change under the gates. This sweep is
+# therefore about what is there, not a race: it refuses a configuration the owner themselves
+# placed above the snapshot, which is unrecorded policy even when it cannot be swapped.
 require_no_ancestor_gate_config
 
 # Resolve the gate toolchain from inside the snapshot, so `rust-toolchain.toml`
@@ -1443,10 +1492,10 @@ compile(source, sys.argv[1], "exec")
 print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
     "${tool_path[bash]}" -n "$topic_rel/experiment/run_remote.sh"
 ) >"$gates_dir/script-syntax.log" 2>&1
-# Sweep once more now that the gates have run. The pre-gate checks inside `gate_env`
-# cannot cover the interval in which each tool performs its own lookup, so a
-# configuration that appeared during the gates would have applied unrecorded. Finding it
-# here does not undo that, but it turns the run into a failure instead of a receipt.
+# Sweep once more now that the gates have run. Only the chain's owner — this user or root —
+# can add a configuration file to it, so this covers the one writer the privacy invariant
+# permits rather than an arbitrary one, and it makes the gate logs above answerable for the
+# policy in force when they were produced rather than only when the run started.
 require_no_ancestor_gate_config
 
 # Name the driver's environment for the same reason the gates' is named. The
