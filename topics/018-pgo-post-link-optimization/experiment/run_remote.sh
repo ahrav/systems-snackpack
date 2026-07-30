@@ -995,23 +995,34 @@ if [[ ! -x "$gate_cargo" ]]; then
     exit 2
 fi
 gate_toolchain_bin="${gate_cargo%/*}"
-# `cargo <command>` is translated into an external `cargo-<command>` found on `PATH`, so a
-# second directory on the gate `PATH` holding any `cargo`-prefixed program would be a
-# fall-through for `cargo fmt` and `cargo clippy` if the toolchain's own helper were hidden
-# after being digested. The gate `PATH` puts the toolchain first, so refuse when any other
-# directory on it could answer instead.
+# The gate `PATH` restricts directories, not names: the toolchain comes first, but every
+# program in the remaining directories is still reachable, so hiding a digested `cargo`,
+# `rustc`, or a `cargo-<command>` helper after it is bound would change resolution rather
+# than fail — and `cargo <command>` is translated into an external `cargo-<command>` found
+# on `PATH`, so the helpers matter as much as `cargo` itself. Refuse when any directory
+# other than the toolchain's own could answer for one of these names.
 for gate_path_directory in $(bound_tool_path -- \
     awk bash cc cmp cp date diff env getconf ld mkdir mktemp mv nm \
     objdump python3 rm sed sha256sum sort tar taskset uname xargs | tr : ' '); do
+    # Only the patterns go through `nullglob`; a word with no metacharacter is not a glob
+    # and would survive as a literal, matching every directory.
     shopt -s nullglob
-    gate_shadowing_helpers=("$gate_path_directory"/cargo*)
+    gate_shadowing_programs=(
+        "$gate_path_directory"/cargo*
+        "$gate_path_directory"/rust-*
+    )
     shopt -u nullglob
-    if ((${#gate_shadowing_helpers[@]} > 0)); then
+    for gate_shadowing_name in rustc rustfmt rustdoc rustup clippy-driver; do
+        if [[ -e "$gate_path_directory/$gate_shadowing_name" ]]; then
+            gate_shadowing_programs+=("$gate_path_directory/$gate_shadowing_name")
+        fi
+    done
+    if ((${#gate_shadowing_programs[@]} > 0)); then
         printf '%s\n' \
-            "a gate PATH directory supplies Cargo programs: $gate_path_directory" \
-            "${gate_shadowing_helpers[@]}" \
-            "cargo resolves its subcommand helpers through PATH, so this directory could" \
-            "answer for a hidden toolchain helper" >&2
+            "a gate PATH directory supplies toolchain programs: $gate_path_directory" \
+            "${gate_shadowing_programs[@]}" \
+            "the gates resolve cargo and its subcommand helpers through PATH, so this" \
+            "directory could answer for a hidden toolchain program" >&2
         exit 2
     fi
 done

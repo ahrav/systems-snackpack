@@ -41,6 +41,7 @@ procfs, `taskset`, `lscpu`, GNU `objdump`, `nm`, and `sha256sum`:
 
 ```bash
 for loader_variable in ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}; do builtin unset "$loader_variable"; done
+[ -z "${!LD_@}${!GLIBC_@}${!MALLOC_@}" ] || { echo "loader variables survived: ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}" >&2; return 1 2>/dev/null || exit 1; }
 /usr/bin/env -i \
   PATH="/usr/bin:/bin:$HOME/.cargo/bin" \
   HOME="$HOME" \
@@ -72,6 +73,13 @@ would execute two of them first. `builtin unset` rather than `unset`, because a 
 function of that name would otherwise answer and leave the variable in place — one more
 reason the requirement above is a shell with no functions either, since `builtin` is
 shadowable in turn and nothing inside the shell can settle it.
+
+The line after the loop is what makes the clearing fail closed. `unset` cannot remove a
+`readonly` variable, and it reports that without stopping the launch, so a readonly
+exported `LD_PRELOAD` would survive into the `env` exec and be processed by the loader
+before `-i` clears the child environment. Testing that the namespaces are empty catches
+that and every other way an entry could persist, rather than trusting the loop's own
+exit status.
 
 `REPOSITORY_ROOT` is `$(/usr/bin/pwd -P)` rather than `$(pwd)` for the same reason: the
 shell builtin can be shadowed by a function, which would hand the wrapper a different tree
