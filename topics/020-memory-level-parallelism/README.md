@@ -102,3 +102,15 @@ The probe does not measure crossing or disambiguation costs. See
 
 See [round 1](rounds/01.md) for the decision record and
 [measurements](measurements/README.md) for retained evidence.
+
+## Retained result
+
+For commit `635f8687466c12889a33b6ae7900b0535a1480c1`, eight paired fresh-process
+runs measured a one/eight steady ratio of 7.7170 [7.6994, 7.7347] on the
+required AArch64 host and 8.1875 [8.0751, 8.3015] on the configured live x86
+host. The brackets are 95% log-t intervals over process-pair contrasts from
+each run window.
+
+The literal instructed x86 endpoint was unreachable; the x86 run used the
+configured `xxl` replacement and is not evidence that the literal endpoint
+completed. See the [cross-host record](measurements/2026-07-30-cross-host.md).

@@ -1,0 +1,21 @@
+utc_start=2026-07-30T15:11:07Z
+Darwin b0f1d8752aba 25.5.0 Darwin Kernel Version 25.5.0: Tue Jun  9 22:18:58 PDT 2026; root:xnu-12377.121.10~1/RELEASE_ARM64_T6000 arm64
+architecture=arm64
+hostname=b0f1d8752aba
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+binary: rustc
+commit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf
+commit-date: 2026-02-11
+host: aarch64-apple-darwin
+release: 1.93.1
+LLVM version: 21.1.8
+cargo 1.93.1 (083ac5135 2025-12-15)
+release: 1.93.1
+commit-hash: 083ac5135f967fd9dc906ab057a2315861c7a80d
+commit-date: 2025-12-15
+host: aarch64-apple-darwin
+libgit2: 1.9.1 (sys:0.20.2 vendored)
+libcurl: 8.7.1 (sys:0.4.83+curl-8.15.0 system ssl:(SecureTransport) LibreSSL/3.3.6)
+ssl: OpenSSL 3.5.4 30 Sep 2025
+os: Mac OS 26.5.2 [64-bit]
+utc_end=2026-07-30T15:11:08Z
