@@ -610,13 +610,15 @@ def inspect_codegen(
     # `cbz`, `cbnz`, `tbz`, and `tbnz` carry their own test, so a guard built from one of
     # them has no preceding compare to find. Requiring a separate compare would reject
     # exactly the forms listed as conditional above.
-    # Mnemonics that end a straight-line path. A call is deliberately absent: `call *%rax`
-    # and `blr` return to the following instruction, so they do not stop a fallthrough from
-    # arriving wherever it was heading. Unrecognised mnemonics are not treated as
-    # terminators, which makes an unknown instruction reject a guard rather than admit one.
-    unconditional_transfer = re.compile(
-        r"^(?:jmp[qlw]?|b|br|ret[q]?|hlt|ud2|brk|udf)$"
-    )
+    # Mnemonics that end a straight-line path without naming a destination: control does
+    # not continue here whatever the operands say.
+    path_terminator = re.compile(r"^(?:ret[q]?|hlt|ud2|brk|udf)$")
+    # Unconditional jumps. Where the destination is concrete it has to be beyond the
+    # promoted call to count as leaving — a forward jump to an address still short of the
+    # call lands back on the path that reaches it. Only a jump whose target is not in the
+    # disassembly, an indirect tail transfer, is accepted without one. `call` and `blr`
+    # appear in neither set because they return to the following instruction.
+    jump_transfer = re.compile(r"^(?:jmp[qlw]?|b|br)$")
     self_testing_mnemonic = re.compile(r"^(?:cbz|cbnz|tbz|tbnz)$")
 
     def branch_destination(operands: str) -> int | None:
@@ -660,13 +662,18 @@ def inspect_codegen(
         def fallthrough_leaves(branch_index: int, call_index: int, call_address: int) -> bool:
             """Report whether the not-taken path departs before the direct call."""
             for between in range(branch_index + 1, call_index):
-                if not unconditional_transfer.match(decoded[between].group(2)):
+                mnemonic = decoded[between].group(2)
+                if path_terminator.match(mnemonic):
+                    return True
+                if not jump_transfer.match(mnemonic):
                     continue
-                # A jump whose destination is the call does not take the path away
-                # from it.
-                if branch_destination(decoded[between].group(3)) == call_address:
-                    continue
-                return True
+                destination = branch_destination(decoded[between].group(3))
+                if destination is None or destination > call_address:
+                    return True
+                # The jump lands at or before the call, so the path it leads to is not
+                # this span and cannot be followed from here. Refuse rather than keep
+                # reading instructions that are no longer on the path.
+                return False
             return False
 
         direct_pattern = direct(target)
