@@ -674,9 +674,14 @@ def inspect_codegen(
                 return (target_index(operands),)
             return (following,)
 
-        def reaches(start: int | None, goal: int) -> bool:
-            """Report whether `goal` is reachable from `start` along those successors."""
-            if start is None:
+        def reaches(start: int | None, goal: int, blocked: int | None = None) -> bool:
+            """Report whether `goal` is reachable from `start` along those successors.
+
+            `blocked` removes one instruction from the graph, which is how the guard's
+            position relative to the entry is established: if deleting a branch makes the
+            call unreachable from the entry, every path to the call runs through it.
+            """
+            if start is None or start == blocked:
                 return False
             seen = set()
             pending = [start]
@@ -684,7 +689,7 @@ def inspect_codegen(
                 position = pending.pop()
                 if position == goal:
                     return True
-                if position in seen:
+                if position in seen or position == blocked:
                     continue
                 seen.add(position)
                 pending.extend(
@@ -698,9 +703,23 @@ def inspect_codegen(
             for position, match in enumerate(decoded)
             if direct_pattern.search(match.group(0))
         ]
+        # The listing starts at the function entry, so index 0 is where every invocation
+        # begins.
+        entry = 0
         for call_index in promoted:
+            # A call the entry cannot reach is not the one being measured, and asymmetry
+            # around it says nothing about the shape that runs.
+            if not reaches(entry, call_index):
+                continue
             for position, match in enumerate(decoded):
                 if not conditional_mnemonic.match(match.group(2)):
+                    continue
+                # Successor asymmetry on its own is satisfied by branches that no
+                # invocation consults before the call — an unreachable one, or one placed
+                # after it whose taken edge is a back edge to it. Require the branch to
+                # sit on every path from the entry to the call, so that whether the call
+                # runs is actually this branch's decision.
+                if reaches(entry, call_index, blocked=position):
                     continue
                 not_taken, taken = edges(position)
                 if reaches(not_taken, call_index) != reaches(taken, call_index):
