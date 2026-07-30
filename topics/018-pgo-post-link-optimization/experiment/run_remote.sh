@@ -4,11 +4,33 @@ set -euo pipefail
 # Validates an exact Linux source tree, runs Topic 18, and writes evidence
 # outside the repository.
 
+# Refuse a startup file rather than clearing one. This runs before the restart
+# below because the restart is already too late: an ordinary non-interactive Bash
+# sources `BASH_ENV` before line one, so by the time any branch here executes the
+# hook has run, and it can export a `PATH` and `set --` the repository and output
+# arguments the restart then forwards. Unsetting the variable at that point
+# removes the only remaining record that unattributed code chose this run's
+# inputs, leaving receipts that name hook-selected tools and paths. A hostile hook
+# can unset the variable itself, which is why the documented invocation is
+# `bash -p` — privileged mode never sources it, and the value stays visible here
+# to be refused. This check covers what remains visible and never destroys it.
+#
+# `builtin printf` because this is the one check that can run in an unprivileged
+# shell, where an imported function answers ahead of the builtin.
+for startup_variable in BASH_ENV ENV; do
+    if [[ -n "${!startup_variable:-}" ]]; then
+        builtin printf '%s\n' \
+            "shell startup file must not be set: $startup_variable=${!startup_variable}" \
+            "it is sourced before this script runs and no receipt records it" >&2
+        exit 2
+    fi
+done
+
 # Restart once in a shell that carries none of the caller's shell state. Bash
 # sources `BASH_ENV` before the first line of a non-interactive script, and a
-# hook can unset the variable, install traps, define functions, and prepend a
-# directory to `PATH` — so a later test for the variable proves nothing and a
-# `PATH` lookup for the relaunch could find a planted `bash`. Replacing the
+# hook can install traps, define functions, prepend a directory to `PATH`, and
+# replace the positional arguments — so the restart cannot undo what already ran,
+# and a `PATH` lookup for the relaunch could find a planted `bash`. Replacing the
 # process image discards traps and shell options, and `/proc/self/exe` is the
 # running interpreter rather than a name resolved through a `PATH` the hook may
 # already own.
@@ -47,7 +69,6 @@ if [[ ! -o privileged ]]; then
             "caller's shell functions and startup files were not excluded" >&2
         exit 2
     fi
-    unset BASH_ENV ENV
     while read -r _ _ imported_function; do
         unset -f "$imported_function"
     done < <(builtin declare -F)
@@ -86,18 +107,6 @@ if ((${#raw_environment_functions[@]} > 0)); then
         "script starts a shell that does, and no receipt records them" >&2
     exit 2
 fi
-# Reaching here means the shell is privileged, so `BASH_ENV` and `ENV` were never
-# processed by it. They can still be set in the environment, and a launcher that
-# started an unprivileged shell earlier would have sourced them before this script
-# began, so refuse rather than infer from the current shell's own immunity.
-for startup_variable in BASH_ENV ENV; do
-    if [[ -n "${!startup_variable:-}" ]]; then
-        printf '%s\n' \
-            "shell startup file must not be set: $startup_variable=${!startup_variable}" \
-            "it is sourced before this script runs and no receipt records it" >&2
-        exit 2
-    fi
-done
 
 if (($# < 2 || $# > 3)); then
     printf 'usage: %s REPOSITORY_ROOT OUTPUT_DIRECTORY [CPU]\n' "$0" >&2
@@ -530,6 +539,77 @@ if [[ "$source_tree_mode" == checkout ]]; then
         exit 2
     fi
     source_commit="$("${tool_path[git]}" -C "$repo_root" rev-parse HEAD)"
+    # A `filter` attribute selects a `filter.<driver>.clean`, `.smudge`, or
+    # `.process` command, and those commands are defined in `.git/config`, which
+    # every source manifest excludes. Both provenance reads on this branch run one:
+    # `status --porcelain` below runs the clean filter on a tracked file whose stat
+    # cache is stale, and `git archive` runs the smudge filter while extracting the
+    # reference tree. That is unrecorded code executing inside the verification that
+    # attests to this source, before `tools.txt` exists. Neither command has a
+    # `--no-filters`, which is why the worktree hash comparison further down passes
+    # that flag and is unaffected.
+    #
+    # Gate on the attribute rather than on the driver definitions. A driver no
+    # attribute selects never runs, and `filter.lfs.*` is present in the global
+    # config of any host with git-lfs installed, so refusing on definitions would
+    # refuse ordinary hosts. An attribute naming a driver with no configured command
+    # is a documented pass-through, but deciding which of the two applies means
+    # reading the same unrecorded `.git/config`, so refuse on selection instead. An
+    # explicit `-filter` is an unset, not a selection, and stays allowed.
+    #
+    # Two views, because the two readers resolve attributes differently. `status`
+    # takes them from the worktree, where `.git/info/attributes` and
+    # `core.attributesFile` also apply and neither is covered by a manifest;
+    # `git archive` takes them from the tree it archives. `check-attr` reports the
+    # effective value and runs no filter itself, as do `ls-files` and `ls-tree`.
+    #
+    # Probe `--source` first. It is what establishes the archive-side view, and an
+    # older git rejects it inside a pipeline whose exit status the reader below does
+    # not observe — which would silently skip that half of the check.
+    if ! printf '' | "${tool_path[git]}" -C "$repo_root" \
+        check-attr -z --stdin --source="$source_commit" filter >/dev/null 2>&1; then
+        printf '%s\n' \
+            "git check-attr does not support --source: ${tool_path[git]}" \
+            "the tree-side attribute view cannot be established, so a smudge filter" \
+            "git archive would run could not be detected here" >&2
+        exit 2
+    fi
+    filter_selection=""
+    for attribute_view in worktree "$source_commit"; do
+        if [[ "$attribute_view" == worktree ]]; then
+            attribute_paths=(-C "$repo_root" -c core.fsmonitor=false ls-files -z)
+            attribute_query=(-C "$repo_root" check-attr -z --stdin filter)
+        else
+            attribute_paths=(-C "$repo_root" ls-tree -r --name-only -z "$attribute_view")
+            attribute_query=(
+                -C "$repo_root" check-attr -z --stdin --source="$attribute_view" filter
+            )
+        fi
+        # `check-attr -z` emits NUL-separated triples of path, attribute, value.
+        while IFS= read -r -d '' attribute_path \
+            && IFS= read -r -d '' _attribute_name \
+            && IFS= read -r -d '' attribute_value; do
+            case "$attribute_value" in
+                unspecified | unset) ;;
+                *)
+                    filter_selection+="$attribute_view: $attribute_path"
+                    filter_selection+=" -> filter=$attribute_value"$'\n'
+                    ;;
+            esac
+        done < <(
+            "${tool_path[git]}" "${attribute_paths[@]}" \
+                | "${tool_path[git]}" "${attribute_query[@]}"
+        )
+    done
+    if [[ -n "$filter_selection" ]]; then
+        printf '%s\n' \
+            "attributes select a filter driver for tracked paths:" \
+            "$filter_selection" \
+            "the driver command lives in .git/config, which no source manifest" \
+            "covers, and git status and git archive would run it during this" \
+            "verification" >&2
+        exit 2
+    fi
     if [[ -n "$("${tool_path[git]}" -C "$repo_root" -c core.fsmonitor=false status --porcelain)" ]]; then
         printf 'repository must be clean\n' >&2
         exit 2
@@ -950,11 +1030,15 @@ topic_dir="$repo_root/$topic_rel"
 config_ancestor="$repo_root"
 while :; do
     # `rustfmt` searches the formatted file's directory and its ancestors for
-    # `rustfmt.toml` or `.rustfmt.toml`, so the `cargo fmt` gate would otherwise run
-    # under a policy from above the snapshot that no manifest covers — the same class
-    # as the Cargo configuration beside it. The snapshot itself is exempt: a
-    # repository-owned formatting policy is inside the verified tree and is what the gate
-    # is supposed to check the repository against.
+    # `rustfmt.toml` or `.rustfmt.toml`, and Clippy searches the manifest directory
+    # and then walks parents to the filesystem root for `clippy.toml` or
+    # `.clippy.toml`, so the `cargo fmt` and `cargo clippy` gates would otherwise
+    # run under a policy from above the snapshot that no manifest covers — the same
+    # class as the Cargo configuration beside it. `CLIPPY_CONF_DIR` would redirect
+    # only Clippy's own lookup, so refuse here instead and keep one rule for all
+    # three. The snapshot itself is exempt: a repository-owned formatting or lint
+    # policy is inside the verified tree and is what the gate is supposed to check
+    # the repository against.
     ancestor_configs=(
         "$config_ancestor/.cargo/config.toml"
         "$config_ancestor/.cargo/config"
@@ -963,13 +1047,15 @@ while :; do
         ancestor_configs+=(
             "$config_ancestor/rustfmt.toml"
             "$config_ancestor/.rustfmt.toml"
+            "$config_ancestor/clippy.toml"
+            "$config_ancestor/.clippy.toml"
         )
     fi
     for ancestor_config in "${ancestor_configs[@]}"; do
         if [[ -e "$ancestor_config" ]]; then
             printf '%s\n' \
                 "configuration above the snapshot would reach the gates: $ancestor_config" \
-                "set TMPDIR to a location with no Cargo or rustfmt configuration above it" >&2
+                "set TMPDIR to a location with no Cargo, rustfmt, or Clippy configuration above it" >&2
             exit 2
         fi
     done
