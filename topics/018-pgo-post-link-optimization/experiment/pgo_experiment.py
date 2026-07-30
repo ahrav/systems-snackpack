@@ -573,11 +573,21 @@ def inspect_codegen(
     compare_mnemonic = re.compile(
         r"^(?:cmp|cmpb|cmpw|cmpl|cmpq|test|testb|testw|testl|testq|subs|cmn)$"
     )
-    # `j(?!mp)` rather than `j(?!mp$)`: the latter excludes only the exact spelling, so
-    # `jmpq` and `jmpl` would pass as conditional and an unconditional jump over the call
-    # would read as a guard. No x86 conditional jump begins with `jmp`.
+    # x86 is handled by excluding a prefix rather than enumerating: `jmp` and its `jmpq`,
+    # `jmpl`, and `jmpw` spellings are the only unconditional jumps, and every conditional
+    # form — Jcc plus `jcxz`/`jecxz`/`jrcxz` — begins with something else. `j(?!mp$)`
+    # would exclude only the bare spelling and let `jmpq` through as a guard.
+    #
+    # AArch64 has to be enumerated, because `al` and `nv` are conditions in the same
+    # `b.<cond>` syntax as the real ones and both execute unconditionally, so a suffix
+    # wildcard would accept `b.al` jumping past the call as a guard. `bc.<cond>` is the
+    # FEAT_HBC hinted form of the same branch and takes the same condition set.
     conditional_mnemonic = re.compile(
-        r"^(?:j(?!mp)[a-z]+|b\.[a-z]+|cbz|cbnz|tbz|tbnz)$"
+        r"^(?:"
+        r"j(?!mp)[a-z]+"
+        r"|bc?\.(?:eq|ne|cs|hs|cc|lo|mi|pl|vs|vc|hi|ls|ge|lt|gt|le)"
+        r"|cbz|cbnz|tbz|tbnz"
+        r")$"
     )
 
     def branch_destination(operands: str) -> int | None:
