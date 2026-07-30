@@ -457,7 +457,68 @@ if [[ "$output_candidate" == "$repo_root" || "$output_candidate" == "$repo_root"
     printf 'OUTPUT_DIRECTORY must be outside the repository\n' >&2
     exit 2
 fi
+# Establish the invariant that two separate checks depend on: the gate configuration
+# sweep further down, and the retained-evidence comparisons at the end. Existence scans describe the chain at
+# the moment they run; Cargo, rustfmt, and Clippy open their ancestor configuration later, so
+# a concurrent writer can create a file after any scan, let the tool read it, and remove it
+# before the next one — every scan passes and the retained log was produced under policy no
+# receipt names. Rechecking narrows that window and never closes it.
+#
+# What closes it is a chain no other user can write. If every directory from the snapshot to
+# the filesystem root is writable only by its owner, the set of configuration files on the
+# search path is fixed for the run, and the sweep below becomes a statement about contents
+# rather than a race. A default `TMPDIR` of `/tmp` is mode 1777 and fails this: the sticky bit
+# stops deletion of another user's files, not creation of new ones. So `TMPDIR` has to be
+# chosen — a directory under `$HOME` normally satisfies it already.
+#
+# Ownership is checked alongside the mode because a directory owned by a third user is
+# writable by them whatever its mode currently says: they can change it.
+require_private_ancestors() {
+    "${tool_path[python3]}" -I -c '
+import os, stat, sys
+
+path = os.path.realpath(sys.argv[1])
+allowed_owners = {os.getuid(), 0}
+problems = []
+while True:
+    try:
+        entry = os.stat(path)
+    except OSError as error:
+        sys.stderr.write(f"cannot inspect the {sys.argv[2]} chain: {error}\n")
+        raise SystemExit(2)
+    if entry.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
+        problems.append(
+            f"{path}: mode {stat.filemode(entry.st_mode)} is writable beyond its owner"
+        )
+    elif entry.st_uid not in allowed_owners:
+        problems.append(
+            f"{path}: owned by uid {entry.st_uid}, which can change its mode"
+        )
+    parent = os.path.dirname(path)
+    if parent == path:
+        break
+    path = parent
+if problems:
+    sys.stderr.write(f"the {sys.argv[2]} chain is writable by another user:\n")
+    for problem in problems:
+        sys.stderr.write(f"  {problem}\n")
+    sys.stderr.write(
+        "choose a path whose every ancestor is writable only by its owner\n"
+    )
+    raise SystemExit(2)
+' "$1" "$2"
+}
 "${tool_path[mkdir]}" -p -- "$output_dir"
+# Drop group and other write on the directory this run is about to fill. Everything in
+# it is authenticated by `evidence.sha256`, and that authentication means something only
+# if no other user can rewrite a file between the run producing it and the manifest
+# hashing it. Read and execute are untouched, so the evidence stays shareable. A caller
+# `umask` of 002 would otherwise leave the directory group-writable and fail the check
+# below on a directory this script created itself. `chmod` is not in the required-tool
+# set, and `python3` already is.
+"${tool_path[python3]}" -I -c 'import os, stat, sys
+path = sys.argv[1]
+os.chmod(path, os.stat(path).st_mode & ~(stat.S_IWGRP | stat.S_IWOTH))' "$output_dir"
 output_dir="$(cd -- "$output_dir" && pwd -P)"
 # The candidate above resolved the path that did not exist yet. Re-test the created
 # directory: between the two, a component could have been replaced by a symlink
@@ -466,6 +527,13 @@ if [[ "$output_dir" == "$repo_root" || "$output_dir" == "$repo_root"/* ]]; then
     printf 'OUTPUT_DIRECTORY must be outside the repository\n' >&2
     exit 2
 fi
+# Every retained-evidence check at the end of this run — the retained directory identities,
+# the exact path sets, the receipt digests — is a check against a writer. None of them can
+# cover the interval between a file being written and the manifest hashing it, so each one
+# narrows a window rather than closing it. Requiring the chain to this directory to be
+# writable only by its owner removes the writer instead, which is what makes those checks
+# statements about this run rather than races against another one.
+require_private_ancestors "$output_dir" "retained evidence"
 
 # Claim the directory with one atomic `mkdir`. The emptiness test above and the
 # creation below do not establish ownership, so two runs aimed at the same absent or
@@ -1109,59 +1177,7 @@ topic_dir="$repo_root/$topic_rel"
 # still decides what the gates validate. The snapshot sits under `TMPDIR`, so
 # its ancestors are the caller's choice; refuse rather than validate against
 # them. Pure parameter expansion so this adds no tool dependency.
-# Establish the invariant the sweep below depends on. Existence scans describe the chain at
-# the moment they run; Cargo, rustfmt, and Clippy open their ancestor configuration later, so
-# a concurrent writer can create a file after any scan, let the tool read it, and remove it
-# before the next one — every scan passes and the retained log was produced under policy no
-# receipt names. Rechecking narrows that window and never closes it.
-#
-# What closes it is a chain no other user can write. If every directory from the snapshot to
-# the filesystem root is writable only by its owner, the set of configuration files on the
-# search path is fixed for the run, and the sweep below becomes a statement about contents
-# rather than a race. A default `TMPDIR` of `/tmp` is mode 1777 and fails this: the sticky bit
-# stops deletion of another user's files, not creation of new ones. So `TMPDIR` has to be
-# chosen — a directory under `$HOME` normally satisfies it already.
-#
-# Ownership is checked alongside the mode because a directory owned by a third user is
-# writable by them whatever its mode currently says: they can change it.
-require_private_ancestors() {
-    "${tool_path[python3]}" -I -c '
-import os, stat, sys
-
-path = os.path.realpath(sys.argv[1])
-allowed_owners = {os.getuid(), 0}
-problems = []
-while True:
-    try:
-        entry = os.stat(path)
-    except OSError as error:
-        sys.stderr.write(f"cannot inspect the gate configuration chain: {error}\n")
-        raise SystemExit(2)
-    if entry.st_mode & (stat.S_IWGRP | stat.S_IWOTH):
-        problems.append(
-            f"{path}: mode {stat.filemode(entry.st_mode)} is writable beyond its owner"
-        )
-    elif entry.st_uid not in allowed_owners:
-        problems.append(
-            f"{path}: owned by uid {entry.st_uid}, which can change its mode"
-        )
-    parent = os.path.dirname(path)
-    if parent == path:
-        break
-    path = parent
-if problems:
-    sys.stderr.write(
-        "gate configuration lookups walk a chain another user can write:\n"
-    )
-    for problem in problems:
-        sys.stderr.write(f"  {problem}\n")
-    sys.stderr.write(
-        "set TMPDIR to a directory whose every ancestor is writable only by its owner\n"
-    )
-    raise SystemExit(2)
-' "$1"
-}
-require_private_ancestors "$repo_root"
+require_private_ancestors "$repo_root" "gate configuration lookup"
 
 require_no_ancestor_gate_config() {
     config_ancestor="$repo_root"
@@ -1698,27 +1714,30 @@ fi
 # Hold the manifest to the receipt digests taken when the last one was written, not to
 # their names. A name test accepts a same-named file another writer put there, and the
 # manifest would hash that file — so the run would authenticate a receipt it did not
-# produce. Comparing digests covers deletion and replacement together, since a missing
-# path drops its line from the manifest extract.
+# produce.
+#
+# Compared with `cmp` as two sorted files rather than by searching the manifest for each
+# expected line. A fixed-string search is a substring match, so a planted `tools.txt.bak`
+# carrying the same digest satisfies the probe for `tools.txt` while the real receipt is
+# gone. An exact comparison also rejects an unexpected extra entry at the top level, which
+# a per-line search cannot see at all: the receipts below are the complete top-level set,
+# since `evidence.sha256` is written after this walk and the run lock is a directory that
+# `rg --files` does not list.
 top_level_manifest="$scratch_dir/top-level.manifest"
 "${tool_path[sed]}" -n 's|^\([0-9a-f]\{64\}\)  \./\([^/]*\)$|\1  \2|p' "$manifest_tmp" \
-    | LC_ALL=C "${tool_path[sort]}" -k2 >"$top_level_manifest"
+    | LC_ALL=C "${tool_path[sort]}" >"$top_level_manifest"
 top_level_expected="$scratch_dir/top-level.expected"
-LC_ALL=C "${tool_path[sort]}" -k2 "$top_level_digests" >"$top_level_expected"
-top_level_drift=""
-while read -r expected_digest expected_receipt; do
-    if ! "${tool_path[rg]}" --no-config -qF "$expected_digest  $expected_receipt" \
-        "$top_level_manifest"; then
-        top_level_drift+="$expected_receipt"$'\n'
-    fi
-done <"$top_level_expected"
-if [[ -n "$top_level_drift" ]]; then
-    printf '%s\n%s' \
-        "evidence manifest does not match the receipts this run wrote:" \
-        "$top_level_drift" >&2
+LC_ALL=C "${tool_path[sort]}" "$top_level_digests" >"$top_level_expected"
+if ! "${tool_path[cmp]}" -s "$top_level_expected" "$top_level_manifest"; then
+    printf 'evidence manifest does not match the receipts this run wrote:\n' >&2
+    LC_ALL=C "${tool_path[diff]}" -- "$top_level_expected" "$top_level_manifest" >&2 || true
     exit 1
 fi
-"${tool_path[mv]}" -- "$manifest_tmp" "$output_dir/evidence.sha256"
+# `-T` because without it an existing directory named `evidence.sha256` is treated as the
+# destination directory: the manifest would be moved inside it and the run would exit
+# successfully with no manifest at the top level. With `-T` the destination is the name
+# itself, so a directory there fails the move.
+"${tool_path[mv]}" -T -- "$manifest_tmp" "$output_dir/evidence.sha256"
 # Remove the scratch tree here and disarm the trap rather than leaving cleanup to
 # run on exit. An EXIT trap fires after the last comparison below, so the `rm` it
 # runs would be the one program in the run that no digest check ever covers.

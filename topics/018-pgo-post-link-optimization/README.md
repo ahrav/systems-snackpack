@@ -50,16 +50,19 @@ mkdir -p -m 700 "$HOME/topic18-scratch"
   /usr/bin/bash -p \
   topics/018-pgo-post-link-optimization/experiment/run_remote.sh \
   "$(/usr/bin/pwd -P)" \
-  /tmp/topic18-evidence
+  "$HOME/topic18-evidence"
 ```
 
-`TMPDIR` is named rather than defaulted because the immutable source snapshot is created
-beneath it, and Cargo, rustfmt, and Clippy resolve their configuration by walking from that
-snapshot to the filesystem root while the gates run. The run therefore requires every
-directory on that chain to be writable only by its owner, so the configuration on the search
-path cannot change under the gates. A default `/tmp` is mode 1777 and fails that: the sticky
-bit prevents deleting another user's files, not creating new ones. A directory under `$HOME`
-normally satisfies it, and the run refuses with the offending path if it does not.
+`TMPDIR` and `OUTPUT_DIRECTORY` are both named under `$HOME` rather than left in `/tmp`,
+because the run requires every directory on the chain to each of them to be writable only by
+its owner. For `TMPDIR` that is because the immutable source snapshot lives beneath it, and
+Cargo, rustfmt, and Clippy resolve their configuration by walking from that snapshot to the
+filesystem root while the gates run. For the output directory it is because every retained
+file is authenticated by `evidence.sha256`, and no check can cover the interval between a file
+being written and the manifest hashing it — so the guarantee has to come from there being no
+other writer rather than from checking for one. A default `/tmp` is mode 1777 and fails both:
+the sticky bit prevents deleting another user's files, not creating new ones. A directory under
+`$HOME` normally satisfies it, and the run refuses with the offending path if it does not.
 
 Launch from a shell that never inherited the loader namespace. That is a requirement, not
 a preference, and the loop above does not substitute for it: if this shell was itself

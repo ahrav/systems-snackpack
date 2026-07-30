@@ -20,6 +20,19 @@ import statistics
 import subprocess
 import sys
 import time
+from typing import NamedTuple
+
+
+class GuardShape(NamedTuple):
+    """What the dispatch control flow says about one promoted call.
+
+    Both fields come from the same successor graph and the same guard branch, so they
+    describe one shape rather than two independent searches that happen to agree.
+    """
+
+    guarded: bool
+    fallback_reachable: bool
+
 
 
 # Variables every recorded command must carry, whether or not the driver set
@@ -622,8 +635,8 @@ def inspect_codegen(
                 continue
         return None
 
-    def guarded_promotion(body: str, target: str) -> bool:
-        """Report whether the promoted call sits on exactly one edge of a branch.
+    def guarded_promotion(body: str, target: str) -> GuardShape:
+        """Describe the promoted call's position in the dispatch control flow.
 
         This is a reachability question and is answered as one. Comparing addresses
         cannot decide it: a transfer that leaves before the call can land past the call
@@ -639,6 +652,10 @@ def inspect_codegen(
         `adds`, `ands`, `tst`, and `fcmp` set flags without being a compare. What the
         claim rests on is the edge asymmetry, which is what this measures.
 
+        The fallback is answered on the same graph: the guard edge that does not reach
+        the promoted call must reach an indirect transfer, so the shape recorded is one
+        the candidate actually has rather than one assembled from separate searches.
+
         What it does not establish is that the branch tests the trained target's
         address. That operand is usually materialised into a register first, so the
         disassembly does not carry it; `no_direct_untrained_target` and the baseline
@@ -650,7 +667,7 @@ def inspect_codegen(
             if match is not None
         ]
         if not decoded:
-            return False
+            return GuardShape(False, False)
         index_of_address = {
             int(match.group(1), 16): position for position, match in enumerate(decoded)
         }
@@ -700,6 +717,24 @@ def inspect_codegen(
                 )
             return False
 
+        def reaches_indirect(start: int | None, avoid: int) -> bool:
+            """Report whether an indirect transfer is reachable without reaching `avoid`."""
+            if start is None:
+                return False
+            seen = set()
+            pending = [start]
+            while pending:
+                position = pending.pop()
+                if position == avoid or position in seen:
+                    continue
+                seen.add(position)
+                if indirect.search(decoded[position].group(0)):
+                    return True
+                pending.extend(
+                    successor for successor in edges(position) if successor is not None
+                )
+            return False
+
         direct_pattern = direct(target)
         promoted = [
             position
@@ -725,9 +760,16 @@ def inspect_codegen(
                 if reaches(entry, call_index, blocked=position):
                     continue
                 not_taken, taken = edges(position)
-                if reaches(not_taken, call_index) != reaches(taken, call_index):
-                    return True
-        return False
+                promoted_edge_reaches = reaches(not_taken, call_index)
+                if promoted_edge_reaches == reaches(taken, call_index):
+                    continue
+                # The other edge has to arrive somewhere that dispatches indirectly.
+                # Searching the whole body for an indirect instruction instead would count
+                # one sitting in a block this guard never reaches, and then the retained
+                # shape claims a fallback the candidate does not have.
+                other_edge = taken if promoted_edge_reaches else not_taken
+                return GuardShape(True, reaches_indirect(other_edge, call_index))
+        return GuardShape(False, False)
 
     baseline_body = dispatch_bodies["baseline"]
     baseline_has_indirect = indirect.search(baseline_body) is not None
@@ -762,10 +804,11 @@ def inspect_codegen(
         # separate compare test would also disagree with it, because the guard forms it
         # accepts include `test`, `subs`, and `cmn`, so a promotion guarded by `subs`
         # plus `cbz` would satisfy the guard and fail the compare test.
+        shape = guarded_promotion(body, mode)
         candidate = {
             "direct_trained_target": direct(mode).search(body) is not None,
-            "guarded_trained_target": guarded_promotion(body, mode),
-            "indirect_fallback": indirect.search(body) is not None,
+            "guarded_trained_target": shape.guarded,
+            "indirect_fallback": shape.fallback_reachable,
             "no_direct_untrained_target": direct(other_mode).search(body) is None,
         }
         if not all(candidate.values()):

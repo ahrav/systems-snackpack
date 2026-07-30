@@ -173,9 +173,34 @@ done
 # `archive`, `rev-parse`, and `ls-tree` output. Run this recipe as
 # `bash -p handoff.sh`, not by pasting it into an interactive shell.
 [[ -o privileged ]] || { printf 'run this recipe with bash -p\n' >&2; exit 2; }
+# `bash -p` declines to import the caller's functions into *this* shell, but the
+# `BASH_FUNC_name%%` entries carrying them stay in the environment and are inherited by
+# every child. The per-file hash below runs `sh -c`, and where `sh` is Bash that shell
+# imports them — so a caller function named `git` would answer `git hash-object` and
+# forge the archive-versus-commit proof. `compgen -e` cannot report these names because
+# they are not valid identifiers, so read the raw environment, which is the only place
+# they are visible. Same check the receiver performs on itself.
+while IFS= read -r -d '' environment_entry; do
+  case "$environment_entry" in
+    BASH_FUNC_*)
+      printf 'exported shell function must not be set: %s\n' \
+        "${environment_entry%%=*}" >&2
+      exit 2
+      ;;
+  esac
+done <"/proc/$$/environ"
 export PATH="/usr/bin:/bin:$HOME/.cargo/bin"
-archive=/tmp/topic18-source.tar
+# Both retained artifacts live inside the private `mktemp -d` tree, not in `/tmp`
+# directly. On a world-writable `/tmp` another local process can replace the archive or
+# the manifest after the proof below has checked the extraction and before the final
+# `sha256sum` prints the digests — the receiver would then hold a self-consistent pair
+# that was never compared with the commit, and archive mode gives it no way to notice.
+# `mktemp -d` creates at mode 0700, so digest and transfer from there.
 scratch="$(mktemp -d)"
+archive="$scratch/topic18-source.tar"
+manifest="$scratch/topic18-source-files.sha256"
+extracted="$scratch/extracted"
+mkdir -p "$extracted"
 unset TAR_OPTIONS
 # Clear Git's local repository environment before any command below. `GIT_DIR`,
 # `GIT_WORK_TREE`, `GIT_OBJECT_DIRECTORY`, `GIT_INDEX_FILE`, and the rest of
@@ -191,7 +216,7 @@ GIT_NO_REPLACE_OBJECTS=1 git -c tar.umask=0 archive \
 # would strip the executable bits that `git archive -c tar.umask=0` just
 # preserved. The proof below derives `100755` from `-x`, so a sender umask such as
 # `0111` would otherwise make a correct archive fail this comparison.
-tar --same-permissions -xf "$archive" -C "$scratch"
+tar --same-permissions -xf "$archive" -C "$extracted"
 # The archive must be the whole commit, byte for byte, with its modes.
 # `export-ignore` omits paths and `export-subst` rewrites contents, from a
 # tracked `.gitattributes` or from the sender-local `$GIT_DIR/info/attributes`,
@@ -211,16 +236,16 @@ LC_ALL=C diff \
   <(GIT_NO_REPLACE_OBJECTS=1 git ls-tree -r \
       --format='%(objectmode) %(objectname) %(path)' <source_commit> \
       | LC_ALL=C sort) \
-  <(cd "$scratch" && rg --no-config --files -uu -g '!.git/' -g '!.git' \
+  <(cd "$extracted" && rg --no-config --files -uu -g '!.git/' -g '!.git' \
       -g '!target/' -0 \
       | xargs -0 -n1 sh -c \
           'if [ -x "$0" ]; then mode=100755; else mode=100644; fi
            printf "%s %s %s\n" "$mode" \
              "$(GIT_NO_REPLACE_OBJECTS=1 git hash-object --no-filters -- "$0")" "$0"' \
       | LC_ALL=C sort)
-(cd "$scratch" && rg --no-config --files -uu -g '!.git/' -g '!.git' -g '!target/' -0 \
-  | LC_ALL=C sort -z | xargs -0 sha256sum --) > /tmp/topic18-source-files.sha256
-sha256sum "$archive" /tmp/topic18-source-files.sha256
+(cd "$extracted" && rg --no-config --files -uu -g '!.git/' -g '!.git' -g '!target/' -0 \
+  | LC_ALL=C sort -z | xargs -0 sha256sum --) > "$manifest"
+sha256sum "$archive" "$manifest"
 ```
 
 The retained archive and manifest digests bind the transferred archive and
