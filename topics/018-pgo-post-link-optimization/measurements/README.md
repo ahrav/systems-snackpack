@@ -158,7 +158,11 @@ set -euo pipefail
 # it can be established. `GLIBC_TUNABLES` and the `MALLOC_*` knobs are swept for the
 # same reason the wrapper sweeps them. Refuse rather than clear: a value here means
 # something already chose it, and that choice is not recorded anywhere.
-for loader_variable in $(env | sed -n 's/^\(LD_[A-Z_]*\|GLIBC_[A-Z_]*\|MALLOC_[A-Z_]*\)=.*/\1/p'); do
+#
+# `${!LD_@}` and `printf` are a shell expansion and a builtin, so this check starts no
+# process. Reaching for `env | sed` here would run two programs under the very loader
+# state being refused, which is the situation the check exists to prevent.
+for loader_variable in ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}; do
   printf 'loader environment must be unset for the handoff proof: %s\n' \
     "$loader_variable" >&2
   exit 2

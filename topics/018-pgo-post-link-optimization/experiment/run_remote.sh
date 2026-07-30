@@ -327,6 +327,10 @@ gate_env() {
     # name. `require_unshadowed_gate_path` is defined further down but is only ever
     # called from here and from that scan, both of which run after its definition.
     require_unshadowed_gate_path
+    # Same reason, for the configuration these tools look up rather than the programs:
+    # rustfmt and Clippy walk to the filesystem root when they run, and `TMPDIR`'s
+    # ancestors stay writable after the sweep further down passes.
+    require_no_ancestor_gate_config
     "${tool_path[env]}" -i \
         PATH="$(bound_tool_path "$gate_toolchain_bin" -- \
             awk bash cc cmp cp date diff env getconf ld mkdir mktemp mv nm \
@@ -933,8 +937,17 @@ if [[ "$source_commit_verification" == git-checkout ]]; then
             ;;
         esac
     done < <(
-        "${tool_path[git]}" -C "$input_root" ls-tree -r -z \
-            --format='%(objectmode) %(objectname) %(path)' "$source_commit"
+        # Report failure in band, for the reason the attribute scan does: this reader
+        # cannot see the substitution's exit status, so `set -e` and `pipefail` do not
+        # stop it when `ls-tree` fails. It would then leave `tree_drift`, `blob_paths`,
+        # and `blob_objects` empty and every check below would be skipped rather than
+        # run — a host git that rejects this `--format` form would silently admit an
+        # unsupported tree entry, which `rg --files` also omits. Emitting a mode this
+        # `case` cannot handle makes the failure land in `tree_drift`.
+        if ! "${tool_path[git]}" -C "$input_root" ls-tree -r -z \
+            --format='%(objectmode) %(objectname) %(path)' "$source_commit"; then
+            printf 'ls-tree-failed 0 /commit-tree-scan-failed\0'
+        fi
     )
     # Hash the worktree files and compare object identities. One `hash-object`
     # call covers the whole tree, and it reads the files rather than the index,
@@ -1100,44 +1113,53 @@ topic_dir="$repo_root/$topic_rel"
 # still decides what the gates validate. The snapshot sits under `TMPDIR`, so
 # its ancestors are the caller's choice; refuse rather than validate against
 # them. Pure parameter expansion so this adds no tool dependency.
-config_ancestor="$repo_root"
-while :; do
-    # `rustfmt` searches the formatted file's directory and its ancestors for
-    # `rustfmt.toml` or `.rustfmt.toml`, and Clippy searches the manifest directory
-    # and then walks parents to the filesystem root for `clippy.toml` or
-    # `.clippy.toml`, so the `cargo fmt` and `cargo clippy` gates would otherwise
-    # run under a policy from above the snapshot that no manifest covers — the same
-    # class as the Cargo configuration beside it. The snapshot itself is exempt: a
-    # repository-owned formatting or lint policy is inside the verified tree and is
-    # what the gate is supposed to check the repository against.
-    #
-    # This refusal, not `CLIPPY_CONF_DIR`, is what covers Clippy. That variable moves
-    # where the search starts; it does not stop it walking parents, so pointing it at
-    # the snapshot would still reach these same ancestors and close nothing.
-    ancestor_configs=(
-        "$config_ancestor/.cargo/config.toml"
-        "$config_ancestor/.cargo/config"
-    )
-    if [[ "$config_ancestor" != "$repo_root" ]]; then
-        ancestor_configs+=(
-            "$config_ancestor/rustfmt.toml"
-            "$config_ancestor/.rustfmt.toml"
-            "$config_ancestor/clippy.toml"
-            "$config_ancestor/.clippy.toml"
+require_no_ancestor_gate_config() {
+    config_ancestor="$repo_root"
+    while :; do
+        # `rustfmt` searches the formatted file's directory and its ancestors for
+        # `rustfmt.toml` or `.rustfmt.toml`, and Clippy searches the manifest directory
+        # and then walks parents to the filesystem root for `clippy.toml` or
+        # `.clippy.toml`, so the `cargo fmt` and `cargo clippy` gates would otherwise
+        # run under a policy from above the snapshot that no manifest covers — the same
+        # class as the Cargo configuration beside it. The snapshot itself is exempt: a
+        # repository-owned formatting or lint policy is inside the verified tree and is
+        # what the gate is supposed to check the repository against.
+        #
+        # This refusal, not `CLIPPY_CONF_DIR`, is what covers Clippy. That variable moves
+        # where the search starts; it does not stop it walking parents, so pointing it at
+        # the snapshot would still reach these same ancestors and close nothing.
+        ancestor_configs=(
+            "$config_ancestor/.cargo/config.toml"
+            "$config_ancestor/.cargo/config"
         )
-    fi
-    for ancestor_config in "${ancestor_configs[@]}"; do
-        if [[ -e "$ancestor_config" ]]; then
-            printf '%s\n' \
-                "configuration above the snapshot would reach the gates: $ancestor_config" \
-                "set TMPDIR to a location with no Cargo, rustfmt, or Clippy configuration above it" >&2
-            exit 2
+        if [[ "$config_ancestor" != "$repo_root" ]]; then
+            ancestor_configs+=(
+                "$config_ancestor/rustfmt.toml"
+                "$config_ancestor/.rustfmt.toml"
+                "$config_ancestor/clippy.toml"
+                "$config_ancestor/.clippy.toml"
+            )
         fi
+        for ancestor_config in "${ancestor_configs[@]}"; do
+            if [[ -e "$ancestor_config" ]]; then
+                printf '%s\n' \
+                    "configuration above the snapshot would reach the gates: $ancestor_config" \
+                    "set TMPDIR to a location with no Cargo, rustfmt, or Clippy configuration above it" >&2
+                exit 2
+            fi
+        done
+        [[ "$config_ancestor" == "/" ]] && break
+        config_ancestor="${config_ancestor%/*}"
+        [[ -z "$config_ancestor" ]] && config_ancestor=/
     done
-    [[ "$config_ancestor" == "/" ]] && break
-    config_ancestor="${config_ancestor%/*}"
-    [[ -z "$config_ancestor" ]] && config_ancestor=/
-done
+}
+# The snapshot's own parent is the `mktemp -d` tree at mode 0700, but `TMPDIR` and the
+# directories above it are not, and these tools walk to the filesystem root at use time.
+# So this is a function rather than a straight-line sweep: `gate_env` calls it again
+# before each gate execs, and it runs once more after the gates, which turns a file that
+# appears mid-run from unrecorded policy into a failed run. The window between the last
+# check and the tool's own lookup stays open, exactly as it does for the gate `PATH`.
+require_no_ancestor_gate_config
 
 # Resolve the gate toolchain from inside the snapshot, so `rust-toolchain.toml`
 # selects it exactly as the receipts claim, then use that toolchain's own bin
@@ -1421,6 +1443,11 @@ compile(source, sys.argv[1], "exec")
 print("parsed:", sys.argv[1])' "$topic_rel/experiment/pgo_experiment.py"
     "${tool_path[bash]}" -n "$topic_rel/experiment/run_remote.sh"
 ) >"$gates_dir/script-syntax.log" 2>&1
+# Sweep once more now that the gates have run. The pre-gate checks inside `gate_env`
+# cannot cover the interval in which each tool performs its own lookup, so a
+# configuration that appeared during the gates would have applied unrecorded. Finding it
+# here does not undo that, but it turns the run into a failure instead of a receipt.
+require_no_ancestor_gate_config
 
 # Name the driver's environment for the same reason the gates' is named. The
 # probe builds link through `cc`, which reads `LIBRARY_PATH`, `COMPILER_PATH`,
@@ -1512,6 +1539,33 @@ if ! "${tool_path[cmp]}" -s \
     printf 'source files changed during evidence collection\n' >&2
     exit 1
 fi
+# Every top-level receipt this run writes exists by now — `source-files.after.sha256`
+# above is the last of them — so digest them here, before the checks that follow and
+# before the manifest walk. Comparing the manifest against names only would accept a
+# same-named file put there by another writer, and `evidence.sha256` would then
+# authenticate that file instead of the receipt this run produced. The comparison itself
+# is further down, where the manifest exists.
+expected_top_level=(
+    host.txt
+    process.log
+    source-files.after.sha256
+    source-files.before.sha256
+    source-files.origin.sha256
+    source-provenance.txt
+    tools.txt
+)
+# Which `source-files.*.sha256` exists is decided by the source mode: the checkout branch
+# reproduces the manifest from the commit, the archive branch from the tarball.
+if [[ "$source_commit_verification" == git-checkout ]]; then
+    expected_top_level+=(source-files.commit.sha256)
+else
+    expected_top_level+=(source-files.archive.sha256)
+fi
+top_level_digests="$scratch_dir/top-level.written"
+(
+    cd "$output_dir"
+    LC_ALL=C "${tool_path[sha256sum]}" -- "${expected_top_level[@]}"
+) >"$top_level_digests"
 # The manifests hash contents, so they cannot see an executable bit that a gate or the
 # driver changed, and the mode comparisons all ran before those steps. Compare modes
 # against the verified input again, so the retained evidence covers the modes the run
@@ -1592,38 +1646,27 @@ if ! "${tool_path[cmp]}" -s "$experiment_paths_driver" "$experiment_paths_manife
         "$experiment_paths_driver" "$experiment_paths_manifest" >&2 || true
     exit 1
 fi
-# The receipts at the top level are covered by the same reasoning as the two
-# subdirectories: they are written by this script, so the manifest can be held to the
-# set rather than trusted to have found them. Without this, deleting or replacing
-# `tools.txt`, `host.txt`, `process.log`, or a `source-files.*.sha256` before the walk
-# leaves a manifest that authenticates the omission. Compared as a subset rather than
-# an exact set, because which `source-files.*.sha256` files exist depends on the source
-# mode — `.commit` on the checkout branch, `.archive` on the other — and `evidence.sha256`
-# itself is not in the walk that produces it.
-expected_top_level=(
-    host.txt
-    process.log
-    source-files.after.sha256
-    source-files.before.sha256
-    source-files.origin.sha256
-    source-provenance.txt
-    tools.txt
-)
-if [[ "$source_commit_verification" == git-checkout ]]; then
-    expected_top_level+=(source-files.commit.sha256)
-else
-    expected_top_level+=(source-files.archive.sha256)
-fi
-top_level_missing=""
-for expected_receipt in "${expected_top_level[@]}"; do
-    if ! "${tool_path[rg]}" --no-config -qF "  ./$expected_receipt" "$manifest_tmp"; then
-        top_level_missing+="$expected_receipt"$'\n'
+# Hold the manifest to the receipt digests taken when the last one was written, not to
+# their names. A name test accepts a same-named file another writer put there, and the
+# manifest would hash that file — so the run would authenticate a receipt it did not
+# produce. Comparing digests covers deletion and replacement together, since a missing
+# path drops its line from the manifest extract.
+top_level_manifest="$scratch_dir/top-level.manifest"
+"${tool_path[sed]}" -n 's|^\([0-9a-f]\{64\}\)  \./\([^/]*\)$|\1  \2|p' "$manifest_tmp" \
+    | LC_ALL=C "${tool_path[sort]}" -k2 >"$top_level_manifest"
+top_level_expected="$scratch_dir/top-level.expected"
+LC_ALL=C "${tool_path[sort]}" -k2 "$top_level_digests" >"$top_level_expected"
+top_level_drift=""
+while read -r expected_digest expected_receipt; do
+    if ! "${tool_path[rg]}" --no-config -qF "$expected_digest  $expected_receipt" \
+        "$top_level_manifest"; then
+        top_level_drift+="$expected_receipt"$'\n'
     fi
-done
-if [[ -n "$top_level_missing" ]]; then
+done <"$top_level_expected"
+if [[ -n "$top_level_drift" ]]; then
     printf '%s\n%s' \
-        "evidence manifest does not cover receipts this run writes:" \
-        "$top_level_missing" >&2
+        "evidence manifest does not match the receipts this run wrote:" \
+        "$top_level_drift" >&2
     exit 1
 fi
 "${tool_path[mv]}" -- "$manifest_tmp" "$output_dir/evidence.sha256"

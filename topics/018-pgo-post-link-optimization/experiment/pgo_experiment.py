@@ -604,8 +604,11 @@ def inspect_codegen(
     # name no destination in this function.
     path_terminator = re.compile(r"^(?:ret[q]?|hlt|ud2|brk|udf)$")
     # Unconditional transfers. `call`, `bl`, and `blr` are absent because they return to
-    # the following instruction, so they do continue.
-    jump_transfer = re.compile(r"^(?:jmp[qlw]?|b|br)$")
+    # the following instruction, so they do continue. `b.al` and `b.nv` belong here rather
+    # than with the conditional branches: they use the conditional encoding but always
+    # execute, so modelling them as fall-through would give the following instruction an
+    # edge it does not have and could make an unreachable call look guarded.
+    jump_transfer = re.compile(r"^(?:jmp[qlw]?|b|br|bc?\.(?:al|nv))$")
 
     def branch_destination(operands: str) -> int | None:
         """Return a transfer's destination address, or None when it is not concrete."""
