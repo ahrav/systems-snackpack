@@ -202,10 +202,16 @@ export PATH="/usr/bin:/bin:$HOME/.cargo/bin"
 # world-writable parent lets another user rename the 0700 child out of the way whatever
 # its mode says. This leaves the same-uid residue the receiver documents; run the handoff
 # on a host where nothing else is acting as this user.
-export TMPDIR="$HOME/topic18-handoff"
+TMPDIR="$HOME/topic18-handoff"
 mkdir -p -m 700 "$TMPDIR"
-python3 -I -c 'import os, stat, sys
-path = os.path.realpath(sys.argv[1])
+# Validate, then use the canonical path. Validating the resolved chain while `mktemp` walks
+# the lexical one leaves the two disagreeing: if `$TMPDIR` is reached through a symlink under
+# a writable directory, the target chain can pass this check and the symlink can be repointed
+# before `mktemp -d` follows it. Assigning the resolved path back means `mktemp` traverses the
+# directories that were actually checked.
+TMPDIR="$(python3 -I -c 'import os, stat, sys
+resolved = os.path.realpath(sys.argv[1])
+path = resolved
 while True:
     entry = os.stat(path)
     if entry.st_mode & (stat.S_IWGRP | stat.S_IWOTH) or entry.st_uid not in (os.getuid(), 0):
@@ -213,7 +219,9 @@ while True:
     parent = os.path.dirname(path)
     if parent == path:
         break
-    path = parent' "$TMPDIR"
+    path = parent
+print(resolved)' "$TMPDIR")"
+export TMPDIR
 scratch="$(mktemp -d)"
 archive="$scratch/topic18-source.tar"
 manifest="$scratch/topic18-source-files.sha256"
