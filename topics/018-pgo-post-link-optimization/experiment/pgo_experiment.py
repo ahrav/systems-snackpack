@@ -610,6 +610,13 @@ def inspect_codegen(
     # `cbz`, `cbnz`, `tbz`, and `tbnz` carry their own test, so a guard built from one of
     # them has no preceding compare to find. Requiring a separate compare would reject
     # exactly the forms listed as conditional above.
+    # Mnemonics that end a straight-line path. A call is deliberately absent: `call *%rax`
+    # and `blr` return to the following instruction, so they do not stop a fallthrough from
+    # arriving wherever it was heading. Unrecognised mnemonics are not treated as
+    # terminators, which makes an unknown instruction reject a guard rather than admit one.
+    unconditional_transfer = re.compile(
+        r"^(?:jmp[qlw]?|b|br|ret[q]?|hlt|ud2|brk|udf)$"
+    )
     self_testing_mnemonic = re.compile(r"^(?:cbz|cbnz|tbz|tbnz)$")
 
     def branch_destination(operands: str) -> int | None:
@@ -635,18 +642,33 @@ def inspect_codegen(
         Two layouts qualify, because block order is the compiler's choice:
 
         * the branch jumps past the call, so the call is on the not-taken edge;
-        * the branch jumps to the call, so the call is on the taken edge and the
-          fallthrough reaches the indirect path instead.
+        * the branch jumps to the call **and** the fallthrough path between the two
+          transfers control away before reaching it, so the call is on the taken edge
+          only.
 
-        A branch to the immediately following instruction is neither. Both of its
-        edges arrive at the call, so the call is unconditional however the branch
-        resolves.
+        The second condition is what an intervening-instruction test cannot establish.
+        A fallthrough made of ordinary instructions, or of an indirect call that
+        returns, arrives at the direct call as well, and then both edges execute it and
+        the promotion is not guarded at all.
         """
         decoded = [
             match
             for match in (instruction.match(line) for line in body.splitlines())
             if match is not None
         ]
+
+        def fallthrough_leaves(branch_index: int, call_index: int, call_address: int) -> bool:
+            """Report whether the not-taken path departs before the direct call."""
+            for between in range(branch_index + 1, call_index):
+                if not unconditional_transfer.match(decoded[between].group(2)):
+                    continue
+                # A jump whose destination is the call does not take the path away
+                # from it.
+                if branch_destination(decoded[between].group(3)) == call_address:
+                    continue
+                return True
+            return False
+
         direct_pattern = direct(target)
         for index, match in enumerate(decoded):
             if not direct_pattern.search(match.group(0)):
@@ -660,7 +682,9 @@ def inspect_codegen(
                 if destination is None:
                     continue
                 jumps_past = destination > call_address
-                jumps_to_call = destination == call_address and branch_index != index - 1
+                jumps_to_call = destination == call_address and fallthrough_leaves(
+                    branch_index, index, call_address
+                )
                 if not (jumps_past or jumps_to_call):
                     continue
                 if self_testing_mnemonic.match(branch.group(2)):
