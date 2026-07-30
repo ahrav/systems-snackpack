@@ -548,13 +548,12 @@ if [[ "$source_tree_mode" == checkout ]]; then
     source_commit="$("${tool_path[git]}" -C "$repo_root" rev-parse HEAD)"
     # A `filter` attribute selects a `filter.<driver>.clean`, `.smudge`, or
     # `.process` command, and those commands are defined in `.git/config`, which
-    # every source manifest excludes. Both provenance reads on this branch run one:
-    # `status --porcelain` below runs the clean filter on a tracked file whose stat
-    # cache is stale, and `git archive` runs the smudge filter while extracting the
-    # reference tree. That is unrecorded code executing inside the verification that
-    # attests to this source, before `tools.txt` exists. Neither command has a
-    # `--no-filters`, which is why the worktree hash comparison further down passes
-    # that flag and is unaffected.
+    # every source manifest excludes. `git archive` runs the smudge filter while
+    # extracting the reference tree below, from the tree's own `.gitattributes` and
+    # from `.git/info/attributes` alike. That is unrecorded code executing inside the
+    # verification that attests to this source, before `tools.txt` exists. `archive`
+    # has no `--no-filters`, which is why the worktree hash comparison further down
+    # passes that flag and is unaffected.
     #
     # Gate on the attribute rather than on the driver definitions. A driver no
     # attribute selects never runs, and `filter.lfs.*` is present in the global
@@ -564,15 +563,23 @@ if [[ "$source_tree_mode" == checkout ]]; then
     # reading the same unrecorded `.git/config`, so refuse on selection instead. An
     # explicit `-filter` is an unset, not a selection, and stays allowed.
     #
-    # Two views, because the two readers resolve attributes differently. `status`
-    # takes them from the worktree, where `.git/info/attributes` and
-    # `core.attributesFile` also apply and neither is covered by a manifest;
-    # `git archive` takes them from the tree it archives. `check-attr` reports the
-    # effective value and runs no filter itself, as do `ls-files` and `ls-tree`.
+    # Two views, because `archive` resolves attributes from the tree it archives
+    # while `.git/info/attributes` and `core.attributesFile` are worktree state that
+    # applies on top of it, and neither of those is covered by a manifest.
+    # `check-attr` reports the effective value and runs no filter itself, as do
+    # `ls-files` and `ls-tree`.
     #
-    # Probe `--source` first. It is what establishes the archive-side view, and an
-    # older git rejects it inside a pipeline whose exit status the reader below does
-    # not observe — which would silently skip that half of the check.
+    # What this does not do is freeze the attribute state: a file written between
+    # this scan and the extraction below selects a driver the scan did not see. That
+    # window cannot be closed from inside this process, and it is not the only
+    # protection against a filter — a filter that alters content is caught by the
+    # manifest comparison, which requires the extracted tree to reproduce the input
+    # byte for byte. The residual is a filter that emits identical bytes and runs code
+    # as a side effect.
+    #
+    # Probe `--source` first. It is what establishes the tree-side view, and an older
+    # git rejects it inside a pipeline whose exit status the reader below does not
+    # observe — which would silently skip that half of the check.
     if ! printf '' | "${tool_path[git]}" -C "$repo_root" \
         check-attr -z --stdin --source="$source_commit" filter >/dev/null 2>&1; then
         printf '%s\n' \
@@ -582,6 +589,10 @@ if [[ "$source_tree_mode" == checkout ]]; then
         exit 2
     fi
     filter_selection=""
+    # A path `ls-files` and `ls-tree` cannot emit: both print repository-relative
+    # names, so nothing they list begins with a slash. Used below to report a failed
+    # scan through the same channel as a real selection.
+    attribute_scan_failed=/attribute-scan-failed
     for attribute_view in worktree "$source_commit"; do
         if [[ "$attribute_view" == worktree ]]; then
             attribute_paths=(-C "$repo_root" -c core.fsmonitor=false ls-files -z)
@@ -596,6 +607,10 @@ if [[ "$source_tree_mode" == checkout ]]; then
         while IFS= read -r -d '' attribute_path \
             && IFS= read -r -d '' _attribute_name \
             && IFS= read -r -d '' attribute_value; do
+            if [[ "$attribute_path" == "$attribute_scan_failed" ]]; then
+                filter_selection+="$attribute_view: the attribute scan itself failed"$'\n'
+                continue
+            fi
             case "$attribute_value" in
                 unspecified | unset) ;;
                 *)
@@ -604,8 +619,18 @@ if [[ "$source_tree_mode" == checkout ]]; then
                     ;;
             esac
         done < <(
-            "${tool_path[git]}" "${attribute_paths[@]}" \
-                | "${tool_path[git]}" "${attribute_query[@]}"
+            # Report failure in band. `while ... done < <(pipeline)` discards the
+            # substitution's exit status, so neither `set -e` nor `pipefail` can stop
+            # the reader when `ls-files`, `ls-tree`, or `check-attr` fails: it would
+            # see empty or truncated output, leave `filter_selection` empty, and fall
+            # through to the extraction below having checked nothing. Emitting a
+            # triple on failure makes a failed scan indistinguishable from a refusal.
+            # `if !` disables `set -e` for the pipeline while `pipefail` still decides
+            # its status, so a first stage that fails after partial output is caught.
+            if ! "${tool_path[git]}" "${attribute_paths[@]}" \
+                | "${tool_path[git]}" "${attribute_query[@]}"; then
+                printf '%s\0filter\0scan-error\0' "$attribute_scan_failed"
+            fi
         )
     done
     if [[ -n "$filter_selection" ]]; then
@@ -613,14 +638,24 @@ if [[ "$source_tree_mode" == checkout ]]; then
             "attributes select a filter driver for tracked paths:" \
             "$filter_selection" \
             "the driver command lives in .git/config, which no source manifest" \
-            "covers, and git status and git archive would run it during this" \
-            "verification" >&2
+            "covers, and git archive would run it during this verification" >&2
         exit 2
     fi
-    if [[ -n "$("${tool_path[git]}" -C "$repo_root" -c core.fsmonitor=false status --porcelain)" ]]; then
-        printf 'repository must be clean\n' >&2
-        exit 2
-    fi
+    # No `git status --porcelain` here. It was strictly weaker than the checks that
+    # follow and it was the second command that could run a filter. Weaker because it
+    # omits ignored files while `scan_source_paths` passes `-uu`, and because it sees
+    # neither a sparse or skip-worktree path missing from the tree nor an
+    # assume-unchanged file whose bytes no longer match its blob — all of which the
+    # manifest reproduction and the `ls-tree`/`hash-object` comparison below do catch,
+    # with a diff naming the paths instead of "repository must be clean".
+    #
+    # Filter-capable because `status` recurses into a populated submodule and converts
+    # its contents through that submodule's own `filter.<driver>.clean`, and the
+    # attribute scan above cannot see those attributes: `ls-files` emits a gitlink's
+    # top-level path only. So the submodule's filters ran before the `ls-tree` loop
+    # below reached mode `160000` and refused it. `git archive` does not recurse into a
+    # gitlink, so removing `status` leaves that ordering hazard with nothing to trigger
+    # it.
     source_commit_verification=git-checkout
 else
     if ! [[ "${SOURCE_COMMIT:-}" =~ ^[0-9a-f]{40}$ ]]; then
@@ -1055,11 +1090,13 @@ while :; do
     # and then walks parents to the filesystem root for `clippy.toml` or
     # `.clippy.toml`, so the `cargo fmt` and `cargo clippy` gates would otherwise
     # run under a policy from above the snapshot that no manifest covers — the same
-    # class as the Cargo configuration beside it. `CLIPPY_CONF_DIR` would redirect
-    # only Clippy's own lookup, so refuse here instead and keep one rule for all
-    # three. The snapshot itself is exempt: a repository-owned formatting or lint
-    # policy is inside the verified tree and is what the gate is supposed to check
-    # the repository against.
+    # class as the Cargo configuration beside it. The snapshot itself is exempt: a
+    # repository-owned formatting or lint policy is inside the verified tree and is
+    # what the gate is supposed to check the repository against.
+    #
+    # This refusal, not `CLIPPY_CONF_DIR`, is what covers Clippy. That variable moves
+    # where the search starts; it does not stop it walking parents, so pointing it at
+    # the snapshot would still reach these same ancestors and close nothing.
     ancestor_configs=(
         "$config_ancestor/.cargo/config.toml"
         "$config_ancestor/.cargo/config"
