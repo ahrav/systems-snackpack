@@ -791,6 +791,25 @@ experiment_dir="$output_dir/experiment"
 # reason: the driver accepts an existing empty directory, and that test resolves a
 # symlink as readily as `mkdir -p` does.
 "${tool_path[mkdir]}" -- "$gates_dir" "$experiment_dir"
+# `mkdir` establishes that the names were free; it does not bind what they refer to for
+# the rest of the run. The type test before the manifest catches a substitution that
+# changes the kind of object, and the path-set comparisons there catch one that changes
+# which files exist — but a replacement real directory holding files under the expected
+# names passes both, and `evidence.sha256` would then authenticate those files instead of
+# the ones this run produced. Record device and inode now and compare before the manifest
+# is written.
+#
+# `python3` rather than `stat`: the required-tool set is fixed above and `stat` is not in
+# it, so pulling one in for a single field would widen the digested surface. `-I` for the
+# same reason it is passed to every other interpreter call here.
+retained_identity() {
+    "${tool_path[python3]}" -I -c 'import os, sys
+for path in sys.argv[1:]:
+    entry = os.lstat(path)
+    print(path, f"{entry.st_dev}:{entry.st_ino}")' "$@"
+}
+retained_identity_created="$scratch_dir/retained-identity.created"
+retained_identity "$gates_dir" "$experiment_dir" >"$retained_identity_created"
 
 # Emits NUL-separated paths relative to the caller's directory, and is the only
 # definition of which files count as source. `!.git` excludes the gitdir pointer
@@ -1513,6 +1532,17 @@ for retained_dir in "$gates_dir" "$experiment_dir"; do
         exit 1
     fi
 done
+# The loop above rejects a symlink or a non-directory and gives that case a legible
+# message; this compares identity, which a replacement directory of the right type
+# would otherwise satisfy.
+retained_identity_final="$scratch_dir/retained-identity.final"
+retained_identity "$gates_dir" "$experiment_dir" >"$retained_identity_final"
+if ! "${tool_path[cmp]}" -s "$retained_identity_created" "$retained_identity_final"; then
+    printf 'retained output directories are not the ones this run created:\n' >&2
+    LC_ALL=C "${tool_path[diff]}" -- \
+        "$retained_identity_created" "$retained_identity_final" >&2 || true
+    exit 1
+fi
 
 manifest_tmp="$scratch_dir/evidence.sha256"
 (

@@ -571,6 +571,55 @@ def inspect_codegen(
             rf"\b(?:callq?|jmpq?|bl|b)\s+(?!\*)[^\n]*<pgo_probe::{target}>"
         )
 
+    instruction = re.compile(r"^\s*([0-9a-f]+):\s+(\S+)\s*(.*)$")
+    compare_mnemonic = re.compile(r"^(?:cmp|cmpb|cmpw|cmpl|cmpq|test|testb|testw|testl|testq|subs|cmn)$")
+    conditional_mnemonic = re.compile(r"^(?:j(?!mp$)[a-z]+|b\.[a-z]+|cbz|cbnz|tbz|tbnz)$")
+
+    def branch_destination(operands: str) -> int | None:
+        """Return a conditional branch's destination address, or None."""
+        # objdump appends a `<symbol+offset>` comment; the destination is the last
+        # bare hex operand before it.
+        for token in reversed(operands.split("<")[0].replace(",", " ").split()):
+            try:
+                return int(token, 16)
+            except ValueError:
+                continue
+        return None
+
+    def guarded_promotion(body: str, target: str) -> bool:
+        """Report whether a compare and branch make the direct call conditional.
+
+        A promoted call is guarded when a conditional branch placed before it
+        jumps past it, so the call runs only on the not-taken edge, and a compare
+        precedes that branch. Merely finding a compare somewhere in the function
+        does not establish either: an unconditional direct call to the trained
+        target next to an unrelated compare satisfies that and is not a guarded
+        promotion at all.
+        """
+        decoded = [
+            match
+            for match in (instruction.match(line) for line in body.splitlines())
+            if match is not None
+        ]
+        direct_pattern = direct(target)
+        for index, match in enumerate(decoded):
+            if not direct_pattern.search(match.group(0)):
+                continue
+            call_address = int(match.group(1), 16)
+            for branch_index in range(index - 1, -1, -1):
+                branch = decoded[branch_index]
+                if not conditional_mnemonic.match(branch.group(2)):
+                    continue
+                destination = branch_destination(branch.group(3))
+                if destination is None or destination <= call_address:
+                    continue
+                if any(
+                    compare_mnemonic.match(decoded[before].group(2))
+                    for before in range(branch_index)
+                ):
+                    return True
+        return False
+
     baseline_body = dispatch_bodies["baseline"]
     baseline_has_indirect = indirect.search(baseline_body) is not None
     if not baseline_has_indirect:
@@ -601,6 +650,7 @@ def inspect_codegen(
         candidate = {
             "comparison": comparison.search(body) is not None,
             "direct_trained_target": direct(mode).search(body) is not None,
+            "guarded_trained_target": guarded_promotion(body, mode),
             "indirect_fallback": indirect.search(body) is not None,
             "no_direct_untrained_target": direct(other_mode).search(body) is None,
         }
