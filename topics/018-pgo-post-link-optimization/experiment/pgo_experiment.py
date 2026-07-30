@@ -560,11 +560,6 @@ def inspect_codegen(
         encoding="utf-8",
     )
     indirect = re.compile(r"\b(?:callq?|jmpq?)\s+\*|\b(?:blr|br)\s+x")
-    # objdump interpolates demangled symbol names into operand comments, so a
-    # substring search for "cmp" is also satisfied by a neighbouring
-    # `core::cmp::*` symbol with no compare instruction present. Anchoring to
-    # the address-then-mnemonic column admits only a real compare.
-    comparison = re.compile(r"^\s*[0-9a-f]+:\s+cmp", re.MULTILINE)
 
     def direct(target: str) -> re.Pattern[str]:
         return re.compile(
@@ -572,8 +567,18 @@ def inspect_codegen(
         )
 
     instruction = re.compile(r"^\s*([0-9a-f]+):\s+(\S+)\s*(.*)$")
-    compare_mnemonic = re.compile(r"^(?:cmp|cmpb|cmpw|cmpl|cmpq|test|testb|testw|testl|testq|subs|cmn)$")
-    conditional_mnemonic = re.compile(r"^(?:j(?!mp$)[a-z]+|b\.[a-z]+|cbz|cbnz|tbz|tbnz)$")
+    # Anchored to the mnemonic column that `instruction` captures. A substring search for
+    # "cmp" over the raw disassembly is also satisfied by a neighbouring `core::cmp::*`
+    # symbol that objdump interpolated into an operand comment, with no compare present.
+    compare_mnemonic = re.compile(
+        r"^(?:cmp|cmpb|cmpw|cmpl|cmpq|test|testb|testw|testl|testq|subs|cmn)$"
+    )
+    # `j(?!mp)` rather than `j(?!mp$)`: the latter excludes only the exact spelling, so
+    # `jmpq` and `jmpl` would pass as conditional and an unconditional jump over the call
+    # would read as a guard. No x86 conditional jump begins with `jmp`.
+    conditional_mnemonic = re.compile(
+        r"^(?:j(?!mp)[a-z]+|b\.[a-z]+|cbz|cbnz|tbz|tbnz)$"
+    )
 
     def branch_destination(operands: str) -> int | None:
         """Return a conditional branch's destination address, or None."""
@@ -647,8 +652,13 @@ def inspect_codegen(
         # Requiring the trained target admits a toolchain that direct-calls both, and
         # then the dispatch shape is not evidence that this profile chose this target.
         # The untrained target must stay behind the indirect call.
+        #
+        # `guarded_trained_target` subsumes a standalone "a compare exists" predicate:
+        # it requires a compare before the branch that makes this call conditional. A
+        # separate compare test would also disagree with it, because the guard forms it
+        # accepts include `test`, `subs`, and `cmn`, so a promotion guarded by `subs`
+        # plus `cbz` would satisfy the guard and fail the compare test.
         candidate = {
-            "comparison": comparison.search(body) is not None,
             "direct_trained_target": direct(mode).search(body) is not None,
             "guarded_trained_target": guarded_promotion(body, mode),
             "indirect_fallback": indirect.search(body) is not None,
