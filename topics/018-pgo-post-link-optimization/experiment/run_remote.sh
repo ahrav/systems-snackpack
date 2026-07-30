@@ -641,21 +641,19 @@ if [[ "$source_tree_mode" == checkout ]]; then
             "covers, and git archive would run it during this verification" >&2
         exit 2
     fi
-    # No `git status --porcelain` here. It was strictly weaker than the checks that
-    # follow and it was the second command that could run a filter. Weaker because it
-    # omits ignored files while `scan_source_paths` passes `-uu`, and because it sees
-    # neither a sparse or skip-worktree path missing from the tree nor an
-    # assume-unchanged file whose bytes no longer match its blob — all of which the
-    # manifest reproduction and the `ls-tree`/`hash-object` comparison below do catch,
-    # with a diff naming the paths instead of "repository must be clean".
+    # Checkout cleanliness is decided by the manifest reproduction and the
+    # `ls-tree`/`hash-object` comparison below rather than by `git status`. Those catch
+    # strictly more: `status` omits ignored files while `scan_source_paths` passes
+    # `-uu`, and it sees neither a sparse or skip-worktree path missing from the tree
+    # nor an assume-unchanged file whose bytes no longer match its blob. They also name
+    # the paths that differ instead of only reporting that something does.
     #
-    # Filter-capable because `status` recurses into a populated submodule and converts
-    # its contents through that submodule's own `filter.<driver>.clean`, and the
-    # attribute scan above cannot see those attributes: `ls-files` emits a gitlink's
-    # top-level path only. So the submodule's filters ran before the `ls-tree` loop
-    # below reached mode `160000` and refused it. `git archive` does not recurse into a
-    # gitlink, so removing `status` leaves that ordering hazard with nothing to trigger
-    # it.
+    # `status` is unusable here for a second reason: it executes filter policy. It
+    # recurses into a populated submodule and converts that submodule's contents
+    # through the submodule's own `filter.<driver>.clean`, which the scan above cannot
+    # cover — `ls-files` emits a gitlink's top-level path only, so attributes inside a
+    # submodule are outside every view it queries. `git archive` does not recurse into
+    # a gitlink, so no check on this branch runs a filter from a submodule.
     source_commit_verification=git-checkout
 else
     if ! [[ "${SOURCE_COMMIT:-}" =~ ^[0-9a-f]{40}$ ]]; then
@@ -1486,11 +1484,38 @@ require_matching_modes "$snapshot_root" "$verified_reference_tree" \
 # the whole run rather than only its first half.
 require_unchanged_tools "during evidence collection"
 
+# Creating these directories empty establishes that this run made them; it does not
+# hold their identity for the rest of the run. The output directory stays writable by
+# whoever can write it, so `gates` or `experiment` can be removed and replaced by a
+# symlink at any point after creation, and everything written afterwards lands outside
+# this tree. `rg --files` does not follow symlinks, so the substitution surfaces as a
+# manifest that quietly omits those trees rather than as an error. No check inside this
+# process can prevent the swap — what it can do is decline to authenticate the result.
+# Test the identities, then require the walk to have actually covered both.
+for retained_dir in "$gates_dir" "$experiment_dir"; do
+    if [[ -L "$retained_dir" ]] || [[ ! -d "$retained_dir" ]]; then
+        printf '%s\n' \
+            "retained output directory is not the one this run created: $retained_dir" \
+            "anything written through it lies outside the tree evidence.sha256 covers" >&2
+        exit 1
+    fi
+done
+
 manifest_tmp="$scratch_dir/evidence.sha256"
 (
     cd "$output_dir"
     "${tool_path[rg]}" --no-config --files -uu -0 . | LC_ALL=C "${tool_path[sort]}" -z | "${tool_path[xargs]}" -0 "${tool_path[sha256sum]}" --
 ) >"$manifest_tmp"
+# Both trees hold files on every completed run — the gate logs and the driver's
+# output — so a manifest naming neither means the walk did not reach them.
+for retained_rel in gates experiment; do
+    if ! "${tool_path[rg]}" --no-config -qF "./$retained_rel/" "$manifest_tmp"; then
+        printf '%s\n' \
+            "evidence manifest covers no files under $retained_rel/" \
+            "the retained output for it is not inside the tree this manifest hashes" >&2
+        exit 1
+    fi
+done
 "${tool_path[mv]}" -- "$manifest_tmp" "$output_dir/evidence.sha256"
 # Remove the scratch tree here and disarm the trap rather than leaving cleanup to
 # run on exit. An EXIT trap fires after the last comparison below, so the `rm` it
