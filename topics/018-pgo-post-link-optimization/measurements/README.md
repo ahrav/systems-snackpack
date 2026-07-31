@@ -155,15 +155,25 @@ set -euo pipefail
 # can forge `archive`, `rev-parse`, and `ls-tree` output. Run this recipe as
 # `bash -p handoff.sh`, not by pasting it into an interactive shell.
 #
-# The refusal is a parameter expansion rather than a command, and that is the point. In an
-# unprivileged shell every command name can be shadowed by an imported function — including
-# `builtin` itself, so `builtin printf` and `builtin exit` are both dispatched through a
-# caller's `builtin` function and a refusal written that way prints and then continues. A
-# `${var?message}` expansion is performed by the shell before any command lookup happens,
-# so no function can intercept it: a non-interactive shell prints the message and exits.
+# The refusal is an assignment and an expansion rather than a command, and both halves are
+# load-bearing. In an unprivileged shell every command name can be shadowed by an imported
+# function — including `builtin` itself, so `builtin printf` and `builtin exit` are both
+# dispatched through a caller's `builtin` function and a refusal written that way prints and
+# then continues. Neither an assignment nor a `${var:?}` expansion is a command lookup, so
+# no function can intercept either. The assignment is what makes the expansion unconditional:
+# `:?` fires only on an unset or null value, and the caller owns the environment, so
+# `__handoff_refuse=1 bash handoff.sh` would otherwise satisfy it. Assigning null first
+# discards whatever was inherited. If a `BASH_ENV` hook pre-marks the name readonly the
+# assignment itself fails, which `set -e` makes fatal — the same refusal by another route.
 # `if` and `[[` are keywords rather than builtins, so the test cannot be shadowed either.
+# The `printf` is best-effort diagnostics; the stop does not depend on it.
+#
+# This holds while `set -euo pipefail` above is in force. A caller who shadows `set` removes
+# the recipe's error handling wholesale, which no in-band check can restore.
 if [[ ! -o privileged ]]; then
-  : "${__handoff_requires_bash_p:?run this recipe with bash -p}"
+  printf 'run this recipe with bash -p\n' >&2
+  __handoff_refuse=
+  : "${__handoff_refuse:?run this recipe with bash -p}"
 fi
 # Refuse an inherited loader or libc namespace before running anything. `LD_PRELOAD`
 # and `LD_AUDIT` interpose on every process below, including the `git` that produces
