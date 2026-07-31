@@ -243,13 +243,12 @@ source_commit=<source_commit>
 # established here, so this is the only place it can be got right.
 unset $(git rev-parse --local-env-vars)
 # Then set the one member this proof relies on, once, so every git command below inherits
-# it. `GIT_NO_REPLACE_OBJECTS` is itself in `--local-env-vars` and was therefore cleared by
-# the line above, which is why it used to be prefixed per command — and a per-command
-# prefix is a rule each new command has to remember. The filter scan below is exactly what
-# that costs: without it the scan resolves a replacement tree and sees no selected filter
-# while `git archive` reads the original tree and runs one. `git replace` refs and grafts
-# are honoured by object reads, so the archive, the `ls-tree` proof, and the attribute scan
-# must all read raw objects or they are not describing the same commit.
+# it. `GIT_NO_REPLACE_OBJECTS` is itself in `--local-env-vars` and is therefore cleared by
+# the line above, so exporting it here is what re-establishes it: after this assignment
+# every object-reading command below — the attribute scan, `git archive`, and the `ls-tree`
+# object proof — resolves the same raw commit. `git replace` refs and grafts are honoured by
+# object reads, so without it the scan can resolve a replacement tree and see no selected
+# filter while `git archive` reads the original tree and runs one.
 export GIT_NO_REPLACE_OBJECTS=1
 # Refuse a selected filter driver before archiving. `git archive` runs a `filter.<driver>`
 # smudge command while it emits the tree — from the tree's own `.gitattributes` and from
@@ -263,14 +262,25 @@ export GIT_NO_REPLACE_OBJECTS=1
 # `$GIT_DIR/info/attributes` and `core.attributesFile` are worktree state layered on top.
 # `check-attr` reports the effective value and runs no filter itself, and neither do
 # `ls-files` and `ls-tree`. An explicit `-filter` is an unset, not a selection.
+#
+# `core.fsmonitor` is a different hazard from a filter and needs its own flag. It names an
+# executable that every index-reading command runs, and it lives in `.git/config`, which no
+# archive or manifest covers — so it is unrecorded code executing inside the proof that
+# establishes this handoff's trust root, and it can alter the sender's tools or artifacts
+# before the commit-to-archive comparison completes. `ls-files` and `check-attr` both read
+# the index and both run it, `check-attr` with or without `--source`, so both carry
+# `-c core.fsmonitor=false`; `ls-tree` reads objects and cannot reach it. `-c` overrides the
+# config file for that invocation only and leaves the sender's repository untouched. The
+# receiver disables it the same way, but archive mode gives it no way to recheck this, so it
+# has to be got right here.
 filter_selection=""
 for attribute_view in worktree "$source_commit"; do
   if [ "$attribute_view" = worktree ]; then
-    paths_command="git ls-files -z"
-    attr_command="git check-attr -z --stdin filter"
+    paths_command="git -c core.fsmonitor=false ls-files -z"
+    attr_command="git -c core.fsmonitor=false check-attr -z --stdin filter"
   else
     paths_command="git ls-tree -r --name-only -z $attribute_view"
-    attr_command="git check-attr -z --stdin --source=$attribute_view filter"
+    attr_command="git -c core.fsmonitor=false check-attr -z --stdin --source=$attribute_view filter"
   fi
   while IFS= read -r -d '' attribute_path \
     && IFS= read -r -d '' _attribute_name \

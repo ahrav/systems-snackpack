@@ -531,14 +531,31 @@ if problems:
     raise SystemExit(2)
 ' "$1" "$2"
 }
+# Remove group and other write from every entry this run creates, before it creates any.
+# `evidence.sha256` authenticates the retained files, and that means something only if no
+# other user can rewrite one between the run producing it and the manifest hashing it. The
+# `chmod` below reaches a single directory; the retained tree is `gates/`, `experiment/`,
+# and every log, receipt, and profile written into them, each taking its mode from the
+# umask in force when it is created. A caller `umask` of 000 or 002 therefore leaves the
+# gate logs and receipts group-writable however the top-level directory is fixed up.
+#
+# Setting the umask rather than widening that `chmod` is what closes the window instead of
+# narrowing it: a file created writable and repaired afterwards is writable for the
+# interval in between, which is the interval the manifest cannot cover. Creating it
+# unwritable has no such interval.
+#
+# Subtracting the write bits rather than assigning a mask keeps this a floor: a caller who
+# already runs a more restrictive umask keeps it, and read and execute are untouched either
+# way, so the evidence stays shareable. Every place a mode has to survive this already says
+# so — `cp -p`, `cp --preserve=mode`, and `tar --same-permissions` ignore the umask, and
+# `mktemp -d` is 0700 regardless — so the pinned linker copy, the snapshot, and the
+# reference trees are unaffected.
+umask g-w,o-w
 "${tool_path[mkdir]}" -p -- "$output_dir"
-# Drop group and other write on the directory this run is about to fill. Everything in
-# it is authenticated by `evidence.sha256`, and that authentication means something only
-# if no other user can rewrite a file between the run producing it and the manifest
-# hashing it. Read and execute are untouched, so the evidence stays shareable. A caller
-# `umask` of 002 would otherwise leave the directory group-writable and fail the check
-# below on a directory this script created itself. `chmod` is not in the required-tool
-# set, and `python3` already is.
+# The umask above governs entries this run creates. An `OUTPUT_DIRECTORY` that already
+# existed was created under whatever umask its maker had, so drop the same bits from it
+# here; otherwise the check below fails on a directory that is legitimately empty. `chmod`
+# is not in the required-tool set, and `python3` already is.
 "${tool_path[python3]}" -I -c 'import os, stat, sys
 path = sys.argv[1]
 os.chmod(path, os.stat(path).st_mode & ~(stat.S_IWGRP | stat.S_IWOTH))' "$output_dir"
@@ -597,8 +614,9 @@ fi
 # discovery: `rev-parse --git-dir` walks upward, so an archive extracted beneath
 # an unrelated checkout would otherwise adopt that ancestor's HEAD and status as
 # its own source identity and skip the archive checks below.
-# `core.fsmonitor` in the repository's own `.git/config` names an executable that
-# `git status` runs, and `.git` is excluded from the source manifest, so that hook
+# `core.fsmonitor` in the repository's own `.git/config` names an executable that every
+# command reading the index runs — `ls-files` and `check-attr` in the attribute scan below,
+# and the `diff --check` gate — and `.git` is excluded from the source manifest, so that hook
 # is arbitrary code with no receipt — running during the very check that decides the
 # tree is clean, before `tools.txt` exists. The environment sweep cannot reach it
 # because the setting is repo-local rather than an environment variable, so disable
@@ -671,7 +689,7 @@ if [[ "$source_tree_mode" == checkout ]]; then
     # Probe `--source` first. It is what establishes the tree-side view, and an older
     # git rejects it inside a pipeline whose exit status the reader below does not
     # observe — which would silently skip that half of the check.
-    if ! printf '' | "${tool_path[git]}" -C "$repo_root" \
+    if ! printf '' | "${tool_path[git]}" -C "$repo_root" -c core.fsmonitor=false \
         check-attr -z --stdin --source="$source_commit" filter >/dev/null 2>&1; then
         printf '%s\n' \
             "git check-attr does not support --source: ${tool_path[git]}" \
@@ -684,14 +702,23 @@ if [[ "$source_tree_mode" == checkout ]]; then
     # names, so nothing they list begins with a slash. Used below to report a failed
     # scan through the same channel as a real selection.
     attribute_scan_failed=/attribute-scan-failed
+    # Every command below that reads the index carries `-c core.fsmonitor=false`, which is
+    # the whole of `ls-files` and `check-attr` — `check-attr` consults the index to resolve
+    # attributes and runs the hook doing so, with or without `--source`, so exempting it
+    # because its paths arrive on stdin would leave the hook running anyway. `ls-tree` and
+    # `archive` read objects and never the index, so they cannot reach it and do not carry
+    # the flag.
     for attribute_view in worktree "$source_commit"; do
         if [[ "$attribute_view" == worktree ]]; then
             attribute_paths=(-C "$repo_root" -c core.fsmonitor=false ls-files -z)
-            attribute_query=(-C "$repo_root" check-attr -z --stdin filter)
+            attribute_query=(
+                -C "$repo_root" -c core.fsmonitor=false check-attr -z --stdin filter
+            )
         else
             attribute_paths=(-C "$repo_root" ls-tree -r --name-only -z "$attribute_view")
             attribute_query=(
-                -C "$repo_root" check-attr -z --stdin --source="$attribute_view" filter
+                -C "$repo_root" -c core.fsmonitor=false
+                check-attr -z --stdin --source="$attribute_view" filter
             )
         fi
         # `check-attr -z` emits NUL-separated triples of path, attribute, value.

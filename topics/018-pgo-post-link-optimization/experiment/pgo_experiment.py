@@ -23,6 +23,20 @@ import time
 from typing import NamedTuple
 
 
+class Instruction(NamedTuple):
+    """One decoded objdump line, with its prefixes separated from its mnemonic.
+
+    `mnemonic` and `operands` are what the control-flow patterns are matched against, so
+    they must name the instruction itself rather than a prefix qualifying it. `text` is
+    the whole line, which is what an operand-shape search needs.
+    """
+
+    address: int
+    mnemonic: str
+    operands: str
+    text: str
+
+
 class DispatchGraph:
     """The instructions of one `dispatch` body and the control flow between them.
 
@@ -35,6 +49,22 @@ class DispatchGraph:
     # own column is what keeps a demangled symbol interpolated into an operand comment —
     # `core::cmp::*`, say — from satisfying a mnemonic test.
     INSTRUCTION = re.compile(r"^\s*([0-9a-f]+):\s+(\S+)\s*(.*)$")
+    # A prefix occupies the mnemonic column as its own token, so the first token of the
+    # bytes `f3 c3` is `repz` and the instruction it qualifies is `ret`. Classifying that
+    # first token alone reads a prefixed return as an ordinary instruction and gives it a
+    # fall-through edge into whatever follows — which is how padding decoded as a call
+    # becomes reachable evidence for a call that cannot execute. Strip a leading run of
+    # prefixes so every pattern below sees the instruction, rather than adding prefixed
+    # spellings to each one: the prefix set belongs to the encoding, while the spellings
+    # are its cross product with every mnemonic. `rep`/`repz`/`repnz` carry the `rep ret`
+    # idiom, `bnd` and `notrack` qualify branches and returns, and the segment and
+    # operand-size prefixes appear on branch padding and hints. AArch64 has no prefix
+    # column, and none of these names is an AArch64 mnemonic — its condition codes are
+    # suffixes of `b.<cond>` and stay attached to it — so the stripping is inert there.
+    PREFIX = re.compile(
+        r"^(?:lock|rep|repe|repz|repne|repnz|bnd|notrack"
+        r"|data16|data32|addr16|addr32|rex64|cs|ds|es|fs|gs|ss)$"
+    )
     # x86 excludes a prefix rather than enumerating: `jmp` and its `jmpq`, `jmpl`, and
     # `jmpw` spellings are the only unconditional jumps, and every conditional form — Jcc
     # plus `jcxz`/`jecxz`/`jrcxz` — begins with something else. `j(?!mp$)` would exclude
@@ -72,14 +102,33 @@ class DispatchGraph:
 
     def __init__(self, body: str) -> None:
         self.decoded = [
-            match
+            self._decode(match)
             for match in (self.INSTRUCTION.match(line) for line in body.splitlines())
             if match is not None
         ]
         self.index_of_address = {
-            int(match.group(1), 16): position
-            for position, match in enumerate(self.decoded)
+            instruction.address: position
+            for position, instruction in enumerate(self.decoded)
         }
+
+    @classmethod
+    def _decode(cls, match: re.Match[str]) -> Instruction:
+        """Split one matched line into its address, instruction, and operands."""
+        # The mnemonic column holds a prefix run followed by the instruction, so advance
+        # past the prefixes and take the next token as the mnemonic. A line that is only
+        # prefixes leaves the mnemonic empty, which matches no pattern and therefore
+        # continues to the following address — correct, because a prefix transfers nothing.
+        tokens = f"{match.group(2)} {match.group(3)}".split()
+        leading = 0
+        while leading < len(tokens) and cls.PREFIX.match(tokens[leading]):
+            leading += 1
+        mnemonic = tokens[leading] if leading < len(tokens) else ""
+        return Instruction(
+            address=int(match.group(1), 16),
+            mnemonic=mnemonic,
+            operands=" ".join(tokens[leading + 1 :]),
+            text=match.group(0),
+        )
 
     def __bool__(self) -> bool:
         """A body that decoded to nothing answers no question."""
@@ -113,8 +162,8 @@ class DispatchGraph:
         A conditional branch always returns two, in `(not_taken, taken)` order, so a
         caller can name the edges without re-deciding which is which.
         """
-        mnemonic = self.decoded[position].group(2)
-        operands = self.decoded[position].group(3)
+        mnemonic = self.decoded[position].mnemonic
+        operands = self.decoded[position].operands
         following = position + 1 if position + 1 < len(self.decoded) else None
         if self.TERMINATOR.match(mnemonic):
             return ()
@@ -164,22 +213,33 @@ class DispatchGraph:
             if position == avoid or position in seen:
                 continue
             seen.add(position)
-            if self.INDIRECT.search(self.decoded[position].group(0)):
+            if self.INDIRECT.search(self.decoded[position].text):
                 return True
             pending.extend(
                 successor for successor in self.edges(position) if successor is not None
             )
         return False
 
-    def promoted_calls(self, target: str) -> list[int]:
-        """Return the positions of direct calls to `pgo_probe::<target>`."""
-        pattern = re.compile(
+    @classmethod
+    def direct_transfer(cls, target: str) -> re.Pattern[str]:
+        """Match a direct call or tail jump to `pgo_probe::<target>`.
+
+        One recognizer answers both questions asked of a direct transfer: which positions
+        hold one, and whether a body contains one at all. Compiling the pattern twice
+        would let a mnemonic or operand-shape correction reach the position search without
+        reaching the presence gates, and the two would then disagree about the same body.
+        """
+        return re.compile(
             rf"\b(?:callq?|jmpq?|bl|b)\s+(?!\*)[^\n]*<pgo_probe::{target}>"
         )
+
+    def promoted_calls(self, target: str) -> list[int]:
+        """Return the positions of direct calls to `pgo_probe::<target>`."""
+        pattern = self.direct_transfer(target)
         return [
             position
-            for position, match in enumerate(self.decoded)
-            if pattern.search(match.group(0))
+            for position, instruction in enumerate(self.decoded)
+            if pattern.search(instruction.text)
         ]
 
 
@@ -802,8 +862,8 @@ def inspect_codegen(
             # around it says nothing about the shape that runs.
             if not graph.reaches(graph.ENTRY, call_index):
                 continue
-            for position, match in enumerate(graph.decoded):
-                if not graph.CONDITIONAL.match(match.group(2)):
+            for position, instruction in enumerate(graph.decoded):
+                if not graph.CONDITIONAL.match(instruction.mnemonic):
                     continue
                 if graph.reaches(graph.ENTRY, call_index, blocked=position):
                     continue
@@ -829,12 +889,6 @@ def inspect_codegen(
         graph = DispatchGraph(body)
         return bool(graph) and graph.reaches_indirect(graph.ENTRY)
 
-    def direct(target: str) -> re.Pattern[str]:
-        """Match a direct call or tail jump to `pgo_probe::<target>`."""
-        return re.compile(
-            rf"\b(?:callq?|jmpq?|bl|b)\s+(?!\*)[^\n]*<pgo_probe::{target}>"
-        )
-
     baseline_body = dispatch_bodies["baseline"]
     baseline_has_indirect = dispatches_indirectly(baseline_body)
     if not baseline_has_indirect:
@@ -845,7 +899,9 @@ def inspect_codegen(
     # below would pass on a shape the control already has. Reject a direct call to
     # either target in the baseline, so the comparison rests on a difference.
     baseline_direct = [
-        target for target in ("alpha", "beta") if direct(target).search(baseline_body)
+        target
+        for target in ("alpha", "beta")
+        if DispatchGraph.direct_transfer(target).search(baseline_body)
     ]
     if baseline_direct:
         raise RuntimeError(
@@ -870,10 +926,14 @@ def inspect_codegen(
         # plus `cbz` would satisfy the guard and fail the compare test.
         shape = guarded_promotion(body, mode)
         candidate = {
-            "direct_trained_target": direct(mode).search(body) is not None,
+            "direct_trained_target": DispatchGraph.direct_transfer(mode).search(body)
+            is not None,
             "guarded_trained_target": shape.guarded,
             "indirect_fallback": shape.fallback_reachable,
-            "no_direct_untrained_target": direct(other_mode).search(body) is None,
+            "no_direct_untrained_target": DispatchGraph.direct_transfer(
+                other_mode
+            ).search(body)
+            is None,
         }
         if not all(candidate.values()):
             raise RuntimeError(
