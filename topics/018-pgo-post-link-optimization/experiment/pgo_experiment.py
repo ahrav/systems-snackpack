@@ -61,9 +61,15 @@ class DispatchGraph:
     # operand-size prefixes appear on branch padding and hints. AArch64 has no prefix
     # column, and none of these names is an AArch64 mnemonic — its condition codes are
     # suffixes of `b.<cond>` and stay attached to it — so the stripping is inert there.
+    #
+    # A REX prefix reaches this column only when it applies to nothing: objdump folds an
+    # effective one into the operands. It spells the redundant form as `rex` plus the
+    # subset of `W`, `R`, `X`, and `B` that is set — sixteen spellings for the bytes `40`
+    # through `4f`, matched by one optional letter group rather than listed. `rex64` is the
+    # separate spelling used where the operand-size prefix stands alone.
     PREFIX = re.compile(
         r"^(?:lock|rep|repe|repz|repne|repnz|bnd|notrack"
-        r"|data16|data32|addr16|addr32|rex64|cs|ds|es|fs|gs|ss)$"
+        r"|data16|data32|addr16|addr32|rex(?:64|\.[WRXB]+)?|cs|ds|es|fs|gs|ss)$"
     )
     # x86 excludes a prefix rather than enumerating: `jmp` and its `jmpq`, `jmpl`, and
     # `jmpw` spellings are the only unconditional jumps, and every conditional form — Jcc
@@ -87,7 +93,14 @@ class DispatchGraph:
     # one as an ordinary instruction invents a fall-through edge into whatever bytes
     # follow it — which could make a call the code would never reach look like the
     # guarded one.
-    TERMINATOR = re.compile(r"^(?:ret[q]?|hlt|int3|ud0|ud1|ud2|brk|udf)$")
+    #
+    # The return is spelled by operand size and by kind, and both vary: `c3` prints as
+    # `ret` or `retq`, `66 c3` as `retw` — a mnemonic, not a prefixed `ret`, so prefix
+    # stripping does not reach it — and misdecoded padding yields the far and interrupt
+    # returns `lret`/`lretw`/`lretq` and `iret`/`iretw`/`iretq`. Padding is exactly what
+    # this set exists to stop, so accept the optional `l`/`i` kind and the operand-size
+    # suffix rather than the `ret`/`retq` pair alone. AArch64's `ret` matches the same way.
+    TERMINATOR = re.compile(r"^(?:[li]?ret[qwdl]?|hlt|int3|ud0|ud1|ud2|brk|udf)$")
     # Unconditional transfers. `call`, `bl`, and `blr` are absent because they return to
     # the following instruction, so they do continue. `b.al` and `b.nv` belong here rather
     # than with the conditional branches: they use the conditional encoding but always
