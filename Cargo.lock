@@ -69,3 +69,7 @@ version = "0.1.0"
 [[package]]
 name = "systems-snackpack-topic-014"
 version = "0.1.0"
+
+[[package]]
+name = "topic-021-store-write-path"
+version = "0.1.0"
