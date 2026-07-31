@@ -100,13 +100,26 @@ class DispatchGraph:
     # returns `lret`/`lretw`/`lretq` and `iret`/`iretw`/`iretq`. Padding is exactly what
     # this set exists to stop, so accept the optional `l`/`i` kind and the operand-size
     # suffix rather than the `ret`/`retq` pair alone. AArch64's `ret` matches the same way.
-    TERMINATOR = re.compile(r"^(?:[li]?ret[qwdl]?|hlt|int3|ud0|ud1|ud2|brk|udf)$")
+    #
+    # Bytes that decode to no instruction belong here for the same reason. objdump reports
+    # them as `(bad)`, or as `.byte 0x..` where it cannot even frame them, and executing
+    # either traps — so control does not continue past one. Without them a `(bad)` in
+    # padding takes a fall-through edge into whatever follows, which is the case this set
+    # exists to prevent, reached by undecodable bytes instead of a named trap.
+    TERMINATOR = re.compile(
+        r"^(?:[li]?ret[qwdl]?|hlt|int3|ud0|ud1|ud2|brk|udf|\(bad\)|\.byte)$"
+    )
     # Unconditional transfers. `call`, `bl`, and `blr` are absent because they return to
     # the following instruction, so they do continue. `b.al` and `b.nv` belong here rather
     # than with the conditional branches: they use the conditional encoding but always
     # execute, so modelling them as fall-through would give the following instruction an
     # edge it does not have and could make an unreachable call look guarded.
-    JUMP = re.compile(r"^(?:jmp[qlw]?|b|br|bc?\.(?:al|nv))$")
+    #
+    # `ljmp` is the far form and transfers just as unconditionally, so it belongs here too;
+    # its destination is a segment-offset pair that no listing address matches, which the
+    # resolver already reports as an edge that leaves. Its counterpart `lcall` is absent for
+    # the same reason `call` is — a far call returns to the following instruction.
+    JUMP = re.compile(r"^(?:jmp[qlw]?|ljmp[qlw]?|b|br|bc?\.(?:al|nv))$")
     # Dispatch through a register, on either architecture.
     INDIRECT = re.compile(r"\b(?:callq?|jmpq?)\s+\*|\b(?:blr|br)\s+x")
 

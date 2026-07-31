@@ -15,14 +15,17 @@ set -euo pipefail
 # `bash -p` — privileged mode never sources it, and the value stays visible here
 # to be refused. This check covers what remains visible and never destroys it.
 #
-# `builtin printf` because this is the one check that can run in an unprivileged
-# shell, where an imported function answers ahead of the builtin.
+# `builtin printf` and `builtin exit` because this is the one check that can run in an
+# unprivileged shell, where an imported function answers ahead of the builtin. The `exit`
+# matters as much as the `printf`: an imported `exit` that returns instead of exiting turns
+# this refusal into a warning the script then continues past, into a run whose startup hook
+# has already chosen unrecorded state.
 for startup_variable in BASH_ENV ENV; do
     if [[ -n "${!startup_variable:-}" ]]; then
         builtin printf '%s\n' \
             "shell startup file must not be set: $startup_variable=${!startup_variable}" \
             "it is sourced before this script runs and no receipt records it" >&2
-        exit 2
+        builtin exit 2
     fi
 done
 
@@ -106,6 +109,36 @@ if ((${#raw_environment_functions[@]} > 0)); then
         "privileged mode does not import them here, but any tool that is a Bash" \
         "script starts a shell that does, and no receipt records them" >&2
     exit 2
+fi
+
+# `/etc/ld.so.preload` is the file form of `LD_PRELOAD`: the glibc loader reads it for
+# every process on the host and interposes what it names. The environment sweep further
+# down cannot see it — there is no variable to find — so a host with a non-empty file
+# would interpose the timed probes and every tool this run digests, and the retained
+# evidence would attribute the rows to the binary and host with no record of the
+# interposed code. Refuse rather than clear, as with the loader variables: the file is
+# root-owned host policy, this run cannot alter it, and a value there means something
+# already chose it. Read it before any tool resolves, so nothing whose digest is recorded
+# has run under it. Bash redirection reads the file with no external program, which is why
+# this check can sit ahead of tool resolution at all; a missing file is the ordinary case
+# and is not an error.
+if [[ -e /etc/ld.so.preload ]]; then
+    preload_entries=()
+    while IFS= read -r preload_line || [[ -n "$preload_line" ]]; do
+        # The loader does not honour comments in this file, so any non-blank line names a
+        # library to interpose. Treating a `#` line as a comment would skip a real entry.
+        if [[ -n "${preload_line//[[:space:]]/}" ]]; then
+            preload_entries+=("$preload_line")
+        fi
+    done </etc/ld.so.preload
+    if ((${#preload_entries[@]} > 0)); then
+        printf '%s\n' \
+            "system-wide loader preload is configured: /etc/ld.so.preload" \
+            "${preload_entries[@]}" \
+            "the loader interposes these on every timed probe and every recorded tool," \
+            "and no receipt names them" >&2
+        exit 2
+    fi
 fi
 
 if (($# < 2 || $# > 3)); then
