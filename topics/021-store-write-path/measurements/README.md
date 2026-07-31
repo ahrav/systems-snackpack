@@ -72,6 +72,8 @@ that must remain cache-resident. The STLF workload isolates one aligned
 eight-byte store and two load offsets; it does not characterize every size,
 alignment, or overlap geometry.
 
-No retained host evidence exists as of the first visit on 2026-07-31. A future
-result note must link the raw evidence and report both primary and A/A intervals
-without replacing failed or incomplete attempts.
+The first visit retains [AArch64](2026-07-31-arm.md), [`xxl`
+x86-64](2026-07-31-xxl.md), and [cross-host](2026-07-31-cross-host.md) notes.
+Each links its raw process records and reports both primary and A/A intervals.
+Future notes must preserve the same boundaries without replacing failed or
+incomplete attempts.

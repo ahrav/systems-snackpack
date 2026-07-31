@@ -1,0 +1,13 @@
+{
+  "analysis_unit": "four-process block",
+  "binary": "/tmp/topic21-20f09a6-x86-evidence/binary/write_path",
+  "binary_sha256": "eceb3ab07abf030d1f5d0e5673c26e75ed565afe79bb9ca6e4a960c3214f2fcd",
+  "control_blocks": 4,
+  "cpu": 0,
+  "primary_blocks": 12,
+  "schedule": "odd ABBA; even BAAB; four fresh processes per block",
+  "schema": 1,
+  "source_commit": "20f09a6ef066df02ba4a180cb04b06a96e4dc633",
+  "stlf_iterations": 500000000,
+  "write_mib": 512
+}

@@ -54,4 +54,7 @@ functions, and executes 128 fresh pinned processes. See the [runner
 contract](experiment/README.md), [measurement contract](measurements/README.md),
 [first-round decision record](rounds/01.md), and [primary sources](references.md).
 
-No retained host result exists for the first visit on 2026-07-31.
+The first visit retains exact-source results for the [AArch64
+host](measurements/2026-07-31-arm.md), [`xxl`
+x86-64](measurements/2026-07-31-xxl.md), and the bounded [cross-host
+interpretation](measurements/2026-07-31-cross-host.md).

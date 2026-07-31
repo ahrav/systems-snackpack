@@ -1,0 +1,154 @@
+
+/tmp/topic21-20f09a6-arm-evidence/binary/write_path:     file format elf64-littleaarch64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000019220 <topic21_temporal_store>:
+   19220:	b4000541 	cbz	x1, 192c8 <topic21_temporal_store+0xa8>
+   19224:	d299bde9 	mov	x9, #0xcdef                	// #52719
+   19228:	d286420a 	mov	x10, #0x3210                	// #12816
+   1922c:	d28d2f0b 	mov	x11, #0x6978                	// #27000
+   19230:	d284422c 	mov	x12, #0x2211                	// #8721
+   19234:	d2959c0d 	mov	x13, #0xace0                	// #44256
+   19238:	d292d0ee 	mov	x14, #0x9687                	// #38535
+   1923c:	d292d2cf 	mov	x15, #0x9696                	// #38550
+   19240:	d280e310 	mov	x16, #0x718                 	// #1816
+   19244:	aa1f03e8 	mov	x8, xzr
+   19248:	f2b13569 	movk	x9, #0x89ab, lsl #16
+   1924c:	f2aeca8a 	movk	x10, #0x7654, lsl #16
+   19250:	f2a96b4b 	movk	x11, #0x4b5a, lsl #16
+   19254:	f2a8866c 	movk	x12, #0x4433, lsl #16
+   19258:	f2a48d0d 	movk	x13, #0x2468, lsl #16
+   1925c:	f2b4b68e 	movk	x14, #0xa5b4, lsl #16
+   19260:	f2be01ef 	movk	x15, #0xf00f, lsl #16
+   19264:	f2bcbed0 	movk	x16, #0xe5f6, lsl #16
+   19268:	f2c8ace9 	movk	x9, #0x4567, lsl #32
+   1926c:	f2d7530a 	movk	x10, #0xba98, lsl #32
+   19270:	f2c5a78b 	movk	x11, #0x2d3c, lsl #32
+   19274:	f2cccaac 	movk	x12, #0x6655, lsl #32
+   19278:	f2d37bed 	movk	x13, #0x9bdf, lsl #32
+   1927c:	f2dc3e0e 	movk	x14, #0xe1f0, lsl #32
+   19280:	f2c6798f 	movk	x15, #0x33cc, lsl #32
+   19284:	f2d87a90 	movk	x16, #0xc3d4, lsl #32
+   19288:	f2e02469 	movk	x9, #0x123, lsl #48
+   1928c:	f2ffdb8a 	movk	x10, #0xfedc, lsl #48
+   19290:	f2e1e3cb 	movk	x11, #0xf1e, lsl #48
+   19294:	f2f10eec 	movk	x12, #0x8877, lsl #48
+   19298:	f2e26aed 	movk	x13, #0x1357, lsl #48
+   1929c:	f2f87a4e 	movk	x14, #0xc3d2, lsl #48
+   192a0:	f2eab54f 	movk	x15, #0x55aa, lsl #48
+   192a4:	f2f43650 	movk	x16, #0xa1b2, lsl #48
+   192a8:	8b080011 	add	x17, x0, x8
+   192ac:	a9002a29 	stp	x9, x10, [x17]
+   192b0:	a901322b 	stp	x11, x12, [x17, #16]
+   192b4:	a9023a2d 	stp	x13, x14, [x17, #32]
+   192b8:	a903422f 	stp	x15, x16, [x17, #48]
+   192bc:	91010108 	add	x8, x8, #0x40
+   192c0:	eb01011f 	cmp	x8, x1
+   192c4:	54ffff23 	b.cc	192a8 <topic21_temporal_store+0x88>  // b.lo, b.ul, b.last
+   192c8:	52800028 	mov	w8, #0x1                   	// #1
+   192cc:	c89ffc48 	stlr	x8, [x2]
+   192d0:	d65f03c0 	ret
+
+Disassembly of section .fini:
+
+/tmp/topic21-20f09a6-arm-evidence/binary/write_path:     file format elf64-littleaarch64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000019120 <topic21_nontemporal_store>:
+   19120:	b4000541 	cbz	x1, 191c8 <topic21_nontemporal_store+0xa8>
+   19124:	d299bde9 	mov	x9, #0xcdef                	// #52719
+   19128:	d286420a 	mov	x10, #0x3210                	// #12816
+   1912c:	d28d2f0b 	mov	x11, #0x6978                	// #27000
+   19130:	d284422c 	mov	x12, #0x2211                	// #8721
+   19134:	d2959c0d 	mov	x13, #0xace0                	// #44256
+   19138:	d292d0ee 	mov	x14, #0x9687                	// #38535
+   1913c:	d292d2cf 	mov	x15, #0x9696                	// #38550
+   19140:	d280e310 	mov	x16, #0x718                 	// #1816
+   19144:	aa1f03e8 	mov	x8, xzr
+   19148:	f2b13569 	movk	x9, #0x89ab, lsl #16
+   1914c:	f2aeca8a 	movk	x10, #0x7654, lsl #16
+   19150:	f2a96b4b 	movk	x11, #0x4b5a, lsl #16
+   19154:	f2a8866c 	movk	x12, #0x4433, lsl #16
+   19158:	f2a48d0d 	movk	x13, #0x2468, lsl #16
+   1915c:	f2b4b68e 	movk	x14, #0xa5b4, lsl #16
+   19160:	f2be01ef 	movk	x15, #0xf00f, lsl #16
+   19164:	f2bcbed0 	movk	x16, #0xe5f6, lsl #16
+   19168:	f2c8ace9 	movk	x9, #0x4567, lsl #32
+   1916c:	f2d7530a 	movk	x10, #0xba98, lsl #32
+   19170:	f2c5a78b 	movk	x11, #0x2d3c, lsl #32
+   19174:	f2cccaac 	movk	x12, #0x6655, lsl #32
+   19178:	f2d37bed 	movk	x13, #0x9bdf, lsl #32
+   1917c:	f2dc3e0e 	movk	x14, #0xe1f0, lsl #32
+   19180:	f2c6798f 	movk	x15, #0x33cc, lsl #32
+   19184:	f2d87a90 	movk	x16, #0xc3d4, lsl #32
+   19188:	f2e02469 	movk	x9, #0x123, lsl #48
+   1918c:	f2ffdb8a 	movk	x10, #0xfedc, lsl #48
+   19190:	f2e1e3cb 	movk	x11, #0xf1e, lsl #48
+   19194:	f2f10eec 	movk	x12, #0x8877, lsl #48
+   19198:	f2e26aed 	movk	x13, #0x1357, lsl #48
+   1919c:	f2f87a4e 	movk	x14, #0xc3d2, lsl #48
+   191a0:	f2eab54f 	movk	x15, #0x55aa, lsl #48
+   191a4:	f2f43650 	movk	x16, #0xa1b2, lsl #48
+   191a8:	8b080011 	add	x17, x0, x8
+   191ac:	a8002a29 	stnp	x9, x10, [x17]
+   191b0:	a801322b 	stnp	x11, x12, [x17, #16]
+   191b4:	a8023a2d 	stnp	x13, x14, [x17, #32]
+   191b8:	a803422f 	stnp	x15, x16, [x17, #48]
+   191bc:	91010108 	add	x8, x8, #0x40
+   191c0:	eb01011f 	cmp	x8, x1
+   191c4:	54ffff23 	b.cc	191a8 <topic21_nontemporal_store+0x88>  // b.lo, b.ul, b.last
+   191c8:	52800028 	mov	w8, #0x1                   	// #1
+   191cc:	c89ffc48 	stlr	x8, [x2]
+   191d0:	d65f03c0 	ret
+
+Disassembly of section .fini:
+
+/tmp/topic21-20f09a6-arm-evidence/binary/write_path:     file format elf64-littleaarch64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+00000000000191e0 <topic21_stlf_exact>:
+   191e0:	f9000002 	str	x2, [x0]
+   191e4:	f8400002 	ldur	x2, [x0]
+   191e8:	f1000421 	subs	x1, x1, #0x1
+   191ec:	54ffffa1 	b.ne	191e0 <topic21_stlf_exact>  // b.any
+   191f0:	aa0203e0 	mov	x0, x2
+   191f4:	d65f03c0 	ret
+
+Disassembly of section .fini:
+
+/tmp/topic21-20f09a6-arm-evidence/binary/write_path:     file format elf64-littleaarch64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000019200 <topic21_stlf_partial>:
+   19200:	f9000002 	str	x2, [x0]
+   19204:	f8404002 	ldur	x2, [x0, #4]
+   19208:	f1000421 	subs	x1, x1, #0x1
+   1920c:	54ffffa1 	b.ne	19200 <topic21_stlf_partial>  // b.any
+   19210:	aa0203e0 	mov	x0, x2
+   19214:	d65f03c0 	ret
+
+Disassembly of section .fini:
