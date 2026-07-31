@@ -80,9 +80,16 @@ class DispatchGraph:
     # `b.<cond>` syntax as the real ones and both execute unconditionally, so a suffix
     # wildcard would treat `b.al` as a branch with two edges. `bc.<cond>` is the FEAT_HBC
     # hinted form of the same branch and takes the same condition set.
+    #
+    # The counted x86 branches are conditional without being Jcc: `loop`, `loope`, and
+    # `loopne` test `rcx` and the zero flag and take a taken edge like any other. They begin
+    # with `l`, so the `j` prefix rule does not reach them, and modelling one as pure
+    # fall-through drops its taken edge — which can hide a path to the promoted call and
+    # make a later branch look like the dominating guard.
     CONDITIONAL = re.compile(
         r"^(?:"
         r"j(?!mp)[a-z]+"
+        r"|loop(?:n?[ez])?"
         r"|bc?\.(?:eq|ne|cs|hs|cc|lo|mi|pl|vs|vc|hi|ls|ge|lt|gt|le)"
         r"|cbz|cbnz|tbz|tbnz"
         r")$"

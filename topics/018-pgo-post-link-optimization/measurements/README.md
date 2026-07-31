@@ -149,6 +149,22 @@ cannot recheck the commit binding those digests are standing in for:
 
 ```bash
 set -euo pipefail
+# Establish privileged mode before anything else, because every refusal below depends on
+# it. `bash -p` does not process `BASH_ENV` or `ENV` and does not import the caller's shell
+# functions, and an imported `git` or `command` function answers ahead of the program and
+# can forge `archive`, `rev-parse`, and `ls-tree` output. Run this recipe as
+# `bash -p handoff.sh`, not by pasting it into an interactive shell.
+#
+# The refusal is a parameter expansion rather than a command, and that is the point. In an
+# unprivileged shell every command name can be shadowed by an imported function — including
+# `builtin` itself, so `builtin printf` and `builtin exit` are both dispatched through a
+# caller's `builtin` function and a refusal written that way prints and then continues. A
+# `${var?message}` expansion is performed by the shell before any command lookup happens,
+# so no function can intercept it: a non-interactive shell prints the message and exits.
+# `if` and `[[` are keywords rather than builtins, so the test cannot be shadowed either.
+if [[ ! -o privileged ]]; then
+  : "${__handoff_requires_bash_p:?run this recipe with bash -p}"
+fi
 # Refuse an inherited loader or libc namespace before running anything. `LD_PRELOAD`
 # and `LD_AUDIT` interpose on every process below, including the `git` that produces
 # the archive and the `git`, `tar`, `rg`, and `sha256sum` that prove it matches the
@@ -163,21 +179,35 @@ set -euo pipefail
 # `env | sed` here would run two programs under the very loader state being refused,
 # which is the situation the check exists to prevent.
 #
-# `builtin printf` and `builtin exit`, not the bare names: these refusals run before
-# `bash -p` has been established, so an exported function named `exit` or `printf` is
-# imported and answers ahead of the builtin — and an `exit` that returns instead of
-# exiting turns every refusal below into a warning that the recipe continues past.
+# `builtin printf` and `builtin exit`, not the bare names: an exported function named
+# `exit` or `printf` answers ahead of the builtin, and an `exit` that returns instead of
+# exiting turns every refusal below into a warning the recipe continues past. What makes
+# them trustworthy here is the privileged-mode gate above, which has already refused a
+# shell that could have imported such a function; the prefixes stay so that reordering
+# these blocks cannot silently weaken them.
 for loader_variable in ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}; do
   builtin printf 'loader environment must be unset for the handoff proof: %s\n' \
     "$loader_variable" >&2
   builtin exit 2
 done
-# Start Bash privileged for the same reason the wrapper does: privileged mode does not
-# process `BASH_ENV` or `ENV` and does not import the caller's shell functions, and an
-# imported `git` or `command` function answers ahead of the program and can forge
-# `archive`, `rev-parse`, and `ls-tree` output. Run this recipe as
-# `bash -p handoff.sh`, not by pasting it into an interactive shell.
-[[ -o privileged ]] || { builtin printf 'run this recipe with bash -p\n' >&2; builtin exit 2; }
+# `/etc/ld.so.preload` is the file form of `LD_PRELOAD` and the sweep above cannot see it,
+# because there is no variable to find. The loader interposes what it names into every
+# external command below — the `git` that produces the archive and the `git`, `tar`, `rg`,
+# and `sha256sum` that prove it matches the commit — so a preload can forge an archive and
+# a manifest that agree with each other, exactly as an `LD_PRELOAD` can. The receiver
+# refuses this file for its own run, but archive mode can only take the commit-to-bytes
+# binding on the sender's word, so it has to be refused here too. Read it with shell
+# redirection, before the first external command, for the same reason the sweep above uses
+# an expansion. The loader honours no comments in this file, so any non-blank line counts.
+if [[ -e /etc/ld.so.preload ]]; then
+  while IFS= read -r preload_line || [[ -n "$preload_line" ]]; do
+    if [[ -n "${preload_line//[[:space:]]/}" ]]; then
+      builtin printf 'system-wide loader preload must be empty: /etc/ld.so.preload: %s\n' \
+        "$preload_line" >&2
+      builtin exit 2
+    fi
+  done </etc/ld.so.preload
+fi
 # `bash -p` declines to import the caller's functions into *this* shell, but the
 # `BASH_FUNC_name%%` entries carrying them stay in the environment and are inherited by
 # every child. The per-file hash below runs `sh -c`, and where `sh` is Bash that shell
