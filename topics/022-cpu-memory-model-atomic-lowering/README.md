@@ -38,3 +38,9 @@ python3 topics/022-cpu-memory-model-atomic-lowering/experiment/run_processes.py 
 
 See [the experiment contract](experiment/README.md), [measurement records](measurements/README.md),
 and [primary sources](references.md).
+
+The exact-source two-host run found a 33.987× SeqCst/Release store ratio on the
+recorded `xxl` host, where final code used `xchgq` versus `movq`. The recorded
+Arm host used `STLR` for both and measured a 0.999962 ratio. SeqCst/Relaxed
+private-line RMW ratios were 0.999307 and 1.001299, respectively. These results
+apply only to the recorded hosts, toolchains, binaries, and workload.
