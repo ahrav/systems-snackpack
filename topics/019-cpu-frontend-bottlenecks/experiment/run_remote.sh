@@ -10,10 +10,23 @@ set -euo pipefail
 # before anything else, including before the alias cleanup: a backslash suppresses
 # alias expansion but not function lookup, so calling shopt or unalias first would
 # hand control to an imported function that could install an alias and self-unset.
-# `declare` is dropped first only so that it can be trusted to report the rest,
-# and the backslash forms defeat aliases on these two names. A shadowed `unset` is
-# outside what this check can establish.
-\unset -f declare 2>/dev/null || true
+#
+# The enumerators themselves are shadowable, and exported functions are not
+# visible to parameter expansion, so trust is established by behaviour instead of
+# by assumption: a probe function must be reported by `declare -F` and must stop
+# existing after `unset -f`. A no-op `unset` or a silent `declare` fails one of
+# those two tests. The backslash forms defeat aliases on the same names.
+# shellcheck disable=SC2329  # invoked below, after unset -f, to test whether it survived
+__integrity_probe() { return 0; }
+if [[ -z "$(\declare -F __integrity_probe 2>/dev/null || true)" ]]; then
+    printf 'declare -F does not report a defined function; refusing to run\n' >&2
+    exit 2
+fi
+\unset -f __integrity_probe 2>/dev/null || true
+if __integrity_probe 2>/dev/null; then
+    printf 'unset -f did not remove a function; refusing to run\n' >&2
+    exit 2
+fi
 imported_functions="$(\declare -F)"
 if [[ -n "$imported_functions" ]]; then
     printf 'refusing to run with shell functions imported from the environment:\n' >&2
@@ -36,6 +49,25 @@ fi
 # emptying the sweep. Clear it before the first rg call; --no-config is also passed
 # at each call site.
 unset RIPGREP_CONFIG_PATH
+# The dynamic loader acts on every external command, including the ripgrep process
+# the main sweep uses to find these very names, so LD_* has to go first and
+# without running anything. Parameter expansion needs no external process.
+swept_variables=()
+for variable in ${!LD_@}; do
+    swept_variables+=("$variable")
+    unset "$variable"
+done
+# A relative PATH component resolves against the current directory, and this
+# script changes directory before the builds and gates, so a tool recorded now
+# would not be the tool invoked later.
+IFS=':' read -r -a path_entries <<<"$PATH"
+for entry in "${path_entries[@]}"; do
+    if [[ -z "$entry" || "$entry" != /* ]]; then
+        printf 'refusing to run with a relative PATH component: %s\n' \
+            "${entry:-<empty, meaning the current directory>}" >&2
+        exit 2
+    fi
+done
 
 if (($# < 2 || $# > 3)); then
     printf 'usage: %s REPOSITORY_ROOT OUTPUT_DIRECTORY [CPU]\n' "$0" >&2
@@ -58,13 +90,13 @@ topic_dir="$repo_root/$topic_rel"
 sweep_pattern='^(CARGO_|GIT_'
 sweep_pattern+='|RUSTC$|RUSTC_WRAPPER$|RUSTC_WORKSPACE_WRAPPER$|RUSTC_BOOTSTRAP$'
 sweep_pattern+='|RUSTDOC$|RUSTDOCFLAGS$|RUSTFLAGS$|RUSTFMT$'
-sweep_pattern+='|RUSTUP_TOOLCHAIN$|CLIPPY_CONF_DIR$|RIPGREP_CONFIG_PATH$'
+sweep_pattern+='|RUSTUP_TOOLCHAIN$|RUSTUP_HOME$|CLIPPY_CONF_DIR$|RIPGREP_CONFIG_PATH$'
 sweep_pattern+='|CPATH$|C_INCLUDE_PATH$|CPLUS_INCLUDE_PATH$|OBJC_INCLUDE_PATH$'
 sweep_pattern+='|COMPILER_PATH$|GCC_EXEC_PREFIX$|GCC_COMPARE_DEBUG$'
 sweep_pattern+='|LIBRARY_PATH$|DEPENDENCIES_OUTPUT$|SUNPRO_DEPENDENCIES$'
 sweep_pattern+='|PYTHONPATH$|PYTHONHOME$|PYTHONSTARTUP$'
 sweep_pattern+='|LD_)'
-swept_variables=()
+swept_variables+=()
 while IFS= read -r variable; do
     swept_variables+=("$variable")
     unset "$variable"
@@ -75,9 +107,9 @@ done < <(
 )
 
 for tool in \
-    awk bash cargo cmp date gcc getconf git gzip ln lscpu mkdir mktemp mv nm \
-    objdump perf python3 readelf rg rm rustc sha256sum size sort stat taskset \
-    uname xargs; do
+    awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ln lscpu \
+    mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sha256sum size \
+    sort stat taskset uname xargs; do
     # A function shadows PATH lookup while still satisfying command -v, so the
     # gates could run caller-supplied tools. Imported functions were already
     # rejected above; this also refuses any name that does not resolve to a file.
@@ -92,12 +124,15 @@ for tool in \
 done
 # command -v proves only that the name resolves to some executable, so record the
 # resolved path and content hash of each one. A PATH shim can then be identified
-# in the retained evidence instead of being invisible.
+# in the retained evidence instead of being invisible. cargo-fmt and cargo-clippy
+# are included because Cargo dispatches `cargo fmt` and `cargo clippy` to PATH
+# binaries of those names, so hashing `cargo` alone would not cover the fmt and
+# clippy gates.
 resolved_tools=()
 for tool in \
-    awk bash cargo cmp date gcc getconf git gzip ln lscpu mkdir mktemp mv nm \
-    objdump perf python3 readelf rg rm rustc sha256sum size sort stat taskset \
-    uname xargs; do
+    awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ln lscpu \
+    mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sha256sum size \
+    sort stat taskset uname xargs; do
     tool_path="$(command -v "$tool")"
     resolved_tools+=("$(printf '%s %s' "$tool" "$(sha256sum -- "$tool_path")")")
 done
@@ -175,14 +210,24 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
             "$hidden_index_flags" >&2
         exit 2
     fi
-    # git status cannot report ignored paths at all, so an ignored Cargo.toml or
-    # build.rs under the workspace member glob stays out of the manifest while the
-    # --workspace gates still load it -- and Cargo compiles and runs a package-root
-    # build.rs automatically. Compare both against the index.
+    # git status cannot report ignored paths at all, so an ignored Cargo.toml,
+    # build.rs, or auto-discovered target stays out of the manifest while the
+    # --workspace gates still load it: Cargo compiles and runs a package-root
+    # build.rs automatically, and auto-discovers examples, tests, benches, and
+    # src/bin targets that `cargo test --examples` and `clippy --all-targets`
+    # then compile. Compare all of them against the index.
     members_root="${topic_rel%%/*}"
     hidden_members=""
     for candidate in "$repo_root/$members_root"/*/Cargo.toml \
-        "$repo_root/$members_root"/*/build.rs; do
+        "$repo_root/$members_root"/*/build.rs \
+        "$repo_root/$members_root"/*/clippy.toml \
+        "$repo_root/$members_root"/*/.clippy.toml \
+        "$repo_root/$members_root"/*/rustfmt.toml \
+        "$repo_root/$members_root"/*/.rustfmt.toml \
+        "$repo_root/$members_root"/*/examples/*.rs \
+        "$repo_root/$members_root"/*/tests/*.rs \
+        "$repo_root/$members_root"/*/benches/*.rs \
+        "$repo_root/$members_root"/*/src/bin/*.rs; do
         [[ -e "$candidate" ]] || continue
         candidate_rel="${candidate#"$repo_root"/}"
         if ! git -C "$repo_root" ls-files --error-unmatch -- "$candidate_rel" \
@@ -243,19 +288,24 @@ fi
 # rustup's own settings rather than the environment, so clearing RUSTUP_TOOLCHAIN
 # does not remove it.
 if rustup override list >/dev/null 2>&1; then
-    rustup_overrides="$(
+    # Rows are '<path><padding><tab><toolchain>', and the padding width depends on
+    # the longest path, so matching a path followed directly by a tab silently
+    # misses short paths. Compare the trimmed first column instead.
+    override_dirs="$(
         rustup override list 2>/dev/null \
-            | rg --no-config -v '^no overrides$' || true
+            | rg --no-config -v '^no overrides$' \
+            | sed 's/[[:space:]]*\t.*$//' || true
     )"
     probe_dir="$repo_root"
     while :; do
-        if [[ -n "$rustup_overrides" ]] \
-            && printf '%s\n' "$rustup_overrides" \
-                | rg --no-config -q -F "$probe_dir"$'\t'; then
-            printf 'a rustup directory override outranks rust-toolchain.toml: %s\n' \
-                "$probe_dir" >&2
-            exit 2
-        fi
+        while IFS= read -r override_dir; do
+            [[ -n "$override_dir" ]] || continue
+            if [[ "$override_dir" == "$probe_dir" ]]; then
+                printf 'a rustup directory override outranks rust-toolchain.toml: %s\n' \
+                    "$probe_dir" >&2
+                exit 2
+            fi
+        done <<<"$override_dirs"
         [[ "$probe_dir" == / ]] && break
         probe_dir="$(dirname -- "$probe_dir")"
     done
