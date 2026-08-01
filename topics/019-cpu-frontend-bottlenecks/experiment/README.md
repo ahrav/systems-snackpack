@@ -37,7 +37,9 @@ The primary comparison uses 12 complete process blocks, alternating `ABBA` and
 `CLOCK_MONOTONIC_RAW` timer starts after 512 untimed warm-up rounds; compilation
 and process startup are excluded. The analysis reports the geometric
 `sparse4096/dense16` ratio, 12 block analysis units, log-contrast dispersion, and
-a 95% Student-t interval covering within-window block variation.
+a 95% Student-t confidence interval for that geometric-mean ratio, computed from
+between-block dispersion. It is not a prediction interval for an individual
+block, which would be wider.
 
 An identical-artifact A/A control uses two hard links to the dense ELF and the
 same schedule. It checks launch-label and analysis symmetry, not independent
@@ -45,7 +47,8 @@ build variation or a false-positive rate.
 
 The runner also retains:
 
-- checksum smoke tests and all process attempts;
+- checksum smoke tests, with command, status, and output, and all process
+  attempts;
 - ELF hashes, sections, program headers, symbols, and disassembly;
 - a machine-checked 512-leaf layout invariant;
 - order-balanced `perf stat` passes with counter running fractions;

@@ -52,8 +52,16 @@ enum {{ NFUN = {NFUN} }};
 static uint64_t parse_u64(const char *text, const char *what) {{
     char *end = NULL;
     errno = 0;
+    /* strtoull leaves end at text when no digits are consumed, so *end == '\0'
+       would accept an empty argument as 0, and it applies negation to the
+       unsigned result, so "-1" would become UINT64_MAX without setting errno.
+       Require a leading digit, then that digits were actually consumed. */
+    if (text[0] < '0' || text[0] > '9') {{
+        fprintf(stderr, "invalid %s: %s\n", what, text);
+        exit(2);
+    }}
     unsigned long long value = strtoull(text, &end, 10);
-    if (errno || !end || *end != '\0') {{
+    if (errno || end == text || *end != '\0') {{
         fprintf(stderr, "invalid %s: %s\n", what, text);
         exit(2);
     }}

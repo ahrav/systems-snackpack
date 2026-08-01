@@ -393,7 +393,15 @@ def run_perf(
                 raise RuntimeError("anchor PMU group ran for less than 99 percent")
 
     groups: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+    failed_attempts = 0
     for attempt in attempts:
+        # perf stat exits with the workload's status, so a non-zero attempt can
+        # still have written valid counter rows. Those rows describe a run that
+        # did not complete as intended, so they must not enter the quantitative
+        # summaries; the raw attempt records below retain them either way.
+        if attempt["returncode"] != 0:
+            failed_attempts += 1
+            continue
         for row in attempt["rows"]:
             key = (attempt["pass"], attempt["arm"], row["event"])
             groups.setdefault(key, []).append(row)
@@ -427,6 +435,8 @@ def run_perf(
             "processes_per_pass": PERF_BLOCKS * 4,
             "order": "odd ABBA; even BAAB",
             "scope": "whole process including startup and warm-up",
+            "summaries_exclude_failed_attempts": True,
+            "failed_attempts": failed_attempts,
         },
         "passes": [{"name": name, "events": events} for name, events in passes],
         "attempts": attempts,
@@ -468,18 +478,30 @@ def main() -> None:
         json.dumps(layout, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
 
+    smoke_records = []
     for executable in (args.dense, args.sparse, args.aa_a, args.aa_b):
-        smoke = checked_run(
-            [
-                "taskset",
-                "-c",
-                str(args.cpu),
-                str(executable),
-                str(WARM_ROUNDS),
-                "1",
-            ]
+        command = [
+            "taskset",
+            "-c",
+            str(args.cpu),
+            str(executable),
+            str(WARM_ROUNDS),
+            "1",
+        ]
+        smoke = checked_run(command)
+        smoke_records.append(
+            {
+                "command": command,
+                "returncode": smoke.returncode,
+                "stdout": smoke.stdout,
+                "stderr": smoke.stderr,
+                "fields": parse_program_output(smoke.stdout),
+            }
         )
-        parse_program_output(smoke.stdout)
+    (args.output_dir / "smoke-tests.json").write_text(
+        json.dumps(smoke_records, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
     ab_rows = run_timing(
         "layout",
@@ -515,8 +537,10 @@ def main() -> None:
             "warm-up; process startup excluded"
         ),
         "interval_scope": (
-            "complete-block variation in this host, binary, workload, and "
-            "single run window"
+            "95% Student-t confidence interval for the geometric-mean ratio, "
+            "from between-block log-contrast dispersion in this host, binary, "
+            "workload, and single run window; not a prediction interval for an "
+            "individual block"
         ),
         "layout": ab_summary,
         "identical_artifact": aa_summary,

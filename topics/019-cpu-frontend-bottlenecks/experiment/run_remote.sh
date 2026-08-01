@@ -57,6 +57,11 @@ for variable in ${!LD_@}; do
     swept_variables+=("$variable")
     unset "$variable"
 done
+# GLOBIGNORE is inert when merely inherited through the environment, because Bash
+# applies its glob-ignore hook on assignment rather than on import, and the one
+# route that would assign it -- BASH_ENV -- is already refused above. Clear it
+# anyway, since the integrity checks below depend on globs seeing every match.
+unset GLOBIGNORE
 # A relative PATH component resolves against the current directory, and this
 # script changes directory before the builds and gates, so a tool recorded now
 # would not be the tool invoked later.
