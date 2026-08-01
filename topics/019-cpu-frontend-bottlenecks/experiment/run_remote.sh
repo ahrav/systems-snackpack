@@ -13,13 +13,22 @@ set -euo pipefail
 #
 # The enumerators themselves are shadowable, and exported functions are not
 # visible to parameter expansion, so trust is established by behaviour instead of
-# by assumption: a probe function must be reported by `declare -F` and must stop
-# existing after `unset -f`. A no-op `unset` or a silent `declare` fails one of
-# those two tests. The backslash forms defeat aliases on the same names.
+# by assumption. Three properties are tested, because a selective replacement can
+# satisfy any one of them alone: `declare -F NAME` must report a defined probe,
+# the no-argument `declare -F` must list a second probe (so a `declare` that
+# answers for named probes but returns nothing for the full list is caught), and
+# `unset -f` must actually remove a probe. The backslash forms defeat aliases on
+# the same names.
 # shellcheck disable=SC2329  # invoked below, after unset -f, to test whether it survived
 __integrity_probe() { return 0; }
+# shellcheck disable=SC2329  # existence is asserted through declare -F, not by calling it
+__integrity_probe_list() { return 0; }
 if [[ -z "$(\declare -F __integrity_probe 2>/dev/null || true)" ]]; then
     printf 'declare -F does not report a defined function; refusing to run\n' >&2
+    exit 2
+fi
+if [[ "$(\declare -F)" != *__integrity_probe_list* ]]; then
+    printf 'declare -F does not list defined functions; refusing to run\n' >&2
     exit 2
 fi
 \unset -f __integrity_probe 2>/dev/null || true
@@ -27,12 +36,29 @@ if __integrity_probe 2>/dev/null; then
     printf 'unset -f did not remove a function; refusing to run\n' >&2
     exit 2
 fi
+\unset -f __integrity_probe_list 2>/dev/null || true
 imported_functions="$(\declare -F)"
 if [[ -n "$imported_functions" ]]; then
     printf 'refusing to run with shell functions imported from the environment:\n' >&2
     printf '%s\n' "$imported_functions" >&2
     exit 2
 fi
+# The environment sweep below depends on `compgen -e` listing exported variables,
+# and that is the enumerator a selective replacement would target, so verify it
+# reports a variable this script just exported rather than trusting it.
+__INTEGRITY_SENTINEL=1
+export __INTEGRITY_SENTINEL
+sentinel_seen=0
+while IFS= read -r variable; do
+    if [[ "$variable" == __INTEGRITY_SENTINEL ]]; then
+        sentinel_seen=1
+    fi
+done < <(compgen -e)
+if ((sentinel_seen != 1)); then
+    printf 'compgen -e did not report an exported variable; refusing to run\n' >&2
+    exit 2
+fi
+unset __INTEGRITY_SENTINEL
 
 # No imported functions remain, so these builtins cannot be shadowed. Bash sources
 # BASH_ENV before this script starts, so any aliases and shell options it installed
@@ -113,8 +139,8 @@ done < <(
 
 for tool in \
     awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ln lscpu \
-    mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sha256sum size \
-    sort stat taskset uname xargs; do
+    mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed sha256sum \
+    size sort stat taskset uname xargs; do
     # A function shadows PATH lookup while still satisfying command -v, so the
     # gates could run caller-supplied tools. Imported functions were already
     # rejected above; this also refuses any name that does not resolve to a file.
@@ -131,16 +157,37 @@ done
 # resolved path and content hash of each one. A PATH shim can then be identified
 # in the retained evidence instead of being invisible. cargo-fmt and cargo-clippy
 # are included because Cargo dispatches `cargo fmt` and `cargo clippy` to PATH
-# binaries of those names, so hashing `cargo` alone would not cover the fmt and
-# clippy gates.
+# binaries of those names, and sed because the rustup override guard depends on
+# it. rustup itself is optional, and is recorded when present because that guard
+# and the toolchain resolution below both rely on it.
 resolved_tools=()
 for tool in \
     awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ln lscpu \
-    mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sha256sum size \
-    sort stat taskset uname xargs; do
+    mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed sha256sum \
+    size sort stat taskset uname xargs; do
     tool_path="$(command -v "$tool")"
     resolved_tools+=("$(printf '%s %s' "$tool" "$(sha256sum -- "$tool_path")")")
 done
+if command -v rustup >/dev/null 2>&1 \
+    && [[ "$(type -t rustup 2>/dev/null || true)" == file ]]; then
+    rustup_path="$(command -v rustup)"
+    resolved_tools+=("$(printf 'rustup %s' "$(sha256sum -- "$rustup_path")")")
+    # The rustup proxies are thin, so their hashes say nothing about the toolchain
+    # they dispatch to. rustup resolves the store from RUSTUP_HOME, which is swept,
+    # and otherwise from HOME, which cannot be. Record the binaries that actually
+    # run so a redirected store is visible in the evidence.
+    for proxied in cargo rustc; do
+        proxied_path="$(rustup which "$proxied" 2>/dev/null || true)"
+        if [[ -n "$proxied_path" && -f "$proxied_path" ]]; then
+            resolved_tools+=(
+                "$(printf 'rustup-which-%s %s' \
+                    "$proxied" "$(sha256sum -- "$proxied_path")")"
+            )
+        fi
+    done
+fi
+resolved_tools+=("$(printf 'effective_rustup_home %s' "${RUSTUP_HOME:-$HOME/.rustup}")")
+resolved_tools+=("$(printf 'home %s' "$HOME")")
 if [[ ! -r "$topic_dir/experiment/generate.py" ]] \
     || [[ ! -r "$topic_dir/experiment/frontend_experiment.py" ]]; then
     printf 'repository lacks the Topic 19 experiment\n' >&2
@@ -225,14 +272,15 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
     hidden_members=""
     for candidate in "$repo_root/$members_root"/*/Cargo.toml \
         "$repo_root/$members_root"/*/build.rs \
-        "$repo_root/$members_root"/*/clippy.toml \
-        "$repo_root/$members_root"/*/.clippy.toml \
-        "$repo_root/$members_root"/*/rustfmt.toml \
-        "$repo_root/$members_root"/*/.rustfmt.toml \
+        "$repo_root/$members_root"/*/src/main.rs \
         "$repo_root/$members_root"/*/examples/*.rs \
         "$repo_root/$members_root"/*/tests/*.rs \
         "$repo_root/$members_root"/*/benches/*.rs \
-        "$repo_root/$members_root"/*/src/bin/*.rs; do
+        "$repo_root/$members_root"/*/src/bin/*.rs \
+        "$repo_root/$members_root"/*/examples/*/main.rs \
+        "$repo_root/$members_root"/*/tests/*/main.rs \
+        "$repo_root/$members_root"/*/benches/*/main.rs \
+        "$repo_root/$members_root"/*/src/bin/*/main.rs; do
         [[ -e "$candidate" ]] || continue
         candidate_rel="${candidate#"$repo_root"/}"
         if ! git -C "$repo_root" ls-files --error-unmatch -- "$candidate_rel" \
@@ -243,6 +291,29 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
     if [[ -n "$hidden_members" ]]; then
         printf 'untracked workspace files would be loaded by the Cargo gates:%s\n' \
             "$hidden_members" >&2
+        exit 2
+    fi
+    # rustfmt and Clippy read configuration from the directory of the file being
+    # processed and every parent, so a config nested at any depth applies -- a
+    # src/rustfmt.toml changes `cargo fmt --check` for src/lib.rs. Scan the whole
+    # tree, including ignored paths, and require every such file to be tracked.
+    nested_configs=""
+    while IFS= read -r candidate_rel; do
+        [[ -n "$candidate_rel" ]] || continue
+        if ! git -C "$repo_root" ls-files --error-unmatch -- "$candidate_rel" \
+            >/dev/null 2>&1; then
+            nested_configs+=" $candidate_rel"
+        fi
+    done < <(
+        cd "$repo_root" \
+            && rg --no-config --files -uu -g '!/.git/' -g '!/target/' \
+                -g 'rustfmt.toml' -g '.rustfmt.toml' \
+                -g 'clippy.toml' -g '.clippy.toml' \
+                || true
+    )
+    if [[ -n "$nested_configs" ]]; then
+        printf 'untracked rustfmt or Clippy configuration would apply to the gates:%s\n' \
+            "$nested_configs" >&2
         exit 2
     fi
     source_commit_verification=git-checkout
