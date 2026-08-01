@@ -3,34 +3,39 @@ set -euo pipefail
 
 # Validate an exact Linux source tree and write Topic 19 evidence outside it.
 
-# Bash sources BASH_ENV before this script starts, so any aliases and shell
-# options it installed are already in effect and cannot be undone by unsetting
-# the variable later. Alias expansion in particular is invisible to the function
-# check below, and an alias on compgen would make the environment sweep
-# enumerate nothing while still reporting success. Drop alias state first, using
-# backslash forms so these two commands cannot themselves be aliased.
-\shopt -u expand_aliases 2>/dev/null || true
-\unalias -a 2>/dev/null || true
-if [[ -n "${BASH_ENV:-}" ]]; then
-    printf 'refusing to run with BASH_ENV set: %s\n' "$BASH_ENV" >&2
-    printf 'it already ran arbitrary shell code before this script started\n' >&2
-    exit 2
-fi
-
 # Bash imports exported functions from the environment before this script runs,
 # and a function takes precedence over both PATH lookup and builtins, so an
 # imported definition could redirect a tool or make the environment sweep below
 # enumerate nothing while still reporting success. Reject any such definition
-# before doing anything else; this script defines its own functions later.
-# `declare` is dropped first only so that it can be trusted to report the rest.
-# A shadowed `unset` is outside what this check can establish.
-unset -f declare 2>/dev/null || true
-imported_functions="$(declare -F)"
+# before anything else, including before the alias cleanup: a backslash suppresses
+# alias expansion but not function lookup, so calling shopt or unalias first would
+# hand control to an imported function that could install an alias and self-unset.
+# `declare` is dropped first only so that it can be trusted to report the rest,
+# and the backslash forms defeat aliases on these two names. A shadowed `unset` is
+# outside what this check can establish.
+\unset -f declare 2>/dev/null || true
+imported_functions="$(\declare -F)"
 if [[ -n "$imported_functions" ]]; then
     printf 'refusing to run with shell functions imported from the environment:\n' >&2
     printf '%s\n' "$imported_functions" >&2
     exit 2
 fi
+
+# No imported functions remain, so these builtins cannot be shadowed. Bash sources
+# BASH_ENV before this script starts, so any aliases and shell options it installed
+# are already in effect and cannot be undone by unsetting the variable later.
+builtin shopt -u expand_aliases 2>/dev/null || true
+builtin unalias -a 2>/dev/null || true
+if [[ -n "${BASH_ENV:-}" ]]; then
+    printf 'refusing to run with BASH_ENV set: %s\n' "$BASH_ENV" >&2
+    printf 'it already ran arbitrary shell code before this script started\n' >&2
+    exit 2
+fi
+# ripgrep reads RIPGREP_CONFIG_PATH unless --no-config is passed, and a config as
+# small as --fixed-strings would make every pattern below literal, silently
+# emptying the sweep. Clear it before the first rg call; --no-config is also passed
+# at each call site.
+unset RIPGREP_CONFIG_PATH
 
 if (($# < 2 || $# > 3)); then
     printf 'usage: %s REPOSITORY_ROOT OUTPUT_DIRECTORY [CPU]\n' "$0" >&2
@@ -51,9 +56,9 @@ topic_dir="$repo_root/$topic_rel"
 # repository while the evidence calls the environment swept. This runs before the
 # first Git probe, because GIT_DIR and GIT_WORK_TREE override even git -C.
 sweep_pattern='^(CARGO_|GIT_'
-sweep_pattern+='|RUSTC$|RUSTC_WRAPPER$|RUSTC_WORKSPACE_WRAPPER$'
+sweep_pattern+='|RUSTC$|RUSTC_WRAPPER$|RUSTC_WORKSPACE_WRAPPER$|RUSTC_BOOTSTRAP$'
 sweep_pattern+='|RUSTDOC$|RUSTDOCFLAGS$|RUSTFLAGS$|RUSTFMT$'
-sweep_pattern+='|RUSTUP_TOOLCHAIN$'
+sweep_pattern+='|RUSTUP_TOOLCHAIN$|CLIPPY_CONF_DIR$|RIPGREP_CONFIG_PATH$'
 sweep_pattern+='|CPATH$|C_INCLUDE_PATH$|CPLUS_INCLUDE_PATH$|OBJC_INCLUDE_PATH$'
 sweep_pattern+='|COMPILER_PATH$|GCC_EXEC_PREFIX$|GCC_COMPARE_DEBUG$'
 sweep_pattern+='|LIBRARY_PATH$|DEPENDENCIES_OUTPUT$|SUNPRO_DEPENDENCIES$'
@@ -65,7 +70,7 @@ while IFS= read -r variable; do
     unset "$variable"
 done < <(
     compgen -e \
-        | rg "$sweep_pattern" \
+        | rg --no-config "$sweep_pattern" \
         || true
 )
 
@@ -73,10 +78,9 @@ for tool in \
     awk bash cargo cmp date gcc getconf git gzip ln lscpu mkdir mktemp mv nm \
     objdump perf python3 readelf rg rm rustc sha256sum size sort stat taskset \
     uname xargs; do
-    # Bash imports exported functions from the environment before this check, and
-    # a function shadows PATH lookup while still satisfying command -v, so the
-    # gates could run caller-supplied tools. Drop any such definition first.
-    unset -f "$tool" 2>/dev/null || true
+    # A function shadows PATH lookup while still satisfying command -v, so the
+    # gates could run caller-supplied tools. Imported functions were already
+    # rejected above; this also refuses any name that does not resolve to a file.
     if ! command -v "$tool" >/dev/null 2>&1; then
         printf 'required tool is unavailable: %s\n' "$tool" >&2
         exit 2
@@ -85,6 +89,17 @@ for tool in \
         printf 'required tool does not resolve to an executable: %s\n' "$tool" >&2
         exit 2
     fi
+done
+# command -v proves only that the name resolves to some executable, so record the
+# resolved path and content hash of each one. A PATH shim can then be identified
+# in the retained evidence instead of being invisible.
+resolved_tools=()
+for tool in \
+    awk bash cargo cmp date gcc getconf git gzip ln lscpu mkdir mktemp mv nm \
+    objdump perf python3 readelf rg rm rustc sha256sum size sort stat taskset \
+    uname xargs; do
+    tool_path="$(command -v "$tool")"
+    resolved_tools+=("$(printf '%s %s' "$tool" "$(sha256sum -- "$tool_path")")")
 done
 if [[ ! -r "$topic_dir/experiment/generate.py" ]] \
     || [[ ! -r "$topic_dir/experiment/frontend_experiment.py" ]]; then
@@ -119,7 +134,7 @@ fi
 if (($# == 3)); then
     cpu="$3"
 else
-    allowed="$(rg -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}')"
+    allowed="$(rg --no-config -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}')"
     first="${allowed%%,*}"
     cpu="${first%%-*}"
 fi
@@ -142,7 +157,7 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
         exit 2
     fi
     unmanifestable="$(
-        git -C "$repo_root" ls-files -s | rg -m 1 -v '^(100644|100755) ' || true
+        git -C "$repo_root" ls-files -s | rg --no-config -m 1 -v '^(100644|100755) ' || true
     )"
     if [[ -n "$unmanifestable" ]]; then
         printf 'tracked symbolic links or submodules are unsupported: %s\n' \
@@ -153,19 +168,21 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
     # of git status, so the clean-tree gate above would pass while the manifest
     # hashes working-tree bytes that differ from source_commit.
     hidden_index_flags="$(
-        git -C "$repo_root" ls-files -v | rg -m 1 '^([a-z]|S) ' || true
+        git -C "$repo_root" ls-files -v | rg --no-config -m 1 '^([a-z]|S) ' || true
     )"
     if [[ -n "$hidden_index_flags" ]]; then
         printf 'assume-unchanged or skip-worktree hides edits from the clean-tree gate: %s\n' \
             "$hidden_index_flags" >&2
         exit 2
     fi
-    # git status cannot report ignored paths at all, so an ignored Cargo.toml
-    # under the workspace member glob stays out of the manifest while the
-    # --workspace gates still load it. Compare the glob against the index.
+    # git status cannot report ignored paths at all, so an ignored Cargo.toml or
+    # build.rs under the workspace member glob stays out of the manifest while the
+    # --workspace gates still load it -- and Cargo compiles and runs a package-root
+    # build.rs automatically. Compare both against the index.
     members_root="${topic_rel%%/*}"
     hidden_members=""
-    for candidate in "$repo_root/$members_root"/*/Cargo.toml; do
+    for candidate in "$repo_root/$members_root"/*/Cargo.toml \
+        "$repo_root/$members_root"/*/build.rs; do
         [[ -e "$candidate" ]] || continue
         candidate_rel="${candidate#"$repo_root"/}"
         if ! git -C "$repo_root" ls-files --error-unmatch -- "$candidate_rel" \
@@ -174,7 +191,7 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
         fi
     done
     if [[ -n "$hidden_members" ]]; then
-        printf 'untracked workspace members would be loaded by the Cargo gates:%s\n' \
+        printf 'untracked workspace files would be loaded by the Cargo gates:%s\n' \
             "$hidden_members" >&2
         exit 2
     fi
@@ -192,25 +209,56 @@ else
     source_commit_verification=declared-archive
 fi
 
-# Cargo discovers .cargo/config.toml from the gate working directory upward, so
-# an isolated CARGO_HOME is not sufficient: a config in repo_root or any ancestor
-# can inject build.rustflags, wrappers, or linker and target settings that
-# build-flags.txt never records.
-cargo_configs=()
+# Cargo, rustfmt, and Clippy all discover configuration from the gate working
+# directory upward or from the package root, so an isolated CARGO_HOME is not
+# sufficient: a config in repo_root or any ancestor can inject build.rustflags,
+# wrappers, linker or target settings, formatting rules, or lint thresholds that
+# build-flags.txt never records. A config tracked inside repo_root is part of the
+# recorded source and is allowed; anything else is refused.
+unrecorded_configs=()
 probe_dir="$repo_root"
 while :; do
-    for candidate in "$probe_dir/.cargo/config.toml" "$probe_dir/.cargo/config"; do
-        if [[ -e "$candidate" ]]; then
-            cargo_configs+=("$candidate")
+    for candidate in \
+        "$probe_dir/.cargo/config.toml" "$probe_dir/.cargo/config" \
+        "$probe_dir/rustfmt.toml" "$probe_dir/.rustfmt.toml" \
+        "$probe_dir/clippy.toml" "$probe_dir/.clippy.toml"; do
+        [[ -e "$candidate" ]] || continue
+        if [[ "$probe_dir" == "$repo_root" ]] \
+            && git -C "$repo_root" ls-files --error-unmatch -- \
+                "${candidate#"$repo_root"/}" >/dev/null 2>&1; then
+            continue
         fi
+        unrecorded_configs+=("$candidate")
     done
     [[ "$probe_dir" == / ]] && break
     probe_dir="$(dirname -- "$probe_dir")"
 done
-if (( ${#cargo_configs[@]} > 0 )); then
-    printf 'unrecorded Cargo configuration would apply to the gates:\n' >&2
-    printf '  %s\n' "${cargo_configs[@]}" >&2
+if ((${#unrecorded_configs[@]} > 0)); then
+    printf 'unrecorded tool configuration would apply to the gates:\n' >&2
+    printf '  %s\n' "${unrecorded_configs[@]}" >&2
     exit 2
+fi
+
+# A rustup directory override outranks rust-toolchain.toml and is stored in
+# rustup's own settings rather than the environment, so clearing RUSTUP_TOOLCHAIN
+# does not remove it.
+if rustup override list >/dev/null 2>&1; then
+    rustup_overrides="$(
+        rustup override list 2>/dev/null \
+            | rg --no-config -v '^no overrides$' || true
+    )"
+    probe_dir="$repo_root"
+    while :; do
+        if [[ -n "$rustup_overrides" ]] \
+            && printf '%s\n' "$rustup_overrides" \
+                | rg --no-config -q -F "$probe_dir"$'\t'; then
+            printf 'a rustup directory override outranks rust-toolchain.toml: %s\n' \
+                "$probe_dir" >&2
+            exit 2
+        fi
+        [[ "$probe_dir" == / ]] && break
+        probe_dir="$(dirname -- "$probe_dir")"
+    done
 fi
 
 build_dir="$(mktemp -d)"
@@ -263,7 +311,7 @@ manifest_source() {
         if [[ "$source_commit_verification" == git-checkout ]]; then
             git ls-files -z
         else
-            rg --files -uu -g '!/.git/' -g '!/target/' -0
+            rg --no-config --files -uu -g '!/.git/' -g '!/target/' -0
         fi \
             | LC_ALL=C sort -z \
             | xargs -0 sha256sum --
@@ -281,7 +329,7 @@ start_utc="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
     printf 'source_archive_sha256=%s\n' "${SOURCE_ARCHIVE_SHA256:-unknown}"
     printf 'selected_cpu=%s\n' "$cpu"
     printf 'cpus_allowed_list=%s\n' \
-        "$(rg -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}')"
+        "$(rg --no-config -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}')"
     uname -a
     printf 'architecture=%s\n' "$(uname -m)"
     printf 'kernel=%s\n' "$(uname -r)"
@@ -289,13 +337,13 @@ start_utc="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
     printf 'configured_cpus=%s\n' "$(getconf _NPROCESSORS_CONF)"
     printf 'page_size=%s\n' "$(getconf PAGESIZE)"
     printf 'perf_event_paranoid=%s\n' \
-        "$(rg -m 1 '^-?[0-9]+$' /proc/sys/kernel/perf_event_paranoid)"
+        "$(rg --no-config -m 1 '^-?[0-9]+$' /proc/sys/kernel/perf_event_paranoid)"
     printf '\naffinity\n'
     taskset --cpu-list --pid "$$"
     printf '\nlscpu\n'
     lscpu
     printf '\ncpu_model_and_features\n'
-    rg -m 128 \
+    rg --no-config -m 128 \
         '^(model name|vendor_id|cpu family|model|stepping|microcode|Hardware|CPU implementer|CPU architecture|CPU variant|CPU part|CPU revision|Features|flags)' \
         /proc/cpuinfo
     printf '\ngcc\n'
@@ -353,6 +401,9 @@ gcc_flags=(
     printf '%q ' gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 \
         frontend_layout.c -o sparse4096
     printf '\n'
+    printf 'gcc_working_directory=%s\n' "$frontend_dir"
+    printf 'resolved_tools\n'
+    printf '%s\n' "${resolved_tools[@]}"
     printf 'timing=12 blocks; odd ABBA; even BAAB; 48 fresh processes; '
     printf 'warm_rounds=512; measure_rounds=8192\n'
     printf 'perf=4 blocks per event pass; odd ABBA; even BAAB; '
@@ -412,8 +463,16 @@ sparse="$frontend_dir/sparse4096"
 aa_a="$frontend_dir/identical-a"
 aa_b="$frontend_dir/identical-b"
 python3 -I "$topic_dir/experiment/generate.py" "$generated_c"
-gcc "${gcc_flags[@]}" -DFUNC_ALIGN=16 "$generated_c" -o "$dense"
-gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 "$generated_c" -o "$sparse"
+# Compile from inside frontend_dir with a relative source name. -g records the
+# compilation directory in DWARF, so invoking gcc from the caller's directory made
+# the ELF bytes depend on that directory even with the source path mapped. Running
+# here means the compilation directory is frontend_dir, which -ffile-prefix-map
+# already rewrites to the fixed placeholder.
+(
+    cd "$frontend_dir"
+    gcc "${gcc_flags[@]}" -DFUNC_ALIGN=16 frontend_layout.c -o dense16
+    gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 frontend_layout.c -o sparse4096
+)
 ln "$dense" "$aa_a"
 ln "$dense" "$aa_b"
 {
@@ -472,7 +531,7 @@ printf 'run_end_utc=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
 manifest_tmp="$(mktemp -p "$build_dir")"
 (
     cd "$output_dir"
-    rg --files -uu -0 . | LC_ALL=C sort -z | xargs -0 sha256sum --
+    rg --no-config --files -uu -0 . | LC_ALL=C sort -z | xargs -0 sha256sum --
 ) >"$manifest_tmp"
 mv -- "$manifest_tmp" "$output_dir/evidence.sha256"
 
