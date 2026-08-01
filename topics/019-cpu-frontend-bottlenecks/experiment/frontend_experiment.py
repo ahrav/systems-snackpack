@@ -231,7 +231,14 @@ def validate_layout(dense: Path, sparse: Path) -> dict[str, Any]:
         }
     if all_sizes["dense16"] != all_sizes["sparse4096"]:
         raise RuntimeError("leaf symbol sizes differ across variants")
-    result["code_size_equal"] = True
+    # Scoped to leaf symbols: the guard above only compares leaf sizes. The
+    # alignment treatment can move non-leaf code generation, so report the
+    # caller separately instead of implying every code symbol stayed equal.
+    result["leaf_code_size_equal"] = True
+    result["run_rounds_size_equal"] = (
+        result["dense16"]["run_rounds_size"]
+        == result["sparse4096"]["run_rounds_size"]
+    )
     return result
 
 

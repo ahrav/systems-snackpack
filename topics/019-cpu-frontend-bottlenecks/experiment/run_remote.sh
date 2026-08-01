@@ -118,7 +118,7 @@ while IFS= read -r variable; do
     unset "$variable"
 done < <(
     compgen -e \
-        | rg '^(CARGO_TARGET_DIR|CARGO_BUILD_|RUSTC$|RUSTDOC$|RUSTFLAGS$|RUSTDOCFLAGS$|LD_)' \
+        | rg '^(CARGO_TARGET_DIR|CARGO_BUILD_|RUSTC$|RUSTDOC$|RUSTFLAGS$|RUSTDOCFLAGS$|RUSTUP_TOOLCHAIN$|LD_)' \
         || true
 )
 export CARGO_HOME="$build_dir/cargo-home"
@@ -167,13 +167,13 @@ start_utc="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
     gcc -dumpmachine
     gcc -dumpfullversion
     printf '\nrustc\n'
-    rustc -vV
+    (cd "$repo_root" && rustc -vV)
     printf '\ncargo\n'
-    cargo -vV
+    (cd "$repo_root" && cargo -vV)
     printf '\npython\n'
     python3 --version
     printf '\ntarget_cfg\n'
-    rustc --print cfg -C target-cpu=native
+    (cd "$repo_root" && rustc --print cfg -C target-cpu=native)
     printf '\nbinutils\n'
     objdump --version
     readelf --version
