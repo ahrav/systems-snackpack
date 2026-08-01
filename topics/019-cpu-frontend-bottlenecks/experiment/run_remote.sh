@@ -123,14 +123,20 @@ experiment_dir="$output_dir/experiment"
 frontend_dir="$build_dir/frontend"
 mkdir -p -- "$gates_dir" "$frontend_dir"
 
-# Cargo and rustup honor all of these for the gates below: they select the
-# toolchain, replace rustc/rustfmt, or inject compiler flags. Sweeping records
-# each name in swept_environment, so a gate can no longer pass under a
-# caller-supplied tool while the evidence calls the environment swept.
+# Cargo, rustup, and GCC honor all of these for the builds and gates below:
+# they select the toolchain, replace rustc/rustfmt, inject compiler flags, add
+# implicit header or library search paths, or redirect compiler subprograms.
+# Sweeping records each name in swept_environment, so a gate can no longer pass
+# under a caller-supplied tool, flag, or header while the evidence calls the
+# environment swept.
 sweep_pattern='^(CARGO_TARGET_DIR|CARGO_BUILD_|CARGO_ENCODED_RUSTFLAGS$'
 sweep_pattern+='|RUSTC$|RUSTC_WRAPPER$|RUSTC_WORKSPACE_WRAPPER$'
 sweep_pattern+='|RUSTDOC$|RUSTDOCFLAGS$|RUSTFLAGS$|RUSTFMT$'
-sweep_pattern+='|RUSTUP_TOOLCHAIN$|LD_)'
+sweep_pattern+='|RUSTUP_TOOLCHAIN$'
+sweep_pattern+='|CPATH$|C_INCLUDE_PATH$|CPLUS_INCLUDE_PATH$|OBJC_INCLUDE_PATH$'
+sweep_pattern+='|COMPILER_PATH$|GCC_EXEC_PREFIX$|GCC_COMPARE_DEBUG$'
+sweep_pattern+='|LIBRARY_PATH$|DEPENDENCIES_OUTPUT$|SUNPRO_DEPENDENCIES$'
+sweep_pattern+='|LD_)'
 swept_variables=()
 while IFS= read -r variable; do
     swept_variables+=("$variable")

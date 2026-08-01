@@ -30,8 +30,8 @@ every retained file present before the manifest itself was installed.
 
 These archives are the original `cf1b205` outputs and are **not** regenerated:
 the hashes above pin them, and re-running requires both original hosts. Later
-commits fixed the generators, so four recorded fields are stale. The defects are
-in derived reporting, not in the measurements.
+commits fixed the generators, so five recorded fields are stale. The defects are
+in derived reporting and field naming, not in the measured values.
 
 1. **`code_size_equal` overstates its scope.** `experiment/layout.json` and
    `experiment/summary.json` record `code_size_equal=true`, but the check behind
@@ -51,16 +51,27 @@ in derived reporting, not in the measurements.
    workspace. The C toolchain, kernel, and CPU blocks are unaffected.
 3. **`swept_environment=none` is weaker than it looks.** The sweep predated
    clearing `RUSTUP_TOOLCHAIN`, `RUSTFMT`, `RUSTC_WRAPPER`,
-   `RUSTC_WORKSPACE_WRAPPER`, and `CARGO_ENCODED_RUSTFLAGS`. `none` means no
-   *then-swept* variable was set; it does not establish that these overrides
-   were absent.
+   `RUSTC_WORKSPACE_WRAPPER`, and `CARGO_ENCODED_RUSTFLAGS`, and the GCC
+   implicit search-path and subprogram variables (`CPATH`, `C_INCLUDE_PATH`,
+   `CPLUS_INCLUDE_PATH`, `OBJC_INCLUDE_PATH`, `LIBRARY_PATH`, `COMPILER_PATH`,
+   `GCC_EXEC_PREFIX`). `none` means no *then-swept* variable was set; it does
+   not establish that these overrides were absent.
 4. **Source manifests include ignored paths.** `source-files.before.sha256` and
    `source-files.after.sha256` were produced with an unrestricted scan, so
    ignored files present at run time would be hashed and attributed to
    `source_commit`. In checkout mode the manifest is now restricted to tracked
    files. The before/after comparison that proves the source did not change
    mid-run remains valid either way.
+5. **PMU rows name the wrong perf timing field.** Every row in
+   `experiment/perf/*.status.json` and `experiment/perf-summary.json` records
+   the counter's running time under `time_enabled_ns`. `perf stat -x` places the
+   *run time of counter* in that column, so the key is now `time_running_ns`.
+   The recorded numbers are correct: every retained group reports
+   `percent_running` of 100, where running time equals enabled time. Read those
+   values as running time. For a multiplexed group they would have differed, and
+   enabled time is recoverable as `time_running_ns / (percent_running / 100)`.
 
-The timing records, PMU attempt records, counts, ELF metadata, and disassembly
-are unaffected by all four.
+The timing records, PMU counts and `percent_running` values, ELF metadata, and
+disassembly are unaffected. Defect 5 is a key name only, and defect 1 can be
+recomputed from the per-symbol sizes the archives already contain.
 

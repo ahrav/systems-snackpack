@@ -25,7 +25,8 @@ Each run generated and built its ELF files locally with GCC 11.5.0 and
 The treatment slowed the workload on both hosts. The point estimates differ,
 and `xxl` had more block-to-block timing dispersion. These are two host results,
 not x86-64-versus-AArch64 estimates. The machines differ in processor,
-operating system build, Rust toolchain, native compiler target, and concurrent
+operating system build, host default Rust toolchain, native compiler target, and
+concurrent
 host state.
 
 Final-image inspection established equal leaf code within each host. The x86-64
