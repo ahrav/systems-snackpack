@@ -277,6 +277,10 @@ def perf_passes(architecture: str, perf_list: str) -> list[tuple[str, str]]:
 
 
 def parse_perf_csv(path: Path) -> list[dict[str, Any]]:
+    # perf stat -x field order (no -I/-a/-A/-r, so no leading fields):
+    #   0 counter value, 1 unit, 2 event name,
+    #   3 run time of counter, 4 percent of measurement time counter was running.
+    # Field 3 is running time, not enabled time; enabled = field 3 / (field 4 / 100).
     rows: list[dict[str, Any]] = []
     with path.open(newline="", encoding="utf-8") as handle:
         for raw in csv.reader(handle, delimiter=";"):
@@ -296,7 +300,7 @@ def parse_perf_csv(path: Path) -> list[dict[str, Any]]:
                     "event": raw[2].strip(),
                     "count_text": count_text,
                     "count": count,
-                    "time_enabled_ns": raw[3].strip(),
+                    "time_running_ns": raw[3].strip(),
                     "percent_running": percent_running,
                 }
             )
