@@ -1,0 +1,14 @@
+probe_utc=2026-07-28T15:03:24Z
+
+requested_x86_host=dev-dsk-ahrav-2c-b89a08b3.us-west-2.amazon.com
+requested_x86_host_ssh_status=255
+requested_x86_host_result=WSSH Proxy HTTP 403; hostname could not be resolved
+
+xlg_resolved_host=dev-dsk-ahrav-2c-a9191cb6.us-west-2.amazon.com
+xlg_uname=Linux dev-dsk-ahrav-2c-a9191cb6.us-west-2.amazon.com 6.12.94-123.190.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Jul 14 14:13:08 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+xlg_online_cpus=128
+
+requested_arm_host=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+requested_arm_resolved_host=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+requested_arm_uname=Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.94-123.190.amzn2023.aarch64 #1 SMP Tue Jul 14 14:12:45 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+requested_arm_online_cpus=64

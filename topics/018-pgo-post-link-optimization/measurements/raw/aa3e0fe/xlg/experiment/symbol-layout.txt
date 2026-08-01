@@ -1,0 +1,15 @@
+baseline
+0000000000014f10 t pgo_probe::beta
+0000000000014f40 t pgo_probe::main
+00000000000155d0 t pgo_probe::alpha
+0000000000015600 t pgo_probe::dispatch
+pgo-alpha
+0000000000014e00 t pgo_probe::main
+0000000000015380 t pgo_probe::dispatch
+00000000000153b0 t pgo_probe::alpha
+0000000000015ef0 t pgo_probe::beta
+pgo-beta
+0000000000014e00 t pgo_probe::main
+0000000000015380 t pgo_probe::dispatch
+00000000000153b0 t pgo_probe::beta
+0000000000015ef0 t pgo_probe::alpha

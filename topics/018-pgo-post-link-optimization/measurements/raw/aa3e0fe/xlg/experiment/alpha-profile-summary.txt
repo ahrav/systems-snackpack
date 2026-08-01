@@ -1,0 +1,23 @@
+Instrumentation level: IR  entry_first = 0  instrument_loop_entries = 0
+Total functions: 13
+Maximum function count: 5000000
+Maximum internal block count: 8
+Total number of blocks: 76
+Total count: 15000044
+Detailed summary:
+3 blocks (3.95%) with count >= 5000000 account for 1% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 10% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 20% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 30% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 40% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 50% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 60% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 70% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 80% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 90% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 95% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 99% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 99.9% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 99.99% of the total counts.
+3 blocks (3.95%) with count >= 5000000 account for 99.999% of the total counts.
+30 blocks (39.47%) with count >= 1 account for 99.9999% of the total counts.

@@ -1,0 +1,16 @@
+0000000000015600 <pgo_probe::dispatch>:
+   15600:	push   %rax
+   15601:	mov    %rdi,(%rsp)
+   15605:	mov    %rsp,%rax
+   15608:	mov    %rsp,%rcx
+   1560b:	mov    (%rsp),%rax
+   1560f:	mov    %rsi,(%rsp)
+   15613:	mov    (%rsp),%rdi
+   15617:	call   *%rax
+   15619:	pop    %rcx
+   1561a:	ret
+   1561b:	int3
+   1561c:	int3
+   1561d:	int3
+   1561e:	int3
+   1561f:	int3
