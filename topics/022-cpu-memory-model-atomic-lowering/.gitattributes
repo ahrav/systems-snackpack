@@ -1,0 +1,1 @@
+measurements/raw/**/processes/raw.csv -text whitespace=cr-at-eol
