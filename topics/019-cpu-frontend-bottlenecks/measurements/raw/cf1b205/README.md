@@ -74,7 +74,20 @@ in derived reporting and field naming, not in the measured values.
    values as running time. For a multiplexed group they would have differed, and
    enabled time is recoverable as `time_running_ns / (percent_running / 100)`.
 
-The timing records, PMU counts and `percent_running` values, ELF metadata, and
-disassembly are unaffected. Defect 5 is a key name only, and defect 1 can be
-recomputed from the per-symbol sizes the archives already contain.
+Defects 1, 2, and 5 are reporting and naming errors, and both can be recomputed
+or reinterpreted from data the archives already contain: defect 1 from the
+retained per-symbol sizes, defect 5 by reading `time_enabled_ns` as running time.
+The timing records, PMU counts, `percent_running` values, ELF metadata, and
+disassembly are unaffected by those three.
+
+Defects 3 and 4 are different in kind, and limit what the measurements
+themselves prove. Because the narrower sweep cannot establish that the GCC
+search-path, Python import-path, Cargo flag, or rustup override variables were
+unset, and because ancestor Cargo configuration was not rejected, these archives
+cannot rule out that a caller-supplied header, compiler subprogram, rustc flag,
+or Python module influenced the compiled binaries or the evidence writer. Nothing
+retained suggests that happened, and the recorded command lines, source hashes,
+and ELF metadata are self-consistent, but the archives cannot exclude it. Treat
+the measurements as reproducible only under the recorded source and command
+lines plus the assumption that no such override was present.
 

@@ -17,8 +17,16 @@ for tool in \
     awk bash cargo cmp date gcc getconf git gzip ln lscpu mkdir mktemp mv nm \
     objdump perf python3 readelf rg rm rustc sha256sum size sort stat taskset \
     uname xargs; do
+    # Bash imports exported functions from the environment before this check, and
+    # a function shadows PATH lookup while still satisfying command -v, so the
+    # gates could run caller-supplied tools. Drop any such definition first.
+    unset -f "$tool" 2>/dev/null || true
     if ! command -v "$tool" >/dev/null 2>&1; then
         printf 'required tool is unavailable: %s\n' "$tool" >&2
+        exit 2
+    fi
+    if [[ "$(type -t "$tool" 2>/dev/null || true)" != file ]]; then
+        printf 'required tool does not resolve to an executable: %s\n' "$tool" >&2
         exit 2
     fi
 done
@@ -133,13 +141,19 @@ build_dir="$(mktemp -d)"
 build_dir="$(cd -- "$build_dir" && pwd -P)"
 # A temporary tree inside the evidence directory (TMPDIR=OUTPUT_DIRECTORY) would
 # be hashed by the final evidence scan and then deleted by cleanup, leaving
-# evidence.sha256 describing files the archive does not contain.
+# evidence.sha256 describing files the archive does not contain. A temporary tree
+# inside the repository is equally unusable: the root workspace globs topics/*,
+# so scratch there becomes a workspace member and the Cargo gates fail to load.
 if [[ "$build_dir" == "$output_dir" \
     || "$build_dir" == "$output_dir"/* \
-    || "$output_dir" == "$build_dir"/* ]]; then
-    printf 'refusing to place the build tree inside the evidence tree\n' >&2
-    printf 'build_dir=%s\noutput_dir=%s\n' "$build_dir" "$output_dir" >&2
-    printf 'set TMPDIR outside OUTPUT_DIRECTORY\n' >&2
+    || "$output_dir" == "$build_dir"/* \
+    || "$build_dir" == "$repo_root" \
+    || "$build_dir" == "$repo_root"/* \
+    || "$repo_root" == "$build_dir"/* ]]; then
+    printf 'refusing to place the build tree inside the evidence or source tree\n' >&2
+    printf 'build_dir=%s\noutput_dir=%s\nrepo_root=%s\n' \
+        "$build_dir" "$output_dir" "$repo_root" >&2
+    printf 'set TMPDIR outside OUTPUT_DIRECTORY and the repository\n' >&2
     exit 1
 fi
 manifest_tmp=
@@ -169,7 +183,7 @@ sweep_pattern+='|RUSTUP_TOOLCHAIN$'
 sweep_pattern+='|CPATH$|C_INCLUDE_PATH$|CPLUS_INCLUDE_PATH$|OBJC_INCLUDE_PATH$'
 sweep_pattern+='|COMPILER_PATH$|GCC_EXEC_PREFIX$|GCC_COMPARE_DEBUG$'
 sweep_pattern+='|LIBRARY_PATH$|DEPENDENCIES_OUTPUT$|SUNPRO_DEPENDENCIES$'
-sweep_pattern+='|PYTHONPATH$|PYTHONHOME$|PYTHONSTARTUP$'
+sweep_pattern+='|PYTHONPATH$|PYTHONHOME$|PYTHONSTARTUP$|BASH_ENV$'
 sweep_pattern+='|LD_)'
 swept_variables=()
 while IFS= read -r variable; do
@@ -323,8 +337,10 @@ fi
     RUSTDOCFLAGS="-D warnings" cargo doc --locked --workspace --no-deps
 ) >"$gates_dir/cargo-doc.log" 2>&1
 (
-    PYTHONPYCACHEPREFIX="$build_dir/pycache" \
-        python3 -I -m py_compile \
+    # -I implies -E, so PYTHONPYCACHEPREFIX would be ignored and py_compile
+    # would write __pycache__ beside the sources, which the archive-mode
+    # after-manifest then reports as a source change. -X survives -E.
+    python3 -I -X pycache_prefix="$build_dir/pycache" -m py_compile \
         "$topic_dir/experiment/generate.py" \
         "$topic_dir/experiment/frontend_experiment.py"
     bash -n "$topic_dir/experiment/run_remote.sh"
