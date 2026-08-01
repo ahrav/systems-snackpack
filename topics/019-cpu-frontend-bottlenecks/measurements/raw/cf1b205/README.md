@@ -30,7 +30,7 @@ every retained file present before the manifest itself was installed.
 
 These archives are the original `cf1b205` outputs and are **not** regenerated:
 the hashes above pin them, and re-running requires both original hosts. Later
-commits fixed the generators, so five recorded fields are stale. The defects are
+commits fixed the generators, so six recorded fields are stale. The defects are
 in derived reporting and field naming, not in the measured values.
 
 1. **`code_size_equal` overstates its scope.** `experiment/layout.json` and
@@ -73,21 +73,36 @@ in derived reporting and field naming, not in the measured values.
    `percent_running` of 100, where running time equals enabled time. Read those
    values as running time. For a multiplexed group they would have differed, and
    enabled time is recoverable as `time_running_ns / (percent_running / 100)`.
+6. **The ELF hashes are not reproducible.** `artifact-identity.txt` records
+   SHA-256 sums for `dense16` and `sparse4096` that were produced without a
+   debug-prefix map. With `-g`, GCC embeds the absolute generated-source path,
+   which lived under a fresh `mktemp` directory, so rebuilding the same generated
+   C from a different scratch directory yields different ELF bytes and therefore
+   a different hash. The builds now pass `-ffile-prefix-map` to a fixed
+   placeholder, which makes the bytes identical across scratch directories, but
+   these retained hashes cannot be reproduced from the recorded source and
+   command line. The symbol addresses, sizes, spacing, and disassembly in the
+   archives remain valid descriptions of the binaries that were measured.
 
 Defects 1, 2, and 5 are reporting and naming errors, and both can be recomputed
 or reinterpreted from data the archives already contain: defect 1 from the
 retained per-symbol sizes, defect 5 by reading `time_enabled_ns` as running time.
 The timing records, PMU counts, `percent_running` values, ELF metadata, and
-disassembly are unaffected by those three.
+disassembly are unaffected by those three. Defect 6 limits only hash-level
+reproduction of the two binaries, not what was measured from them.
 
 Defects 3 and 4 are different in kind, and limit what the measurements
 themselves prove. Because the narrower sweep cannot establish that the GCC
 search-path, Python import-path, Cargo flag, or rustup override variables were
-unset, and because ancestor Cargo configuration was not rejected, these archives
-cannot rule out that a caller-supplied header, compiler subprogram, rustc flag,
-or Python module influenced the compiled binaries or the evidence writer. Nothing
-retained suggests that happened, and the recorded command lines, source hashes,
-and ELF metadata are self-consistent, but the archives cannot exclude it. Treat
-the measurements as reproducible only under the recorded source and command
-lines plus the assumption that no such override was present.
+unset, because the Git repository-location variables (`GIT_DIR`,
+`GIT_WORK_TREE`, `GIT_INDEX_FILE`) were not cleared before the Git probes, because
+shell functions and aliases imported from the environment were not rejected, and
+because ancestor Cargo configuration was not rejected, these archives cannot rule
+out that a caller-supplied header, compiler subprogram, rustc flag, Python
+module, tool wrapper, or alternate Git repository influenced the compiled
+binaries, the recorded `source_commit`, or the evidence writer. Nothing retained
+suggests that happened, and the recorded command lines, source hashes, and ELF
+metadata are self-consistent, but the archives cannot exclude it. Treat the
+measurements as reproducible only under the recorded source and command lines
+plus the assumption that no such override was present.
 

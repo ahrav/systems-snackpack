@@ -3,6 +3,20 @@ set -euo pipefail
 
 # Validate an exact Linux source tree and write Topic 19 evidence outside it.
 
+# Bash sources BASH_ENV before this script starts, so any aliases and shell
+# options it installed are already in effect and cannot be undone by unsetting
+# the variable later. Alias expansion in particular is invisible to the function
+# check below, and an alias on compgen would make the environment sweep
+# enumerate nothing while still reporting success. Drop alias state first, using
+# backslash forms so these two commands cannot themselves be aliased.
+\shopt -u expand_aliases 2>/dev/null || true
+\unalias -a 2>/dev/null || true
+if [[ -n "${BASH_ENV:-}" ]]; then
+    printf 'refusing to run with BASH_ENV set: %s\n' "$BASH_ENV" >&2
+    printf 'it already ran arbitrary shell code before this script started\n' >&2
+    exit 2
+fi
+
 # Bash imports exported functions from the environment before this script runs,
 # and a function takes precedence over both PATH lookup and builtins, so an
 # imported definition could redirect a tool or make the environment sweep below
@@ -43,7 +57,7 @@ sweep_pattern+='|RUSTUP_TOOLCHAIN$'
 sweep_pattern+='|CPATH$|C_INCLUDE_PATH$|CPLUS_INCLUDE_PATH$|OBJC_INCLUDE_PATH$'
 sweep_pattern+='|COMPILER_PATH$|GCC_EXEC_PREFIX$|GCC_COMPARE_DEBUG$'
 sweep_pattern+='|LIBRARY_PATH$|DEPENDENCIES_OUTPUT$|SUNPRO_DEPENDENCIES$'
-sweep_pattern+='|PYTHONPATH$|PYTHONHOME$|PYTHONSTARTUP$|BASH_ENV$'
+sweep_pattern+='|PYTHONPATH$|PYTHONHOME$|PYTHONSTARTUP$'
 sweep_pattern+='|LD_)'
 swept_variables=()
 while IFS= read -r variable; do
@@ -117,7 +131,9 @@ fi
 
 if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$repo_root" ]]; then
     source_commit="$(git -C "$repo_root" rev-parse HEAD)"
-    if [[ -n "$(git -C "$repo_root" status --porcelain)" ]]; then
+    # --untracked-files=all so that a repository-level status.showUntrackedFiles
+    # setting cannot suppress the report.
+    if [[ -n "$(git -C "$repo_root" status --porcelain --untracked-files=all)" ]]; then
         printf 'repository must be clean\n' >&2
         exit 2
     fi
@@ -142,6 +158,24 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
     if [[ -n "$hidden_index_flags" ]]; then
         printf 'assume-unchanged or skip-worktree hides edits from the clean-tree gate: %s\n' \
             "$hidden_index_flags" >&2
+        exit 2
+    fi
+    # git status cannot report ignored paths at all, so an ignored Cargo.toml
+    # under the workspace member glob stays out of the manifest while the
+    # --workspace gates still load it. Compare the glob against the index.
+    members_root="${topic_rel%%/*}"
+    hidden_members=""
+    for candidate in "$repo_root/$members_root"/*/Cargo.toml; do
+        [[ -e "$candidate" ]] || continue
+        candidate_rel="${candidate#"$repo_root"/}"
+        if ! git -C "$repo_root" ls-files --error-unmatch -- "$candidate_rel" \
+            >/dev/null 2>&1; then
+            hidden_members+=" $candidate_rel"
+        fi
+    done
+    if [[ -n "$hidden_members" ]]; then
+        printf 'untracked workspace members would be loaded by the Cargo gates:%s\n' \
+            "$hidden_members" >&2
         exit 2
     fi
     source_commit_verification=git-checkout
@@ -196,6 +230,10 @@ if [[ "$build_dir" == "$output_dir" \
     printf 'build_dir=%s\noutput_dir=%s\nrepo_root=%s\n' \
         "$build_dir" "$output_dir" "$repo_root" >&2
     printf 'set TMPDIR outside OUTPUT_DIRECTORY and the repository\n' >&2
+    # The cleanup trap is not installed yet, and mktemp already created this
+    # directory. Leaving it inside the workspace glob would break later Cargo
+    # invocations until someone removed it by hand.
+    rm -rf -- "$build_dir"
     exit 1
 fi
 manifest_tmp=
