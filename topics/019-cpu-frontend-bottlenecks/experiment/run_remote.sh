@@ -334,7 +334,7 @@ gcc_flags=(
     # DWARF, so without this the same source produced a different ELF hash on
     # every run and the retained artifact-identity hashes could not be
     # reproduced. Map the scratch path to a fixed placeholder instead.
-    -ffile-prefix-map=$frontend_dir=/topic19-build
+    "-ffile-prefix-map=$frontend_dir=/topic19-build"
     -Wall
     -Wextra
     -Werror
