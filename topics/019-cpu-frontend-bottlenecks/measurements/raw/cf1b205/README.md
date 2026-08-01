@@ -25,3 +25,42 @@ tar -xzf alg-evidence.tar.gz -C alg
 
 Each extracted archive contains `evidence/evidence.sha256`. That manifest hashes
 every retained file present before the manifest itself was installed.
+
+## Known reporting defects in these archives
+
+These archives are the original `cf1b205` outputs and are **not** regenerated:
+the hashes above pin them, and re-running requires both original hosts. Later
+commits fixed the generators, so four recorded fields are stale. The defects are
+in derived reporting, not in the measurements.
+
+1. **`code_size_equal` overstates its scope.** `experiment/layout.json` and
+   `experiment/summary.json` record `code_size_equal=true`, but the check behind
+   it only compared leaf symbols. The alignment treatment moved non-leaf code
+   generation on AArch64: the same records show `run_rounds` at 116 bytes dense
+   and 112 sparse (x86-64 stayed at 77/77). The field is now split into
+   `leaf_code_size_equal` and a computed `run_rounds_size_equal`. The per-symbol
+   sizes in these archives are correct and show the difference directly.
+2. **`host.txt` names the wrong Rust toolchain.** The `rustc`, `cargo`, and
+   `target_cfg` probes ran in the caller's directory instead of the repository
+   root, so they recorded the host default rather than the pinned toolchain:
+   `1.97.1` for `xxl` and `1.95.0` for `alg`, while the source pins `1.93.1`.
+   The Cargo gates did run from the repository root, and
+   `source-files.before.sha256` includes `rust-toolchain.toml`, so the gates
+   resolved `1.93.1`. Treat the recorded `rustc`/`cargo`/`target_cfg` blocks as
+   describing the caller's default toolchain, not the one that validated the
+   workspace. The C toolchain, kernel, and CPU blocks are unaffected.
+3. **`swept_environment=none` is weaker than it looks.** The sweep predated
+   clearing `RUSTUP_TOOLCHAIN`, `RUSTFMT`, `RUSTC_WRAPPER`,
+   `RUSTC_WORKSPACE_WRAPPER`, and `CARGO_ENCODED_RUSTFLAGS`. `none` means no
+   *then-swept* variable was set; it does not establish that these overrides
+   were absent.
+4. **Source manifests include ignored paths.** `source-files.before.sha256` and
+   `source-files.after.sha256` were produced with an unrestricted scan, so
+   ignored files present at run time would be hashed and attributed to
+   `source_commit`. In checkout mode the manifest is now restricted to tracked
+   files. The before/after comparison that proves the source did not change
+   mid-run remains valid either way.
+
+The timing records, PMU attempt records, counts, ELF metadata, and disassembly
+are unaffected by all four.
+

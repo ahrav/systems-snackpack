@@ -99,6 +99,17 @@ fi
 
 build_dir="$(mktemp -d)"
 build_dir="$(cd -- "$build_dir" && pwd -P)"
+# A temporary tree inside the evidence directory (TMPDIR=OUTPUT_DIRECTORY) would
+# be hashed by the final evidence scan and then deleted by cleanup, leaving
+# evidence.sha256 describing files the archive does not contain.
+if [[ "$build_dir" == "$output_dir" \
+    || "$build_dir" == "$output_dir"/* \
+    || "$output_dir" == "$build_dir"/* ]]; then
+    printf 'refusing to place the build tree inside the evidence tree\n' >&2
+    printf 'build_dir=%s\noutput_dir=%s\n' "$build_dir" "$output_dir" >&2
+    printf 'set TMPDIR outside OUTPUT_DIRECTORY\n' >&2
+    exit 1
+fi
 manifest_tmp=
 cleanup() {
     rm -rf -- "$build_dir"
@@ -112,13 +123,21 @@ experiment_dir="$output_dir/experiment"
 frontend_dir="$build_dir/frontend"
 mkdir -p -- "$gates_dir" "$frontend_dir"
 
+# Cargo and rustup honor all of these for the gates below: they select the
+# toolchain, replace rustc/rustfmt, or inject compiler flags. Sweeping records
+# each name in swept_environment, so a gate can no longer pass under a
+# caller-supplied tool while the evidence calls the environment swept.
+sweep_pattern='^(CARGO_TARGET_DIR|CARGO_BUILD_|CARGO_ENCODED_RUSTFLAGS$'
+sweep_pattern+='|RUSTC$|RUSTC_WRAPPER$|RUSTC_WORKSPACE_WRAPPER$'
+sweep_pattern+='|RUSTDOC$|RUSTDOCFLAGS$|RUSTFLAGS$|RUSTFMT$'
+sweep_pattern+='|RUSTUP_TOOLCHAIN$|LD_)'
 swept_variables=()
 while IFS= read -r variable; do
     swept_variables+=("$variable")
     unset "$variable"
 done < <(
     compgen -e \
-        | rg '^(CARGO_TARGET_DIR|CARGO_BUILD_|RUSTC$|RUSTDOC$|RUSTFLAGS$|RUSTDOCFLAGS$|RUSTUP_TOOLCHAIN$|LD_)' \
+        | rg "$sweep_pattern" \
         || true
 )
 export CARGO_HOME="$build_dir/cargo-home"
@@ -128,7 +147,15 @@ mkdir -p -- "$CARGO_HOME" "$CARGO_TARGET_DIR"
 manifest_source() {
     (
         cd "$repo_root"
-        rg --files -uu -g '!/.git/' -g '!/target/' -0 \
+        # In checkout mode the manifest must be reproducible from
+        # source_commit, so hash tracked files only. An -uu scan also picks up
+        # ignored paths (__pycache__, *.rs.bk) that leave the clean-tree gate
+        # satisfied yet change the recorded hashes.
+        if [[ "$source_commit_verification" == git-checkout ]]; then
+            git ls-files -z
+        else
+            rg --files -uu -g '!/.git/' -g '!/target/' -0
+        fi \
             | LC_ALL=C sort -z \
             | xargs -0 sha256sum --
     )
@@ -326,7 +353,7 @@ fi
 
 printf 'run_end_utc=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
     >>"$output_dir/host.txt"
-manifest_tmp="$(mktemp)"
+manifest_tmp="$(mktemp -p "$build_dir")"
 (
     cd "$output_dir"
     rg --files -uu -0 . | LC_ALL=C sort -z | xargs -0 sha256sum --
