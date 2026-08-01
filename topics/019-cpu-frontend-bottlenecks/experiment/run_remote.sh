@@ -3,6 +3,21 @@ set -euo pipefail
 
 # Validate an exact Linux source tree and write Topic 19 evidence outside it.
 
+# Bash imports exported functions from the environment before this script runs,
+# and a function takes precedence over both PATH lookup and builtins, so an
+# imported definition could redirect a tool or make the environment sweep below
+# enumerate nothing while still reporting success. Reject any such definition
+# before doing anything else; this script defines its own functions later.
+# `declare` is dropped first only so that it can be trusted to report the rest.
+# A shadowed `unset` is outside what this check can establish.
+unset -f declare 2>/dev/null || true
+imported_functions="$(declare -F)"
+if [[ -n "$imported_functions" ]]; then
+    printf 'refusing to run with shell functions imported from the environment:\n' >&2
+    printf '%s\n' "$imported_functions" >&2
+    exit 2
+fi
+
 if (($# < 2 || $# > 3)); then
     printf 'usage: %s REPOSITORY_ROOT OUTPUT_DIRECTORY [CPU]\n' "$0" >&2
     exit 2
@@ -12,6 +27,33 @@ repo_root="$(cd -- "$1" && pwd -P)"
 output_dir="$2"
 topic_rel="topics/019-cpu-frontend-bottlenecks"
 topic_dir="$repo_root/$topic_rel"
+
+# Cargo, rustup, GCC, Python, and Git honor environment overrides that change
+# what the builds and gates below actually run: they select the toolchain,
+# replace rustc/rustfmt, inject compiler flags, add implicit header or library
+# search paths, redirect compiler subprograms or Python imports, or relocate the
+# Git repository and index. Sweeping records each name in swept_environment, so a
+# gate can no longer pass under a caller-supplied tool, flag, header, or
+# repository while the evidence calls the environment swept. This runs before the
+# first Git probe, because GIT_DIR and GIT_WORK_TREE override even git -C.
+sweep_pattern='^(CARGO_|GIT_'
+sweep_pattern+='|RUSTC$|RUSTC_WRAPPER$|RUSTC_WORKSPACE_WRAPPER$'
+sweep_pattern+='|RUSTDOC$|RUSTDOCFLAGS$|RUSTFLAGS$|RUSTFMT$'
+sweep_pattern+='|RUSTUP_TOOLCHAIN$'
+sweep_pattern+='|CPATH$|C_INCLUDE_PATH$|CPLUS_INCLUDE_PATH$|OBJC_INCLUDE_PATH$'
+sweep_pattern+='|COMPILER_PATH$|GCC_EXEC_PREFIX$|GCC_COMPARE_DEBUG$'
+sweep_pattern+='|LIBRARY_PATH$|DEPENDENCIES_OUTPUT$|SUNPRO_DEPENDENCIES$'
+sweep_pattern+='|PYTHONPATH$|PYTHONHOME$|PYTHONSTARTUP$|BASH_ENV$'
+sweep_pattern+='|LD_)'
+swept_variables=()
+while IFS= read -r variable; do
+    swept_variables+=("$variable")
+    unset "$variable"
+done < <(
+    compgen -e \
+        | rg "$sweep_pattern" \
+        || true
+)
 
 for tool in \
     awk bash cargo cmp date gcc getconf git gzip ln lscpu mkdir mktemp mv nm \
@@ -169,31 +211,6 @@ experiment_dir="$output_dir/experiment"
 frontend_dir="$build_dir/frontend"
 mkdir -p -- "$gates_dir" "$frontend_dir"
 
-# Cargo, rustup, and GCC honor all of these for the builds and gates below:
-# they select the toolchain, replace rustc/rustfmt, inject compiler flags, add
-# implicit header or library search paths, or redirect compiler subprograms.
-# Sweeping records each name in swept_environment, so a gate can no longer pass
-# under a caller-supplied tool, flag, or header while the evidence calls the
-# environment swept.
-sweep_pattern='^(CARGO_TARGET_|CARGO_BUILD_|CARGO_ENCODED_RUSTFLAGS$'
-sweep_pattern+='|CARGO_ENCODED_RUSTDOCFLAGS$'
-sweep_pattern+='|RUSTC$|RUSTC_WRAPPER$|RUSTC_WORKSPACE_WRAPPER$'
-sweep_pattern+='|RUSTDOC$|RUSTDOCFLAGS$|RUSTFLAGS$|RUSTFMT$'
-sweep_pattern+='|RUSTUP_TOOLCHAIN$'
-sweep_pattern+='|CPATH$|C_INCLUDE_PATH$|CPLUS_INCLUDE_PATH$|OBJC_INCLUDE_PATH$'
-sweep_pattern+='|COMPILER_PATH$|GCC_EXEC_PREFIX$|GCC_COMPARE_DEBUG$'
-sweep_pattern+='|LIBRARY_PATH$|DEPENDENCIES_OUTPUT$|SUNPRO_DEPENDENCIES$'
-sweep_pattern+='|PYTHONPATH$|PYTHONHOME$|PYTHONSTARTUP$|BASH_ENV$'
-sweep_pattern+='|LD_)'
-swept_variables=()
-while IFS= read -r variable; do
-    swept_variables+=("$variable")
-    unset "$variable"
-done < <(
-    compgen -e \
-        | rg "$sweep_pattern" \
-        || true
-)
 export CARGO_HOME="$build_dir/cargo-home"
 export CARGO_TARGET_DIR="$build_dir/cargo-target"
 mkdir -p -- "$CARGO_HOME" "$CARGO_TARGET_DIR"
@@ -275,6 +292,11 @@ gcc_flags=(
     -fno-optimize-sibling-calls
     -fno-toplevel-reorder
     -march=native
+    # build_dir is a fresh mktemp path per run, and -g embeds the source path in
+    # DWARF, so without this the same source produced a different ELF hash on
+    # every run and the retained artifact-identity hashes could not be
+    # reproduced. Map the scratch path to a fixed placeholder instead.
+    -ffile-prefix-map=$frontend_dir=/topic19-build
     -Wall
     -Wextra
     -Werror
