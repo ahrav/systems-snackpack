@@ -45,17 +45,20 @@ in derived reporting and field naming, not in the measured values.
    root, so they recorded the host default rather than the pinned toolchain:
    `1.97.1` for `xxl` and `1.95.0` for `alg`, while the source pins `1.93.1`.
    The Cargo gates did run from the repository root, and
-   `source-files.before.sha256` includes `rust-toolchain.toml`, so the gates
-   resolved `1.93.1`. Treat the recorded `rustc`/`cargo`/`target_cfg` blocks as
-   describing the caller's default toolchain, not the one that validated the
-   workspace. The C toolchain, kernel, and CPU blocks are unaffected.
-3. **`swept_environment=none` is weaker than it looks.** The sweep predated
-   clearing `RUSTUP_TOOLCHAIN`, `RUSTFMT`, `RUSTC_WRAPPER`,
-   `RUSTC_WORKSPACE_WRAPPER`, and `CARGO_ENCODED_RUSTFLAGS`, and the GCC
-   implicit search-path and subprogram variables (`CPATH`, `C_INCLUDE_PATH`,
-   `CPLUS_INCLUDE_PATH`, `OBJC_INCLUDE_PATH`, `LIBRARY_PATH`, `COMPILER_PATH`,
-   `GCC_EXEC_PREFIX`). `none` means no *then-swept* variable was set; it does
-   not establish that these overrides were absent.
+   `source-files.before.sha256` includes `rust-toolchain.toml`. But because
+   `RUSTUP_TOOLCHAIN` was not swept (defect 3), and rustup honors it ahead of
+   `rust-toolchain.toml`, these archives cannot establish which compiler ran the
+   gates. Treat the recorded `rustc`/`cargo`/`target_cfg` blocks as the caller's
+   default toolchain, and the gate toolchain as unproven. The C toolchain,
+   kernel, and CPU blocks are unaffected.
+3. **`swept_environment=none` is weaker than it looks.** The sweep at the time
+   covered a narrower set than the current one, which now also clears the
+   `CARGO_TARGET_*` and encoded Cargo flag variables, the rustc/rustfmt wrapper
+   and tool overrides, the rustup toolchain override, the GCC implicit
+   search-path and subprogram variables, and the Python import-path variables,
+   and additionally rejects ancestor Cargo configuration files. `none` means no
+   *then-swept* variable was set; it does not establish that any of the
+   later-added overrides were absent.
 4. **Source manifests include ignored paths.** `source-files.before.sha256` and
    `source-files.after.sha256` were produced with an unrestricted scan, so
    ignored files present at run time would be hashed and attributed to

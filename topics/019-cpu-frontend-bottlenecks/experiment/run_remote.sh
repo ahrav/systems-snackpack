@@ -83,6 +83,17 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
             "$unmanifestable" >&2
         exit 2
     fi
+    # assume-unchanged (lowercase) and skip-worktree (S) entries keep edits out
+    # of git status, so the clean-tree gate above would pass while the manifest
+    # hashes working-tree bytes that differ from source_commit.
+    hidden_index_flags="$(
+        git -C "$repo_root" ls-files -v | rg -m 1 '^([a-z]|S) ' || true
+    )"
+    if [[ -n "$hidden_index_flags" ]]; then
+        printf 'assume-unchanged or skip-worktree hides edits from the clean-tree gate: %s\n' \
+            "$hidden_index_flags" >&2
+        exit 2
+    fi
     source_commit_verification=git-checkout
 else
     if ! [[ "${SOURCE_COMMIT:-}" =~ ^[0-9a-f]{40}$ ]]; then
@@ -95,6 +106,27 @@ else
     fi
     source_commit="$SOURCE_COMMIT"
     source_commit_verification=declared-archive
+fi
+
+# Cargo discovers .cargo/config.toml from the gate working directory upward, so
+# an isolated CARGO_HOME is not sufficient: a config in repo_root or any ancestor
+# can inject build.rustflags, wrappers, or linker and target settings that
+# build-flags.txt never records.
+cargo_configs=()
+probe_dir="$repo_root"
+while :; do
+    for candidate in "$probe_dir/.cargo/config.toml" "$probe_dir/.cargo/config"; do
+        if [[ -e "$candidate" ]]; then
+            cargo_configs+=("$candidate")
+        fi
+    done
+    [[ "$probe_dir" == / ]] && break
+    probe_dir="$(dirname -- "$probe_dir")"
+done
+if (( ${#cargo_configs[@]} > 0 )); then
+    printf 'unrecorded Cargo configuration would apply to the gates:\n' >&2
+    printf '  %s\n' "${cargo_configs[@]}" >&2
+    exit 2
 fi
 
 build_dir="$(mktemp -d)"
@@ -129,13 +161,15 @@ mkdir -p -- "$gates_dir" "$frontend_dir"
 # Sweeping records each name in swept_environment, so a gate can no longer pass
 # under a caller-supplied tool, flag, or header while the evidence calls the
 # environment swept.
-sweep_pattern='^(CARGO_TARGET_DIR|CARGO_BUILD_|CARGO_ENCODED_RUSTFLAGS$'
+sweep_pattern='^(CARGO_TARGET_|CARGO_BUILD_|CARGO_ENCODED_RUSTFLAGS$'
+sweep_pattern+='|CARGO_ENCODED_RUSTDOCFLAGS$'
 sweep_pattern+='|RUSTC$|RUSTC_WRAPPER$|RUSTC_WORKSPACE_WRAPPER$'
 sweep_pattern+='|RUSTDOC$|RUSTDOCFLAGS$|RUSTFLAGS$|RUSTFMT$'
 sweep_pattern+='|RUSTUP_TOOLCHAIN$'
 sweep_pattern+='|CPATH$|C_INCLUDE_PATH$|CPLUS_INCLUDE_PATH$|OBJC_INCLUDE_PATH$'
 sweep_pattern+='|COMPILER_PATH$|GCC_EXEC_PREFIX$|GCC_COMPARE_DEBUG$'
 sweep_pattern+='|LIBRARY_PATH$|DEPENDENCIES_OUTPUT$|SUNPRO_DEPENDENCIES$'
+sweep_pattern+='|PYTHONPATH$|PYTHONHOME$|PYTHONSTARTUP$'
 sweep_pattern+='|LD_)'
 swept_variables=()
 while IFS= read -r variable; do
@@ -290,7 +324,7 @@ fi
 ) >"$gates_dir/cargo-doc.log" 2>&1
 (
     PYTHONPYCACHEPREFIX="$build_dir/pycache" \
-        python3 -m py_compile \
+        python3 -I -m py_compile \
         "$topic_dir/experiment/generate.py" \
         "$topic_dir/experiment/frontend_experiment.py"
     bash -n "$topic_dir/experiment/run_remote.sh"
@@ -301,7 +335,7 @@ dense="$frontend_dir/dense16"
 sparse="$frontend_dir/sparse4096"
 aa_a="$frontend_dir/identical-a"
 aa_b="$frontend_dir/identical-b"
-python3 "$topic_dir/experiment/generate.py" "$generated_c"
+python3 -I "$topic_dir/experiment/generate.py" "$generated_c"
 gcc "${gcc_flags[@]}" -DFUNC_ALIGN=16 "$generated_c" -o "$dense"
 gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 "$generated_c" -o "$sparse"
 ln "$dense" "$aa_a"
@@ -340,7 +374,7 @@ if ! perf stat -x ';' --no-big-num -o "$output_dir/perf-probe.csv" \
     exit 1
 fi
 
-python3 "$topic_dir/experiment/frontend_experiment.py" \
+python3 -I "$topic_dir/experiment/frontend_experiment.py" \
     --dense "$dense" \
     --sparse "$sparse" \
     --aa-a "$aa_a" \
