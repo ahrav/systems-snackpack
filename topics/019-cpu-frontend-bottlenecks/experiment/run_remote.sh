@@ -34,13 +34,31 @@ unset __loader_override
 
 # In-shell self-verification has a fixed point: every function enumerator is a
 # shadowable builtin, and a DEBUG trap can define functions named builtin,
-# declare, or compgen at the moment a reset runs. Re-exec once through env -i into
-# a privileged shell, so the shell that does the real work cannot have imported
-# any of it. The condition is privileged mode itself rather than a marker
-# variable: a caller cannot claim it without also getting its effects, so there is
-# nothing to forge and no recursion. The guards below still run as defence in
-# depth, and they are meaningful because this shell is privileged.
+# declare, or compgen at the moment a reset runs. Privileged mode is what removes
+# the problem rather than reacting to it, so entry through the shebang above is
+# mandatory. Under `bash script` the shebang does not apply, BASH_ENV has already
+# run and may have cleared itself, and nothing later can undo what it did -- so
+# this refuses rather than pretending a re-exec repairs it.
 if [[ ! -o privileged ]]; then
+    printf 'this script must be executed directly, so that its\n' >&2
+    printf '"#!/bin/bash -p" line takes effect. Running it as "bash %s"\n' "$0" >&2
+    printf 'lets startup files and exported functions act before any check.\n' >&2
+    exit 2
+fi
+
+# Privileged mode makes this shell ignore exported functions, but the BASH_FUNC_*
+# entries stay in the environment, and any child Bash -- a PATH tool that happens
+# to be a shell script -- imports them. Those names are not valid shell variables,
+# so compgen -e cannot see them; read the raw environment instead and hop through
+# env -i, which drops them. None remain afterwards, so this happens at most once.
+environ_has_functions=0
+while IFS= read -r -d '' __environ_entry; do
+    case "$__environ_entry" in
+        BASH_FUNC_*) environ_has_functions=1 ;;
+    esac
+done </proc/self/environ
+unset __environ_entry
+if ((environ_has_functions == 1)); then
     exec /usr/bin/env -i \
         PATH="$PATH" \
         HOME="$HOME" \
@@ -290,6 +308,13 @@ export GIT_CONFIG_SYSTEM=/dev/null
 # while rev-parse still reports the original commit, so the blob comparison below
 # would accept bytes that are not in source_commit.
 export GIT_NO_REPLACE_OBJECTS=1
+# core.fsmonitor names a hook that `git status` executes, and repository-local
+# config stays in effect because Git cannot operate without it. Override the
+# setting for every Git probe rather than leaving an unrecorded program in the
+# path between the working tree and the clean-tree gate.
+export GIT_CONFIG_COUNT=1
+export GIT_CONFIG_KEY_0=core.fsmonitor
+export GIT_CONFIG_VALUE_0=false
 
 for tool in \
     as awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ld ln \
@@ -379,6 +404,10 @@ resolved_tools+=("$(printf 'git_config_global %s' "$GIT_CONFIG_GLOBAL")")
 resolved_tools+=("$(printf 'git_config_system %s' "$GIT_CONFIG_SYSTEM")")
 resolved_tools+=(
     "$(printf 'git_no_replace_objects %s' "$GIT_NO_REPLACE_OBJECTS")"
+)
+resolved_tools+=(
+    "$(printf 'git_config_override_%s %s' \
+        "$GIT_CONFIG_KEY_0" "$GIT_CONFIG_VALUE_0")"
 )
 if [[ ! -r "$topic_dir/experiment/generate.py" ]] \
     || [[ ! -r "$topic_dir/experiment/frontend_experiment.py" ]]; then
