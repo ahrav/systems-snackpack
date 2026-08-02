@@ -24,3 +24,10 @@ Startup and warmup are outside the timed region. The measured kernel uses one
 private hot `AtomicU64` and performs two successful CAS operations per
 iteration. The result excludes reclamation scans, allocator work, destruction,
 stalled participants, and contention.
+
+Retained records:
+
+- [Resolved `xxl` x86-64 host](xxl-2026-08-02.md)
+- [Required Arm host](arm-2026-08-02.md)
+- [Cross-host comparison](comparison-2026-08-02.md)
+- [Raw exact-source receipts](raw/6b20b1f/)

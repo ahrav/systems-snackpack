@@ -54,5 +54,12 @@ iteration. They measure generation packing on one uncontended hot atomic. They
 do not measure hazard scans, epoch advancement, RCU grace periods, allocation,
 destruction, stalled readers, or contention.
 
+On the exact source candidate `6b20b1f`, the tagged/raw elapsed-time ratio was
+`1.038854` with a 95% interval of `[1.038506, 1.039203]` on the resolved `xxl`
+host and `1.002938 [1.001997, 1.003880]` on the required Arm host. Each estimate
+uses 12 order-balanced blocks and 48 fresh timed processes. Both raw/raw A/A
+intervals included one. These host-specific results do not rank reclamation
+protocols or generalize to an ISA.
+
 See the [first-round decision record](rounds/01.md), [measurement contract](measurements/README.md),
 and [primary sources](references.md).
