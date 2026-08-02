@@ -15,6 +15,10 @@ name = "linkers-loaders-binary-layout"
 version = "0.1.0"
 
 [[package]]
+name = "lock-free-reclamation-aba"
+version = "0.1.0"
+
+[[package]]
 name = "pgo-post-link-optimization"
 version = "0.1.0"
 
