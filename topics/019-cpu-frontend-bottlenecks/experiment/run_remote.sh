@@ -24,7 +24,12 @@ if [[ -n "${BASH_ENV:-}" ]]; then
     printf 'it may already have run arbitrary shell code before this script\n' >&2
     exit 2
 fi
-for __loader_override in ${!LD_@}; do
+# GLIBC_TUNABLES is a loader and runtime knob that no LD_* pattern matches, and
+# glibc.cpu.hwcaps alone changes which ifunc variant of memcpy or strlen the
+# measured binaries select -- verified that the loader accepts it and that it
+# reaches children. It acted on this shell before any check could run, exactly
+# like the loader overrides above, so it is refused on the same terms.
+for __loader_override in ${!LD_@} ${GLIBC_TUNABLES+GLIBC_TUNABLES}; do
     printf 'refusing to run with a dynamic loader override set: %s\n' \
         "$__loader_override" >&2
     printf 'it already acted on this shell before any check could run\n' >&2
@@ -289,6 +294,13 @@ topic_dir="$repo_root/$topic_rel"
 # first Git probe, because GIT_DIR and GIT_WORK_TREE override even git -C, and
 # before the tool inventory, so the match uses shell patterns rather than an
 # external matcher that has not been required or hashed yet.
+#
+# CDPATH is included because privileged mode only makes this shell ignore it: a
+# required tool that is a shell wrapper is a child shell, and an inherited CDPATH
+# still changes where its relative `cd` lands -- verified that a child
+# `bash -c 'cd foo'` launched from a privileged parent followed CDPATH. PERF_CONFIG
+# is included because it selects perf's configuration file, and perf stat settings
+# there change how events are collected.
 while IFS= read -r variable; do
     case "$variable" in
         CARGO_* | GIT_* | LD_* \
@@ -299,6 +311,7 @@ while IFS= read -r variable; do
             | CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | OBJC_INCLUDE_PATH \
             | COMPILER_PATH | GCC_EXEC_PREFIX | GCC_COMPARE_DEBUG \
             | LIBRARY_PATH | DEPENDENCIES_OUTPUT | SUNPRO_DEPENDENCIES \
+            | CDPATH | PERF_CONFIG \
             | PYTHONPATH | PYTHONHOME | PYTHONSTARTUP)
             swept_variables+=("$variable")
             unset "$variable"
@@ -323,6 +336,12 @@ export GIT_NO_REPLACE_OBJECTS=1
 export GIT_CONFIG_COUNT=1
 export GIT_CONFIG_KEY_0=core.fsmonitor
 export GIT_CONFIG_VALUE_0=false
+# Sweeping PERF_CONFIG removes a caller-supplied file, but perf then falls back to
+# $HOME/.perfconfig, which cannot be swept. Point it at an empty file instead, so
+# neither source applies -- verified that `perf config` reports a setting under
+# PERF_CONFIG and reports nothing under /dev/null -- and record the value, because
+# perf stat configuration changes how the measured events are collected.
+export PERF_CONFIG=/dev/null
 
 for tool in \
     as awk bash cargo cargo-clippy cargo-fmt cc cmp date gcc getconf git gzip ld \
@@ -427,6 +446,7 @@ resolved_tools+=(
     "$(printf 'git_config_override_%s %s' \
         "$GIT_CONFIG_KEY_0" "$GIT_CONFIG_VALUE_0")"
 )
+resolved_tools+=("$(printf 'perf_config %s' "$PERF_CONFIG")")
 if [[ ! -r "$topic_dir/experiment/generate.py" ]] \
     || [[ ! -r "$topic_dir/experiment/frontend_experiment.py" ]]; then
     printf 'repository lacks the Topic 19 experiment\n' >&2
@@ -549,7 +569,21 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
     fi
     # --untracked-files=all so that a repository-level status.showUntrackedFiles
     # setting cannot suppress the report.
-    if [[ -n "$(git -C "$repo_root" status --porcelain --untracked-files=all)" ]]; then
+    #
+    # An empty answer must not read as a clean tree: repository-local config can
+    # break this one command while leaving the others working -- verified that
+    # `status.renames=maybe` makes `git status` exit 128 with no output, which
+    # a bare `[[ -n "$(...)" ]]` accepts as clean. Any nonzero status is fatal.
+    status_scan_status=0
+    worktree_status="$(
+        git -C "$repo_root" status --porcelain --untracked-files=all
+    )" || status_scan_status=$?
+    if ((status_scan_status != 0)); then
+        printf 'git status failed with status %s; refusing to run\n' \
+            "$status_scan_status" >&2
+        exit 2
+    fi
+    if [[ -n "$worktree_status" ]]; then
         printf 'repository must be clean\n' >&2
         exit 2
     fi
@@ -557,9 +591,24 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
         printf 'SOURCE_COMMIT does not match the checked-out commit\n' >&2
         exit 2
     fi
-    unmanifestable="$(
-        git -C "$repo_root" ls-files -s | rg --no-config -m 1 -v '^(100644|100755) ' || true
-    )"
+    # `|| true` on the pipeline would swallow a git failure as well as ripgrep's
+    # no-match 1, and an empty answer here means "no unmanifestable entries", so
+    # the listing is captured with its own status first and filtered in-shell.
+    index_scan_status=0
+    index_listing="$(git -C "$repo_root" ls-files -s)" || index_scan_status=$?
+    if ((index_scan_status != 0)); then
+        printf 'the index scan failed with status %s; refusing to run\n' \
+            "$index_scan_status" >&2
+        exit 2
+    fi
+    unmanifestable=""
+    while IFS= read -r index_row; do
+        [[ -n "$index_row" ]] || continue
+        case "$index_row" in
+            '100644 '* | '100755 '*) ;;
+            *) unmanifestable+=" $index_row" ;;
+        esac
+    done <<<"$index_listing"
     if [[ -n "$unmanifestable" ]]; then
         printf 'tracked symbolic links or submodules are unsupported: %s\n' \
             "$unmanifestable" >&2
@@ -567,10 +616,25 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
     fi
     # assume-unchanged (lowercase) and skip-worktree (S) entries keep edits out
     # of git status, so the clean-tree gate above would pass while the manifest
-    # hashes working-tree bytes that differ from source_commit.
-    hidden_index_flags="$(
-        git -C "$repo_root" ls-files -v | rg --no-config -m 1 '^([a-z]|S) ' || true
-    )"
+    # hashes working-tree bytes that differ from source_commit. Captured with its
+    # own status for the same reason as the scan above.
+    flag_scan_status=0
+    flag_listing="$(git -C "$repo_root" ls-files -v)" || flag_scan_status=$?
+    if ((flag_scan_status != 0)); then
+        printf 'the index-flag scan failed with status %s; refusing to run\n' \
+            "$flag_scan_status" >&2
+        exit 2
+    fi
+    hidden_index_flags=""
+    while IFS= read -r flag_row; do
+        [[ -n "$flag_row" ]] || continue
+        # A lowercase tag is the assume-unchanged form of any tag, and S is
+        # skip-worktree. [[:lower:]] rather than [a-z], so the class cannot pick
+        # up an uppercase tag such as the ordinary H under a collating locale.
+        case "$flag_row" in
+            [[:lower:]]' '* | 'S '*) hidden_index_flags+=" $flag_row" ;;
+        esac
+    done <<<"$flag_listing"
     if [[ -n "$hidden_index_flags" ]]; then
         printf 'assume-unchanged or skip-worktree hides edits from the clean-tree gate: %s\n' \
             "$hidden_index_flags" >&2
@@ -645,6 +709,22 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
     # variables exported above, so a same-size edit mapped back to the committed
     # bytes can leave both empty. Compare each tracked file's bytes against its
     # blob directly, which no filter can influence.
+    #
+    # Two empty streams compare equal, so a listing that fails identically on both
+    # sides would pass this gate. NUL-separated data cannot be held in a shell
+    # variable, so the streams stay as they are and the enumerator is proved to
+    # work and to report a non-empty index immediately beforehand instead.
+    tracked_scan_status=0
+    tracked_listing="$(git -C "$repo_root" ls-files)" || tracked_scan_status=$?
+    if ((tracked_scan_status != 0)); then
+        printf 'the tracked-file scan failed with status %s; refusing to run\n' \
+            "$tracked_scan_status" >&2
+        exit 2
+    fi
+    if [[ -z "$tracked_listing" ]]; then
+        printf 'the index reports no tracked files; refusing to run\n' >&2
+        exit 2
+    fi
     if ! cmp -s \
         <(git -C "$repo_root" ls-files -z \
             | (cd "$repo_root" && LC_ALL=C sort -z | xargs -0 sha256sum --)) \

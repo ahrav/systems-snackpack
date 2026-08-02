@@ -70,12 +70,24 @@ can prove about provenance, and defect 6 limits only hash-level reproduction.
    Cargo or Python compiled, so treat manifest *completeness* as resting on the
    same assumption as the rest of this entry. Current runs pass `--no-config` at
    every call site and clear the variable.
-4. **Source manifests include ignored paths.** `source-files.before.sha256` and
+4. **Source manifests include ignored paths and omit symbolic links.**
+   `source-files.before.sha256` and
    `source-files.after.sha256` were produced with an unrestricted scan, so
    ignored files present at run time would be hashed and attributed to
    `source_commit`. In checkout mode the manifest is now restricted to tracked
    files. The before/after comparison that proves the source did not change
    mid-run remains valid either way.
+
+   The same archived scan also skipped symbolic links, because `rg --files` does
+   not follow them without `-L/--follow`. A symlinked source file or tool
+   configuration in the extracted tree would therefore have been used by Cargo,
+   rustfmt, Clippy, or Python while its bytes appeared in neither manifest, and
+   the before/after comparison would still have matched because both omitted it
+   identically. This compounds the `RIPGREP_CONFIG_PATH` caveat in entry 3: both
+   bear on manifest *completeness* rather than on the equality of the two
+   manifests. Current runs reject symbolic links anywhere in the source tree, in
+   both checkout and archive mode, rather than recording a link in place of the
+   bytes that get used.
 
    Separately, and by design rather than by defect: in archive mode
    `source_commit` and `source_archive_sha256` are values the caller declared,
