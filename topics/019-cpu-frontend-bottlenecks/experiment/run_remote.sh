@@ -74,10 +74,10 @@ fi
 # empty, because an inherited ignored signal is not something this script needs
 # to reject.
 for __inherited_trap in DEBUG RETURN ERR EXIT HUP INT QUIT TERM; do
-    trap - "$__inherited_trap"
+    \trap - "$__inherited_trap"
 done
 unset __inherited_trap
-if [[ -n "$(trap -p DEBUG RETURN ERR EXIT)" ]]; then
+if [[ -n "$(\trap -p DEBUG RETURN ERR EXIT)" ]]; then
     printf 'inherited traps could not be cleared; refusing to run\n' >&2
     exit 2
 fi
@@ -99,10 +99,20 @@ if [[ -n "$(\alias 2>/dev/null || true)" ]]; then
     printf 'aliases could not be cleared; refusing to run\n' >&2
     exit 2
 fi
-if [[ -n "$(\declare -F)" ]]; then
-    printf 'a shell function was defined after the trap reset; refusing to run\n' >&2
+# A failed enumerator must not read as an empty answer, so the listing is captured
+# into a variable -- which set -e turns into a fatal error if the builtin has been
+# disabled -- and then compared against exactly the probe this script defined. Any
+# other entry, including one a DEBUG trap installed during the reset above, is
+# refused.
+# shellcheck disable=SC2329  # existence is asserted through declare -F, not by calling it
+__integrity_probe_after() { return 0; }
+functions_after_reset="$(\declare -F)"
+if [[ "$functions_after_reset" != 'declare -f __integrity_probe_after' ]]; then
+    printf 'unexpected shell functions after the trap reset; refusing to run:\n' >&2
+    printf '%s\n' "$functions_after_reset" >&2
     exit 2
 fi
+\unset -f __integrity_probe_after
 # The environment sweep below depends on `compgen -e` listing exported variables,
 # and that is the enumerator a selective replacement would target, so verify it
 # reports a variable this script just exported rather than trusting it.
@@ -207,6 +217,10 @@ done < <(compgen -e)
 # effect, because Git cannot operate without it.
 export GIT_CONFIG_GLOBAL=/dev/null
 export GIT_CONFIG_SYSTEM=/dev/null
+# A repository-local replace ref would make cat-file return a substituted object
+# while rev-parse still reports the original commit, so the blob comparison below
+# would accept bytes that are not in source_commit.
+export GIT_NO_REPLACE_OBJECTS=1
 
 for tool in \
     as awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ld ln \
@@ -282,6 +296,9 @@ resolved_tools+=("$(printf 'effective_rustup_home %s' "${RUSTUP_HOME:-$HOME/.rus
 resolved_tools+=("$(printf 'home %s' "$HOME")")
 resolved_tools+=("$(printf 'git_config_global %s' "$GIT_CONFIG_GLOBAL")")
 resolved_tools+=("$(printf 'git_config_system %s' "$GIT_CONFIG_SYSTEM")")
+resolved_tools+=(
+    "$(printf 'git_no_replace_objects %s' "$GIT_NO_REPLACE_OBJECTS")"
+)
 if [[ ! -r "$topic_dir/experiment/generate.py" ]] \
     || [[ ! -r "$topic_dir/experiment/frontend_experiment.py" ]]; then
     printf 'repository lacks the Topic 19 experiment\n' >&2
@@ -314,6 +331,16 @@ fi
 case "$output_dir" in
     /*) candidate_output="$output_dir" ;;
     *) candidate_output="$PWD/$output_dir" ;;
+esac
+# A .. component can cancel a not-yet-existing directory, so the reconstruction
+# below would compare a path that mkdir -p never creates while it creates the
+# canceled prefix instead. Refuse them rather than trying to normalize.
+case "/$candidate_output/" in
+    */../*)
+        printf 'OUTPUT_DIRECTORY must not contain a .. component: %s\n' \
+            "$output_dir" >&2
+        exit 2
+        ;;
 esac
 candidate_existing="$candidate_output"
 candidate_tail=""
@@ -439,7 +466,7 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
     # variables exported above, so a same-size edit mapped back to the committed
     # bytes can leave both empty. Compare each tracked file's bytes against its
     # blob directly, which no filter can influence.
-    if ! diff -q \
+    if ! cmp -s \
         <(git -C "$repo_root" ls-files -z \
             | (cd "$repo_root" && LC_ALL=C sort -z | xargs -0 sha256sum --)) \
         <(git -C "$repo_root" ls-files -z \
@@ -450,7 +477,7 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
                         | sha256sum -- | cut -d' ' -f1)" \
                     "$blob_path"
             done) \
-        >/dev/null; then
+        ; then
         printf 'tracked working-tree bytes differ from their committed blobs\n' >&2
         printf 'a clean filter or index flag can hide this from git status\n' >&2
         exit 2
