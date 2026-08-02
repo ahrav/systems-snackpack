@@ -171,25 +171,32 @@ topic_dir="$repo_root/$topic_rel"
 # Git repository and index. Sweeping records each name in swept_environment, so a
 # gate can no longer pass under a caller-supplied tool, flag, header, or
 # repository while the evidence calls the environment swept. This runs before the
-# first Git probe, because GIT_DIR and GIT_WORK_TREE override even git -C.
-sweep_pattern='^(CARGO_|GIT_'
-sweep_pattern+='|RUSTC$|RUSTC_WRAPPER$|RUSTC_WORKSPACE_WRAPPER$|RUSTC_BOOTSTRAP$'
-sweep_pattern+='|RUSTDOC$|RUSTDOCFLAGS$|RUSTFLAGS$|RUSTFMT$'
-sweep_pattern+='|RUSTUP_TOOLCHAIN$|RUSTUP_HOME$|CLIPPY_CONF_DIR$|RIPGREP_CONFIG_PATH$'
-sweep_pattern+='|CPATH$|C_INCLUDE_PATH$|CPLUS_INCLUDE_PATH$|OBJC_INCLUDE_PATH$'
-sweep_pattern+='|COMPILER_PATH$|GCC_EXEC_PREFIX$|GCC_COMPARE_DEBUG$'
-sweep_pattern+='|LIBRARY_PATH$|DEPENDENCIES_OUTPUT$|SUNPRO_DEPENDENCIES$'
-sweep_pattern+='|PYTHONPATH$|PYTHONHOME$|PYTHONSTARTUP$'
-sweep_pattern+='|LD_)'
-swept_variables+=()
+# first Git probe, because GIT_DIR and GIT_WORK_TREE override even git -C, and
+# before the tool inventory, so the match uses shell patterns rather than an
+# external matcher that has not been required or hashed yet.
 while IFS= read -r variable; do
-    swept_variables+=("$variable")
-    unset "$variable"
-done < <(
-    compgen -e \
-        | rg --no-config "$sweep_pattern" \
-        || true
-)
+    case "$variable" in
+        CARGO_* | GIT_* | LD_* \
+            | RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTC_BOOTSTRAP \
+            | RUSTDOC | RUSTDOCFLAGS | RUSTFLAGS | RUSTFMT \
+            | RUSTUP_TOOLCHAIN | RUSTUP_HOME | CLIPPY_CONF_DIR \
+            | RIPGREP_CONFIG_PATH \
+            | CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | OBJC_INCLUDE_PATH \
+            | COMPILER_PATH | GCC_EXEC_PREFIX | GCC_COMPARE_DEBUG \
+            | LIBRARY_PATH | DEPENDENCIES_OUTPUT | SUNPRO_DEPENDENCIES \
+            | PYTHONPATH | PYTHONHOME | PYTHONSTARTUP)
+            swept_variables+=("$variable")
+            unset "$variable"
+            ;;
+    esac
+done < <(compgen -e)
+# Global and system Git configuration can assign a clean filter to tracked paths,
+# and a same-size edit then leaves `git status` empty while the working tree
+# differs from source_commit. Neither file is recorded source, so both are taken
+# out of play for every Git probe below. The repository's own config stays in
+# effect, because Git cannot operate without it.
+export GIT_CONFIG_GLOBAL=/dev/null
+export GIT_CONFIG_SYSTEM=/dev/null
 
 for tool in \
     as awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ld ln \
@@ -263,6 +270,8 @@ if command -v rustup >/dev/null 2>&1 \
 fi
 resolved_tools+=("$(printf 'effective_rustup_home %s' "${RUSTUP_HOME:-$HOME/.rustup}")")
 resolved_tools+=("$(printf 'home %s' "$HOME")")
+resolved_tools+=("$(printf 'git_config_global %s' "$GIT_CONFIG_GLOBAL")")
+resolved_tools+=("$(printf 'git_config_system %s' "$GIT_CONFIG_SYSTEM")")
 if [[ ! -r "$topic_dir/experiment/generate.py" ]] \
     || [[ ! -r "$topic_dir/experiment/frontend_experiment.py" ]]; then
     printf 'repository lacks the Topic 19 experiment\n' >&2
@@ -616,7 +625,12 @@ start_utc="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
     printf '\nperf\n'
     perf version
 } >"$output_dir/host.txt" 2>&1
-gcc -march=native -Q --help=target >"$output_dir/gcc-native-target.txt" 2>&1
+# -march=native resolves from the CPU the compiler happens to run on, so on a
+# host whose allowed set spans core types this must be pinned to the same CPU the
+# measured processes use, or the recorded native flags and the ELFs would describe
+# a different core than taskset measures.
+taskset -c "$cpu" gcc -march=native -Q --help=target \
+    >"$output_dir/gcc-native-target.txt" 2>&1
 perf list >"$output_dir/perf-list.txt" 2>&1
 
 gcc_flags=(
@@ -646,11 +660,11 @@ gcc_flags=(
     printf 'cargo_target_dir=%s\n' "$CARGO_TARGET_DIR"
     printf 'swept_environment=%s\n' "${swept_variables[*]:-none}"
     printf 'gcc_dense='
-    printf '%q ' gcc "${gcc_flags[@]}" -DFUNC_ALIGN=16 \
+    printf '%q ' taskset -c "$cpu" gcc "${gcc_flags[@]}" -DFUNC_ALIGN=16 \
         frontend_layout.c -o dense16
     printf '\n'
     printf 'gcc_sparse='
-    printf '%q ' gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 \
+    printf '%q ' taskset -c "$cpu" gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 \
         frontend_layout.c -o sparse4096
     printf '\n'
     printf 'gcc_working_directory=%s\n' "$frontend_dir"
@@ -722,8 +736,10 @@ python3 -I "$topic_dir/experiment/generate.py" "$generated_c"
 # already rewrites to the fixed placeholder.
 (
     cd "$frontend_dir"
-    gcc "${gcc_flags[@]}" -DFUNC_ALIGN=16 frontend_layout.c -o dense16
-    gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 frontend_layout.c -o sparse4096
+    taskset -c "$cpu" gcc "${gcc_flags[@]}" -DFUNC_ALIGN=16 \
+        frontend_layout.c -o dense16
+    taskset -c "$cpu" gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 \
+        frontend_layout.c -o sparse4096
 )
 ln "$dense" "$aa_a"
 ln "$dense" "$aa_b"
