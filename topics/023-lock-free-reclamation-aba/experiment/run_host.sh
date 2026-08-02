@@ -103,6 +103,7 @@ done >"$output_directory/correctness/replicates.txt"
 objdump -d -C "$binary" >"$output_directory/codegen/final-binary.txt"
 rg -n -A 80 '<bench_(raw|tagged)_kernel>' "$output_directory/codegen/final-binary.txt" \
   >"$output_directory/codegen/kernels.txt"
+gzip -9 "$output_directory/codegen/final-binary.txt"
 
 python3 "$topic/experiment/run_processes.py" \
   "$binary" "$output_directory/processes" "$cpu" --iterations 5000000 \
