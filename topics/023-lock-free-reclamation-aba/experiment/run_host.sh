@@ -85,7 +85,7 @@ cargo test --workspace --doc >"$output_directory/gates/cargo-test-doc.log" 2>&1
 cargo clippy --workspace --all-targets -- -D warnings >"$output_directory/gates/cargo-clippy.log" 2>&1
 cargo bench --workspace --no-run >"$output_directory/gates/cargo-bench-no-run.log" 2>&1
 RUSTDOCFLAGS='-D warnings' cargo doc --workspace --no-deps >"$output_directory/gates/cargo-doc.log" 2>&1
-PYTHONPYCACHEPREFIX="$output_directory/pycache" \
+PYTHONPYCACHEPREFIX="$repository_root/../pycache" \
   python3 -m py_compile "$topic/experiment/run_processes.py" "$topic/experiment/validate_receipts.py"
 bash -n "$topic/experiment/run_host.sh"
 
