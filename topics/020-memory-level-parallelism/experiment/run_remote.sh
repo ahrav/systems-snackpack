@@ -15,7 +15,7 @@ topic_dir="$repo_root/$topic_rel"
 
 for tool in \
     awk bash cargo cmp cp date getconf git gzip lscpu mkdir mktemp mv objdump \
-    python3 rg rustc sha256sum sort tar taskset uname xargs; do
+    python3 realpath rg rustc sha256sum sort tar taskset uname xargs; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         printf 'required tool is unavailable: %s\n' "$tool" >&2
         exit 2
@@ -25,16 +25,18 @@ if [[ ! -r "$topic_dir/experiment/run_processes.py" ]]; then
     printf 'repository lacks the Topic 20 experiment\n' >&2
     exit 2
 fi
+# realpath -m resolves without requiring existence, so containment is decided
+# before anything is created and a rejected path leaves no directory behind.
+output_dir="$(realpath -m -- "$output_dir")"
+if [[ "$output_dir" == "$repo_root" || "$output_dir" == "$repo_root"/* ]]; then
+    printf 'OUTPUT_DIRECTORY must be outside the repository\n' >&2
+    exit 2
+fi
 if [[ -e "$output_dir" ]] && [[ -n "$(rg --files -uu "$output_dir" 2>/dev/null || true)" ]]; then
     printf 'OUTPUT_DIRECTORY must be absent or empty: %s\n' "$output_dir" >&2
     exit 2
 fi
 mkdir -p -- "$output_dir"
-output_dir="$(cd -- "$output_dir" && pwd -P)"
-if [[ "$output_dir" == "$repo_root" || "$output_dir" == "$repo_root"/* ]]; then
-    printf 'OUTPUT_DIRECTORY must be outside the repository\n' >&2
-    exit 2
-fi
 
 if (($# == 3)); then
     cpu="$3"
@@ -90,6 +92,7 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
         exit 2
     fi
     source_verification=git-checkout
+    source_trust_root=local-checkout-head
 else
     if ! [[ "${SOURCE_COMMIT:-}" =~ ^[0-9a-f]{40}$ ]]; then
         printf 'SOURCE_COMMIT is required for an archive source tree\n' >&2
@@ -110,6 +113,9 @@ else
     fi
     archive_tar="$build_dir/source.tar"
     gzip -dc "$SOURCE_ARCHIVE_PATH" >"$archive_tar"
+    # get-tar-commit-id reads a pax global header comment that no digest inside
+    # the archive covers, so the embedded id is a claim the archive makes about
+    # itself. SOURCE_ARCHIVE_SHA256 above is what actually pins these bytes.
     embedded_commit="$(git get-tar-commit-id <"$archive_tar")"
     if [[ "$embedded_commit" != "$SOURCE_COMMIT" ]]; then
         printf 'Git archive commit differs from SOURCE_COMMIT\n' >&2
@@ -126,6 +132,7 @@ else
     fi
     source_commit="$SOURCE_COMMIT"
     source_verification=git-archive-commit-and-tree
+    source_trust_root=caller-supplied-archive-sha256
 fi
 if [[ -n "${SOURCE_COMMIT:-}" && "$SOURCE_COMMIT" != "$source_commit" ]]; then
     printf 'SOURCE_COMMIT does not match the source tree\n' >&2
@@ -147,7 +154,11 @@ finalize() {
         source_manifest_status=match
     else
         source_manifest_status=mismatch
-        status=1
+        # A gate's own code, say 101 from cargo test, says which step failed;
+        # the mismatch already has its own field, so do not overwrite it.
+        if ((status == 0)); then
+            status=1
+        fi
     fi
     printf 'utc_end=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >>"$output_dir/host.txt"
     printf 'exit=%s\nsource_manifest=%s\n' \
@@ -172,6 +183,7 @@ trap finalize EXIT
     printf 'utc_start=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
     printf 'source_commit=%s\n' "$source_commit"
     printf 'source_verification=%s\n' "$source_verification"
+    printf 'source_trust_root=%s\n' "$source_trust_root"
     printf 'source_archive_sha256=%s\n' "${SOURCE_ARCHIVE_SHA256:-unknown}"
     printf 'selected_cpu=%s\n' "$cpu"
     printf 'cpu_allowed_list=%s\n' \
@@ -182,16 +194,19 @@ trap finalize EXIT
     printf 'online_cpus=%s\n' "$(getconf _NPROCESSORS_ONLN)"
     printf 'page_size=%s\n' "$(getconf PAGESIZE)"
     printf 'thp=%s\n' "$(rg -m 1 '.' /sys/kernel/mm/transparent_hugepage/enabled 2>/dev/null || true)"
-    printf 'perf_event_paranoid=%s\n' "$(rg -m 1 '.' /proc/sys/kernel/perf_event_paranoid)"
+    printf 'perf_event_paranoid=%s\n' \
+        "$(rg -m 1 '.' /proc/sys/kernel/perf_event_paranoid 2>/dev/null || true)"
     printf 'smt_active=%s\n' "$(rg -m 1 '.' /sys/devices/system/cpu/smt/active 2>/dev/null || true)"
     printf 'selected_cpu_siblings=%s\n' \
         "$(rg -m 1 '.' "/sys/devices/system/cpu/cpu${cpu}/topology/thread_siblings_list" 2>/dev/null || true)"
     printf '\nlscpu\n'
     lscpu
     printf '\ncpu_model_and_features\n'
+    # The pattern list is x86-centric plus a few AArch64 keys, and rg exits 1 on
+    # no match, which would abort the run and drop the toolchain records below.
     rg -m 128 \
         '^(model name|vendor_id|cpu family|model|stepping|microcode|Hardware|CPU implementer|CPU architecture|CPU variant|CPU part|CPU revision|Features|flags)' \
-        /proc/cpuinfo
+        /proc/cpuinfo || true
     printf '\nrustc\n'
     rustc -vV
     printf '\ncargo\n'
