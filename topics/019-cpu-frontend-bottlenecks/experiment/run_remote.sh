@@ -1,6 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# A default field separator is needed before the unquoted expansion below.
+IFS=$' \t\n'
+
+# Refuse the inherited state whose effects predate this script. BASH_ENV's startup
+# file has already run, and a dynamic loader override has already acted on this
+# shell and would act on the sanitizer itself, so either could have altered the
+# source tree or the working directory before line 1. The re-exec below drops both
+# variables, which would erase the evidence that they were ever set, so they are
+# refused here instead of being sanitized away silently.
+if [[ -n "${BASH_ENV:-}" ]]; then
+    printf 'refusing to run with BASH_ENV set: %s\n' "$BASH_ENV" >&2
+    printf 'it already ran arbitrary shell code before this script started\n' >&2
+    exit 2
+fi
+for __loader_override in ${!LD_@}; do
+    printf 'refusing to run with a dynamic loader override set: %s\n' \
+        "$__loader_override" >&2
+    printf 'it already acted on this shell before any check could run\n' >&2
+    exit 2
+done
+unset __loader_override
+
 # Bash imports functions, aliases through BASH_ENV, traps, and shell options from
 # the invoking environment before line 1 runs, and a DEBUG trap can re-arm any of
 # them at a chosen moment -- including defining functions named builtin, declare,
@@ -9,9 +31,12 @@ set -euo pipefail
 # through env -i with an explicit variable list, so the shell that does the real
 # work starts with no imported functions, no BASH_ENV, no traps, and default
 # options. The guards below still run in that shell as defence in depth.
-if [[ -z "${TOPIC19_SANITIZED_SHELL:-}" ]]; then
+#
+# The marker is this process's PID, which exec preserves and a caller cannot
+# predict, so setting the variable by hand cannot skip the sanitizing exec.
+if [[ "${TOPIC19_SANITIZED_SHELL:-}" != "$$" ]]; then
     exec /usr/bin/env -i \
-        TOPIC19_SANITIZED_SHELL=1 \
+        TOPIC19_SANITIZED_SHELL="$$" \
         PATH="$PATH" \
         HOME="$HOME" \
         TERM="${TERM:-dumb}" \
@@ -336,6 +361,13 @@ if command -v rustup >/dev/null 2>&1 \
         fi
     done
 fi
+# The re-exec above pins the interpreter, and the tool inventory records whatever
+# `bash` PATH resolves -- which need not be the same file. Record the shell that
+# is actually parsing and running this script.
+interpreter_sum="$(sha256sum -- "$BASH")"
+resolved_tools+=(
+    "$(printf 'interpreter %s %s' "${interpreter_sum%% *}" "$BASH")"
+)
 resolved_tools+=("$(printf 'effective_rustup_home %s' "${RUSTUP_HOME:-$HOME/.rustup}")")
 resolved_tools+=("$(printf 'home %s' "$HOME")")
 resolved_tools+=("$(printf 'git_config_global %s' "$GIT_CONFIG_GLOBAL")")
@@ -415,7 +447,7 @@ else
     cpu="${first%%-*}"
 fi
 if ! [[ "$cpu" =~ ^(0|[1-9][0-9]*)$ ]] \
-    || ! taskset -c "$cpu" true >/dev/null 2>&1; then
+    || ! taskset -c "$cpu" uname >/dev/null 2>&1; then
     printf 'taskset cannot pin to CPU %s\n' "${cpu:-unknown}" >&2
     exit 2
 fi
@@ -631,12 +663,15 @@ fi
 # entirely. Verify the outcome instead of the mechanism -- the versions the gates
 # will actually report must name the pinned channel.
 if ((toolchain_pin == 1)); then
-    pinned_channel="$(
+    pinned_channel_line="$(
         rg --no-config -m 1 '^[[:space:]]*channel[[:space:]]*=' \
-            "$repo_root/rust-toolchain.toml" 2>/dev/null \
-            | rg --no-config -o '"[^"]+"' | tr -d '"' || true
+            "$repo_root/rust-toolchain.toml" 2>/dev/null || true
     )"
-    if [[ -z "$pinned_channel" ]]; then
+    # Shell-only extraction of the quoted value, so the parser is not an
+    # unrecorded external that could make any version string appear to match.
+    pinned_channel="${pinned_channel_line#*\"}"
+    pinned_channel="${pinned_channel%%\"*}"
+    if [[ -z "$pinned_channel" || "$pinned_channel" == "$pinned_channel_line" ]]; then
         printf 'could not read the pinned toolchain channel\n' >&2
         exit 2
     fi
