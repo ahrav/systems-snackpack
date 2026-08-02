@@ -57,39 +57,10 @@ if [[ -n "$imported_functions" ]]; then
     exit 2
 fi
 
-# No imported functions remain, so these builtins cannot be shadowed by a
-# function -- but `builtin` is itself a command word subject to alias expansion,
-# so an `alias builtin=':'` installed by a startup file would turn both lines
-# into no-ops. The backslash suppresses alias expansion on the command word, the
-# calls are fatal on failure, and the postcondition confirms the result.
-\builtin shopt -u expand_aliases
-\builtin unalias -a || true
-if [[ -n "$(\alias 2>/dev/null || true)" ]]; then
-    printf 'aliases could not be cleared; refusing to run\n' >&2
-    exit 2
-fi
 # Bash remembers command pathnames, and `hash -p` can seed an entry that points
 # `command -v` at one binary while PATH lookups in child processes -- including
 # the Python analysis script -- resolve a different one. Forget them all, so the
 # recorded tool paths and the tools the children run agree.
-\hash -r
-
-# The environment sweep below depends on `compgen -e` listing exported variables,
-# and that is the enumerator a selective replacement would target, so verify it
-# reports a variable this script just exported rather than trusting it.
-__INTEGRITY_SENTINEL=1
-export __INTEGRITY_SENTINEL
-sentinel_seen=0
-while IFS= read -r variable; do
-    if [[ "$variable" == __INTEGRITY_SENTINEL ]]; then
-        sentinel_seen=1
-    fi
-done < <(compgen -e)
-if ((sentinel_seen != 1)); then
-    printf 'compgen -e did not report an exported variable; refusing to run\n' >&2
-    exit 2
-fi
-unset __INTEGRITY_SENTINEL
 # A startup file can `unset BASH_ENV` before this check and still have left a
 # trap behind, so the variable being empty proves nothing on its own. An inline
 # DEBUG trap needs no function, which makes it invisible to the check above, and
@@ -110,6 +81,45 @@ if [[ -n "$(trap -p DEBUG RETURN ERR EXIT)" ]]; then
     printf 'inherited traps could not be cleared; refusing to run\n' >&2
     exit 2
 fi
+# A DEBUG trap runs before each command, so one could have re-enabled alias
+# expansion, reinstated a function, or reset IFS or noglob immediately before it
+# was removed -- which would leave every check above stale. No trap can run from
+# here on, so the shell state is established again and re-verified now, and this
+# is the point the later sweeps and globs actually depend on.
+IFS=$' \t\n'
+set +f
+\builtin shopt -u expand_aliases
+\builtin unalias -a || true
+\hash -r
+if [[ -o noglob ]]; then
+    printf 'pathname expansion is disabled; refusing to run\n' >&2
+    exit 2
+fi
+if [[ -n "$(\alias 2>/dev/null || true)" ]]; then
+    printf 'aliases could not be cleared; refusing to run\n' >&2
+    exit 2
+fi
+if [[ -n "$(\declare -F)" ]]; then
+    printf 'a shell function was defined after the trap reset; refusing to run\n' >&2
+    exit 2
+fi
+# The environment sweep below depends on `compgen -e` listing exported variables,
+# and that is the enumerator a selective replacement would target, so verify it
+# reports a variable this script just exported rather than trusting it.
+__INTEGRITY_SENTINEL=1
+export __INTEGRITY_SENTINEL
+sentinel_seen=0
+while IFS= read -r variable; do
+    if [[ "$variable" == __INTEGRITY_SENTINEL ]]; then
+        sentinel_seen=1
+    fi
+done < <(compgen -e)
+if ((sentinel_seen != 1)); then
+    printf 'compgen -e did not report an exported variable; refusing to run\n' >&2
+    exit 2
+fi
+unset __INTEGRITY_SENTINEL
+IFS=$' \t\n'
 if [[ -n "${BASH_ENV:-}" ]]; then
     printf 'refusing to run with BASH_ENV set: %s\n' "$BASH_ENV" >&2
     printf 'it already ran arbitrary shell code before this script started\n' >&2
@@ -296,29 +306,33 @@ if [[ -e "$output_dir" ]]; then
     fi
 fi
 # Reject a path inside the repository before creating it. mkdir -p would
-# otherwise leave a new directory that the root workspace's topics/* glob treats
-# as a member without a manifest, breaking every later Cargo invocation. The
-# lexical test runs first; the resolved test below still catches symlinks.
+# otherwise leave new directories that the root workspace's topics/* glob treats
+# as members without a manifest, breaking every later Cargo invocation. A lexical
+# test is not enough, because a symlinked path does not share the physical
+# repo_root prefix, so the deepest existing ancestor is resolved physically and
+# the remaining components are appended to it.
 case "$output_dir" in
     /*) candidate_output="$output_dir" ;;
     *) candidate_output="$PWD/$output_dir" ;;
 esac
+candidate_existing="$candidate_output"
+candidate_tail=""
+while [[ ! -d "$candidate_existing" ]]; do
+    candidate_tail="${candidate_existing##*/}${candidate_tail:+/$candidate_tail}"
+    candidate_existing="${candidate_existing%/*}"
+    [[ -z "$candidate_existing" ]] && candidate_existing=/
+done
+candidate_existing="$(cd -- "$candidate_existing" && pwd -P)"
+candidate_output="${candidate_existing%/}${candidate_tail:+/$candidate_tail}"
 if [[ "$candidate_output" == "$repo_root" || "$candidate_output" == "$repo_root"/* ]]; then
     printf 'OUTPUT_DIRECTORY must be outside the repository: %s\n' \
         "$candidate_output" >&2
     exit 2
 fi
-output_dir_existed=1
-if [[ ! -d "$output_dir" ]]; then
-    output_dir_existed=0
-fi
 mkdir -p -- "$output_dir"
 output_dir="$(cd -- "$output_dir" && pwd -P)"
 if [[ "$output_dir" == "$repo_root" || "$output_dir" == "$repo_root"/* ]]; then
     printf 'OUTPUT_DIRECTORY must be outside the repository\n' >&2
-    if ((output_dir_existed == 0)); then
-        rmdir -- "$output_dir" 2>/dev/null || true
-    fi
     exit 2
 fi
 
@@ -396,6 +410,49 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
     if [[ -n "$hidden_members" ]]; then
         printf 'untracked workspace files would be loaded by the Cargo gates:%s\n' \
             "$hidden_members" >&2
+        exit 2
+    fi
+    # A tracked manifest can name a target with an explicit `path`, and tracked
+    # source can pull in a module with `mod` or `#[path]`, so enumerating the
+    # default layouts cannot cover every compile input. Require instead that every
+    # Rust source file in the tree is tracked, which holds regardless of how Cargo
+    # or rustc is told to find it.
+    untracked_rust=""
+    while IFS= read -r candidate_rel; do
+        [[ -n "$candidate_rel" ]] || continue
+        if ! git -C "$repo_root" ls-files --error-unmatch -- "$candidate_rel" \
+            >/dev/null 2>&1; then
+            untracked_rust+=" $candidate_rel"
+        fi
+    done < <(
+        cd "$repo_root" \
+            && rg --no-config --files -uu -g '!/.git/' -g '!/target/' -g '*.rs' \
+                || true
+    )
+    if [[ -n "$untracked_rust" ]]; then
+        printf 'untracked Rust sources are present and could be compiled:%s\n' \
+            "$untracked_rust" >&2
+        exit 2
+    fi
+    # `git status` and `git diff` both apply clean filters, and repository-local
+    # attributes in $GIT_DIR/info/attributes cannot be disabled by the config
+    # variables exported above, so a same-size edit mapped back to the committed
+    # bytes can leave both empty. Compare each tracked file's bytes against its
+    # blob directly, which no filter can influence.
+    if ! diff -q \
+        <(git -C "$repo_root" ls-files -z \
+            | (cd "$repo_root" && LC_ALL=C sort -z | xargs -0 sha256sum --)) \
+        <(git -C "$repo_root" ls-files -z \
+            | LC_ALL=C sort -z \
+            | while IFS= read -r -d '' blob_path; do
+                printf '%s  %s\n' \
+                    "$(git -C "$repo_root" cat-file blob "HEAD:$blob_path" \
+                        | sha256sum -- | cut -d' ' -f1)" \
+                    "$blob_path"
+            done) \
+        >/dev/null; then
+        printf 'tracked working-tree bytes differ from their committed blobs\n' >&2
+        printf 'a clean filter or index flag can hide this from git status\n' >&2
         exit 2
     fi
     # rustfmt and Clippy read configuration from the directory of the file being
