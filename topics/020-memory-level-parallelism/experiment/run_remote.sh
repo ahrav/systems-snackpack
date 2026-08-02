@@ -295,10 +295,12 @@ rg -q '<topic20_walk_one>:' "$output_dir/codegen-one.txt"
 rg -q '<topic20_walk_eight>:' "$output_dir/codegen-eight.txt"
 gzip -9 "$output_dir/codegen.txt"
 
+# Separate streams rather than 2>&1: the probe's contract is one line on stdout
+# and nothing on stderr, so merging them would corrupt the record being checked.
 taskset -c "$cpu" "$binary" --lanes 1 --nodes 4096 --loads 8192 \
-    >"$output_dir/smoke-one.txt"
+    >"$output_dir/smoke-one.txt" 2>"$output_dir/smoke-one.stderr"
 taskset -c "$cpu" "$binary" --lanes 8 --nodes 4096 --loads 8192 \
-    >"$output_dir/smoke-eight.txt"
+    >"$output_dir/smoke-eight.txt" 2>"$output_dir/smoke-eight.stderr"
 
 nodes="${TOPIC20_NODES:-4194304}"
 loads="${TOPIC20_LOADS:-33554432}"
@@ -313,7 +315,7 @@ python3 "$topic_dir/experiment/run_processes.py" \
 record_perf_smoke() {
     local label="$1"
     local lanes="$2"
-    local status reason
+    local status reason usable
     set +e
     LC_ALL=C taskset -c "$cpu" perf stat \
         -e cycles,instructions,cache-misses,L1-dcache-load-misses \
