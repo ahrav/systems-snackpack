@@ -82,6 +82,13 @@ fi
 build_dir="$(mktemp -d)"
 trap 'rm -rf -- "$build_dir"' EXIT
 
+# Sweeping CARGO_* clears the environment but not $HOME/.cargo/config.toml, whose
+# build.rustc-wrapper and build.rustflags still reach the gates and the native
+# build. Point CARGO_HOME at an empty directory instead. The workspace resolves
+# no external crates, so an empty registry costs nothing.
+export CARGO_HOME="$build_dir/cargo-home"
+mkdir -p -- "$CARGO_HOME"
+
 scan_source_paths() {
     rg --files -uu -g '!.git/**' -g '!target/**' -0
 }
@@ -215,6 +222,7 @@ trap finalize EXIT
     printf 'source_trust_root=%s\n' "$source_trust_root"
     printf 'source_archive_sha256=%s\n' "${SOURCE_ARCHIVE_SHA256:-unknown}"
     printf 'swept_environment=%s\n' "${swept_variables[*]:-none}"
+    printf 'cargo_home=%s\n' "$CARGO_HOME"
     printf 'selected_cpu=%s\n' "$cpu"
     printf 'cpu_allowed_list=%s\n' \
         "$(rg -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}')"
@@ -242,7 +250,10 @@ trap finalize EXIT
     printf '\ncargo\n'
     cargo -vV
     printf '\ntarget_cfg\n'
-    rustc --print cfg -C target-cpu=native
+    # native resolves against whichever core rustc lands on, so pin the probe to
+    # the measured CPU or it can describe a different core class on a big.LITTLE
+    # or affinity-partitioned host.
+    taskset -c "$cpu" rustc --print cfg -C target-cpu=native
 ) >"$output_dir/host.txt" 2>&1
 
 if [[ "$source_verification" == git-checkout ]]; then
@@ -278,7 +289,9 @@ build_flags="-C target-cpu=native -C lto=no -C codegen-units=1"
 printf 'RUSTFLAGS=%s\n' "$build_flags" >"$output_dir/build-flags.txt"
 (
     cd "$repo_root"
-    RUSTFLAGS="$build_flags" cargo build --locked --release \
+    # Pinned for the same reason as the cfg probe: -C target-cpu=native encodes
+    # the core rustc runs on, which must be the core the processes are measured on.
+    RUSTFLAGS="$build_flags" taskset -c "$cpu" cargo build --locked --release \
         --package memory-level-parallelism --example chain_probe \
         --target-dir "$target_dir"
 ) >"$output_dir/native-build.log" 2>&1
