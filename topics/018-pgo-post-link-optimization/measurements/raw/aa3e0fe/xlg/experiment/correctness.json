@@ -1,0 +1,104 @@
+{
+  "alpha": {
+    "baseline": {
+      "checksum": "55e7b04d09c7ad39",
+      "elapsed_ns": 24450,
+      "iterations": 10000,
+      "mode": "alpha",
+      "process_wall_ns": 2127819,
+      "seed": 7
+    },
+    "baseline-copy": {
+      "checksum": "55e7b04d09c7ad39",
+      "elapsed_ns": 24460,
+      "iterations": 10000,
+      "mode": "alpha",
+      "process_wall_ns": 1972479,
+      "seed": 7
+    },
+    "pgo-alpha": {
+      "checksum": "55e7b04d09c7ad39",
+      "elapsed_ns": 27150,
+      "iterations": 10000,
+      "mode": "alpha",
+      "process_wall_ns": 1957858,
+      "seed": 7
+    },
+    "pgo-beta": {
+      "checksum": "55e7b04d09c7ad39",
+      "elapsed_ns": 27160,
+      "iterations": 10000,
+      "mode": "alpha",
+      "process_wall_ns": 1944759,
+      "seed": 7
+    }
+  },
+  "beta": {
+    "baseline": {
+      "checksum": "38a4bed193b63f4a",
+      "elapsed_ns": 24460,
+      "iterations": 10000,
+      "mode": "beta",
+      "process_wall_ns": 1924578,
+      "seed": 7
+    },
+    "baseline-copy": {
+      "checksum": "38a4bed193b63f4a",
+      "elapsed_ns": 24460,
+      "iterations": 10000,
+      "mode": "beta",
+      "process_wall_ns": 1930378,
+      "seed": 7
+    },
+    "pgo-alpha": {
+      "checksum": "38a4bed193b63f4a",
+      "elapsed_ns": 29851,
+      "iterations": 10000,
+      "mode": "beta",
+      "process_wall_ns": 2083009,
+      "seed": 7
+    },
+    "pgo-beta": {
+      "checksum": "38a4bed193b63f4a",
+      "elapsed_ns": 27131,
+      "iterations": 10000,
+      "mode": "beta",
+      "process_wall_ns": 1926089,
+      "seed": 7
+    }
+  },
+  "noop": {
+    "baseline": {
+      "checksum": "0000000000000007",
+      "elapsed_ns": 0,
+      "iterations": 0,
+      "mode": "noop",
+      "process_wall_ns": 1900198,
+      "seed": 7
+    },
+    "baseline-copy": {
+      "checksum": "0000000000000007",
+      "elapsed_ns": 0,
+      "iterations": 0,
+      "mode": "noop",
+      "process_wall_ns": 1861688,
+      "seed": 7
+    },
+    "pgo-alpha": {
+      "checksum": "0000000000000007",
+      "elapsed_ns": 0,
+      "iterations": 0,
+      "mode": "noop",
+      "process_wall_ns": 1877878,
+      "seed": 7
+    },
+    "pgo-beta": {
+      "checksum": "0000000000000007",
+      "elapsed_ns": 0,
+      "iterations": 0,
+      "mode": "noop",
+      "process_wall_ns": 1872368,
+      "seed": 7
+    }
+  }
+}

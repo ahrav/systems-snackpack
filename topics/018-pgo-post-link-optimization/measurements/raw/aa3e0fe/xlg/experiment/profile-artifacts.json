@@ -1,0 +1,48 @@
+{
+  "alpha": {
+    "instrumented_binary_sha256": "eaad85cbee47a57e2cc8eae9742a2a89333a2cd7b697e732f8e2e0112a76182d",
+    "instrumented_binary_size_bytes": 9139504,
+    "merged_profile": {
+      "file": "profiles/alpha/alpha.profdata",
+      "sha256": "5c800842b5fbdb30962871a6bd0cde3897fbcc587810932e819e39b243a374ab",
+      "size_bytes": 3440
+    },
+    "raw_profiles": [
+      {
+        "file": "profiles/alpha/alpha-547473324885185294_0-3280461.profraw",
+        "sha256": "998ca93740a9bed3f3b462c08553dd096479416bebf3887ee1fe62cfad7ff807",
+        "size_bytes": 2024
+      }
+    ],
+    "training_output": {
+      "checksum": "1256521b057dcf6d",
+      "elapsed_ns": 21722083,
+      "iterations": 5000000,
+      "mode": "alpha",
+      "seed": 1
+    }
+  },
+  "beta": {
+    "instrumented_binary_sha256": "927fd77ad4e230111fcdfca9dc632640cfc2afcc0f0f0dd73954782eb96b2a80",
+    "instrumented_binary_size_bytes": 9139504,
+    "merged_profile": {
+      "file": "profiles/beta/beta.profdata",
+      "sha256": "96eb668e999380d0c5f3905d4f5804dd9c39c9f1face767c78b7dc4fe8534987",
+      "size_bytes": 3440
+    },
+    "raw_profiles": [
+      {
+        "file": "profiles/beta/beta-547473324885185294_0-3280584.profraw",
+        "sha256": "37d8c0dc60d0b10d13ee2a922883d56d791c98d132c1330fb5799a4459dd8a0e",
+        "size_bytes": 2024
+      }
+    ],
+    "training_output": {
+      "checksum": "08addc340a202051",
+      "elapsed_ns": 21826872,
+      "iterations": 5000000,
+      "mode": "beta",
+      "seed": 1
+    }
+  }
+}

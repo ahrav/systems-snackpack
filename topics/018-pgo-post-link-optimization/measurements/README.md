@@ -1,0 +1,410 @@
+# Measurement contract
+
+The retained runs are:
+
+- [Linux AArch64, 2026-07-28](2026-07-28-linux-aarch64.md);
+- [Linux x86-64, 2026-07-28](2026-07-28-linux-x86-64.md);
+- [cross-host interpretation](2026-07-28-linux-cross-host.md).
+
+Each record applies only to its named source commit, archive digest, binaries,
+host, toolchain, target features, build flags, inputs, CPU affinity, run window,
+and retained raw process rows.
+
+Both retained host runs declare source commit `aa3e0fe`. They ran in archive mode, so
+that commit is a sender declaration rather than something either host verified — see the
+archive-mode note below — and the wrapper at that commit predates the current
+caller-isolation hardening. Every measured row in the two host records therefore carries
+the [pre-hardening caveat](2026-07-28-linux-cross-host.md) recorded with the launch
+command. The cross-host file is their joint interpretation and reports no rows of its own.
+
+## Experimental unit
+
+Each comparison contains six `ABBA` and six `BAAB` blocks scheduled by a fixed,
+recorded shuffle seed. Every block launches four fresh processes and contains
+two observations per binary. The driver also shuffles comparison order within
+each block. The ratio direction is `right/left`, as recorded in
+`experiment.json` and `summary.csv`.
+
+For a steady-state comparison, `elapsed_ns` spans only the loop inside
+`pgo_probe`; it excludes process launch and argument parsing. The parent
+`process_wall_ns` spans `subprocess.run`, including child creation, program
+startup, the workload, output, and exit. A `noop` comparison reports only the
+parent-observed process interval because its internal elapsed value is zero.
+
+Each block contrast subtracts the mean log duration of its two left-arm
+processes from the mean log duration of its two right-arm processes. The point
+estimate is the geometric mean of the 12 block ratios. The two-sided 95%
+Student-t interval uses the sample standard deviation among those 12 log
+contrasts. It covers process-block variation within one host and run window. It
+does not cover independent builds, later load, other hosts, an ISA, or a vendor
+family. The 20,000,000 loop iterations and four positions inside a block are not
+independent samples. The interval treats block contrasts as independent; the
+retained lag-one log-ratio correlation is a serial-dependence diagnostic, not
+proof of independence.
+
+One discarded warm-up runs each binary for each comparison. The driver trains
+each profile in one separate process with training seed `1`, then measures with
+seed `2`. Training iterations produce the profile and do not count as timing
+replicates.
+
+## Retained evidence
+
+The remote wrapper writes all evidence outside the source tree:
+
+- `host.txt` records `uname`, CPU identity, CPU count, affinity, kernel,
+  workspace and experiment toolchains, native Rust target configurations, and
+  available post-link tools;
+- `gates/` retains every repository and script validation log. A run executes the
+  gates from an empty environment with the repository toolchain's own binaries
+  first, a scratch `CARGO_HOME`, a scratch target directory, and no Cargo
+  configuration above the snapshot. The retained logs below predate that
+  isolation: their wrapper removed only `RUSTUP_TOOLCHAIN`, so they record a gate
+  result obtained under whatever Cargo environment and configuration the operator
+  had, not one established against the pinned source and toolchain alone;
+- `source-files.before.sha256` and `source-files.after.sha256` prove that the
+  included non-`.git`, non-`target` file bytes did not change;
+- `source-files.commit.sha256` appears only for a checkout run, where it carries
+  the manifest rebuilt from `git archive <source_commit>`; the run aborts unless
+  it equals `source-files.origin.sha256`, which is what ties a checkout tree to
+  its commit rather than to a clean `git status`;
+- `source-files.archive.sha256` is the archive-mode counterpart, carrying the
+  manifest rebuilt from the extracted `SOURCE_ARCHIVE_PATH`; it ties the measured
+  tree to the archive whose digest is retained, which the two independent digest
+  comparisons alone do not establish. It is absent from the retained runs below,
+  which predate the check;
+- `source-provenance.txt` records the verified archive and extracted-manifest
+  identities and the immutable source snapshot used by every build and
+  non-Git gate, plus the selected experiment Rust toolchain;
+- `process.log` retains the complete driver output;
+- `experiment/raw.csv` retains every completed timed process, any failed
+  attempt, block order, checksum, and both clocks. A run gives each timed
+  process a fixed empty environment, recorded as `probe_environment` in
+  `experiment.json`, because `execve` copies the environment and the loader walks
+  it, so an inherited `PATH` sits inside `process_wall_ns`. The retained runs
+  below predate that and carry no `probe_environment` field: their
+  `process_wall_ns` and `noop` rows include the launching environment's startup
+  cost, so those values compare within their own run rather than across runs or
+  hosts. The in-process `elapsed_ns` rows are unaffected;
+- `experiment/summary.csv` and `experiment/experiment.json` retain point
+  estimates, dispersion, intervals, and experiment parameters;
+- `experiment/correctness.json` and `experiment/discarded-warmups.json` retain
+  correctness checks and excluded warm-ups;
+- `experiment/*-dispatch.txt`, `experiment/codegen-verification.json`, and
+  `experiment/symbol-layout.txt` retain observed final code generation, checked
+  call forms, and symbol addresses;
+- `experiment/profiles/`, `experiment/profile-artifacts.json`, and
+  `experiment/*-profile-summary.txt` retain the raw and merged profiles plus
+  their hashes;
+- `experiment/*-pgo-build.log`, `experiment/tool-versions.json`, and
+  `experiment/build-commands.txt` retain compiler diagnostics, matching tool
+  versions, linker-driver and linker versions, and invocations. A run records
+  each command with the environment assignments that decide its result,
+  including `RUSTUP_TOOLCHAIN` and `LLVM_PROFILE_FILE`, so the entry is a
+  complete account of what executed. It is a log, not a runnable script: the
+  commands name absolute paths inside the snapshot and work directories, and the
+  wrapper deletes that scratch tree on exit, so replaying one requires
+  reconstructing those paths. The retained transcripts below additionally
+  predate the assignment recording, so they omit the profile destination and the
+  toolchain selection as well;
+- `experiment/tool-versions.json` distinguishes the linker driver (`cc`), the
+  `ld` found on `PATH` (`ld_on_path`), and the toolchain's bundled `rust-lld`
+  (`rust_lld`, `rust_lld_path`), because rustc may hand the link to the bundled
+  linker rather than the one on `PATH`. The retained runs below record only
+  `ld`, which named the `PATH` tool; their x86-64 build logs show `rust-lld`
+  performed the link;
+- `experiment/binary-sha256.before.json` and
+  `experiment/binary-sha256.json` bind inspection and measurement to unchanged
+  binaries and prove that the identity-control copy has the baseline hash. The
+  builds pass `--remap-path-prefix` for the snapshot and work directories, so
+  these digests depend on the source, toolchain, and flags rather than on the
+  scratch paths a run happens to receive. The retained runs below predate that
+  flag, so their digests still carry their own scratch paths and compare only
+  within their run;
+- `experiment/post-link-tools.json` records BOLT and `perf` tool availability;
+- `evidence.sha256` covers the retained evidence files of the run that wrote it,
+  which is the files under that run's own directory. `raw/aa3e0fe/host-resolution.txt`
+  sits beside those directories and is therefore in neither manifest, so the host
+  records cite a receipt that neither advertised verification covers; read it as an
+  operator note rather than as authenticated evidence.
+
+For an extracted Git archive, `SOURCE_COMMIT`, `SOURCE_ARCHIVE_PATH`,
+`SOURCE_ARCHIVE_SHA256`, and `SOURCE_MANIFEST_SHA256` are required. The wrapper
+hashes the transferred archive and the extracted per-file manifest before any
+build. The archive has no Git index or parent tree, so its remote
+`git-diff-check.log` records `not-applicable`.
+
+Run this from an environment the sender controls, not an inherited one. The receiver
+can verify the archive and manifest against the digests it is given, but it can never
+recompute `git archive <source_commit>` — it has no object store — so a caller-supplied
+`git`, `tar`, or `sha256sum` here produces a self-consistent handoff for bytes that are
+not the committed ones, and nothing downstream can detect it. Name the programs by
+absolute path or start from a `PATH` chosen for this purpose, for the same reason the
+wrapper is launched that way. Order matters: the system directories come first so that
+`git`, `tar`, `sha256sum`, `sort`, `xargs`, and `sh` resolve from them, and the
+user-writable Cargo directory comes last because `rg` normally lives there and nothing
+else in this recipe should. Adjust the directories to this host. `set -euo pipefail`
+so that a failing proof stops the recipe: without it an interactive shell carries on
+past a mismatched `diff` and prints digests a receiver would accept, and the receiver
+cannot recheck the commit binding those digests are standing in for:
+
+```bash
+set -euo pipefail
+# Establish privileged mode before anything else, because every refusal below depends on
+# it. `bash -p` does not process `BASH_ENV` or `ENV` and does not import the caller's shell
+# functions, and an imported `git` or `command` function answers ahead of the program and
+# can forge `archive`, `rev-parse`, and `ls-tree` output. Run this recipe as
+# `bash -p handoff.sh`, not by pasting it into an interactive shell.
+#
+# The refusal is an assignment and an expansion rather than a command, and both halves are
+# load-bearing. In an unprivileged shell every command name can be shadowed by an imported
+# function — including `builtin` itself, so `builtin printf` and `builtin exit` are both
+# dispatched through a caller's `builtin` function and a refusal written that way prints and
+# then continues. Neither an assignment nor a `${var:?}` expansion is a command lookup, so
+# no function can intercept either. The assignment is what makes the expansion unconditional:
+# `:?` fires only on an unset or null value, and the caller owns the environment, so
+# `__handoff_refuse=1 bash handoff.sh` would otherwise satisfy it. Assigning null first
+# discards whatever was inherited. If a `BASH_ENV` hook pre-marks the name readonly the
+# assignment itself fails, which `set -e` makes fatal — the same refusal by another route.
+# `if` and `[[` are keywords rather than builtins, so the test cannot be shadowed either.
+# The `printf` is best-effort diagnostics; the stop does not depend on it.
+#
+# This holds while `set -euo pipefail` above is in force. A caller who shadows `set` removes
+# the recipe's error handling wholesale, which no in-band check can restore.
+if [[ ! -o privileged ]]; then
+  printf 'run this recipe with bash -p\n' >&2
+  __handoff_refuse=
+  : "${__handoff_refuse:?run this recipe with bash -p}"
+fi
+# Refuse an inherited loader or libc namespace before running anything. `LD_PRELOAD`
+# and `LD_AUDIT` interpose on every process below, including the `git` that produces
+# the archive and the `git`, `tar`, `rg`, and `sha256sum` that prove it matches the
+# commit — so a preload can forge an archive and a manifest that agree with each
+# other. The receiver refuses these variables for its own run, but archive mode can
+# only take the commit-to-bytes binding on the sender's word, so this is the one place
+# it can be established. `GLIBC_TUNABLES` and the `MALLOC_*` knobs are swept for the
+# same reason the wrapper sweeps them. Refuse rather than clear: a value here means
+# something already chose it, and that choice is not recorded anywhere.
+#
+# `${!LD_@}` is a shell expansion, so this check starts no process. Reaching for
+# `env | sed` here would run two programs under the very loader state being refused,
+# which is the situation the check exists to prevent.
+#
+# `builtin printf` and `builtin exit`, not the bare names: an exported function named
+# `exit` or `printf` answers ahead of the builtin, and an `exit` that returns instead of
+# exiting turns every refusal below into a warning the recipe continues past. What makes
+# them trustworthy here is the privileged-mode gate above, which has already refused a
+# shell that could have imported such a function; the prefixes stay so that reordering
+# these blocks cannot silently weaken them.
+for loader_variable in ${!LD_@} ${!GLIBC_@} ${!MALLOC_@}; do
+  builtin printf 'loader environment must be unset for the handoff proof: %s\n' \
+    "$loader_variable" >&2
+  builtin exit 2
+done
+# `/etc/ld.so.preload` is the file form of `LD_PRELOAD` and the sweep above cannot see it,
+# because there is no variable to find. The loader interposes what it names into every
+# external command below — the `git` that produces the archive and the `git`, `tar`, `rg`,
+# and `sha256sum` that prove it matches the commit — so a preload can forge an archive and
+# a manifest that agree with each other, exactly as an `LD_PRELOAD` can. The receiver
+# refuses this file for its own run, but archive mode can only take the commit-to-bytes
+# binding on the sender's word, so it has to be refused here too. Read it with shell
+# redirection, before the first external command, for the same reason the sweep above uses
+# an expansion. The loader honours no comments in this file, so any non-blank line counts.
+if [[ -e /etc/ld.so.preload ]]; then
+  while IFS= read -r preload_line || [[ -n "$preload_line" ]]; do
+    if [[ -n "${preload_line//[[:space:]]/}" ]]; then
+      builtin printf 'system-wide loader preload must be empty: /etc/ld.so.preload: %s\n' \
+        "$preload_line" >&2
+      builtin exit 2
+    fi
+  done </etc/ld.so.preload
+fi
+# `bash -p` declines to import the caller's functions into *this* shell, but the
+# `BASH_FUNC_name%%` entries carrying them stay in the environment and are inherited by
+# every child. The per-file hash below runs `sh -c`, and where `sh` is Bash that shell
+# imports them — so a caller function named `git` would answer `git hash-object` and
+# forge the archive-versus-commit proof. `compgen -e` cannot report these names because
+# they are not valid identifiers, so read the raw environment, which is the only place
+# they are visible. Same check the receiver performs on itself.
+while IFS= read -r -d '' environment_entry; do
+  case "$environment_entry" in
+    BASH_FUNC_*)
+      builtin printf 'exported shell function must not be set: %s\n' \
+        "${environment_entry%%=*}" >&2
+      builtin exit 2
+      ;;
+  esac
+done <"/proc/$$/environ"
+export PATH="/usr/bin:/bin:$HOME/.cargo/bin"
+# Both retained artifacts live inside a private `mktemp -d` tree, not in `/tmp`
+# directly. On a world-writable `/tmp` another local process can replace the archive or
+# the manifest after the proof below has checked the extraction and before the final
+# `sha256sum` prints the digests — the receiver would then hold a self-consistent pair
+# that was never compared with the commit, and archive mode gives it no way to notice.
+#
+# Mode 0700 on the tree is not enough on its own, and `mktemp -d` honours an inherited
+# `TMPDIR`, so pin the parent and hold it to the same requirement the receiver applies to
+# its own snapshot and output directories: every ancestor writable only by its owner. A
+# world-writable parent lets another user rename the 0700 child out of the way whatever
+# its mode says. This leaves the same-uid residue the receiver documents; run the handoff
+# on a host where nothing else is acting as this user.
+TMPDIR="$HOME/topic18-handoff"
+mkdir -p -m 700 "$TMPDIR"
+# Validate, then use the canonical path. Validating the resolved chain while `mktemp` walks
+# the lexical one leaves the two disagreeing: if `$TMPDIR` is reached through a symlink under
+# a writable directory, the target chain can pass this check and the symlink can be repointed
+# before `mktemp -d` follows it. Assigning the resolved path back means `mktemp` traverses the
+# directories that were actually checked.
+TMPDIR="$(python3 -I -c 'import os, stat, sys
+resolved = os.path.realpath(sys.argv[1])
+path = resolved
+while True:
+    entry = os.stat(path)
+    if entry.st_mode & (stat.S_IWGRP | stat.S_IWOTH) or entry.st_uid not in (os.getuid(), 0):
+        raise SystemExit(f"handoff scratch parent is writable by another user: {path}")
+    parent = os.path.dirname(path)
+    if parent == path:
+        break
+    path = parent
+print(resolved)' "$TMPDIR")"
+export TMPDIR
+scratch="$(mktemp -d)"
+archive="$scratch/topic18-source.tar"
+manifest="$scratch/topic18-source-files.sha256"
+extracted="$scratch/extracted"
+mkdir -p "$extracted"
+unset TAR_OPTIONS
+source_commit=<source_commit>
+# Clear Git's local repository environment before any command below. `GIT_DIR`,
+# `GIT_WORK_TREE`, `GIT_OBJECT_DIRECTORY`, `GIT_INDEX_FILE`, and the rest of
+# `git rev-parse --local-env-vars` redirect both the archive and the `ls-tree`
+# proof to another object store, so the two would agree with each other while
+# describing a commit that is not the checkout being handed off. The receiver
+# refuses these variables, but it can never recheck the commit-to-bytes binding
+# established here, so this is the only place it can be got right.
+unset $(git rev-parse --local-env-vars)
+# Then set the one member this proof relies on, once, so every git command below inherits
+# it. `GIT_NO_REPLACE_OBJECTS` is itself in `--local-env-vars` and is therefore cleared by
+# the line above, so exporting it here is what re-establishes it: after this assignment
+# every object-reading command below — the attribute scan, `git archive`, and the `ls-tree`
+# object proof — resolves the same raw commit. `git replace` refs and grafts are honoured by
+# object reads, so without it the scan can resolve a replacement tree and see no selected
+# filter while `git archive` reads the original tree and runs one.
+export GIT_NO_REPLACE_OBJECTS=1
+# Refuse a selected filter driver before archiving. `git archive` runs a `filter.<driver>`
+# smudge command while it emits the tree — from the tree's own `.gitattributes` and from
+# `$GIT_DIR/info/attributes` alike — so unrecorded code would execute inside the proof that
+# establishes this handoff's trust root, before anything has been compared with the commit. A
+# filter that emits identical bytes still runs, and can alter the tools or artifacts the rest
+# of this recipe uses. The receiver refuses selected filters for the same reason; in archive
+# mode it cannot recheck this, so it has to be refused here.
+#
+# Two attribute views: `archive` resolves from the tree it archives, while
+# `$GIT_DIR/info/attributes` and `core.attributesFile` are worktree state layered on top.
+# `check-attr` reports the effective value and runs no filter itself, and neither do
+# `ls-files` and `ls-tree`. An explicit `-filter` is an unset, not a selection.
+#
+# `core.fsmonitor` is a different hazard from a filter and needs its own flag. It names an
+# executable that every index-reading command runs, and it lives in `.git/config`, which no
+# archive or manifest covers — so it is unrecorded code executing inside the proof that
+# establishes this handoff's trust root, and it can alter the sender's tools or artifacts
+# before the commit-to-archive comparison completes. `ls-files` and `check-attr` both read
+# the index and both run it, `check-attr` with or without `--source`, so both carry
+# `-c core.fsmonitor=false`; `ls-tree` reads objects and cannot reach it. `-c` overrides the
+# config file for that invocation only and leaves the sender's repository untouched. The
+# receiver disables it the same way, but archive mode gives it no way to recheck this, so it
+# has to be got right here.
+filter_selection=""
+for attribute_view in worktree "$source_commit"; do
+  if [ "$attribute_view" = worktree ]; then
+    paths_command="git -c core.fsmonitor=false ls-files -z"
+    attr_command="git -c core.fsmonitor=false check-attr -z --stdin filter"
+  else
+    paths_command="git ls-tree -r --name-only -z $attribute_view"
+    attr_command="git -c core.fsmonitor=false check-attr -z --stdin --source=$attribute_view filter"
+  fi
+  while IFS= read -r -d '' attribute_path \
+    && IFS= read -r -d '' _attribute_name \
+    && IFS= read -r -d '' attribute_value; do
+    case "$attribute_value" in
+      unspecified | unset) ;;
+      *) filter_selection="$filter_selection$attribute_view: $attribute_path -> $attribute_value
+" ;;
+    esac
+  done < <(
+    # In band, because the reader cannot see this substitution's exit status: a failing
+    # `ls-files`, `ls-tree`, or `check-attr` would otherwise leave the scan empty and the
+    # archive would be taken having checked nothing.
+    if ! $paths_command | $attr_command; then
+      builtin printf '/attribute-scan-failed\0filter\0scan-error\0'
+    fi
+  )
+done
+if [ -n "$filter_selection" ]; then
+  builtin printf 'attributes select a filter driver, so archiving would run it:\n%s' \
+    "$filter_selection" >&2
+  builtin exit 2
+fi
+git -c tar.umask=0 archive \
+  --format=tar --output="$archive" "$source_commit"
+# `--same-permissions` because ordinary-user extraction applies the umask, which
+# would strip the executable bits that `git archive -c tar.umask=0` just
+# preserved. The proof below derives `100755` from `-x`, so a sender umask such as
+# `0111` would otherwise make a correct archive fail this comparison.
+tar --same-permissions -xf "$archive" -C "$extracted"
+# The archive must be the whole commit, byte for byte, with its modes.
+# `export-ignore` omits paths and `export-subst` rewrites contents, from a
+# tracked `.gitattributes` or from the sender-local `$GIT_DIR/info/attributes`,
+# and repacking an extracted tree can store an executable as `0644` — while the
+# manifest is computed from the filtered, substituted, or repacked tarball. The
+# receiver can only compare the measured tree against the archive, never back to
+# <source_commit>, so this is the only place those three are checkable. Compare
+# mode, blob identity, and path against the object database, which no archive
+# attribute touches, with replace refs disabled on both sides. The mode column
+# assumes the tree holds no symlinks; `git ls-tree -r` reporting any `120000`
+# entry means this comparison needs extending before it can be trusted.
+# `--no-filters` because a `filter.<driver>.clean` command selected by tracked
+# `.gitattributes` or by the sender-local `$GIT_DIR/info/attributes` otherwise runs
+# during this hash, and the comparison would then be between the filtered result and
+# the commit blob rather than between the archived bytes and the commit blob.
+LC_ALL=C diff \
+  <(git ls-tree -r \
+      --format='%(objectmode) %(objectname) %(path)' "$source_commit" \
+      | LC_ALL=C sort) \
+  <(cd "$extracted" && rg --no-config --files -uu -g '!.git/' -g '!.git' \
+      -g '!target/' -0 \
+      | xargs -0 -n1 sh -c \
+          'if [ -x "$0" ]; then mode=100755; else mode=100644; fi
+           printf "%s %s %s\n" "$mode" \
+             "$(git hash-object --no-filters -- "$0")" "$0"' \
+      | LC_ALL=C sort)
+(cd "$extracted" && rg --no-config --files -uu -g '!.git/' -g '!.git' -g '!target/' -0 \
+  | LC_ALL=C sort -z | xargs -0 sha256sum --) > "$manifest"
+sha256sum "$archive" "$manifest"
+```
+
+The retained archive and manifest digests bind the transferred archive and
+extracted bytes to the source-candidate receipts. A run also rebuilds the
+manifest from the extracted archive, so the measured tree is tied to the archive
+rather than only to its own declared digest; the retained runs below predate that
+check and retain no `source-files.archive.sha256`, so for them the archive digest
+and the tree manifest remain two independent comparisons. They do not bind those
+bytes to the commit id: an extracted archive carries no object store, so the
+receiving host cannot recompute `git archive <source_commit>`. In archive mode
+`source_commit` is therefore a sender declaration, and
+`source_commit_verification=verified-archive-and-manifest` names the archive and
+manifest digests it does verify. A checkout run establishes the commit directly
+and additionally rejects any tree that does not reproduce from it.
+
+## Measured and inferred claims
+
+Elapsed clocks, process orders, checksums, compiler output, binary hashes,
+profile summaries, symbol addresses, instruction text, host identity, CPU model,
+and tool availability are measured or directly observed. The experiment does
+not measure branch-misprediction cost, instruction-cache pressure, optimizer
+pass attribution, BOLT benefit, or a production workload distribution.
+
+A guarded direct call in `pgo-alpha` establishes profile-conditioned code
+generation for that compiler and binary. It does not prove that the guard caused
+a timing ratio. A host-specific timing result does not generalize to its
+architecture or CPU vendor. Explain any mechanism as an inference and name the
+additional counter, trace, or perturbation required to test it.
