@@ -30,8 +30,8 @@ every retained file present before the manifest itself was installed.
 
 These archives are the original `cf1b205` outputs and are **not** regenerated:
 the hashes above pin them, and re-running requires both original hosts. Later
-commits fixed the generators, so six recorded fields are stale. They fall into
-three groups: defects 1 and 5 are reporting or naming errors that can be
+commits fixed the generators, so seven recorded fields are stale. They fall into
+three groups: defects 1, 5, and 7 are reporting or naming errors that can be
 reinterpreted from the retained data, defects 2, 3, and 4 limit what the archives
 can prove about provenance, and defect 6 limits only hash-level reproduction.
 
@@ -85,12 +85,22 @@ can prove about provenance, and defect 6 limits only hash-level reproduction.
    these retained hashes cannot be reproduced from the recorded source and
    command line. The symbol addresses, sizes, spacing, and disassembly in the
    archives remain valid descriptions of the binaries that were measured.
+7. **`interval_scope` describes the wrong kind of interval.**
+   `experiment/summary.json` records the scope as "complete-block variation in
+   this host, binary, workload, and single run window". The value is computed as
+   `mean_log ± t · sd_log / √12` and exponentiated, which is a confidence
+   interval for the geometric-mean ratio from between-block dispersion, not an
+   interval covering what an individual block does -- a prediction interval would
+   be roughly 3.5× wider here. The field now says so, and the narrative documents
+   were corrected alongside it. The recorded bounds themselves are correct for the
+   statistic that was computed; only the description of that statistic was wrong.
 
-Defects 1 and 5 are reporting and naming errors, and both can be recomputed or
-reinterpreted from data the archives already contain: defect 1 from the retained
-per-symbol sizes, defect 5 by reading `time_enabled_ns` as running time. The
+Defects 1, 5, and 7 are reporting and naming errors, and each can be recomputed
+or reinterpreted from data the archives already contain: defect 1 from the
+retained per-symbol sizes, defect 5 by reading `time_enabled_ns` as running time,
+defect 7 by reading the interval as a confidence interval for the mean ratio. The
 timing records, PMU counts, `percent_running` values, ELF metadata, and
-disassembly are unaffected by those two. Defect 6 limits only hash-level
+disassembly are unaffected by those three. Defect 6 limits only hash-level
 reproduction of the two binaries, not what was measured from them.
 
 Defects 2, 3, and 4 are different in kind, and limit what the measurements

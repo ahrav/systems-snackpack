@@ -1,6 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Bash imports functions, aliases through BASH_ENV, traps, and shell options from
+# the invoking environment before line 1 runs, and a DEBUG trap can re-arm any of
+# them at a chosen moment -- including defining functions named builtin, declare,
+# or compgen, which a backslash does not suppress because it only defeats alias
+# expansion. In-shell self-verification therefore has a fixed point. Re-exec once
+# through env -i with an explicit variable list, so the shell that does the real
+# work starts with no imported functions, no BASH_ENV, no traps, and default
+# options. The guards below still run in that shell as defence in depth.
+if [[ -z "${TOPIC19_SANITIZED_SHELL:-}" ]]; then
+    exec /usr/bin/env -i \
+        TOPIC19_SANITIZED_SHELL=1 \
+        PATH="$PATH" \
+        HOME="$HOME" \
+        TERM="${TERM:-dumb}" \
+        TMPDIR="${TMPDIR:-/tmp}" \
+        SOURCE_COMMIT="${SOURCE_COMMIT:-}" \
+        SOURCE_ARCHIVE_SHA256="${SOURCE_ARCHIVE_SHA256:-}" \
+        RUNTIME_HOST_ALIAS="${RUNTIME_HOST_ALIAS:-}" \
+        /bin/bash "$0" "$@"
+fi
+
 # Restore a default field separator and enable pathname expansion before any
 # unquoted expansion or glob below. `set -euo pipefail` clears neither, and both
 # are inheritable through a startup file: an inherited IFS splits variable names
@@ -89,6 +110,9 @@ fi
 IFS=$' \t\n'
 set +f
 \builtin shopt -u expand_aliases
+# failglob aborts an expansion that matches nothing, which would kill the member
+# globs below on any normal checkout, and the others change what a pattern means.
+\builtin shopt -u failglob nullglob dotglob nocaseglob globstar
 \builtin unalias -a || true
 \hash -r
 # `enable -n` removes a builtin, and Bash then falls back to a PATH executable of
@@ -266,7 +290,12 @@ for tool in \
     lscpu mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed \
     sha256sum size sort stat taskset uname xargs; do
     tool_path="$(command -v "$tool")"
-    resolved_tools+=("$(printf '%s %s' "$tool" "$(sha256sum -- "$tool_path")")")
+    # The digest comes from the hasher, but the recorded path comes from the
+    # shell, so a shim cannot supply both halves of its own provenance line.
+    tool_sum="$(sha256sum -- "$tool_path")"
+    resolved_tools+=(
+        "$(printf '%s %s %s' "$tool" "${tool_sum%% *}" "$tool_path")"
+    )
 done
 # The GCC driver executes its own subprograms, and -print-prog-name reports bare
 # names for the ones it resolves through PATH, so a shim named as or ld reaches
@@ -596,6 +625,33 @@ if ((toolchain_pin == 1 && rustup_available == 0)); then
     printf 'the checkout pins a toolchain but rustup is unavailable, so a\n' >&2
     printf 'directory override cannot be ruled out for the Cargo gates\n' >&2
     exit 2
+fi
+# Requiring rustup does not establish that the gates use it: PATH could put a
+# standalone cargo ahead of the proxies, and that binary ignores the pin
+# entirely. Verify the outcome instead of the mechanism -- the versions the gates
+# will actually report must name the pinned channel.
+if ((toolchain_pin == 1)); then
+    pinned_channel="$(
+        rg --no-config -m 1 '^[[:space:]]*channel[[:space:]]*=' \
+            "$repo_root/rust-toolchain.toml" 2>/dev/null \
+            | rg --no-config -o '"[^"]+"' | tr -d '"' || true
+    )"
+    if [[ -z "$pinned_channel" ]]; then
+        printf 'could not read the pinned toolchain channel\n' >&2
+        exit 2
+    fi
+    for pinned_tool in cargo rustc; do
+        pinned_version="$(cd "$repo_root" && "$pinned_tool" --version)"
+        if [[ "$pinned_version" != *"$pinned_channel"* ]]; then
+            printf 'the %s the gates would use does not match the pinned %s\n' \
+                "$pinned_tool" "$pinned_channel" >&2
+            printf 'reported: %s\n' "$pinned_version" >&2
+            exit 2
+        fi
+        resolved_tools+=(
+            "$(printf 'pinned-%s-version %s' "$pinned_tool" "$pinned_version")"
+        )
+    done
 fi
 if ((rustup_available == 1)); then
     # Rows are '<path><padding><tab><toolchain>', and the padding width depends on
