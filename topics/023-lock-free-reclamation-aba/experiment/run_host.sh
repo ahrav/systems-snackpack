@@ -105,7 +105,7 @@ rg -n -A 80 '<bench_(raw|tagged)_kernel>' "$output_directory/codegen/final-binar
 
 python3 "$topic/experiment/run_processes.py" \
   "$binary" "$output_directory/processes" "$cpu" --iterations 5000000 \
-  >"$output_directory/processes/driver.log"
+  >"$output_directory/process-driver.log"
 python3 "$topic/experiment/validate_receipts.py" "$output_directory" \
   >"$output_directory/receipt-validation.txt"
 
