@@ -277,7 +277,9 @@ trap finalize EXIT
     printf 'selected_cpu_siblings=%s\n' \
         "$(rg -m 1 '.' "/sys/devices/system/cpu/cpu${cpu}/topology/thread_siblings_list" 2>/dev/null || true)"
     printf '\nlscpu\n'
-    lscpu
+    # Another informational record: lscpu exits nonzero where /sys is restricted,
+    # which must not take the toolchain records below with it.
+    lscpu || true
     printf '\ncpu_model_and_features\n'
     # The pattern list is x86-centric plus a few AArch64 keys, and rg exits 1 on
     # no match, which would abort the run and drop the toolchain records below.
