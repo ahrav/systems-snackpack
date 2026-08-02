@@ -65,6 +65,15 @@ unset __INTEGRITY_SENTINEL
 # are already in effect and cannot be undone by unsetting the variable later.
 builtin shopt -u expand_aliases 2>/dev/null || true
 builtin unalias -a 2>/dev/null || true
+# A startup file can `unset BASH_ENV` before this check and still have left a
+# trap behind, so the variable being empty proves nothing on its own. An inline
+# DEBUG trap needs no function, which makes it invisible to the check above, and
+# it can re-export a swept variable after the sweep has run. Reset inherited
+# traps here; the script installs its own EXIT trap later.
+for __inherited_trap in DEBUG RETURN ERR EXIT HUP INT QUIT TERM; do
+    trap - "$__inherited_trap" 2>/dev/null || true
+done
+unset __inherited_trap
 if [[ -n "${BASH_ENV:-}" ]]; then
     printf 'refusing to run with BASH_ENV set: %s\n' "$BASH_ENV" >&2
     printf 'it already ran arbitrary shell code before this script started\n' >&2
@@ -176,8 +185,13 @@ if command -v rustup >/dev/null 2>&1 \
     # they dispatch to. rustup resolves the store from RUSTUP_HOME, which is swept,
     # and otherwise from HOME, which cannot be. Record the binaries that actually
     # run so a redirected store is visible in the evidence.
-    for proxied in cargo rustc; do
-        proxied_path="$(rustup which "$proxied" 2>/dev/null || true)"
+    # rustup resolves a toolchain from the working directory, so this must run
+    # where the gates run rather than where the caller happened to stand, and it
+    # must cover every binary rustup dispatches for them.
+    for proxied in cargo rustc rustfmt clippy-driver rustdoc; do
+        proxied_path="$(
+            cd "$repo_root" && rustup which "$proxied" 2>/dev/null || true
+        )"
         if [[ -n "$proxied_path" && -f "$proxied_path" ]]; then
             resolved_tools+=(
                 "$(printf 'rustup-which-%s %s' \
@@ -211,10 +225,30 @@ if [[ -e "$output_dir" ]]; then
         exit 2
     fi
 fi
+# Reject a path inside the repository before creating it. mkdir -p would
+# otherwise leave a new directory that the root workspace's topics/* glob treats
+# as a member without a manifest, breaking every later Cargo invocation. The
+# lexical test runs first; the resolved test below still catches symlinks.
+case "$output_dir" in
+    /*) candidate_output="$output_dir" ;;
+    *) candidate_output="$PWD/$output_dir" ;;
+esac
+if [[ "$candidate_output" == "$repo_root" || "$candidate_output" == "$repo_root"/* ]]; then
+    printf 'OUTPUT_DIRECTORY must be outside the repository: %s\n' \
+        "$candidate_output" >&2
+    exit 2
+fi
+output_dir_existed=1
+if [[ ! -d "$output_dir" ]]; then
+    output_dir_existed=0
+fi
 mkdir -p -- "$output_dir"
 output_dir="$(cd -- "$output_dir" && pwd -P)"
 if [[ "$output_dir" == "$repo_root" || "$output_dir" == "$repo_root"/* ]]; then
     printf 'OUTPUT_DIRECTORY must be outside the repository\n' >&2
+    if ((output_dir_existed == 0)); then
+        rmdir -- "$output_dir" 2>/dev/null || true
+    fi
     exit 2
 fi
 
@@ -352,7 +386,10 @@ while :; do
         unrecorded_configs+=("$candidate")
     done
     [[ "$probe_dir" == / ]] && break
-    probe_dir="$(dirname -- "$probe_dir")"
+    # Shell-only parent expansion, so these walks do not depend on an external
+    # dirname that a PATH shim could truncate to / and stop the loop early.
+    probe_dir="${probe_dir%/*}"
+    [[ -z "$probe_dir" ]] && probe_dir=/
 done
 if ((${#unrecorded_configs[@]} > 0)); then
     printf 'unrecorded tool configuration would apply to the gates:\n' >&2
@@ -383,7 +420,8 @@ if rustup override list >/dev/null 2>&1; then
             fi
         done <<<"$override_dirs"
         [[ "$probe_dir" == / ]] && break
-        probe_dir="$(dirname -- "$probe_dir")"
+        probe_dir="${probe_dir%/*}"
+        [[ -z "$probe_dir" ]] && probe_dir=/
     done
 fi
 
