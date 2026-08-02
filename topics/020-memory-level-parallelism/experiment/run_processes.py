@@ -70,7 +70,11 @@ def parse_payload(
             fail(f"unexpected probe field: {key}")
         if key in parsed:
             fail(f"duplicate probe field: {key}")
-        parsed[key] = int(value) if key in INTEGER_FIELDS else float(value)
+        convert = int if key in INTEGER_FIELDS else float
+        try:
+            parsed[key] = convert(value)
+        except ValueError:
+            fail(f"invalid numeric value for {key}: {value}")
     if set(parsed) != PAYLOAD_FIELDS:
         fail(f"probe fields differ: {sorted(set(parsed) ^ PAYLOAD_FIELDS)}")
     if parsed["lanes"] != expected_lanes:
