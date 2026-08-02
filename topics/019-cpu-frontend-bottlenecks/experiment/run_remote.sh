@@ -91,6 +91,21 @@ set +f
 \builtin shopt -u expand_aliases
 \builtin unalias -a || true
 \hash -r
+# `enable -n` removes a builtin, and Bash then falls back to a PATH executable of
+# the same name -- verified that a disabled `pwd` resolves through a PATH shim, so
+# repo_root itself could point at a different tree, and a disabled `printf` could
+# forge the recorded tool provenance. Every builtin this script depends on for
+# integrity work must still be a builtin, and this runs before repo_root is
+# derived or anything is recorded.
+for __required_builtin in alias cd command compgen declare hash printf pwd read \
+    shopt trap type unalias unset; do
+    if [[ "$(\builtin type -t "$__required_builtin")" != builtin ]]; then
+        printf 'shell builtin %s is unavailable; refusing to run\n' \
+            "$__required_builtin" >&2
+        exit 2
+    fi
+done
+unset __required_builtin
 if [[ -o noglob ]]; then
     printf 'pathname expansion is disabled; refusing to run\n' >&2
     exit 2
@@ -472,10 +487,11 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
         <(git -C "$repo_root" ls-files -z \
             | LC_ALL=C sort -z \
             | while IFS= read -r -d '' blob_path; do
-                printf '%s  %s\n' \
-                    "$(git -C "$repo_root" cat-file blob "HEAD:$blob_path" \
-                        | sha256sum -- | cut -d' ' -f1)" \
-                    "$blob_path"
+                # Shell-only field extraction, so the comparison does not depend
+                # on an external cut that is not in the frozen inventory.
+                blob_sum="$(git -C "$repo_root" cat-file blob "HEAD:$blob_path" \
+                    | sha256sum --)"
+                printf '%s  %s\n' "${blob_sum%% *}" "$blob_path"
             done) \
         ; then
         printf 'tracked working-tree bytes differ from their committed blobs\n' >&2
