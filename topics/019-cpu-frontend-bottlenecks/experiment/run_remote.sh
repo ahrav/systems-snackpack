@@ -222,15 +222,23 @@ if [[ -n "${BASH_ENV:-}" ]]; then
     printf 'it already ran arbitrary shell code before this script started\n' >&2
     exit 2
 fi
+# The accumulator is initialized before the first unset, because a name cleared
+# ahead of the main sweep is invisible to the `compgen -e` pass that would
+# otherwise record it -- and swept_environment would then read `none` for a launch
+# that did carry a manifest-affecting override.
+swept_variables=()
 # ripgrep reads RIPGREP_CONFIG_PATH unless --no-config is passed, and a config as
 # small as --fixed-strings would make every pattern below literal, silently
 # emptying the sweep. Clear it before the first rg call; --no-config is also passed
-# at each call site.
+# at each call site. The main sweep below names it too, but cannot see it once it
+# is gone, so it is recorded here rather than dropped from the provenance.
+if [[ -n "${RIPGREP_CONFIG_PATH+set}" ]]; then
+    swept_variables+=(RIPGREP_CONFIG_PATH)
+fi
 unset RIPGREP_CONFIG_PATH
 # The dynamic loader acts on every external command, including the ripgrep process
 # the main sweep uses to find these very names, so LD_* has to go first and
 # without running anything. Parameter expansion needs no external process.
-swept_variables=()
 for variable in ${!LD_@}; do
     swept_variables+=("$variable")
     unset "$variable"
@@ -356,17 +364,27 @@ done
 # names for the ones it resolves through PATH, so a shim named as or ld reaches
 # the measured builds. as and ld are required and hashed above; record what the
 # driver itself says it will run, resolving relative answers through PATH.
-for subprogram in as ld collect2 cc1; do
-    subprogram_path="$(gcc -print-prog-name="$subprogram" 2>/dev/null || true)"
-    if [[ -n "$subprogram_path" && "$subprogram_path" != /* ]]; then
-        subprogram_path="$(command -v "$subprogram_path" 2>/dev/null || true)"
-    fi
-    if [[ -n "$subprogram_path" && -f "$subprogram_path" ]]; then
-        resolved_tools+=(
-            "$(printf 'gcc-prog-%s %s' \
-                "$subprogram" "$(sha256sum -- "$subprogram_path")")"
-        )
-    fi
+#
+# Both drivers are probed, because rustc links through `cc` and not `gcc` --
+# `rustc --print link-args` shows the link command invoking "cc" -- so on a host
+# where `cc` is a distinct driver or a wrapper rather than a link to gcc, the
+# Cargo gates dispatch as, ld, collect2, or cc1 that a gcc-only probe never
+# records. Both are already required and hashed above.
+for driver in gcc cc; do
+    for subprogram in as ld collect2 cc1; do
+        subprogram_path="$(
+            "$driver" -print-prog-name="$subprogram" 2>/dev/null || true
+        )"
+        if [[ -n "$subprogram_path" && "$subprogram_path" != /* ]]; then
+            subprogram_path="$(command -v "$subprogram_path" 2>/dev/null || true)"
+        fi
+        if [[ -n "$subprogram_path" && -f "$subprogram_path" ]]; then
+            resolved_tools+=(
+                "$(printf '%s-prog-%s %s' "$driver" \
+                    "$subprogram" "$(sha256sum -- "$subprogram_path")")"
+            )
+        fi
+    done
 done
 if command -v rustup >/dev/null 2>&1 \
     && [[ "$(type -t rustup 2>/dev/null || true)" == file ]]; then
@@ -488,6 +506,47 @@ fi
 
 if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$repo_root" ]]; then
     source_commit="$(git -C "$repo_root" rev-parse HEAD)"
+    # A filter driver is an arbitrary command that Git runs to convert worktree
+    # content, and `git status` below invokes it -- verified that
+    # `git status --porcelain` executes a repo-local `filter.<driver>.clean`. The
+    # config variables exported above take global and system configuration out of
+    # play, but a driver defined in .git/config stays in effect and
+    # .git/info/attributes can bind it to tracked paths without being recorded
+    # source. That command would run after the tool inventory is hashed, so it
+    # could replace a recorded binary while build-flags.txt still names the old
+    # digest. There is no environment override that disables filters, and an
+    # attributes binding to an undefined driver is inert, so the definitions are
+    # what gets refused -- before the first probe that would run one.
+    # The listing is captured with its own status rather than piped into a matcher,
+    # because under pipefail a git failure would be masked by the matcher's
+    # no-match 1 and this guard would fail open. `git config` exits 1 for no
+    # match, which is a legitimate empty result; anything else is fatal. The keys
+    # are then selected in-shell, so the parser is not an unrecorded external.
+    filter_scan_status=0
+    filter_config="$(
+        git -C "$repo_root" config --get-regexp '^filter\.'
+    )" || filter_scan_status=$?
+    if ((filter_scan_status != 0 && filter_scan_status != 1)); then
+        printf 'the filter-driver scan failed with status %s; refusing to run\n' \
+            "$filter_scan_status" >&2
+        exit 2
+    fi
+    # Rows are '<key> <value>', and only the three keys that name a command can
+    # execute anything; `filter.<driver>.required` on its own cannot.
+    configured_filters=""
+    while IFS= read -r filter_row; do
+        [[ -n "$filter_row" ]] || continue
+        case "${filter_row%% *}" in
+            *.clean | *.smudge | *.process)
+                configured_filters+=" ${filter_row%% *}"
+                ;;
+        esac
+    done <<<"$filter_config"
+    if [[ -n "$configured_filters" ]]; then
+        printf 'repository-local filter drivers would run during the Git probes\n' >&2
+        printf 'and are not recorded source:%s\n' "$configured_filters" >&2
+        exit 2
+    fi
     # --untracked-files=all so that a repository-level status.showUntrackedFiles
     # setting cannot suppress the report.
     if [[ -n "$(git -C "$repo_root" status --porcelain --untracked-files=all)" ]]; then
@@ -806,9 +865,46 @@ if ((toolchain_pin == 1)); then
         exit 2
     fi
     resolved_tools+=("$(printf 'pin_file %s' "${pin_file#"$repo_root"/}")")
+    # A numeric channel appears verbatim in `cargo --version`, but a symbolic one
+    # does not: under a `stable` pin, `cargo --version` still reports a numeric
+    # version and never the word `stable` or the host triple, so a substring test
+    # against the version string aborts on a legitimate pin --
+    # verified against rustup for both forms. Symbolic pins are therefore checked
+    # against the toolchain rustup reports as active for the gate directory, which
+    # does name the channel: `stable-<host triple> (overridden by ...)`. rustup is
+    # guaranteed present here, because toolchain_pin == 1 with rustup unavailable
+    # already exited above.
+    case "$pinned_channel" in
+        [0-9]*) pin_match=version ;;
+        *) pin_match=active-toolchain ;;
+    esac
+    if [[ "$pin_match" == active-toolchain ]]; then
+        active_toolchain_report="$(
+            cd "$repo_root" && rustup show active-toolchain
+        )"
+        # The row is '<toolchain> (<reason>)' and the reason names a path that can
+        # itself contain the channel, so only the first field is compared, and the
+        # first line is taken in case the report grows. Shell-only extraction, so
+        # the parser is not an unrecorded external.
+        active_toolchain="${active_toolchain_report%%$'\n'*}"
+        active_toolchain="${active_toolchain%% *}"
+        # A pin may name the channel alone or include the host triple, and rustup
+        # always answers with the triple appended.
+        if [[ "$active_toolchain" != "$pinned_channel" \
+            && "$active_toolchain" != "$pinned_channel"-* ]]; then
+            printf 'the active toolchain does not match the pinned %s\n' \
+                "$pinned_channel" >&2
+            printf 'reported: %s\n' "$active_toolchain_report" >&2
+            exit 2
+        fi
+        resolved_tools+=(
+            "$(printf 'pinned-active-toolchain %s' "$active_toolchain")"
+        )
+    fi
     for pinned_tool in cargo rustc; do
         pinned_version="$(cd "$repo_root" && "$pinned_tool" --version)"
-        if [[ "$pinned_version" != *"$pinned_channel"* ]]; then
+        if [[ "$pin_match" == version \
+            && "$pinned_version" != *"$pinned_channel"* ]]; then
             printf 'the %s the gates would use does not match the pinned %s\n' \
                 "$pinned_tool" "$pinned_channel" >&2
             printf 'reported: %s\n' "$pinned_version" >&2
