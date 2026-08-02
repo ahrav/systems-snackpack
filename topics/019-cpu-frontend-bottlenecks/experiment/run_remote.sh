@@ -147,9 +147,9 @@ done < <(
 )
 
 for tool in \
-    awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ln lscpu \
-    mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed sha256sum \
-    size sort stat taskset uname xargs; do
+    as awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ld ln \
+    lscpu mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed \
+    sha256sum size sort stat taskset uname xargs; do
     # A function shadows PATH lookup while still satisfying command -v, so the
     # gates could run caller-supplied tools. Imported functions were already
     # rejected above; this also refuses any name that does not resolve to a file.
@@ -171,11 +171,27 @@ done
 # and the toolchain resolution below both rely on it.
 resolved_tools=()
 for tool in \
-    awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ln lscpu \
-    mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed sha256sum \
-    size sort stat taskset uname xargs; do
+    as awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ld ln \
+    lscpu mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed \
+    sha256sum size sort stat taskset uname xargs; do
     tool_path="$(command -v "$tool")"
     resolved_tools+=("$(printf '%s %s' "$tool" "$(sha256sum -- "$tool_path")")")
+done
+# The GCC driver executes its own subprograms, and -print-prog-name reports bare
+# names for the ones it resolves through PATH, so a shim named as or ld reaches
+# the measured builds. as and ld are required and hashed above; record what the
+# driver itself says it will run, resolving relative answers through PATH.
+for subprogram in as ld collect2 cc1; do
+    subprogram_path="$(gcc -print-prog-name="$subprogram" 2>/dev/null || true)"
+    if [[ -n "$subprogram_path" && "$subprogram_path" != /* ]]; then
+        subprogram_path="$(command -v "$subprogram_path" 2>/dev/null || true)"
+    fi
+    if [[ -n "$subprogram_path" && -f "$subprogram_path" ]]; then
+        resolved_tools+=(
+            "$(printf 'gcc-prog-%s %s' \
+                "$subprogram" "$(sha256sum -- "$subprogram_path")")"
+        )
+    fi
 done
 if command -v rustup >/dev/null 2>&1 \
     && [[ "$(type -t rustup 2>/dev/null || true)" == file ]]; then

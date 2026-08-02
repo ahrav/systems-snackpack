@@ -15,8 +15,10 @@ Reported steady-state timing excludes compilation and process startup. Each
 outcome contains 12 complete blocks and 48 fresh process invocations. Odd blocks
 use `ABBA`; even blocks use `BAAB`. The analysis unit is the complete block, not
 an inner call. The point estimate is the geometric `sparse4096/dense16` ratio
-across block log contrasts. Its 95% Student-t interval covers block-to-block
-variation in one run window.
+across block log contrasts. Its 95% Student-t interval is a confidence interval
+for that geometric-mean ratio, computed from between-block dispersion in one run
+window. It is not a prediction interval for an individual block, which would be
+wider.
 
 An identical-artifact A/A run uses hard links to one dense executable and the
 same schedule. It checks label, launch-path, and analysis symmetry. One A/A run
