@@ -738,6 +738,22 @@ if ((toolchain_pin == 1)); then
             "$(printf 'pinned-%s-version %s' "$pinned_tool" "$pinned_version")"
         )
     done
+    # Cargo dispatches `cargo fmt` and `cargo clippy` to PATH binaries named
+    # cargo-fmt and cargo-clippy, so the pin has to cover those too. Their
+    # --version strings name rustfmt and clippy rather than the channel, so the
+    # version comparison above cannot be reused; verify instead that each gate
+    # binary is a rustup proxy -- content-identical to rustup itself -- which is
+    # what makes dispatch go through rustup and honor the pin.
+    rustup_proxy_sum="$(sha256sum -- "$(command -v rustup)")"
+    rustup_proxy_sum="${rustup_proxy_sum%% *}"
+    for pinned_tool in cargo rustc cargo-fmt cargo-clippy; do
+        proxy_sum="$(sha256sum -- "$(command -v "$pinned_tool")")"
+        if [[ "${proxy_sum%% *}" != "$rustup_proxy_sum" ]]; then
+            printf '%s is not a rustup proxy, so it can ignore the pinned %s\n' \
+                "$pinned_tool" "$pinned_channel" >&2
+            exit 2
+        fi
+    done
 fi
 if ((rustup_available == 1)); then
     # Rows are '<path><padding><tab><toolchain>', and the padding width depends on
@@ -1012,7 +1028,7 @@ for variant in dense16 sparse4096; do
 done
 
 if ! perf stat -x ';' --no-big-num -o "$output_dir/perf-probe.csv" \
-    -e task-clock -- true \
+    -e task-clock -- uname \
     >"$output_dir/perf-probe.stdout" \
     2>"$output_dir/perf-probe.stderr"; then
     printf 'perf task-clock probe failed\n' >&2
