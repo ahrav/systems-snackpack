@@ -866,6 +866,15 @@ manifest_source() {
     )
 }
 manifest_source >"$output_dir/source-files.before.sha256"
+# A digest over that manifest is an identity for the bytes this run actually
+# compiled, computed here rather than taken from the caller. In archive mode
+# SOURCE_COMMIT and SOURCE_ARCHIVE_SHA256 are declared values that nothing in this
+# script can verify -- which is why the evidence labels them declared-archive --
+# so this digest is the value to compare between runs or against a known tree.
+source_tree_digest="$(sha256sum -- "$output_dir/source-files.before.sha256")"
+resolved_tools+=(
+    "$(printf 'source_tree_digest %s' "${source_tree_digest%% *}")"
+)
 
 start_utc="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 {

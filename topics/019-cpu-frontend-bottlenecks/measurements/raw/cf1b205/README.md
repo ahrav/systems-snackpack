@@ -61,12 +61,31 @@ can prove about provenance, and defect 6 limits only hash-level reproduction.
    and additionally rejects ancestor Cargo configuration files. `none` means no
    *then-swept* variable was set; it does not establish that any of the
    later-added overrides were absent.
+
+   It also cannot rule out `RIPGREP_CONFIG_PATH`. The archived runner built both
+   source manifests with a bare `rg --files`, and ripgrep reads that
+   configuration file unless `--no-config` is passed, so `--glob` entries in it
+   could have excluded paths from the before and after manifests identically. The
+   comparison between them would still succeed while both omitted source that
+   Cargo or Python compiled, so treat manifest *completeness* as resting on the
+   same assumption as the rest of this entry. Current runs pass `--no-config` at
+   every call site and clear the variable.
 4. **Source manifests include ignored paths.** `source-files.before.sha256` and
    `source-files.after.sha256` were produced with an unrestricted scan, so
    ignored files present at run time would be hashed and attributed to
    `source_commit`. In checkout mode the manifest is now restricted to tracked
    files. The before/after comparison that proves the source did not change
    mid-run remains valid either way.
+
+   Separately, and by design rather than by defect: in archive mode
+   `source_commit` and `source_archive_sha256` are values the caller declared,
+   which is why `host.txt` records
+   `source_commit_verification=declared-archive`. Nothing in the runner verifies
+   that the extracted tree corresponds to them. Current runs additionally record a
+   `source_tree_digest` computed over the before-manifest, which is an identity
+   for the bytes that were actually compiled and is the value to compare between
+   runs; these archives predate it, so their per-file manifest is the only such
+   record.
 5. **PMU rows name the wrong perf timing field.** Every row in
    `experiment/perf/*.status.json` and `experiment/perf-summary.json` records
    the counter's running time under `time_enabled_ns`. `perf stat -x` places the
