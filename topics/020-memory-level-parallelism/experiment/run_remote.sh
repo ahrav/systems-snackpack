@@ -80,6 +80,22 @@ if ! [[ "$cpu" =~ ^(0|[1-9][0-9]*)$ ]] || ! taskset -c "$cpu" true >/dev/null 2>
 fi
 
 build_dir="$(mktemp -d)"
+build_dir="$(cd -- "$build_dir" && pwd -P)"
+# mktemp with no template honours TMPDIR, so scratch can land inside the evidence
+# tree, where the final manifest hashes it and finalize then deletes it, leaving
+# evidence.sha256 describing files the bundle lacks. Inside the repository it
+# would become a workspace member and break the gates.
+if [[ "$build_dir" == "$output_dir" \
+    || "$build_dir" == "$output_dir"/* \
+    || "$output_dir" == "$build_dir"/* \
+    || "$build_dir" == "$repo_root" \
+    || "$build_dir" == "$repo_root"/* \
+    || "$repo_root" == "$build_dir"/* ]]; then
+    printf 'refusing to place the build tree inside the evidence or source tree\n' >&2
+    printf 'set TMPDIR outside OUTPUT_DIRECTORY and the repository\n' >&2
+    rm -rf -- "$build_dir"
+    exit 2
+fi
 trap 'rm -rf -- "$build_dir"' EXIT
 
 # Sweeping CARGO_* clears the environment but not $HOME/.cargo/config.toml, whose
@@ -123,8 +139,13 @@ trap seal_initial_failure EXIT
 
 if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$repo_root" ]]; then
     source_commit="$(git -C "$repo_root" rev-parse HEAD)"
-    if [[ -n "$(git -C "$repo_root" status --porcelain)" ]]; then
+    # Assigned rather than tested inline: a command substitution inside [[ ]] does
+    # not abort under set -e, so a git status that failed on, say, an unreadable
+    # index would read as empty and label an unverified worktree git-checkout.
+    worktree_status="$(git -C "$repo_root" status --porcelain)"
+    if [[ -n "$worktree_status" ]]; then
         printf 'repository must be clean\n' >&2
+        printf '%s\n' "$worktree_status" >&2
         exit 2
     fi
     source_verification=git-checkout
@@ -199,6 +220,9 @@ finalize() {
     printf 'utc_end=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >>"$output_dir/host.txt"
     printf 'exit=%s\nsource_manifest=%s\n' \
         "$status" "$source_manifest_status" >"$output_dir/run.status"
+    # set +e above keeps the trap sealing evidence on a failed run, but it also
+    # means these two steps would otherwise fail silently and still exit 0. Built
+    # in scratch and moved, so evidence.sha256 is the whole manifest or absent.
     manifest_tmp="$build_dir/evidence.sha256"
     (
         cd "$output_dir"
@@ -206,7 +230,22 @@ finalize() {
             | sort -z \
             | xargs -0 sha256sum --
     ) >"$manifest_tmp"
-    mv -- "$manifest_tmp" "$output_dir/evidence.sha256"
+    manifest_exit="$?"
+    if ((manifest_exit == 0)); then
+        mv -- "$manifest_tmp" "$output_dir/evidence.sha256"
+        manifest_exit="$?"
+    fi
+    if ((manifest_exit != 0)); then
+        printf 'evidence manifest did not seal\n' >&2
+        if ((status == 0)); then
+            status=1
+        fi
+        # Rewritten after the fact, which puts run.status outside the manifest it
+        # would have been covered by. There is no manifest on this path, so
+        # nothing is covered either way, and saying so beats reporting exit=0.
+        printf 'exit=%s\nsource_manifest=%s\nevidence_manifest=failed\n' \
+            "$status" "$source_manifest_status" >"$output_dir/run.status"
+    fi
     rm -rf -- "$build_dir"
     exit "$status"
 }
