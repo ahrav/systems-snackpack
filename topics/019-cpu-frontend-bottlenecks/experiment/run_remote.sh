@@ -1,18 +1,27 @@
-#!/usr/bin/env bash
+#!/bin/bash -p
 set -euo pipefail
+
+# A fixed interpreter rather than `env bash`, because the shebang runs before any
+# check in this file and a `bash` earlier on PATH would already have executed.
+#
+# `-p` is privileged mode, which prevents the inherited state rather than reacting
+# to it: Bash does not read BASH_ENV, does not import functions from the
+# environment, and ignores SHELLOPTS, BASHOPTS, CDPATH, and GLOBIGNORE. A startup
+# file that clears its own variable is therefore not merely undetectable, it never
+# runs at all.
 
 # A default field separator is needed before the unquoted expansion below.
 IFS=$' \t\n'
 
-# Refuse the inherited state whose effects predate this script. BASH_ENV's startup
-# file has already run, and a dynamic loader override has already acted on this
-# shell and would act on the sanitizer itself, so either could have altered the
-# source tree or the working directory before line 1. The re-exec below drops both
+# Refuse the inherited state whose effects predate this script. If the first
+# interpreter was not privileged -- `bash script` ignores the shebang -- then
+# BASH_ENV's startup file has already run, and a loader override has already acted
+# on this shell and would act on the sanitizer itself. The re-exec below drops both
 # variables, which would erase the evidence that they were ever set, so they are
 # refused here instead of being sanitized away silently.
 if [[ -n "${BASH_ENV:-}" ]]; then
     printf 'refusing to run with BASH_ENV set: %s\n' "$BASH_ENV" >&2
-    printf 'it already ran arbitrary shell code before this script started\n' >&2
+    printf 'it may already have run arbitrary shell code before this script\n' >&2
     exit 2
 fi
 for __loader_override in ${!LD_@}; do
@@ -23,20 +32,16 @@ for __loader_override in ${!LD_@}; do
 done
 unset __loader_override
 
-# Bash imports functions, aliases through BASH_ENV, traps, and shell options from
-# the invoking environment before line 1 runs, and a DEBUG trap can re-arm any of
-# them at a chosen moment -- including defining functions named builtin, declare,
-# or compgen, which a backslash does not suppress because it only defeats alias
-# expansion. In-shell self-verification therefore has a fixed point. Re-exec once
-# through env -i with an explicit variable list, so the shell that does the real
-# work starts with no imported functions, no BASH_ENV, no traps, and default
-# options. The guards below still run in that shell as defence in depth.
-#
-# The marker is this process's PID, which exec preserves and a caller cannot
-# predict, so setting the variable by hand cannot skip the sanitizing exec.
-if [[ "${TOPIC19_SANITIZED_SHELL:-}" != "$$" ]]; then
+# In-shell self-verification has a fixed point: every function enumerator is a
+# shadowable builtin, and a DEBUG trap can define functions named builtin,
+# declare, or compgen at the moment a reset runs. Re-exec once through env -i into
+# a privileged shell, so the shell that does the real work cannot have imported
+# any of it. The condition is privileged mode itself rather than a marker
+# variable: a caller cannot claim it without also getting its effects, so there is
+# nothing to forge and no recursion. The guards below still run as defence in
+# depth, and they are meaningful because this shell is privileged.
+if [[ ! -o privileged ]]; then
     exec /usr/bin/env -i \
-        TOPIC19_SANITIZED_SHELL="$$" \
         PATH="$PATH" \
         HOME="$HOME" \
         TERM="${TERM:-dumb}" \
@@ -44,7 +49,7 @@ if [[ "${TOPIC19_SANITIZED_SHELL:-}" != "$$" ]]; then
         SOURCE_COMMIT="${SOURCE_COMMIT:-}" \
         SOURCE_ARCHIVE_SHA256="${SOURCE_ARCHIVE_SHA256:-}" \
         RUNTIME_HOST_ALIAS="${RUNTIME_HOST_ALIAS:-}" \
-        /bin/bash "$0" "$@"
+        /bin/bash -p "$0" "$@"
 fi
 
 # Restore a default field separator and enable pathname expansion before any
@@ -582,6 +587,31 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
             "$nested_configs" >&2
         exit 2
     fi
+    # The manifest and every source scan use `rg --files`, which does not follow
+    # symbolic links, so a symlinked input or tool config would be used by Cargo,
+    # rustfmt, Clippy, or Python while never appearing in the recorded bytes.
+    # Tracked symlinks are already refused by the index mode check above; this
+    # covers untracked and ignored ones, using shell globbing so no external
+    # walker is needed. Globstar does not descend through symlinked directories,
+    # so such a directory is reported rather than traversed.
+    symlinked_inputs=""
+    \builtin shopt -s globstar dotglob nullglob
+    for candidate in "$repo_root"/**/*; do
+        candidate_rel="${candidate#"$repo_root"/}"
+        case "$candidate_rel" in
+            .git | .git/* | target | target/*) continue ;;
+        esac
+        if [[ -L "$candidate" ]]; then
+            symlinked_inputs+=" $candidate_rel"
+        fi
+    done
+    \builtin shopt -u globstar dotglob nullglob
+    if [[ -n "$symlinked_inputs" ]]; then
+        printf 'symbolic links in the source tree are unsupported, because the\n' >&2
+        printf 'manifest records the link and not the bytes that get used:%s\n' \
+            "$symlinked_inputs" >&2
+        exit 2
+    fi
     source_commit_verification=git-checkout
 else
     if ! [[ "${SOURCE_COMMIT:-}" =~ ^[0-9a-f]{40}$ ]]; then
@@ -594,6 +624,27 @@ else
     fi
     source_commit="$SOURCE_COMMIT"
     source_commit_verification=declared-archive
+    # Archive mode has no index, so the symlink check that checkout mode gets from
+    # `ls-files -s` must be done here too: the manifest is the only record of the
+    # source bytes, and `rg --files` does not follow links.
+    symlinked_inputs=""
+    \builtin shopt -s globstar dotglob nullglob
+    for candidate in "$repo_root"/**/*; do
+        candidate_rel="${candidate#"$repo_root"/}"
+        case "$candidate_rel" in
+            .git | .git/* | target | target/*) continue ;;
+        esac
+        if [[ -L "$candidate" ]]; then
+            symlinked_inputs+=" $candidate_rel"
+        fi
+    done
+    \builtin shopt -u globstar dotglob nullglob
+    if [[ -n "$symlinked_inputs" ]]; then
+        printf 'symbolic links in the source tree are unsupported, because the\n' >&2
+        printf 'manifest records the link and not the bytes that get used:%s\n' \
+            "$symlinked_inputs" >&2
+        exit 2
+    fi
 fi
 
 # Cargo, rustfmt, and Clippy all discover configuration from the gate working
