@@ -43,6 +43,19 @@ if [[ -n "$imported_functions" ]]; then
     printf '%s\n' "$imported_functions" >&2
     exit 2
 fi
+
+# No imported functions remain, so these builtins cannot be shadowed by a
+# function -- but `builtin` is itself a command word subject to alias expansion,
+# so an `alias builtin=':'` installed by a startup file would turn both lines
+# into no-ops. The backslash suppresses alias expansion on the command word.
+\builtin shopt -u expand_aliases 2>/dev/null || true
+\builtin unalias -a 2>/dev/null || true
+# Bash remembers command pathnames, and `hash -p` can seed an entry that points
+# `command -v` at one binary while PATH lookups in child processes -- including
+# the Python analysis script -- resolve a different one. Forget them all, so the
+# recorded tool paths and the tools the children run agree.
+\hash -r 2>/dev/null || true
+
 # The environment sweep below depends on `compgen -e` listing exported variables,
 # and that is the enumerator a selective replacement would target, so verify it
 # reports a variable this script just exported rather than trusting it.
@@ -59,12 +72,6 @@ if ((sentinel_seen != 1)); then
     exit 2
 fi
 unset __INTEGRITY_SENTINEL
-
-# No imported functions remain, so these builtins cannot be shadowed. Bash sources
-# BASH_ENV before this script starts, so any aliases and shell options it installed
-# are already in effect and cannot be undone by unsetting the variable later.
-builtin shopt -u expand_aliases 2>/dev/null || true
-builtin unalias -a 2>/dev/null || true
 # A startup file can `unset BASH_ENV` before this check and still have left a
 # trap behind, so the variable being empty proves nothing on its own. An inline
 # DEBUG trap needs no function, which makes it invisible to the check above, and
@@ -204,7 +211,7 @@ if command -v rustup >/dev/null 2>&1 \
     # rustup resolves a toolchain from the working directory, so this must run
     # where the gates run rather than where the caller happened to stand, and it
     # must cover every binary rustup dispatches for them.
-    for proxied in cargo rustc rustfmt clippy-driver rustdoc; do
+    for proxied in cargo rustc rustfmt clippy-driver rustdoc cargo-fmt cargo-clippy; do
         proxied_path="$(
             cd "$repo_root" && rustup which "$proxied" 2>/dev/null || true
         )"
@@ -322,6 +329,7 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
     hidden_members=""
     for candidate in "$repo_root/$members_root"/*/Cargo.toml \
         "$repo_root/$members_root"/*/build.rs \
+        "$repo_root/$members_root"/*/src/lib.rs \
         "$repo_root/$members_root"/*/src/main.rs \
         "$repo_root/$members_root"/*/examples/*.rs \
         "$repo_root/$members_root"/*/tests/*.rs \
@@ -392,7 +400,8 @@ while :; do
     for candidate in \
         "$probe_dir/.cargo/config.toml" "$probe_dir/.cargo/config" \
         "$probe_dir/rustfmt.toml" "$probe_dir/.rustfmt.toml" \
-        "$probe_dir/clippy.toml" "$probe_dir/.clippy.toml"; do
+        "$probe_dir/clippy.toml" "$probe_dir/.clippy.toml" \
+        "$probe_dir/rust-toolchain" "$probe_dir/rust-toolchain.toml"; do
         [[ -e "$candidate" ]] || continue
         if [[ "$probe_dir" == "$repo_root" ]] \
             && git -C "$repo_root" ls-files --error-unmatch -- \
@@ -413,10 +422,28 @@ if ((${#unrecorded_configs[@]} > 0)); then
     exit 2
 fi
 
-# A rustup directory override outranks rust-toolchain.toml and is stored in
+# A rustup directory override outranks a rust-toolchain file and is stored in
 # rustup's own settings rather than the environment, so clearing RUSTUP_TOOLCHAIN
-# does not remove it.
-if rustup override list >/dev/null 2>&1; then
+# does not remove it. When the checkout pins a toolchain, the gates are expected to
+# run through rustup, so rustup must be present for that override to be checkable:
+# proxy cargo/rustc honor overrides whether or not a binary named rustup is on
+# PATH, and skipping the check would claim a guarantee the run cannot make.
+toolchain_pin=0
+if [[ -e "$repo_root/rust-toolchain.toml" || -e "$repo_root/rust-toolchain" ]]; then
+    toolchain_pin=1
+fi
+rustup_available=0
+if command -v rustup >/dev/null 2>&1 \
+    && [[ "$(type -t rustup 2>/dev/null || true)" == file ]] \
+    && rustup override list >/dev/null 2>&1; then
+    rustup_available=1
+fi
+if ((toolchain_pin == 1 && rustup_available == 0)); then
+    printf 'the checkout pins a toolchain but rustup is unavailable, so a\n' >&2
+    printf 'directory override cannot be ruled out for the Cargo gates\n' >&2
+    exit 2
+fi
+if ((rustup_available == 1)); then
     # Rows are '<path><padding><tab><toolchain>', and the padding width depends on
     # the longest path, so matching a path followed directly by a tab silently
     # misses short paths. Compare the trimmed first column instead.
