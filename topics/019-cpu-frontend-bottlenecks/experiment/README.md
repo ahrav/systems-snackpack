@@ -32,6 +32,21 @@ The runner chooses the first allowed CPU unless a numeric CPU is the third
 argument. It generates and builds under an ephemeral directory, writes evidence
 outside the source tree, and verifies that the source manifest is unchanged.
 
+## What the runner does and does not check
+
+The runner exists to keep the *measurement* honest. Every guard in it answers one
+of two questions: did this run measure what it claims to measure (toolchain pin,
+swept codegen variables, recorded flags, CPU pinning, before/after source
+manifest, hard-linked A/A control), and can a later reader tell what produced
+these numbers (host record, build flags, ELF hashes and layout dumps, evidence
+manifest).
+
+It does not try to make a run unforgeable against a hostile host. Anyone able to
+set `RUSTFLAGS` or shim `gcc` on the measuring host can equally edit the retained
+evidence afterwards, so guards aimed at that threat add surface without adding
+confidence. Before adding a check here, name which of the two questions above it
+answers; if it answers neither, it belongs somewhere else.
+
 The primary comparison uses 12 complete process blocks, alternating `ABBA` and
 `BAAB`. Every letter launches a fresh pinned process. The internal
 `CLOCK_MONOTONIC_RAW` timer starts after 512 untimed warm-up rounds; compilation

@@ -57,10 +57,9 @@ can prove about provenance, and defect 6 limits only hash-level reproduction.
    covered a narrower set than the current one, which now also clears the
    `CARGO_TARGET_*` and encoded Cargo flag variables, the rustc/rustfmt wrapper
    and tool overrides, the rustup toolchain override, the GCC implicit
-   search-path and subprogram variables, and the Python import-path variables,
-   and additionally rejects ancestor Cargo configuration files. `none` means no
-   *then-swept* variable was set; it does not establish that any of the
-   later-added overrides were absent.
+   search-path and subprogram variables, and the Python import-path variables.
+   `none` means no *then-swept* variable was set; it does not establish that any
+   of the later-added overrides were absent.
 
    It also cannot rule out `RIPGREP_CONFIG_PATH`. The archived runner built both
    source manifests with a bare `rg --files`, and ripgrep reads that
@@ -85,9 +84,10 @@ can prove about provenance, and defect 6 limits only hash-level reproduction.
    the before/after comparison would still have matched because both omitted it
    identically. This compounds the `RIPGREP_CONFIG_PATH` caveat in entry 3: both
    bear on manifest *completeness* rather than on the equality of the two
-   manifests. Current runs reject symbolic links anywhere in the source tree, in
-   both checkout and archive mode, rather than recording a link in place of the
-   bytes that get used.
+   manifests. Current checkout-mode runs reject tracked symbolic links, read from
+   the index, so the manifest cannot hash a link target in place of recorded
+   source. Archive mode has no index and does not check this, which is one more
+   reason its source identity is labelled declared rather than verified.
 
    Separately, and by design rather than by defect: in archive mode
    `source_commit` and `source_archive_sha256` are values the caller declared,
@@ -139,15 +139,22 @@ themselves prove. The recorded Rust toolchain is not the one that validated the
 workspace, and because `RUSTUP_TOOLCHAIN` was not swept the gate toolchain cannot
 be established at all. Because the narrower sweep cannot establish that the GCC
 search-path, Python import-path, Cargo flag, or rustup override variables were
-unset, because the Git repository-location variables (`GIT_DIR`,
-`GIT_WORK_TREE`, `GIT_INDEX_FILE`) were not cleared before the Git probes, because
-shell functions and aliases imported from the environment were not rejected, and
-because ancestor Cargo configuration was not rejected, these archives cannot rule
-out that a caller-supplied header, compiler subprogram, rustc flag, Python
+unset, and because the Git repository-location variables (`GIT_DIR`,
+`GIT_WORK_TREE`, `GIT_INDEX_FILE`) were not cleared before the Git probes, these
+archives cannot rule out that a caller-supplied header, compiler subprogram,
+rustc flag, Python
 module, tool wrapper, or alternate Git repository influenced the compiled
 binaries, the recorded `source_commit`, or the evidence writer. Nothing retained
 suggests that happened, and the recorded command lines, source hashes, and ELF
 metadata are self-consistent, but the archives cannot exclude it. Treat the
 measurements as reproducible only under the recorded source and command lines
 plus the assumption that no such override was present.
+
+That last assumption is inherent rather than a gap a later runner version closes.
+The runner controls the environment that changes *what gets compiled* -- the
+toolchain pin, the codegen-affecting variables, CPU pinning, the recorded flags --
+and records enough to identify the build afterwards. It does not try to make a run
+unforgeable against a hostile host, because anyone able to shim a compiler on the
+measuring host can equally edit the retained evidence. Every measurement of this
+kind rests on trusting the host it ran on.
 

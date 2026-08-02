@@ -1,306 +1,35 @@
-#!/bin/bash -p
+#!/usr/bin/env bash
 set -euo pipefail
 
-# A fixed interpreter rather than `env bash`, because the shebang runs before any
-# check in this file and a `bash` earlier on PATH would already have executed.
+# Collect Topic 19 frontend-layout evidence on a Linux host.
 #
-# `-p` is privileged mode, which prevents the inherited state rather than reacting
-# to it: Bash does not read BASH_ENV, does not import functions from the
-# environment, and ignores SHELLOPTS, BASHOPTS, CDPATH, and GLOBIGNORE. A startup
-# file that clears its own variable is therefore not merely undetectable, it never
-# runs at all.
-
-# A default field separator is needed before the unquoted expansion below.
-IFS=$' \t\n'
-
-# Refuse the inherited state whose effects predate this script. If the first
-# interpreter was not privileged -- `bash script` ignores the shebang -- then
-# BASH_ENV's startup file has already run, and a loader override has already acted
-# on this shell and would act on the sanitizer itself. The re-exec below drops both
-# variables, which would erase the evidence that they were ever set, so they are
-# refused here instead of being sanitized away silently.
-if [[ -n "${BASH_ENV:-}" ]]; then
-    printf 'refusing to run with BASH_ENV set: %s\n' "$BASH_ENV" >&2
-    printf 'it may already have run arbitrary shell code before this script\n' >&2
-    exit 2
-fi
-# GLIBC_TUNABLES is a loader and runtime knob that no LD_* pattern matches, and
-# glibc.cpu.hwcaps alone changes which ifunc variant of memcpy or strlen the
-# measured binaries select -- verified that the loader accepts it and that it
-# reaches children. It acted on this shell before any check could run, exactly
-# like the loader overrides above, so it is refused on the same terms.
-for __loader_override in ${!LD_@} ${GLIBC_TUNABLES+GLIBC_TUNABLES}; do
-    printf 'refusing to run with a dynamic loader override set: %s\n' \
-        "$__loader_override" >&2
-    printf 'it already acted on this shell before any check could run\n' >&2
-    exit 2
-done
-unset __loader_override
-
-# In-shell self-verification has a fixed point: every function enumerator is a
-# shadowable builtin, and a DEBUG trap can define functions named builtin,
-# declare, or compgen at the moment a reset runs. Privileged mode is what removes
-# the problem rather than reacting to it, so entry through the shebang above is
-# mandatory. Under `bash script` the shebang does not apply, BASH_ENV has already
-# run and may have cleared itself, and nothing later can undo what it did -- so
-# this refuses rather than pretending a re-exec repairs it.
-if [[ ! -o privileged ]]; then
-    printf 'this script must be executed directly, so that its\n' >&2
-    printf '"#!/bin/bash -p" line takes effect. Running it as "bash %s"\n' "$0" >&2
-    printf 'lets startup files and exported functions act before any check.\n' >&2
-    exit 2
-fi
-
-# Privileged mode makes this shell ignore exported functions, but the BASH_FUNC_*
-# entries stay in the environment, and any child Bash -- a PATH tool that happens
-# to be a shell script -- imports them. Those names are not valid shell variables,
-# so compgen -e cannot see them; read the raw environment instead.
+# Scope, stated up front because it bounds every check below: this runner keeps a
+# *measurement* honest. It is not an attestation apparatus. Every guard here
+# answers one of exactly two questions:
 #
-# Refuse rather than sanitize. Dropping them would mean re-execing through env -i,
-# which also discards every other inherited variable before the sweep records what
-# it cleared -- so an invocation carrying CPATH would be reported as
-# swept_environment=none purely because a function was also exported, making the
-# recorded provenance depend on an unrelated condition.
-environ_functions=""
-while IFS= read -r -d '' __environ_entry; do
-    case "$__environ_entry" in
-        BASH_FUNC_*) environ_functions+=" ${__environ_entry%%=*}" ;;
-    esac
-done </proc/self/environ
-unset __environ_entry
-if [[ -n "$environ_functions" ]]; then
-    printf 'refusing to run with exported shell functions in the environment:%s\n' \
-        "$environ_functions" >&2
-    printf 'this shell ignores them, but any child shell would import them\n' >&2
-    exit 2
-fi
-
-# Restore a default field separator and enable pathname expansion before any
-# unquoted expansion or glob below. `set -euo pipefail` clears neither, and both
-# are inheritable through a startup file: an inherited IFS splits variable names
-# such as LD_PRELOAD into pieces so the loader sweep unsets the wrong names, and
-# an inherited noglob leaves every source-integrity glob literal so it matches
-# nothing and the checks silently pass.
-IFS=$' \t\n'
-set +f
-if [[ -o noglob ]]; then
-    printf 'pathname expansion is disabled; refusing to run\n' >&2
-    exit 2
-fi
-
-# Validate an exact Linux source tree and write Topic 19 evidence outside it.
-
-# Bash imports exported functions from the environment before this script runs,
-# and a function takes precedence over both PATH lookup and builtins, so an
-# imported definition could redirect a tool or make the environment sweep below
-# enumerate nothing while still reporting success. Reject any such definition
-# before anything else, including before the alias cleanup: a backslash suppresses
-# alias expansion but not function lookup, so calling shopt or unalias first would
-# hand control to an imported function that could install an alias and self-unset.
+#   1. Did I measure what I think I measured?
+#      -- toolchain pin, swept codegen variables, recorded flags, CPU pinning,
+#         before/after source manifest, hard-linked A/A control
+#   2. Can I tell later what produced these numbers?
+#      -- host.txt, build-flags.txt, ELF hashes and layout dumps, evidence.sha256
 #
-# The enumerators themselves are shadowable, and exported functions are not
-# visible to parameter expansion, so trust is established by behaviour instead of
-# by assumption. Three properties are tested, because a selective replacement can
-# satisfy any one of them alone: `declare -F NAME` must report a defined probe,
-# the no-argument `declare -F` must list a second probe (so a `declare` that
-# answers for named probes but returns nothing for the full list is caught), and
-# `unset -f` must actually remove a probe. The backslash forms defeat aliases on
-# the same names.
-# shellcheck disable=SC2329  # invoked below, after unset -f, to test whether it survived
-__integrity_probe() { return 0; }
-# shellcheck disable=SC2329  # existence is asserted through declare -F, not by calling it
-__integrity_probe_list() { return 0; }
-if [[ -z "$(\declare -F __integrity_probe 2>/dev/null || true)" ]]; then
-    printf 'declare -F does not report a defined function; refusing to run\n' >&2
-    exit 2
-fi
-if [[ "$(\declare -F)" != *__integrity_probe_list* ]]; then
-    printf 'declare -F does not list defined functions; refusing to run\n' >&2
-    exit 2
-fi
-\unset -f __integrity_probe 2>/dev/null || true
-if __integrity_probe 2>/dev/null; then
-    printf 'unset -f did not remove a function; refusing to run\n' >&2
-    exit 2
-fi
-\unset -f __integrity_probe_list 2>/dev/null || true
-imported_functions="$(\declare -F)"
-if [[ -n "$imported_functions" ]]; then
-    printf 'refusing to run with shell functions imported from the environment:\n' >&2
-    printf '%s\n' "$imported_functions" >&2
-    exit 2
-fi
+# It deliberately does NOT try to make the run unforgeable against a hostile
+# environment. Anyone who can set RUSTFLAGS or shim gcc on the measuring host can
+# equally edit the retained evidence afterwards, so checks aimed at that threat
+# buy nothing here while adding surface that obscures the measurement logic. If
+# you find yourself adding a guard, first say which of the two questions above it
+# answers; if it answers neither, it does not belong in this file.
 
-# Bash remembers command pathnames, and `hash -p` can seed an entry that points
-# `command -v` at one binary while PATH lookups in child processes -- including
-# the Python analysis script -- resolve a different one. Forget them all, so the
-# recorded tool paths and the tools the children run agree.
-# A startup file can `unset BASH_ENV` before this check and still have left a
-# trap behind, so the variable being empty proves nothing on its own. An inline
-# DEBUG trap needs no function, which makes it invisible to the check above, and
-# it can re-export a swept variable after the sweep has run.
-#
-# Clearing inherited state must succeed rather than merely be attempted: with
-# `enable -n trap` or `enable -n builtin` these calls fail, and an ignored
-# failure would leave the trap or the aliases in place while the environment
-# report claimed otherwise. So the resets are fatal on failure and each one is
-# confirmed by its postcondition. Only the code-execution traps are asserted
-# empty, because an inherited ignored signal is not something this script needs
-# to reject.
-for __inherited_trap in DEBUG RETURN ERR EXIT HUP INT QUIT TERM; do
-    \trap - "$__inherited_trap"
-done
-unset __inherited_trap
-if [[ -n "$(\trap -p DEBUG RETURN ERR EXIT)" ]]; then
-    printf 'inherited traps could not be cleared; refusing to run\n' >&2
-    exit 2
-fi
-# A DEBUG trap runs before each command, so one could have re-enabled alias
-# expansion, reinstated a function, or reset IFS or noglob immediately before it
-# was removed -- which would leave every check above stale. No trap can run from
-# here on, so the shell state is established again and re-verified now, and this
-# is the point the later sweeps and globs actually depend on.
-IFS=$' \t\n'
-set +f
-\builtin shopt -u expand_aliases
-# failglob aborts an expansion that matches nothing, which would kill the member
-# globs below on any normal checkout, and the others change what a pattern means.
-\builtin shopt -u failglob nullglob dotglob nocaseglob globstar
-\builtin unalias -a || true
-\hash -r
-# `enable -n` removes a builtin, and Bash then falls back to a PATH executable of
-# the same name -- verified that a disabled `pwd` resolves through a PATH shim, so
-# repo_root itself could point at a different tree, and a disabled `printf` could
-# forge the recorded tool provenance. Every builtin this script depends on for
-# integrity work must still be a builtin, and this runs before repo_root is
-# derived or anything is recorded.
-for __required_builtin in alias cd command compgen declare hash printf pwd read \
-    shopt trap type unalias unset; do
-    if [[ "$(\builtin type -t "$__required_builtin")" != builtin ]]; then
-        printf 'shell builtin %s is unavailable; refusing to run\n' \
-            "$__required_builtin" >&2
-        exit 2
-    fi
-done
-unset __required_builtin
-if [[ -o noglob ]]; then
-    printf 'pathname expansion is disabled; refusing to run\n' >&2
-    exit 2
-fi
-if [[ -n "$(\alias 2>/dev/null || true)" ]]; then
-    printf 'aliases could not be cleared; refusing to run\n' >&2
-    exit 2
-fi
-# A failed enumerator must not read as an empty answer, so the listing is captured
-# into a variable -- which set -e turns into a fatal error if the builtin has been
-# disabled -- and then compared against exactly the probe this script defined. Any
-# other entry, including one a DEBUG trap installed during the reset above, is
-# refused.
-# shellcheck disable=SC2329  # existence is asserted through declare -F, not by calling it
-__integrity_probe_after() { return 0; }
-functions_after_reset="$(\declare -F)"
-if [[ "$functions_after_reset" != 'declare -f __integrity_probe_after' ]]; then
-    printf 'unexpected shell functions after the trap reset; refusing to run:\n' >&2
-    printf '%s\n' "$functions_after_reset" >&2
-    exit 2
-fi
-\unset -f __integrity_probe_after
-# The environment sweep below depends on `compgen -e` listing exported variables,
-# and that is the enumerator a selective replacement would target, so verify it
-# reports a variable this script just exported rather than trusting it.
-__INTEGRITY_SENTINEL=1
-export __INTEGRITY_SENTINEL
-sentinel_seen=0
-while IFS= read -r variable; do
-    if [[ "$variable" == __INTEGRITY_SENTINEL ]]; then
-        sentinel_seen=1
-    fi
-done < <(compgen -e)
-if ((sentinel_seen != 1)); then
-    printf 'compgen -e did not report an exported variable; refusing to run\n' >&2
-    exit 2
-fi
-unset __INTEGRITY_SENTINEL
-IFS=$' \t\n'
-if [[ -n "${BASH_ENV:-}" ]]; then
-    printf 'refusing to run with BASH_ENV set: %s\n' "$BASH_ENV" >&2
-    printf 'it already ran arbitrary shell code before this script started\n' >&2
-    exit 2
-fi
-# The accumulator is initialized before the first unset, because a name cleared
-# ahead of the main sweep is invisible to the `compgen -e` pass that would
-# otherwise record it -- and swept_environment would then read `none` for a launch
-# that did carry a manifest-affecting override.
+# ---------------------------------------------------------------------------
+# Environment hygiene
+# ---------------------------------------------------------------------------
+# These variables change what the compilers actually do -- which toolchain runs,
+# which flags it gets, which headers and libraries it finds, what Python imports
+# -- or change how perf collects counters. Left in place, build-flags.txt would
+# describe a build that did not happen. Clear them and record what was cleared,
+# so a run made under a stray RUSTFLAGS is visible in the evidence instead of
+# being silently folded into the numbers.
 swept_variables=()
-# ripgrep reads RIPGREP_CONFIG_PATH unless --no-config is passed, and a config as
-# small as --fixed-strings would make every pattern below literal, silently
-# emptying the sweep. Clear it before the first rg call; --no-config is also passed
-# at each call site. The main sweep below names it too, but cannot see it once it
-# is gone, so it is recorded here rather than dropped from the provenance.
-if [[ -n "${RIPGREP_CONFIG_PATH+set}" ]]; then
-    swept_variables+=(RIPGREP_CONFIG_PATH)
-fi
-unset RIPGREP_CONFIG_PATH
-# The dynamic loader acts on every external command, including the ripgrep process
-# the main sweep uses to find these very names, so LD_* has to go first and
-# without running anything. Parameter expansion needs no external process.
-for variable in ${!LD_@}; do
-    swept_variables+=("$variable")
-    unset "$variable"
-done
-# GLOBIGNORE is inert when merely inherited through the environment, because Bash
-# applies its glob-ignore hook on assignment rather than on import, and the one
-# route that would assign it -- BASH_ENV -- is already refused above. Clear it
-# anyway, since the integrity checks below depend on globs seeing every match.
-unset GLOBIGNORE
-# A relative PATH component resolves against the current directory, and this
-# script changes directory before the builds and gates, so a tool recorded now
-# would not be the tool invoked later. An empty component means the current
-# directory too, and `read -a` discards a trailing empty field, so the string is
-# tested for empty components before it is split.
-case ":$PATH:" in
-    *::*)
-        printf 'refusing to run with an empty PATH component, which means the\n' >&2
-        printf 'current directory: %s\n' "$PATH" >&2
-        exit 2
-        ;;
-esac
-IFS=':' read -r -a path_entries <<<"$PATH"
-for entry in "${path_entries[@]}"; do
-    if [[ -z "$entry" || "$entry" != /* ]]; then
-        printf 'refusing to run with a relative PATH component: %s\n' \
-            "${entry:-<empty, meaning the current directory>}" >&2
-        exit 2
-    fi
-done
-
-if (($# < 2 || $# > 3)); then
-    printf 'usage: %s REPOSITORY_ROOT OUTPUT_DIRECTORY [CPU]\n' "$0" >&2
-    exit 2
-fi
-
-repo_root="$(cd -- "$1" && pwd -P)"
-output_dir="$2"
-topic_rel="topics/019-cpu-frontend-bottlenecks"
-topic_dir="$repo_root/$topic_rel"
-
-# Cargo, rustup, GCC, Python, and Git honor environment overrides that change
-# what the builds and gates below actually run: they select the toolchain,
-# replace rustc/rustfmt, inject compiler flags, add implicit header or library
-# search paths, redirect compiler subprograms or Python imports, or relocate the
-# Git repository and index. Sweeping records each name in swept_environment, so a
-# gate can no longer pass under a caller-supplied tool, flag, header, or
-# repository while the evidence calls the environment swept. This runs before the
-# first Git probe, because GIT_DIR and GIT_WORK_TREE override even git -C, and
-# before the tool inventory, so the match uses shell patterns rather than an
-# external matcher that has not been required or hashed yet.
-#
-# CDPATH is included because privileged mode only makes this shell ignore it: a
-# required tool that is a shell wrapper is a child shell, and an inherited CDPATH
-# still changes where its relative `cd` lands -- verified that a child
-# `bash -c 'cd foo'` launched from a privileged parent followed CDPATH. PERF_CONFIG
-# is included because it selects perf's configuration file, and perf stat settings
-# there change how events are collected.
 while IFS= read -r variable; do
     case "$variable" in
         CARGO_* | GIT_* | LD_* \
@@ -318,199 +47,97 @@ while IFS= read -r variable; do
             ;;
     esac
 done < <(compgen -e)
-# Global and system Git configuration can assign a clean filter to tracked paths,
-# and a same-size edit then leaves `git status` empty while the working tree
-# differs from source_commit. Neither file is recorded source, so both are taken
-# out of play for every Git probe below. The repository's own config stays in
-# effect, because Git cannot operate without it.
-export GIT_CONFIG_GLOBAL=/dev/null
-export GIT_CONFIG_SYSTEM=/dev/null
-# A repository-local replace ref would make cat-file return a substituted object
-# while rev-parse still reports the original commit, so the blob comparison below
-# would accept bytes that are not in source_commit.
-export GIT_NO_REPLACE_OBJECTS=1
-# core.fsmonitor names a hook that `git status` executes, and repository-local
-# config stays in effect because Git cannot operate without it. Override the
-# setting for every Git probe rather than leaving an unrecorded program in the
-# path between the working tree and the clean-tree gate.
-export GIT_CONFIG_COUNT=1
-export GIT_CONFIG_KEY_0=core.fsmonitor
-export GIT_CONFIG_VALUE_0=false
-# Sweeping PERF_CONFIG removes a caller-supplied file, but perf then falls back to
-# $HOME/.perfconfig, which cannot be swept. Point it at an empty file instead, so
-# neither source applies -- verified that `perf config` reports a setting under
-# PERF_CONFIG and reports nothing under /dev/null -- and record the value, because
-# perf stat configuration changes how the measured events are collected.
+# perf falls back to $HOME/.perfconfig when PERF_CONFIG is unset, and perf stat
+# settings there change how the measured events are collected. Point it at an
+# empty file so neither source applies.
 export PERF_CONFIG=/dev/null
 
-for tool in \
-    as awk bash cargo cargo-clippy cargo-fmt cc cmp date gcc getconf git gzip ld \
-    ln lscpu mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed \
-    sha256sum size sort stat taskset uname xargs; do
-    # A function shadows PATH lookup while still satisfying command -v, so the
-    # gates could run caller-supplied tools. Imported functions were already
-    # rejected above; this also refuses any name that does not resolve to a file.
-    if ! command -v "$tool" >/dev/null 2>&1; then
-        printf 'required tool is unavailable: %s\n' "$tool" >&2
-        exit 2
-    fi
-    if [[ "$(type -t "$tool" 2>/dev/null || true)" != file ]]; then
-        printf 'required tool does not resolve to an executable: %s\n' "$tool" >&2
-        exit 2
-    fi
-done
-# command -v proves only that the name resolves to some executable, so record the
-# resolved path and content hash of each one. A PATH shim can then be identified
-# in the retained evidence instead of being invisible. cargo-fmt and cargo-clippy
-# are included because Cargo dispatches `cargo fmt` and `cargo clippy` to PATH
-# binaries of those names, and sed because the rustup override guard depends on
-# it. rustup itself is optional, and is recorded when present because that guard
-# and the toolchain resolution below both rely on it.
-resolved_tools=()
-for tool in \
-    as awk bash cargo cargo-clippy cargo-fmt cc cmp date gcc getconf git gzip ld \
-    ln lscpu mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed \
-    sha256sum size sort stat taskset uname xargs; do
-    tool_path="$(command -v "$tool")"
-    # The digest comes from the hasher, but the recorded path comes from the
-    # shell, so a shim cannot supply both halves of its own provenance line.
-    tool_sum="$(sha256sum -- "$tool_path")"
-    resolved_tools+=(
-        "$(printf '%s %s %s' "$tool" "${tool_sum%% *}" "$tool_path")"
-    )
-done
-# The GCC driver executes its own subprograms, and -print-prog-name reports bare
-# names for the ones it resolves through PATH, so a shim named as or ld reaches
-# the measured builds. as and ld are required and hashed above; record what the
-# driver itself says it will run, resolving relative answers through PATH.
-#
-# Both drivers are probed, because rustc links through `cc` and not `gcc` --
-# `rustc --print link-args` shows the link command invoking "cc" -- so on a host
-# where `cc` is a distinct driver or a wrapper rather than a link to gcc, the
-# Cargo gates dispatch as, ld, collect2, or cc1 that a gcc-only probe never
-# records. Both are already required and hashed above.
-for driver in gcc cc; do
-    for subprogram in as ld collect2 cc1; do
-        subprogram_path="$(
-            "$driver" -print-prog-name="$subprogram" 2>/dev/null || true
-        )"
-        if [[ -n "$subprogram_path" && "$subprogram_path" != /* ]]; then
-            subprogram_path="$(command -v "$subprogram_path" 2>/dev/null || true)"
-        fi
-        if [[ -n "$subprogram_path" && -f "$subprogram_path" ]]; then
-            resolved_tools+=(
-                "$(printf '%s-prog-%s %s' "$driver" \
-                    "$subprogram" "$(sha256sum -- "$subprogram_path")")"
-            )
-        fi
-    done
-done
-if command -v rustup >/dev/null 2>&1 \
-    && [[ "$(type -t rustup 2>/dev/null || true)" == file ]]; then
-    rustup_path="$(command -v rustup)"
-    resolved_tools+=("$(printf 'rustup %s' "$(sha256sum -- "$rustup_path")")")
-    # The rustup proxies are thin, so their hashes say nothing about the toolchain
-    # they dispatch to. rustup resolves the store from RUSTUP_HOME, which is swept,
-    # and otherwise from HOME, which cannot be. Record the binaries that actually
-    # run so a redirected store is visible in the evidence.
-    # rustup resolves a toolchain from the working directory, so this must run
-    # where the gates run rather than where the caller happened to stand, and it
-    # must cover every binary rustup dispatches for them.
-    for proxied in cargo rustc rustfmt clippy-driver rustdoc cargo-fmt cargo-clippy; do
-        proxied_path="$(
-            cd "$repo_root" && rustup which "$proxied" 2>/dev/null || true
-        )"
-        if [[ -n "$proxied_path" && -f "$proxied_path" ]]; then
-            resolved_tools+=(
-                "$(printf 'rustup-which-%s %s' \
-                    "$proxied" "$(sha256sum -- "$proxied_path")")"
-            )
-        fi
-    done
+# ---------------------------------------------------------------------------
+# Arguments
+# ---------------------------------------------------------------------------
+if (($# < 2 || $# > 3)); then
+    printf 'usage: %s REPOSITORY_ROOT OUTPUT_DIRECTORY [CPU]\n' "$0" >&2
+    exit 2
 fi
-# The re-exec above pins the interpreter, and the tool inventory records whatever
-# `bash` PATH resolves -- which need not be the same file. Record the shell that
-# is actually parsing and running this script.
-interpreter_sum="$(sha256sum -- "$BASH")"
-resolved_tools+=(
-    "$(printf 'interpreter %s %s' "${interpreter_sum%% *}" "$BASH")"
-)
-resolved_tools+=("$(printf 'effective_rustup_home %s' "${RUSTUP_HOME:-$HOME/.rustup}")")
-resolved_tools+=("$(printf 'home %s' "$HOME")")
-resolved_tools+=("$(printf 'git_config_global %s' "$GIT_CONFIG_GLOBAL")")
-resolved_tools+=("$(printf 'git_config_system %s' "$GIT_CONFIG_SYSTEM")")
-resolved_tools+=(
-    "$(printf 'git_no_replace_objects %s' "$GIT_NO_REPLACE_OBJECTS")"
-)
-resolved_tools+=(
-    "$(printf 'git_config_override_%s %s' \
-        "$GIT_CONFIG_KEY_0" "$GIT_CONFIG_VALUE_0")"
-)
-resolved_tools+=("$(printf 'perf_config %s' "$PERF_CONFIG")")
+
+repo_root="$(cd -- "$1" && pwd -P)"
+output_dir="$2"
+topic_rel="topics/019-cpu-frontend-bottlenecks"
+topic_dir="$repo_root/$topic_rel"
+
 if [[ ! -r "$topic_dir/experiment/generate.py" ]] \
     || [[ ! -r "$topic_dir/experiment/frontend_experiment.py" ]]; then
     printf 'repository lacks the Topic 19 experiment\n' >&2
     exit 2
 fi
 
-if [[ -L "$output_dir" ]]; then
-    printf 'OUTPUT_DIRECTORY must not be a symbolic link: %s\n' "$output_dir" >&2
-    exit 2
-fi
-if [[ -e "$output_dir" ]]; then
-    if [[ ! -d "$output_dir" ]]; then
-        printf 'OUTPUT_DIRECTORY exists and is not a directory: %s\n' "$output_dir" >&2
-        exit 2
-    fi
-    shopt -s nullglob dotglob
-    existing_entries=("$output_dir"/*)
-    shopt -u nullglob dotglob
-    if ((${#existing_entries[@]} > 0)); then
-        printf 'OUTPUT_DIRECTORY must be empty: %s\n' "$output_dir" >&2
-        exit 2
-    fi
-fi
-# Reject a path inside the repository before creating it. mkdir -p would
-# otherwise leave new directories that the root workspace's topics/* glob treats
-# as members without a manifest, breaking every later Cargo invocation. A lexical
-# test is not enough, because a symlinked path does not share the physical
-# repo_root prefix, so the deepest existing ancestor is resolved physically and
-# the remaining components are appended to it.
+# ---------------------------------------------------------------------------
+# Output directory
+# ---------------------------------------------------------------------------
+# The evidence directory must live outside the repository. This is a practical
+# constraint, not a security one: the root workspace globs `topics/*`, so a
+# directory created under it becomes a workspace member with no manifest and
+# every later Cargo invocation fails to load. Check the absolute path before
+# mkdir so the common mistake does not leave the repo broken, then re-check the
+# resolved path afterwards to catch a symlinked target.
 case "$output_dir" in
     /*) candidate_output="$output_dir" ;;
     *) candidate_output="$PWD/$output_dir" ;;
 esac
-# A .. component can cancel a not-yet-existing directory, so the reconstruction
-# below would compare a path that mkdir -p never creates while it creates the
-# canceled prefix instead. Refuse them rather than trying to normalize.
-case "/$candidate_output/" in
-    */../*)
-        printf 'OUTPUT_DIRECTORY must not contain a .. component: %s\n' \
-            "$output_dir" >&2
-        exit 2
-        ;;
-esac
-candidate_existing="$candidate_output"
-candidate_tail=""
-while [[ ! -d "$candidate_existing" ]]; do
-    candidate_tail="${candidate_existing##*/}${candidate_tail:+/$candidate_tail}"
-    candidate_existing="${candidate_existing%/*}"
-    [[ -z "$candidate_existing" ]] && candidate_existing=/
-done
-candidate_existing="$(cd -- "$candidate_existing" && pwd -P)"
-candidate_output="${candidate_existing%/}${candidate_tail:+/$candidate_tail}"
 if [[ "$candidate_output" == "$repo_root" || "$candidate_output" == "$repo_root"/* ]]; then
-    printf 'OUTPUT_DIRECTORY must be outside the repository: %s\n' \
-        "$candidate_output" >&2
+    printf 'OUTPUT_DIRECTORY must be outside the repository: %s\n' "$output_dir" >&2
+    exit 2
+fi
+if [[ -e "$output_dir" && ! -d "$output_dir" ]]; then
+    printf 'OUTPUT_DIRECTORY exists and is not a directory: %s\n' "$output_dir" >&2
     exit 2
 fi
 mkdir -p -- "$output_dir"
 output_dir="$(cd -- "$output_dir" && pwd -P)"
 if [[ "$output_dir" == "$repo_root" || "$output_dir" == "$repo_root"/* ]]; then
-    printf 'OUTPUT_DIRECTORY must be outside the repository\n' >&2
+    printf 'OUTPUT_DIRECTORY must be outside the repository: %s\n' "$output_dir" >&2
+    exit 2
+fi
+# A non-empty directory would mix this run's evidence with a previous one, and
+# evidence.sha256 at the end would cover both without distinguishing them.
+shopt -s nullglob dotglob
+existing_entries=("$output_dir"/*)
+shopt -u nullglob dotglob
+if ((${#existing_entries[@]} > 0)); then
+    printf 'OUTPUT_DIRECTORY must be empty: %s\n' "$output_dir" >&2
     exit 2
 fi
 
+# ---------------------------------------------------------------------------
+# Required tools
+# ---------------------------------------------------------------------------
+required_tools=(
+    awk cargo cc cmp date gcc getconf git gzip ln lscpu mkdir mktemp mv nm
+    objdump perf python3 readelf rg rm rustc sha256sum size sort stat taskset
+    uname xargs
+)
+for tool in "${required_tools[@]}"; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+        printf 'required tool is unavailable: %s\n' "$tool" >&2
+        exit 2
+    fi
+done
+# Record where each tool resolved. A surprising answer (a wrapper, a second gcc
+# earlier on PATH) is then visible when reading the evidence months later, which
+# is the question this answers -- not tamper detection.
+recorded_tools=()
+for tool in "${required_tools[@]}"; do
+    recorded_tools+=("$(printf '%s %s' "$tool" "$(command -v "$tool")")")
+done
+recorded_tools+=("$(printf 'effective_rustup_home %s' "${RUSTUP_HOME:-$HOME/.rustup}")")
+recorded_tools+=("$(printf 'perf_config %s' "$PERF_CONFIG")")
+
+# ---------------------------------------------------------------------------
+# CPU selection
+# ---------------------------------------------------------------------------
+# Everything measured runs pinned to one CPU, and -march=native below resolves
+# from whichever CPU the compiler runs on, so the same CPU has to be used for
+# both or the recorded flags describe a different core than the one measured.
 if (($# == 3)); then
     cpu="$3"
 else
@@ -524,288 +151,44 @@ if ! [[ "$cpu" =~ ^(0|[1-9][0-9]*)$ ]] \
     exit 2
 fi
 
+# ---------------------------------------------------------------------------
+# Source identity
+# ---------------------------------------------------------------------------
+# Two modes. A Git checkout names its own commit and must be clean, so the
+# evidence can say exactly which bytes were compiled. An extracted Git archive
+# has no index, so the caller declares the identity and the evidence labels it
+# declared rather than verified.
+#
+# Assignments from command substitution abort under `set -e`, so a git failure
+# here cannot be mistaken for a clean tree.
 if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == "$repo_root" ]]; then
     source_commit="$(git -C "$repo_root" rev-parse HEAD)"
-    # A filter driver is an arbitrary command that Git runs to convert worktree
-    # content, and `git status` below invokes it -- verified that
-    # `git status --porcelain` executes a repo-local `filter.<driver>.clean`. The
-    # config variables exported above take global and system configuration out of
-    # play, but a driver defined in .git/config stays in effect and
-    # .git/info/attributes can bind it to tracked paths without being recorded
-    # source. That command would run after the tool inventory is hashed, so it
-    # could replace a recorded binary while build-flags.txt still names the old
-    # digest. There is no environment override that disables filters, and an
-    # attributes binding to an undefined driver is inert, so the definitions are
-    # what gets refused -- before the first probe that would run one.
-    # The listing is captured with its own status rather than piped into a matcher,
-    # because under pipefail a git failure would be masked by the matcher's
-    # no-match 1 and this guard would fail open. `git config` exits 1 for no
-    # match, which is a legitimate empty result; anything else is fatal. The keys
-    # are then selected in-shell, so the parser is not an unrecorded external.
-    filter_scan_status=0
-    filter_config="$(
-        git -C "$repo_root" config --get-regexp '^filter\.'
-    )" || filter_scan_status=$?
-    if ((filter_scan_status != 0 && filter_scan_status != 1)); then
-        printf 'the filter-driver scan failed with status %s; refusing to run\n' \
-            "$filter_scan_status" >&2
-        exit 2
-    fi
-    # Rows are '<key> <value>', and only the three keys that name a command can
-    # execute anything; `filter.<driver>.required` on its own cannot.
-    configured_filters=""
-    while IFS= read -r filter_row; do
-        [[ -n "$filter_row" ]] || continue
-        case "${filter_row%% *}" in
-            *.clean | *.smudge | *.process)
-                configured_filters+=" ${filter_row%% *}"
-                ;;
-        esac
-    done <<<"$filter_config"
-    if [[ -n "$configured_filters" ]]; then
-        printf 'repository-local filter drivers would run during the Git probes\n' >&2
-        printf 'and are not recorded source:%s\n' "$configured_filters" >&2
-        exit 2
-    fi
-    # --untracked-files=all so that a repository-level status.showUntrackedFiles
-    # setting cannot suppress the report.
-    #
-    # An empty answer must not read as a clean tree: repository-local config can
-    # break this one command while leaving the others working -- verified that
-    # `status.renames=maybe` makes `git status` exit 128 with no output, which
-    # a bare `[[ -n "$(...)" ]]` accepts as clean. Any nonzero status is fatal.
-    status_scan_status=0
-    worktree_status="$(
-        git -C "$repo_root" status --porcelain --untracked-files=all
-    )" || status_scan_status=$?
-    if ((status_scan_status != 0)); then
-        printf 'git status failed with status %s; refusing to run\n' \
-            "$status_scan_status" >&2
-        exit 2
-    fi
+    source_commit_verification=git-checkout
+    # --untracked-files=all so a repository-level status.showUntrackedFiles
+    # setting cannot hide a stray file that the Cargo gates would compile.
+    worktree_status="$(git -C "$repo_root" status --porcelain --untracked-files=all)"
     if [[ -n "$worktree_status" ]]; then
-        printf 'repository must be clean\n' >&2
+        printf 'repository must be clean; measured bytes would not match %s\n' \
+            "$source_commit" >&2
+        printf '%s\n' "$worktree_status" >&2
         exit 2
     fi
     if [[ -n "${SOURCE_COMMIT:-}" && "$SOURCE_COMMIT" != "$source_commit" ]]; then
         printf 'SOURCE_COMMIT does not match the checked-out commit\n' >&2
         exit 2
     fi
-    # `|| true` on the pipeline would swallow a git failure as well as ripgrep's
-    # no-match 1, and an empty answer here means "no unmanifestable entries", so
-    # the listing is captured with its own status first and filtered in-shell.
-    index_scan_status=0
-    index_listing="$(git -C "$repo_root" ls-files -s)" || index_scan_status=$?
-    if ((index_scan_status != 0)); then
-        printf 'the index scan failed with status %s; refusing to run\n' \
-            "$index_scan_status" >&2
+    # A tracked symbolic link puts the link in the index while the manifest below
+    # hashes what the link resolves to -- sha256sum follows links -- so a link
+    # pointing outside the tree would attribute foreign bytes to source_commit.
+    # One index read answers this. Walking the worktree is not needed and would
+    # traverse .git and target/ to reach the same conclusion.
+    tracked_symlinks="$(git -C "$repo_root" ls-files -s | awk '$1 == "120000"')"
+    if [[ -n "$tracked_symlinks" ]]; then
+        printf 'tracked symbolic links are unsupported: the manifest would hash\n' >&2
+        printf 'the link target rather than the recorded source bytes:\n%s\n' \
+            "$tracked_symlinks" >&2
         exit 2
     fi
-    unmanifestable=""
-    while IFS= read -r index_row; do
-        [[ -n "$index_row" ]] || continue
-        case "$index_row" in
-            '100644 '* | '100755 '*) ;;
-            *) unmanifestable+=" $index_row" ;;
-        esac
-    done <<<"$index_listing"
-    if [[ -n "$unmanifestable" ]]; then
-        printf 'tracked symbolic links or submodules are unsupported: %s\n' \
-            "$unmanifestable" >&2
-        exit 2
-    fi
-    # assume-unchanged (lowercase) and skip-worktree (S) entries keep edits out
-    # of git status, so the clean-tree gate above would pass while the manifest
-    # hashes working-tree bytes that differ from source_commit. Captured with its
-    # own status for the same reason as the scan above.
-    flag_scan_status=0
-    flag_listing="$(git -C "$repo_root" ls-files -v)" || flag_scan_status=$?
-    if ((flag_scan_status != 0)); then
-        printf 'the index-flag scan failed with status %s; refusing to run\n' \
-            "$flag_scan_status" >&2
-        exit 2
-    fi
-    hidden_index_flags=""
-    while IFS= read -r flag_row; do
-        [[ -n "$flag_row" ]] || continue
-        # A lowercase tag is the assume-unchanged form of any tag, and S is
-        # skip-worktree. [[:lower:]] rather than [a-z], so the class cannot pick
-        # up an uppercase tag such as the ordinary H under a collating locale.
-        case "$flag_row" in
-            [[:lower:]]' '* | 'S '*) hidden_index_flags+=" $flag_row" ;;
-        esac
-    done <<<"$flag_listing"
-    if [[ -n "$hidden_index_flags" ]]; then
-        printf 'assume-unchanged or skip-worktree hides edits from the clean-tree gate: %s\n' \
-            "$hidden_index_flags" >&2
-        exit 2
-    fi
-    # git status cannot report ignored paths at all, so an ignored Cargo.toml,
-    # build.rs, or auto-discovered target stays out of the manifest while the
-    # --workspace gates still load it: Cargo compiles and runs a package-root
-    # build.rs automatically, and auto-discovers examples, tests, benches, and
-    # src/bin targets that `cargo test --examples` and `clippy --all-targets`
-    # then compile. Compare all of them against the index.
-    members_root="${topic_rel%%/*}"
-    hidden_members=""
-    for candidate in "$repo_root/$members_root"/*/Cargo.toml \
-        "$repo_root/$members_root"/*/build.rs \
-        "$repo_root/$members_root"/*/src/lib.rs \
-        "$repo_root/$members_root"/*/src/main.rs \
-        "$repo_root/$members_root"/*/examples/*.rs \
-        "$repo_root/$members_root"/*/tests/*.rs \
-        "$repo_root/$members_root"/*/benches/*.rs \
-        "$repo_root/$members_root"/*/src/bin/*.rs \
-        "$repo_root/$members_root"/*/examples/*/main.rs \
-        "$repo_root/$members_root"/*/tests/*/main.rs \
-        "$repo_root/$members_root"/*/benches/*/main.rs \
-        "$repo_root/$members_root"/*/src/bin/*/main.rs; do
-        [[ -e "$candidate" ]] || continue
-        candidate_rel="${candidate#"$repo_root"/}"
-        if ! git -C "$repo_root" ls-files --error-unmatch -- "$candidate_rel" \
-            >/dev/null 2>&1; then
-            hidden_members+=" $candidate_rel"
-        fi
-    done
-    if [[ -n "$hidden_members" ]]; then
-        printf 'untracked workspace files would be loaded by the Cargo gates:%s\n' \
-            "$hidden_members" >&2
-        exit 2
-    fi
-    # A tracked manifest can name a target with an explicit `path`, and tracked
-    # source can pull in a module with `mod` or `#[path]`, so enumerating the
-    # default layouts cannot cover every compile input. Require instead that every
-    # Rust source file in the tree is tracked, which holds regardless of how Cargo
-    # or rustc is told to find it.
-    # The listing is captured with its status rather than piped, because a process
-    # substitution that fails yields an empty list and this guard would then pass
-    # on a traversal or permission error. ripgrep exits 1 for no matches, which is
-    # a legitimate empty result; anything else is fatal.
-    rust_scan_status=0
-    rust_file_list="$(
-        cd "$repo_root" &&
-            rg --no-config --files -uu -g '!/.git/' -g '!/target/' -g '*.rs'
-    )" || rust_scan_status=$?
-    if ((rust_scan_status != 0 && rust_scan_status != 1)); then
-        printf 'the Rust source scan failed with status %s; refusing to run\n' \
-            "$rust_scan_status" >&2
-        exit 2
-    fi
-    untracked_rust=""
-    while IFS= read -r candidate_rel; do
-        [[ -n "$candidate_rel" ]] || continue
-        if ! git -C "$repo_root" ls-files --error-unmatch -- "$candidate_rel" \
-            >/dev/null 2>&1; then
-            untracked_rust+=" $candidate_rel"
-        fi
-    done <<<"$rust_file_list"
-    if [[ -n "$untracked_rust" ]]; then
-        printf 'untracked Rust sources are present and could be compiled:%s\n' \
-            "$untracked_rust" >&2
-        exit 2
-    fi
-    # `git status` and `git diff` both apply clean filters, and repository-local
-    # attributes in $GIT_DIR/info/attributes cannot be disabled by the config
-    # variables exported above, so a same-size edit mapped back to the committed
-    # bytes can leave both empty. Compare each tracked file's bytes against its
-    # blob directly, which no filter can influence.
-    #
-    # Two empty streams compare equal, so a listing that fails identically on both
-    # sides would pass this gate. NUL-separated data cannot be held in a shell
-    # variable, so the streams stay as they are and the enumerator is proved to
-    # work and to report a non-empty index immediately beforehand instead.
-    tracked_scan_status=0
-    tracked_listing="$(git -C "$repo_root" ls-files)" || tracked_scan_status=$?
-    if ((tracked_scan_status != 0)); then
-        printf 'the tracked-file scan failed with status %s; refusing to run\n' \
-            "$tracked_scan_status" >&2
-        exit 2
-    fi
-    if [[ -z "$tracked_listing" ]]; then
-        printf 'the index reports no tracked files; refusing to run\n' >&2
-        exit 2
-    fi
-    if ! cmp -s \
-        <(git -C "$repo_root" ls-files -z \
-            | (cd "$repo_root" && LC_ALL=C sort -z | xargs -0 sha256sum --)) \
-        <(git -C "$repo_root" ls-files -z \
-            | LC_ALL=C sort -z \
-            | while IFS= read -r -d '' blob_path; do
-                # Shell-only field extraction, so the comparison does not depend
-                # on an external cut that is not in the frozen inventory.
-                blob_sum="$(
-                    git -C "$repo_root" cat-file blob \
-                        "$source_commit:$blob_path" | sha256sum --
-                )"
-                printf '%s  %s\n' "${blob_sum%% *}" "$blob_path"
-            done) \
-        ; then
-        printf 'tracked working-tree bytes differ from their committed blobs\n' >&2
-        printf 'a clean filter or index flag can hide this from git status\n' >&2
-        exit 2
-    fi
-    # The comparison above reads blobs from source_commit rather than HEAD, so a
-    # checkout that moved HEAD mid-run cannot make it validate a different tree.
-    # Confirm HEAD is still the commit the evidence names.
-    if [[ "$(git -C "$repo_root" rev-parse HEAD)" != "$source_commit" ]]; then
-        printf 'HEAD moved during validation; refusing to run\n' >&2
-        exit 2
-    fi
-    # rustfmt and Clippy read configuration from the directory of the file being
-    # processed and every parent, so a config nested at any depth applies -- a
-    # src/rustfmt.toml changes `cargo fmt --check` for src/lib.rs. Scan the whole
-    # tree, including ignored paths, and require every such file to be tracked.
-    config_scan_status=0
-    config_file_list="$(
-        cd "$repo_root" &&
-            rg --no-config --files -uu -g '!/.git/' -g '!/target/' \
-                -g 'rustfmt.toml' -g '.rustfmt.toml' \
-                -g 'clippy.toml' -g '.clippy.toml'
-    )" || config_scan_status=$?
-    if ((config_scan_status != 0 && config_scan_status != 1)); then
-        printf 'the tool-configuration scan failed with status %s; refusing\n' \
-            "$config_scan_status" >&2
-        exit 2
-    fi
-    nested_configs=""
-    while IFS= read -r candidate_rel; do
-        [[ -n "$candidate_rel" ]] || continue
-        if ! git -C "$repo_root" ls-files --error-unmatch -- "$candidate_rel" \
-            >/dev/null 2>&1; then
-            nested_configs+=" $candidate_rel"
-        fi
-    done <<<"$config_file_list"
-    if [[ -n "$nested_configs" ]]; then
-        printf 'untracked rustfmt or Clippy configuration would apply to the gates:%s\n' \
-            "$nested_configs" >&2
-        exit 2
-    fi
-    # The manifest and every source scan use `rg --files`, which does not follow
-    # symbolic links, so a symlinked input or tool config would be used by Cargo,
-    # rustfmt, Clippy, or Python while never appearing in the recorded bytes.
-    # Tracked symlinks are already refused by the index mode check above; this
-    # covers untracked and ignored ones, using shell globbing so no external
-    # walker is needed. Globstar does not descend through symlinked directories,
-    # so such a directory is reported rather than traversed.
-    symlinked_inputs=""
-    \builtin shopt -s globstar dotglob nullglob
-    for candidate in "$repo_root"/**/*; do
-        candidate_rel="${candidate#"$repo_root"/}"
-        case "$candidate_rel" in
-            .git | .git/* | target | target/*) continue ;;
-        esac
-        if [[ -L "$candidate" ]]; then
-            symlinked_inputs+=" $candidate_rel"
-        fi
-    done
-    \builtin shopt -u globstar dotglob nullglob
-    if [[ -n "$symlinked_inputs" ]]; then
-        printf 'symbolic links in the source tree are unsupported, because the\n' >&2
-        printf 'manifest records the link and not the bytes that get used:%s\n' \
-            "$symlinked_inputs" >&2
-        exit 2
-    fi
-    source_commit_verification=git-checkout
 else
     if ! [[ "${SOURCE_COMMIT:-}" =~ ^[0-9a-f]{40}$ ]]; then
         printf 'SOURCE_COMMIT is required for an archive source tree\n' >&2
@@ -817,117 +200,31 @@ else
     fi
     source_commit="$SOURCE_COMMIT"
     source_commit_verification=declared-archive
-    # Archive mode has no index, so the symlink check that checkout mode gets from
-    # `ls-files -s` must be done here too: the manifest is the only record of the
-    # source bytes, and `rg --files` does not follow links.
-    symlinked_inputs=""
-    \builtin shopt -s globstar dotglob nullglob
-    for candidate in "$repo_root"/**/*; do
-        candidate_rel="${candidate#"$repo_root"/}"
-        case "$candidate_rel" in
-            .git | .git/* | target | target/*) continue ;;
-        esac
-        if [[ -L "$candidate" ]]; then
-            symlinked_inputs+=" $candidate_rel"
-        fi
-    done
-    \builtin shopt -u globstar dotglob nullglob
-    if [[ -n "$symlinked_inputs" ]]; then
-        printf 'symbolic links in the source tree are unsupported, because the\n' >&2
-        printf 'manifest records the link and not the bytes that get used:%s\n' \
-            "$symlinked_inputs" >&2
-        exit 2
-    fi
 fi
 
-# Cargo, rustfmt, and Clippy all discover configuration from the gate working
-# directory upward or from the package root, so an isolated CARGO_HOME is not
-# sufficient: a config in repo_root or any ancestor can inject build.rustflags,
-# wrappers, linker or target settings, formatting rules, or lint thresholds that
-# build-flags.txt never records. A config tracked inside repo_root is part of the
-# recorded source and is allowed; anything else is refused.
-unrecorded_configs=()
-probe_dir="$repo_root"
-while :; do
-    for candidate in \
-        "$probe_dir/.cargo/config.toml" "$probe_dir/.cargo/config" \
-        "$probe_dir/rustfmt.toml" "$probe_dir/.rustfmt.toml" \
-        "$probe_dir/clippy.toml" "$probe_dir/.clippy.toml" \
-        "$probe_dir/rust-toolchain" "$probe_dir/rust-toolchain.toml"; do
-        [[ -e "$candidate" ]] || continue
-        # In archive mode there is no index to consult, and the source manifest is
-        # an unrestricted scan of repo_root, so every file under it is recorded by
-        # construction. In checkout mode only tracked files are recorded.
-        if [[ "$probe_dir" == "$repo_root" ]]; then
-            if [[ "$source_commit_verification" == declared-archive ]]; then
-                continue
-            fi
-            if git -C "$repo_root" ls-files --error-unmatch -- \
-                "${candidate#"$repo_root"/}" >/dev/null 2>&1; then
-                continue
-            fi
-        fi
-        unrecorded_configs+=("$candidate")
-    done
-    [[ "$probe_dir" == / ]] && break
-    # Shell-only parent expansion, so these walks do not depend on an external
-    # dirname that a PATH shim could truncate to / and stop the loop early.
-    probe_dir="${probe_dir%/*}"
-    [[ -z "$probe_dir" ]] && probe_dir=/
-done
-if ((${#unrecorded_configs[@]} > 0)); then
-    printf 'unrecorded tool configuration would apply to the gates:\n' >&2
-    printf '  %s\n' "${unrecorded_configs[@]}" >&2
-    exit 2
+# ---------------------------------------------------------------------------
+# Toolchain pin
+# ---------------------------------------------------------------------------
+# This is the one pin that materially changes the measurement: a different rustc
+# or gcc emits different code, and this topic is about the shape of emitted code.
+# rustup gives the extensionless legacy file precedence when both exist, so the
+# effective pin is selected the same way.
+if [[ -e "$repo_root/rust-toolchain" ]]; then
+    pin_file="$repo_root/rust-toolchain"
+elif [[ -e "$repo_root/rust-toolchain.toml" ]]; then
+    pin_file="$repo_root/rust-toolchain.toml"
+else
+    pin_file=""
 fi
-
-# A rustup directory override outranks a rust-toolchain file and is stored in
-# rustup's own settings rather than the environment, so clearing RUSTUP_TOOLCHAIN
-# does not remove it. When the checkout pins a toolchain, the gates are expected to
-# run through rustup, so rustup must be present for that override to be checkable:
-# proxy cargo/rustc honor overrides whether or not a binary named rustup is on
-# PATH, and skipping the check would claim a guarantee the run cannot make.
-toolchain_pin=0
-if [[ -e "$repo_root/rust-toolchain.toml" || -e "$repo_root/rust-toolchain" ]]; then
-    toolchain_pin=1
-fi
-rustup_available=0
-if command -v rustup >/dev/null 2>&1 \
-    && [[ "$(type -t rustup 2>/dev/null || true)" == file ]] \
-    && rustup override list >/dev/null 2>&1; then
-    rustup_available=1
-fi
-if ((toolchain_pin == 1 && rustup_available == 0)); then
-    printf 'the checkout pins a toolchain but rustup is unavailable, so a\n' >&2
-    printf 'directory override cannot be ruled out for the Cargo gates\n' >&2
-    exit 2
-fi
-# Requiring rustup does not establish that the gates use it: PATH could put a
-# standalone cargo ahead of the proxies, and that binary ignores the pin
-# entirely. Verify the outcome instead of the mechanism -- the versions the gates
-# will actually report must name the pinned channel.
-if ((toolchain_pin == 1)); then
-    # rustup gives the extensionless rust-toolchain file precedence when both
-    # exist, so the effective pin has to be selected the same way rather than
-    # always reading the TOML. The legacy file may hold a bare channel name or the
-    # same TOML shape, so both forms are handled.
-    if [[ -e "$repo_root/rust-toolchain" ]]; then
-        pin_file="$repo_root/rust-toolchain"
-    else
-        pin_file="$repo_root/rust-toolchain.toml"
-    fi
+if [[ -n "$pin_file" ]]; then
     pinned_channel_line="$(
-        rg --no-config -m 1 '^[[:space:]]*channel[[:space:]]*=' \
-            "$pin_file" 2>/dev/null || true
+        rg --no-config -m 1 '^[[:space:]]*channel[[:space:]]*=' "$pin_file" \
+            2>/dev/null || true
     )"
     if [[ -n "$pinned_channel_line" ]]; then
-        # Shell-only extraction of the quoted value, so the parser is not an
-        # unrecorded external that could make any version string appear to match.
         pinned_channel="${pinned_channel_line#*\"}"
         pinned_channel="${pinned_channel%%\"*}"
-        if [[ "$pinned_channel" == "$pinned_channel_line" ]]; then
-            pinned_channel=""
-        fi
+        [[ "$pinned_channel" == "$pinned_channel_line" ]] && pinned_channel=""
     else
         # A legacy file with no channel key is a bare toolchain name on one line.
         pinned_channel="$(
@@ -940,109 +237,32 @@ if ((toolchain_pin == 1)); then
         esac
     fi
     if [[ -z "$pinned_channel" ]]; then
-        printf 'could not read the pinned toolchain channel from %s\n' \
-            "$pin_file" >&2
+        printf 'could not read the pinned toolchain channel from %s\n' "$pin_file" >&2
         exit 2
     fi
-    resolved_tools+=("$(printf 'pin_file %s' "${pin_file#"$repo_root"/}")")
-    # A numeric channel appears verbatim in `cargo --version`, but a symbolic one
-    # does not: under a `stable` pin, `cargo --version` still reports a numeric
-    # version and never the word `stable` or the host triple, so a substring test
-    # against the version string aborts on a legitimate pin --
-    # verified against rustup for both forms. Symbolic pins are therefore checked
-    # against the toolchain rustup reports as active for the gate directory, which
-    # does name the channel: `stable-<host triple> (overridden by ...)`. rustup is
-    # guaranteed present here, because toolchain_pin == 1 with rustup unavailable
-    # already exited above.
-    case "$pinned_channel" in
-        [0-9]*) pin_match=version ;;
-        *) pin_match=active-toolchain ;;
-    esac
-    if [[ "$pin_match" == active-toolchain ]]; then
-        active_toolchain_report="$(
-            cd "$repo_root" && rustup show active-toolchain
-        )"
-        # The row is '<toolchain> (<reason>)' and the reason names a path that can
-        # itself contain the channel, so only the first field is compared, and the
-        # first line is taken in case the report grows. Shell-only extraction, so
-        # the parser is not an unrecorded external.
-        active_toolchain="${active_toolchain_report%%$'\n'*}"
-        active_toolchain="${active_toolchain%% *}"
-        # A pin may name the channel alone or include the host triple, and rustup
-        # always answers with the triple appended.
-        if [[ "$active_toolchain" != "$pinned_channel" \
-            && "$active_toolchain" != "$pinned_channel"-* ]]; then
-            printf 'the active toolchain does not match the pinned %s\n' \
-                "$pinned_channel" >&2
-            printf 'reported: %s\n' "$active_toolchain_report" >&2
-            exit 2
-        fi
-        resolved_tools+=(
-            "$(printf 'pinned-active-toolchain %s' "$active_toolchain")"
-        )
-    fi
+    recorded_tools+=("$(printf 'pin_file %s' "${pin_file#"$repo_root"/}")")
+    # Verify the outcome rather than the mechanism: whatever cargo and rustc the
+    # gates will actually run must report the pinned channel.
     for pinned_tool in cargo rustc; do
         pinned_version="$(cd "$repo_root" && "$pinned_tool" --version)"
-        if [[ "$pin_match" == version \
-            && "$pinned_version" != *"$pinned_channel"* ]]; then
+        if [[ "$pinned_version" != *"$pinned_channel"* ]]; then
             printf 'the %s the gates would use does not match the pinned %s\n' \
                 "$pinned_tool" "$pinned_channel" >&2
             printf 'reported: %s\n' "$pinned_version" >&2
             exit 2
         fi
-        resolved_tools+=(
-            "$(printf 'pinned-%s-version %s' "$pinned_tool" "$pinned_version")"
-        )
-    done
-    # Cargo dispatches `cargo fmt` and `cargo clippy` to PATH binaries named
-    # cargo-fmt and cargo-clippy, so the pin has to cover those too. Their
-    # --version strings name rustfmt and clippy rather than the channel, so the
-    # version comparison above cannot be reused; verify instead that each gate
-    # binary is a rustup proxy -- content-identical to rustup itself -- which is
-    # what makes dispatch go through rustup and honor the pin.
-    rustup_proxy_sum="$(sha256sum -- "$(command -v rustup)")"
-    rustup_proxy_sum="${rustup_proxy_sum%% *}"
-    for pinned_tool in cargo rustc cargo-fmt cargo-clippy rustdoc; do
-        proxy_sum="$(sha256sum -- "$(command -v "$pinned_tool")")"
-        if [[ "${proxy_sum%% *}" != "$rustup_proxy_sum" ]]; then
-            printf '%s is not a rustup proxy, so it can ignore the pinned %s\n' \
-                "$pinned_tool" "$pinned_channel" >&2
-            exit 2
-        fi
-    done
-fi
-if ((rustup_available == 1)); then
-    # Rows are '<path><padding><tab><toolchain>', and the padding width depends on
-    # the longest path, so matching a path followed directly by a tab silently
-    # misses short paths. Compare the trimmed first column instead.
-    override_dirs="$(
-        rustup override list 2>/dev/null \
-            | rg --no-config -v '^no overrides$' \
-            | sed 's/[[:space:]]*\t.*$//' || true
-    )"
-    probe_dir="$repo_root"
-    while :; do
-        while IFS= read -r override_dir; do
-            [[ -n "$override_dir" ]] || continue
-            if [[ "$override_dir" == "$probe_dir" ]]; then
-                printf 'a rustup directory override outranks rust-toolchain.toml: %s\n' \
-                    "$probe_dir" >&2
-                exit 2
-            fi
-        done <<<"$override_dirs"
-        [[ "$probe_dir" == / ]] && break
-        probe_dir="${probe_dir%/*}"
-        [[ -z "$probe_dir" ]] && probe_dir=/
+        recorded_tools+=("$(printf 'pinned-%s-version %s' "$pinned_tool" "$pinned_version")")
     done
 fi
 
+# ---------------------------------------------------------------------------
+# Scratch tree
+# ---------------------------------------------------------------------------
 build_dir="$(mktemp -d)"
 build_dir="$(cd -- "$build_dir" && pwd -P)"
-# A temporary tree inside the evidence directory (TMPDIR=OUTPUT_DIRECTORY) would
-# be hashed by the final evidence scan and then deleted by cleanup, leaving
-# evidence.sha256 describing files the archive does not contain. A temporary tree
-# inside the repository is equally unusable: the root workspace globs topics/*,
-# so scratch there becomes a workspace member and the Cargo gates fail to load.
+# Scratch inside the evidence directory would be hashed by the final manifest and
+# then deleted, leaving evidence.sha256 describing files the archive lacks.
+# Scratch inside the repository becomes a workspace member and breaks the gates.
 if [[ "$build_dir" == "$output_dir" \
     || "$build_dir" == "$output_dir"/* \
     || "$output_dir" == "$build_dir"/* \
@@ -1050,39 +270,48 @@ if [[ "$build_dir" == "$output_dir" \
     || "$build_dir" == "$repo_root"/* \
     || "$repo_root" == "$build_dir"/* ]]; then
     printf 'refusing to place the build tree inside the evidence or source tree\n' >&2
-    printf 'build_dir=%s\noutput_dir=%s\nrepo_root=%s\n' \
-        "$build_dir" "$output_dir" "$repo_root" >&2
     printf 'set TMPDIR outside OUTPUT_DIRECTORY and the repository\n' >&2
-    # The cleanup trap is not installed yet, and mktemp already created this
-    # directory. Leaving it inside the workspace glob would break later Cargo
-    # invocations until someone removed it by hand.
     rm -rf -- "$build_dir"
     exit 1
 fi
 manifest_tmp=
 cleanup() {
     rm -rf -- "$build_dir"
+    # An `if` rather than `[[ ... ]] && rm`: under `set -e` a false test as the
+    # last command in an EXIT trap makes the trap return nonzero, which becomes
+    # the script's exit status -- reporting failure for a run that fully
+    # succeeded. `return 0` for the same reason.
     if [[ -n "$manifest_tmp" ]]; then
         rm -f -- "$manifest_tmp"
     fi
+    return 0
 }
 trap cleanup EXIT
+
 gates_dir="$output_dir/gates"
 experiment_dir="$output_dir/experiment"
 frontend_dir="$build_dir/frontend"
 mkdir -p -- "$gates_dir" "$frontend_dir"
 
+# An isolated CARGO_HOME and target dir keep the gates from depending on, or
+# writing into, whatever state the host's Cargo cache happens to hold.
 export CARGO_HOME="$build_dir/cargo-home"
 export CARGO_TARGET_DIR="$build_dir/cargo-target"
 mkdir -p -- "$CARGO_HOME" "$CARGO_TARGET_DIR"
 
+# ---------------------------------------------------------------------------
+# Source manifest, before
+# ---------------------------------------------------------------------------
+# Hashed before and after the run and compared at the end. This catches the
+# realistic failure -- editing the tree while a multi-minute run is in flight, so
+# the numbers and the recorded source disagree.
 manifest_source() {
     (
         cd "$repo_root"
-        # In checkout mode the manifest must be reproducible from
-        # source_commit, so hash tracked files only. An -uu scan also picks up
-        # ignored paths (__pycache__, *.rs.bk) that leave the clean-tree gate
-        # satisfied yet change the recorded hashes.
+        # Checkout mode hashes tracked files only, so the manifest is
+        # reproducible from source_commit. An -uu scan would also pick up ignored
+        # paths (__pycache__, *.rs.bk) that change the hashes while leaving the
+        # clean-tree check satisfied.
         if [[ "$source_commit_verification" == git-checkout ]]; then
             git ls-files -z
         else
@@ -1093,16 +322,16 @@ manifest_source() {
     )
 }
 manifest_source >"$output_dir/source-files.before.sha256"
-# A digest over that manifest is an identity for the bytes this run actually
-# compiled, computed here rather than taken from the caller. In archive mode
-# SOURCE_COMMIT and SOURCE_ARCHIVE_SHA256 are declared values that nothing in this
-# script can verify -- which is why the evidence labels them declared-archive --
-# so this digest is the value to compare between runs or against a known tree.
+# A digest over that manifest is a single value identifying the bytes this run
+# compiled, computed here rather than taken from the caller. In archive mode the
+# declared commit and archive hash are unverifiable, so this is the value to
+# compare between runs or against a known tree.
 source_tree_digest="$(sha256sum -- "$output_dir/source-files.before.sha256")"
-resolved_tools+=(
-    "$(printf 'source_tree_digest %s' "${source_tree_digest%% *}")"
-)
+recorded_tools+=("$(printf 'source_tree_digest %s' "${source_tree_digest%% *}")")
 
+# ---------------------------------------------------------------------------
+# Host and toolchain record
+# ---------------------------------------------------------------------------
 start_utc="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 {
     printf 'run_start_utc=%s\n' "$start_utc"
@@ -1148,14 +377,15 @@ start_utc="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
     printf '\nperf\n'
     perf version
 } >"$output_dir/host.txt" 2>&1
-# -march=native resolves from the CPU the compiler happens to run on, so on a
-# host whose allowed set spans core types this must be pinned to the same CPU the
-# measured processes use, or the recorded native flags and the ELFs would describe
-# a different core than taskset measures.
+# -march=native resolves from the CPU the compiler happens to run on, so pin this
+# to the same CPU the measured processes use.
 taskset -c "$cpu" gcc -march=native -Q --help=target \
     >"$output_dir/gcc-native-target.txt" 2>&1
 perf list >"$output_dir/perf-list.txt" 2>&1
 
+# ---------------------------------------------------------------------------
+# Build flags
+# ---------------------------------------------------------------------------
 gcc_flags=(
     -std=c11
     -O3
@@ -1167,10 +397,9 @@ gcc_flags=(
     -fno-optimize-sibling-calls
     -fno-toplevel-reorder
     -march=native
-    # build_dir is a fresh mktemp path per run, and -g embeds the source path in
-    # DWARF, so without this the same source produced a different ELF hash on
-    # every run and the retained artifact-identity hashes could not be
-    # reproduced. Map the scratch path to a fixed placeholder instead.
+    # build_dir is a fresh mktemp path per run and -g embeds the source path in
+    # DWARF, so without this the same source produced a different ELF hash every
+    # run and the recorded artifact identities could not be reproduced.
     "-ffile-prefix-map=$frontend_dir=/topic19-build"
     -Wall
     -Wextra
@@ -1191,19 +420,21 @@ gcc_flags=(
         frontend_layout.c -o sparse4096
     printf '\n'
     printf 'gcc_working_directory=%s\n' "$frontend_dir"
-    printf 'resolved_tools\n'
-    printf '%s\n' "${resolved_tools[@]}"
+    printf 'recorded_tools\n'
+    printf '%s\n' "${recorded_tools[@]}"
     printf 'timing=12 blocks; odd ABBA; even BAAB; 48 fresh processes; '
     printf 'warm_rounds=512; measure_rounds=8192\n'
     printf 'perf=4 blocks per event pass; odd ABBA; even BAAB; '
     printf 'whole-process counts; anchor group must run at least 99%%\n'
 } >"$output_dir/build-flags.txt"
 
+# ---------------------------------------------------------------------------
+# Workspace gates
+# ---------------------------------------------------------------------------
+# The repo's own health checks. Retained as logs so a later reader can see the
+# tree was in a known-good state when the numbers were taken.
 if [[ "$source_commit_verification" == git-checkout ]]; then
-    (
-        cd "$repo_root"
-        git diff --check
-    ) >"$gates_dir/git-diff-check.log" 2>&1
+    (cd "$repo_root" && git diff --check) >"$gates_dir/git-diff-check.log" 2>&1
 else
     printf '%s\n' \
         'status=not-applicable' \
@@ -1212,40 +443,31 @@ else
         "source_archive_sha256=${SOURCE_ARCHIVE_SHA256:-unknown}" \
         >"$gates_dir/git-diff-check.log"
 fi
+(cd "$repo_root" && cargo fmt --all -- --check) \
+    >"$gates_dir/cargo-fmt.log" 2>&1
+(cd "$repo_root" && cargo test --locked --workspace --lib --examples) \
+    >"$gates_dir/cargo-test-lib-examples.log" 2>&1
+(cd "$repo_root" && cargo test --locked --workspace --doc) \
+    >"$gates_dir/cargo-test-doc.log" 2>&1
+(cd "$repo_root" && cargo clippy --locked --workspace --all-targets -- -D warnings) \
+    >"$gates_dir/cargo-clippy.log" 2>&1
+(cd "$repo_root" && cargo bench --locked --workspace --no-run) \
+    >"$gates_dir/cargo-bench-no-run.log" 2>&1
+(cd "$repo_root" && RUSTDOCFLAGS="-D warnings" cargo doc --locked --workspace --no-deps) \
+    >"$gates_dir/cargo-doc.log" 2>&1
 (
-    cd "$repo_root"
-    cargo fmt --all -- --check
-) >"$gates_dir/cargo-fmt.log" 2>&1
-(
-    cd "$repo_root"
-    cargo test --locked --workspace --lib --examples
-) >"$gates_dir/cargo-test-lib-examples.log" 2>&1
-(
-    cd "$repo_root"
-    cargo test --locked --workspace --doc
-) >"$gates_dir/cargo-test-doc.log" 2>&1
-(
-    cd "$repo_root"
-    cargo clippy --locked --workspace --all-targets -- -D warnings
-) >"$gates_dir/cargo-clippy.log" 2>&1
-(
-    cd "$repo_root"
-    cargo bench --locked --workspace --no-run
-) >"$gates_dir/cargo-bench-no-run.log" 2>&1
-(
-    cd "$repo_root"
-    RUSTDOCFLAGS="-D warnings" cargo doc --locked --workspace --no-deps
-) >"$gates_dir/cargo-doc.log" 2>&1
-(
-    # -I implies -E, so PYTHONPYCACHEPREFIX would be ignored and py_compile
-    # would write __pycache__ beside the sources, which the archive-mode
-    # after-manifest then reports as a source change. -X survives -E.
+    # -I implies -E, so PYTHONPYCACHEPREFIX would be ignored and py_compile would
+    # write __pycache__ beside the sources, which the after-manifest then reports
+    # as a source change. -X survives -E.
     python3 -I -X pycache_prefix="$build_dir/pycache" -m py_compile \
         "$topic_dir/experiment/generate.py" \
         "$topic_dir/experiment/frontend_experiment.py"
     bash -n "$topic_dir/experiment/run_remote.sh"
 ) >"$gates_dir/script-syntax.log" 2>&1
 
+# ---------------------------------------------------------------------------
+# Build the two layout variants
+# ---------------------------------------------------------------------------
 generated_c="$frontend_dir/frontend_layout.c"
 dense="$frontend_dir/dense16"
 sparse="$frontend_dir/sparse4096"
@@ -1255,8 +477,8 @@ python3 -I "$topic_dir/experiment/generate.py" "$generated_c"
 # Compile from inside frontend_dir with a relative source name. -g records the
 # compilation directory in DWARF, so invoking gcc from the caller's directory made
 # the ELF bytes depend on that directory even with the source path mapped. Running
-# here means the compilation directory is frontend_dir, which -ffile-prefix-map
-# already rewrites to the fixed placeholder.
+# here makes the compilation directory frontend_dir, which -ffile-prefix-map
+# already rewrites to a fixed placeholder.
 (
     cd "$frontend_dir"
     taskset -c "$cpu" gcc "${gcc_flags[@]}" -DFUNC_ALIGN=16 \
@@ -1264,12 +486,14 @@ python3 -I "$topic_dir/experiment/generate.py" "$generated_c"
     taskset -c "$cpu" gcc "${gcc_flags[@]}" -DFUNC_ALIGN=4096 \
         frontend_layout.c -o sparse4096
 )
+# The A/A control is two hard links to one ELF, so the two arms are byte- and
+# inode-identical by construction. Any measured difference between them is
+# label, launch-path, or analysis asymmetry rather than a layout effect.
 ln "$dense" "$aa_a"
 ln "$dense" "$aa_b"
 {
     sha256sum "$generated_c" "$dense" "$sparse" "$aa_a" "$aa_b"
-    stat -c 'path=%n device=%d inode=%i links=%h size=%s' \
-        "$dense" "$aa_a" "$aa_b"
+    stat -c 'path=%n device=%d inode=%i links=%h size=%s' "$dense" "$aa_a" "$aa_b"
 } >"$output_dir/artifact-identity.txt"
 if [[ "$(stat -c '%d:%i' "$dense")" != "$(stat -c '%d:%i' "$aa_a")" ]] \
     || [[ "$(stat -c '%d:%i' "$dense")" != "$(stat -c '%d:%i' "$aa_b")" ]]; then
@@ -1277,6 +501,10 @@ if [[ "$(stat -c '%d:%i' "$dense")" != "$(stat -c '%d:%i' "$aa_a")" ]] \
     exit 1
 fi
 
+# ---------------------------------------------------------------------------
+# Layout evidence
+# ---------------------------------------------------------------------------
+# This is the substance of the topic: what the two binaries actually look like.
 for variant in dense16 sparse4096; do
     binary="$frontend_dir/$variant"
     size -A "$binary" >"$output_dir/$variant.size.txt"
@@ -1292,6 +520,11 @@ for variant in dense16 sparse4096; do
     done
 done
 
+# ---------------------------------------------------------------------------
+# Measure
+# ---------------------------------------------------------------------------
+# Fail early and loudly if perf cannot count at all, rather than producing a run
+# full of zeros that reads like an absence of activity.
 if ! perf stat -x ';' --no-big-num -o "$output_dir/perf-probe.csv" \
     -e task-clock -- uname \
     >"$output_dir/perf-probe.stdout" \
@@ -1309,6 +542,9 @@ python3 -I "$topic_dir/experiment/frontend_experiment.py" \
     --cpu "$cpu" \
     >"$output_dir/process.log" 2>&1
 
+# ---------------------------------------------------------------------------
+# Source manifest, after
+# ---------------------------------------------------------------------------
 manifest_source >"$output_dir/source-files.after.sha256"
 if ! cmp -s \
     "$output_dir/source-files.before.sha256" \
@@ -1319,12 +555,15 @@ fi
 
 printf 'run_end_utc=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
     >>"$output_dir/host.txt"
+# The manifest is built in scratch and moved into place, so a run interrupted
+# mid-hash does not leave a partial evidence.sha256 that looks complete.
 manifest_tmp="$(mktemp -p "$build_dir")"
 (
     cd "$output_dir"
     rg --no-config --files -uu -0 . | LC_ALL=C sort -z | xargs -0 sha256sum --
 ) >"$manifest_tmp"
 mv -- "$manifest_tmp" "$output_dir/evidence.sha256"
+manifest_tmp=
 
 printf 'source_commit=%s\noutput=%s\ncpu=%s\n' \
     "$source_commit" "$output_dir" "$cpu"
