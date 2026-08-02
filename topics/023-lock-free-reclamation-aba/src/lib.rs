@@ -37,8 +37,9 @@ pub struct WitnessOutcome {
 
 /// Packs one 32-bit generation and one 32-bit index into a single CAS word.
 ///
-/// Packing provides no lifetime protection. It distinguishes histories only
-/// while the generation does not wrap during a stale snapshot's lifetime.
+/// Packing provides no lifetime protection. A protocol that increments the
+/// generation on every relevant head change distinguishes histories only while
+/// the generation does not wrap during a stale snapshot's lifetime.
 ///
 /// # Examples
 ///
