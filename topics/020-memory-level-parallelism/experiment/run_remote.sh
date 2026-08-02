@@ -3,6 +3,35 @@ set -euo pipefail
 
 # Validates an exact source tree, runs Topic 20, and writes evidence outside it.
 
+# These variables change which toolchain runs, which flags it gets, which headers
+# and libraries it finds, what Python imports, or how perf collects counters.
+# CARGO_ENCODED_RUSTFLAGS in particular outranks the RUSTFLAGS this script sets,
+# so left in place build-flags.txt would describe a build that did not happen.
+# Clear them and record what was cleared, so a run made under a stray RUSTFLAGS is
+# visible in the evidence instead of being folded silently into the numbers.
+swept_variables=()
+while IFS= read -r variable; do
+    case "$variable" in
+        CARGO_* | GIT_* | LD_* \
+            | RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTC_BOOTSTRAP \
+            | RUSTDOC | RUSTDOCFLAGS | RUSTFLAGS | RUSTFMT \
+            | RUSTUP_TOOLCHAIN | RUSTUP_HOME | CLIPPY_CONF_DIR \
+            | RIPGREP_CONFIG_PATH \
+            | CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | OBJC_INCLUDE_PATH \
+            | COMPILER_PATH | GCC_EXEC_PREFIX | GCC_COMPARE_DEBUG \
+            | LIBRARY_PATH | DEPENDENCIES_OUTPUT | SUNPRO_DEPENDENCIES \
+            | CDPATH | PERF_CONFIG \
+            | PYTHONPATH | PYTHONHOME | PYTHONSTARTUP)
+            swept_variables+=("$variable")
+            unset "$variable"
+            ;;
+    esac
+done < <(compgen -e)
+# perf falls back to $HOME/.perfconfig when PERF_CONFIG is unset, and perf stat
+# settings there change how the smoke events are collected. Point it at an empty
+# file so neither source applies.
+export PERF_CONFIG=/dev/null
+
 if (($# < 2 || $# > 3)); then
     printf 'usage: %s REPOSITORY_ROOT OUTPUT_DIRECTORY [CPU]\n' "$0" >&2
     exit 2
@@ -185,6 +214,7 @@ trap finalize EXIT
     printf 'source_verification=%s\n' "$source_verification"
     printf 'source_trust_root=%s\n' "$source_trust_root"
     printf 'source_archive_sha256=%s\n' "${SOURCE_ARCHIVE_SHA256:-unknown}"
+    printf 'swept_environment=%s\n' "${swept_variables[*]:-none}"
     printf 'selected_cpu=%s\n' "$cpu"
     printf 'cpu_allowed_list=%s\n' \
         "$(rg -m 1 '^Cpus_allowed_list:' /proc/self/status | awk '{print $2}')"
