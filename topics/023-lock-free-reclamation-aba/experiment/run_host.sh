@@ -35,7 +35,8 @@ if [[ $actual_archive_sha256 != "$SOURCE_ARCHIVE_SHA256" ]]; then
     "$SOURCE_ARCHIVE_SHA256" "$actual_archive_sha256" >&2
   exit 2
 fi
-rg --files | LC_ALL=C sort | xargs sha256sum >"$output_directory/source-tree.before.sha256"
+rg --files -g '!target/**' | LC_ALL=C sort | xargs sha256sum \
+  >"$output_directory/source-tree.before.sha256"
 actual_manifest_sha256=$(sha256sum "$output_directory/source-tree.before.sha256" | awk '{print $1}')
 if [[ $actual_manifest_sha256 != "$SOURCE_TREE_MANIFEST_SHA256" ]]; then
   printf 'source manifest mismatch: expected %s, observed %s\n' \
@@ -88,7 +89,7 @@ PYTHONPYCACHEPREFIX="$output_directory/pycache" \
   python3 -m py_compile "$topic/experiment/run_processes.py" "$topic/experiment/validate_receipts.py"
 bash -n "$topic/experiment/run_host.sh"
 
-native_target="$output_directory/native-target"
+native_target="$repository_root/../native-target"
 RUSTFLAGS='-C target-cpu=native -C codegen-units=1' \
   cargo build --release -p lock-free-reclamation-aba --bin aba_lab \
   --target-dir "$native_target" >"$output_directory/build.log" 2>&1
@@ -109,7 +110,8 @@ python3 "$topic/experiment/run_processes.py" \
 python3 "$topic/experiment/validate_receipts.py" "$output_directory" \
   >"$output_directory/receipt-validation.txt"
 
-rg --files | LC_ALL=C sort | xargs sha256sum >"$output_directory/source-tree.after.sha256"
+rg --files -g '!target/**' | LC_ALL=C sort | xargs sha256sum \
+  >"$output_directory/source-tree.after.sha256"
 cmp "$output_directory/source-tree.before.sha256" "$output_directory/source-tree.after.sha256"
 
 {
