@@ -35,7 +35,7 @@ if [[ $actual_archive_sha256 != "$SOURCE_ARCHIVE_SHA256" ]]; then
     "$SOURCE_ARCHIVE_SHA256" "$actual_archive_sha256" >&2
   exit 2
 fi
-rg --files | sort | xargs sha256sum >"$output_directory/source-tree.before.sha256"
+rg --files | LC_ALL=C sort | xargs sha256sum >"$output_directory/source-tree.before.sha256"
 actual_manifest_sha256=$(sha256sum "$output_directory/source-tree.before.sha256" | awk '{print $1}')
 if [[ $actual_manifest_sha256 != "$SOURCE_TREE_MANIFEST_SHA256" ]]; then
   printf 'source manifest mismatch: expected %s, observed %s\n' \
@@ -70,7 +70,7 @@ fi
   printf 'RUSTFLAGS=%s\n' "${RUSTFLAGS-<unset>}"
 } >"$output_directory/host.txt"
 
-rg --files "$topic" | sort | xargs sha256sum >"$output_directory/source-files.sha256"
+rg --files "$topic" | LC_ALL=C sort | xargs sha256sum >"$output_directory/source-files.sha256"
 
 if git rev-parse --git-dir >/dev/null 2>&1; then
   git diff --check >"$output_directory/gates/git-diff-check.log" 2>&1
@@ -109,7 +109,7 @@ python3 "$topic/experiment/run_processes.py" \
 python3 "$topic/experiment/validate_receipts.py" "$output_directory" \
   >"$output_directory/receipt-validation.txt"
 
-rg --files | sort | xargs sha256sum >"$output_directory/source-tree.after.sha256"
+rg --files | LC_ALL=C sort | xargs sha256sum >"$output_directory/source-tree.after.sha256"
 cmp "$output_directory/source-tree.before.sha256" "$output_directory/source-tree.after.sha256"
 
 {
@@ -124,5 +124,5 @@ run_finished_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)
 printf 'run_finished_utc=%s\n' "$run_finished_utc" >>"$output_directory/host.txt"
 (
   cd "$output_directory"
-  rg --files -g '!evidence.sha256' | sort | xargs sha256sum >evidence.sha256
+  rg --files -g '!evidence.sha256' | LC_ALL=C sort | xargs sha256sum >evidence.sha256
 )
