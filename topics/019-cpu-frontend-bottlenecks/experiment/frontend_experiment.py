@@ -479,6 +479,14 @@ def main() -> None:
     )
 
     smoke_records = []
+    smoke_output = args.output_dir / "smoke-tests.json"
+
+    def persist_smoke() -> None:
+        smoke_output.write_text(
+            json.dumps(smoke_records, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
     for executable in (args.dense, args.sparse, args.aa_a, args.aa_b):
         command = [
             "taskset",
@@ -488,20 +496,25 @@ def main() -> None:
             str(WARM_ROUNDS),
             "1",
         ]
-        smoke = checked_run(command)
-        smoke_records.append(
-            {
-                "command": command,
-                "returncode": smoke.returncode,
-                "stdout": smoke.stdout,
-                "stderr": smoke.stderr,
-                "fields": parse_program_output(smoke.stdout),
-            }
-        )
-    (args.output_dir / "smoke-tests.json").write_text(
-        json.dumps(smoke_records, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+        # Recorded before it is judged, and flushed after every attempt, so a
+        # failing smoke test leaves its command, status, and streams behind
+        # instead of aborting before any of it reaches the evidence directory.
+        smoke = subprocess.run(command, text=True, capture_output=True)
+        record: dict[str, Any] = {
+            "command": command,
+            "returncode": smoke.returncode,
+            "stdout": smoke.stdout,
+            "stderr": smoke.stderr,
+            "fields": None,
+        }
+        smoke_records.append(record)
+        persist_smoke()
+        if smoke.returncode != 0:
+            raise RuntimeError(
+                f"smoke test failed with status {smoke.returncode}: {command}"
+            )
+        record["fields"] = parse_program_output(smoke.stdout)
+        persist_smoke()
 
     ab_rows = run_timing(
         "layout",

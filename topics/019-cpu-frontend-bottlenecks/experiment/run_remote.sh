@@ -49,25 +49,25 @@ fi
 # Privileged mode makes this shell ignore exported functions, but the BASH_FUNC_*
 # entries stay in the environment, and any child Bash -- a PATH tool that happens
 # to be a shell script -- imports them. Those names are not valid shell variables,
-# so compgen -e cannot see them; read the raw environment instead and hop through
-# env -i, which drops them. None remain afterwards, so this happens at most once.
-environ_has_functions=0
+# so compgen -e cannot see them; read the raw environment instead.
+#
+# Refuse rather than sanitize. Dropping them would mean re-execing through env -i,
+# which also discards every other inherited variable before the sweep records what
+# it cleared -- so an invocation carrying CPATH would be reported as
+# swept_environment=none purely because a function was also exported, making the
+# recorded provenance depend on an unrelated condition.
+environ_functions=""
 while IFS= read -r -d '' __environ_entry; do
     case "$__environ_entry" in
-        BASH_FUNC_*) environ_has_functions=1 ;;
+        BASH_FUNC_*) environ_functions+=" ${__environ_entry%%=*}" ;;
     esac
 done </proc/self/environ
 unset __environ_entry
-if ((environ_has_functions == 1)); then
-    exec /usr/bin/env -i \
-        PATH="$PATH" \
-        HOME="$HOME" \
-        TERM="${TERM:-dumb}" \
-        TMPDIR="${TMPDIR:-/tmp}" \
-        SOURCE_COMMIT="${SOURCE_COMMIT:-}" \
-        SOURCE_ARCHIVE_SHA256="${SOURCE_ARCHIVE_SHA256:-}" \
-        RUNTIME_HOST_ALIAS="${RUNTIME_HOST_ALIAS:-}" \
-        /bin/bash -p "$0" "$@"
+if [[ -n "$environ_functions" ]]; then
+    printf 'refusing to run with exported shell functions in the environment:%s\n' \
+        "$environ_functions" >&2
+    printf 'this shell ignores them, but any child shell would import them\n' >&2
+    exit 2
 fi
 
 # Restore a default field separator and enable pathname expansion before any
@@ -317,8 +317,8 @@ export GIT_CONFIG_KEY_0=core.fsmonitor
 export GIT_CONFIG_VALUE_0=false
 
 for tool in \
-    as awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ld ln \
-    lscpu mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed \
+    as awk bash cargo cargo-clippy cargo-fmt cc cmp date gcc getconf git gzip ld \
+    ln lscpu mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed \
     sha256sum size sort stat taskset uname xargs; do
     # A function shadows PATH lookup while still satisfying command -v, so the
     # gates could run caller-supplied tools. Imported functions were already
@@ -341,8 +341,8 @@ done
 # and the toolchain resolution below both rely on it.
 resolved_tools=()
 for tool in \
-    as awk bash cargo cargo-clippy cargo-fmt cmp date gcc getconf git gzip ld ln \
-    lscpu mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed \
+    as awk bash cargo cargo-clippy cargo-fmt cc cmp date gcc getconf git gzip ld \
+    ln lscpu mkdir mktemp mv nm objdump perf python3 readelf rg rm rustc sed \
     sha256sum size sort stat taskset uname xargs; do
     tool_path="$(command -v "$tool")"
     # The digest comes from the hasher, but the recorded path comes from the
@@ -554,6 +554,20 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
     # default layouts cannot cover every compile input. Require instead that every
     # Rust source file in the tree is tracked, which holds regardless of how Cargo
     # or rustc is told to find it.
+    # The listing is captured with its status rather than piped, because a process
+    # substitution that fails yields an empty list and this guard would then pass
+    # on a traversal or permission error. ripgrep exits 1 for no matches, which is
+    # a legitimate empty result; anything else is fatal.
+    rust_scan_status=0
+    rust_file_list="$(
+        cd "$repo_root" &&
+            rg --no-config --files -uu -g '!/.git/' -g '!/target/' -g '*.rs'
+    )" || rust_scan_status=$?
+    if ((rust_scan_status != 0 && rust_scan_status != 1)); then
+        printf 'the Rust source scan failed with status %s; refusing to run\n' \
+            "$rust_scan_status" >&2
+        exit 2
+    fi
     untracked_rust=""
     while IFS= read -r candidate_rel; do
         [[ -n "$candidate_rel" ]] || continue
@@ -561,11 +575,7 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
             >/dev/null 2>&1; then
             untracked_rust+=" $candidate_rel"
         fi
-    done < <(
-        cd "$repo_root" \
-            && rg --no-config --files -uu -g '!/.git/' -g '!/target/' -g '*.rs' \
-                || true
-    )
+    done <<<"$rust_file_list"
     if [[ -n "$untracked_rust" ]]; then
         printf 'untracked Rust sources are present and could be compiled:%s\n' \
             "$untracked_rust" >&2
@@ -584,8 +594,10 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
             | while IFS= read -r -d '' blob_path; do
                 # Shell-only field extraction, so the comparison does not depend
                 # on an external cut that is not in the frozen inventory.
-                blob_sum="$(git -C "$repo_root" cat-file blob "HEAD:$blob_path" \
-                    | sha256sum --)"
+                blob_sum="$(
+                    git -C "$repo_root" cat-file blob \
+                        "$source_commit:$blob_path" | sha256sum --
+                )"
                 printf '%s  %s\n' "${blob_sum%% *}" "$blob_path"
             done) \
         ; then
@@ -593,10 +605,29 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
         printf 'a clean filter or index flag can hide this from git status\n' >&2
         exit 2
     fi
+    # The comparison above reads blobs from source_commit rather than HEAD, so a
+    # checkout that moved HEAD mid-run cannot make it validate a different tree.
+    # Confirm HEAD is still the commit the evidence names.
+    if [[ "$(git -C "$repo_root" rev-parse HEAD)" != "$source_commit" ]]; then
+        printf 'HEAD moved during validation; refusing to run\n' >&2
+        exit 2
+    fi
     # rustfmt and Clippy read configuration from the directory of the file being
     # processed and every parent, so a config nested at any depth applies -- a
     # src/rustfmt.toml changes `cargo fmt --check` for src/lib.rs. Scan the whole
     # tree, including ignored paths, and require every such file to be tracked.
+    config_scan_status=0
+    config_file_list="$(
+        cd "$repo_root" &&
+            rg --no-config --files -uu -g '!/.git/' -g '!/target/' \
+                -g 'rustfmt.toml' -g '.rustfmt.toml' \
+                -g 'clippy.toml' -g '.clippy.toml'
+    )" || config_scan_status=$?
+    if ((config_scan_status != 0 && config_scan_status != 1)); then
+        printf 'the tool-configuration scan failed with status %s; refusing\n' \
+            "$config_scan_status" >&2
+        exit 2
+    fi
     nested_configs=""
     while IFS= read -r candidate_rel; do
         [[ -n "$candidate_rel" ]] || continue
@@ -604,13 +635,7 @@ if [[ "$(git -C "$repo_root" rev-parse --show-toplevel 2>/dev/null || true)" == 
             >/dev/null 2>&1; then
             nested_configs+=" $candidate_rel"
         fi
-    done < <(
-        cd "$repo_root" \
-            && rg --no-config --files -uu -g '!/.git/' -g '!/target/' \
-                -g 'rustfmt.toml' -g '.rustfmt.toml' \
-                -g 'clippy.toml' -g '.clippy.toml' \
-                || true
-    )
+    done <<<"$config_file_list"
     if [[ -n "$nested_configs" ]]; then
         printf 'untracked rustfmt or Clippy configuration would apply to the gates:%s\n' \
             "$nested_configs" >&2
@@ -743,18 +768,44 @@ fi
 # entirely. Verify the outcome instead of the mechanism -- the versions the gates
 # will actually report must name the pinned channel.
 if ((toolchain_pin == 1)); then
+    # rustup gives the extensionless rust-toolchain file precedence when both
+    # exist, so the effective pin has to be selected the same way rather than
+    # always reading the TOML. The legacy file may hold a bare channel name or the
+    # same TOML shape, so both forms are handled.
+    if [[ -e "$repo_root/rust-toolchain" ]]; then
+        pin_file="$repo_root/rust-toolchain"
+    else
+        pin_file="$repo_root/rust-toolchain.toml"
+    fi
     pinned_channel_line="$(
         rg --no-config -m 1 '^[[:space:]]*channel[[:space:]]*=' \
-            "$repo_root/rust-toolchain.toml" 2>/dev/null || true
+            "$pin_file" 2>/dev/null || true
     )"
-    # Shell-only extraction of the quoted value, so the parser is not an
-    # unrecorded external that could make any version string appear to match.
-    pinned_channel="${pinned_channel_line#*\"}"
-    pinned_channel="${pinned_channel%%\"*}"
-    if [[ -z "$pinned_channel" || "$pinned_channel" == "$pinned_channel_line" ]]; then
-        printf 'could not read the pinned toolchain channel\n' >&2
+    if [[ -n "$pinned_channel_line" ]]; then
+        # Shell-only extraction of the quoted value, so the parser is not an
+        # unrecorded external that could make any version string appear to match.
+        pinned_channel="${pinned_channel_line#*\"}"
+        pinned_channel="${pinned_channel%%\"*}"
+        if [[ "$pinned_channel" == "$pinned_channel_line" ]]; then
+            pinned_channel=""
+        fi
+    else
+        # A legacy file with no channel key is a bare toolchain name on one line.
+        pinned_channel="$(
+            rg --no-config -m 1 -v '^[[:space:]]*$' "$pin_file" 2>/dev/null || true
+        )"
+        pinned_channel="${pinned_channel#"${pinned_channel%%[![:space:]]*}"}"
+        pinned_channel="${pinned_channel%"${pinned_channel##*[![:space:]]}"}"
+        case "$pinned_channel" in
+            *'='* | *'['*) pinned_channel="" ;;
+        esac
+    fi
+    if [[ -z "$pinned_channel" ]]; then
+        printf 'could not read the pinned toolchain channel from %s\n' \
+            "$pin_file" >&2
         exit 2
     fi
+    resolved_tools+=("$(printf 'pin_file %s' "${pin_file#"$repo_root"/}")")
     for pinned_tool in cargo rustc; do
         pinned_version="$(cd "$repo_root" && "$pinned_tool" --version)"
         if [[ "$pinned_version" != *"$pinned_channel"* ]]; then
@@ -775,7 +826,7 @@ if ((toolchain_pin == 1)); then
     # what makes dispatch go through rustup and honor the pin.
     rustup_proxy_sum="$(sha256sum -- "$(command -v rustup)")"
     rustup_proxy_sum="${rustup_proxy_sum%% *}"
-    for pinned_tool in cargo rustc cargo-fmt cargo-clippy; do
+    for pinned_tool in cargo rustc cargo-fmt cargo-clippy rustdoc; do
         proxy_sum="$(sha256sum -- "$(command -v "$pinned_tool")")"
         if [[ "${proxy_sum%% *}" != "$rustup_proxy_sum" ]]; then
             printf '%s is not a rustup proxy, so it can ignore the pinned %s\n' \
