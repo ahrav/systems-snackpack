@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Restore a default field separator and enable pathname expansion before any
+# unquoted expansion or glob below. `set -euo pipefail` clears neither, and both
+# are inheritable through a startup file: an inherited IFS splits variable names
+# such as LD_PRELOAD into pieces so the loader sweep unsets the wrong names, and
+# an inherited noglob leaves every source-integrity glob literal so it matches
+# nothing and the checks silently pass.
+IFS=$' \t\n'
+set +f
+if [[ -o noglob ]]; then
+    printf 'pathname expansion is disabled; refusing to run\n' >&2
+    exit 2
+fi
+
 # Validate an exact Linux source tree and write Topic 19 evidence outside it.
 
 # Bash imports exported functions from the environment before this script runs,
@@ -47,14 +60,19 @@ fi
 # No imported functions remain, so these builtins cannot be shadowed by a
 # function -- but `builtin` is itself a command word subject to alias expansion,
 # so an `alias builtin=':'` installed by a startup file would turn both lines
-# into no-ops. The backslash suppresses alias expansion on the command word.
-\builtin shopt -u expand_aliases 2>/dev/null || true
-\builtin unalias -a 2>/dev/null || true
+# into no-ops. The backslash suppresses alias expansion on the command word, the
+# calls are fatal on failure, and the postcondition confirms the result.
+\builtin shopt -u expand_aliases
+\builtin unalias -a || true
+if [[ -n "$(\alias 2>/dev/null || true)" ]]; then
+    printf 'aliases could not be cleared; refusing to run\n' >&2
+    exit 2
+fi
 # Bash remembers command pathnames, and `hash -p` can seed an entry that points
 # `command -v` at one binary while PATH lookups in child processes -- including
 # the Python analysis script -- resolve a different one. Forget them all, so the
 # recorded tool paths and the tools the children run agree.
-\hash -r 2>/dev/null || true
+\hash -r
 
 # The environment sweep below depends on `compgen -e` listing exported variables,
 # and that is the enumerator a selective replacement would target, so verify it
@@ -75,12 +93,23 @@ unset __INTEGRITY_SENTINEL
 # A startup file can `unset BASH_ENV` before this check and still have left a
 # trap behind, so the variable being empty proves nothing on its own. An inline
 # DEBUG trap needs no function, which makes it invisible to the check above, and
-# it can re-export a swept variable after the sweep has run. Reset inherited
-# traps here; the script installs its own EXIT trap later.
+# it can re-export a swept variable after the sweep has run.
+#
+# Clearing inherited state must succeed rather than merely be attempted: with
+# `enable -n trap` or `enable -n builtin` these calls fail, and an ignored
+# failure would leave the trap or the aliases in place while the environment
+# report claimed otherwise. So the resets are fatal on failure and each one is
+# confirmed by its postcondition. Only the code-execution traps are asserted
+# empty, because an inherited ignored signal is not something this script needs
+# to reject.
 for __inherited_trap in DEBUG RETURN ERR EXIT HUP INT QUIT TERM; do
-    trap - "$__inherited_trap" 2>/dev/null || true
+    trap - "$__inherited_trap"
 done
 unset __inherited_trap
+if [[ -n "$(trap -p DEBUG RETURN ERR EXIT)" ]]; then
+    printf 'inherited traps could not be cleared; refusing to run\n' >&2
+    exit 2
+fi
 if [[ -n "${BASH_ENV:-}" ]]; then
     printf 'refusing to run with BASH_ENV set: %s\n' "$BASH_ENV" >&2
     printf 'it already ran arbitrary shell code before this script started\n' >&2
@@ -106,7 +135,16 @@ done
 unset GLOBIGNORE
 # A relative PATH component resolves against the current directory, and this
 # script changes directory before the builds and gates, so a tool recorded now
-# would not be the tool invoked later.
+# would not be the tool invoked later. An empty component means the current
+# directory too, and `read -a` discards a trailing empty field, so the string is
+# tested for empty components before it is split.
+case ":$PATH:" in
+    *::*)
+        printf 'refusing to run with an empty PATH component, which means the\n' >&2
+        printf 'current directory: %s\n' "$PATH" >&2
+        exit 2
+        ;;
+esac
 IFS=':' read -r -a path_entries <<<"$PATH"
 for entry in "${path_entries[@]}"; do
     if [[ -z "$entry" || "$entry" != /* ]]; then
@@ -403,10 +441,17 @@ while :; do
         "$probe_dir/clippy.toml" "$probe_dir/.clippy.toml" \
         "$probe_dir/rust-toolchain" "$probe_dir/rust-toolchain.toml"; do
         [[ -e "$candidate" ]] || continue
-        if [[ "$probe_dir" == "$repo_root" ]] \
-            && git -C "$repo_root" ls-files --error-unmatch -- \
+        # In archive mode there is no index to consult, and the source manifest is
+        # an unrestricted scan of repo_root, so every file under it is recorded by
+        # construction. In checkout mode only tracked files are recorded.
+        if [[ "$probe_dir" == "$repo_root" ]]; then
+            if [[ "$source_commit_verification" == declared-archive ]]; then
+                continue
+            fi
+            if git -C "$repo_root" ls-files --error-unmatch -- \
                 "${candidate#"$repo_root"/}" >/dev/null 2>&1; then
-            continue
+                continue
+            fi
         fi
         unrecorded_configs+=("$candidate")
     done
