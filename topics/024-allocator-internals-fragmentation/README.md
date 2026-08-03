@@ -57,5 +57,10 @@ The experiment excludes multiple arenas, cross-thread frees, mixed size
 classes, allocator caches beyond one thread, and default mmap and trim policy.
 One host result does not represent an instruction set or allocator family.
 
+The exact-source run retained 4,194,304 requested live bytes and 4,325,376
+usable live bytes in both treatments. Post-trim RSS was 9.083 times higher for
+the scattered layout on the named x86-64 host and 9.444 times higher on the
+named AArch64 host. See the comparison note for intervals and controls.
+
 See [round 1](rounds/01.md), [references](references.md), and the
 [measurement contract](measurements/README.md).

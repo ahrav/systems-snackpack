@@ -1,0 +1,8 @@
+Each treatment application is a fresh process pinned to CPU 0.
+Each process allocates and touches 262,144 blocks of 256 requested bytes.
+Each process retains 16,384 blocks and 4,194,304 requested bytes.
+The primary estimand is scattered/compact post-trim RSS across 12 four-process blocks.
+The interval covers block-to-block variation in this run window only.
+Four compact/compact A/A blocks diagnose label and period effects.
+Allocation, free, and trim clocks exclude adjacent procfs snapshots.
+The run does not cover multiple arenas, multiple threads, cross-thread frees, or other allocators.

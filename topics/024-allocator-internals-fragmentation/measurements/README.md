@@ -21,3 +21,10 @@ Final publication requires validated exact-source receipts from:
 Store retained evidence under `measurements/raw/<source>/<host>/`. Record the
 host-specific result and a cross-host comparison only after
 `validate_receipts.py` succeeds.
+
+Exact-source records for commit `c7187b178fd75cea08462e4e77cdad225c1e7522`:
+
+- [x86-64 host](xxl-2026-08-03.md)
+- [AArch64 host](arm-2026-08-03.md)
+- [cross-host comparison](comparison-2026-08-03.md)
+- [raw receipts](raw/c7187b1/)
