@@ -15,7 +15,8 @@ release-publishing `ready = 1`.
   executes `SFENCE`, and then performs the release publication.
 - On AArch64, `A` uses four `STP` instructions per line. `B` substitutes the
   advisory `STNP` hint. Both arms publish with a release store; the evidence
-  gate requires manual confirmation of `STLR` in the final binary.
+  gate requires `STLR` in the final binary and manual confirmation that the
+  publication follows the line stores.
 
 Setup allocates a second 512 MiB buffer. The scrub phase prefaults both buffers
 and sweeps the second buffer before timing. Full destination verification and a

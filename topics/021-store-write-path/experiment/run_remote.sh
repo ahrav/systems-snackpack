@@ -252,7 +252,7 @@ case "$(uname -m)" in
             rg -ni '\bvmovaps\b|\bvmovntdq\b|\bsfence\b' \
                 "$binary_dir/write_path.focused-objdump.txt"
             printf 'manual_geometry_gate=inspect exact [base] and partial [base+4] dependent loads below\n'
-            rg -ni 'topic21_stlf_(exact|partial)|mov.*0x4\(' \
+            rg -ni 'topic21_stlf_(exact|partial)|mov\s+(0x[0-9a-f]+)?\(%[a-z0-9]+\),%' \
                 "$binary_dir/write_path.focused-objdump.txt" || true
         } >"$codegen_review"
         rg -qi '\bvmovaps\b' "$binary_dir/write_path.focused-objdump.txt"
