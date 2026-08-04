@@ -147,6 +147,21 @@ The brackets are the scratch probe's 95% paired intervals. Their narrowness is
 run-window precision, not coverage of other hosts, builds, access patterns, or
 long-lived automatic migration.
 
+## Exact-source result
+
+Commit `8edc18103c6649949ce393cfcf7a099327fcf92c` passed the full source,
+workspace, placement, correctness, code-generation, and receipt gates on both
+required hosts. The one-node Arm host provided a correctness-only control. On
+the two-node `xxl` host, the reciprocal remote/local ratios were 1.5610
+[1.5342, 1.5882] and 1.5540 [1.5362, 1.5721], each from eight complete blocks.
+The corresponding A/A intervals included 1.0. These exact-source records
+supersede the scratch values above; they do not broaden the host or workload
+boundary.
+
+See the [Arm control](measurements/arm-2026-08-04.md),
+[`xxl` measurement](measurements/xxl-2026-08-04.md), and
+[cross-host comparison](measurements/comparison-2026-08-04.md).
+
 ## Exact-source measurement contract
 
 A retained performance record is admissible only when all of these gates pass:

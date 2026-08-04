@@ -1,0 +1,15 @@
+882:  410c2c:	940004d5 	bl	411f80 <topic25_first_touch>
+1102:  410f9c:	94000432 	bl	412064 <topic25_read_mapping>
+2152:0000000000411f80 <topic25_first_touch>:
+2173:  411fd0:	54000263 	b.cc	41201c <topic25_first_touch+0x9c>  // b.lo, b.ul, b.last
+2183:  411ff8:	b5ffff83 	cbnz	x3, 411fe8 <topic25_first_touch+0x68>
+2185:  412000:	54000140 	b.eq	412028 <topic25_first_touch+0xa8>  // b.none
+2191:  412018:	54fffe42 	b.cs	411fe0 <topic25_first_touch+0x60>  // b.hs, b.nlast
+2194:  412024:	54ffff01 	b.ne	412004 <topic25_first_touch+0x84>  // b.any
+2196:  41202c:	540001a3 	b.cc	412060 <topic25_first_touch+0xe0>  // b.lo, b.ul, b.last
+2208:  41205c:	54ffff28 	b.hi	412040 <topic25_first_touch+0xc0>  // b.pmore
+2211:0000000000412064 <topic25_read_mapping>:
+2214:  41206c:	34000243 	cbz	w3, 4120b4 <topic25_read_mapping+0x50>
+2220:  412084:	b40000e2 	cbz	x2, 4120a0 <topic25_read_mapping+0x3c>
+2226:  41209c:	54ffff61 	b.ne	412088 <topic25_read_mapping+0x24>  // b.any
+2229:  4120a8:	54fffec1 	b.ne	412080 <topic25_read_mapping+0x1c>  // b.any

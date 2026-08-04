@@ -39,3 +39,13 @@ notes must link to that evidence rather than copying only summary values.
 The 2026-08-04 values in the [topic README](../README.md) are pre-artifact
 scratch observations. They must not be copied into a retained record for the
 checked-in candidate.
+
+The promoted exact-source records are:
+
+- [Arm one-node correctness control](arm-2026-08-04.md)
+- [`xxl` reciprocal NUMA measurement](xxl-2026-08-04.md)
+- [Cross-host comparison](comparison-2026-08-04.md)
+
+Their sealed raw bundles are under `raw/8edc181/`. Each host bundle contains an
+`evidence.sha256` manifest and a passing `run.status`. Supplements collected
+outside the sealed run window are named and hashed separately.

@@ -1,0 +1,76 @@
+
+/tmp/tmp.BdTH8Glrg0/numa-first-touch-probe:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000403180 <topic25_first_touch>:
+  403180:	48 89 f0             	mov    %rsi,%rax
+  403183:	49 89 f9             	mov    %rdi,%r9
+  403186:	48 89 d7             	mov    %rdx,%rdi
+  403189:	31 d2                	xor    %edx,%edx
+  40318b:	48 f7 f7             	div    %rdi
+  40318e:	48 89 ca             	mov    %rcx,%rdx
+  403191:	49 89 f2             	mov    %rsi,%r10
+  403194:	48 c1 ea 1e          	shr    $0x1e,%rdx
+  403198:	48 31 ca             	xor    %rcx,%rdx
+  40319b:	48 89 c6             	mov    %rax,%rsi
+  40319e:	48 b8 b9 e5 e4 1c 6d 47 58 bf 	movabs $0xbf58476d1ce4e5b9,%rax
+  4031a8:	48 0f af d0          	imul   %rax,%rdx
+  4031ac:	48 89 d0             	mov    %rdx,%rax
+  4031af:	48 c1 e8 1b          	shr    $0x1b,%rax
+  4031b3:	48 31 c2             	xor    %rax,%rdx
+  4031b6:	48 b8 eb 11 31 13 bb 49 d0 94 	movabs $0x94d049bb133111eb,%rax
+  4031c0:	48 0f af d0          	imul   %rax,%rdx
+  4031c4:	48 89 d0             	mov    %rdx,%rax
+  4031c7:	48 c1 e8 1f          	shr    $0x1f,%rax
+  4031cb:	48 31 d0             	xor    %rdx,%rax
+  4031ce:	31 d2                	xor    %edx,%edx
+  4031d0:	48 f7 f6             	div    %rsi
+  4031d3:	b8 01 00 00 00       	mov    $0x1,%eax
+  4031d8:	48 85 d2             	test   %rdx,%rdx
+  4031db:	48 0f 45 c2          	cmovne %rdx,%rax
+  4031df:	49 89 c0             	mov    %rax,%r8
+  4031e2:	49 39 fa             	cmp    %rdi,%r10
+  4031e5:	72 44                	jb     40322b <topic25_first_touch+0xab>
+  4031e7:	66 0f 1f 84 00 00 00 00 00 	nopw   0x0(%rax,%rax,1)
+  4031f0:	48 89 f2             	mov    %rsi,%rdx
+  4031f3:	4c 89 c0             	mov    %r8,%rax
+  4031f6:	66 2e 0f 1f 84 00 00 00 00 00 	cs nopw 0x0(%rax,%rax,1)
+  403200:	48 89 d1             	mov    %rdx,%rcx
+  403203:	31 d2                	xor    %edx,%edx
+  403205:	48 f7 f1             	div    %rcx
+  403208:	48 89 c8             	mov    %rcx,%rax
+  40320b:	48 85 d2             	test   %rdx,%rdx
+  40320e:	75 f0                	jne    403200 <topic25_first_touch+0x80>
+  403210:	48 83 f9 01          	cmp    $0x1,%rcx
+  403214:	74 1e                	je     403234 <topic25_first_touch+0xb4>
+  403216:	49 83 c0 01          	add    $0x1,%r8
+  40321a:	b8 01 00 00 00       	mov    $0x1,%eax
+  40321f:	4c 39 c6             	cmp    %r8,%rsi
+  403222:	4c 0f 44 c0          	cmove  %rax,%r8
+  403226:	49 39 fa             	cmp    %rdi,%r10
+  403229:	73 c5                	jae    4031f0 <topic25_first_touch+0x70>
+  40322b:	4c 89 c1             	mov    %r8,%rcx
+  40322e:	48 83 f9 01          	cmp    $0x1,%rcx
+  403232:	75 e2                	jne    403216 <topic25_first_touch+0x96>
+  403234:	49 39 fa             	cmp    %rdi,%r10
+  403237:	72 1f                	jb     403258 <topic25_first_touch+0xd8>
+  403239:	31 c9                	xor    %ecx,%ecx
+  40323b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+  403240:	49 8d 04 08          	lea    (%r8,%rcx,1),%rax
+  403244:	31 d2                	xor    %edx,%edx
+  403246:	48 83 c1 01          	add    $0x1,%rcx
+  40324a:	48 f7 f6             	div    %rsi
+  40324d:	49 89 11             	mov    %rdx,(%r9)
+  403250:	49 01 f9             	add    %rdi,%r9
+  403253:	48 39 ce             	cmp    %rcx,%rsi
+  403256:	77 e8                	ja     403240 <topic25_first_touch+0xc0>
+  403258:	4c 89 c0             	mov    %r8,%rax
+  40325b:	c3                   	ret
+
+Disassembly of section .fini:

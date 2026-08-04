@@ -1,0 +1,35 @@
+
+/tmp/tmp.cZEsW4YJyj/numa-first-touch-probe:     file format elf64-littleaarch64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000412064 <topic25_read_mapping>:
+  412064:	52800008 	mov	w8, #0x0                   	// #0
+  412068:	d2800006 	mov	x6, #0x0                   	// #0
+  41206c:	34000243 	cbz	w3, 4120b4 <topic25_read_mapping+0x50>
+  412070:	d29950e7 	mov	x7, #0xca87                	// #51847
+  412074:	f2b0bd67 	movk	x7, #0x85eb, lsl #16
+  412078:	f2cf3627 	movk	x7, #0x79b1, lsl #32
+  41207c:	f2f3c6e7 	movk	x7, #0x9e37, lsl #48
+  412080:	d2800005 	mov	x5, #0x0                   	// #0
+  412084:	b40000e2 	cbz	x2, 4120a0 <topic25_read_mapping+0x3c>
+  412088:	9b047c24 	mul	x4, x1, x4
+  41208c:	910004a5 	add	x5, x5, #0x1
+  412090:	f8646804 	ldr	x4, [x0, x4]
+  412094:	9b0710c6 	madd	x6, x6, x7, x4
+  412098:	eb05005f 	cmp	x2, x5
+  41209c:	54ffff61 	b.ne	412088 <topic25_read_mapping+0x24>  // b.any
+  4120a0:	11000508 	add	w8, w8, #0x1
+  4120a4:	6b08007f 	cmp	w3, w8
+  4120a8:	54fffec1 	b.ne	412080 <topic25_read_mapping+0x1c>  // b.any
+  4120ac:	ca0400c0 	eor	x0, x6, x4
+  4120b0:	d65f03c0 	ret
+  4120b4:	aa0403e0 	mov	x0, x4
+  4120b8:	d65f03c0 	ret
+
+Disassembly of section .fini:

@@ -1,0 +1,70 @@
+
+/tmp/tmp.cZEsW4YJyj/numa-first-touch-probe:     file format elf64-littleaarch64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000411f80 <topic25_first_touch>:
+  411f80:	d29cb725 	mov	x5, #0xe5b9                	// #58809
+  411f84:	ca437863 	eor	x3, x3, x3, lsr #30
+  411f88:	d2823d64 	mov	x4, #0x11eb                	// #4587
+  411f8c:	f2a39c85 	movk	x5, #0x1ce4, lsl #16
+  411f90:	9ac20827 	udiv	x7, x1, x2
+  411f94:	f2a26624 	movk	x4, #0x1331, lsl #16
+  411f98:	f2c8eda5 	movk	x5, #0x476d, lsl #32
+  411f9c:	f2c93764 	movk	x4, #0x49bb, lsl #32
+  411fa0:	f2f7eb05 	movk	x5, #0xbf58, lsl #48
+  411fa4:	aa0003e8 	mov	x8, x0
+  411fa8:	f2f29a04 	movk	x4, #0x94d0, lsl #48
+  411fac:	9b057c63 	mul	x3, x3, x5
+  411fb0:	ca436c60 	eor	x0, x3, x3, lsr #27
+  411fb4:	9b047c00 	mul	x0, x0, x4
+  411fb8:	ca407c00 	eor	x0, x0, x0, lsr #31
+  411fbc:	9ac70803 	udiv	x3, x0, x7
+  411fc0:	9b078060 	msub	x0, x3, x7, x0
+  411fc4:	f100001f 	cmp	x0, #0x0
+  411fc8:	9a9f1400 	csinc	x0, x0, xzr, ne	// ne = any
+  411fcc:	eb02003f 	cmp	x1, x2
+  411fd0:	54000263 	b.cc	41201c <topic25_first_touch+0x9c>  // b.lo, b.ul, b.last
+  411fd4:	d503201f 	nop
+  411fd8:	d503201f 	nop
+  411fdc:	d503201f 	nop
+  411fe0:	aa0703e3 	mov	x3, x7
+  411fe4:	aa0003e4 	mov	x4, x0
+  411fe8:	9ac30886 	udiv	x6, x4, x3
+  411fec:	aa0303e5 	mov	x5, x3
+  411ff0:	9b0390c3 	msub	x3, x6, x3, x4
+  411ff4:	aa0503e4 	mov	x4, x5
+  411ff8:	b5ffff83 	cbnz	x3, 411fe8 <topic25_first_touch+0x68>
+  411ffc:	f10004bf 	cmp	x5, #0x1
+  412000:	54000140 	b.eq	412028 <topic25_first_touch+0xa8>  // b.none
+  412004:	91000400 	add	x0, x0, #0x1
+  412008:	d2800023 	mov	x3, #0x1                   	// #1
+  41200c:	eb0000ff 	cmp	x7, x0
+  412010:	9a831000 	csel	x0, x0, x3, ne	// ne = any
+  412014:	eb02003f 	cmp	x1, x2
+  412018:	54fffe42 	b.cs	411fe0 <topic25_first_touch+0x60>  // b.hs, b.nlast
+  41201c:	aa0003e5 	mov	x5, x0
+  412020:	f10004bf 	cmp	x5, #0x1
+  412024:	54ffff01 	b.ne	412004 <topic25_first_touch+0x84>  // b.any
+  412028:	eb02003f 	cmp	x1, x2
+  41202c:	540001a3 	b.cc	412060 <topic25_first_touch+0xe0>  // b.lo, b.ul, b.last
+  412030:	aa0803e4 	mov	x4, x8
+  412034:	d2800001 	mov	x1, #0x0                   	// #0
+  412038:	d503201f 	nop
+  41203c:	d503201f 	nop
+  412040:	8b010005 	add	x5, x0, x1
+  412044:	91000421 	add	x1, x1, #0x1
+  412048:	9ac708a3 	udiv	x3, x5, x7
+  41204c:	9b079463 	msub	x3, x3, x7, x5
+  412050:	f9000083 	str	x3, [x4]
+  412054:	8b020084 	add	x4, x4, x2
+  412058:	eb0100ff 	cmp	x7, x1
+  41205c:	54ffff28 	b.hi	412040 <topic25_first_touch+0xc0>  // b.pmore
+  412060:	d65f03c0 	ret
+
+Disassembly of section .fini:
