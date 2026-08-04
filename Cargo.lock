@@ -23,6 +23,10 @@ name = "memory-level-parallelism"
 version = "0.1.0"
 
 [[package]]
+name = "numa-first-touch-migration"
+version = "0.1.0"
+
+[[package]]
 name = "pgo-post-link-optimization"
 version = "0.1.0"
 

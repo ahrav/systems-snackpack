@@ -1,0 +1,7 @@
+# Preserve retained runner output byte-for-byte.
+**/* -text -whitespace
+*.bin binary
+*.gz binary
+*.o binary
+*.tar binary
+*.zst binary
