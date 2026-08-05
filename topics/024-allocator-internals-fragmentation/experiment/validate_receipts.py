@@ -40,6 +40,13 @@ def require(condition: bool, message: str) -> None:
         raise SystemExit(message)
 
 
+def require_integer(row: dict[str, Any], key: str) -> int:
+    """Return a field that must be a JSON integer, not a string or float."""
+    value = row[key]
+    require(type(value) is int, f"non-integer {key}")
+    return value
+
+
 def validate_rows(
     rows: list[dict[str, Any]], phase: str, templates: tuple[str, ...]
 ) -> None:
@@ -55,7 +62,8 @@ def validate_rows(
         block, period, template, label = position
         pattern = "scattered" if phase == "ab" and label == "B" else "compact"
         require(
-            int(row["block"]) == block and int(row["period"]) == period,
+            require_integer(row, "block") == block
+            and require_integer(row, "period") == period,
             f"{phase} receipt {number} is out of schedule order",
         )
         require(row["phase"] == phase, f"wrong phase in {phase} receipt {number}")
@@ -64,14 +72,21 @@ def validate_rows(
         )
         require(row["label"] == label, f"wrong label in {phase} receipt {number}")
         require(row["pattern"] == pattern, f"wrong treatment in {phase} receipt {number}")
-        require(int(row["count"]) == 262_144, "allocation count changed")
-        require(int(row["block_size"]) == 256, "requested size changed")
-        require(int(row["survivors"]) == 16_384, "survivor count changed")
-        require(int(row["live_requested"]) == 4_194_304, "live bytes changed")
-        require(int(row["live_usable"]) == 4_325_376, "usable bytes changed")
+        require(require_integer(row, "count") == 262_144, "allocation count changed")
+        require(require_integer(row, "block_size") == 256, "requested size changed")
+        require(require_integer(row, "survivors") == 16_384, "survivor count changed")
+        require(
+            require_integer(row, "live_requested") == 4_194_304, "live bytes changed"
+        )
+        require(
+            require_integer(row, "live_usable") == 4_325_376, "usable bytes changed"
+        )
         require(row["checksum"] == row["expected_checksum"], "checksum mismatch")
-        require(int(row["trim_result"]) == 1, "malloc_trim released no memory")
-        require(int(row["uord_trimmed"]) == 6_557_696, "uordblks changed")
+        require(type(row["checksum"]) is int, "non-integer checksum")
+        require(
+            require_integer(row, "trim_result") == 1, "malloc_trim released no memory"
+        )
+        require(require_integer(row, "uord_trimmed") == 6_557_696, "uordblks changed")
         for key in (
             "alloc_ns",
             "free_ns",
@@ -83,7 +98,7 @@ def validate_rows(
             "anonymous_trimmed_kb",
             "arena_trimmed",
         ):
-            require(int(row[key]) > 0, f"nonpositive {key}")
+            require(require_integer(row, key) > 0, f"nonpositive {key}")
 
 
 def require_equal(expected: Any, actual: Any, context: str) -> None:
@@ -135,7 +150,10 @@ def main() -> None:
     validate_rows(ab_rows, "ab", AB_TEMPLATES)
     validate_rows(aa_rows, "aa", AA_TEMPLATES)
     all_rows = ab_rows + aa_rows
-    require(len({int(row["pid"]) for row in all_rows}) == 64, "PIDs are not unique")
+    require(
+        len({require_integer(row, "pid") for row in all_rows}) == 64,
+        "PIDs are not unique",
+    )
 
     summary = json.loads((args.process_directory / "summary.json").read_text())
     # Independent shape checks first: these do not rely on the producer's

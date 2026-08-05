@@ -13,7 +13,8 @@ The interval covers block-to-block variation in one run window. It excludes
 build, host, future-window, allocator-version, and workload variation. Four
 A/A blocks exercise both labels but do not establish a calibrated noise floor.
 
-Final publication requires validated exact-source receipts from:
+Final publication requires exact-source receipts from the following hosts,
+accepted only after `validate_receipts.py` succeeds:
 
 - AArch64: `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`.
 - x86-64: the runtime-resolved backing host for SSH alias `xxl`.

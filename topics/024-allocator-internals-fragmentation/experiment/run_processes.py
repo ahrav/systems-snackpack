@@ -36,6 +36,7 @@ BLOCK_SIZE = 256
 # and binary hashes still match; every probe runs without them.
 PROBE_ENV_BLOCKLIST = (
     "GLIBC_TUNABLES",
+    "LD_AUDIT",
     "LD_PRELOAD",
     "LD_LIBRARY_PATH",
     "MALLOC_CHECK_",
