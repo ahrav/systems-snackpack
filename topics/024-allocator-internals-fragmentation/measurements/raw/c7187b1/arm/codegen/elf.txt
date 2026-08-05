@@ -1,0 +1,246 @@
+/tmp/topic24-c7187b1.Vvda94/source/../native-output/allocator_frag_probe: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=109c382232435b6c035c2e53ff55abd8a92e151f, for GNU/Linux 3.7.0, with debug_info, not stripped
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              EXEC (Executable file)
+  Machine:                           AArch64
+  Version:                           0x1
+  Entry point address:               0x4107c0
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          213464 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         11
+  Size of section headers:           64 (bytes)
+  Number of section headers:         39
+  Section header string table index: 38
+
+Dynamic section at offset 0x2fdf8 contains 24 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000000c (INIT)               0x410000
+ 0x000000000000000d (FINI)               0x410ae0
+ 0x0000000000000019 (INIT_ARRAY)         0x43fde8
+ 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)
+ 0x000000000000001a (FINI_ARRAY)         0x43fdf0
+ 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
+ 0x000000006ffffef5 (GNU_HASH)           0x400308
+ 0x0000000000000005 (STRTAB)             0x400600
+ 0x0000000000000006 (SYMTAB)             0x400330
+ 0x000000000000000a (STRSZ)              342 (bytes)
+ 0x000000000000000b (SYMENT)             24 (bytes)
+ 0x0000000000000015 (DEBUG)              0x0
+ 0x0000000000000003 (PLTGOT)             0x43ffe8
+ 0x0000000000000002 (PLTRELSZ)           624 (bytes)
+ 0x0000000000000014 (PLTREL)             RELA
+ 0x0000000000000017 (JMPREL)             0x400838
+ 0x0000000000000007 (RELA)               0x4007d8
+ 0x0000000000000008 (RELASZ)             96 (bytes)
+ 0x0000000000000009 (RELAENT)            24 (bytes)
+ 0x000000006ffffffe (VERNEED)            0x400798
+ 0x000000006fffffff (VERNEEDNUM)         1
+ 0x000000006ffffff0 (VERSYM)             0x400756
+ 0x0000000000000000 (NULL)               0x0
+
+Symbol table '.dynsym' contains 30 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mallinfo2@GLIBC_2.33 (2)
+     2: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND exit@GLIBC_2.17 (3)
+     3: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.34 (4)
+     4: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND perror@GLIBC_2.17 (3)
+     5: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTable
+     6: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND clock_gettime@GLIBC_2.17 (3)
+     7: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fclose@GLIBC_2.17 (3)
+     8: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getpid@GLIBC_2.17 (3)
+     9: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND malloc_usable_size@GLIBC_2.17 (3)
+    10: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fopen@GLIBC_2.17 (3)
+    11: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND malloc@GLIBC_2.17 (3)
+    12: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memset@GLIBC_2.17 (3)
+    13: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND calloc@GLIBC_2.17 (3)
+    14: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+    15: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND abort@GLIBC_2.17 (3)
+    16: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND malloc_trim@GLIBC_2.17 (3)
+    17: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strcmp@GLIBC_2.17 (3)
+    18: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND free@GLIBC_2.17 (3)
+    19: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strtoull@GLIBC_2.17 (3)
+    20: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mallopt@GLIBC_2.17 (3)
+    21: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fwrite@GLIBC_2.17 (3)
+    22: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __isoc99_sscanf@GLIBC_2.17 (3)
+    23: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable
+    24: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND printf@GLIBC_2.17 (3)
+    25: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __errno_location@GLIBC_2.17 (3)
+    26: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fprintf@GLIBC_2.17 (3)
+    27: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fgets@GLIBC_2.17 (3)
+    28: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND ferror@GLIBC_2.17 (3)
+    29: 00000000004400d8     8 OBJECT  GLOBAL DEFAULT   24 stderr@GLIBC_2.17 (3)
+
+Symbol table '.symtab' contains 130 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 00000000004002a8     0 SECTION LOCAL  DEFAULT    1 .interp
+     2: 00000000004002c4     0 SECTION LOCAL  DEFAULT    2 .note.gnu.build-id
+     3: 00000000004002e8     0 SECTION LOCAL  DEFAULT    3 .note.ABI-tag
+     4: 0000000000400308     0 SECTION LOCAL  DEFAULT    4 .gnu.hash
+     5: 0000000000400330     0 SECTION LOCAL  DEFAULT    5 .dynsym
+     6: 0000000000400600     0 SECTION LOCAL  DEFAULT    6 .dynstr
+     7: 0000000000400756     0 SECTION LOCAL  DEFAULT    7 .gnu.version
+     8: 0000000000400798     0 SECTION LOCAL  DEFAULT    8 .gnu.version_r
+     9: 00000000004007d8     0 SECTION LOCAL  DEFAULT    9 .rela.dyn
+    10: 0000000000400838     0 SECTION LOCAL  DEFAULT   10 .rela.plt
+    11: 0000000000410000     0 SECTION LOCAL  DEFAULT   11 .init
+    12: 0000000000410020     0 SECTION LOCAL  DEFAULT   12 .plt
+    13: 0000000000410200     0 SECTION LOCAL  DEFAULT   13 .text
+    14: 0000000000410ae0     0 SECTION LOCAL  DEFAULT   14 .fini
+    15: 0000000000420000     0 SECTION LOCAL  DEFAULT   15 .rodata
+    16: 0000000000420538     0 SECTION LOCAL  DEFAULT   16 .eh_frame_hdr
+    17: 00000000004205a0     0 SECTION LOCAL  DEFAULT   17 .eh_frame
+    18: 000000000043fde8     0 SECTION LOCAL  DEFAULT   18 .init_array
+    19: 000000000043fdf0     0 SECTION LOCAL  DEFAULT   19 .fini_array
+    20: 000000000043fdf8     0 SECTION LOCAL  DEFAULT   20 .dynamic
+    21: 000000000043ffc8     0 SECTION LOCAL  DEFAULT   21 .got
+    22: 000000000043ffe8     0 SECTION LOCAL  DEFAULT   22 .got.plt
+    23: 00000000004400d0     0 SECTION LOCAL  DEFAULT   23 .data
+    24: 00000000004400d8     0 SECTION LOCAL  DEFAULT   24 .bss
+    25: 0000000000000000     0 SECTION LOCAL  DEFAULT   25 .comment
+    26: 0000000000000000     0 SECTION LOCAL  DEFAULT   26 .annobin.notes
+    27: 00000000004400e8     0 SECTION LOCAL  DEFAULT   27 .gnu.build.attributes
+    28: 0000000000000000     0 SECTION LOCAL  DEFAULT   28 .debug_aranges
+    29: 0000000000000000     0 SECTION LOCAL  DEFAULT   29 .debug_info
+    30: 0000000000000000     0 SECTION LOCAL  DEFAULT   30 .debug_abbrev
+    31: 0000000000000000     0 SECTION LOCAL  DEFAULT   31 .debug_line
+    32: 0000000000000000     0 SECTION LOCAL  DEFAULT   32 .debug_str
+    33: 0000000000000000     0 SECTION LOCAL  DEFAULT   33 .debug_line_str
+    34: 0000000000000000     0 SECTION LOCAL  DEFAULT   34 .debug_loclists
+    35: 0000000000000000     0 SECTION LOCAL  DEFAULT   35 .debug_rnglists
+    36: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crt1.o
+    37: 00000000004107c0     0 NOTYPE  LOCAL  DEFAULT   13 $x
+    38: 00000000004107f4     0 NOTYPE  LOCAL  DEFAULT   13 __wrap_main
+    39: 00000000004205b4     0 NOTYPE  LOCAL  DEFAULT   17 $d
+    40: 00000000004002e8     0 NOTYPE  LOCAL  DEFAULT    3 $d
+    41: 00000000004002e8    32 OBJECT  LOCAL  DEFAULT    3 __abi_tag
+    42: 0000000000420000     0 NOTYPE  LOCAL  DEFAULT   15 $d
+    43: 0000000000410800     0 NOTYPE  LOCAL  DEFAULT   13 $x
+    44: 00000000004205c8     0 NOTYPE  LOCAL  DEFAULT   17 $d
+    45: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crti.o
+    46: 0000000000410808     0 NOTYPE  LOCAL  DEFAULT   13 $x
+    47: 0000000000410808    20 FUNC    LOCAL  DEFAULT   13 call_weak_fn
+    48: 0000000000410000     0 NOTYPE  LOCAL  DEFAULT   11 $x
+    49: 0000000000410ae0     0 NOTYPE  LOCAL  DEFAULT   14 $x
+    50: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtn.o
+    51: 0000000000410010     0 NOTYPE  LOCAL  DEFAULT   11 $x
+    52: 0000000000410aec     0 NOTYPE  LOCAL  DEFAULT   14 $x
+    53: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS allocator_frag_probe.c
+    54: 0000000000420010     0 NOTYPE  LOCAL  DEFAULT   15 $d
+    55: 00000000004108e0     0 NOTYPE  LOCAL  DEFAULT   13 $x
+    56: 00000000004108e0   144 FUNC    LOCAL  DEFAULT   13 parse_size
+    57: 0000000000410970    20 FUNC    LOCAL  DEFAULT   13 die
+    58: 0000000000410984    60 FUNC    LOCAL  DEFAULT   13 now_ns
+    59: 00000000004109c0   288 FUNC    LOCAL  DEFAULT   13 read_smaps_rollup
+    60: 0000000000410200     0 NOTYPE  LOCAL  DEFAULT   13 $x
+    61: 0000000000420648     0 NOTYPE  LOCAL  DEFAULT   17 $d
+    62: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+    63: 0000000000410820     0 NOTYPE  LOCAL  DEFAULT   13 $x
+    64: 0000000000410820     0 FUNC    LOCAL  DEFAULT   13 deregister_tm_clones
+    65: 0000000000410850     0 FUNC    LOCAL  DEFAULT   13 register_tm_clones
+    66: 0000000000420008     0 NOTYPE  LOCAL  DEFAULT   15 $d
+    67: 000000000041088c     0 FUNC    LOCAL  DEFAULT   13 __do_global_dtors_aux
+    68: 00000000004400e0     1 OBJECT  LOCAL  DEFAULT   24 completed.0
+    69: 000000000043fdf0     0 NOTYPE  LOCAL  DEFAULT   19 $d
+    70: 000000000043fdf0     0 OBJECT  LOCAL  DEFAULT   19 __do_global_dtors_aux_fini_array_entry
+    71: 00000000004108c4     0 FUNC    LOCAL  DEFAULT   13 frame_dummy
+    72: 000000000043fde8     0 NOTYPE  LOCAL  DEFAULT   18 $d
+    73: 000000000043fde8     0 OBJECT  LOCAL  DEFAULT   18 __frame_dummy_init_array_entry
+    74: 00000000004205e0     0 NOTYPE  LOCAL  DEFAULT   17 $d
+    75: 00000000004400e0     0 NOTYPE  LOCAL  DEFAULT   24 $d
+    76: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+    77: 0000000000420788     0 NOTYPE  LOCAL  DEFAULT   17 $d
+    78: 0000000000420788     0 OBJECT  LOCAL  DEFAULT   17 __FRAME_END__
+    79: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS 
+    80: 000000000043fdf8     0 OBJECT  LOCAL  DEFAULT   20 _DYNAMIC
+    81: 0000000000420538     0 NOTYPE  LOCAL  DEFAULT   16 __GNU_EH_FRAME_HDR
+    82: 000000000043ffc8     0 OBJECT  LOCAL  DEFAULT   21 _GLOBAL_OFFSET_TABLE_
+    83: 0000000000410020     0 NOTYPE  LOCAL  DEFAULT   12 $x
+    84: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mallinfo2@GLIBC_2.33
+    85: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND exit@GLIBC_2.17
+    86: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.34
+    87: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND perror@GLIBC_2.17
+    88: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTable
+    89: 00000000004400d0     0 NOTYPE  WEAK   DEFAULT   23 data_start
+    90: 00000000004400d4     0 NOTYPE  GLOBAL DEFAULT   24 __bss_start__
+    91: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND clock_gettime@GLIBC_2.17
+    92: 00000000004400d8     8 OBJECT  GLOBAL DEFAULT   24 stderr@GLIBC_2.17
+    93: 00000000004400e8     0 NOTYPE  GLOBAL DEFAULT   24 _bss_end__
+    94: 00000000004400d4     0 NOTYPE  GLOBAL DEFAULT   23 _edata
+    95: 0000000000410ae0     0 FUNC    GLOBAL HIDDEN    14 _fini
+    96: 00000000004400e8     0 NOTYPE  GLOBAL DEFAULT   24 __bss_end__
+    97: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fclose@GLIBC_2.17
+    98: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getpid@GLIBC_2.17
+    99: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND malloc_usable_size@GLIBC_2.17
+   100: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fopen@GLIBC_2.17
+   101: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND malloc@GLIBC_2.17
+   102: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND memset@GLIBC_2.17
+   103: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND calloc@GLIBC_2.17
+   104: 00000000004400d0     0 NOTYPE  GLOBAL DEFAULT   23 __data_start
+   105: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+   106: 0000000000420008     0 OBJECT  GLOBAL HIDDEN    15 __dso_handle
+   107: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND abort@GLIBC_2.17
+   108: 0000000000420000     4 OBJECT  GLOBAL DEFAULT   15 _IO_stdin_used
+   109: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND malloc_trim@GLIBC_2.17
+   110: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strcmp@GLIBC_2.17
+   111: 00000000004400e8     0 NOTYPE  GLOBAL DEFAULT   24 _end
+   112: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND free@GLIBC_2.17
+   113: 0000000000410800     8 FUNC    GLOBAL HIDDEN    13 _dl_relocate_static_pie
+   114: 00000000004107c0    60 FUNC    GLOBAL DEFAULT   13 _start
+   115: 00000000004400e8     0 NOTYPE  GLOBAL DEFAULT   24 __end__
+   116: 00000000004400d4     0 NOTYPE  GLOBAL DEFAULT   24 __bss_start
+   117: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strtoull@GLIBC_2.17
+   118: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND mallopt@GLIBC_2.17
+   119: 0000000000410200  1436 FUNC    GLOBAL DEFAULT   13 main
+   120: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fwrite@GLIBC_2.17
+   121: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __isoc99_sscanf@GLIBC_2.17
+   122: 00000000004400d8     0 OBJECT  GLOBAL HIDDEN    23 __TMC_END__
+   123: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable
+   124: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND printf@GLIBC_2.17
+   125: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __errno_location@GLIBC_2.17
+   126: 0000000000410000     0 FUNC    GLOBAL HIDDEN    11 _init
+   127: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fprintf@GLIBC_2.17
+   128: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fgets@GLIBC_2.17
+   129: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND ferror@GLIBC_2.17
+                 w _ITM_deregisterTMCloneTable
+                 w _ITM_registerTMCloneTable
+                 U __errno_location@GLIBC_2.17
+                 w __gmon_start__
+                 U __isoc99_sscanf@GLIBC_2.17
+                 U __libc_start_main@GLIBC_2.34
+                 U abort@GLIBC_2.17
+                 U calloc@GLIBC_2.17
+                 U clock_gettime@GLIBC_2.17
+                 U exit@GLIBC_2.17
+                 U fclose@GLIBC_2.17
+                 U ferror@GLIBC_2.17
+                 U fgets@GLIBC_2.17
+                 U fopen@GLIBC_2.17
+                 U fprintf@GLIBC_2.17
+                 U free@GLIBC_2.17
+                 U fwrite@GLIBC_2.17
+                 U getpid@GLIBC_2.17
+                 U mallinfo2@GLIBC_2.33
+                 U malloc@GLIBC_2.17
+                 U malloc_trim@GLIBC_2.17
+                 U malloc_usable_size@GLIBC_2.17
+                 U mallopt@GLIBC_2.17
+                 U memset@GLIBC_2.17
+                 U perror@GLIBC_2.17
+                 U printf@GLIBC_2.17
+00000000004400d8 B stderr@GLIBC_2.17
+                 U strcmp@GLIBC_2.17
+                 U strtoull@GLIBC_2.17
+	linux-vdso.so.1 (0x0000ffff81f07000)
+	libc.so.6 => /lib64/libc.so.6 (0x0000ffff81ce2000)
+	/lib/ld-linux-aarch64.so.1 (0x0000ffff81eb0000)

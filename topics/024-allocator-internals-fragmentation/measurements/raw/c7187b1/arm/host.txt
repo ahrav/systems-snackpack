@@ -1,0 +1,169 @@
+run_started_utc=2026-08-03T14:12:47.919197649Z
+host_label=arm
+source_commit=c7187b178fd75cea08462e4e77cdad225c1e7522
+archive_commit=c7187b178fd75cea08462e4e77cdad225c1e7522
+source_archive_path=/tmp/topic24-c7187b1.Vvda94/source.tar
+source_archive_sha256=5c1a49fa2ceaa587ce5838e83255ea776a2ff4b571a463cec5a54962160ef738
+source_tree_manifest_sha256=a60b9b80b8423ac33116ac430f1970c47f4ada4c670941cd32b8b49179d1f41c
+hostname_fqdn=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+uname=Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.94-123.192.amzn2023.aarch64 #1 SMP Fri Jul 24 13:35:21 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+architecture=aarch64
+kernel=6.12.94-123.192.amzn2023.aarch64
+configured_cpus=64
+available_cpus=64
+allowed_cpu_list=0-63
+selected_cpu=0
+page_size=4096
+glibc=glibc 2.34
+thp_enabled=always [madvise] never
+cc_version=11.5.0
+cc_target=aarch64-amazon-linux
+cc_target_options_begin
+The following options are target specific:
+  -mabi=                      		lp64
+  -march=                     		armv8.2-a+crypto
+  -mbig-endian                		[disabled]
+  -mbionic                    		[disabled]
+  -mbranch-protection=        		
+  -mcmodel=                   		small
+  -mcpu=                      		generic
+  -mfix-cortex-a53-835769     		[enabled]
+  -mfix-cortex-a53-843419     		[enabled]
+  -mgeneral-regs-only         		[disabled]
+  -mglibc                     		[enabled]
+  -mharden-sls=               		
+  -mlittle-endian             		[enabled]
+  -mlow-precision-div         		[disabled]
+  -mlow-precision-recip-sqrt  		[disabled]
+  -mlow-precision-sqrt        		[disabled]
+  -mmusl                      		[disabled]
+  -momit-leaf-frame-pointer   		[enabled]
+  -moutline-atomics           		[enabled]
+  -moverride=<string>         		
+  -mpc-relative-literal-loads 		[enabled]
+  -msign-return-address=      		none
+  -mstack-protector-guard-offset= 	
+  -mstack-protector-guard-reg= 		
+  -mstack-protector-guard=    		global
+  -mstrict-align              		[disabled]
+  -msve-vector-bits=<number>  		scalable
+  -mtls-dialect=              		desc
+  -mtls-size=                 		24
+  -mtrack-speculation         		[disabled]
+  -mtune=                     		neoverse-n1
+  -muclibc                    		[disabled]
+  -mverbose-cost-dump         		[disabled]
+
+  Known AArch64 ABIs (for use with the -mabi= option):
+    ilp32 lp64
+
+  Supported AArch64 return address signing scope (for use with -msign-return-address= option):
+    all non-leaf none
+
+  The code model option names for -mcmodel:
+    large small tiny
+
+  Valid arguments to -mstack-protector-guard=:
+    global sysreg
+
+  The possible SVE vector lengths:
+    1024 128 2048 256 512 scalable
+
+  The possible TLS dialects:
+    desc trad
+
+cc_target_options_end
+cflags=-std=c11 -O2 -g -Wall -Wextra -Werror -fno-omit-frame-pointer -fno-builtin-malloc -fno-builtin-free
+binutils=GNU ld version 2.41-50.amzn2023.0.5
+Architecture:                            aarch64
+CPU op-mode(s):                          32-bit, 64-bit
+Byte Order:                              Little Endian
+CPU(s):                                  64
+On-line CPU(s) list:                     0-63
+Vendor ID:                               ARM
+Model:                                   1
+Thread(s) per core:                      1
+Core(s) per socket:                      64
+Socket(s):                               1
+Stepping:                                r1p1
+BogoMIPS:                                2100.00
+Flags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng
+L1d cache:                               4 MiB (64 instances)
+L1i cache:                               4 MiB (64 instances)
+L2 cache:                                64 MiB (64 instances)
+L3 cache:                                32 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-63
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; CSV2, BHB
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x1
+CPU part	: 0xd40
+CPU revision	: 1
+MIDR_EL1=0x00000000411fd401
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+binary: rustc
+commit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf
+commit-date: 2026-02-11
+host: aarch64-unknown-linux-gnu
+release: 1.93.1
+LLVM version: 21.1.8
+cargo 1.93.1 (083ac5135 2025-12-15)
+target_arch="aarch64"
+target_feature="aes"
+target_feature="bf16"
+target_feature="crc"
+target_feature="dit"
+target_feature="dotprod"
+target_feature="dpb"
+target_feature="dpb2"
+target_feature="fcma"
+target_feature="fhm"
+target_feature="flagm"
+target_feature="fp16"
+target_feature="i8mm"
+target_feature="jsconv"
+target_feature="lor"
+target_feature="lse"
+target_feature="neon"
+target_feature="paca"
+target_feature="pacg"
+target_feature="pan"
+target_feature="pmuv3"
+target_feature="rand"
+target_feature="ras"
+target_feature="rcpc"
+target_feature="rcpc2"
+target_feature="rdm"
+target_feature="sha2"
+target_feature="sha3"
+target_feature="sm4"
+target_feature="spe"
+target_feature="ssbs"
+target_feature="sve"
+target_feature="vh"
+target_has_atomic="128"
+target_has_atomic="16"
+target_has_atomic="32"
+target_has_atomic="64"
+target_has_atomic="8"
+target_has_atomic="ptr"
+target_pointer_width="64"
+RUSTFLAGS=<unset>
+run_finished_utc=2026-08-03T14:12:59.507634776Z

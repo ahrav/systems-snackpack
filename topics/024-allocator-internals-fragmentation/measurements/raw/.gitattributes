@@ -1,0 +1,3 @@
+# Raw receipts retain exact bytes and are not subject to text normalization.
+**/* -text -whitespace
+*.gz binary

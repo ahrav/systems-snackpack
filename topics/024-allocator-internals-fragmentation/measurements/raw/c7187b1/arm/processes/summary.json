@@ -1,0 +1,99 @@
+{
+  "comparisons": [
+    {
+      "alloc_ns_ratio": {
+        "block_log_sd": 0.0036163024661197457,
+        "ci95_high": 1.002727603863729,
+        "ci95_low": 0.998130262908669,
+        "estimate": 1.0004262925724632
+      },
+      "blocks": 12,
+      "estimand": "B/A",
+      "phase": "ab",
+      "processes": 48,
+      "rss_trimmed_kb_difference": {
+        "block_sd": 22.47355348093857,
+        "ci95_high": 65284.11234798178,
+        "ci95_low": 65255.55431868489,
+        "estimate": 65269.833333333336
+      },
+      "rss_trimmed_kb_ratio": {
+        "block_log_sd": 0.002243030931141505,
+        "ci95_high": 9.457792797889926,
+        "ci95_low": 9.430873560317767,
+        "estimate": 9.444323588091628
+      }
+    },
+    {
+      "alloc_ns_ratio": {
+        "block_log_sd": 0.002338966255618437,
+        "ci95_high": 1.0039785420137868,
+        "ci95_low": 0.9965330378666972,
+        "estimate": 1.0002488622467793
+      },
+      "blocks": 4,
+      "estimand": "B/A",
+      "phase": "aa",
+      "processes": 16,
+      "rss_trimmed_kb_difference": {
+        "block_sd": 13.9522996909709,
+        "ci95_high": 60.20122230098434,
+        "ci95_low": 15.798777699015663,
+        "estimate": 38.0
+      },
+      "rss_trimmed_kb_ratio": {
+        "block_log_sd": 0.0018093564094784449,
+        "ci95_high": 1.007832383190941,
+        "ci95_low": 1.0020457794419284,
+        "estimate": 1.0049349162813395
+      }
+    }
+  ],
+  "parameters": {
+    "aa_templates": [
+      "BAAB",
+      "ABBA",
+      "BAAB",
+      "ABBA"
+    ],
+    "ab_templates": [
+      "BAAB",
+      "ABBA",
+      "ABBA",
+      "ABBA",
+      "BAAB",
+      "ABBA",
+      "ABBA",
+      "BAAB",
+      "BAAB",
+      "ABBA",
+      "BAAB",
+      "BAAB"
+    ],
+    "analysis_unit": "one complete four-process block contrast",
+    "block_size": 256,
+    "count": 262144,
+    "survivor_spacing": 16,
+    "treatment_application": "one fresh process"
+  },
+  "treatment_medians": {
+    "compact": {
+      "anonymous_trimmed_kb": 6500.0,
+      "arena_trimmed": 6561792.0,
+      "live_requested": 4194304.0,
+      "live_usable": 4325376.0,
+      "rss_freed_kb": 73014.0,
+      "rss_trimmed_kb": 7738.0,
+      "uord_trimmed": 6557696.0
+    },
+    "scattered": {
+      "anonymous_trimmed_kb": 71772.0,
+      "arena_trimmed": 73400320.0,
+      "live_requested": 4194304.0,
+      "live_usable": 4325376.0,
+      "rss_freed_kb": 73012.0,
+      "rss_trimmed_kb": 73008.0,
+      "uord_trimmed": 6557696.0
+    }
+  }
+}
