@@ -246,8 +246,13 @@ def invoke(
     except subprocess.TimeoutExpired as error:
         timed_out = True
         returncode = None
+        # TimeoutExpired carries captured output as bytes even under text=True.
         stdout = error.stdout or ""
         stderr = error.stderr or ""
+        if isinstance(stdout, bytes):
+            stdout = stdout.decode("utf-8", errors="replace")
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8", errors="replace")
     process_ns = time.monotonic_ns() - started
     parse_status = "ok"
     parse_error = ""
@@ -280,7 +285,9 @@ def invoke(
     }
     attempts.write(json.dumps(attempt, sort_keys=True) + "\n")
     attempts.flush()
-    if parsed is None:
+    # A parsed line that later failed measurement validation must not become
+    # an observation.
+    if parse_status != "ok" or parsed is None:
         return None
     return {**identity, "label": label, "process_ns": process_ns, **parsed}
 

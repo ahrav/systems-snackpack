@@ -258,6 +258,31 @@ static void discover_topology(struct topology *topology)
     if (configured <= 0 || configured > INT_MAX) {
         contract_error("invalid configured CPU count");
     }
+    /* On hosts with sparse or non-contiguous CPU ids the configured COUNT is
+     * smaller than the maximum id plus one; a mask sized from the count
+     * would omit valid CPUs and can make sched_getaffinity fail. Size the
+     * mask from the kernel's possible-CPU range instead. */
+    char *possible = read_text_file("/sys/devices/system/cpu/possible");
+    if (possible != NULL) {
+        long highest = -1;
+        const char *cursor = possible;
+        while (*cursor != '\0') {
+            if (*cursor >= '0' && *cursor <= '9') {
+                char *end = NULL;
+                long parsed = strtol(cursor, &end, 10);
+                if (parsed > highest) {
+                    highest = parsed;
+                }
+                cursor = end;
+            } else {
+                cursor++;
+            }
+        }
+        free(possible);
+        if (highest >= 0 && highest < INT_MAX - 1 && highest + 1 > configured) {
+            configured = highest + 1;
+        }
+    }
     topology->cpu_capacity = (int)configured;
     topology->affinity_bytes = CPU_ALLOC_SIZE(topology->cpu_capacity);
     topology->initial_affinity = CPU_ALLOC(topology->cpu_capacity);

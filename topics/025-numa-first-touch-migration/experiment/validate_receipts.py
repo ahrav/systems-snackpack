@@ -207,6 +207,22 @@ def verify_source_identity(evidence: Path, source_root: Path, binary_digest: str
     if not binary_line or binary_line[0] != binary_digest:
         fail("binary SHA-256 differs from experiment design")
     identity_lines = (evidence / "source-identity.txt").read_text(encoding="utf-8").splitlines()
+    recorded = None
+    for line in identity_lines:
+        if line.startswith("source_commit="):
+            recorded = line.split("=", 1)[1].strip()
+    if recorded is None or len(recorded) != 40:
+        fail("source identity lacks a recorded source commit")
+    # Retained receipts are validated from later commits, after review may
+    # have changed the experiment sources. Bind the receipts to the recorded
+    # source commit's blobs, and require that commit to be reachable from the
+    # checkout, instead of assuming HEAD is the source commit.
+    reachable = subprocess.run(
+        ["git", "-C", str(source_root), "merge-base", "--is-ancestor", recorded, "HEAD"],
+        capture_output=True, check=False,
+    )
+    if reachable.returncode != 0:
+        fail("recorded source commit is not reachable from the checkout HEAD")
     expected_files = {
         "numa_first_touch_probe.c", "run_processes.py", "validate_receipts.py", "run_host.sh"
     }
@@ -217,18 +233,62 @@ def verify_source_identity(evidence: Path, source_root: Path, binary_digest: str
             continue
         name = Path(parts[1].strip()).name
         if name in expected_files:
-            path = source_root / "topics/025-numa-first-touch-migration/experiment" / name
-            if sha256(path) != parts[0]:
+            blob = subprocess.run(
+                [
+                    "git", "-C", str(source_root), "show",
+                    f"{recorded}:topics/025-numa-first-touch-migration/experiment/{name}",
+                ],
+                capture_output=True, check=False,
+            )
+            if blob.returncode != 0:
+                fail(f"recorded source commit lacks experiment file {name}")
+            if hashlib.sha256(blob.stdout).hexdigest() != parts[0]:
                 fail(f"source identity differs for {name}")
             found.add(name)
     if found != expected_files:
         fail("source identity does not cover every experiment file")
-    commit = subprocess.run(
-        ["git", "-C", str(source_root), "rev-parse", "HEAD"],
-        text=True, capture_output=True, check=True,
-    ).stdout.strip()
-    if f"source_commit={commit}" not in identity_lines:
-        fail("source commit receipt differs from the worktree HEAD")
+
+
+def verify_evidence_manifest(evidence: Path) -> None:
+    """Verify the retained seal: every bundle file hashed, every hash correct."""
+    manifest_path = evidence / "evidence.sha256"
+    listed: set[str] = set()
+    for line in manifest_path.read_text(encoding="utf-8").splitlines():
+        parts = line.split(maxsplit=1)
+        if len(parts) != 2 or len(parts[0]) != 64:
+            fail("malformed evidence manifest line")
+        name = parts[1].strip()
+        target = (evidence / name).resolve()
+        if evidence.resolve() not in target.parents:
+            fail(f"evidence manifest names a path outside the bundle: {name}")
+        if sha256(target) != parts[0]:
+            fail(f"evidence hash differs for {name}")
+        listed.add(str(target))
+    for path in evidence.rglob("*"):
+        if (
+            path.is_file()
+            # Manifests seal other files; they are not themselves sealed.
+            and path.name not in ("evidence.sha256", "supplement.sha256")
+            and str(path.resolve()) not in listed
+        ):
+            # Post-run supplements are sealed by the bundle set's sibling
+            # manifest rather than the run's own evidence manifest.
+            if supplement_digest(evidence, path) == sha256(path):
+                continue
+            fail(f"retained file is not sealed by the evidence manifest: {path.name}")
+
+
+def supplement_digest(evidence: Path, path: Path) -> str | None:
+    """Return the recorded digest for a supplement file, if sealed."""
+    manifest = evidence.parent / "supplements.sha256"
+    if not manifest.is_file():
+        return None
+    relative = f"{evidence.name}/{path.relative_to(evidence)}"
+    for line in manifest.read_text(encoding="utf-8").splitlines():
+        parts = line.split(maxsplit=1)
+        if len(parts) == 2 and parts[1].strip() == relative:
+            return parts[0]
+    return None
 
 
 def validate_schedule(design: dict[str, Any], observations: list[dict[str, Any]]) -> None:
@@ -357,9 +417,11 @@ def main() -> None:
     if design.get("binary_sha256") != summary.get("binary_sha256"):
         fail("design and summary binary identities differ")
     verify_source_identity(evidence, source_root, design["binary_sha256"])
+    verify_evidence_manifest(evidence)
 
     if len(attempts) != len(observations):
         fail("attempt and observation ledgers differ in length")
+    # pi-lens-ignore: B905
     for attempt, observation in zip(attempts, observations):
         if attempt.get("returncode") != 0 or attempt.get("timed_out") is not False or (
             attempt.get("stderr") != "" or attempt.get("parse_status") != "ok"
