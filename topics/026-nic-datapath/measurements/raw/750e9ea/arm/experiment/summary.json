@@ -1,0 +1,59 @@
+{
+  "attempt_count": 82,
+  "binary_sha256": "fc7710757226fff992307d7bfaeaac336fadaedd85991b78bcf4e58101532c64",
+  "gro_control": {
+    "coalesced_delivery_observed": true,
+    "same_logical_payload": true,
+    "timing_claim": null
+  },
+  "mode_diagnostics": {
+    "scalar": {
+      "median_data_receive_syscalls": 16741.0,
+      "median_data_send_syscalls": 32000.0,
+      "median_ns_per_datagram": 2902.6992185,
+      "processes": 32
+    },
+    "sendmmsg": {
+      "median_data_receive_syscalls": 8211.0,
+      "median_data_send_syscalls": 1000.0,
+      "median_ns_per_datagram": 2686.0291405,
+      "processes": 32
+    },
+    "udp_segment": {
+      "median_data_receive_syscalls": 1000.0,
+      "median_data_send_syscalls": 1000.0,
+      "median_ns_per_datagram": 2768.5097035,
+      "processes": 16
+    }
+  },
+  "primary_gro_enabled": false,
+  "schema": 1,
+  "summaries": {
+    "aa_right_over_aa_left": {
+      "geometric_mean_ratio": 0.9940179471103586,
+      "log_sd": 0.01809498922109155,
+      "log_t_95_high": 1.0230548974716298,
+      "log_t_95_low": 0.9658051406815065,
+      "mean_log_contrast": -0.006000017045543871,
+      "n_complete_blocks": 4,
+      "scope": "same binary and sendmmsg command through both labels; mechanical path-asymmetry diagnostic, not long-run null calibration"
+    },
+    "sendmmsg_over_scalar": {
+      "geometric_mean_ratio": 0.9261678615278481,
+      "log_sd": 0.010648715416667471,
+      "log_t_95_high": 0.9344499272287295,
+      "log_t_95_low": 0.9179592000943063,
+      "mean_log_contrast": -0.07669978481645678,
+      "n_complete_blocks": 8
+    },
+    "udp_segment_over_scalar": {
+      "geometric_mean_ratio": 0.9553055090460902,
+      "log_sd": 0.021745743314065907,
+      "log_t_95_high": 0.9728316935940438,
+      "log_t_95_low": 0.9380950699110705,
+      "mean_log_contrast": -0.04572408489972046,
+      "n_complete_blocks": 8
+    }
+  },
+  "valid_observation_count": 82
+}

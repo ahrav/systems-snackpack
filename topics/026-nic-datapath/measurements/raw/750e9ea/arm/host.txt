@@ -1,0 +1,876 @@
+utc_start=2026-08-05T15:26:16Z
+hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+invocation_target_alias=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+invocation_resolved_host=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+source_commit=750e9ea8729063d118409f9f73537d76cb8ad392
+source_tree=74926ef177f0fd9329e13a35e38069dc38fb152a
+source_branch=curriculum/topic-026-nic-datapath
+swept_environment=none
+architecture=aarch64
+kernel=6.12.94-123.192.amzn2023.aarch64
+online_cpu_count=64
+configured_cpu_count=64
+cpus_allowed_list=0-63
+mems_allowed_list=0
+
+uname
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.94-123.192.amzn2023.aarch64 #1 SMP Fri Jul 24 13:35:21 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+
+compiler
+cc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+compiler_target=aarch64-amazon-linux
+
+compiler_target_options
+The following options are target specific:
+  -mabi=                      		lp64
+  -march=                     		armv8.4-a+crypto+sha3+sm4+sve+rng+i8mm+bf16
+  -mbig-endian                		[disabled]
+  -mbionic                    		[disabled]
+  -mbranch-protection=        		
+  -mcmodel=                   		small
+  -mcpu=                      		generic
+  -mfix-cortex-a53-835769     		[enabled]
+  -mfix-cortex-a53-843419     		[enabled]
+  -mgeneral-regs-only         		[disabled]
+  -mglibc                     		[enabled]
+  -mharden-sls=               		
+  -mlittle-endian             		[enabled]
+  -mlow-precision-div         		[disabled]
+  -mlow-precision-recip-sqrt  		[disabled]
+  -mlow-precision-sqrt        		[disabled]
+  -mmusl                      		[disabled]
+  -momit-leaf-frame-pointer   		[enabled]
+  -moutline-atomics           		[enabled]
+  -moverride=<string>         		
+  -mpc-relative-literal-loads 		[enabled]
+  -msign-return-address=      		none
+  -mstack-protector-guard-offset= 	
+  -mstack-protector-guard-reg= 		
+  -mstack-protector-guard=    		global
+  -mstrict-align              		[disabled]
+  -msve-vector-bits=<number>  		scalable
+  -mtls-dialect=              		desc
+  -mtls-size=                 		24
+  -mtrack-speculation         		[disabled]
+  -mtune=                     		neoverse-n1
+  -muclibc                    		[disabled]
+  -mverbose-cost-dump         		[disabled]
+
+  Known AArch64 ABIs (for use with the -mabi= option):
+    ilp32 lp64
+
+  Supported AArch64 return address signing scope (for use with -msign-return-address= option):
+    all non-leaf none
+
+  The code model option names for -mcmodel:
+    large small tiny
+
+  Valid arguments to -mstack-protector-guard=:
+    global sysreg
+
+  The possible SVE vector lengths:
+    1024 128 2048 256 512 scalable
+
+  The possible TLS dialects:
+    desc trad
+
+
+rustc
+rustc 1.95.0 (59807616e 2026-04-14)
+binary: rustc
+commit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860
+commit-date: 2026-04-14
+host: aarch64-unknown-linux-gnu
+release: 1.95.0
+LLVM version: 22.1.2
+
+cargo
+cargo 1.95.0 (f2d3ce0bd 2026-03-21)
+
+rust_target_cfg_native
+debug_assertions
+panic="unwind"
+target_abi=""
+target_arch="aarch64"
+target_endian="little"
+target_env="gnu"
+target_family="unix"
+target_feature="aes"
+target_feature="bf16"
+target_feature="crc"
+target_feature="dit"
+target_feature="dotprod"
+target_feature="dpb"
+target_feature="dpb2"
+target_feature="fcma"
+target_feature="fhm"
+target_feature="flagm"
+target_feature="fp16"
+target_feature="i8mm"
+target_feature="jsconv"
+target_feature="lor"
+target_feature="lse"
+target_feature="neon"
+target_feature="paca"
+target_feature="pacg"
+target_feature="pan"
+target_feature="pmuv3"
+target_feature="rand"
+target_feature="ras"
+target_feature="rcpc"
+target_feature="rcpc2"
+target_feature="rdm"
+target_feature="sha2"
+target_feature="sha3"
+target_feature="sm4"
+target_feature="spe"
+target_feature="ssbs"
+target_feature="sve"
+target_feature="vh"
+target_has_atomic="128"
+target_has_atomic="16"
+target_has_atomic="32"
+target_has_atomic="64"
+target_has_atomic="8"
+target_has_atomic="ptr"
+target_os="linux"
+target_pointer_width="64"
+target_vendor="unknown"
+unix
+
+rust_target_features
+Features supported by rustc for this target:
+    aes                                   - Enable AES support.
+    bf16                                  - Enable BFloat16 Extension.
+    bti                                   - Enable Branch Target Identification.
+    crc                                   - Enable Armv8.0-A CRC-32 checksum instructions.
+    crt-static                            - Enables C Run-time Libraries to be statically linked.
+    cssc                                  - Enable Common Short Sequence Compression (CSSC) instructions.
+    dit                                   - Enable Armv8.4-A Data Independent Timing instructions.
+    dotprod                               - Enable dot product support.
+    dpb                                   - Enable Armv8.2-A data Cache Clean to Point of Persistence.
+    dpb2                                  - Enable Armv8.5-A Cache Clean to Point of Deep Persistence.
+    ecv                                   - Enable enhanced counter virtualization extension.
+    f32mm                                 - Enable Matrix Multiply FP32 Extension.
+    f64mm                                 - Enable Matrix Multiply FP64 Extension.
+    faminmax                              - Enable FAMIN and FAMAX instructions.
+    fcma                                  - Enable Armv8.3-A Floating-point complex number support.
+    fhm                                   - Enable FP16 FML instructions.
+    flagm                                 - Enable Armv8.4-A Flag Manipulation instructions.
+    flagm2                                - Enable alternative NZCV format for floating point comparisons.
+    fp16                                  - Enable half-precision floating-point data processing.
+    fp8                                   - Enable FP8 instructions.
+    fp8dot2                               - Enable FP8 2-way dot instructions.
+    fp8dot4                               - Enable FP8 4-way dot instructions.
+    fp8fma                                - Enable Armv9.5-A FP8 multiply-add instructions.
+    frintts                               - Enable FRInt[32|64][Z|X] instructions that round a floating-point number to an integer (in FP format) forcing it to fit into a 32- or 64-bit int.
+    hbc                                   - Enable Armv8.8-A Hinted Conditional Branches Extension.
+    i8mm                                  - Enable Matrix Multiply Int8 Extension.
+    jsconv                                - Enable Armv8.3-A JavaScript FP conversion instructions.
+    lor                                   - Enable Armv8.1-A Limited Ordering Regions extension.
+    lse                                   - Enable Armv8.1-A Large System Extension (LSE) atomic instructions.
+    lse128                                - Enable Armv9.4-A 128-bit Atomic instructions.
+    lse2                                  - Enable Armv8.4-A Large System Extension 2 (LSE2) atomicity rules.
+    lut                                   - Enable Lookup Table instructions.
+    mops                                  - Enable Armv8.8-A memcpy and memset acceleration instructions.
+    mte                                   - Enable Memory Tagging Extension.
+    neon                                  - Enable Advanced SIMD instructions.
+    outline-atomics                       - Enable out of line atomics to support LSE instructions.
+    paca                                  - Enable Armv8.3-A Pointer Authentication extension.
+    pacg                                  - Enable Armv8.3-A Pointer Authentication extension.
+    pan                                   - Enable Armv8.1-A Privileged Access-Never extension.
+    pauth-lr                              - Enable Armv9.5-A PAC enhancements.
+    pmuv3                                 - Enable Armv8.0-A PMUv3 Performance Monitors extension.
+    rand                                  - Enable Random Number generation instructions.
+    ras                                   - Enable Armv8.0-A Reliability, Availability and Serviceability Extensions.
+    rcpc                                  - Enable support for RCPC extension.
+    rcpc2                                 - Enable Armv8.4-A RCPC instructions with Immediate Offsets.
+    rcpc3                                 - Enable Armv8.9-A RCPC instructions for A64 and Advanced SIMD and floating-point instruction set.
+    rdm                                   - Enable Armv8.1-A Rounding Double Multiply Add/Subtract instructions.
+    sb                                    - Enable Armv8.5-A Speculation Barrier.
+    sha2                                  - Enable SHA1 and SHA256 support.
+    sha3                                  - Enable SHA512 and SHA3 support.
+    sm4                                   - Enable SM3 and SM4 support.
+    sme                                   - Enable Scalable Matrix Extension (SME).
+    sme-b16b16                            - Enable SME2.1 ZA-targeting non-widening BFloat16 instructions.
+    sme-f16f16                            - Enable SME non-widening Float16 instructions.
+    sme-f64f64                            - Enable Scalable Matrix Extension (SME) F64F64 instructions.
+    sme-f8f16                             - Enable Scalable Matrix Extension (SME) F8F16 instructions.
+    sme-f8f32                             - Enable Scalable Matrix Extension (SME) F8F32 instructions.
+    sme-fa64                              - Enable the full A64 instruction set in streaming SVE mode.
+    sme-i16i64                            - Enable Scalable Matrix Extension (SME) I16I64 instructions.
+    sme-lutv2                             - Enable Scalable Matrix Extension (SME) LUTv2 instructions.
+    sme2                                  - Enable Scalable Matrix Extension 2 (SME2) instructions.
+    sme2p1                                - Enable Scalable Matrix Extension 2.1 instructions.
+    spe                                   - Enable Statistical Profiling extension.
+    ssbs                                  - Enable Speculative Store Bypass Safe bit.
+    ssve-fp8dot2                          - Enable SVE2 FP8 2-way dot product instructions.
+    ssve-fp8dot4                          - Enable SVE2 FP8 4-way dot product instructions.
+    ssve-fp8fma                           - Enable SVE2 FP8 multiply-add instructions.
+    sve                                   - Enable Scalable Vector Extension (SVE) instructions.
+    sve-b16b16                            - Enable SVE2 non-widening and SME2 Z-targeting non-widening BFloat16 instructions.
+    sve2                                  - Enable Scalable Vector Extension 2 (SVE2) instructions.
+    sve2-aes                              - Shorthand for +sve2+sve-aes.
+    sve2-bitperm                          - Shorthand for +sve2+sve-bitperm.
+    sve2-sha3                             - Shorthand for +sve2+sve-sha3.
+    sve2-sm4                              - Shorthand for +sve2+sve-sm4.
+    sve2p1                                - Enable Scalable Vector Extension 2.1 instructions.
+    v8.1a                                 - Support ARM v8.1a architecture.
+    v8.2a                                 - Support ARM v8.2a architecture.
+    v8.3a                                 - Support ARM v8.3a architecture.
+    v8.4a                                 - Support ARM v8.4a architecture.
+    v8.5a                                 - Support ARM v8.5a architecture.
+    v8.6a                                 - Support ARM v8.6a architecture.
+    v8.7a                                 - Support ARM v8.7a architecture.
+    v8.8a                                 - Support ARM v8.8a architecture.
+    v8.9a                                 - Support ARM v8.9a architecture.
+    v9.1a                                 - Support ARM v9.1a architecture.
+    v9.2a                                 - Support ARM v9.2a architecture.
+    v9.3a                                 - Support ARM v9.3a architecture.
+    v9.4a                                 - Support ARM v9.4a architecture.
+    v9.5a                                 - Support ARM v9.5a architecture.
+    v9a                                   - Support ARM v9a architecture.
+    vh                                    - Enable Armv8.1-A Virtual Host extension.
+    wfxt                                  - Enable Armv8.7-A WFET and WFIT instruction.
+
+Code-generation features supported by LLVM for this target:
+    CONTEXTIDREL2                         - Enable RW operand CONTEXTIDR_EL2.
+    a320                                  - Cortex-A320 ARM processors.
+    a35                                   - Cortex-A35 ARM processors.
+    a510                                  - Cortex-A510 ARM processors.
+    a520                                  - Cortex-A520 ARM processors.
+    a520ae                                - Cortex-A520AE ARM processors.
+    a53                                   - Cortex-A53 ARM processors.
+    a55                                   - Cortex-A55 ARM processors.
+    a57                                   - Cortex-A57 ARM processors.
+    a64fx                                 - Fujitsu A64FX processors.
+    a65                                   - Cortex-A65 ARM processors.
+    a710                                  - Cortex-A710 ARM processors.
+    a715                                  - Cortex-A715 ARM processors.
+    a72                                   - Cortex-A72 ARM processors.
+    a720                                  - Cortex-A720 ARM processors.
+    a720ae                                - Cortex-A720AE ARM processors.
+    a73                                   - Cortex-A73 ARM processors.
+    a75                                   - Cortex-A75 ARM processors.
+    a76                                   - Cortex-A76 ARM processors.
+    a77                                   - Cortex-A77 ARM processors.
+    a78                                   - Cortex-A78 ARM processors.
+    a78ae                                 - Cortex-A78AE ARM processors.
+    a78c                                  - Cortex-A78C ARM processors.
+    addr-lsl-slow-14                      - Address operands with shift amount of 1 or 4 are slow.
+    aggressive-fma                        - Enable Aggressive FMA for floating-point..
+    aggressive-interleaving               - Make use of aggressive interleaving during vectorization.
+    all                                   - Enable all instructions.
+    alternate-sextload-cvt-f32-pattern    - Use alternative pattern for sextload convert to f32.
+    alu-lsl-fast                          - Add/Sub operations with lsl shift <= 4 are cheap.
+    am                                    - Enable Armv8.4-A Activity Monitors extension.
+    ampere1                               - Ampere Computing Ampere-1 processors.
+    ampere1a                              - Ampere Computing Ampere-1A processors.
+    ampere1b                              - Ampere Computing Ampere-1B processors.
+    ampere1c                              - Ampere Computing Ampere-1C processors.
+    amvs                                  - Enable Armv8.6-A Activity Monitors Virtualization support.
+    apple-a10                             - Apple A10.
+    apple-a11                             - Apple A11.
+    apple-a12                             - Apple A12.
+    apple-a13                             - Apple A13.
+    apple-a14                             - Apple A14.
+    apple-a15                             - Apple A15.
+    apple-a16                             - Apple A16.
+    apple-a17                             - Apple A17.
+    apple-a7                              - Apple A7 (the CPU formerly known as Cyclone).
+    apple-m4                              - Apple M4.
+    apple-m5                              - Apple M5.
+    arith-bcc-fusion                      - CPU fuses arithmetic+bcc operations.
+    arith-cbz-fusion                      - CPU fuses arithmetic + cbz/cbnz operations.
+    ascend-store-address                  - Schedule vector stores by ascending address.
+    avoid-ldapur                          - Prefer add+ldapr to offset ldapur.
+    balance-fp-ops                        - balance mix of odd and even D-registers for fp multiply(-accumulate) ops.
+    brbe                                  - Enable Branch Record Buffer Extension.
+    btie                                  - Enable Enhanced Branch Target Identification extension.
+    c1-nano                               - C1-Nano ARM Processors.
+    c1-premium                            - C1-Premium ARM Processors.
+    c1-pro                                - C1-Pro ARM Processors.
+    c1-ultra                              - C1-Ultra ARM Processors.
+    call-saved-x10                        - Make X10 callee saved..
+    call-saved-x11                        - Make X11 callee saved..
+    call-saved-x12                        - Make X12 callee saved..
+    call-saved-x13                        - Make X13 callee saved..
+    call-saved-x14                        - Make X14 callee saved..
+    call-saved-x15                        - Make X15 callee saved..
+    call-saved-x18                        - Make X18 callee saved..
+    call-saved-x8                         - Make X8 callee saved..
+    call-saved-x9                         - Make X9 callee saved..
+    carmel                                - Nvidia Carmel processors.
+    ccidx                                 - Enable Armv8.3-A Extend of the CCSIDR number of sets.
+    chk                                   - Enable Armv8.0-A Check Feature Status Extension.
+    clrbhb                                - Enable Clear BHB instruction.
+    cmh                                   - Enable Armv9.7-A Contention Management Hints.
+    cmp-bcc-fusion                        - CPU fuses cmp+bcc operations.
+    cmpbr                                 - Enable Armv9.6-A base compare and branch instructions.
+    cortex-a725                           - Cortex-A725 ARM processors.
+    cortex-r82                            - Cortex-R82 ARM processors.
+    cortex-r82ae                          - Cortex-R82-AE ARM processors.
+    cortex-x1                             - Cortex-X1 ARM processors.
+    cortex-x2                             - Cortex-X2 ARM processors.
+    cortex-x3                             - Cortex-X3 ARM processors.
+    cortex-x4                             - Cortex-X4 ARM processors.
+    cortex-x925                           - Cortex-X925 ARM processors.
+    cpa                                   - Enable Armv9.5-A Checked Pointer Arithmetic.
+    crypto                                - Enable cryptographic instructions.
+    d128                                  - Enable Armv9.4-A 128-bit Page Table Descriptors, System Registers and instructions.
+    disable-fast-inc-vl                   - Do not prefer INC/DEC, ALL, { 1, 2, 4 } over ADDVL.
+    disable-latency-sched-heuristic       - Disable latency scheduling heuristic.
+    disable-ldp                           - Do not emit ldp.
+    disable-maximize-scalable-bandwidth   - Determine the maximum scalable vector length for a loop by the largest scalar type rather than the smallest.
+    disable-stp                           - Do not emit stp.
+    disable-unpredicated-ld-st-lower      - Disable lowering unpredicated loads/stores as LDR/STR.
+    el2vmsa                               - Enable Exception Level 2 Virtual Memory System Architecture.
+    el3                                   - Enable Exception Level 3.
+    enable-select-opt                     - Enable the select optimize pass for select loop heuristics.
+    ete                                   - Enable Embedded Trace Extension.
+    execute-only                          - Enable the generation of execute only code..
+    exynos-cheap-as-move                  - Use Exynos specific handling of cheap instructions.
+    exynosm3                              - Samsung Exynos-M3 processors.
+    exynosm4                              - Samsung Exynos-M4 processors.
+    f16f32dot                             - Enable Armv9.7-A Advanced SIMD half-precision dot product accumulate to single-precision.
+    f16f32mm                              - Enable Armv9.7-A Advanced SIMD half-precision matrix multiply-accumulate to single-precision.
+    f16mm                                 - Enable Armv9.7-A non-widening half-precision matrix multiply-accumulate.
+    f8f16mm                               - Enable Armv9.6-A FP8 to Half-Precision Matrix Multiplication.
+    f8f32mm                               - Enable Armv9.6-A FP8 to Single-Precision Matrix Multiplication.
+    falkor                                - Qualcomm Falkor processors.
+    fgt                                   - Enable fine grained virtualization traps extension.
+    fix-cortex-a53-835769                 - Mitigate Cortex-A53 Erratum 835769.
+    fmv                                   - Enable Function Multi Versioning support..
+    force-32bit-jump-tables               - Force jump table entries to be 32-bits wide except at MinSize.
+    fp-armv8                              - Enable Armv8.0-A Floating Point Extensions.
+    fpac                                  - Enable Armv8.3-A Pointer Authentication Faulting enhancement.
+    fprcvt                                - Enable Armv9.6-A base convert instructions for SIMD&FP scalar register operands of different input and output sizes.
+    fujitsu-monaka                        - Fujitsu FUJITSU-MONAKA processors.
+    fuse-address                          - CPU fuses address generation and memory operations.
+    fuse-addsub-2reg-const1               - CPU fuses (a + b + 1) and (a - b - 1).
+    fuse-adrp-add                         - CPU fuses adrp+add operations.
+    fuse-aes                              - CPU fuses AES crypto operations.
+    fuse-arith-logic                      - CPU fuses arithmetic and logic operations.
+    fuse-crypto-eor                       - CPU fuses AES/PMULL and EOR operations.
+    fuse-csel                             - CPU can fuse CMP and CSEL operations.
+    fuse-cset                             - CPU can fuse CMP and CSET operations.
+    fuse-literals                         - CPU fuses literal generation operations.
+    gcie                                  - Enable GICv5 (Generic Interrupt Controller) CPU Interface Extension.
+    gcs                                   - Enable Armv9.4-A Guarded Call Stack Extension.
+    harden-sls-blr                        - Harden against straight line speculation across BLR instructions.
+    harden-sls-nocomdat                   - Generate thunk code for SLS mitigation in the normal text section.
+    harden-sls-retbr                      - Harden against straight line speculation across RET and BR instructions.
+    hcx                                   - Enable Armv8.7-A HCRX_EL2 system register.
+    ite                                   - Enable Armv9.4-A Instrumentation Extension.
+    kryo                                  - Qualcomm Kryo processors.
+    ldp-aligned-only                      - In order to emit ldp, first check if the load will be aligned to 2 * element_size.
+    ls64                                  - Enable Armv8.7-A LD64B/ST64B Accelerator Extension.
+    lscp                                  - Enable Armv9.7-A Load-acquire and store-release pair extension.
+    lsfe                                  - Enable Armv9.6-A base Atomic floating-point in-memory instructions.
+    lsui                                  - Enable Armv9.6-A unprivileged load/store instructions.
+    max-interleave-factor-4               - Set the MaxInterleaveFactor to 4 (from the default 2).
+    mec                                   - Enable Memory Encryption Contexts Extension.
+    mops-go                               - Enable memset acceleration granule only.
+    mpam                                  - Enable Armv8.4-A Memory system Partitioning and Monitoring extension.
+    mpamv2                                - Enable Armv9.7-A MPAMv2 Lookaside Buffer Invalidate instructions.
+    mtetc                                 - Enable Virtual Memory Tagging Extension.
+    neoverse512tvb                        - Neoverse 512-TVB ARM processors.
+    neoversee1                            - Neoverse E1 ARM processors.
+    neoversen1                            - Neoverse N1 ARM processors.
+    neoversen2                            - Neoverse N2 ARM processors.
+    neoversen3                            - Neoverse N3 ARM processors.
+    neoversev1                            - Neoverse V1 ARM processors.
+    neoversev2                            - Neoverse V2 ARM processors.
+    neoversev3                            - Neoverse V3 ARM processors.
+    neoversev3AE                          - Neoverse V3AE ARM processors.
+    nmi                                   - Enable Armv8.8-A Non-maskable Interrupts.
+    no-bti-at-return-twice                - Don't place a BTI instruction after a return-twice.
+    no-neg-immediates                     - Convert immediates and instructions to their negated or complemented equivalent when the immediate does not fit in the encoding..
+    no-sve-fp-ld1r                        - Avoid using LD1RX instructions for FP.
+    no-zcz-fpr64                          - Has no zero-cycle zeroing instructions for FPR64 registers.
+    nv                                    - Enable Armv8.4-A Nested Virtualization Enchancement.
+    occmo                                 - Enable Armv9.6-A Outer cacheable cache maintenance operations.
+    olympus                               - NVIDIA Olympus processors.
+    oryon-1                               - Nuvia Inc Oryon processors.
+    pan-rwv                               - Enable Armv8.2-A PAN s1e1R and s1e1W Variants.
+    pcdphint                              - Enable Armv9.6-A Producer Consumer Data Placement hints.
+    poe2                                  - Enable Stage 1 Permission Overlays Extension 2 instructions.
+    pops                                  - Enable Armv9.6-A Point Of Physical Storage (PoPS) DC instructions.
+    predictable-select-expensive          - Prefer likely predicted branches over selects.
+    predres                               - Enable Armv8.5-A execution and data prediction invalidation instructions.
+    prfm-slc-target                       - Enable SLC target for PRFM instruction.
+    rasv2                                 - Enable Armv8.9-A Reliability, Availability and Serviceability Extensions.
+    reserve-lr-for-ra                     - Reserve LR for call use only.
+    reserve-x1                            - Reserve X1, making it unavailable as a GPR.
+    reserve-x10                           - Reserve X10, making it unavailable as a GPR.
+    reserve-x11                           - Reserve X11, making it unavailable as a GPR.
+    reserve-x12                           - Reserve X12, making it unavailable as a GPR.
+    reserve-x13                           - Reserve X13, making it unavailable as a GPR.
+    reserve-x14                           - Reserve X14, making it unavailable as a GPR.
+    reserve-x15                           - Reserve X15, making it unavailable as a GPR.
+    reserve-x18                           - Reserve X18, making it unavailable as a GPR.
+    reserve-x2                            - Reserve X2, making it unavailable as a GPR.
+    reserve-x20                           - Reserve X20, making it unavailable as a GPR.
+    reserve-x21                           - Reserve X21, making it unavailable as a GPR.
+    reserve-x22                           - Reserve X22, making it unavailable as a GPR.
+    reserve-x23                           - Reserve X23, making it unavailable as a GPR.
+    reserve-x24                           - Reserve X24, making it unavailable as a GPR.
+    reserve-x25                           - Reserve X25, making it unavailable as a GPR.
+    reserve-x26                           - Reserve X26, making it unavailable as a GPR.
+    reserve-x27                           - Reserve X27, making it unavailable as a GPR.
+    reserve-x28                           - Reserve X28, making it unavailable as a GPR.
+    reserve-x3                            - Reserve X3, making it unavailable as a GPR.
+    reserve-x4                            - Reserve X4, making it unavailable as a GPR.
+    reserve-x5                            - Reserve X5, making it unavailable as a GPR.
+    reserve-x6                            - Reserve X6, making it unavailable as a GPR.
+    reserve-x7                            - Reserve X7, making it unavailable as a GPR.
+    reserve-x9                            - Reserve X9, making it unavailable as a GPR.
+    rme                                   - Enable Realm Management Extension.
+    saphira                               - Qualcomm Saphira processors.
+    sel2                                  - Enable Armv8.4-A Secure Exception Level 2 extension.
+    slow-misaligned-128store              - Misaligned 128 bit stores are slow.
+    slow-paired-128                       - Paired 128 bit loads and stores are slow.
+    slow-strqro-store                     - STR of Q register with register offset is slow.
+    sme-mop4                              - Enable SME Quarter-tile outer product instructions.
+    sme-tmop                              - Enable SME Structured sparsity outer product instructions..
+    sme2p2                                - Enable Armv9.6-A Scalable Matrix Extension 2.2 instructions.
+    sme2p3                                - Enable Armv9.7-A Scalable Matrix Extension 2.3 instructions.
+    spe-eef                               - Enable extra register in the Statistical Profiling Extension.
+    specres2                              - Enable Speculation Restriction Instruction.
+    specrestrict                          - Enable architectural speculation restriction.
+    ssve-aes                              - Enable Armv9.6-A SVE AES support in streaming SVE mode.
+    ssve-bitperm                          - Enable Armv9.6-A SVE BitPerm support in streaming SVE mode.
+    ssve-fexpa                            - Enable SVE FEXPA instruction in Streaming SVE mode.
+    store-pair-suppress                   - Enable Store Pair Suppression heuristics.
+    stp-aligned-only                      - In order to emit stp, first check if the store will be aligned to 2 * element_size.
+    strict-align                          - Disallow all unaligned memory access.
+    sve-aes                               - Enable SVE AES and quadword SVE polynomial multiply instructions.
+    sve-aes2                              - Enable Armv9.6-A SVE multi-vector AES and multi-vector quadword polynomial multiply instructions.
+    sve-b16mm                             - Enable Armv9.7-A SVE non-widening BFloat16 matrix multiply-accumulate.
+    sve-bfscale                           - Enable Armv9.6-A SVE BFloat16 scaling instructions.
+    sve-bitperm                           - Enable bit permutation SVE2 instructions.
+    sve-f16f32mm                          - Enable Armv9.6-A FP16 to FP32 Matrix Multiply instructions.
+    sve-sha3                              - Enable SVE SHA3 instructions.
+    sve-sm4                               - Enable SVE SM4 instructions.
+    sve2p2                                - Enable Armv9.6-A Scalable Vector Extension 2.2 instructions.
+    sve2p3                                - Enable Armv9.7-A Scalable Vector Extension 2.3 instructions.
+    tagged-globals                        - Use an instruction sequence for taking the address of a global that allows a memory tag in the upper address bits.
+    tev                                   - Enable TIndex Exception-like Vector instructions.
+    the                                   - Enable Armv8.9-A Translation Hardening Extension.
+    thunderx                              - Cavium ThunderX processors.
+    thunderx2t99                          - Cavium ThunderX2 processors.
+    thunderx3t110                         - Marvell ThunderX3 processors.
+    thunderxt81                           - Cavium ThunderX processors.
+    thunderxt83                           - Cavium ThunderX processors.
+    thunderxt88                           - Cavium ThunderX processors.
+    tlb-rmi                               - Enable Armv8.4-A TLB Range and Maintenance instructions.
+    tlbid                                 - Enable Armv9.7-A TLBI Domains extension.
+    tlbiw                                 - Enable Armv9.5-A TLBI VMALL for Dirty State.
+    tpidr-el1                             - Permit use of TPIDR_EL1 for the TLS base.
+    tpidr-el2                             - Permit use of TPIDR_EL2 for the TLS base.
+    tpidr-el3                             - Permit use of TPIDR_EL3 for the TLS base.
+    tpidrro-el0                           - Permit use of TPIDRRO_EL0 for the TLS base.
+    tracev8.4                             - Enable Armv8.4-A Trace extension.
+    trbe                                  - Enable Trace Buffer Extension.
+    tsv110                                - HiSilicon TS-V110 processors.
+    uaops                                 - Enable Armv8.2-A UAO PState.
+    use-experimental-zeroing-pseudos      - Hint to the compiler that the MOVPRFX instruction is merged with destructive operations.
+    use-fixed-over-scalable-if-equal-cost - Prefer fixed width loop vectorization over scalable if the cost-model assigns equal costs.
+    use-postra-scheduler                  - Schedule again after register allocation.
+    use-reciprocal-square-root            - Use the reciprocal square root approximation.
+    use-wzr-to-vec-move                   - Move from WZR to insert 0 into vector registers.
+    v8a                                   - Support ARM v8a architecture.
+    v8r                                   - Support ARM v8r architecture.
+    v9.6a                                 - Support ARM v9.6a architecture.
+    v9.7a                                 - Support ARM v9.7a architecture.
+    xs                                    - Enable Armv8.7-A limited-TLB-maintenance instruction.
+    zcm-fpr128                            - Has zero-cycle register moves for FPR128 registers.
+    zcm-fpr32                             - Has zero-cycle register moves for FPR32 registers.
+    zcm-fpr64                             - Has zero-cycle register moves for FPR64 registers.
+    zcm-gpr32                             - Has zero-cycle register moves for GPR32 registers.
+    zcm-gpr64                             - Has zero-cycle register moves for GPR64 registers.
+    zcz-fp-workaround                     - The zero-cycle floating-point zeroing instruction has a bug.
+    zcz-fpr128                            - Has zero-cycle zeroing instructions for FPR128 registers.
+    zcz-gpr32                             - Has zero-cycle zeroing instructions for GPR32 registers.
+    zcz-gpr64                             - Has zero-cycle zeroing instructions for GPR64 registers.
+
+Use +feature to enable a feature, or -feature to disable it.
+For example, rustc -C target-cpu=mycpu -C target-feature=+feature1,-feature2
+
+Code-generation features cannot be used in cfg or #[target_feature],
+and may be renamed or removed in a future version of LLVM or rustc.
+
+
+lscpu
+Architecture:                            aarch64
+CPU op-mode(s):                          32-bit, 64-bit
+Byte Order:                              Little Endian
+CPU(s):                                  64
+On-line CPU(s) list:                     0-63
+Vendor ID:                               ARM
+Model:                                   1
+Thread(s) per core:                      1
+Core(s) per socket:                      64
+Socket(s):                               1
+Stepping:                                r1p1
+BogoMIPS:                                2100.00
+Flags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng
+L1d cache:                               4 MiB (64 instances)
+L1i cache:                               4 MiB (64 instances)
+L2 cache:                                64 MiB (64 instances)
+L3 cache:                                32 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-63
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; CSV2, BHB
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+
+proc_cpu_model
+CPU implementer	: 0x41
+CPU part	: 0xd40
+CPU implementer	: 0x41
+CPU part	: 0xd40
+CPU implementer	: 0x41
+CPU part	: 0xd40
+CPU implementer	: 0x41
+CPU part	: 0xd40
+
+proc_status_affinity
+Cpus_allowed:	ffffffff,ffffffff
+Cpus_allowed_list:	0-63
+Mems_allowed:	00000000,00000001
+Mems_allowed_list:	0
+
+cgroup
+0::/user.slice/user-32352702.slice/session-5359.scope
+
+network_interfaces
+interface=docker0
+docker0.ifindex=4
+docker0.address=02:42:42:d2:47:26
+docker0.mtu=1500
+docker0.operstate=down
+docker0.carrier=0
+docker0.speed=-1
+docker0.duplex=unknown
+docker0.tx_queue_len=0
+docker0.gro_flush_timeout=0
+docker0.napi_defer_hard_irqs=0
+docker0.device_numa_node=unavailable
+docker0.device_local_cpulist=unavailable
+docker0.driver=unavailable
+docker0.driver_module_version=unavailable
+docker0.queue=rx-0
+docker0.rx-0.rps_cpus=00000000,00000000
+docker0.rx-0.rps_flow_cnt=0
+docker0.queue=tx-0
+docker0.tx-0.xps_cpus=
+docker0.tx-0.xps_rxqs=0
+interface=eth0
+eth0.ifindex=2
+eth0.address=02:f2:c1:fa:14:bb
+eth0.mtu=9001
+eth0.operstate=up
+eth0.carrier=1
+eth0.speed=
+eth0.duplex=
+eth0.tx_queue_len=1000
+eth0.gro_flush_timeout=0
+eth0.napi_defer_hard_irqs=0
+eth0.device_numa_node=-1
+eth0.device_local_cpulist=0-63
+eth0.driver=ena
+eth0.driver_module_version=2.17.2g
+eth0.queue=rx-0
+eth0.rx-0.rps_cpus=00000000,00000000
+eth0.rx-0.rps_flow_cnt=0
+eth0.queue=rx-1
+eth0.rx-1.rps_cpus=00000000,00000000
+eth0.rx-1.rps_flow_cnt=0
+eth0.queue=rx-2
+eth0.rx-2.rps_cpus=00000000,00000000
+eth0.rx-2.rps_flow_cnt=0
+eth0.queue=rx-3
+eth0.rx-3.rps_cpus=00000000,00000000
+eth0.rx-3.rps_flow_cnt=0
+eth0.queue=rx-4
+eth0.rx-4.rps_cpus=00000000,00000000
+eth0.rx-4.rps_flow_cnt=0
+eth0.queue=rx-5
+eth0.rx-5.rps_cpus=00000000,00000000
+eth0.rx-5.rps_flow_cnt=0
+eth0.queue=rx-6
+eth0.rx-6.rps_cpus=00000000,00000000
+eth0.rx-6.rps_flow_cnt=0
+eth0.queue=rx-7
+eth0.rx-7.rps_cpus=00000000,00000000
+eth0.rx-7.rps_flow_cnt=0
+eth0.queue=tx-0
+eth0.tx-0.xps_cpus=00000000,00000000
+eth0.tx-0.xps_rxqs=00000000,00000000
+eth0.queue=tx-1
+eth0.tx-1.xps_cpus=00000000,00000000
+eth0.tx-1.xps_rxqs=00000000,00000000
+eth0.queue=tx-2
+eth0.tx-2.xps_cpus=00000000,00000000
+eth0.tx-2.xps_rxqs=00000000,00000000
+eth0.queue=tx-3
+eth0.tx-3.xps_cpus=00000000,00000000
+eth0.tx-3.xps_rxqs=00000000,00000000
+eth0.queue=tx-4
+eth0.tx-4.xps_cpus=00000000,00000000
+eth0.tx-4.xps_rxqs=00000000,00000000
+eth0.queue=tx-5
+eth0.tx-5.xps_cpus=00000000,00000000
+eth0.tx-5.xps_rxqs=00000000,00000000
+eth0.queue=tx-6
+eth0.tx-6.xps_cpus=00000000,00000000
+eth0.tx-6.xps_rxqs=00000000,00000000
+eth0.queue=tx-7
+eth0.tx-7.xps_cpus=00000000,00000000
+eth0.tx-7.xps_rxqs=00000000,00000000
+interface=lo
+lo.ifindex=1
+lo.address=00:00:00:00:00:00
+lo.mtu=65536
+lo.operstate=unknown
+lo.carrier=1
+lo.speed=
+lo.duplex=
+lo.tx_queue_len=1000
+lo.gro_flush_timeout=0
+lo.napi_defer_hard_irqs=0
+lo.device_numa_node=unavailable
+lo.device_local_cpulist=unavailable
+lo.driver=unavailable
+lo.driver_module_version=unavailable
+lo.queue=rx-0
+lo.rx-0.rps_cpus=00000000,00000000
+lo.rx-0.rps_flow_cnt=0
+lo.queue=tx-0
+lo.tx-0.xps_cpus=
+lo.tx-0.xps_rxqs=0
+
+network_ip_link
+ip_status=available
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0 allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 
+    RX:   bytes packets errors dropped  missed   mcast           
+    10033024047 7738076      0       0       0       0 
+    TX:   bytes packets errors dropped carrier collsns           
+    10033024047 7738076      0       0       0       0 
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 9001 qdisc mq state UP mode DEFAULT group default qlen 1000
+    link/ether 02:f2:c1:fa:14:bb brd ff:ff:ff:ff:ff:ff promiscuity 0 allmulti 0 minmtu 128 maxmtu 9216 addrgenmode eui64 numtxqueues 64 numrxqueues 64 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 parentbus pci parentdev 0000:00:05.0 
+    RX:   bytes  packets errors dropped  missed   mcast           
+    12223077911 13433519      0       0       0       0 
+    TX:   bytes  packets errors dropped carrier collsns           
+     9681329493 11683827      0       0       0       0 
+    altname enp0s5
+    altname ens5
+    altname eni-0417a0e290c67d44b
+    altname device-number-0.0
+4: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN mode DEFAULT group default 
+    link/ether 02:42:42:d2:47:26 brd ff:ff:ff:ff:ff:ff promiscuity 0 allmulti 0 minmtu 68 maxmtu 65535 
+    bridge forward_delay 1500 hello_time 200 max_age 2000 ageing_time 30000 stp_state 0 priority 32768 vlan_filtering 0 vlan_protocol 802.1Q bridge_id 8000.2:42:42:d2:47:26 designated_root 8000.2:42:42:d2:47:26 root_port 0 root_path_cost 0 topology_change 0 topology_change_detected 0 hello_timer    0.00 tcn_timer    0.00 topology_change_timer    0.00 gc_timer  127.92 fdb_n_learned 0 fdb_max_learned 0 vlan_default_pvid 1 vlan_stats_enabled 0 vlan_stats_per_port 0 group_fwd_mask 0 group_address 01:80:c2:00:00:00 mcast_snooping 1 no_linklocal_learn 0 mcast_vlan_snooping 0 mcast_router 1 mcast_query_use_ifaddr 0 mcast_querier 0 mcast_hash_elasticity 16 mcast_hash_max 4096 mcast_last_member_count 2 mcast_startup_query_count 2 mcast_last_member_interval 100 mcast_membership_interval 26000 mcast_querier_interval 25500 mcast_query_interval 12500 mcast_query_response_interval 1000 mcast_startup_query_interval 3125 mcast_stats_enabled 0 mcast_igmp_version 2 mcast_mld_version 1 nf_call_iptables 0 nf_call_ip6tables 0 nf_call_arptables 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 
+    RX:  bytes packets errors dropped  missed   mcast           
+             0       0      0       0       0       0 
+    TX:  bytes packets errors dropped carrier collsns           
+             0       0      0       2       0       0 
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0 allmulti 0 minmtu 0 maxmtu 0 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet 169.254.253.253/32 scope link lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 9001 qdisc mq state UP group default qlen 1000
+    link/ether 02:f2:c1:fa:14:bb brd ff:ff:ff:ff:ff:ff promiscuity 0 allmulti 0 minmtu 128 maxmtu 9216 numtxqueues 64 numrxqueues 64 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 parentbus pci parentdev 0000:00:05.0 
+    altname enp0s5
+    altname ens5
+    altname eni-0417a0e290c67d44b
+    altname device-number-0.0
+    inet 10.2.101.218/18 metric 512 brd 10.2.127.255 scope global dynamic eth0
+       valid_lft 3409sec preferred_lft 3409sec
+    inet6 fe80::f2:c1ff:fefa:14bb/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+4: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default 
+    link/ether 02:42:42:d2:47:26 brd ff:ff:ff:ff:ff:ff promiscuity 0 allmulti 0 minmtu 68 maxmtu 65535 
+    bridge forward_delay 1500 hello_time 200 max_age 2000 ageing_time 30000 stp_state 0 priority 32768 vlan_filtering 0 vlan_protocol 802.1Q bridge_id 8000.2:42:42:d2:47:26 designated_root 8000.2:42:42:d2:47:26 root_port 0 root_path_cost 0 topology_change 0 topology_change_detected 0 hello_timer    0.00 tcn_timer    0.00 topology_change_timer    0.00 gc_timer  127.91 fdb_n_learned 0 fdb_max_learned 0 vlan_default_pvid 1 vlan_stats_enabled 0 vlan_stats_per_port 0 group_fwd_mask 0 group_address 01:80:c2:00:00:00 mcast_snooping 1 no_linklocal_learn 0 mcast_vlan_snooping 0 mcast_router 1 mcast_query_use_ifaddr 0 mcast_querier 0 mcast_hash_elasticity 16 mcast_hash_max 4096 mcast_last_member_count 2 mcast_startup_query_count 2 mcast_last_member_interval 100 mcast_membership_interval 26000 mcast_querier_interval 25500 mcast_query_interval 12500 mcast_query_response_interval 1000 mcast_startup_query_interval 3125 mcast_stats_enabled 0 mcast_igmp_version 2 mcast_mld_version 1 nf_call_iptables 0 nf_call_ip6tables 0 nf_call_arptables 0 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 
+    inet 240.10.0.1/24 brd 240.10.0.255 scope global docker0
+       valid_lft forever preferred_lft forever
+default via 10.2.64.1 dev eth0 table 10000 proto dhcp metric 512 
+10.2.64.0/18 dev eth0 table 10000 proto static scope link 
+default via 10.2.64.1 dev eth0 proto dhcp src 10.2.101.218 metric 512 
+10.2.64.0/18 dev eth0 proto kernel scope link src 10.2.101.218 metric 512 
+10.2.64.1 dev eth0 proto dhcp scope link src 10.2.101.218 metric 512 
+10.4.4.10 via 10.2.64.1 dev eth0 proto dhcp src 10.2.101.218 metric 512 
+240.10.0.0/24 dev docker0 proto kernel scope link src 240.10.0.1 linkdown 
+local 10.2.101.218 dev eth0 table local proto kernel scope host src 10.2.101.218 
+broadcast 10.2.127.255 dev eth0 table local proto kernel scope link src 10.2.101.218 
+local 127.0.0.0/8 dev lo table local proto kernel scope host src 127.0.0.1 
+local 127.0.0.1 dev lo table local proto kernel scope host src 127.0.0.1 
+broadcast 127.255.255.255 dev lo table local proto kernel scope link src 127.0.0.1 
+local 169.254.253.253 dev lo table local proto kernel scope host src 169.254.253.253 
+local 240.10.0.1 dev docker0 table local proto kernel scope host src 240.10.0.1 
+broadcast 240.10.0.255 dev docker0 table local proto kernel scope link src 240.10.0.1 linkdown 
+fe80::/64 dev eth0 proto kernel metric 256 pref medium
+local ::1 dev lo table local proto kernel metric 0 pref medium
+local fe80::f2:c1ff:fefa:14bb dev eth0 table local proto kernel metric 0 pref medium
+multicast ff00::/8 dev eth0 table local proto kernel metric 256 pref medium
+
+network_ethtool
+ethtool_status=unavailable
+
+network_sysctls
+net/core/rmem_default=212992
+net/core/rmem_max=212992
+net/core/wmem_default=212992
+net/core/wmem_max=212992
+net/core/optmem_max=81920
+net/core/netdev_max_backlog=1000
+net/core/netdev_budget=300
+net/core/netdev_budget_usecs=20000
+net/core/busy_read=0
+net/core/busy_poll=0
+net/core/rps_sock_flow_entries=0
+net/core/somaxconn=4096
+net/ipv4/udp_mem=3028509	4038015	6057018
+net/ipv4/udp_rmem_min=4096
+net/ipv4/udp_wmem_min=4096
+net/ipv4/ip_local_port_range=32768	60999
+net/ipv4/tcp_max_syn_backlog=4096
+net/ipv4/tcp_moderate_rcvbuf=1
+net/ipv4/tcp_rmem=4096	131072	6291456
+net/ipv4/tcp_wmem=4096	20480	4194304
+net/ipv4/tcp_syncookies=1
+
+network_steering
+default_irq_smp_affinity=ffffffff,ffffffff
+relevant_interrupts
+42: 55:          0         55          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0     349625          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  ITS-PCI-MSIX-0000:00:05.0   0 Edge      ena-mgmnt@pci:0000:00:05.0
+43: 56:          0          0        595          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    1668002          0          0          0          0          0          0          0  ITS-PCI-MSIX-0000:00:05.0   1 Edge      eth0-Tx-Rx-0
+44: 57:          0          0          0        294          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    2018713          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  ITS-PCI-MSIX-0000:00:05.0   2 Edge      eth0-Tx-Rx-1
+45: 58:          0          0          0          0        285          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    1530190          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  ITS-PCI-MSIX-0000:00:05.0   3 Edge      eth0-Tx-Rx-2
+46: 59:          0          0          0          0          0        239          0    1398491          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  ITS-PCI-MSIX-0000:00:05.0   4 Edge      eth0-Tx-Rx-3
+47: 60:          0          0          0          0          0          0        304          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    1174374          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  ITS-PCI-MSIX-0000:00:05.0   5 Edge      eth0-Tx-Rx-4
+48: 61:          0          0          0          0          0          0          0        159          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    1815220          0          0          0          0          0  ITS-PCI-MSIX-0000:00:05.0   6 Edge      eth0-Tx-Rx-5
+49: 62:          0          0          0          0          0          0          0          0        199    1246428          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  ITS-PCI-MSIX-0000:00:05.0   7 Edge      eth0-Tx-Rx-6
+50: 63:          0          0          0          0          0          0          0          0          0        139          0    1950039          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  ITS-PCI-MSIX-0000:00:05.0   8 Edge      eth0-Tx-Rx-7
+
+proc_softirqs
+                    CPU0       CPU1       CPU2       CPU3       CPU4       CPU5       CPU6       CPU7       CPU8       CPU9       CPU10      CPU11      CPU12      CPU13      CPU14      CPU15      CPU16      CPU17      CPU18      CPU19      CPU20      CPU21      CPU22      CPU23      CPU24      CPU25      CPU26      CPU27      CPU28      CPU29      CPU30      CPU31      CPU32      CPU33      CPU34      CPU35      CPU36      CPU37      CPU38      CPU39      CPU40      CPU41      CPU42      CPU43      CPU44      CPU45      CPU46      CPU47      CPU48      CPU49      CPU50      CPU51      CPU52      CPU53      CPU54      CPU55      CPU56      CPU57      CPU58      CPU59      CPU60      CPU61      CPU62      CPU63      
+          HI:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0
+       TIMER:    1532432    1193484     905350    2891833     804648     804967     792672    1041517     835301    1058811     774454    1071606     781213     757519     750194     738979     745899     735844     771451     721351     723110     915093     735330    1098389     798487     732221     736576     743038     970952     728896     677709     689548    1187446     760807     708448     715160     678445     713732     960279     688367     730153     681157     680752     670457     671365     671847     660464     996812     950525     668067     647617     619619     632180     614374     615456     606379     990101     714788     988013     699787     655035     647694     671156     668342
+      NET_TX:          9          9          4          6          2          2          3          4          1          2          5          1          3          3          2          3          1          5          1          1          1          1          2          1          3          5          7          3          5          3          4          2          7          8          8          9          3          4          1          3          3          1          5          2          3          4          5          4          3          5          3          2          3          2          0          2          2          2          2          3          2          5          4          2
+      NET_RX:    6410396     269823      21535      21493      19094      17484       9383    1422818      14227    1278497      13670    1974341      13140       8949      11390       9497       9672       9839       9498       8147      13158      19768      13675      11696      12555      12342      11445       9137    2041537      12925      12665       8859       9242      17667      11165      26312      11303       9596    1554799      13790      11709       9825       7740      11048       9205      15277      12679      14707    1204897      13060      24385      11920       9195      11063       7571       6982    1693339      10490    1844040      17651      11254      20110      13540      11147
+       BLOCK:         15          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0
+    IRQ_POLL:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0
+     TASKLET:          0          0          1          2          2          8         13      19925          1      16276          0      28563          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0      34641          0          0          0          0          0          0          0          0          0      15332          0          0          0          0          0          0          0          0          0      17127          0          0          0          0          0          0          0      15407          0      82784          0          0          0          0          0
+       SCHED:   13798734    2791713    1825641    1669969    1584566    1548063    1535888    1561275    1530966    1549423    1520949    1546008    1537853    1502778    1523763    1535811    1530820    1538393    1554840    1547213    1531840    1570756    1544983    1619635    1563779    1537011    1544151    1518610    1528033    1506639    1487332    1502737    1538013    1508195    1526077    1507236    1511223    1517725    1526692    1511021    1504386    1500736    1519446    1489929    1502922    1495119    1518384    1579773    1565981    1523594    1495010    1514836    1509533    1507624    1507927    1490250    1520818    1500361    1508667    1490832    1478955    1478165    1477757    1486728
+     HRTIMER:          0          0          1          0          1          2          0        264          0        198          0         91          4          1          0          0          0          0          0          3          0          0          0          0          0          0          0          0        135          0          0          4          1          0          0          1          0          0        184          1          0          0          0          0          0          0          0          1         98          0          0          0          0          1          0          0         99          0        178          1          0          0          1          0
+         RCU:    8773022    9185900    8966791    9022232    8870497    8853321    8810833    9009859    8872258    9016555    8794616    8928968    8908585    8699807    8824129    8915881    8913670    8952923    9011282    8946106    8927391    9092085    8875050    9275163    9053532    8990206    9019961    8891348    8953322    8863392    8702558    8889138    8963724    8799007    8850984    8731674    8774946    8795267    8835846    8738266    8698485    8667728    8867590    8672726    8746551    8668355    8691543    9122183    9052825    8931976    8743398    8783524    8835542    8810975    8844523    8673674    8799351    8693284    8790935    8714621    8618557    8665330    8645057    8746143
+
+proc_net_softnet_stat
+0061d730 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+000429a0 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001 00000000 00000000
+00005fc8 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000002 00000000 00000000
+00005d3d 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000003 00000000 00000000
+000053c0 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000004 00000000 00000000
+00004d02 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000005 00000000 00000000
+00002981 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000006 00000000 00000000
+000af61d 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000007 00000000 00000000
+00003fcc 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000008 00000000 00000000
+000c684c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000009 00000000 00000000
+00003e80 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000a 00000000 00000000
+0014360a 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000b 00000000 00000000
+00003a79 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000c 00000000 00000000
+000029ec 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000d 00000000 00000000
+00003536 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000e 00000000 00000000
+00002ac3 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000f 00000000 00000000
+00002aa9 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000010 00000000 00000000
+00002cae 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000011 00000000 00000000
+00002dc1 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000012 00000000 00000000
+000025ae 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000013 00000000 00000000
+00003aa3 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000014 00000000 00000000
+0000596e 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000015 00000000 00000000
+00003d02 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000016 00000000 00000000
+00003778 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000017 00000000 00000000
+0000395c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000018 00000000 00000000
+00003871 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000019 00000000 00000000
+000034a4 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001a 00000000 00000000
+00002be3 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001b 00000000 00000000
+000a67ea 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001c 00000000 00000000
+00003aa8 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001d 00000000 00000000
+00003aa2 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001e 00000000 00000000
+000029fb 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001f 00000000 00000000
+00002be7 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000020 00000000 00000000
+00005062 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000021 00000000 00000000
+00003532 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000022 00000000 00000000
+000077de 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000023 00000000 00000000
+00003340 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000024 00000000 00000000
+00002bc0 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000025 00000000 00000000
+0011c634 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000026 00000000 00000000
+00003ca7 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000027 00000000 00000000
+0000357c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000028 00000000 00000000
+00002d1b 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000029 00000000 00000000
+0000234e 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002a 00000000 00000000
+00003233 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002b 00000000 00000000
+00002b13 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002c 00000000 00000000
+000043ae 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002d 00000000 00000000
+00003a82 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002e 00000000 00000000
+000040b8 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002f 00000000 00000000
+00094752 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000030 00000000 00000000
+00003d58 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000031 00000000 00000000
+00006d08 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000032 00000000 00000000
+000034e2 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000033 00000000 00000000
+0000293f 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000034 00000000 00000000
+00003259 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000035 00000000 00000000
+00002388 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000036 00000000 00000000
+0000212c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000037 00000000 00000000
+0010c7fb 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000038 00000000 00000000
+00002fd9 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000039 00000000 00000000
+000cefe9 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003a 00000000 00000000
+00004e69 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003b 00000000 00000000
+00003313 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003c 00000000 00000000
+00005575 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003d 00000000 00000000
+00003c56 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003e 00000000 00000000
+0000332a 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003f 00000000 00000000
+
+proc_net_dev
+Inter-|   Receive                                                |  Transmit
+ face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+    lo: 10033024047 7738076    0    0    0     0          0         0 10033024047 7738076    0    0    0     0       0          0
+  eth0: 12223077911 13433519    0    0    0     0          0         0 9681329707 11683828    0    0    0     0       0          0
+docker0:       0       0    0    0    0     0          0         0        0       0    0    2    0     0       0          0
+
+proc_net_udp
+   sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode ref pointer drops            
+45941: FDFDFEA9:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 74502465 2 000000000e5173eb 0      
+45941: 0100007F:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 74502463 2 00000000db00a89f 0      
+45941: 3535357F:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 74502461 2 00000000c66ac554 0      
+45941: FDFDFEA9:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 74502459 2 00000000ea1242a8 0      
+45941: 0100007F:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 74502457 2 00000000c024b348 0      
+45941: 3535357F:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 74502455 2 00000000518136ca 0      
+45956: DA65020A:0044 00000000:0000 07 00000000:00000000 00:00000000 00000000   192        0 88982773 2 00000000a32be831 0      
+46211: 0100007F:0143 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 17549 2 0000000081324c29 0         
+54331: 00000000:20FB 00000000:0000 07 00000000:00000000 00:00000000 00000000   991        0 29722 2 0000000032bf7af8 0         
+utc_end=2026-08-05T15:26:37Z

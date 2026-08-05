@@ -1,0 +1,23 @@
+561:  40194e:	e8 dd 11 00 00       	call   402b30 <topic26_send_scalar_batch>
+707:  401c60:	e8 5b 11 00 00       	call   402dc0 <topic26_send_gso_batch>
+710:  401c6d:	e8 3e 0f 00 00       	call   402bb0 <topic26_send_mmsg_batch>
+1614:0000000000402b30 <topic26_send_scalar_batch>:
+1625:  402b4b:	eb 0d                	jmp    402b5a <topic26_send_scalar_batch+0x2a>
+1629:  402b58:	75 3e                	jne    402b98 <topic26_send_scalar_batch+0x68>
+1637:  402b73:	78 db                	js     402b50 <topic26_send_scalar_batch+0x20>
+1639:  402b7b:	75 1b                	jne    402b98 <topic26_send_scalar_batch+0x68>
+1642:  402b87:	75 d1                	jne    402b5a <topic26_send_scalar_batch+0x2a>
+1656:0000000000402bb0 <topic26_send_mmsg_batch>:
+1720:  402cff:	0f 85 0b ff ff ff    	jne    402c10 <topic26_send_mmsg_batch+0x60>
+1730:  402d2a:	eb 0e                	jmp    402d3a <topic26_send_mmsg_batch+0x18a>
+1734:  402d38:	75 6e                	jne    402da8 <topic26_send_mmsg_batch+0x1f8>
+1742:  402d50:	78 de                	js     402d30 <topic26_send_mmsg_batch+0x180>
+1743:  402d52:	74 54                	je     402da8 <topic26_send_mmsg_batch+0x1f8>
+1749:  402d72:	75 23                	jne    402d97 <topic26_send_mmsg_batch+0x1e7>
+1752:  402d79:	7f e5                	jg     402d60 <topic26_send_mmsg_batch+0x1b0>
+1755:  402d80:	76 8e                	jbe    402d10 <topic26_send_mmsg_batch+0x160>
+1773:0000000000402dc0 <topic26_send_gso_batch>:
+1797:  402e33:	eb 0d                	jmp    402e42 <topic26_send_gso_batch+0x82>
+1801:  402e40:	75 1a                	jne    402e5c <topic26_send_gso_batch+0x9c>
+1809:  402e5a:	78 dc                	js     402e38 <topic26_send_gso_batch+0x78>
+1811:  402e63:	75 0e                	jne    402e73 <topic26_send_gso_batch+0xb3>

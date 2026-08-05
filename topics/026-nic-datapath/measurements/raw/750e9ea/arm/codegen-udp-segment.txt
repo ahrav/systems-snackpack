@@ -1,0 +1,61 @@
+
+/tmp/tmp.9JyDHf5LtU/udp-batch:     file format elf64-littleaarch64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+000000000041192c <topic26_send_gso_batch>:
+  41192c:	d292c004 	mov	x4, #0x9600                	// #38400
+  411930:	d2800245 	mov	x5, #0x12                  	// #18
+  411934:	4f000400 	movi	v0.4s, #0x0
+  411938:	a9b77bfd 	stp	x29, x30, [sp, #-144]!
+  41193c:	910003fd 	mov	x29, sp
+  411940:	9100c3e3 	add	x3, sp, #0x30
+  411944:	d2800022 	mov	x2, #0x1                   	// #1
+  411948:	910103e6 	add	x6, sp, #0x40
+  41194c:	a90313e1 	stp	x1, x4, [sp, #48]
+  411950:	d2800224 	mov	x4, #0x11                  	// #17
+  411954:	d2809601 	mov	x1, #0x4b0                 	// #1200
+  411958:	f2c00ce4 	movk	x4, #0x67, lsl #32
+  41195c:	f90023e5 	str	x5, [sp, #64]
+  411960:	910163e5 	add	x5, sp, #0x58
+  411964:	a90153f3 	stp	x19, x20, [sp, #16]
+  411968:	d2800014 	mov	x20, #0x0                   	// #0
+  41196c:	f90013f5 	str	x21, [sp, #32]
+  411970:	2a0003f5 	mov	w21, w0
+  411974:	d2800300 	mov	x0, #0x18                  	// #24
+  411978:	ad0000a0 	stp	q0, q0, [x5]
+  41197c:	a90487e4 	stp	x4, x1, [sp, #72]
+  411980:	a9068be3 	stp	x3, x2, [sp, #104]
+  411984:	f9003fe6 	str	x6, [sp, #120]
+  411988:	f90043e0 	str	x0, [sp, #128]
+  41198c:	f90047ff 	str	xzr, [sp, #136]
+  411990:	14000005 	b	4119a4 <topic26_send_gso_batch+0x78>
+  411994:	97fffa33 	bl	410260 <__errno_location@plt>
+  411998:	b9400001 	ldr	w1, [x0]
+  41199c:	7100103f 	cmp	w1, #0x4
+  4119a0:	54000101 	b.ne	4119c0 <topic26_send_gso_batch+0x94>  // b.any
+  4119a4:	52800002 	mov	w2, #0x0                   	// #0
+  4119a8:	910163e1 	add	x1, sp, #0x58
+  4119ac:	2a1503e0 	mov	w0, w21
+  4119b0:	91000694 	add	x20, x20, #0x1
+  4119b4:	97fff9df 	bl	410130 <sendmsg@plt>
+  4119b8:	aa0003f3 	mov	x19, x0
+  4119bc:	b7fffec0 	tbnz	x0, #63, 411994 <topic26_send_gso_batch+0x68>
+  4119c0:	f9401fe0 	ldr	x0, [sp, #56]
+  4119c4:	eb13001f 	cmp	x0, x19
+  4119c8:	540000c1 	b.ne	4119e0 <topic26_send_gso_batch+0xb4>  // b.any
+  4119cc:	aa1403e0 	mov	x0, x20
+  4119d0:	a94153f3 	ldp	x19, x20, [sp, #16]
+  4119d4:	f94013f5 	ldr	x21, [sp, #32]
+  4119d8:	a8c97bfd 	ldp	x29, x30, [sp], #144
+  4119dc:	d65f03c0 	ret
+  4119e0:	f0000060 	adrp	x0, 420000 <_IO_stdin_used>
+  4119e4:	910c6000 	add	x0, x0, #0x318
+  4119e8:	97fffcce 	bl	410d20 <fail_errno>
+
+Disassembly of section .fini:

@@ -1,0 +1,2 @@
+compiler=cc
+flags=-O3 -std=c11 -Wall -Wextra -Werror -Wpedantic -D_GNU_SOURCE -fno-lto -fno-omit-frame-pointer -pthread 

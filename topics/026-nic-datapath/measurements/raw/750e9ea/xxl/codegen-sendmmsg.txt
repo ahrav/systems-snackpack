@@ -1,0 +1,126 @@
+
+/tmp/tmp.pFhbxexfAJ/udp-batch:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000402bb0 <topic26_send_mmsg_batch>:
+  402bb0:	55                   	push   %rbp
+  402bb1:	31 c0                	xor    %eax,%eax
+  402bb3:	b9 00 01 00 00       	mov    $0x100,%ecx
+  402bb8:	66 48 0f 6e de       	movq   %rsi,%xmm3
+  402bbd:	66 0f 6c db          	punpcklqdq %xmm3,%xmm3
+  402bc1:	48 89 e5             	mov    %rsp,%rbp
+  402bc4:	41 57                	push   %r15
+  402bc6:	41 89 ff             	mov    %edi,%r15d
+  402bc9:	41 56                	push   %r14
+  402bcb:	48 8d bd d0 f7 ff ff 	lea    -0x830(%rbp),%rdi
+  402bd2:	48 8d 95 e0 f7 ff ff 	lea    -0x820(%rbp),%rdx
+  402bd9:	41 55                	push   %r13
+  402bdb:	41 54                	push   %r12
+  402bdd:	53                   	push   %rbx
+  402bde:	48 81 ec 08 0a 00 00 	sub    $0xa08,%rsp
+  402be5:	66 0f 6f 15 43 0c 00 00 	movdqa 0xc43(%rip),%xmm2        # 403830 <CSWTCH.43+0x20>
+  402bed:	66 0f 6f 25 5b 0c 00 00 	movdqa 0xc5b(%rip),%xmm4        # 403850 <CSWTCH.43+0x40>
+  402bf5:	f3 48 ab             	rep stos %rax,%es:(%rdi)
+  402bf8:	48 8d 85 d0 f5 ff ff 	lea    -0xa30(%rbp),%rax
+  402bff:	66 48 0f 6e f0       	movq   %rax,%xmm6
+  402c04:	f2 0f 12 ee          	movddup %xmm6,%xmm5
+  402c08:	66 0f 6f 35 30 0c 00 00 	movdqa 0xc30(%rip),%xmm6        # 403840 <CSWTCH.43+0x30>
+  402c10:	66 0f 6f c2          	movdqa %xmm2,%xmm0
+  402c14:	48 c7 40 08 b0 04 00 00 	movq   $0x4b0,0x8(%rax)
+  402c1c:	48 8d b5 d0 f7 ff ff 	lea    -0x830(%rbp),%rsi
+  402c23:	48 83 c0 40          	add    $0x40,%rax
+  402c27:	66 0f 6f f8          	movdqa %xmm0,%xmm7
+  402c2b:	48 c7 40 d8 b0 04 00 00 	movq   $0x4b0,-0x28(%rax)
+  402c33:	66 0f fe d6          	paddd  %xmm6,%xmm2
+  402c37:	48 81 c2 00 01 00 00 	add    $0x100,%rdx
+  402c3e:	66 0f 72 f7 02       	pslld  $0x2,%xmm7
+  402c43:	48 c7 40 e8 b0 04 00 00 	movq   $0x4b0,-0x18(%rax)
+  402c4b:	66 0f fe f8          	paddd  %xmm0,%xmm7
+  402c4f:	48 c7 40 f8 b0 04 00 00 	movq   $0x4b0,-0x8(%rax)
+  402c57:	66 0f 6f cf          	movdqa %xmm7,%xmm1
+  402c5b:	66 0f 72 f1 04       	pslld  $0x4,%xmm1
+  402c60:	66 0f fa cf          	psubd  %xmm7,%xmm1
+  402c64:	66 0f 72 f1 04       	pslld  $0x4,%xmm1
+  402c69:	66 0f 38 35 f9       	pmovzxdq %xmm1,%xmm7
+  402c6e:	66 0f 73 d9 08       	psrldq $0x8,%xmm1
+  402c73:	66 0f 38 35 c9       	pmovzxdq %xmm1,%xmm1
+  402c78:	66 0f d4 fb          	paddq  %xmm3,%xmm7
+  402c7c:	66 0f d4 cb          	paddq  %xmm3,%xmm1
+  402c80:	66 0f d6 78 c0       	movq   %xmm7,-0x40(%rax)
+  402c85:	66 48 0f 3a 16 78 d0 01 	pextrq $0x1,%xmm7,-0x30(%rax)
+  402c8d:	66 0f d6 48 e0       	movq   %xmm1,-0x20(%rax)
+  402c92:	66 48 0f 3a 16 48 f0 01 	pextrq $0x1,%xmm1,-0x10(%rax)
+  402c9a:	66 0f 6f c8          	movdqa %xmm0,%xmm1
+  402c9e:	66 0f 62 c8          	punpckldq %xmm0,%xmm1
+  402ca2:	66 0f 6a c0          	punpckhdq %xmm0,%xmm0
+  402ca6:	48 c7 82 08 ff ff ff 01 00 00 00 	movq   $0x1,-0xf8(%rdx)
+  402cb1:	66 0f f4 cc          	pmuludq %xmm4,%xmm1
+  402cb5:	66 0f f4 c4          	pmuludq %xmm4,%xmm0
+  402cb9:	48 c7 82 48 ff ff ff 01 00 00 00 	movq   $0x1,-0xb8(%rdx)
+  402cc4:	48 c7 42 88 01 00 00 00 	movq   $0x1,-0x78(%rdx)
+  402ccc:	48 c7 42 c8 01 00 00 00 	movq   $0x1,-0x38(%rdx)
+  402cd4:	66 0f d4 cd          	paddq  %xmm5,%xmm1
+  402cd8:	66 0f d4 c5          	paddq  %xmm5,%xmm0
+  402cdc:	66 0f d6 42 80       	movq   %xmm0,-0x80(%rdx)
+  402ce1:	66 48 0f 3a 16 42 c0 01 	pextrq $0x1,%xmm0,-0x40(%rdx)
+  402ce9:	66 48 0f 3a 16 8a 40 ff ff ff 01 	pextrq $0x1,%xmm1,-0xc0(%rdx)
+  402cf4:	66 0f d6 8a 00 ff ff ff 	movq   %xmm1,-0x100(%rdx)
+  402cfc:	48 39 f0             	cmp    %rsi,%rax
+  402cff:	0f 85 0b ff ff ff    	jne    402c10 <topic26_send_mmsg_batch+0x60>
+  402d05:	31 db                	xor    %ebx,%ebx
+  402d07:	45 31 e4             	xor    %r12d,%r12d
+  402d0a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+  402d10:	41 89 dd             	mov    %ebx,%r13d
+  402d13:	48 8d 85 d0 f7 ff ff 	lea    -0x830(%rbp),%rax
+  402d1a:	41 be 20 00 00 00    	mov    $0x20,%r14d
+  402d20:	49 c1 e5 06          	shl    $0x6,%r13
+  402d24:	41 29 de             	sub    %ebx,%r14d
+  402d27:	49 01 c5             	add    %rax,%r13
+  402d2a:	eb 0e                	jmp    402d3a <topic26_send_mmsg_batch+0x18a>
+  402d2c:	0f 1f 40 00          	nopl   0x0(%rax)
+  402d30:	e8 1b e3 ff ff       	call   401050 <__errno_location@plt>
+  402d35:	83 38 04             	cmpl   $0x4,(%rax)
+  402d38:	75 6e                	jne    402da8 <topic26_send_mmsg_batch+0x1f8>
+  402d3a:	31 c9                	xor    %ecx,%ecx
+  402d3c:	44 89 f2             	mov    %r14d,%edx
+  402d3f:	4c 89 ee             	mov    %r13,%rsi
+  402d42:	44 89 ff             	mov    %r15d,%edi
+  402d45:	e8 16 e4 ff ff       	call   401160 <sendmmsg@plt>
+  402d4a:	49 83 c4 01          	add    $0x1,%r12
+  402d4e:	85 c0                	test   %eax,%eax
+  402d50:	78 de                	js     402d30 <topic26_send_mmsg_batch+0x180>
+  402d52:	74 54                	je     402da8 <topic26_send_mmsg_batch+0x1f8>
+  402d54:	31 d2                	xor    %edx,%edx
+  402d56:	66 2e 0f 1f 84 00 00 00 00 00 	cs nopw 0x0(%rax,%rax,1)
+  402d60:	8d 0c 1a             	lea    (%rdx,%rbx,1),%ecx
+  402d63:	48 c1 e1 06          	shl    $0x6,%rcx
+  402d67:	81 bc 0d 08 f8 ff ff b0 04 00 00 	cmpl   $0x4b0,-0x7f8(%rbp,%rcx,1)
+  402d72:	75 23                	jne    402d97 <topic26_send_mmsg_batch+0x1e7>
+  402d74:	83 c2 01             	add    $0x1,%edx
+  402d77:	39 d0                	cmp    %edx,%eax
+  402d79:	7f e5                	jg     402d60 <topic26_send_mmsg_batch+0x1b0>
+  402d7b:	01 c3                	add    %eax,%ebx
+  402d7d:	83 fb 1f             	cmp    $0x1f,%ebx
+  402d80:	76 8e                	jbe    402d10 <topic26_send_mmsg_batch+0x160>
+  402d82:	48 81 c4 08 0a 00 00 	add    $0xa08,%rsp
+  402d89:	4c 89 e0             	mov    %r12,%rax
+  402d8c:	5b                   	pop    %rbx
+  402d8d:	41 5c                	pop    %r12
+  402d8f:	41 5d                	pop    %r13
+  402d91:	41 5e                	pop    %r14
+  402d93:	41 5f                	pop    %r15
+  402d95:	5d                   	pop    %rbp
+  402d96:	c3                   	ret
+  402d97:	bf d8 33 40 00       	mov    $0x4033d8,%edi
+  402d9c:	e8 ef f2 ff ff       	call   402090 <fail_message>
+  402da1:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  402da8:	bf 14 31 40 00       	mov    $0x403114,%edi
+  402dad:	e8 9e f2 ff ff       	call   402050 <fail_errno>
+
+Disassembly of section .fini:

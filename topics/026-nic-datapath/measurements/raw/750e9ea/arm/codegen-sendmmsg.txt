@@ -1,0 +1,88 @@
+
+/tmp/tmp.9JyDHf5LtU/udp-batch:     file format elf64-littleaarch64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000411800 <topic26_send_mmsg_batch>:
+  411800:	d12943ff 	sub	sp, sp, #0xa50
+  411804:	d2810002 	mov	x2, #0x800                 	// #2048
+  411808:	a9007bfd 	stp	x29, x30, [sp]
+  41180c:	910003fd 	mov	x29, sp
+  411810:	a90363f7 	stp	x23, x24, [sp, #48]
+  411814:	910943f7 	add	x23, sp, #0x250
+  411818:	a90153f3 	stp	x19, x20, [sp, #16]
+  41181c:	aa0103f3 	mov	x19, x1
+  411820:	52800001 	mov	w1, #0x0                   	// #0
+  411824:	a9025bf5 	stp	x21, x22, [sp, #32]
+  411828:	2a0003f6 	mov	w22, w0
+  41182c:	aa1703e0 	mov	x0, x23
+  411830:	a9046bf9 	stp	x25, x26, [sp, #64]
+  411834:	97fffa3b 	bl	410120 <memset@plt>
+  411838:	aa1303e2 	mov	x2, x19
+  41183c:	910143e0 	add	x0, sp, #0x50
+  411840:	910983e1 	add	x1, sp, #0x260
+  411844:	d2809604 	mov	x4, #0x4b0                 	// #1200
+  411848:	d2800023 	mov	x3, #0x1                   	// #1
+  41184c:	a9001002 	stp	x2, x4, [x0]
+  411850:	9112c042 	add	x2, x2, #0x4b0
+  411854:	a9000c20 	stp	x0, x3, [x1]
+  411858:	91004000 	add	x0, x0, #0x10
+  41185c:	91010021 	add	x1, x1, #0x40
+  411860:	eb17001f 	cmp	x0, x23
+  411864:	54ffff41 	b.ne	41184c <topic26_send_mmsg_batch+0x4c>  // b.any
+  411868:	52800013 	mov	w19, #0x0                   	// #0
+  41186c:	d2800014 	mov	x20, #0x0                   	// #0
+  411870:	52800418 	mov	w24, #0x20                  	// #32
+  411874:	910a23f5 	add	x21, sp, #0x288
+  411878:	d503201f 	nop
+  41187c:	d503201f 	nop
+  411880:	d37a7e79 	ubfiz	x25, x19, #6, #32
+  411884:	4b13031a 	sub	w26, w24, w19
+  411888:	8b1902f9 	add	x25, x23, x25
+  41188c:	14000005 	b	4118a0 <topic26_send_mmsg_batch+0xa0>
+  411890:	97fffa74 	bl	410260 <__errno_location@plt>
+  411894:	b9400000 	ldr	w0, [x0]
+  411898:	7100101f 	cmp	w0, #0x4
+  41189c:	54000421 	b.ne	411920 <topic26_send_mmsg_batch+0x120>  // b.any
+  4118a0:	52800003 	mov	w3, #0x0                   	// #0
+  4118a4:	2a1a03e2 	mov	w2, w26
+  4118a8:	aa1903e1 	mov	x1, x25
+  4118ac:	2a1603e0 	mov	w0, w22
+  4118b0:	97fff9f4 	bl	410080 <sendmmsg@plt>
+  4118b4:	91000694 	add	x20, x20, #0x1
+  4118b8:	7100001f 	cmp	w0, #0x0
+  4118bc:	54fffeab 	b.lt	411890 <topic26_send_mmsg_batch+0x90>  // b.tstop
+  4118c0:	54000300 	b.eq	411920 <topic26_send_mmsg_batch+0x120>  // b.none
+  4118c4:	52800001 	mov	w1, #0x0                   	// #0
+  4118c8:	0b130022 	add	w2, w1, w19
+  4118cc:	d37ae442 	lsl	x2, x2, #6
+  4118d0:	b8626aa2 	ldr	w2, [x21, x2]
+  4118d4:	7112c05f 	cmp	w2, #0x4b0
+  4118d8:	540001e1 	b.ne	411914 <topic26_send_mmsg_batch+0x114>  // b.any
+  4118dc:	11000421 	add	w1, w1, #0x1
+  4118e0:	6b01001f 	cmp	w0, w1
+  4118e4:	54ffff2c 	b.gt	4118c8 <topic26_send_mmsg_batch+0xc8>
+  4118e8:	0b000273 	add	w19, w19, w0
+  4118ec:	71007e7f 	cmp	w19, #0x1f
+  4118f0:	54fffc89 	b.ls	411880 <topic26_send_mmsg_batch+0x80>  // b.plast
+  4118f4:	aa1403e0 	mov	x0, x20
+  4118f8:	a9407bfd 	ldp	x29, x30, [sp]
+  4118fc:	a94153f3 	ldp	x19, x20, [sp, #16]
+  411900:	a9425bf5 	ldp	x21, x22, [sp, #32]
+  411904:	a94363f7 	ldp	x23, x24, [sp, #48]
+  411908:	a9446bf9 	ldp	x25, x26, [sp, #64]
+  41190c:	912943ff 	add	sp, sp, #0xa50
+  411910:	d65f03c0 	ret
+  411914:	f0000060 	adrp	x0, 420000 <_IO_stdin_used>
+  411918:	910bc000 	add	x0, x0, #0x2f0
+  41191c:	97fffd12 	bl	410d64 <fail_message>
+  411920:	f0000060 	adrp	x0, 420000 <_IO_stdin_used>
+  411924:	910b8000 	add	x0, x0, #0x2e0
+  411928:	97fffcfe 	bl	410d20 <fail_errno>
+
+Disassembly of section .fini:

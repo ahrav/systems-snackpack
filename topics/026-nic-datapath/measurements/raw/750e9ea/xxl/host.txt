@@ -1,0 +1,1137 @@
+utc_start=2026-08-05T15:26:17Z
+hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+invocation_target_alias=xxl
+invocation_resolved_host=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+source_commit=750e9ea8729063d118409f9f73537d76cb8ad392
+source_tree=74926ef177f0fd9329e13a35e38069dc38fb152a
+source_branch=curriculum/topic-026-nic-datapath
+swept_environment=none
+architecture=x86_64
+kernel=6.12.94-123.180.amzn2023.x86_64
+online_cpu_count=192
+configured_cpu_count=192
+cpus_allowed_list=0-191
+mems_allowed_list=0-1
+
+uname
+Linux dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com 6.12.94-123.180.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Thu Jul  9 21:10:41 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+
+compiler
+cc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+compiler_target=x86_64-amazon-linux
+
+compiler_target_options
+The following options are target specific:
+  -m128bit-long-double        		[enabled]
+  -m16                        		[disabled]
+  -m32                        		[disabled]
+  -m3dnow                     		[disabled]
+  -m3dnowa                    		[disabled]
+  -m64                        		[enabled]
+  -m80387                     		[enabled]
+  -m8bit-idiv                 		[disabled]
+  -m96bit-long-double         		[disabled]
+  -mabi=                      		sysv
+  -mabm                       		[enabled]
+  -maccumulate-outgoing-args  		[disabled]
+  -maddress-mode=             		long
+  -madx                       		[enabled]
+  -maes                       		[enabled]
+  -malign-data=               		compat
+  -malign-double              		[disabled]
+  -malign-functions=          		0
+  -malign-jumps=              		0
+  -malign-loops=              		0
+  -malign-stringops           		[enabled]
+  -mamx-bf16                  		[enabled]
+  -mamx-int8                  		[enabled]
+  -mamx-tile                  		[enabled]
+  -mandroid                   		[disabled]
+  -march=                     		sapphirerapids
+  -masm=                      		att
+  -mavx                       		[enabled]
+  -mavx2                      		[enabled]
+  -mavx256-split-unaligned-load 	[disabled]
+  -mavx256-split-unaligned-store 	[disabled]
+  -mavx5124fmaps              		[disabled]
+  -mavx5124vnniw              		[disabled]
+  -mavx512bf16                		[enabled]
+  -mavx512bitalg              		[enabled]
+  -mavx512bw                  		[enabled]
+  -mavx512cd                  		[enabled]
+  -mavx512dq                  		[enabled]
+  -mavx512er                  		[disabled]
+  -mavx512f                   		[enabled]
+  -mavx512ifma                		[enabled]
+  -mavx512pf                  		[disabled]
+  -mavx512vbmi                		[enabled]
+  -mavx512vbmi2               		[enabled]
+  -mavx512vl                  		[enabled]
+  -mavx512vnni                		[enabled]
+  -mavx512vp2intersect        		[disabled]
+  -mavx512vpopcntdq           		[enabled]
+  -mavxvnni                   		[enabled]
+  -mbionic                    		[disabled]
+  -mbmi                       		[enabled]
+  -mbmi2                      		[enabled]
+  -mbranch-cost=<0,5>         		3
+  -mcall-ms2sysv-xlogues      		[disabled]
+  -mcet-switch                		[disabled]
+  -mcld                       		[disabled]
+  -mcldemote                  		[enabled]
+  -mclflushopt                		[enabled]
+  -mclwb                      		[enabled]
+  -mclzero                    		[disabled]
+  -mcmodel=                   		small
+  -mcpu=                      		
+  -mcrc32                     		[enabled]
+  -mcx16                      		[enabled]
+  -mdaz-ftz                   		[disabled]
+  -mdispatch-scheduler        		[disabled]
+  -mdump-tune-features        		[disabled]
+  -menqcmd                    		[disabled]
+  -mf16c                      		[enabled]
+  -mfancy-math-387            		[enabled]
+  -mfentry                    		[disabled]
+  -mfentry-name=              		
+  -mfentry-section=           		
+  -mfma                       		[enabled]
+  -mfma4                      		[disabled]
+  -mforce-drap                		[disabled]
+  -mforce-indirect-call       		[disabled]
+  -mfp-ret-in-387             		[enabled]
+  -mfpmath=                   		sse
+  -mfsgsbase                  		[enabled]
+  -mfunction-return=          		keep
+  -mfused-madd                		-ffp-contract=fast
+  -mfxsr                      		[enabled]
+  -mgather                    		-mtune-ctrl=use_gather
+  -mgeneral-regs-only         		[disabled]
+  -mgfni                      		[enabled]
+  -mglibc                     		[enabled]
+  -mhard-float                		[enabled]
+  -mharden-sls=               		none
+  -mhle                       		[enabled]
+  -mhreset                    		[disabled]
+  -miamcu                     		[disabled]
+  -mieee-fp                   		[enabled]
+  -mincoming-stack-boundary=  		0
+  -mindirect-branch-cs-prefix 		[disabled]
+  -mindirect-branch-register  		[disabled]
+  -mindirect-branch=          		keep
+  -minline-all-stringops      		[disabled]
+  -minline-stringops-dynamically 	[disabled]
+  -minstrument-return=        		none
+  -mintel-syntax              		-masm=intel
+  -mkl                        		[disabled]
+  -mlarge-data-threshold=<number> 	65536
+  -mlong-double-128           		[disabled]
+  -mlong-double-64            		[disabled]
+  -mlong-double-80            		[enabled]
+  -mlwp                       		[disabled]
+  -mlzcnt                     		[enabled]
+  -mmanual-endbr              		[disabled]
+  -mmemcpy-strategy=          		
+  -mmemset-strategy=          		
+  -mmitigate-rop              		[disabled]
+  -mmmx                       		[enabled]
+  -mmovbe                     		[enabled]
+  -mmovdir64b                 		[enabled]
+  -mmovdiri                   		[enabled]
+  -mmpx                       		[disabled]
+  -mms-bitfields              		[disabled]
+  -mmusl                      		[disabled]
+  -mmwait                     		[enabled]
+  -mmwaitx                    		[disabled]
+  -mneeded                    		[disabled]
+  -mno-align-stringops        		[disabled]
+  -mno-default                		[disabled]
+  -mno-fancy-math-387         		[disabled]
+  -mno-push-args              		[disabled]
+  -mno-red-zone               		[disabled]
+  -mno-sse4                   		[disabled]
+  -mnop-mcount                		[disabled]
+  -momit-leaf-frame-pointer   		[disabled]
+  -mpc32                      		[disabled]
+  -mpc64                      		[disabled]
+  -mpc80                      		[disabled]
+  -mpclmul                    		[enabled]
+  -mpcommit                   		[disabled]
+  -mpconfig                   		[disabled]
+  -mpku                       		[enabled]
+  -mpopcnt                    		[enabled]
+  -mprefer-avx128             		-mprefer-vector-width=128
+  -mprefer-vector-width=      		256
+  -mpreferred-stack-boundary= 		0
+  -mprefetchwt1               		[disabled]
+  -mprfchw                    		[enabled]
+  -mptwrite                   		[disabled]
+  -mpush-args                 		[enabled]
+  -mrdpid                     		[enabled]
+  -mrdrnd                     		[enabled]
+  -mrdseed                    		[enabled]
+  -mrecip                     		[disabled]
+  -mrecip=                    		
+  -mrecord-mcount             		[disabled]
+  -mrecord-return             		[disabled]
+  -mred-zone                  		[enabled]
+  -mregparm=                  		6
+  -mrtd                       		[disabled]
+  -mrtm                       		[disabled]
+  -msahf                      		[enabled]
+  -mserialize                 		[enabled]
+  -msgx                       		[disabled]
+  -msha                       		[enabled]
+  -mshstk                     		[disabled]
+  -mskip-rax-setup            		[disabled]
+  -msoft-float                		[disabled]
+  -msse                       		[enabled]
+  -msse2                      		[enabled]
+  -msse2avx                   		[disabled]
+  -msse3                      		[enabled]
+  -msse4                      		[enabled]
+  -msse4.1                    		[enabled]
+  -msse4.2                    		[enabled]
+  -msse4a                     		[disabled]
+  -msse5                      		-mavx
+  -msseregparm                		[disabled]
+  -mssse3                     		[enabled]
+  -mstack-arg-probe           		[disabled]
+  -mstack-protector-guard-offset= 	
+  -mstack-protector-guard-reg= 		
+  -mstack-protector-guard-symbol= 	
+  -mstack-protector-guard=    		tls
+  -mstackrealign              		[disabled]
+  -mstringop-strategy=        		[default]
+  -mstv                       		[enabled]
+  -mtbm                       		[disabled]
+  -mtls-dialect=              		gnu
+  -mtls-direct-seg-refs       		[enabled]
+  -mtsxldtrk                  		[disabled]
+  -mtune-ctrl=                		
+  -mtune=                     		sapphirerapids
+  -muclibc                    		[disabled]
+  -muintr                     		[disabled]
+  -mvaes                      		[enabled]
+  -mveclibabi=                		[default]
+  -mvect8-ret-in-mem          		[disabled]
+  -mvpclmulqdq                		[enabled]
+  -mvzeroupper                		[disabled]
+  -mwaitpkg                   		[enabled]
+  -mwbnoinvd                  		[enabled]
+  -mwidekl                    		[disabled]
+  -mx32                       		[disabled]
+  -mxop                       		[disabled]
+  -mxsave                     		[enabled]
+  -mxsavec                    		[enabled]
+  -mxsaveopt                  		[enabled]
+  -mxsaves                    		[enabled]
+
+  Known assembler dialects (for use with the -masm= option):
+    att intel
+
+  Known ABIs (for use with the -mabi= option):
+    ms sysv
+
+  Known code models (for use with the -mcmodel= option):
+    32 kernel large medium small
+
+  Valid arguments to -mfpmath=:
+    387 387+sse 387,sse both sse sse+387 sse,387
+
+  Known choices for mitigation against straight line speculation with -mharden-sls=:
+    all indirect-jmp none return
+
+  Known indirect branch choices (for use with the -mindirect-branch=/-mfunction-return= options):
+    keep thunk thunk-extern thunk-inline
+
+  Known choices for return instrumentation with -minstrument-return=:
+    call none nop5
+
+  Known data alignment choices (for use with the -malign-data= option):
+    abi cacheline compat
+
+  Known vectorization library ABIs (for use with the -mveclibabi= option):
+    acml svml
+
+  Known address mode (for use with the -maddress-mode= option):
+    long short
+
+  Known preferred register vector length (to use with the -mprefer-vector-width= option):
+    128 256 512 none
+
+  Known stack protector guard (for use with the -mstack-protector-guard= option):
+    global tls
+
+  Valid arguments to -mstringop-strategy=:
+    byte_loop libcall loop rep_4byte rep_8byte rep_byte unrolled_loop
+    vector_loop
+
+  Known TLS dialects (for use with the -mtls-dialect= option):
+    gnu gnu2
+
+  Known valid arguments for -march= option:
+    i386 i486 i586 pentium lakemont pentium-mmx winchip-c6 winchip2 c3 samuel-2 c3-2 nehemiah c7 esther i686 pentiumpro pentium2 pentium3 pentium3m pentium-m pentium4 pentium4m prescott nocona core2 nehalem corei7 westmere sandybridge corei7-avx ivybridge core-avx-i haswell core-avx2 broadwell skylake skylake-avx512 cannonlake icelake-client rocketlake icelake-server cascadelake tigerlake cooperlake sapphirerapids alderlake bonnell atom silvermont slm goldmont goldmont-plus tremont knl knm intel geode k6 k6-2 k6-3 athlon athlon-tbird athlon-4 athlon-xp athlon-mp x86-64 x86-64-v2 x86-64-v3 x86-64-v4 eden-x2 nano nano-1000 nano-2000 nano-3000 nano-x2 eden-x4 nano-x4 k8 k8-sse3 opteron opteron-sse3 athlon64 athlon64-sse3 athlon-fx amdfam10 barcelona bdver1 bdver2 bdver3 bdver4 znver1 znver2 znver3 znver4 btver1 btver2 generic native
+
+  Known valid arguments for -mtune= option:
+    generic i386 i486 pentium lakemont pentiumpro pentium4 nocona core2 nehalem sandybridge haswell bonnell silvermont goldmont goldmont-plus tremont knl knm skylake skylake-avx512 cannonlake icelake-client icelake-server cascadelake tigerlake cooperlake sapphirerapids alderlake rocketlake intel geode k6 athlon k8 amdfam10 bdver1 bdver2 bdver3 bdver4 btver1 btver2 znver1 znver2 znver3 znver4
+
+
+rustc
+rustc 1.97.1 (8bab26f4f 2026-07-14)
+binary: rustc
+commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+commit-date: 2026-07-14
+host: x86_64-unknown-linux-gnu
+release: 1.97.1
+LLVM version: 22.1.6
+
+cargo
+cargo 1.97.1 (c980f4866 2026-06-30)
+
+rust_target_cfg_native
+debug_assertions
+panic="unwind"
+target_abi=""
+target_arch="x86_64"
+target_endian="little"
+target_env="gnu"
+target_family="unix"
+target_feature="adx"
+target_feature="aes"
+target_feature="avx"
+target_feature="avx2"
+target_feature="avx512bf16"
+target_feature="avx512bitalg"
+target_feature="avx512bw"
+target_feature="avx512cd"
+target_feature="avx512dq"
+target_feature="avx512f"
+target_feature="avx512fp16"
+target_feature="avx512ifma"
+target_feature="avx512vbmi"
+target_feature="avx512vbmi2"
+target_feature="avx512vl"
+target_feature="avx512vnni"
+target_feature="avx512vpopcntdq"
+target_feature="avxvnni"
+target_feature="bmi1"
+target_feature="bmi2"
+target_feature="cmpxchg16b"
+target_feature="f16c"
+target_feature="fma"
+target_feature="fxsr"
+target_feature="gfni"
+target_feature="lzcnt"
+target_feature="movbe"
+target_feature="pclmulqdq"
+target_feature="popcnt"
+target_feature="rdrand"
+target_feature="rdseed"
+target_feature="sha"
+target_feature="sse"
+target_feature="sse2"
+target_feature="sse3"
+target_feature="sse4.1"
+target_feature="sse4.2"
+target_feature="ssse3"
+target_feature="vaes"
+target_feature="vpclmulqdq"
+target_feature="xsave"
+target_feature="xsavec"
+target_feature="xsaveopt"
+target_feature="xsaves"
+target_has_atomic="16"
+target_has_atomic="32"
+target_has_atomic="64"
+target_has_atomic="8"
+target_has_atomic="ptr"
+target_has_atomic_primitive_alignment="16"
+target_has_atomic_primitive_alignment="32"
+target_has_atomic_primitive_alignment="64"
+target_has_atomic_primitive_alignment="8"
+target_has_atomic_primitive_alignment="ptr"
+target_os="linux"
+target_pointer_width="64"
+target_vendor="unknown"
+unix
+
+rust_target_features
+Features supported by rustc for this target:
+    adx                             - Support ADX instructions.
+    aes                             - Enable AES instructions.
+    amx-avx512                      - Support AMX-AVX512 instructions.
+    amx-bf16                        - Support AMX-BF16 instructions.
+    amx-complex                     - Support AMX-COMPLEX instructions.
+    amx-fp16                        - Support AMX amx-fp16 instructions.
+    amx-fp8                         - Support AMX-FP8 instructions.
+    amx-int8                        - Support AMX-INT8 instructions.
+    amx-movrs                       - Support AMX-MOVRS instructions.
+    amx-tf32                        - Support AMX-TF32 instructions.
+    amx-tile                        - Support AMX-TILE instructions.
+    apxf                            - Support extended general purpose register.
+    avx                             - Enable AVX instructions.
+    avx10.1                         - Support AVX10.1 instruction.
+    avx10.2                         - Support AVX10.2 instruction.
+    avx2                            - Enable AVX2 instructions.
+    avx512bf16                      - Support bfloat16 floating point.
+    avx512bitalg                    - Enable AVX-512 Bit Algorithms.
+    avx512bw                        - Enable AVX-512 Byte and Word Instructions.
+    avx512cd                        - Enable AVX-512 Conflict Detection Instructions.
+    avx512dq                        - Enable AVX-512 Doubleword and Quadword Instructions.
+    avx512f                         - Enable AVX-512 instructions.
+    avx512fp16                      - Support 16-bit floating point.
+    avx512ifma                      - Enable AVX-512 Integer Fused Multiple-Add.
+    avx512vbmi                      - Enable AVX-512 Vector Byte Manipulation Instructions.
+    avx512vbmi2                     - Enable AVX-512 further Vector Byte Manipulation Instructions.
+    avx512vl                        - Enable AVX-512 Vector Length eXtensions.
+    avx512vnni                      - Enable AVX-512 Vector Neural Network Instructions.
+    avx512vp2intersect              - Enable AVX-512 vp2intersect.
+    avx512vpopcntdq                 - Enable AVX-512 Population Count Instructions.
+    avxifma                         - Enable AVX-IFMA.
+    avxneconvert                    - Support AVX-NE-CONVERT instructions.
+    avxvnni                         - Support AVX_VNNI encoding.
+    avxvnniint16                    - Enable AVX-VNNI-INT16.
+    avxvnniint8                     - Enable AVX-VNNI-INT8.
+    bmi1                            - Support BMI instructions.
+    bmi2                            - Support BMI2 instructions.
+    cmpxchg16b                      - 64-bit with cmpxchg16b (this is true for most x86-64 chips, but not the first AMD chips).
+    crt-static                      - Enables C Run-time Libraries to be statically linked.
+    ermsb                           - REP MOVS/STOS are fast.
+    f16c                            - Support 16-bit floating point conversion instructions.
+    fma                             - Enable three-operand fused multiple-add.
+    fma4                            - Enable four-operand fused multiple-add.
+    fxsr                            - Support fxsave/fxrestore instructions.
+    gfni                            - Enable Galois Field Arithmetic Instructions.
+    kl                              - Support Key Locker kl Instructions.
+    lahfsahf                        - Support LAHF and SAHF instructions in 64-bit mode.
+    lzcnt                           - Support LZCNT instruction.
+    movbe                           - Support MOVBE instruction.
+    movrs                           - Enable MOVRS.
+    pclmulqdq                       - Enable packed carry-less multiplication instructions.
+    popcnt                          - Support POPCNT instruction.
+    prfchw                          - Support PRFCHW instructions.
+    rdrand                          - Support RDRAND instruction.
+    rdseed                          - Support RDSEED instruction.
+    rtm                             - Support RTM instructions.
+    sha                             - Enable SHA instructions.
+    sha512                          - Support SHA512 instructions.
+    sm3                             - Support SM3 instructions.
+    sm4                             - Support SM4 instructions.
+    sse                             - Enable SSE instructions.
+    sse2                            - Enable SSE2 instructions.
+    sse3                            - Enable SSE3 instructions.
+    sse4.1                          - Enable SSE 4.1 instructions.
+    sse4.2                          - Enable SSE 4.2 instructions.
+    sse4a                           - Support SSE 4a instructions.
+    ssse3                           - Enable SSSE3 instructions.
+    tbm                             - Enable TBM instructions.
+    vaes                            - Promote selected AES instructions to AVX512/AVX registers.
+    vpclmulqdq                      - Enable vpclmulqdq instructions.
+    widekl                          - Support Key Locker wide Instructions.
+    x87                             - Enable X87 float instructions.
+    xop                             - Enable XOP instructions.
+    xsave                           - Support xsave instructions.
+    xsavec                          - Support xsavec instructions.
+    xsaveopt                        - Support xsaveopt instructions.
+    xsaves                          - Support xsaves instructions.
+
+Code-generation features supported by LLVM for this target:
+    16bit-mode                      - 16-bit mode (i8086).
+    32bit-mode                      - 32-bit mode (80386).
+    64bit                           - Support 64-bit instructions.
+    64bit-mode                      - 64-bit mode (x86_64).
+    allow-light-256-bit             - Enable generation of 256-bit load/stores even if we prefer 128-bit.
+    avx10.1-512                     - Support AVX10.1 instruction.
+    avx10.2-512                     - Support AVX10.2 instruction.
+    branch-hint                     - Target has branch hint feature.
+    branchfusion                    - CMP/TEST can be fused with conditional branches.
+    ccmp                            - Support conditional cmp & test instructions.
+    cf                              - Support conditional faulting.
+    cldemote                        - Enable Cache Line Demote.
+    clflushopt                      - Flush A Cache Line Optimized.
+    clwb                            - Cache Line Write Back.
+    clzero                          - Enable Cache Line Zero.
+    cmov                            - Enable conditional move instructions.
+    cmpccxadd                       - Support CMPCCXADD instructions.
+    crc32                           - Enable SSE 4.2 CRC32 instruction (used when SSE4.2 is supported but function is GPR only).
+    cx8                             - Support CMPXCHG8B instructions.
+    enqcmd                          - Has ENQCMD instructions.
+    evex512                         - Support ZMM and 64-bit mask instructions.
+    false-deps-getmant              - VGETMANTSS/SD/SH and VGETMANDPS/PD(memory version) has a false dependency on dest register.
+    false-deps-lzcnt-tzcnt          - LZCNT/TZCNT have a false dependency on dest register.
+    false-deps-mulc                 - VF[C]MULCPH/SH has a false dependency on dest register.
+    false-deps-mullq                - VPMULLQ has a false dependency on dest register.
+    false-deps-perm                 - VPERMD/Q/PS/PD has a false dependency on dest register.
+    false-deps-popcnt               - POPCNT has a false dependency on dest register.
+    false-deps-range                - VRANGEPD/PS/SD/SS has a false dependency on dest register.
+    fast-11bytenop                  - Target can quickly decode up to 11 byte NOPs.
+    fast-15bytenop                  - Target can quickly decode up to 15 byte NOPs.
+    fast-7bytenop                   - Target can quickly decode up to 7 byte NOPs.
+    fast-bextr                      - Indicates that the BEXTR instruction is implemented as a single uop with good throughput.
+    fast-dpwssd                     - Prefer vpdpwssd instruction over vpmaddwd+vpaddd instruction sequence.
+    fast-gather                     - Indicates if gather is reasonably fast (this is true for Skylake client and all AVX-512 CPUs).
+    fast-hops                       - Prefer horizontal vector math instructions (haddp, phsub, etc.) over normal vector instructions with shuffles.
+    fast-imm16                      - Prefer a i16 instruction with i16 immediate over extension to i32.
+    fast-lzcnt                      - LZCNT instructions are as fast as most simple integer ops.
+    fast-movbe                      - Prefer a movbe over a single-use load + bswap / single-use bswap + store.
+    fast-scalar-fsqrt               - Scalar SQRT is fast (disable Newton-Raphson).
+    fast-scalar-shift-masks         - Prefer a left/right scalar logical shift pair over a shift+and pair.
+    fast-shld-rotate                - SHLD can be used as a faster rotate.
+    fast-variable-crosslane-shuffle - Cross-lane shuffles with variable masks are fast.
+    fast-variable-perlane-shuffle   - Per-lane shuffles with variable masks are fast.
+    fast-vector-fsqrt               - Vector SQRT is fast (disable Newton-Raphson).
+    fast-vector-shift-masks         - Prefer a left/right vector logical shift pair over a shift+and pair.
+    faster-shift-than-shuffle       - Shifts are faster (or as fast) as shuffle.
+    fsgsbase                        - Support FS/GS Base instructions.
+    fsrm                            - REP MOVSB of short lengths is faster.
+    harden-sls-ijmp                 - Harden against straight line speculation across indirect JMP instructions..
+    harden-sls-ret                  - Harden against straight line speculation across RET instructions..
+    hreset                          - Has hreset instruction.
+    idivl-to-divb                   - Use 8-bit divide for positive values less than 256.
+    idivq-to-divl                   - Use 32-bit divide for positive values less than 2^32.
+    inline-asm-use-gpr32            - Enable use of GPR32 in inline assembly for APX.
+    invpcid                         - Invalidate Process-Context Identifier.
+    lea-sp                          - Use LEA for adjusting the stack pointer (this is an optimization for Intel Atom processors).
+    lea-uses-ag                     - LEA instruction needs inputs at AG stage.
+    lvi-cfi                         - Prevent indirect calls/branches from using a memory operand, and precede all indirect calls/branches from a register with an LFENCE instruction to serialize control flow. Also decompose RET instructions into a POP+LFENCE+JMP sequence..
+    lvi-load-hardening              - Insert LFENCE instructions to prevent data speculatively injected into loads from being used maliciously..
+    lwp                             - Enable LWP instructions.
+    macrofusion                     - Various instructions can be fused with conditional branches.
+    mmx                             - Enable MMX instructions.
+    movdir64b                       - Support movdir64b instruction (direct store 64 bytes).
+    movdiri                         - Support movdiri instruction (direct store integer).
+    mwaitx                          - Enable MONITORX/MWAITX timer functionality.
+    ndd                             - Support non-destructive destination.
+    nf                              - Support status flags update suppression.
+    no-bypass-delay                 - Has no bypass delay when using the 'wrong' domain.
+    no-bypass-delay-blend           - Has no bypass delay when using the 'wrong' blend type.
+    no-bypass-delay-mov             - Has no bypass delay when using the 'wrong' mov type.
+    no-bypass-delay-shuffle         - Has no bypass delay when using the 'wrong' shuffle type.
+    nopl                            - Enable NOPL instruction (generally pentium pro+).
+    pad-short-functions             - Pad short functions (to prevent a stall when returning too early).
+    pconfig                         - platform configuration instruction.
+    pku                             - Enable protection keys.
+    ppx                             - Support Push-Pop Acceleration.
+    prefer-128-bit                  - Prefer 128-bit AVX instructions.
+    prefer-256-bit                  - Prefer 256-bit AVX instructions.
+    prefer-legacy-setcc             - Prefer to emit legacy SetCC..
+    prefer-mask-registers           - Prefer AVX512 mask registers over PTEST/MOVMSK.
+    prefer-movmsk-over-vtest        - Prefer movmsk over vtest instruction.
+    prefer-no-gather                - Prefer no gather instructions.
+    prefer-no-scatter               - Prefer no scatter instructions.
+    prefetchi                       - Prefetch instruction with T0 or T1 Hint.
+    ptwrite                         - Support ptwrite instruction.
+    push2pop2                       - Support PUSH2/POP2 instructions.
+    raoint                          - Support RAO-INT instructions.
+    rdpid                           - Support RDPID instructions.
+    rdpru                           - Support RDPRU instructions.
+    retpoline                       - Remove speculation of indirect branches from the generated code, either by avoiding them entirely or lowering them with a speculation blocking construct.
+    retpoline-external-thunk        - When lowering an indirect call or branch using a `retpoline`, rely on the specified user provided thunk rather than emitting one ourselves. Only has effect when combined with some other retpoline feature.
+    retpoline-indirect-branches     - Remove speculation of indirect branches from the generated code.
+    retpoline-indirect-calls        - Remove speculation of indirect calls from the generated code.
+    sbb-dep-breaking                - SBB with same register has no source dependency.
+    serialize                       - Has serialize instruction.
+    seses                           - Prevent speculative execution side channel timing attacks by inserting a speculation barrier before memory reads, memory writes, and conditional branches. Implies LVI Control Flow integrity..
+    sgx                             - Enable Software Guard Extensions.
+    shstk                           - Support CET Shadow-Stack instructions.
+    slow-3ops-lea                   - LEA instruction with 3 ops or certain registers is slow.
+    slow-incdec                     - INC and DEC instructions are slower than ADD and SUB.
+    slow-lea                        - LEA instruction with certain arguments is slow.
+    slow-pmaddwd                    - PMADDWD is slower than PMULLD.
+    slow-pmulld                     - PMULLD instruction is slow (compared to PMULLW/PMULHW and PMULUDQ).
+    slow-pmullq                     - PMULLQ instruction is slow.
+    slow-shld                       - SHLD instruction is slow.
+    slow-two-mem-ops                - Two memory operand instructions are slow.
+    slow-unaligned-mem-16           - Slow unaligned 16-byte memory access.
+    slow-unaligned-mem-32           - Slow unaligned 32-byte memory access.
+    soft-float                      - Use software floating point features.
+    sse-unaligned-mem               - Allow unaligned memory operands with SSE instructions (this may require setting a configuration bit in the processor).
+    tagged-globals                  - Use an instruction sequence for taking the address of a global that allows a memory tag in the upper address bits..
+    tsxldtrk                        - Support TSXLDTRK instructions.
+    tuning-fast-imm-vector-shift    - Vector shifts are fast (2/cycle) as opposed to slow (1/cycle).
+    uintr                           - Has UINTR Instructions.
+    use-glm-div-sqrt-costs          - Use Goldmont specific floating point div/sqrt costs.
+    use-slm-arith-costs             - Use Silvermont specific arithmetic costs.
+    usermsr                         - Support USERMSR instructions.
+    vzeroupper                      - Should insert vzeroupper instructions.
+    waitpkg                         - Wait and pause enhancements.
+    wbnoinvd                        - Write Back No Invalidate.
+    x32                             - 64-bit with ILP32 programming model (e.g. x32 ABI).
+    zu                              - Support zero-upper SETcc/IMUL.
+
+Use +feature to enable a feature, or -feature to disable it.
+For example, rustc -C target-cpu=mycpu -C target-feature=+feature1,-feature2
+
+Code-generation features cannot be used in cfg or #[target_feature],
+and may be renamed or removed in a future version of LLVM or rustc.
+
+
+lscpu
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           46 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  192
+On-line CPU(s) list:                     0-191
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Xeon(R) Platinum 8488C
+CPU family:                              6
+Model:                                   143
+Thread(s) per core:                      2
+Core(s) per socket:                      48
+Socket(s):                               2
+Stepping:                                8
+BogoMIPS:                                4800.00
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd ida arat avx512vbmi umip pku ospke waitpkg avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg tme avx512_vpopcntdq rdpid cldemote movdiri movdir64b md_clear serialize amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities
+Hypervisor vendor:                       KVM
+Virtualization type:                     full
+L1d cache:                               4.5 MiB (96 instances)
+L1i cache:                               3 MiB (96 instances)
+L2 cache:                                192 MiB (96 instances)
+L3 cache:                                210 MiB (2 instances)
+NUMA node(s):                            2
+NUMA node0 CPU(s):                       0-47,96-143
+NUMA node1 CPU(s):                       48-95,144-191
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+
+proc_cpu_model
+vendor_id	: GenuineIntel
+model name	: Intel(R) Xeon(R) Platinum 8488C
+vendor_id	: GenuineIntel
+model name	: Intel(R) Xeon(R) Platinum 8488C
+vendor_id	: GenuineIntel
+model name	: Intel(R) Xeon(R) Platinum 8488C
+vendor_id	: GenuineIntel
+model name	: Intel(R) Xeon(R) Platinum 8488C
+
+proc_status_affinity
+Cpus_allowed:	ffffffff,ffffffff,ffffffff,ffffffff,ffffffff,ffffffff
+Cpus_allowed_list:	0-191
+Mems_allowed:	00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000003
+Mems_allowed_list:	0-1
+
+cgroup
+0::/user.slice/user-32352702.slice/session-15364.scope
+
+network_interfaces
+interface=docker0
+docker0.ifindex=4
+docker0.address=02:42:86:af:2e:1a
+docker0.mtu=1500
+docker0.operstate=down
+docker0.carrier=0
+docker0.speed=-1
+docker0.duplex=unknown
+docker0.tx_queue_len=0
+docker0.gro_flush_timeout=0
+docker0.napi_defer_hard_irqs=0
+docker0.device_numa_node=unavailable
+docker0.device_local_cpulist=unavailable
+docker0.driver=unavailable
+docker0.driver_module_version=unavailable
+docker0.queue=rx-0
+docker0.rx-0.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+docker0.rx-0.rps_flow_cnt=0
+docker0.queue=tx-0
+docker0.tx-0.xps_cpus=
+docker0.tx-0.xps_rxqs=0
+interface=eth0
+eth0.ifindex=2
+eth0.address=0a:96:d5:83:2a:45
+eth0.mtu=9001
+eth0.operstate=up
+eth0.carrier=1
+eth0.speed=
+eth0.duplex=
+eth0.tx_queue_len=1000
+eth0.gro_flush_timeout=0
+eth0.napi_defer_hard_irqs=0
+eth0.device_numa_node=1
+eth0.device_local_cpulist=48-95,144-191
+eth0.driver=ena
+eth0.driver_module_version=2.17.2g
+eth0.queue=rx-0
+eth0.rx-0.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-0.rps_flow_cnt=0
+eth0.queue=rx-1
+eth0.rx-1.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-1.rps_flow_cnt=0
+eth0.queue=rx-10
+eth0.rx-10.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-10.rps_flow_cnt=0
+eth0.queue=rx-11
+eth0.rx-11.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-11.rps_flow_cnt=0
+eth0.queue=rx-12
+eth0.rx-12.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-12.rps_flow_cnt=0
+eth0.queue=rx-13
+eth0.rx-13.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-13.rps_flow_cnt=0
+eth0.queue=rx-14
+eth0.rx-14.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-14.rps_flow_cnt=0
+eth0.queue=rx-15
+eth0.rx-15.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-15.rps_flow_cnt=0
+eth0.queue=rx-2
+eth0.rx-2.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-2.rps_flow_cnt=0
+eth0.queue=rx-3
+eth0.rx-3.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-3.rps_flow_cnt=0
+eth0.queue=rx-4
+eth0.rx-4.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-4.rps_flow_cnt=0
+eth0.queue=rx-5
+eth0.rx-5.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-5.rps_flow_cnt=0
+eth0.queue=rx-6
+eth0.rx-6.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-6.rps_flow_cnt=0
+eth0.queue=rx-7
+eth0.rx-7.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-7.rps_flow_cnt=0
+eth0.queue=rx-8
+eth0.rx-8.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-8.rps_flow_cnt=0
+eth0.queue=rx-9
+eth0.rx-9.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.rx-9.rps_flow_cnt=0
+eth0.queue=tx-0
+eth0.tx-0.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-0.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-1
+eth0.tx-1.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-1.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-10
+eth0.tx-10.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-10.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-11
+eth0.tx-11.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-11.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-12
+eth0.tx-12.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-12.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-13
+eth0.tx-13.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-13.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-14
+eth0.tx-14.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-14.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-15
+eth0.tx-15.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-15.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-2
+eth0.tx-2.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-2.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-3
+eth0.tx-3.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-3.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-4
+eth0.tx-4.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-4.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-5
+eth0.tx-5.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-5.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-6
+eth0.tx-6.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-6.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-7
+eth0.tx-7.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-7.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-8
+eth0.tx-8.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-8.xps_rxqs=00000000,00000000,00000000,00000000
+eth0.queue=tx-9
+eth0.tx-9.xps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+eth0.tx-9.xps_rxqs=00000000,00000000,00000000,00000000
+interface=lo
+lo.ifindex=1
+lo.address=00:00:00:00:00:00
+lo.mtu=65536
+lo.operstate=unknown
+lo.carrier=1
+lo.speed=
+lo.duplex=
+lo.tx_queue_len=1000
+lo.gro_flush_timeout=0
+lo.napi_defer_hard_irqs=0
+lo.device_numa_node=unavailable
+lo.device_local_cpulist=unavailable
+lo.driver=unavailable
+lo.driver_module_version=unavailable
+lo.queue=rx-0
+lo.rx-0.rps_cpus=00000000,00000000,00000000,00000000,00000000,00000000
+lo.rx-0.rps_flow_cnt=0
+lo.queue=tx-0
+lo.tx-0.xps_cpus=
+lo.tx-0.xps_rxqs=0
+
+network_ip_link
+ip_status=available
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0 allmulti 0 minmtu 0 maxmtu 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 
+    RX:     bytes   packets errors dropped  missed   mcast           
+    6385507006967 386070995      0       0       0       0 
+    TX:     bytes   packets errors dropped carrier collsns           
+    6385507006967 386070995      0       0       0       0 
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 9001 qdisc mq state UP mode DEFAULT group default qlen 1000
+    link/ether 0a:96:d5:83:2a:45 brd ff:ff:ff:ff:ff:ff promiscuity 0 allmulti 0 minmtu 128 maxmtu 9216 addrgenmode eui64 numtxqueues 128 numrxqueues 128 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 parentbus pci parentdev 0000:87:00.0 
+    RX:    bytes   packets errors dropped  missed   mcast           
+    175004087724 165600999      0       0       0       0 
+    TX:    bytes   packets errors dropped carrier collsns           
+     92614381338 128106419      0       0       0       0 
+    altname enp135s0
+    altname ens130
+    altname eni-070ec10fa756fabf8
+    altname device-number-0.0
+4: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN mode DEFAULT group default 
+    link/ether 02:42:86:af:2e:1a brd ff:ff:ff:ff:ff:ff promiscuity 0 allmulti 0 minmtu 68 maxmtu 65535 
+    bridge forward_delay 1500 hello_time 200 max_age 2000 ageing_time 30000 stp_state 0 priority 32768 vlan_filtering 0 vlan_protocol 802.1Q bridge_id 8000.2:42:86:af:2e:1a designated_root 8000.2:42:86:af:2e:1a root_port 0 root_path_cost 0 topology_change 0 topology_change_detected 0 hello_timer    0.00 tcn_timer    0.00 topology_change_timer    0.00 gc_timer   45.42 fdb_n_learned 0 fdb_max_learned 0 vlan_default_pvid 1 vlan_stats_enabled 0 vlan_stats_per_port 0 group_fwd_mask 0 group_address 01:80:c2:00:00:00 mcast_snooping 1 no_linklocal_learn 0 mcast_vlan_snooping 0 mcast_router 1 mcast_query_use_ifaddr 0 mcast_querier 0 mcast_hash_elasticity 16 mcast_hash_max 4096 mcast_last_member_count 2 mcast_startup_query_count 2 mcast_last_member_interval 100 mcast_membership_interval 26000 mcast_querier_interval 25500 mcast_query_interval 12500 mcast_query_response_interval 1000 mcast_startup_query_interval 3125 mcast_stats_enabled 0 mcast_igmp_version 2 mcast_mld_version 1 nf_call_iptables 0 nf_call_ip6tables 0 nf_call_arptables 0 addrgenmode eui64 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 
+    RX:  bytes packets errors dropped  missed   mcast           
+       1527346   27798      0       0       0       0 
+    TX:  bytes packets errors dropped carrier collsns           
+     375965084   39098      0     104       0       0 
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 promiscuity 0 allmulti 0 minmtu 0 maxmtu 0 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet 169.254.253.253/32 scope link lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 9001 qdisc mq state UP group default qlen 1000
+    link/ether 0a:96:d5:83:2a:45 brd ff:ff:ff:ff:ff:ff promiscuity 0 allmulti 0 minmtu 128 maxmtu 9216 numtxqueues 128 numrxqueues 128 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 parentbus pci parentdev 0000:87:00.0 
+    altname enp135s0
+    altname ens130
+    altname eni-070ec10fa756fabf8
+    altname device-number-0.0
+    inet 172.16.63.44/20 metric 512 brd 172.16.63.255 scope global dynamic eth0
+       valid_lft 2997sec preferred_lft 2997sec
+    inet6 fe80::896:d5ff:fe83:2a45/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+4: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default 
+    link/ether 02:42:86:af:2e:1a brd ff:ff:ff:ff:ff:ff promiscuity 0 allmulti 0 minmtu 68 maxmtu 65535 
+    bridge forward_delay 1500 hello_time 200 max_age 2000 ageing_time 30000 stp_state 0 priority 32768 vlan_filtering 0 vlan_protocol 802.1Q bridge_id 8000.2:42:86:af:2e:1a designated_root 8000.2:42:86:af:2e:1a root_port 0 root_path_cost 0 topology_change 0 topology_change_detected 0 hello_timer    0.00 tcn_timer    0.00 topology_change_timer    0.00 gc_timer   45.42 fdb_n_learned 0 fdb_max_learned 0 vlan_default_pvid 1 vlan_stats_enabled 0 vlan_stats_per_port 0 group_fwd_mask 0 group_address 01:80:c2:00:00:00 mcast_snooping 1 no_linklocal_learn 0 mcast_vlan_snooping 0 mcast_router 1 mcast_query_use_ifaddr 0 mcast_querier 0 mcast_hash_elasticity 16 mcast_hash_max 4096 mcast_last_member_count 2 mcast_startup_query_count 2 mcast_last_member_interval 100 mcast_membership_interval 26000 mcast_querier_interval 25500 mcast_query_interval 12500 mcast_query_response_interval 1000 mcast_startup_query_interval 3125 mcast_stats_enabled 0 mcast_igmp_version 2 mcast_mld_version 1 nf_call_iptables 0 nf_call_ip6tables 0 nf_call_arptables 0 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 524280 tso_max_segs 65535 gro_max_size 65536 gso_ipv4_max_size 65536 gro_ipv4_max_size 65536 
+    inet 240.10.0.1/24 brd 240.10.0.255 scope global docker0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:86ff:feaf:2e1a/64 scope link proto kernel_ll 
+       valid_lft forever preferred_lft forever
+default via 172.16.48.1 dev eth0 table 10000 proto dhcp metric 512 
+172.16.48.0/20 dev eth0 table 10000 proto static scope link 
+default via 172.16.48.1 dev eth0 proto dhcp src 172.16.63.44 metric 512 
+10.4.4.10 via 172.16.48.1 dev eth0 proto dhcp src 172.16.63.44 metric 512 
+172.16.48.0/20 dev eth0 proto kernel scope link src 172.16.63.44 metric 512 
+172.16.48.1 dev eth0 proto dhcp scope link src 172.16.63.44 metric 512 
+240.10.0.0/24 dev docker0 proto kernel scope link src 240.10.0.1 linkdown 
+local 127.0.0.0/8 dev lo table local proto kernel scope host src 127.0.0.1 
+local 127.0.0.1 dev lo table local proto kernel scope host src 127.0.0.1 
+broadcast 127.255.255.255 dev lo table local proto kernel scope link src 127.0.0.1 
+local 169.254.253.253 dev lo table local proto kernel scope host src 169.254.253.253 
+local 172.16.63.44 dev eth0 table local proto kernel scope host src 172.16.63.44 
+broadcast 172.16.63.255 dev eth0 table local proto kernel scope link src 172.16.63.44 
+local 240.10.0.1 dev docker0 table local proto kernel scope host src 240.10.0.1 
+broadcast 240.10.0.255 dev docker0 table local proto kernel scope link src 240.10.0.1 linkdown 
+fe80::/64 dev eth0 proto kernel metric 256 pref medium
+fe80::/64 dev docker0 proto kernel metric 256 linkdown pref medium
+local ::1 dev lo table local proto kernel metric 0 pref medium
+local fe80::42:86ff:feaf:2e1a dev docker0 table local proto kernel metric 0 pref medium
+local fe80::896:d5ff:fe83:2a45 dev eth0 table local proto kernel metric 0 pref medium
+multicast ff00::/8 dev eth0 table local proto kernel metric 256 pref medium
+multicast ff00::/8 dev docker0 table local proto kernel metric 256 linkdown pref medium
+
+network_ethtool
+ethtool_status=unavailable
+
+network_sysctls
+net/core/rmem_default=212992
+net/core/rmem_max=212992
+net/core/wmem_default=212992
+net/core/wmem_max=212992
+net/core/optmem_max=81920
+net/core/netdev_max_backlog=1000
+net/core/netdev_budget=300
+net/core/netdev_budget_usecs=20000
+net/core/busy_read=0
+net/core/busy_poll=0
+net/core/rps_sock_flow_entries=0
+net/core/somaxconn=4096
+net/ipv4/udp_mem=9118035	12157382	18236070
+net/ipv4/udp_rmem_min=4096
+net/ipv4/udp_wmem_min=4096
+net/ipv4/ip_local_port_range=32768	60999
+net/ipv4/tcp_max_syn_backlog=4096
+net/ipv4/tcp_moderate_rcvbuf=1
+net/ipv4/tcp_rmem=4096	131072	6291456
+net/ipv4/tcp_wmem=4096	20480	4194304
+net/ipv4/tcp_syncookies=1
+
+network_steering
+default_irq_smp_affinity=ffffffff,ffffffff,ffffffff,ffffffff,ffffffff,ffffffff
+relevant_interrupts
+156: 173:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0         86          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    1718648          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0    0-edge      ena-mgmnt@pci:0000:87:00.0
+157: 174:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0        478          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    8370093          0          0  PCI-MSIX-0000:87:00.0    1-edge      eth0-Tx-Rx-0
+158: 175:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0         53          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0   11765996          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0    2-edge      eth0-Tx-Rx-1
+159: 176:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0        117          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0   10796846          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0    3-edge      eth0-Tx-Rx-2
+160: 177:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0        238          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    6967166          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0    4-edge      eth0-Tx-Rx-3
+161: 178:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0         79          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0   11374875          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0    5-edge      eth0-Tx-Rx-4
+162: 179:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0         90          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0   11191407          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0    6-edge      eth0-Tx-Rx-5
+163: 180:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0       2392          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    9745364          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0    7-edge      eth0-Tx-Rx-6
+164: 181:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0         88          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    7451345          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0    8-edge      eth0-Tx-Rx-7
+165: 182:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    9648438          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0        118          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0    9-edge      eth0-Tx-Rx-8
+166: 183:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0       2991          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0   11838848          0  PCI-MSIX-0000:87:00.0   10-edge      eth0-Tx-Rx-9
+167: 184:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0        103          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0   11425193          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0   11-edge      eth0-Tx-Rx-10
+168: 185:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    7748233          0          0          0          0          0          0          0          0         69          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0   12-edge      eth0-Tx-Rx-11
+169: 186:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0        337          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    8587338          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0   13-edge      eth0-Tx-Rx-12
+170: 187:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    8814792         89          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0   14-edge      eth0-Tx-Rx-13
+171: 188:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0        421          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    8720734          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0   15-edge      eth0-Tx-Rx-14
+172: 189:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0         92          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0    7858620          0          0          0          0          0          0          0          0          0  PCI-MSIX-0000:87:00.0   16-edge      eth0-Tx-Rx-15
+
+proc_softirqs
+                    CPU0       CPU1       CPU2       CPU3       CPU4       CPU5       CPU6       CPU7       CPU8       CPU9       CPU10      CPU11      CPU12      CPU13      CPU14      CPU15      CPU16      CPU17      CPU18      CPU19      CPU20      CPU21      CPU22      CPU23      CPU24      CPU25      CPU26      CPU27      CPU28      CPU29      CPU30      CPU31      CPU32      CPU33      CPU34      CPU35      CPU36      CPU37      CPU38      CPU39      CPU40      CPU41      CPU42      CPU43      CPU44      CPU45      CPU46      CPU47      CPU48      CPU49      CPU50      CPU51      CPU52      CPU53      CPU54      CPU55      CPU56      CPU57      CPU58      CPU59      CPU60      CPU61      CPU62      CPU63      CPU64      CPU65      CPU66      CPU67      CPU68      CPU69      CPU70      CPU71      CPU72      CPU73      CPU74      CPU75      CPU76      CPU77      CPU78      CPU79      CPU80      CPU81      CPU82      CPU83      CPU84      CPU85      CPU86      CPU87      CPU88      CPU89      CPU90      CPU91      CPU92      CPU93      CPU94      CPU95      CPU96      CPU97      CPU98      CPU99      CPU100     CPU101     CPU102     CPU103     CPU104     CPU105     CPU106     CPU107     CPU108     CPU109     CPU110     CPU111     CPU112     CPU113     CPU114     CPU115     CPU116     CPU117     CPU118     CPU119     CPU120     CPU121     CPU122     CPU123     CPU124     CPU125     CPU126     CPU127     CPU128     CPU129     CPU130     CPU131     CPU132     CPU133     CPU134     CPU135     CPU136     CPU137     CPU138     CPU139     CPU140     CPU141     CPU142     CPU143     CPU144     CPU145     CPU146     CPU147     CPU148     CPU149     CPU150     CPU151     CPU152     CPU153     CPU154     CPU155     CPU156     CPU157     CPU158     CPU159     CPU160     CPU161     CPU162     CPU163     CPU164     CPU165     CPU166     CPU167     CPU168     CPU169     CPU170     CPU171     CPU172     CPU173     CPU174     CPU175     CPU176     CPU177     CPU178     CPU179     CPU180     CPU181     CPU182     CPU183     CPU184     CPU185     CPU186     CPU187     CPU188     CPU189     CPU190     CPU191     
+          HI:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0
+       TIMER:    3193914    4156095    3926937    3712116    3439100    3207630    3184733    3020836    3096656    2956021    2851255    2639193    2667824    2541444    2474114    2503043    2580961    2375888    2239426    2181812    2164500    2150223    2078099    2037058    2206718    2226685    2150089    2248898    2169368    2106209    2204561    2092321    2070437    2126213    2085437    2114127    2051695    2058841    2855094    1997978    2053742    2014824    1984724    1927454    1912039    2091074    1926187    2100999    4913916    2857120    2432880    2430023    2184672    2259437    2167610    2133291    2070039    2019617    3347742    2120059    2089786    2059965    1976198    2005090    1952323    2021167    1974419    1928634    3106411    2138537    1995012    1810261    2048515    1921429    1931190    1984632    1915275    2043243    3365684    2118173    2021209    1984437    2001115    1855943    1920615    1920205    1908356    1909220    3506813    1952016    1874433    1941273    1945613    1928720    1824666    1929303    2333272    1772523    1509055    1400423    1308412    1275901    1283390    1206695    1321135    1313496    1260191    1276622    1279485    1201073    1181390    1221627    1114466    1151428    1110523    1157516    1117514    1118684    1155929    1165271    1181557    1164097    1250068    1186040    1147900    1209037    1237126    1283412    1191925    1198714    1258481    1259702    1188882    1164153    1207235    1270921    1270001    1270517    1218466    1270404    1202664    1205686    1280290    2849869    2799761    1559965    1480095    1446658    1347278    1381109    2495993    1403179    3094844    1499521    1846546    1561119    1436890    1365133    1331924    1423710    2703286    1382348    2663386    1443553    1360137    1434532    1374064    1323431    1430756    2763544    2700111    1552760    2710683    1636808    1504737    1525382    1443914    1466895    1409306    2736762    2650225    1473324    2656284    1543030    1474925    1573178    1546807    1472479    1435600    2838510    2866105    2964125
+      NET_TX:         22         39         24         20         22         25         70         75         16          5          9         11         26         16         16         17         27         24         12          8          7         43         11          8          5         21         23         14          7         13         18         15         17          7         19         25         31         25         26         29         17         16          8         14         20         16         21         14         28         25         34         23         33         39         16         23         10         11         23         16          8         17          5         14          7          7         14          9         14         21         25          9         15         20         21         29         30         30         36         27         15         13         28         21         17         27         18         19         20         27         15          9         16         23         19         17         29         19         17         20         15         12          9         16         15          8          9         11         11          4          2         53         26         33         21         19         12          7          7          6          2         17         26         11          7          6         16         16         15          9         19          8         17         11         18         37         19         15         11         36         13          5         14         36         17         21         33         15         21         25         22         10         11         26         21          9         18         15         38         14         15         14         30         15         13         16         22         25         13         29         18          8          6         20         11         15         20         17          9         19         15         22         13         17         19          6          9          9         11         16         14         41
+      NET_RX:    5801904    2129996    2088613    2140229    2269679    2280058    2424388    2457084    2213629    2303017    2212007    2111623    2057584    2259080    2126789    2243535    2440166    2397521    2139466    2082740    2345913    2199171    1970176    2010650    2006632    2235674    2099713    2009186    2139435    1923087    2072256    2026520    2363259    2181878    2208976    2213423    2444633    2087104    2114297    2064826    2065182    1900894    1967546    1928260    2184389    2061032    2069927    1988029    1256580    1167620    1139749    1223775    1159141    1224446    1225047    1319796    1310231    1297545   10879779    1131256    1019270    1100946    1075465    1037550    1042268    1135820    1202959    1008871    8856019     957776    1048241    1223579    1139534    1153467    1117270    1104801    1201210    1165536    9891159    1211523    1319456    1217749    1362887    1287369    1253454    1371937    1324836    1185243    1149494    1185125    1271312    1165508    1308601    1238770    1107229    1140076    1741848    1769823    1772650    1832595    1834172    1684390    1680989    1685874    1765603    1500818    1702917    1725877    1791098    1623388    1681308    1638688    1706027    1703939    1569610    1715578    1665788    1515402    1681070    1801439    1850526    1659955    1812145    1744761    1816714    1608527    1626395    1663043    2010104    1740544    1855717    1737568    1732882    1817719    1647378    1767142    1703911    1840266    1745542    1714294    1878937    1847732    1951599    1831250    9996677    1160190    1091587    1083594    1244152    1184911    8660111    1153489   12544091    1114290    1106475    1212105    1144355    1130289    1110831    1030697   12869582     972449   12456824    1128216    1207095    1003107    1070326    1149381    1280397   12400672   12000418    1164933    9814794    1153377    1232132    1103437    1220901     947706    1096328   10962178    8109802    1150107    8968368    1268900    1146140    1155338    1131867    1034361    1142449    9505821   12829406    1055281
+       BLOCK:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0         13          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          1          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          1          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          1          0          0          0          0          0          1          0          1          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          1          1          0          0          0          0          0          0          0
+    IRQ_POLL:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0
+     TASKLET:          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          1          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0     153809          0          0          0          0          0          0          0          0          0     128589          0          0          0          0          0          0          0          0          0     157690          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0     121347          0          0          0          0          0      94527          0     131174          0          0          0          0          0          0          0     172756          0     345074          0          0          0          0          0          0     176432     178716          0     200454          0          0          0          0          0          0     109752     125665          0     151236          0          0          0          0          0          0     122822     145708          0
+       SCHED:   76148272   18918237   15127511   14061972   13128902   12502991   12224211   11857167   11743380   11450575   11019315   10618052   10523279   10303146    9905732    9887501   10165761    9642374    9211595    8760417    8823826    8728950    8538644    8446802    8825909    9122079    8827741    8952868    8943787    8585107    8757946    8500287    8576859    8728459    8674267    8895676    8611639    8589975    8155851    8498334    8627730    8591717    8435664    8504435    8361354    8917143    8626228    7782772   14860289   11363669   10155023    9838646    9176876    9490015    9044270    9010751    8447767    8513125   10275217    8948695    9054442    9107574    8939143    8844801    8515719    8457630    8317426    8259391    9651042    9093564    8517327    8221081    8978012    8185460    8337685    8559759    8373072    8914447   10692342    9043806    8894296    8500190    8805747    8266949    8309976    8300310    7998002    8122153   10262359    8396631    8060216    8610094    8484629    8433304    8064136    8351965   11243601    9319126    7991676    7564477    7093015    6964509    6881199    6481285    6898015    6815613    6822086    6760394    6880790    6799165    6820668    7010740    6845468    7267760    7269108    7264440    7129896    7065347    7266623    7357434    7577585    7400655    7630385    7471105    7415412    7676512    7785752    7973422    7623784    7649207    7703578    7698597    7614578    7787743    7804474    8121075    8056286    7771259    7819750    7956223    7849263    7759254    8033413   10831823    8438933    6780392    6828539    6965907    6762033    6965518    8194043    6830952    8952454    7097500    7555302    7307293    7074278    7006766    6892465    7049983    8428514    6982251    8366546    7019662    6841023    7165221    6977725    6816549    7321956    8940495    8874604    7730332    9103091    7684409    7398504    7534378    7333420    7340977    7294908    8771056    8962655    7388865    8628624    7459471    7152940    7463678    7651869    7366365    7253153    9316672    9202069   10030377
+     HRTIMER:          0          1          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          7          0          0          0          0          0          0          0          0          0         16          0          0          0          0          0          0          0          0          0         59          0          0          0          0          0          0          1          0          0          0          1          0          5          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          2          0          0          1          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0          0         21          2          0          0          0          0         10          0         12          0          0          0          0          0          0          1        264          0         30          0          0          0          0          0          0         58         32          1         41          0          0          0          0          0          0         21          6          0         29          0          0          0          0          0          0         99          8          0
+         RCU:   10672067   10736330   10294082    9910335    9456634    9135584    9023858    8841058    8866691    8674594    8486423    8245883    8241221    8128642    7947295    7881096    8037416    7756284    7478782    7263122    7218739    7180512    7082542    6989149    7218214    7366965    7202557    7260493    7276839    7018156    7151725    6938962    6923784    6971052    6983595    7133425    6866509    6975811    6546270    6774975    6879574    6893108    6730153    6760563    6703946    7028824    6863960    5904894   11153502    8168532    7229460    6919250    6620516    6477298    6196329    6120140    5885483    5912056    7259044    6180494    6163219    6236100    6043110    6128985    5819054    5793712    5795243    5680176    6970242    6181545    5842192    5755014    6055885    5646861    5685498    5838461    5761584    6018094    7420337    6070002    6015696    5761558    5908800    5624642    5641767    5578063    5555148    5536388    7080136    5681771    5548778    5850361    5734444    5707129    5533869    5553669    8165294    6905657    6193735    5844417    5644462    5481624    5469557    5276053    5506826    5444220    5468905    5472251    5610683    5636236    5639726    5779032    5615692    5915460    5945858    6025676    5906863    5855829    5925548    6014494    6036405    5899250    6029112    5903879    5917713    6125797    6050962    6217043    5994811    5986825    6008606    5941508    5902643    6080436    6065075    6258893    6176250    6004180    6012829    6095503    6072335    5953481    6154432    8635007    6146847    4646506    4602174    4697317    4570766    4636721    5670171    4611233    6273702    4760969    5140862    4912865    4774422    4743287    4658113    4748070    5961790    4736319    5956767    4818833    4674262    4916436    4755438    4720998    4956095    6260942    6230095    5173619    6341696    5157588    4964285    5091998    4955649    4976976    4878349    6221814    6293653    4998520    6099240    5089656    4860196    5078487    5187788    5006741    4940500    6515311    6449551    6895291
+
+proc_net_softnet_stat
+005fe3be 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+002846d4 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000001 00000000 00000000
+0027e680 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000002 00000000 00000000
+00285049 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000003 00000000 00000000
+002ab8ce 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000004 00000000 00000000
+002a1597 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000005 00000000 00000000
+002c4c1b 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000006 00000000 00000000
+002ca5a3 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000007 00000000 00000000
+002964a0 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000008 00000000 00000000
+002b428b 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000009 00000000 00000000
+00293bb6 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000a 00000000 00000000
+0027cf54 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000b 00000000 00000000
+00277ed3 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000c 00000000 00000000
+002a1ed4 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000d 00000000 00000000
+0028d087 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000e 00000000 00000000
+002a0e90 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000000f 00000000 00000000
+002cf1a2 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000010 00000000 00000000
+002c6031 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000011 00000000 00000000
+0028727a 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000012 00000000 00000000
+002720e5 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000013 00000000 00000000
+002b9457 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000014 00000000 00000000
+0028f6ea 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000015 00000000 00000000
+0025703d 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000016 00000000 00000000
+00266d9c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000017 00000000 00000000
+002617f7 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000018 00000000 00000000
+002a4129 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000019 00000000 00000000
+0027c8b0 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001a 00000000 00000000
+00263765 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001b 00000000 00000000
+0028bada 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001c 00000000 00000000
+00256f68 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001d 00000000 00000000
+00270c88 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001e 00000000 00000000
+002694de 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000001f 00000000 00000000
+002c3015 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000020 00000000 00000000
+0028bf35 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000021 00000000 00000000
+0029db22 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000022 00000000 00000000
+00296fe4 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000023 00000000 00000000
+002d2278 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000024 00000000 00000000
+0027d53b 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000025 00000000 00000000
+00289091 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000026 00000000 00000000
+0027ecc4 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000027 00000000 00000000
+0027a4b3 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000028 00000000 00000000
+00250a1c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000029 00000000 00000000
+0025d872 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002a 00000000 00000000
+0024e5b4 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002b 00000000 00000000
+0029890e 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002c 00000000 00000000
+00279541 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002d 00000000 00000000
+0026b71e 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002e 00000000 00000000
+00250cb8 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000002f 00000000 00000000
+0019665b 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000030 00000000 00000000
+0017efec 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000031 00000000 00000000
+00179f3d 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000032 00000000 00000000
+0018a207 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000033 00000000 00000000
+0017a52c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000034 00000000 00000000
+001870b1 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000035 00000000 00000000
+00189ebe 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000036 00000000 00000000
+001aadae 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000037 00000000 00000000
+0019b564 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000038 00000000 00000000
+0019bcc8 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000039 00000000 00000000
+005e87f5 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003a 00000000 00000000
+0017359d 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003b 00000000 00000000
+00154150 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003c 00000000 00000000
+0016bf89 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003d 00000000 00000000
+001641e6 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003e 00000000 00000000
+0015ad8e 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000003f 00000000 00000000
+0015f8c9 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000040 00000000 00000000
+001745aa 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000041 00000000 00000000
+0018a859 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000042 00000000 00000000
+0014fa46 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000043 00000000 00000000
+004f14fc 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000044 00000000 00000000
+00142862 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000045 00000000 00000000
+0015bf49 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000046 00000000 00000000
+0019039e 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000047 00000000 00000000
+0017a925 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000048 00000000 00000000
+0018320e 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000049 00000000 00000000
+0016ff22 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000004a 00000000 00000000
+00172d80 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000004b 00000000 00000000
+00185fcd 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000004c 00000000 00000000
+0017d909 00000000 00000001 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000004d 00000000 00000000
+004d4217 00000000 00000001 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000004e 00000000 00000000
+0018a206 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000004f 00000000 00000000
+001a6aad 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000050 00000000 00000000
+0018ca51 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000051 00000000 00000000
+001aa5d9 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000052 00000000 00000000
+00197021 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000053 00000000 00000000
+001934fd 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000054 00000000 00000000
+001b7905 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000055 00000000 00000000
+001a592f 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000056 00000000 00000000
+0018044e 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000057 00000000 00000000
+00172741 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000058 00000000 00000000
+001847a8 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000059 00000000 00000000
+00196f3b 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000005a 00000000 00000000
+0017900c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000005b 00000000 00000000
+001a35d2 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000005c 00000000 00000000
+0019369c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000005d 00000000 00000000
+00173483 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000005e 00000000 00000000
+00173e92 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000005f 00000000 00000000
+0020f852 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000060 00000000 00000000
+0021e886 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000061 00000000 00000000
+0021e654 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000062 00000000 00000000
+0023c58e 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000063 00000000 00000000
+00231b16 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000064 00000000 00000000
+00205302 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000065 00000000 00000000
+0020a9f8 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000066 00000000 00000000
+002168fc 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000067 00000000 00000000
+00226a82 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000068 00000000 00000000
+001d7e82 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000069 00000000 00000000
+00212b39 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000006a 00000000 00000000
+0021803f 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000006b 00000000 00000000
+00227972 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000006c 00000000 00000000
+001fa833 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000006d 00000000 00000000
+0020b4c3 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000006e 00000000 00000000
+0020b5dc 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000006f 00000000 00000000
+00214e5a 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000070 00000000 00000000
+0020bb34 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000071 00000000 00000000
+001f0f13 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000072 00000000 00000000
+0021dade 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000073 00000000 00000000
+00207444 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000074 00000000 00000000
+001ddec6 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000075 00000000 00000000
+0020b2b1 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000076 00000000 00000000
+0022ab8a 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000077 00000000 00000000
+0023029d 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000078 00000000 00000000
+0020bf02 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000079 00000000 00000000
+0022f70a 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000007a 00000000 00000000
+0022225a 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000007b 00000000 00000000
+0022d7ab 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000007c 00000000 00000000
+00204190 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000007d 00000000 00000000
+00202b50 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000007e 00000000 00000000
+00200786 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000007f 00000000 00000000
+00258710 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000080 00000000 00000000
+00210e64 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000081 00000000 00000000
+0023c887 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000082 00000000 00000000
+0021c1ab 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000083 00000000 00000000
+002173fa 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000084 00000000 00000000
+0023cfeb 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000085 00000000 00000000
+00201956 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000086 00000000 00000000
+0021f73c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000087 00000000 00000000
+002187ff 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000088 00000000 00000000
+00238fe9 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000089 00000000 00000000
+0021d95a 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000008a 00000000 00000000
+002196dd 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000008b 00000000 00000000
+00242f3b 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000008c 00000000 00000000
+0022f218 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000008d 00000000 00000000
+002464a7 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000008e 00000000 00000000
+0023365d 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000008f 00000000 00000000
+00636374 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000090 00000000 00000000
+00179030 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000091 00000000 00000000
+00165c3d 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000092 00000000 00000000
+0016de02 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000093 00000000 00000000
+001890f4 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000094 00000000 00000000
+0017cb35 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000095 00000000 00000000
+005929d2 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000096 00000000 00000000
+001762d4 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000097 00000000 00000000
+0093938a 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000098 00000000 00000000
+00167765 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000099 00000000 00000000
+00171d23 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000009a 00000000 00000000
+00184075 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000009b 00000000 00000000
+0016c6a5 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000009c 00000000 00000000
+0017b1b3 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000009d 00000000 00000000
+00170cf4 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000009e 00000000 00000000
+001591b0 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 0000009f 00000000 00000000
+0076fae8 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000a0 00000000 00000000
+0014c56f 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000a1 00000000 00000000
+005ffb0d 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000a2 00000000 00000000
+001756d0 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000a3 00000000 00000000
+00184fdf 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000a4 00000000 00000000
+0014ab16 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000a5 00000000 00000000
+0015c91b 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000a6 00000000 00000000
+0018019f 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000a7 00000000 00000000
+0019a123 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000a8 00000000 00000000
+006b45a7 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000a9 00000000 00000000
+006d6c1d 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000aa 00000000 00000000
+001788f5 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000ab 00000000 00000000
+005e666c 00000000 00000003 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000ac 00000000 00000000
+00177240 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000ad 00000000 00000000
+0018950a 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000ae 00000000 00000000
+0016a91c 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000af 00000000 00000000
+00184aa1 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000b0 00000000 00000000
+00141516 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000b1 00000000 00000000
+00167644 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000b2 00000000 00000000
+007c842f 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000b3 00000000 00000000
+00534506 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000b4 00000000 00000000
+0017ae34 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000b5 00000000 00000000
+005671a0 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000b6 00000000 00000000
+00197291 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000b7 00000000 00000000
+00171ea7 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000b8 00000000 00000000
+00174a46 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000b9 00000000 00000000
+0017ad78 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000ba 00000000 00000000
+00154d77 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000bb 00000000 00000000
+001758dd 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000bc 00000000 00000000
+0062be67 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000bd 00000000 00000000
+00763938 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000be 00000000 00000000
+00164cb0 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000 000000bf 00000000 00000000
+
+proc_net_dev
+Inter-|   Receive                                                |  Transmit
+ face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+    lo: 6385507006967 386070995    0    0    0     0          0         0 6385507006967 386070995    0    0    0     0       0          0
+  eth0: 175004088059 165601000    0    0    0     0          0         0 92614381404 128106420    0    0    0     0       0          0
+docker0: 1527346   27798    0    0    0     0          0         0 375965084   39098    0  104    0     0       0          0
+
+proc_net_udp
+   sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode ref pointer drops            
+49319: FDFDFEA9:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 568791195 2 000000005bcbdd8a 0     
+49319: 0100007F:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 568791193 2 0000000073e8f178 0     
+49319: 3535357F:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 568791191 2 000000002b52ed1b 0     
+49319: FDFDFEA9:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 568791189 2 000000006e30024a 0     
+49319: 0100007F:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 568791187 2 000000008b10bc7e 0     
+49319: 3535357F:0035 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 568791185 2 00000000763fe2fa 0     
+49334: 2C3F10AC:0044 00000000:0000 07 00000000:00000000 00:00000000 00000000   192        0 591510873 2 000000009b536d76 0     
+49589: 0100007F:0143 00000000:0000 07 00000000:00000000 00:00000000 00000000     0        0 116754 2 000000008a41ba54 0        
+57709: 00000000:20FB 00000000:0000 07 00000000:00000000 00:00000000 00000000   992        0 44459 2 00000000cf8b8318 0         
+utc_end=2026-08-05T15:26:33Z

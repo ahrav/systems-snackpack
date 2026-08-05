@@ -87,7 +87,7 @@ the physical NIC, DMA, hardware queues, and wire.
 |---|---|---|---|---|
 | TCP socket autotuning | Linux grows TCP buffers within recorded policy limits as demand changes | UDP and a sustained service-rate deficit | Larger queues consume memory and can increase delay | A TCP window or transient burst, not CPU service rate, limits throughput |
 | UDP socket buffer | A larger receive queue holds a longer burst before dropping | Incoming rate above drain rate forever | Linux socket accounting includes metadata and doubles `SO_RCVBUF` values set by applications | Measured bursts exceed the current queue for a bounded time |
-| `listen` backlog | Holds completed connections until `accept` drains them | The separate half-open SYN queue or a slow acceptor | Linux silently caps the request at `somaxconn` | Short completed-connection bursts exceed the accept rate |
+| `listen` backlog | Holds completed connections until `accept` drains them | The separate half-open synchronize (SYN) handshake queue or a slow acceptor | Linux silently caps the request at `somaxconn` | Short completed-connection bursts exceed the accept rate |
 | Busy polling | A socket read polls a supporting device queue for a bounded time | Protocol work, overload, or unsupported devices | It spends CPU and power while reducing some wakeup delay | Tail-latency evidence repays the reserved CPU budget |
 
 ## Cost model
@@ -174,11 +174,11 @@ physical cores on both hosts.
 
 | Observation | Arm host | `xxl` x86 host |
 |---|---|---|
-| Requested target | `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com` | SSH alias `xxl` |
+| Requested target | `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com` | Secure Shell (SSH) alias `xxl` |
 | Resolved host | same as requested | `dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com` |
 | `uname` machine and kernel | `aarch64`, `6.12.94-123.192.amzn2023.aarch64` | `x86_64`, `6.12.94-123.180.amzn2023.x86_64` |
 | CPU evidence | `c7g.16xlarge`, Arm Main ID Register `MIDR_EL1=0x411fd401`, 64 CPUs | `c7i.48xlarge`, Intel Xeon Platinum 8488C, 192 CPUs |
-| Toolchain | GNU Compiler Collection (GCC) 11.5, GNU C Library 2.34, Rust 1.95.0 with LLVM 22.1.2 | GCC 11.5, GNU C Library 2.34, Rust 1.97.1 with LLVM 22.1.6 |
+| Toolchain | GNU Compiler Collection (GCC) 11.5, GNU C Library 2.34, Rust 1.95.0 with LLVM 22.1.2 as its compiler backend | GCC 11.5, GNU C Library 2.34, Rust 1.97.1 with LLVM 22.1.6 as its compiler backend |
 | Default-interface evidence | Elastic Network Adapter (ENA) driver 2.17.2g, 8 receive and 8 transmit queues | ENA 2.17.2g, 16 receive and 16 transmit queues |
 
 Both scratch binaries used `-O3 -g -std=gnu11 -D_GNU_SOURCE -fno-lto -fno-omit-frame-pointer -Wall -Wextra -Werror -pthread`.
@@ -223,13 +223,37 @@ queues, or wire behavior. The relative timings are loopback observations on
 these two exact hosts and binaries, not results for Arm, x86-64, ENA, or a
 physical network family.
 
-## Exact-source result: pending retained host runs
+## Exact-source retained result
 
-The pre-artifact values above are not retained results for this directory.
-Replace this section only after the exact checked-in candidate passes source
-identity, correctness, fixed-schedule, code-generation, validation, and raw
-receipt gates on both required hosts. Link the Arm record, `xxl` record, and
-cross-host comparison here. Until then, the exact-source result is pending.
+Commit `750e9ea8729063d118409f9f73537d76cb8ad392` passed source
+identity, correctness, fixed-schedule, code-generation, workspace, and sealed
+receipt gates on both required hosts. Each host retained 82 fixed fresh-process
+attempts: eight four-process blocks for each primary comparison, four A/A
+blocks, and two semantic controls. No failed process was replaced.
+
+| Candidate divided by scalar elapsed time | Arm host | runtime-resolved `xxl` |
+|---|---:|---:|
+| `sendmmsg` | 0.92617 [0.91796, 0.93445] | 0.93385 [0.92971, 0.93800] |
+| `UDP_SEGMENT` | 0.95531 [0.93810, 0.97283] | 0.78461 [0.77940, 0.78985] |
+| A/A right divided by left | 0.99402 [0.96581, 1.02305] | 0.99251 [0.98023, 1.00494] |
+
+Brackets are descriptive 95% Student-t intervals over complete-block log
+contrasts. They cover observed process-block variation in one run window;
+independence and normality remain assumptions. Program-reported setup,
+including payload construction, was outside the contiguous measured
+send/receive/acknowledgement interval.
+
+The four-round `UDP_GRO` control preserved all 128 logical datagrams and their
+checksum on each host. Four control messages each described at most 32
+segments. Linked Arm and x86-64 images retained the scalar `send`,
+partial-aware `sendmmsg`, and one-`sendmsg` `UDP_SEGMENT` paths.
+
+See the [Arm record](measurements/750e9ea-arm.md), [`xxl`
+record](measurements/750e9ea-xxl.md), [cross-host
+comparison](measurements/750e9ea-comparison.md), and [sealed raw
+bundles](measurements/raw/750e9ea). The timings remain loopback observations
+for these hosts, binaries, payloads, and run windows. They do not establish
+physical-NIC behavior or an Arm-versus-x86 mechanism.
 
 ## Exact-source measurement contract
 

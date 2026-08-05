@@ -1,5 +1,9 @@
 # Raw evidence
 
+Central processing unit (CPU) identifies processor placement. New API (NAPI)
+is Linux's driver polling mechanism. User Datagram Protocol (UDP) Generic
+Receive Offload (GRO) changes the socket delivery shape tested here.
+
 Store one immutable bundle below `<source-prefix>/<host-label>/` for each exact
 candidate and host. A complete bundle contains:
 

@@ -1,0 +1,17 @@
+observed_utc=2026-08-05T15:32:11Z
+source_commit=750e9ea8729063d118409f9f73537d76cb8ad392
+scope=post-run read-only CPU topology confirmation; not part of either sealed host bundle
+
+arm_requested=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+arm_resolved=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+arm_command=lscpu -e=CPU,CORE,SOCKET,NODE,ONLINE
+CPU CORE SOCKET NODE ONLINE
+  0    0      0    0    yes
+  1    1      0    0    yes
+
+xxl_requested_alias=xxl
+xxl_resolved=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+xxl_command=lscpu -e=CPU,CORE,SOCKET,NODE,ONLINE
+CPU CORE SOCKET NODE ONLINE
+  0    0      0    0    yes
+  1    1      0    0    yes

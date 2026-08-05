@@ -1,12 +1,19 @@
 # Measurement contract
 
+This record measures User Datagram Protocol (UDP) work on Linux loopback. A
+network interface controller (NIC) is a physical packet device; direct memory
+access (DMA) lets it access mapped memory. A central processing unit (CPU)
+executes the software work. Elastic Network Adapter (ENA) names the observed
+physical device, Receive-Side Scaling (RSS) distributes device flows, and New
+API (NAPI) is Linux's driver polling mechanism. None participates in loopback.
+
 Each retained record applies only to its source identity, final binary, host,
 kernel, compiler, loopback route, socket configuration, CPUs, datagram shape,
 schedule, and run window. It is not physical-NIC performance evidence.
 
 ## Required record fields
 
-- requested endpoint, SSH alias when used, resolved hostname, architecture,
+- requested endpoint, Secure Shell (SSH) alias when used, resolved hostname, architecture,
   CPU model, kernel, available and allowed CPUs, selected CPUs, sibling maps,
   compiler, build flags, and run window;
 - interface and driver identity, queue counts, feature visibility, interrupt
@@ -45,19 +52,19 @@ schedule, and run window. It is not physical-NIC performance evidence.
 - A/A is a schedule and period diagnostic. It is not a calibrated noise floor
   and does not validate the candidate mechanism.
 
-The 2026-08-05 values in the [topic README](../README.md) are pre-artifact
-scratch observations. Do not copy them into a retained exact-source record.
+The topic README separates the pre-artifact scratch observation from the
+retained exact-source result.
 
-## Exact-source records: pending
+## Exact-source records
 
-Add links here only after both host bundles pass
-`experiment/validate_receipts.py`, the final evidence manifests verify, and
-each `run.status` reports success:
+Both source-bound bundles passed `experiment/validate_receipts.py` before and
+after their evidence manifests were sealed. Each `run.status` reports
+`exit=0` and matching before/after source manifests.
 
-- Arm loopback record: pending
-- runtime-resolved `xxl` loopback record: pending
-- cross-host comparison: pending
-- raw source-bound bundles: pending
+- [Arm loopback record](750e9ea-arm.md)
+- [runtime-resolved `xxl` loopback record](750e9ea-xxl.md)
+- [cross-host comparison](750e9ea-comparison.md)
+- [raw source-bound bundles](raw/750e9ea)
 
 Raw evidence belongs under `raw/<source-prefix>/<host-label>/`. The
 [raw evidence contract](raw/README.md) defines the bundle.
