@@ -1,0 +1,10 @@
+captured_utc=2026-08-01T14:28:41Z
+host_argument=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+uname_machine=aarch64
+cpu_implementer=0x41
+cpu_architecture=8
+cpu_variant=0x1
+cpu_part=0xd40
+cpu_revision=1
+midr_el1=0x00000000411fd401
+command=uname -m; first /proc/cpuinfo processor record; /sys/devices/system/cpu/cpu0/regs/identification/midr_el1

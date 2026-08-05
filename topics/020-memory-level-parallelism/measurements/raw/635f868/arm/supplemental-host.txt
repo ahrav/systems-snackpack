@@ -1,0 +1,5 @@
+requested_endpoint=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+resolved_hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+l1d_cache_line_bytes=64
+gcc=gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+perf=perf version 6.1.176-223.369.amzn2023.aarch64

@@ -1,0 +1,3 @@
+mode=relaxed iterations=1000000 cpu0=0 cpu1=1 coordinator_cpu=2 elapsed_ns=472389050 r00=37679 r01=522078 r10=440060 r11=183 r00_rate=0.037679000
+mode=release-acquire iterations=1000000 cpu0=0 cpu1=1 coordinator_cpu=2 elapsed_ns=668275735 r00=1155 r01=565217 r10=433581 r11=47 r00_rate=0.001155000
+mode=seqcst iterations=1000000 cpu0=0 cpu1=1 coordinator_cpu=2 elapsed_ns=558885633 r00=0 r01=490372 r10=501274 r11=8354 r00_rate=0.000000000
