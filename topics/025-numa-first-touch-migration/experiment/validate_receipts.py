@@ -10,6 +10,7 @@ import math
 import statistics
 import subprocess
 import sys
+import tarfile
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, NoReturn
@@ -224,14 +225,21 @@ def verify_source_identity(evidence: Path, source_root: Path, binary_digest: str
         fail("source identity lacks a recorded source commit")
     # Retained receipts are validated from later commits, after review may
     # have changed the experiment sources. Bind the receipts to the recorded
-    # source commit's blobs, and require that commit to be reachable from the
-    # checkout, instead of assuming HEAD is the source commit.
+    # source commit's blobs when it is reachable; otherwise fall back to the
+    # bundle's retained source archive so independent auditors without the
+    # intermediate collection commit can still validate.
     reachable = subprocess.run(
         ["git", "-C", str(source_root), "merge-base", "--is-ancestor", recorded, "HEAD"],
         capture_output=True, check=False,
     )
+    archive_digests: dict[str, str] | None = None
     if reachable.returncode != 0:
-        fail("recorded source commit is not reachable from the checkout HEAD")
+        archive_digests = experiment_digests_from_archive(evidence)
+        if archive_digests is None:
+            fail(
+                "recorded source commit is not reachable and the bundle "
+                "retains no source archive"
+            )
     expected_files = {
         "numa_first_touch_probe.c", "run_processes.py", "validate_receipts.py", "run_host.sh"
     }
@@ -242,20 +250,41 @@ def verify_source_identity(evidence: Path, source_root: Path, binary_digest: str
             continue
         name = Path(parts[1].strip()).name
         if name in expected_files:
-            blob = subprocess.run(
-                [
-                    "git", "-C", str(source_root), "show",
-                    f"{recorded}:topics/025-numa-first-touch-migration/experiment/{name}",
-                ],
-                capture_output=True, check=False,
-            )
-            if blob.returncode != 0:
-                fail(f"recorded source commit lacks experiment file {name}")
-            if hashlib.sha256(blob.stdout).hexdigest() != parts[0]:
-                fail(f"source identity differs for {name}")
+            if archive_digests is not None:
+                if archive_digests.get(name) != parts[0]:
+                    fail(f"source identity differs for {name}")
+            else:
+                blob = subprocess.run(
+                    [
+                        "git", "-C", str(source_root), "show",
+                        f"{recorded}:topics/025-numa-first-touch-migration/experiment/{name}",
+                    ],
+                    capture_output=True, check=False,
+                )
+                if blob.returncode != 0:
+                    fail(f"recorded source commit lacks experiment file {name}")
+                if hashlib.sha256(blob.stdout).hexdigest() != parts[0]:
+                    fail(f"source identity differs for {name}")
             found.add(name)
     if found != expected_files:
         fail("source identity does not cover every experiment file")
+
+
+def experiment_digests_from_archive(evidence: Path) -> dict[str, str] | None:
+    """Hash this topic's experiment files inside the retained source archive."""
+    archive = evidence / "source.tar.gz"
+    if not archive.is_file():
+        return None
+    prefix = "topics/025-numa-first-touch-migration/experiment/"
+    digests: dict[str, str] = {}
+    with tarfile.open(archive, "r:gz") as tar:
+        for member in tar.getmembers():
+            if member.isfile() and member.name.startswith(prefix):
+                handle = tar.extractfile(member)
+                if handle is None:
+                    fail(f"unreadable archive member: {member.name}")
+                digests[Path(member.name).name] = hashlib.sha256(handle.read()).hexdigest()
+    return digests
 
 
 def verify_evidence_manifest(evidence: Path) -> None:
