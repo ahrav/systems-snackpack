@@ -11,6 +11,14 @@ coordinator_cpu=${COORDINATOR_CPU:-2}
 litmus_iterations=${LITMUS_ITERATIONS:-1000000}
 
 test ! -e "$output"
+mkdir -p "$output"
+output=$(cd "$output" && pwd)
+# A nested output directory would let the provenance scan hash generated
+# artifacts (including a partially written manifest) as if they were source.
+if [[ "$output" == "$workspace" || "$output" == "$workspace"/* ]]; then
+    printf 'OUTPUT_DIRECTORY must be outside the repository: %s\n' "$output" >&2
+    exit 2
+fi
 mkdir -p "$output/binaries" "$output/codegen" "$output/correctness" "$output/litmus"
 build_root=$(mktemp -d /tmp/topic22-build.XXXXXXXX)
 trap 'rm -rf -- "$build_root"' EXIT
@@ -41,8 +49,10 @@ unset LD_LIBRARY_PATH LD_PRELOAD
 {
     printf 'captured_utc='; date -u +%Y-%m-%dT%H:%M:%SZ
     printf 'host_argument=%s\n' "${HOST_ARGUMENT:-unspecified}"
-    printf 'resolved_hostname='; hostname -f 2>/dev/null || hostname
-    printf 'uname='; uname -a
+    # Record a stable label, not the FQDN: these receipts are committed to a
+    # public repository.
+    printf 'host_label=%s\n' "${HOST_ARGUMENT:-$(hostname -s 2>/dev/null || hostname)}"
+    printf 'uname='; uname -srvm
     printf 'cpu_count='; getconf _NPROCESSORS_ONLN
     lscpu
     rustc -vV
@@ -72,10 +82,13 @@ target_dir="$build_root/target-native"
 (
     cd "$workspace"
     rustc --edition=2024 --crate-type=lib -O -C target-cpu=native \
+        --remap-path-prefix "$workspace"=workspace \
         "$topic_dir/src/lib.rs" --emit=asm -o "$output/codegen/lowering-native.s"
     rustc --edition=2024 --crate-type=lib -O -C target-cpu=generic \
+        --remap-path-prefix "$workspace"=workspace \
         "$topic_dir/src/lib.rs" --emit=asm -o "$output/codegen/lowering-generic.s"
     rustc --edition=2024 -O -C target-cpu=generic \
+        --remap-path-prefix "$workspace"=workspace \
         "$topic_dir/src/bin/store_buffering.rs" -o "$output/binaries/store-buffering-generic"
 )
 
