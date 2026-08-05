@@ -17,6 +17,14 @@ native_rustflags='-C target-cpu=native -C codegen-units=1'
 : "${SOURCE_ARCHIVE_SHA256:?set SOURCE_ARCHIVE_SHA256 to the sender's archive digest}"
 : "${SOURCE_TREE_MANIFEST_SHA256:?set SOURCE_TREE_MANIFEST_SHA256 to the sender's manifest digest}"
 
+# Resolve a relative archive path against the caller's directory now; after
+# the cd into the repository below it would name the wrong location.
+SOURCE_ARCHIVE_PATH=$(cd "$(dirname -- "$SOURCE_ARCHIVE_PATH")" && pwd -P)/$(basename -- "$SOURCE_ARCHIVE_PATH")
+
+# Python bytecode caches written during validation would dirty the source
+# tree between the before and after manifests.
+export PYTHONDONTWRITEBYTECODE=1
+
 if [[ -e $output_directory ]]; then
   printf 'output directory already exists: %s\n' "$output_directory" >&2
   exit 2
@@ -78,7 +86,7 @@ fi
   rustc -vV
   cargo -V
   printf 'gcc=%s\n' "$(gcc -dumpfullversion -dumpversion)"
-  rustc -C target-cpu=native --print cfg | rg '^(target_arch|target_feature|target_has_atomic|target_pointer_width)'
+  taskset --cpu-list "$cpu" rustc -C target-cpu=native --print cfg | rg '^(target_arch|target_feature|target_has_atomic|target_pointer_width)'
   printf 'ambient_RUSTFLAGS=%s\n' "${RUSTFLAGS-<unset>}"
   printf 'build_rustflags=%s\n' "$native_rustflags"
 } >"$output_directory/host.txt"
@@ -105,7 +113,7 @@ while :; do
   config_dir=$(dirname "$config_dir")
 done
 unset CARGO_BUILD_RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_TARGET_DIR CARGO_BUILD_TARGET
-unset RUSTC RUSTC_WRAPPER RUSTDOC RUSTDOCFLAGS
+unset RUSTC RUSTC_WRAPPER RUSTDOC RUSTDOCFLAGS RUSTFLAGS
 
 # An extracted archive without its own .git could sit under another checkout,
 # and git would silently walk up to that ancestor repository.
@@ -127,7 +135,10 @@ PYTHONPYCACHEPREFIX="$repository_root/../pycache" \
 bash -n "$topic/experiment/run_host.sh"
 
 native_target="$repository_root/../native-target"
+# Pin the native build to the measured CPU so target-cpu=native detects the
+# features of the core the benchmark will run on, not an arbitrary sibling.
 RUSTFLAGS="$native_rustflags" \
+  taskset --cpu-list "$cpu" \
   cargo build --release -p lock-free-reclamation-aba --bin aba_lab \
   --target-dir "$native_target" >"$output_directory/build.log" 2>&1
 binary="$native_target/release/aba_lab"
