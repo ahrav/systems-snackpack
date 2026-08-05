@@ -9,9 +9,14 @@ import json
 import math
 import statistics
 import subprocess
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, NoReturn
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from run_processes import MEASUREMENT_KEYS
 
 MAPPING_BYTES = 512 * 1024 * 1024
 PASSES = 4
@@ -90,6 +95,8 @@ def validate_affinity(value: Any, cpu: int, name: str) -> None:
 def validate_measurement(
     value: dict[str, Any], topology: dict[str, Any], *, passes: int = PASSES
 ) -> None:
+    if set(value) != MEASUREMENT_KEYS:
+        fail(f"measurement fields differ: {sorted(set(value) ^ MEASUREMENT_KEYS)}")
     if value.get("schema") != 1 or value.get("kind") != "measurement":
         fail("measurement schema differs")
     treatment = value.get("treatment")
@@ -172,6 +179,8 @@ def validate_measurement(
         fail("timed dependent chase incurred a page fault")
     if not isinstance(value.get("read_ns"), int) or value["read_ns"] <= 0:
         fail("read timing is invalid")
+    if not isinstance(value.get("touch_ns"), int) or value["touch_ns"] <= 0:
+        fail("touch timing is invalid")
     close(value.get("ns_per_load"), value["read_ns"] / value["loads"], "ns_per_load")
 
 
@@ -252,6 +261,18 @@ def verify_source_identity(evidence: Path, source_root: Path, binary_digest: str
 def verify_evidence_manifest(evidence: Path) -> None:
     """Verify the retained seal: every bundle file hashed, every hash correct."""
     manifest_path = evidence / "evidence.sha256"
+    status_path = evidence / "run.status"
+    if not manifest_path.is_file():
+        # In-run validation happens before the EXIT trap seals the bundle; a
+        # retained bundle always carries both the seal and run.status.
+        if status_path.exists():
+            fail("run.status is present but evidence.sha256 is missing")
+        return
+    if not status_path.is_file():
+        fail("sealed bundle lacks run.status")
+    status_lines = status_path.read_text(encoding="utf-8").splitlines()
+    if "exit=0" not in status_lines or "source_manifest=match" not in status_lines:
+        fail("run.status does not record a clean, source-stable run")
     listed: set[str] = set()
     for line in manifest_path.read_text(encoding="utf-8").splitlines():
         parts = line.split(maxsplit=1)
@@ -265,12 +286,21 @@ def verify_evidence_manifest(evidence: Path) -> None:
             fail(f"evidence hash differs for {name}")
         listed.add(str(target))
     for path in evidence.rglob("*"):
-        if (
-            path.is_file()
-            # Manifests seal other files; they are not themselves sealed.
-            and path.name not in ("evidence.sha256", "supplement.sha256")
-            and str(path.resolve()) not in listed
-        ):
+        if path.is_file() and path.name != "evidence.sha256":
+            if str(path.resolve()) in listed:
+                continue
+            if path.name == "supplement.sha256":
+                # An in-bundle supplement manifest is acceptable only when
+                # every line it carries also appears in the bundle set's
+                # sibling supplements manifest.
+                for line in path.read_text(encoding="utf-8").splitlines():
+                    parts = line.split(maxsplit=1)
+                    if len(parts) != 2:
+                        fail("malformed supplement manifest line")
+                    named = evidence / parts[1].strip()
+                    if supplement_digest(evidence, named) != parts[0]:
+                        fail(f"unsealed supplement manifest entry: {parts[1].strip()}")
+                continue
             # Post-run supplements are sealed by the bundle set's sibling
             # manifest rather than the run's own evidence manifest.
             if supplement_digest(evidence, path) == sha256(path):

@@ -24,3 +24,13 @@ Never overwrite a failed or superseded bundle. Give a new candidate its own
 source prefix and explain the disposition in the corresponding measurement
 note. Large binary files use the attributes in [`.gitattributes`](.gitattributes)
 so code review does not render meaningless textual diffs.
+
+## Provenance of the `8edc181` bundles
+
+Raw bundles are immutable snapshots bound to their recorded source commit.
+Review commits changed the experiment sources after these bundles were
+recorded; those changes apply to future runs only. The current validator
+verifies each bundle against the recorded commit's blobs (`source-identity.txt`
+hashes resolved through `git show <source_commit>:<path>`), so exact-source
+validation still holds for the retained bundles even though the working-tree
+experiment files have since changed.

@@ -133,12 +133,19 @@ while IFS= read -r variable; do
     case "$variable" in
         CC | CFLAGS | CPPFLAGS | LDFLAGS | CPATH | C_INCLUDE_PATH \
             | CPLUS_INCLUDE_PATH | COMPILER_PATH | GCC_EXEC_PREFIX \
-            | LD_LIBRARY_PATH | LIBRARY_PATH | PYTHONHOME | PYTHONPATH)
+            | LD_LIBRARY_PATH | LIBRARY_PATH | PYTHONHOME | PYTHONPATH \
+            | PYTHONSTARTUP | LD_PRELOAD | LD_AUDIT | GLIBC_TUNABLES \
+            | MALLOC_ARENA_MAX | RUSTFLAGS | CARGO_BUILD_RUSTFLAGS \
+            | CARGO_ENCODED_RUSTFLAGS | CARGO_TARGET_DIR | CARGO_BUILD_TARGET \
+            | RUSTC | RUSTC_WRAPPER | RUSTDOC | RUSTDOCFLAGS)
             swept_variables+=("$variable")
             unset "$variable"
             ;;
     esac
 done < <(compgen -e)
+# The receipt validator imports run_processes; a bytecode cache written into
+# the repository would dirty the source manifest comparison.
+export PYTHONDONTWRITEBYTECODE=1
 
 {
     printf 'utc_start=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
