@@ -1,0 +1,41 @@
+
+/tmp/tmp.BdTH8Glrg0/numa-first-touch-probe:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000403260 <topic25_read_mapping>:
+  403260:	49 89 f9             	mov    %rdi,%r9
+  403263:	45 31 db             	xor    %r11d,%r11d
+  403266:	48 89 f7             	mov    %rsi,%rdi
+  403269:	31 c0                	xor    %eax,%eax
+  40326b:	49 ba 87 ca eb 85 b1 79 37 9e 	movabs $0x9e3779b185ebca87,%r10
+  403275:	48 89 d6             	mov    %rdx,%rsi
+  403278:	85 c9                	test   %ecx,%ecx
+  40327a:	74 3b                	je     4032b7 <topic25_read_mapping+0x57>
+  40327c:	0f 1f 40 00          	nopl   0x0(%rax)
+  403280:	31 d2                	xor    %edx,%edx
+  403282:	48 85 f6             	test   %rsi,%rsi
+  403285:	74 23                	je     4032aa <topic25_read_mapping+0x4a>
+  403287:	66 0f 1f 84 00 00 00 00 00 	nopw   0x0(%rax,%rax,1)
+  403290:	4c 0f af c7          	imul   %rdi,%r8
+  403294:	48 83 c2 01          	add    $0x1,%rdx
+  403298:	49 0f af c2          	imul   %r10,%rax
+  40329c:	4d 01 c8             	add    %r9,%r8
+  40329f:	4d 8b 00             	mov    (%r8),%r8
+  4032a2:	4c 01 c0             	add    %r8,%rax
+  4032a5:	48 39 d6             	cmp    %rdx,%rsi
+  4032a8:	75 e6                	jne    403290 <topic25_read_mapping+0x30>
+  4032aa:	41 83 c3 01          	add    $0x1,%r11d
+  4032ae:	44 39 d9             	cmp    %r11d,%ecx
+  4032b1:	75 cd                	jne    403280 <topic25_read_mapping+0x20>
+  4032b3:	4c 31 c0             	xor    %r8,%rax
+  4032b6:	c3                   	ret
+  4032b7:	4c 89 c0             	mov    %r8,%rax
+  4032ba:	c3                   	ret
+
+Disassembly of section .fini:

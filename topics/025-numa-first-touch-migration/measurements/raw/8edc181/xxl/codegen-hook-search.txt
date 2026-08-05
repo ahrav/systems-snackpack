@@ -1,0 +1,15 @@
+741:  401b8e:	e8 ed 15 00 00       	call   403180 <topic25_first_touch>
+934:  401f8c:	e8 cf 12 00 00       	call   403260 <topic25_read_mapping>
+2065:0000000000403180 <topic25_first_touch>:
+2093:  4031e5:	72 44                	jb     40322b <topic25_first_touch+0xab>
+2103:  40320e:	75 f0                	jne    403200 <topic25_first_touch+0x80>
+2105:  403214:	74 1e                	je     403234 <topic25_first_touch+0xb4>
+2111:  403229:	73 c5                	jae    4031f0 <topic25_first_touch+0x70>
+2114:  403232:	75 e2                	jne    403216 <topic25_first_touch+0x96>
+2116:  403237:	72 1f                	jb     403258 <topic25_first_touch+0xd8>
+2126:  403256:	77 e8                	ja     403240 <topic25_first_touch+0xc0>
+2131:0000000000403260 <topic25_read_mapping>:
+2139:  40327a:	74 3b                	je     4032b7 <topic25_read_mapping+0x57>
+2143:  403285:	74 23                	je     4032aa <topic25_read_mapping+0x4a>
+2152:  4032a8:	75 e6                	jne    403290 <topic25_read_mapping+0x30>
+2155:  4032b1:	75 cd                	jne    403280 <topic25_read_mapping+0x20>

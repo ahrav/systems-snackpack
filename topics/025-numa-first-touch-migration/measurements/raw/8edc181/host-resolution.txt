@@ -1,0 +1,10 @@
+collection_utc=2026-08-04T14:48:33Z
+command=ssh -G xxl
+host=xxl
+user=ahrav
+hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+port=22
+proxycommand=/usr/local/bin/wssh proxy %h
+
+The resolved endpoint returned x86_64 during both the pre-artifact probe and
+the exact-source run. The exact-source host receipt is in xxl/host.txt.

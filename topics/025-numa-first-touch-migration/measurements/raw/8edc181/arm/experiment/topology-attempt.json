@@ -1,0 +1,9 @@
+{
+  "command": [
+    "/tmp/tmp.cZEsW4YJyj/numa-first-touch-probe",
+    "--describe"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "{\"schema\":1,\"kind\":\"topology\",\"mapping_bytes\":536870912,\"all_node_count\":1,\"eligible_node_count\":1,\"control_supported\":true,\"control_node\":0,\"control_cpu\":0,\"control_distance\":10,\"supported\":false,\"reason\":\"fewer-than-two-cpu-and-memory-allowed-nodes\"}\n"
+}

@@ -1,0 +1,24 @@
+{
+  "all_node_count": 2,
+  "control_cpu": 0,
+  "control_distance": 10,
+  "control_node": 0,
+  "control_supported": true,
+  "eligible_node_count": 2,
+  "kind": "topology",
+  "mapping_bytes": 536870912,
+  "pair_cpus": [
+    0,
+    48
+  ],
+  "pair_distances": [
+    21,
+    21
+  ],
+  "pair_nodes": [
+    0,
+    1
+  ],
+  "schema": 1,
+  "supported": true
+}

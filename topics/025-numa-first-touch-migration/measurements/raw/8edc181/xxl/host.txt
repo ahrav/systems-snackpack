@@ -1,0 +1,722 @@
+utc_start=2026-08-04T14:44:14Z
+hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+source_commit=8edc18103c6649949ce393cfcf7a099327fcf92c
+source_tree=30ea5fb9c46a4a89871fce36a1016f0901d56dfb
+source_branch=curriculum/topic-025-numa-first-touch-migration
+swept_environment=none
+architecture=x86_64
+kernel=6.12.94-123.180.amzn2023.x86_64
+online_cpu_count=192
+configured_cpu_count=192
+cpus_allowed_list=0-191
+mems_allowed_list=0-1
+autonuma=1
+thp_enabled=always [madvise] never
+thp_defrag=always defer defer+madvise [madvise] never
+
+uname
+Linux dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com 6.12.94-123.180.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Thu Jul  9 21:10:41 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+
+compiler
+cc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+compiler_target=x86_64-amazon-linux
+
+compiler_target_options
+The following options are target specific:
+  -m128bit-long-double        		[enabled]
+  -m16                        		[disabled]
+  -m32                        		[disabled]
+  -m3dnow                     		[disabled]
+  -m3dnowa                    		[disabled]
+  -m64                        		[enabled]
+  -m80387                     		[enabled]
+  -m8bit-idiv                 		[disabled]
+  -m96bit-long-double         		[disabled]
+  -mabi=                      		sysv
+  -mabm                       		[enabled]
+  -maccumulate-outgoing-args  		[disabled]
+  -maddress-mode=             		long
+  -madx                       		[enabled]
+  -maes                       		[enabled]
+  -malign-data=               		compat
+  -malign-double              		[disabled]
+  -malign-functions=          		0
+  -malign-jumps=              		0
+  -malign-loops=              		0
+  -malign-stringops           		[enabled]
+  -mamx-bf16                  		[enabled]
+  -mamx-int8                  		[enabled]
+  -mamx-tile                  		[enabled]
+  -mandroid                   		[disabled]
+  -march=                     		sapphirerapids
+  -masm=                      		att
+  -mavx                       		[enabled]
+  -mavx2                      		[enabled]
+  -mavx256-split-unaligned-load 	[disabled]
+  -mavx256-split-unaligned-store 	[disabled]
+  -mavx5124fmaps              		[disabled]
+  -mavx5124vnniw              		[disabled]
+  -mavx512bf16                		[enabled]
+  -mavx512bitalg              		[enabled]
+  -mavx512bw                  		[enabled]
+  -mavx512cd                  		[enabled]
+  -mavx512dq                  		[enabled]
+  -mavx512er                  		[disabled]
+  -mavx512f                   		[enabled]
+  -mavx512ifma                		[enabled]
+  -mavx512pf                  		[disabled]
+  -mavx512vbmi                		[enabled]
+  -mavx512vbmi2               		[enabled]
+  -mavx512vl                  		[enabled]
+  -mavx512vnni                		[enabled]
+  -mavx512vp2intersect        		[disabled]
+  -mavx512vpopcntdq           		[enabled]
+  -mavxvnni                   		[enabled]
+  -mbionic                    		[disabled]
+  -mbmi                       		[enabled]
+  -mbmi2                      		[enabled]
+  -mbranch-cost=<0,5>         		3
+  -mcall-ms2sysv-xlogues      		[disabled]
+  -mcet-switch                		[disabled]
+  -mcld                       		[disabled]
+  -mcldemote                  		[enabled]
+  -mclflushopt                		[enabled]
+  -mclwb                      		[enabled]
+  -mclzero                    		[disabled]
+  -mcmodel=                   		small
+  -mcpu=                      		
+  -mcrc32                     		[enabled]
+  -mcx16                      		[enabled]
+  -mdaz-ftz                   		[disabled]
+  -mdispatch-scheduler        		[disabled]
+  -mdump-tune-features        		[disabled]
+  -menqcmd                    		[disabled]
+  -mf16c                      		[enabled]
+  -mfancy-math-387            		[enabled]
+  -mfentry                    		[disabled]
+  -mfentry-name=              		
+  -mfentry-section=           		
+  -mfma                       		[enabled]
+  -mfma4                      		[disabled]
+  -mforce-drap                		[disabled]
+  -mforce-indirect-call       		[disabled]
+  -mfp-ret-in-387             		[enabled]
+  -mfpmath=                   		sse
+  -mfsgsbase                  		[enabled]
+  -mfunction-return=          		keep
+  -mfused-madd                		-ffp-contract=fast
+  -mfxsr                      		[enabled]
+  -mgather                    		-mtune-ctrl=use_gather
+  -mgeneral-regs-only         		[disabled]
+  -mgfni                      		[enabled]
+  -mglibc                     		[enabled]
+  -mhard-float                		[enabled]
+  -mharden-sls=               		none
+  -mhle                       		[enabled]
+  -mhreset                    		[disabled]
+  -miamcu                     		[disabled]
+  -mieee-fp                   		[enabled]
+  -mincoming-stack-boundary=  		0
+  -mindirect-branch-cs-prefix 		[disabled]
+  -mindirect-branch-register  		[disabled]
+  -mindirect-branch=          		keep
+  -minline-all-stringops      		[disabled]
+  -minline-stringops-dynamically 	[disabled]
+  -minstrument-return=        		none
+  -mintel-syntax              		-masm=intel
+  -mkl                        		[disabled]
+  -mlarge-data-threshold=<number> 	65536
+  -mlong-double-128           		[disabled]
+  -mlong-double-64            		[disabled]
+  -mlong-double-80            		[enabled]
+  -mlwp                       		[disabled]
+  -mlzcnt                     		[enabled]
+  -mmanual-endbr              		[disabled]
+  -mmemcpy-strategy=          		
+  -mmemset-strategy=          		
+  -mmitigate-rop              		[disabled]
+  -mmmx                       		[enabled]
+  -mmovbe                     		[enabled]
+  -mmovdir64b                 		[enabled]
+  -mmovdiri                   		[enabled]
+  -mmpx                       		[disabled]
+  -mms-bitfields              		[disabled]
+  -mmusl                      		[disabled]
+  -mmwait                     		[enabled]
+  -mmwaitx                    		[disabled]
+  -mneeded                    		[disabled]
+  -mno-align-stringops        		[disabled]
+  -mno-default                		[disabled]
+  -mno-fancy-math-387         		[disabled]
+  -mno-push-args              		[disabled]
+  -mno-red-zone               		[disabled]
+  -mno-sse4                   		[disabled]
+  -mnop-mcount                		[disabled]
+  -momit-leaf-frame-pointer   		[disabled]
+  -mpc32                      		[disabled]
+  -mpc64                      		[disabled]
+  -mpc80                      		[disabled]
+  -mpclmul                    		[enabled]
+  -mpcommit                   		[disabled]
+  -mpconfig                   		[disabled]
+  -mpku                       		[enabled]
+  -mpopcnt                    		[enabled]
+  -mprefer-avx128             		-mprefer-vector-width=128
+  -mprefer-vector-width=      		256
+  -mpreferred-stack-boundary= 		0
+  -mprefetchwt1               		[disabled]
+  -mprfchw                    		[enabled]
+  -mptwrite                   		[disabled]
+  -mpush-args                 		[enabled]
+  -mrdpid                     		[enabled]
+  -mrdrnd                     		[enabled]
+  -mrdseed                    		[enabled]
+  -mrecip                     		[disabled]
+  -mrecip=                    		
+  -mrecord-mcount             		[disabled]
+  -mrecord-return             		[disabled]
+  -mred-zone                  		[enabled]
+  -mregparm=                  		6
+  -mrtd                       		[disabled]
+  -mrtm                       		[disabled]
+  -msahf                      		[enabled]
+  -mserialize                 		[enabled]
+  -msgx                       		[disabled]
+  -msha                       		[enabled]
+  -mshstk                     		[disabled]
+  -mskip-rax-setup            		[disabled]
+  -msoft-float                		[disabled]
+  -msse                       		[enabled]
+  -msse2                      		[enabled]
+  -msse2avx                   		[disabled]
+  -msse3                      		[enabled]
+  -msse4                      		[enabled]
+  -msse4.1                    		[enabled]
+  -msse4.2                    		[enabled]
+  -msse4a                     		[disabled]
+  -msse5                      		-mavx
+  -msseregparm                		[disabled]
+  -mssse3                     		[enabled]
+  -mstack-arg-probe           		[disabled]
+  -mstack-protector-guard-offset= 	
+  -mstack-protector-guard-reg= 		
+  -mstack-protector-guard-symbol= 	
+  -mstack-protector-guard=    		tls
+  -mstackrealign              		[disabled]
+  -mstringop-strategy=        		[default]
+  -mstv                       		[enabled]
+  -mtbm                       		[disabled]
+  -mtls-dialect=              		gnu
+  -mtls-direct-seg-refs       		[enabled]
+  -mtsxldtrk                  		[disabled]
+  -mtune-ctrl=                		
+  -mtune=                     		sapphirerapids
+  -muclibc                    		[disabled]
+  -muintr                     		[disabled]
+  -mvaes                      		[enabled]
+  -mveclibabi=                		[default]
+  -mvect8-ret-in-mem          		[disabled]
+  -mvpclmulqdq                		[enabled]
+  -mvzeroupper                		[disabled]
+  -mwaitpkg                   		[enabled]
+  -mwbnoinvd                  		[enabled]
+  -mwidekl                    		[disabled]
+  -mx32                       		[disabled]
+  -mxop                       		[disabled]
+  -mxsave                     		[enabled]
+  -mxsavec                    		[enabled]
+  -mxsaveopt                  		[enabled]
+  -mxsaves                    		[enabled]
+
+  Known assembler dialects (for use with the -masm= option):
+    att intel
+
+  Known ABIs (for use with the -mabi= option):
+    ms sysv
+
+  Known code models (for use with the -mcmodel= option):
+    32 kernel large medium small
+
+  Valid arguments to -mfpmath=:
+    387 387+sse 387,sse both sse sse+387 sse,387
+
+  Known choices for mitigation against straight line speculation with -mharden-sls=:
+    all indirect-jmp none return
+
+  Known indirect branch choices (for use with the -mindirect-branch=/-mfunction-return= options):
+    keep thunk thunk-extern thunk-inline
+
+  Known choices for return instrumentation with -minstrument-return=:
+    call none nop5
+
+  Known data alignment choices (for use with the -malign-data= option):
+    abi cacheline compat
+
+  Known vectorization library ABIs (for use with the -mveclibabi= option):
+    acml svml
+
+  Known address mode (for use with the -maddress-mode= option):
+    long short
+
+  Known preferred register vector length (to use with the -mprefer-vector-width= option):
+    128 256 512 none
+
+  Known stack protector guard (for use with the -mstack-protector-guard= option):
+    global tls
+
+  Valid arguments to -mstringop-strategy=:
+    byte_loop libcall loop rep_4byte rep_8byte rep_byte unrolled_loop
+    vector_loop
+
+  Known TLS dialects (for use with the -mtls-dialect= option):
+    gnu gnu2
+
+  Known valid arguments for -march= option:
+    i386 i486 i586 pentium lakemont pentium-mmx winchip-c6 winchip2 c3 samuel-2 c3-2 nehemiah c7 esther i686 pentiumpro pentium2 pentium3 pentium3m pentium-m pentium4 pentium4m prescott nocona core2 nehalem corei7 westmere sandybridge corei7-avx ivybridge core-avx-i haswell core-avx2 broadwell skylake skylake-avx512 cannonlake icelake-client rocketlake icelake-server cascadelake tigerlake cooperlake sapphirerapids alderlake bonnell atom silvermont slm goldmont goldmont-plus tremont knl knm intel geode k6 k6-2 k6-3 athlon athlon-tbird athlon-4 athlon-xp athlon-mp x86-64 x86-64-v2 x86-64-v3 x86-64-v4 eden-x2 nano nano-1000 nano-2000 nano-3000 nano-x2 eden-x4 nano-x4 k8 k8-sse3 opteron opteron-sse3 athlon64 athlon64-sse3 athlon-fx amdfam10 barcelona bdver1 bdver2 bdver3 bdver4 znver1 znver2 znver3 znver4 btver1 btver2 generic native
+
+  Known valid arguments for -mtune= option:
+    generic i386 i486 pentium lakemont pentiumpro pentium4 nocona core2 nehalem sandybridge haswell bonnell silvermont goldmont goldmont-plus tremont knl knm skylake skylake-avx512 cannonlake icelake-client icelake-server cascadelake tigerlake cooperlake sapphirerapids alderlake rocketlake intel geode k6 athlon k8 amdfam10 bdver1 bdver2 bdver3 bdver4 btver1 btver2 znver1 znver2 znver3 znver4
+
+
+rustc
+rustc 1.97.1 (8bab26f4f 2026-07-14)
+binary: rustc
+commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+commit-date: 2026-07-14
+host: x86_64-unknown-linux-gnu
+release: 1.97.1
+LLVM version: 22.1.6
+
+cargo
+cargo 1.97.1 (c980f4866 2026-06-30)
+
+rust_target_cfg_native
+debug_assertions
+panic="unwind"
+target_abi=""
+target_arch="x86_64"
+target_endian="little"
+target_env="gnu"
+target_family="unix"
+target_feature="adx"
+target_feature="aes"
+target_feature="avx"
+target_feature="avx2"
+target_feature="avx512bf16"
+target_feature="avx512bitalg"
+target_feature="avx512bw"
+target_feature="avx512cd"
+target_feature="avx512dq"
+target_feature="avx512f"
+target_feature="avx512fp16"
+target_feature="avx512ifma"
+target_feature="avx512vbmi"
+target_feature="avx512vbmi2"
+target_feature="avx512vl"
+target_feature="avx512vnni"
+target_feature="avx512vpopcntdq"
+target_feature="avxvnni"
+target_feature="bmi1"
+target_feature="bmi2"
+target_feature="cmpxchg16b"
+target_feature="f16c"
+target_feature="fma"
+target_feature="fxsr"
+target_feature="gfni"
+target_feature="lzcnt"
+target_feature="movbe"
+target_feature="pclmulqdq"
+target_feature="popcnt"
+target_feature="rdrand"
+target_feature="rdseed"
+target_feature="sha"
+target_feature="sse"
+target_feature="sse2"
+target_feature="sse3"
+target_feature="sse4.1"
+target_feature="sse4.2"
+target_feature="ssse3"
+target_feature="vaes"
+target_feature="vpclmulqdq"
+target_feature="xsave"
+target_feature="xsavec"
+target_feature="xsaveopt"
+target_feature="xsaves"
+target_has_atomic="16"
+target_has_atomic="32"
+target_has_atomic="64"
+target_has_atomic="8"
+target_has_atomic="ptr"
+target_has_atomic_primitive_alignment="16"
+target_has_atomic_primitive_alignment="32"
+target_has_atomic_primitive_alignment="64"
+target_has_atomic_primitive_alignment="8"
+target_has_atomic_primitive_alignment="ptr"
+target_os="linux"
+target_pointer_width="64"
+target_vendor="unknown"
+unix
+
+rust_target_features
+Features supported by rustc for this target:
+    adx                             - Support ADX instructions.
+    aes                             - Enable AES instructions.
+    amx-avx512                      - Support AMX-AVX512 instructions.
+    amx-bf16                        - Support AMX-BF16 instructions.
+    amx-complex                     - Support AMX-COMPLEX instructions.
+    amx-fp16                        - Support AMX amx-fp16 instructions.
+    amx-fp8                         - Support AMX-FP8 instructions.
+    amx-int8                        - Support AMX-INT8 instructions.
+    amx-movrs                       - Support AMX-MOVRS instructions.
+    amx-tf32                        - Support AMX-TF32 instructions.
+    amx-tile                        - Support AMX-TILE instructions.
+    apxf                            - Support extended general purpose register.
+    avx                             - Enable AVX instructions.
+    avx10.1                         - Support AVX10.1 instruction.
+    avx10.2                         - Support AVX10.2 instruction.
+    avx2                            - Enable AVX2 instructions.
+    avx512bf16                      - Support bfloat16 floating point.
+    avx512bitalg                    - Enable AVX-512 Bit Algorithms.
+    avx512bw                        - Enable AVX-512 Byte and Word Instructions.
+    avx512cd                        - Enable AVX-512 Conflict Detection Instructions.
+    avx512dq                        - Enable AVX-512 Doubleword and Quadword Instructions.
+    avx512f                         - Enable AVX-512 instructions.
+    avx512fp16                      - Support 16-bit floating point.
+    avx512ifma                      - Enable AVX-512 Integer Fused Multiple-Add.
+    avx512vbmi                      - Enable AVX-512 Vector Byte Manipulation Instructions.
+    avx512vbmi2                     - Enable AVX-512 further Vector Byte Manipulation Instructions.
+    avx512vl                        - Enable AVX-512 Vector Length eXtensions.
+    avx512vnni                      - Enable AVX-512 Vector Neural Network Instructions.
+    avx512vp2intersect              - Enable AVX-512 vp2intersect.
+    avx512vpopcntdq                 - Enable AVX-512 Population Count Instructions.
+    avxifma                         - Enable AVX-IFMA.
+    avxneconvert                    - Support AVX-NE-CONVERT instructions.
+    avxvnni                         - Support AVX_VNNI encoding.
+    avxvnniint16                    - Enable AVX-VNNI-INT16.
+    avxvnniint8                     - Enable AVX-VNNI-INT8.
+    bmi1                            - Support BMI instructions.
+    bmi2                            - Support BMI2 instructions.
+    cmpxchg16b                      - 64-bit with cmpxchg16b (this is true for most x86-64 chips, but not the first AMD chips).
+    crt-static                      - Enables C Run-time Libraries to be statically linked.
+    ermsb                           - REP MOVS/STOS are fast.
+    f16c                            - Support 16-bit floating point conversion instructions.
+    fma                             - Enable three-operand fused multiple-add.
+    fma4                            - Enable four-operand fused multiple-add.
+    fxsr                            - Support fxsave/fxrestore instructions.
+    gfni                            - Enable Galois Field Arithmetic Instructions.
+    kl                              - Support Key Locker kl Instructions.
+    lahfsahf                        - Support LAHF and SAHF instructions in 64-bit mode.
+    lzcnt                           - Support LZCNT instruction.
+    movbe                           - Support MOVBE instruction.
+    movrs                           - Enable MOVRS.
+    pclmulqdq                       - Enable packed carry-less multiplication instructions.
+    popcnt                          - Support POPCNT instruction.
+    prfchw                          - Support PRFCHW instructions.
+    rdrand                          - Support RDRAND instruction.
+    rdseed                          - Support RDSEED instruction.
+    rtm                             - Support RTM instructions.
+    sha                             - Enable SHA instructions.
+    sha512                          - Support SHA512 instructions.
+    sm3                             - Support SM3 instructions.
+    sm4                             - Support SM4 instructions.
+    sse                             - Enable SSE instructions.
+    sse2                            - Enable SSE2 instructions.
+    sse3                            - Enable SSE3 instructions.
+    sse4.1                          - Enable SSE 4.1 instructions.
+    sse4.2                          - Enable SSE 4.2 instructions.
+    sse4a                           - Support SSE 4a instructions.
+    ssse3                           - Enable SSSE3 instructions.
+    tbm                             - Enable TBM instructions.
+    vaes                            - Promote selected AES instructions to AVX512/AVX registers.
+    vpclmulqdq                      - Enable vpclmulqdq instructions.
+    widekl                          - Support Key Locker wide Instructions.
+    x87                             - Enable X87 float instructions.
+    xop                             - Enable XOP instructions.
+    xsave                           - Support xsave instructions.
+    xsavec                          - Support xsavec instructions.
+    xsaveopt                        - Support xsaveopt instructions.
+    xsaves                          - Support xsaves instructions.
+
+Code-generation features supported by LLVM for this target:
+    16bit-mode                      - 16-bit mode (i8086).
+    32bit-mode                      - 32-bit mode (80386).
+    64bit                           - Support 64-bit instructions.
+    64bit-mode                      - 64-bit mode (x86_64).
+    allow-light-256-bit             - Enable generation of 256-bit load/stores even if we prefer 128-bit.
+    avx10.1-512                     - Support AVX10.1 instruction.
+    avx10.2-512                     - Support AVX10.2 instruction.
+    branch-hint                     - Target has branch hint feature.
+    branchfusion                    - CMP/TEST can be fused with conditional branches.
+    ccmp                            - Support conditional cmp & test instructions.
+    cf                              - Support conditional faulting.
+    cldemote                        - Enable Cache Line Demote.
+    clflushopt                      - Flush A Cache Line Optimized.
+    clwb                            - Cache Line Write Back.
+    clzero                          - Enable Cache Line Zero.
+    cmov                            - Enable conditional move instructions.
+    cmpccxadd                       - Support CMPCCXADD instructions.
+    crc32                           - Enable SSE 4.2 CRC32 instruction (used when SSE4.2 is supported but function is GPR only).
+    cx8                             - Support CMPXCHG8B instructions.
+    enqcmd                          - Has ENQCMD instructions.
+    evex512                         - Support ZMM and 64-bit mask instructions.
+    false-deps-getmant              - VGETMANTSS/SD/SH and VGETMANDPS/PD(memory version) has a false dependency on dest register.
+    false-deps-lzcnt-tzcnt          - LZCNT/TZCNT have a false dependency on dest register.
+    false-deps-mulc                 - VF[C]MULCPH/SH has a false dependency on dest register.
+    false-deps-mullq                - VPMULLQ has a false dependency on dest register.
+    false-deps-perm                 - VPERMD/Q/PS/PD has a false dependency on dest register.
+    false-deps-popcnt               - POPCNT has a false dependency on dest register.
+    false-deps-range                - VRANGEPD/PS/SD/SS has a false dependency on dest register.
+    fast-11bytenop                  - Target can quickly decode up to 11 byte NOPs.
+    fast-15bytenop                  - Target can quickly decode up to 15 byte NOPs.
+    fast-7bytenop                   - Target can quickly decode up to 7 byte NOPs.
+    fast-bextr                      - Indicates that the BEXTR instruction is implemented as a single uop with good throughput.
+    fast-dpwssd                     - Prefer vpdpwssd instruction over vpmaddwd+vpaddd instruction sequence.
+    fast-gather                     - Indicates if gather is reasonably fast (this is true for Skylake client and all AVX-512 CPUs).
+    fast-hops                       - Prefer horizontal vector math instructions (haddp, phsub, etc.) over normal vector instructions with shuffles.
+    fast-imm16                      - Prefer a i16 instruction with i16 immediate over extension to i32.
+    fast-lzcnt                      - LZCNT instructions are as fast as most simple integer ops.
+    fast-movbe                      - Prefer a movbe over a single-use load + bswap / single-use bswap + store.
+    fast-scalar-fsqrt               - Scalar SQRT is fast (disable Newton-Raphson).
+    fast-scalar-shift-masks         - Prefer a left/right scalar logical shift pair over a shift+and pair.
+    fast-shld-rotate                - SHLD can be used as a faster rotate.
+    fast-variable-crosslane-shuffle - Cross-lane shuffles with variable masks are fast.
+    fast-variable-perlane-shuffle   - Per-lane shuffles with variable masks are fast.
+    fast-vector-fsqrt               - Vector SQRT is fast (disable Newton-Raphson).
+    fast-vector-shift-masks         - Prefer a left/right vector logical shift pair over a shift+and pair.
+    faster-shift-than-shuffle       - Shifts are faster (or as fast) as shuffle.
+    fsgsbase                        - Support FS/GS Base instructions.
+    fsrm                            - REP MOVSB of short lengths is faster.
+    harden-sls-ijmp                 - Harden against straight line speculation across indirect JMP instructions..
+    harden-sls-ret                  - Harden against straight line speculation across RET instructions..
+    hreset                          - Has hreset instruction.
+    idivl-to-divb                   - Use 8-bit divide for positive values less than 256.
+    idivq-to-divl                   - Use 32-bit divide for positive values less than 2^32.
+    inline-asm-use-gpr32            - Enable use of GPR32 in inline assembly for APX.
+    invpcid                         - Invalidate Process-Context Identifier.
+    lea-sp                          - Use LEA for adjusting the stack pointer (this is an optimization for Intel Atom processors).
+    lea-uses-ag                     - LEA instruction needs inputs at AG stage.
+    lvi-cfi                         - Prevent indirect calls/branches from using a memory operand, and precede all indirect calls/branches from a register with an LFENCE instruction to serialize control flow. Also decompose RET instructions into a POP+LFENCE+JMP sequence..
+    lvi-load-hardening              - Insert LFENCE instructions to prevent data speculatively injected into loads from being used maliciously..
+    lwp                             - Enable LWP instructions.
+    macrofusion                     - Various instructions can be fused with conditional branches.
+    mmx                             - Enable MMX instructions.
+    movdir64b                       - Support movdir64b instruction (direct store 64 bytes).
+    movdiri                         - Support movdiri instruction (direct store integer).
+    mwaitx                          - Enable MONITORX/MWAITX timer functionality.
+    ndd                             - Support non-destructive destination.
+    nf                              - Support status flags update suppression.
+    no-bypass-delay                 - Has no bypass delay when using the 'wrong' domain.
+    no-bypass-delay-blend           - Has no bypass delay when using the 'wrong' blend type.
+    no-bypass-delay-mov             - Has no bypass delay when using the 'wrong' mov type.
+    no-bypass-delay-shuffle         - Has no bypass delay when using the 'wrong' shuffle type.
+    nopl                            - Enable NOPL instruction (generally pentium pro+).
+    pad-short-functions             - Pad short functions (to prevent a stall when returning too early).
+    pconfig                         - platform configuration instruction.
+    pku                             - Enable protection keys.
+    ppx                             - Support Push-Pop Acceleration.
+    prefer-128-bit                  - Prefer 128-bit AVX instructions.
+    prefer-256-bit                  - Prefer 256-bit AVX instructions.
+    prefer-legacy-setcc             - Prefer to emit legacy SetCC..
+    prefer-mask-registers           - Prefer AVX512 mask registers over PTEST/MOVMSK.
+    prefer-movmsk-over-vtest        - Prefer movmsk over vtest instruction.
+    prefer-no-gather                - Prefer no gather instructions.
+    prefer-no-scatter               - Prefer no scatter instructions.
+    prefetchi                       - Prefetch instruction with T0 or T1 Hint.
+    ptwrite                         - Support ptwrite instruction.
+    push2pop2                       - Support PUSH2/POP2 instructions.
+    raoint                          - Support RAO-INT instructions.
+    rdpid                           - Support RDPID instructions.
+    rdpru                           - Support RDPRU instructions.
+    retpoline                       - Remove speculation of indirect branches from the generated code, either by avoiding them entirely or lowering them with a speculation blocking construct.
+    retpoline-external-thunk        - When lowering an indirect call or branch using a `retpoline`, rely on the specified user provided thunk rather than emitting one ourselves. Only has effect when combined with some other retpoline feature.
+    retpoline-indirect-branches     - Remove speculation of indirect branches from the generated code.
+    retpoline-indirect-calls        - Remove speculation of indirect calls from the generated code.
+    sbb-dep-breaking                - SBB with same register has no source dependency.
+    serialize                       - Has serialize instruction.
+    seses                           - Prevent speculative execution side channel timing attacks by inserting a speculation barrier before memory reads, memory writes, and conditional branches. Implies LVI Control Flow integrity..
+    sgx                             - Enable Software Guard Extensions.
+    shstk                           - Support CET Shadow-Stack instructions.
+    slow-3ops-lea                   - LEA instruction with 3 ops or certain registers is slow.
+    slow-incdec                     - INC and DEC instructions are slower than ADD and SUB.
+    slow-lea                        - LEA instruction with certain arguments is slow.
+    slow-pmaddwd                    - PMADDWD is slower than PMULLD.
+    slow-pmulld                     - PMULLD instruction is slow (compared to PMULLW/PMULHW and PMULUDQ).
+    slow-pmullq                     - PMULLQ instruction is slow.
+    slow-shld                       - SHLD instruction is slow.
+    slow-two-mem-ops                - Two memory operand instructions are slow.
+    slow-unaligned-mem-16           - Slow unaligned 16-byte memory access.
+    slow-unaligned-mem-32           - Slow unaligned 32-byte memory access.
+    soft-float                      - Use software floating point features.
+    sse-unaligned-mem               - Allow unaligned memory operands with SSE instructions (this may require setting a configuration bit in the processor).
+    tagged-globals                  - Use an instruction sequence for taking the address of a global that allows a memory tag in the upper address bits..
+    tsxldtrk                        - Support TSXLDTRK instructions.
+    tuning-fast-imm-vector-shift    - Vector shifts are fast (2/cycle) as opposed to slow (1/cycle).
+    uintr                           - Has UINTR Instructions.
+    use-glm-div-sqrt-costs          - Use Goldmont specific floating point div/sqrt costs.
+    use-slm-arith-costs             - Use Silvermont specific arithmetic costs.
+    usermsr                         - Support USERMSR instructions.
+    vzeroupper                      - Should insert vzeroupper instructions.
+    waitpkg                         - Wait and pause enhancements.
+    wbnoinvd                        - Write Back No Invalidate.
+    x32                             - 64-bit with ILP32 programming model (e.g. x32 ABI).
+    zu                              - Support zero-upper SETcc/IMUL.
+
+Use +feature to enable a feature, or -feature to disable it.
+For example, rustc -C target-cpu=mycpu -C target-feature=+feature1,-feature2
+
+Code-generation features cannot be used in cfg or #[target_feature],
+and may be renamed or removed in a future version of LLVM or rustc.
+
+
+lscpu
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           46 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  192
+On-line CPU(s) list:                     0-191
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Xeon(R) Platinum 8488C
+CPU family:                              6
+Model:                                   143
+Thread(s) per core:                      2
+Core(s) per socket:                      48
+Socket(s):                               2
+Stepping:                                8
+BogoMIPS:                                4800.00
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd ida arat avx512vbmi umip pku ospke waitpkg avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg tme avx512_vpopcntdq rdpid cldemote movdiri movdir64b md_clear serialize amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities
+Hypervisor vendor:                       KVM
+Virtualization type:                     full
+L1d cache:                               4.5 MiB (96 instances)
+L1i cache:                               3 MiB (96 instances)
+L2 cache:                                192 MiB (96 instances)
+L3 cache:                                210 MiB (2 instances)
+NUMA node(s):                            2
+NUMA node0 CPU(s):                       0-47,96-143
+NUMA node1 CPU(s):                       48-95,144-191
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+
+proc_status_affinity
+Cpus_allowed:	ffffffff,ffffffff,ffffffff,ffffffff,ffffffff,ffffffff
+Cpus_allowed_list:	0-191
+Mems_allowed:	00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000003
+Mems_allowed_list:	0-1
+
+cgroup
+0::/user.slice/user-32352702.slice/session-13835.scope
+
+numa_sysfs
+node0 cpulist=0-47,96-143 cpumap=00000000,0000ffff,ffffffff,00000000,0000ffff,ffffffff distance=10 21
+node0 meminfo
+Node 0 MemTotal:       194955972 kB
+Node 0 MemFree:        11092756 kB
+Node 0 MemUsed:        183863216 kB
+Node 0 SwapCached:            0 kB
+Node 0 Active:         100086716 kB
+Node 0 Inactive:       67443920 kB
+Node 0 Active(anon):   20945008 kB
+Node 0 Inactive(anon): 28155064 kB
+Node 0 Active(file):   79141708 kB
+Node 0 Inactive(file): 39288856 kB
+Node 0 Unevictable:           0 kB
+Node 0 Mlocked:               0 kB
+Node 0 Dirty:              7448 kB
+Node 0 Writeback:             0 kB
+Node 0 FilePages:      139425548 kB
+Node 0 Mapped:          1817156 kB
+Node 0 AnonPages:      28105116 kB
+Node 0 Shmem:          20995100 kB
+Node 0 KernelStack:      139896 kB
+Node 0 PageTables:       258052 kB
+Node 0 SecPageTables:         0 kB
+Node 0 NFS_Unstable:          0 kB
+Node 0 Bounce:                0 kB
+Node 0 WritebackTmp:          0 kB
+Node 0 KReclaimable:    7331740 kB
+Node 0 Slab:           12378732 kB
+Node 0 SReclaimable:    7331740 kB
+Node 0 SUnreclaim:      5046992 kB
+Node 0 AnonHugePages:         0 kB
+Node 0 ShmemHugePages:        0 kB
+Node 0 ShmemPmdMapped:        0 kB
+Node 0 FileHugePages:  12912640 kB
+Node 0 FilePmdMapped:    174080 kB
+Node 0 Unaccepted:            0 kB
+Node 0 HugePages_Total:     0
+Node 0 HugePages_Free:      0
+Node 0 HugePages_Surp:      0
+node1 cpulist=48-95,144-191 cpumap=ffffffff,ffff0000,00000000,ffffffff,ffff0000,00000000 distance=21 10
+node1 meminfo
+Node 1 MemTotal:       194977360 kB
+Node 1 MemFree:        25535608 kB
+Node 1 MemUsed:        169441752 kB
+Node 1 SwapCached:            0 kB
+Node 1 Active:         92346556 kB
+Node 1 Inactive:       63371868 kB
+Node 1 Active(anon):   10060808 kB
+Node 1 Inactive(anon): 16583176 kB
+Node 1 Active(file):   82285748 kB
+Node 1 Inactive(file): 46788692 kB
+Node 1 Unevictable:           0 kB
+Node 1 Mlocked:               0 kB
+Node 1 Dirty:              3228 kB
+Node 1 Writeback:             0 kB
+Node 1 FilePages:      139146348 kB
+Node 1 Mapped:          1837136 kB
+Node 1 AnonPages:      16572088 kB
+Node 1 Shmem:          10072004 kB
+Node 1 KernelStack:       75192 kB
+Node 1 PageTables:       191440 kB
+Node 1 SecPageTables:         0 kB
+Node 1 NFS_Unstable:          0 kB
+Node 1 Bounce:                0 kB
+Node 1 WritebackTmp:          0 kB
+Node 1 KReclaimable:    5451664 kB
+Node 1 Slab:            9256468 kB
+Node 1 SReclaimable:    5451664 kB
+Node 1 SUnreclaim:      3804804 kB
+Node 1 AnonHugePages:         0 kB
+Node 1 ShmemHugePages:        0 kB
+Node 1 ShmemPmdMapped:        0 kB
+Node 1 FileHugePages:  10153984 kB
+Node 1 FilePmdMapped:         0 kB
+Node 1 Unaccepted:            0 kB
+Node 1 HugePages_Total:     0
+Node 1 HugePages_Free:      0
+Node 1 HugePages_Surp:      0
+
+vmstat_numa
+numa_hit 43343834318
+numa_miss 16305668
+numa_foreign 16305668
+numa_interleave 2760
+numa_local 43336394995
+numa_other 16883534
+numa_pte_updates 1786432863
+numa_huge_pte_updates 130
+numa_hint_faults 1459173362
+numa_hint_faults_local 1226785753
+numa_pages_migrated 176428427
+pgmigrate_success 181093019
+pgmigrate_fail 6449
+utc_end=2026-08-04T14:44:53Z

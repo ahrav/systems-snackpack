@@ -1,0 +1,20 @@
+collection_utc=2026-08-04T14:47:57Z
+requested_endpoint=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+instance_type=c7g.16xlarge
+midr_el1=0x00000000411fd401
+CPU implementer=0x41
+CPU architecture=8
+CPU variant=0x1
+CPU part=0xd40
+CPU revision=1
+
+Commands:
+ssh dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com date -u +%Y-%m-%dT%H:%M:%SZ
+ssh dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com ec2-metadata -t
+ssh dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com cat /sys/devices/system/cpu/cpu0/regs/identification/midr_el1
+ssh dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com head -n 10 /proc/cpuinfo
+
+Boundary: this read-only identity supplement was collected after the sealed
+exact-source run. It identifies the same endpoint but is not part of that run's
+evidence.sha256 manifest.

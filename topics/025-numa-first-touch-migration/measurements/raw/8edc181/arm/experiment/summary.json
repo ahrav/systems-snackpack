@@ -1,0 +1,15 @@
+{
+  "all_pages_stayed_on_control_node": true,
+  "attempt_count": 4,
+  "binary_sha256": "d7851ac71ee4f609c5e21a53f06f81049ab008e791b8215e39faeeb2f1962dd6",
+  "diagnostic_read_ns": [
+    75764078,
+    74602372,
+    75403826,
+    74807047
+  ],
+  "mode": "one-node-correctness-control",
+  "remote_local_estimate": null,
+  "schema": 1,
+  "valid_observation_count": 4
+}

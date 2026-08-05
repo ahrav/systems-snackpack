@@ -1,0 +1,9 @@
+{
+  "command": [
+    "/tmp/tmp.BdTH8Glrg0/numa-first-touch-probe",
+    "--describe"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "stdout": "{\"schema\":1,\"kind\":\"topology\",\"mapping_bytes\":536870912,\"all_node_count\":2,\"eligible_node_count\":2,\"control_supported\":true,\"control_node\":0,\"control_cpu\":0,\"control_distance\":10,\"supported\":true,\"pair_nodes\":[0,1],\"pair_cpus\":[0,48],\"pair_distances\":[21,21]}\n"
+}

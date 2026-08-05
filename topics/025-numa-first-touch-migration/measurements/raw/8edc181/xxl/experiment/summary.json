@@ -1,0 +1,56 @@
+{
+  "aa": {
+    "geometric_mean_ratio": 0.998555006165544,
+    "log_sd": 0.01425872860207459,
+    "log_t_95_high": 1.0105296067880454,
+    "log_t_95_low": 0.9867223024841172,
+    "mean_log_contrast": -0.001446038844857167,
+    "n_complete_blocks": 8
+  },
+  "aa_direction_0": {
+    "geometric_mean_ratio": 1.0014737681416566,
+    "log_sd": 0.01595191677700478,
+    "log_t_95_high": 1.0272196079559535,
+    "log_t_95_low": 0.9763732122205111,
+    "mean_log_contrast": 0.0014726832112152977,
+    "n_complete_blocks": 4
+  },
+  "aa_direction_1": {
+    "geometric_mean_ratio": 0.9956447508240975,
+    "log_sd": 0.01404323010477586,
+    "log_t_95_high": 1.018143786212133,
+    "log_t_95_low": 0.9736429011972947,
+    "mean_log_contrast": -0.004364760900929632,
+    "n_complete_blocks": 4
+  },
+  "aa_scope": "mechanical path-asymmetry diagnostic, not long-run null calibration",
+  "ab": {
+    "geometric_mean_ratio": 1.5575207599838263,
+    "log_sd": 0.01713744685332079,
+    "log_t_95_high": 1.571809025320476,
+    "log_t_95_low": 1.5433623797178448,
+    "mean_log_contrast": 0.44309530063322544,
+    "n_complete_blocks": 16
+  },
+  "attempt_count": 96,
+  "binary_sha256": "727779d331e07f810384b5f7248e4fe263154ae2b75675317ab7e63830095089",
+  "direction_0": {
+    "geometric_mean_ratio": 1.5610082126911997,
+    "log_sd": 0.020684976885616463,
+    "log_t_95_high": 1.5882376036991726,
+    "log_t_95_low": 1.5342456534298987,
+    "mean_log_contrast": 0.4453319026925491,
+    "n_complete_blocks": 8
+  },
+  "direction_1": {
+    "geometric_mean_ratio": 1.5540410986040627,
+    "log_sd": 0.013785422777589465,
+    "log_t_95_high": 1.5720548738492885,
+    "log_t_95_low": 1.5362337386080644,
+    "mean_log_contrast": 0.4408586985739018,
+    "n_complete_blocks": 8
+  },
+  "placement_after_changed_pages": 0,
+  "schema": 1,
+  "valid_observation_count": 96
+}

@@ -1,0 +1,136 @@
+{
+  "aa_schedule": [
+    {
+      "block": 1,
+      "direction": 0,
+      "template": "ABBA"
+    },
+    {
+      "block": 2,
+      "direction": 0,
+      "template": "BAAB"
+    },
+    {
+      "block": 3,
+      "direction": 0,
+      "template": "ABBA"
+    },
+    {
+      "block": 4,
+      "direction": 0,
+      "template": "BAAB"
+    },
+    {
+      "block": 5,
+      "direction": 1,
+      "template": "BAAB"
+    },
+    {
+      "block": 6,
+      "direction": 1,
+      "template": "ABBA"
+    },
+    {
+      "block": 7,
+      "direction": 1,
+      "template": "ABBA"
+    },
+    {
+      "block": 8,
+      "direction": 1,
+      "template": "BAAB"
+    }
+  ],
+  "ab_schedule": [
+    {
+      "block": 1,
+      "direction": 0,
+      "template": "BAAB"
+    },
+    {
+      "block": 2,
+      "direction": 0,
+      "template": "ABBA"
+    },
+    {
+      "block": 3,
+      "direction": 0,
+      "template": "BAAB"
+    },
+    {
+      "block": 4,
+      "direction": 0,
+      "template": "ABBA"
+    },
+    {
+      "block": 5,
+      "direction": 0,
+      "template": "BAAB"
+    },
+    {
+      "block": 6,
+      "direction": 0,
+      "template": "ABBA"
+    },
+    {
+      "block": 7,
+      "direction": 0,
+      "template": "ABBA"
+    },
+    {
+      "block": 8,
+      "direction": 0,
+      "template": "BAAB"
+    },
+    {
+      "block": 9,
+      "direction": 1,
+      "template": "ABBA"
+    },
+    {
+      "block": 10,
+      "direction": 1,
+      "template": "BAAB"
+    },
+    {
+      "block": 11,
+      "direction": 1,
+      "template": "BAAB"
+    },
+    {
+      "block": 12,
+      "direction": 1,
+      "template": "ABBA"
+    },
+    {
+      "block": 13,
+      "direction": 1,
+      "template": "BAAB"
+    },
+    {
+      "block": 14,
+      "direction": 1,
+      "template": "ABBA"
+    },
+    {
+      "block": 15,
+      "direction": 1,
+      "template": "BAAB"
+    },
+    {
+      "block": 16,
+      "direction": 1,
+      "template": "ABBA"
+    }
+  ],
+  "analysis_unit": "one complete four-process ABBA or BAAB block",
+  "binary_sha256": "727779d331e07f810384b5f7248e4fe263154ae2b75675317ab7e63830095089",
+  "estimand": "geometric-mean remote/local ratio of dependent-chase read_ns",
+  "interval": "two-sided 95% Student-t interval over complete-block log contrasts",
+  "invalid_attempt_policy": "retain every attempt; any invalid or incomplete block fails the run",
+  "mapping_bytes": 536870912,
+  "passes": 4,
+  "schedule_seed": 2520260804,
+  "schema": 1,
+  "stopping": "fixed 8 A/B blocks and 4 A/A blocks in each reciprocal direction; no peeking or retry"
+}
