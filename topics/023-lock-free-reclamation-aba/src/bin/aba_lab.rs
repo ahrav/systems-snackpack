@@ -179,3 +179,37 @@ fn main() {
         _ => panic!("usage: aba_lab check | aba_lab bench <raw|tagged> [iterations]"),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn raw_kernel_matches_its_contract() {
+        let next = [EMPTY, EMPTY];
+        for iters in 1..=8_u64 {
+            let head = AtomicU64::new(u64::from(A));
+            let checksum = bench_raw_kernel(&head, &next, iters);
+            // Each iteration restores index A and adds the post-reset load.
+            assert_eq!(checksum, iters);
+            assert_eq!(head.load(Ordering::Relaxed), u64::from(A));
+        }
+    }
+
+    #[test]
+    fn tagged_kernel_matches_its_contract() {
+        let next = [EMPTY, EMPTY];
+        for iters in 1..=8_u64 {
+            let head = AtomicU64::new(pack_head(0, A));
+            let checksum = bench_tagged_kernel(&head, &next, iters);
+            let expected = (1..=iters)
+                .map(|i| pack_head((2 * i) as u32, A))
+                .fold(0_u64, u64::wrapping_add);
+            assert_eq!(checksum, expected);
+            assert_eq!(
+                head.load(Ordering::Relaxed),
+                pack_head((2 * iters) as u32, A)
+            );
+        }
+    }
+}

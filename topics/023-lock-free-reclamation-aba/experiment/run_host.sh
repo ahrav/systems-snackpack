@@ -11,6 +11,7 @@ output_directory=$2
 host_label=$3
 source_commit=$4
 topic=topics/023-lock-free-reclamation-aba
+native_rustflags='-C target-cpu=native -C codegen-units=1'
 
 : "${SOURCE_ARCHIVE_PATH:?set SOURCE_ARCHIVE_PATH to the transferred Git archive}"
 : "${SOURCE_ARCHIVE_SHA256:?set SOURCE_ARCHIVE_SHA256 to the sender's archive digest}"
@@ -45,8 +46,8 @@ if [[ $actual_archive_sha256 != "$SOURCE_ARCHIVE_SHA256" ]]; then
     "$SOURCE_ARCHIVE_SHA256" "$actual_archive_sha256" >&2
   exit 2
 fi
-rg --files --hidden -g '!.git/**' -g '!target/**' | LC_ALL=C sort | xargs sha256sum \
-  >"$output_directory/source-tree.before.sha256"
+rg --files --hidden --no-ignore -g '!.git/**' -g '!target/**' -0 | LC_ALL=C sort -z \
+  | xargs -0 sha256sum >"$output_directory/source-tree.before.sha256"
 actual_manifest_sha256=$(sha256sum "$output_directory/source-tree.before.sha256" | awk '{print $1}')
 if [[ $actual_manifest_sha256 != "$SOURCE_TREE_MANIFEST_SHA256" ]]; then
   printf 'source manifest mismatch: expected %s, observed %s\n' \
@@ -78,10 +79,12 @@ fi
   cargo -V
   printf 'gcc=%s\n' "$(gcc -dumpfullversion -dumpversion)"
   rustc -C target-cpu=native --print cfg | rg '^(target_arch|target_feature|target_has_atomic|target_pointer_width)'
-  printf 'RUSTFLAGS=%s\n' "${RUSTFLAGS-<unset>}"
+  printf 'ambient_RUSTFLAGS=%s\n' "${RUSTFLAGS-<unset>}"
+  printf 'build_rustflags=%s\n' "$native_rustflags"
 } >"$output_directory/host.txt"
 
-rg --files --hidden -g '!.git/**' "$topic" | LC_ALL=C sort | xargs sha256sum >"$output_directory/source-files.sha256"
+rg --files --hidden --no-ignore -g '!.git/**' -g '!target/**' -0 "$topic" | LC_ALL=C sort -z \
+  | xargs -0 sha256sum >"$output_directory/source-files.sha256"
 
 # Cargo reads .cargo/config.toml from the working directory and its ancestors;
 # such a file changes the measured build without appearing in any recorded
@@ -114,7 +117,7 @@ else
     >"$output_directory/gates/git-diff-check.log"
 fi
 cargo fmt --all -- --check >"$output_directory/gates/cargo-fmt.log" 2>&1
-cargo test --workspace --lib --examples >"$output_directory/gates/cargo-test-lib-examples.log" 2>&1
+cargo test --workspace --lib --bins --examples >"$output_directory/gates/cargo-test-lib-examples.log" 2>&1
 cargo test --workspace --doc >"$output_directory/gates/cargo-test-doc.log" 2>&1
 cargo clippy --workspace --all-targets -- -D warnings >"$output_directory/gates/cargo-clippy.log" 2>&1
 cargo bench --workspace --no-run >"$output_directory/gates/cargo-bench-no-run.log" 2>&1
@@ -124,13 +127,13 @@ PYTHONPYCACHEPREFIX="$repository_root/../pycache" \
 bash -n "$topic/experiment/run_host.sh"
 
 native_target="$repository_root/../native-target"
-RUSTFLAGS='-C target-cpu=native -C codegen-units=1' \
+RUSTFLAGS="$native_rustflags" \
   cargo build --release -p lock-free-reclamation-aba --bin aba_lab \
   --target-dir "$native_target" >"$output_directory/build.log" 2>&1
 binary="$native_target/release/aba_lab"
 sha256sum "$binary" >"$output_directory/binary.sha256"
 
-for replicate in {1..32}; do
+for _replicate in {1..32}; do
   taskset --cpu-list "$cpu" "$binary" check
 done >"$output_directory/correctness/replicates.txt"
 
@@ -145,8 +148,8 @@ python3 "$topic/experiment/run_processes.py" \
 python3 "$topic/experiment/validate_receipts.py" "$output_directory" \
   >"$output_directory/receipt-validation.txt"
 
-rg --files --hidden -g '!.git/**' -g '!target/**' | LC_ALL=C sort | xargs sha256sum \
-  >"$output_directory/source-tree.after.sha256"
+rg --files --hidden --no-ignore -g '!.git/**' -g '!target/**' -0 | LC_ALL=C sort -z \
+  | xargs -0 sha256sum >"$output_directory/source-tree.after.sha256"
 cmp "$output_directory/source-tree.before.sha256" "$output_directory/source-tree.after.sha256"
 
 {
@@ -161,5 +164,6 @@ run_finished_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)
 printf 'run_finished_utc=%s\n' "$run_finished_utc" >>"$output_directory/host.txt"
 (
   cd "$output_directory"
-  rg --files -g '!evidence.sha256' | LC_ALL=C sort | xargs sha256sum >evidence.sha256
+  rg --files --hidden --no-ignore -g '!evidence.sha256' -0 | LC_ALL=C sort -z \
+    | xargs -0 sha256sum >evidence.sha256
 )

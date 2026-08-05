@@ -158,6 +158,13 @@ mod tests {
 
     #[test]
     fn generation_bits_repeat_after_wrap() {
-        assert_eq!(pack_head(u32::MAX.wrapping_add(1), A), pack_head(0, A));
+        // Exercise extraction, wrapping increment, and repacking rather than
+        // comparing a constant with itself.
+        let saturated = pack_head(u32::MAX, A);
+        assert_eq!(head_generation(saturated), u32::MAX);
+        let advanced = pack_head(head_generation(saturated).wrapping_add(1), A);
+        assert_eq!(advanced, pack_head(0, A));
+        assert_eq!(head_generation(advanced), 0);
+        assert_eq!(head_index(advanced), A);
     }
 }

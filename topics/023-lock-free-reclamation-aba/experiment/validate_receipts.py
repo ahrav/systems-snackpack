@@ -86,6 +86,15 @@ def main() -> None:
         "raw": 1,
         "tagged": ((2 * iterations) % 2**32) << 32 | 1,
     }
+    # Per iteration, each kernel adds the packed post-reset load: 1 for raw,
+    # pack(2i, A) for tagged. The closed form below is exact while the
+    # generation cannot wrap within one process.
+    if 2 * iterations >= 2**32:
+        raise SystemExit("checksum closed form requires 2*iterations < 2^32")
+    expected_checksum = {
+        "raw": iterations % 2**64,
+        "tagged": ((iterations * (iterations + 1) << 32) + iterations) % 2**64,
+    }
     # Lengths are checked above, so plain zip cannot truncate silently.
     # zip(strict=True) needs Python 3.10+, newer than the measurement hosts.
     # pi-lens-ignore: B905
@@ -99,6 +108,10 @@ def main() -> None:
         if int(row["final_word"]) != expected_final[row["mode"]]:
             raise SystemExit(
                 f"row {number}: final_word does not match the kernel contract"
+            )
+        if int(row["checksum"]) != expected_checksum[row["mode"]]:
+            raise SystemExit(
+                f"row {number}: checksum does not match the kernel contract"
             )
         if int(row["elapsed_ns"]) <= 0:
             raise SystemExit(f"row {number}: nonpositive elapsed_ns")

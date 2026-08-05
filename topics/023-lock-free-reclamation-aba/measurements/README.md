@@ -27,6 +27,19 @@ stalled participants, and contention.
 
 Retained records:
 
+Provenance notes for the `6b20b1f` receipts:
+
+- Each retained `host.txt` line `RUSTFLAGS=<unset>` records the ambient
+  environment at run start, not the build flags. The measured build always
+  applied `-C target-cpu=native -C codegen-units=1`, as fixed by
+  `experiment/run_host.sh` at that commit; the runner now records both the
+  ambient and the effective build flags.
+- Each retained `receipt-validation.txt` was produced by the validator as of
+  commit `6b20b1f`, which checked counts, controls, and interval ordering
+  only. The strengthened validator (exact witness lines, predeclared
+  schedule, kernel final-word and checksum contracts, and summary
+  recomputation from `raw.csv`) re-passes both retained receipt sets.
+
 - [Resolved `xxl` x86-64 host](xxl-2026-08-02.md)
 - [Required Arm host](arm-2026-08-02.md)
 - [Cross-host comparison](comparison-2026-08-02.md)
