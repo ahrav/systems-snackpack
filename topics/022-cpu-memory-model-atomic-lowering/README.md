@@ -31,7 +31,8 @@ RMW while differing sharply for a store.
 cargo test -p cpu-memory-model-atomic-lowering
 cargo run --release -p cpu-memory-model-atomic-lowering --example publication
 cargo run --release -p cpu-memory-model-atomic-lowering --bin store-buffering -- relaxed 1000000 0 1 2
-cargo build --release -p cpu-memory-model-atomic-lowering --bin atomic-cost
+RUSTFLAGS='-C target-cpu=native' \
+  cargo build --release -p cpu-memory-model-atomic-lowering --bin atomic-cost
 python3 topics/022-cpu-memory-model-atomic-lowering/experiment/run_processes.py \
   target/release/atomic-cost /tmp/topic22-processes
 ```
@@ -42,5 +43,6 @@ and [primary sources](references.md).
 The exact-source two-host run found a 33.987× SeqCst/Release store ratio on the
 recorded `xxl` host, where final code used `xchgq` versus `movq`. The recorded
 Arm host used `STLR` for both and measured a 0.999962 ratio. SeqCst/Relaxed
-private-line RMW ratios were 0.999307 and 1.001299, respectively. These results
+private-line RMW ratios were 0.999307 on the Arm host and 1.001299 on `xxl`.
+These results
 apply only to the recorded hosts, toolchains, binaries, and workload.

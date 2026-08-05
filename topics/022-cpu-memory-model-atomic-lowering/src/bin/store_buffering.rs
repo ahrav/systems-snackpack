@@ -68,7 +68,11 @@ fn pin_to(cpu: usize) {
 
 #[cfg(not(target_os = "linux"))]
 fn pin_to(cpu: usize) {
+    // The reported CPU placement would be a lie on platforms where this
+    // process cannot set thread affinity; fail fast instead of silently
+    // measuring an unpinned schedule.
     let _ = cpu;
+    panic!("thread pinning is only supported on Linux; refusing to run unpinned");
 }
 
 #[inline(always)]

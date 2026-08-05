@@ -18,7 +18,7 @@
 //! ```
 
 use std::hint::spin_loop;
-use std::sync::atomic::{AtomicU64, Ordering, compiler_fence, fence};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering, compiler_fence, fence};
 use std::thread;
 
 /// Creates no cross-location synchronization edge by itself.
@@ -171,11 +171,22 @@ pub fn publication_roundtrip(rounds: u64) -> u64 {
     let payload = AtomicU64::new(0);
     let published = AtomicU64::new(0);
     let consumed = AtomicU64::new(0);
+    let abort = AtomicBool::new(false);
 
     thread::scope(|scope| {
         scope.spawn(|| {
             for value in 1..=rounds {
-                while consumed.load(Ordering::Acquire) != value - 1 {
+                loop {
+                    // A consumer assertion failure unwinds the scope, which
+                    // then joins this thread; without this check the producer
+                    // would spin forever on an acknowledgement that never
+                    // arrives and the process would hang instead of failing.
+                    if abort.load(Ordering::Acquire) {
+                        return;
+                    }
+                    if consumed.load(Ordering::Acquire) == value - 1 {
+                        break;
+                    }
                     spin_loop();
                 }
                 payload.store(value, Ordering::Relaxed);
@@ -187,7 +198,11 @@ pub fn publication_roundtrip(rounds: u64) -> u64 {
             while published.load(Ordering::Acquire) != expected {
                 spin_loop();
             }
-            assert_eq!(payload.load(Ordering::Relaxed), expected);
+            let observed = payload.load(Ordering::Relaxed);
+            if observed != expected {
+                abort.store(true, Ordering::Release);
+                panic!("payload {observed} does not match acquired epoch {expected}");
+            }
             consumed.store(expected, Ordering::Release);
         }
     });

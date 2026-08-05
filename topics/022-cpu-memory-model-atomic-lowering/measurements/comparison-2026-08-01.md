@@ -5,6 +5,19 @@ from archive SHA-256
 `e024cea840cd416130ab08e2669a909c7046af2f854d8687f5f14a508805b368`.
 These are two host observations, not claims about every AArch64 or x86 CPU.
 
+Toolchain disclosure: the runner did not enforce the workspace's
+`rust-toolchain.toml` pin at measurement time. The Arm host measured with
+rustc 1.95.0 and the `xxl` host with rustc 1.93.1, as recorded in each
+`host.txt`, so the cross-host contrast confounds architecture with compiler
+version. The runner now fails closed on a pin mismatch for future runs.
+
+Codegen provenance: the per-instruction observations below were read from the
+run's `objdump` output of the measured binaries, which was produced by the
+runner but not retained in `measurements/raw/5f93fdb`. The retained
+`lowering-*.s` files come from separate `rustc --emit=asm` invocations of the
+same source and toolchain, not from the measured binaries. The runner's
+evidence manifest now seals the objdump output for future runs.
+
 ## Measured
 
 - Release and Relaxed private-line store throughput was indistinguishable at

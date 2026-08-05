@@ -15,6 +15,19 @@ mkdir -p "$output/binaries" "$output/codegen" "$output/correctness" "$output/lit
 build_root=$(mktemp -d /tmp/topic22-build.XXXXXXXX)
 trap 'rm -rf -- "$build_root"' EXIT
 
+# When cargo on PATH is a standalone binary rather than the rustup shim, the
+# repository's rust-toolchain.toml pin is silently ignored and a host-default
+# compiler changes the measured code generation. Fail closed on a mismatch.
+if [[ -f "$workspace/rust-toolchain.toml" ]]; then
+    pinned_toolchain=$(sed -n 's/^channel = "\(.*\)"$/\1/p' "$workspace/rust-toolchain.toml")
+    resolved_rustc=$(rustc --version | awk '{print $2}')
+    if [[ -z "$pinned_toolchain" || "$resolved_rustc" != "$pinned_toolchain" ]]; then
+        printf 'resolved rustc %s does not match the pinned toolchain %s\n' \
+            "$resolved_rustc" "${pinned_toolchain:-unparsed}" >&2
+        exit 2
+    fi
+fi
+
 {
     printf 'captured_utc='; date -u +%Y-%m-%dT%H:%M:%SZ
     printf 'host_argument=%s\n' "${HOST_ARGUMENT:-unspecified}"

@@ -41,6 +41,10 @@ def run(binary: Path, cpu: str, operation: str, iterations: int) -> dict[str, st
 
     Returns:
         The reported fields plus the executed command.
+
+    Raises:
+        SystemExit: If the probe output is missing required fields or does
+            not echo the requested operation and iteration count.
     """
     command = [
         "taskset",
@@ -50,8 +54,16 @@ def run(binary: Path, cpu: str, operation: str, iterations: int) -> dict[str, st
         operation,
         str(iterations),
     ]
-    completed = subprocess.run(command, check=True, text=True, capture_output=True)
+    completed = subprocess.run(
+        command, check=True, text=True, capture_output=True, timeout=300
+    )
     result = parse_result(completed.stdout)
+    required = {"operation", "iterations", "elapsed_ns", "ns_per_operation", "checksum"}
+    missing = required - result.keys()
+    if missing:
+        raise SystemExit(f"probe output missing fields {sorted(missing)}: {command}")
+    if result["operation"] != operation or result["iterations"] != str(iterations):
+        raise SystemExit(f"probe echoed a different request: {command} -> {result}")
     result["command"] = " ".join(command)
     return result
 
@@ -108,8 +120,14 @@ def main() -> None:
                 row.update(run(args.binary, args.cpu, operation, iterations))
                 rows.append(row)
 
-        for slot in range(2):
-            row = {"comparison": "store_relaxed_aa", "block": block, "slot": slot}
+        for slot in range(4):
+            arm = "A" if slot in (0, 3) else "B"
+            row = {
+                "comparison": "store_relaxed_aa",
+                "block": block,
+                "slot": slot,
+                "arm": arm,
+            }
             row.update(
                 run(args.binary, args.cpu, "store_relaxed", args.store_iterations)
             )
@@ -117,7 +135,8 @@ def main() -> None:
 
     raw_path = args.output / "raw.csv"
     with raw_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        fieldnames = list(dict.fromkeys(key for row in rows for key in row))
+        writer = csv.DictWriter(handle, fieldnames=fieldnames, restval="")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -161,16 +180,22 @@ def main() -> None:
             for row in rows
             if row["comparison"] == "store_relaxed_aa" and row["block"] == block
         ]
-        aa_ratios.append(
-            float(group[1]["ns_per_operation"]) / float(group[0]["ns_per_operation"])
-        )
+        # The A/A control uses the same order-balanced four-slot schedule and
+        # the same log-ratio estimator as the treatment comparisons.
+        a_logs = [
+            math.log(float(row["ns_per_operation"])) for row in group if row["arm"] == "A"
+        ]
+        b_logs = [
+            math.log(float(row["ns_per_operation"])) for row in group if row["arm"] == "B"
+        ]
+        aa_ratios.append(math.exp(statistics.mean(b_logs) - statistics.mean(a_logs)))
     q1, q3 = quartiles(aa_ratios)
     summaries.append(
         {
             "comparison": "store_relaxed_aa",
-            "ratio": "second/first",
+            "ratio": "B/A",
             "blocks": args.blocks,
-            "processes": args.blocks * 2,
+            "processes": args.blocks * 4,
             "median_paired_ratio": statistics.median(aa_ratios),
             "ratio_iqr": [q1, q3],
             "ratio_range": [min(aa_ratios), max(aa_ratios)],
