@@ -11,7 +11,6 @@ import statistics
 import subprocess
 from pathlib import Path
 
-
 COMPARISONS = (
     ("store_release_relaxed", "store_relaxed", "store_release", "store"),
     ("store_seqcst_release", "store_release", "store_seqcst", "store"),
@@ -87,6 +86,8 @@ def main() -> None:
     parser.add_argument("--store-iterations", type=int, default=50_000_000)
     parser.add_argument("--rmw-iterations", type=int, default=10_000_000)
     args = parser.parse_args()
+    if args.blocks < 2:
+        raise SystemExit("--blocks must be at least 2 for quartile aggregation")
     if args.output.exists():
         raise SystemExit(f"output already exists: {args.output}")
     args.output.mkdir(parents=True)

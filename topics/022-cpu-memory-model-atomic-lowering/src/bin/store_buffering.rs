@@ -127,6 +127,14 @@ fn run<const MODE: u8>(mode: &str, iterations: usize, cpus: [usize; 3]) {
     let left = worker::<MODE>(Arc::clone(&state), cpus[0], true);
     let right = worker::<MODE>(Arc::clone(&state), cpus[1], false);
     while state.ready.0.load(Ordering::Acquire) != 2 {
+        // A worker that fails thread pinning panics before incrementing
+        // `ready`; fail closed instead of spinning forever. Its own panic
+        // message (bad CPU id or sched_setaffinity error) is already on
+        // stderr.
+        assert!(
+            !left.is_finished() && !right.is_finished(),
+            "a worker exited before reporting ready; see its panic message above"
+        );
         spin_loop();
     }
 

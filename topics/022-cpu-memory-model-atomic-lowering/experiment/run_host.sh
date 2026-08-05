@@ -69,9 +69,15 @@ done > "$output/litmus/generic.txt"
 objdump -drwC "$cost_binary" > "$output/codegen/atomic-cost.objdump.txt"
 objdump -drwC "$litmus_native" > "$output/codegen/store-buffering.objdump.txt"
 
-rg --files "$topic_dir" | sort | xargs sha256sum > "$output/source-files.sha256"
-sha256sum "$cost_binary" "$litmus_native" "$output/binaries/store-buffering-generic" \
-    "$output/processes/raw.csv" "$output/processes/summary.json" \
-    "$output/litmus/native.txt" "$output/litmus/generic.txt" \
-    "$output/codegen/lowering-native.s" "$output/codegen/lowering-generic.s" \
-    > "$output/evidence.sha256"
+# Provenance covers the source, experiment, and documentation inputs only;
+# retained measurement receipts from earlier runs must not affect the hash of
+# the source being tested.
+rg --files "$topic_dir" -g '!**/measurements/**' | sort | xargs sha256sum \
+    > "$output/source-files.sha256"
+# Seal every retained receipt: hash everything in the output directory except
+# the manifest itself, so edits to host, correctness, codegen, or provenance
+# files are detectable outside this Git commit.
+(
+    cd "$output"
+    rg --files -uu -g '!evidence.sha256' . | sort | xargs sha256sum
+) > "$output/evidence.sha256"
