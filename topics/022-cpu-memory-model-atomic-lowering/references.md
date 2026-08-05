@@ -1,0 +1,16 @@
+# Primary sources
+
+- [Rust atomic memory model and portability](https://doc.rust-lang.org/stable/core/sync/atomic/index.html)
+- [Rust atomic orderings](https://doc.rust-lang.org/std/sync/atomic/enum.Ordering.html)
+- [Rust fences](https://doc.rust-lang.org/core/sync/atomic/fn.fence.html)
+- [Rust compiler fences](https://doc.rust-lang.org/core/sync/atomic/fn.compiler_fence.html)
+- [Rust undefined behavior](https://doc.rust-lang.org/reference/behavior-considered-undefined.html)
+- [C++20 working draft N4861](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/n4861.pdf)
+- [P0418R2 compare-exchange ordering correction](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0418r2.html)
+- [LLVM atomic instructions and concurrency](https://llvm.org/docs/Atomics.html)
+- [LLVM atomic ordering constraints](https://llvm.org/docs/LangRef.html#atomic-memory-ordering-constraints)
+- [Arm C/C++ Atomics ABI, 2025Q4 revision](https://github.com/ARM-software/abi-aa/blob/daa7a94ca55973736c0e434a67a6e4bbcd35d7fa/atomicsabi64/atomicsabi64.rst)
+- [Arm RCpc and RCsc barrier ordering](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/when-a-barrier-does-not-block-the-pitfalls-of-partial-order)
+- [Armv8-A memory model guide](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Learn%20the%20Architecture/Armv8-A%20memory%20model%20guide.pdf)
+- [Intel 64 and IA-32 manuals](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html)
+- [Owens, Sarkar, and Sewell: x86-TSO](https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-745.html)

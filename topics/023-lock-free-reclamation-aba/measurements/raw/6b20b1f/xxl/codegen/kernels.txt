@@ -1,0 +1,250 @@
+787:   1712f:	e8 6c 04 00 00       	call   175a0 <bench_raw_kernel>
+788-   17134:	48 89 44 24 50       	mov    %rax,0x50(%rsp)
+789-   17139:	48 8d 44 24 50       	lea    0x50(%rsp),%rax
+790-   1713e:	48 c7 04 24 01 00 00 	movq   $0x1,(%rsp)
+791-   17145:	00 
+792-   17146:	ff 15 04 86 04 00    	call   *0x48604(%rip)        # 5f750 <_DYNAMIC+0x2d8>
+793-   1714c:	48 89 44 24 50       	mov    %rax,0x50(%rsp)
+794-   17151:	89 54 24 58          	mov    %edx,0x58(%rsp)
+795-   17155:	48 89 e7             	mov    %rsp,%rdi
+796-   17158:	48 8d 74 24 28       	lea    0x28(%rsp),%rsi
+797-   1715d:	4c 89 fa             	mov    %r15,%rdx
+798:   17160:	e8 3b 04 00 00       	call   175a0 <bench_raw_kernel>
+799-   17165:	49 89 c4             	mov    %rax,%r12
+800-   17168:	48 8d 7c 24 50       	lea    0x50(%rsp),%rdi
+801-   1716d:	ff 15 e5 85 04 00    	call   *0x485e5(%rip)        # 5f758 <_DYNAMIC+0x2e0>
+802-   17173:	eb 7d                	jmp    171f2 <aba_lab::main+0x5e2>
+803-   17175:	48 83 fe 06          	cmp    $0x6,%rsi
+804-   17179:	0f 85 e2 01 00 00    	jne    17361 <aba_lab::main+0x751>
+805-   1717f:	be 74 61 67 67       	mov    $0x67676174,%esi
+806-   17184:	33 31                	xor    (%rcx),%esi
+807-   17186:	0f b7 49 04          	movzwl 0x4(%rcx),%ecx
+808-   1718a:	81 f1 65 64 00 00    	xor    $0x6465,%ecx
+809-   17190:	09 f1                	or     %esi,%ecx
+810-   17192:	0f 85 c9 01 00 00    	jne    17361 <aba_lab::main+0x751>
+811-   17198:	49 89 c7             	mov    %rax,%r15
+812-   1719b:	48 c7 44 24 20 01 00 	movq   $0x1,0x20(%rsp)
+813-   171a2:	00 00 
+814-   171a4:	48 8d 7c 24 20       	lea    0x20(%rsp),%rdi
+815-   171a9:	48 8d 74 24 28       	lea    0x28(%rsp),%rsi
+816:   171ae:	e8 7d 04 00 00       	call   17630 <bench_tagged_kernel>
+817-   171b3:	48 89 44 24 50       	mov    %rax,0x50(%rsp)
+818-   171b8:	48 8d 44 24 50       	lea    0x50(%rsp),%rax
+819-   171bd:	48 c7 04 24 01 00 00 	movq   $0x1,(%rsp)
+820-   171c4:	00 
+821-   171c5:	ff 15 85 85 04 00    	call   *0x48585(%rip)        # 5f750 <_DYNAMIC+0x2d8>
+822-   171cb:	48 89 44 24 50       	mov    %rax,0x50(%rsp)
+823-   171d0:	89 54 24 58          	mov    %edx,0x58(%rsp)
+824-   171d4:	48 89 e7             	mov    %rsp,%rdi
+825-   171d7:	48 8d 74 24 28       	lea    0x28(%rsp),%rsi
+826-   171dc:	4c 89 fa             	mov    %r15,%rdx
+827:   171df:	e8 4c 04 00 00       	call   17630 <bench_tagged_kernel>
+828-   171e4:	49 89 c4             	mov    %rax,%r12
+829-   171e7:	48 8d 7c 24 50       	lea    0x50(%rsp),%rdi
+830-   171ec:	ff 15 66 85 04 00    	call   *0x48566(%rip)        # 5f758 <_DYNAMIC+0x2e0>
+831-   171f2:	89 d1                	mov    %edx,%ecx
+832-   171f4:	48 8b 14 24          	mov    (%rsp),%rdx
+833-   171f8:	4c 89 a4 24 e8 00 00 	mov    %r12,0xe8(%rsp)
+834-   171ff:	00 
+835-   17200:	48 89 94 24 f0 00 00 	mov    %rdx,0xf0(%rsp)
+836-   17207:	00 
+837-   17208:	be 00 ca 9a 3b       	mov    $0x3b9aca00,%esi
+838-   1720d:	48 89 c2             	mov    %rax,%rdx
+839-   17210:	c4 e2 eb f6 f6       	mulx   %rsi,%rdx,%rsi
+840-   17215:	89 cf                	mov    %ecx,%edi
+841-   17217:	48 01 d7             	add    %rdx,%rdi
+842-   1721a:	48 83 d6 00          	adc    $0x0,%rsi
+843-   1721e:	48 89 3c 24          	mov    %rdi,(%rsp)
+844-   17222:	48 89 74 24 08       	mov    %rsi,0x8(%rsp)
+845-   17227:	62 f1 87 08 7b c0    	vcvtusi2sd %rax,%xmm15,%xmm0
+846-   1722d:	c5 83 2a c9          	vcvtsi2sd %ecx,%xmm15,%xmm1
+847-   17231:	c5 fb 10 15 b7 e7 fe 	vmovsd -0x11849(%rip),%xmm2        # 59f0 <__abi_tag+0x56f4>
+848-   17238:	ff 
+849-   17239:	c5 f3 5e ca          	vdivsd %xmm2,%xmm1,%xmm1
+850-   1723d:	c5 f3 58 c0          	vaddsd %xmm0,%xmm1,%xmm0
+851-   17241:	c5 fb 59 c2          	vmulsd %xmm2,%xmm0,%xmm0
+852-   17245:	62 d1 87 08 7b cf    	vcvtusi2sd %r15,%xmm15,%xmm1
+853-   1724b:	c5 fb 5e c1          	vdivsd %xmm1,%xmm0,%xmm0
+854-   1724f:	c5 fb 11 44 24 20    	vmovsd %xmm0,0x20(%rsp)
+855-   17255:	48 8d 84 24 f8 00 00 	lea    0xf8(%rsp),%rax
+856-   1725c:	00 
+857-   1725d:	48 89 44 24 50       	mov    %rax,0x50(%rsp)
+858-   17262:	48 8d 05 b7 f6 ff ff 	lea    -0x949(%rip),%rax        # 16920 <<&T as core::fmt::Display>::fmt>
+859-   17269:	48 89 44 24 58       	mov    %rax,0x58(%rsp)
+860-   1726e:	48 8d 84 24 e0 00 00 	lea    0xe0(%rsp),%rax
+861-   17275:	00 
+862-   17276:	48 89 44 24 60       	mov    %rax,0x60(%rsp)
+863-   1727b:	48 8b 05 de 84 04 00 	mov    0x484de(%rip),%rax        # 5f760 <_DYNAMIC+0x2e8>
+864-   17282:	48 89 44 24 68       	mov    %rax,0x68(%rsp)
+865-   17287:	48 89 e1             	mov    %rsp,%rcx
+866-   1728a:	48 89 4c 24 70       	mov    %rcx,0x70(%rsp)
+867-   1728f:	48 8b 0d d2 84 04 00 	mov    0x484d2(%rip),%rcx        # 5f768 <_DYNAMIC+0x2f0>
+868-   17296:	48 89 4c 24 78       	mov    %rcx,0x78(%rsp)
+869-   1729b:	48 8d 4c 24 20       	lea    0x20(%rsp),%rcx
+870-   172a0:	48 89 8c 24 80 00 00 	mov    %rcx,0x80(%rsp)
+871-   172a7:	00 
+872-   172a8:	48 8b 0d c1 84 04 00 	mov    0x484c1(%rip),%rcx        # 5f770 <_DYNAMIC+0x2f8>
+873-   172af:	48 89 8c 24 88 00 00 	mov    %rcx,0x88(%rsp)
+874-   172b6:	00 
+875-   172b7:	48 8d 8c 24 e8 00 00 	lea    0xe8(%rsp),%rcx
+876-   172be:	00 
+877-   172bf:	48 89 8c 24 90 00 00 	mov    %rcx,0x90(%rsp)
+878-   172c6:	00 
+879-   172c7:	48 89 84 24 98 00 00 	mov    %rax,0x98(%rsp)
+880-   172ce:	00 
+881-   172cf:	48 8d 8c 24 f0 00 00 	lea    0xf0(%rsp),%rcx
+882-   172d6:	00 
+883-   172d7:	48 89 8c 24 a0 00 00 	mov    %rcx,0xa0(%rsp)
+884-   172de:	00 
+885-   172df:	48 89 84 24 a8 00 00 	mov    %rax,0xa8(%rsp)
+886-   172e6:	00 
+887-   172e7:	48 8d 3d d7 f9 fe ff 	lea    -0x10629(%rip),%rdi        # 6cc5 <__abi_tag+0x69c9>
+888-   172ee:	48 8d 74 24 50       	lea    0x50(%rsp),%rsi
+889-   172f3:	ff 15 4f 84 04 00    	call   *0x4844f(%rip)        # 5f748 <_DYNAMIC+0x2d0>
+890-   172f9:	4c 8b 74 24 40       	mov    0x40(%rsp),%r14
+891-   172fe:	4d 85 f6             	test   %r14,%r14
+892-   17301:	74 2c                	je     1732f <aba_lab::main+0x71f>
+893-   17303:	4c 8d 7b 08          	lea    0x8(%rbx),%r15
+894-   17307:	4c 8b 25 e2 83 04 00 	mov    0x483e2(%rip),%r12        # 5f6f0 <_DYNAMIC+0x278>
+895-   1730e:	eb 09                	jmp    17319 <aba_lab::main+0x709>
+896-   17310:	49 83 c7 18          	add    $0x18,%r15
+897-   17314:	49 ff ce             	dec    %r14
+898-   17317:	74 16                	je     1732f <aba_lab::main+0x71f>
+899-   17319:	49 8b 77 f8          	mov    -0x8(%r15),%rsi
+900-   1731d:	48 85 f6             	test   %rsi,%rsi
+901-   17320:	74 ee                	je     17310 <aba_lab::main+0x700>
+902-   17322:	49 8b 3f             	mov    (%r15),%rdi
+903-   17325:	ba 01 00 00 00       	mov    $0x1,%edx
+904-   1732a:	41 ff d4             	call   *%r12
+905-   1732d:	eb e1                	jmp    17310 <aba_lab::main+0x700>
+906-   1732f:	48 8b 44 24 30       	mov    0x30(%rsp),%rax
+907-   17334:	48 85 c0             	test   %rax,%rax
+--
+1072:00000000000175a0 <bench_raw_kernel>:
+1073-   175a0:	50                   	push   %rax
+1074-   175a1:	31 c9                	xor    %ecx,%ecx
+1075-   175a3:	48 85 d2             	test   %rdx,%rdx
+1076-   175a6:	74 5f                	je     17607 <bench_raw_kernel+0x67>
+1077-   175a8:	41 b9 01 00 00 00    	mov    $0x1,%r9d
+1078-   175ae:	49 89 e2             	mov    %rsp,%r10
+1079-   175b1:	45 31 db             	xor    %r11d,%r11d
+1080-   175b4:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+1081-   175bb:	00 00 00 00 00 
+1082-   175c0:	49 ff c3             	inc    %r11
+1083-   175c3:	48 8b 07             	mov    (%rdi),%rax
+1084-   175c6:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+1085-   175cd:	00 00 00 
+1086-   175d0:	41 89 c0             	mov    %eax,%r8d
+1087-   175d3:	49 83 f8 02          	cmp    $0x2,%r8
+1088-   175d7:	73 33                	jae    1760c <bench_raw_kernel+0x6c>
+1089-   175d9:	46 8b 04 86          	mov    (%rsi,%r8,4),%r8d
+1090-   175dd:	f0 4c 0f b1 07       	lock cmpxchg %r8,(%rdi)
+1091-   175e2:	75 ec                	jne    175d0 <bench_raw_kernel+0x30>
+1092-   175e4:	48 8b 07             	mov    (%rdi),%rax
+1093-   175e7:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+1094-   175ee:	00 00 
+1095-   175f0:	f0 4c 0f b1 0f       	lock cmpxchg %r9,(%rdi)
+1096-   175f5:	75 f9                	jne    175f0 <bench_raw_kernel+0x50>
+1097-   175f7:	48 8b 07             	mov    (%rdi),%rax
+1098-   175fa:	48 89 04 24          	mov    %rax,(%rsp)
+1099-   175fe:	48 03 0c 24          	add    (%rsp),%rcx
+1100-   17602:	49 39 d3             	cmp    %rdx,%r11
+1101-   17605:	75 b9                	jne    175c0 <bench_raw_kernel+0x20>
+1102-   17607:	48 89 c8             	mov    %rcx,%rax
+1103-   1760a:	59                   	pop    %rcx
+1104-   1760b:	c3                   	ret
+1105-   1760c:	48 8d 15 ad 5a 04 00 	lea    0x45aad(%rip),%rdx        # 5d0c0 <__dso_handle+0x160>
+1106-   17613:	be 02 00 00 00       	mov    $0x2,%esi
+1107-   17618:	4c 89 c7             	mov    %r8,%rdi
+1108-   1761b:	ff 15 77 81 04 00    	call   *0x48177(%rip)        # 5f798 <_DYNAMIC+0x320>
+1109-   17621:	0f 0b                	ud2
+1110-   17623:	ff 15 77 81 04 00    	call   *0x48177(%rip)        # 5f7a0 <_DYNAMIC+0x328>
+1111-   17629:	cc                   	int3
+1112-   1762a:	cc                   	int3
+1113-   1762b:	cc                   	int3
+1114-   1762c:	cc                   	int3
+1115-   1762d:	cc                   	int3
+1116-   1762e:	cc                   	int3
+1117-   1762f:	cc                   	int3
+1118-
+1119:0000000000017630 <bench_tagged_kernel>:
+1120-   17630:	41 56                	push   %r14
+1121-   17632:	53                   	push   %rbx
+1122-   17633:	50                   	push   %rax
+1123-   17634:	48 85 d2             	test   %rdx,%rdx
+1124-   17637:	0f 84 87 00 00 00    	je     176c4 <bench_tagged_kernel+0x94>
+1125-   1763d:	49 b9 00 00 00 00 ff 	movabs $0xffffffff00000000,%r9
+1126-   17644:	ff ff ff 
+1127-   17647:	49 ba 00 00 00 00 01 	movabs $0x100000000,%r10
+1128-   1764e:	00 00 00 
+1129-   17651:	31 c9                	xor    %ecx,%ecx
+1130-   17653:	49 89 e3             	mov    %rsp,%r11
+1131-   17656:	31 db                	xor    %ebx,%ebx
+1132-   17658:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+1133-   1765f:	00 
+1134-   17660:	48 ff c3             	inc    %rbx
+1135-   17663:	48 8b 07             	mov    (%rdi),%rax
+1136-   17666:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+1137-   1766d:	00 00 00 
+1138-   17670:	41 89 c0             	mov    %eax,%r8d
+1139-   17673:	49 83 f8 02          	cmp    $0x2,%r8
+1140-   17677:	73 58                	jae    176d1 <bench_tagged_kernel+0xa1>
+1141-   17679:	46 8b 04 86          	mov    (%rsi,%r8,4),%r8d
+1142-   1767d:	49 89 c6             	mov    %rax,%r14
+1143-   17680:	4d 21 ce             	and    %r9,%r14
+1144-   17683:	4d 01 d6             	add    %r10,%r14
+1145-   17686:	4d 09 c6             	or     %r8,%r14
+1146-   17689:	f0 4c 0f b1 37       	lock cmpxchg %r14,(%rdi)
+1147-   1768e:	75 e0                	jne    17670 <bench_tagged_kernel+0x40>
+1148-   17690:	48 8b 07             	mov    (%rdi),%rax
+1149-   17693:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+1150-   1769a:	84 00 00 00 00 00 
+1151-   176a0:	49 89 c0             	mov    %rax,%r8
+1152-   176a3:	4d 21 c8             	and    %r9,%r8
+1153-   176a6:	4f 8d 44 02 01       	lea    0x1(%r10,%r8,1),%r8
+1154-   176ab:	f0 4c 0f b1 07       	lock cmpxchg %r8,(%rdi)
+1155-   176b0:	75 ee                	jne    176a0 <bench_tagged_kernel+0x70>
+1156-   176b2:	48 8b 07             	mov    (%rdi),%rax
+1157-   176b5:	48 89 04 24          	mov    %rax,(%rsp)
+1158-   176b9:	48 03 0c 24          	add    (%rsp),%rcx
+1159-   176bd:	48 39 d3             	cmp    %rdx,%rbx
+1160-   176c0:	75 9e                	jne    17660 <bench_tagged_kernel+0x30>
+1161-   176c2:	eb 02                	jmp    176c6 <bench_tagged_kernel+0x96>
+1162-   176c4:	31 c9                	xor    %ecx,%ecx
+1163-   176c6:	48 89 c8             	mov    %rcx,%rax
+1164-   176c9:	48 83 c4 08          	add    $0x8,%rsp
+1165-   176cd:	5b                   	pop    %rbx
+1166-   176ce:	41 5e                	pop    %r14
+1167-   176d0:	c3                   	ret
+1168-   176d1:	48 8d 15 00 5a 04 00 	lea    0x45a00(%rip),%rdx        # 5d0d8 <__dso_handle+0x178>
+1169-   176d8:	be 02 00 00 00       	mov    $0x2,%esi
+1170-   176dd:	4c 89 c7             	mov    %r8,%rdi
+1171-   176e0:	ff 15 b2 80 04 00    	call   *0x480b2(%rip)        # 5f798 <_DYNAMIC+0x320>
+1172-   176e6:	0f 0b                	ud2
+1173-   176e8:	ff 15 b2 80 04 00    	call   *0x480b2(%rip)        # 5f7a0 <_DYNAMIC+0x328>
+1174-   176ee:	cc                   	int3
+1175-   176ef:	cc                   	int3
+1176-
+1177-00000000000176f0 <main>:
+1178-   176f0:	50                   	push   %rax
+1179-   176f1:	48 89 f1             	mov    %rsi,%rcx
+1180-   176f4:	48 63 d7             	movslq %edi,%rdx
+1181-   176f7:	48 8d 05 12 f5 ff ff 	lea    -0xaee(%rip),%rax        # 16c10 <aba_lab::main>
+1182-   176fe:	48 89 04 24          	mov    %rax,(%rsp)
+1183-   17702:	48 8d 35 5f 58 04 00 	lea    0x4585f(%rip),%rsi        # 5cf68 <__dso_handle+0x8>
+1184-   17709:	48 89 e7             	mov    %rsp,%rdi
+1185-   1770c:	45 31 c0             	xor    %r8d,%r8d
+1186-   1770f:	ff 15 93 7f 04 00    	call   *0x47f93(%rip)        # 5f6a8 <_DYNAMIC+0x230>
+1187-   17715:	59                   	pop    %rcx
+1188-   17716:	c3                   	ret
+1189-   17717:	cc                   	int3
+1190-   17718:	cc                   	int3
+1191-   17719:	cc                   	int3
+1192-   1771a:	cc                   	int3
+1193-   1771b:	cc                   	int3
+1194-   1771c:	cc                   	int3
+1195-   1771d:	cc                   	int3
+1196-   1771e:	cc                   	int3
+1197-   1771f:	cc                   	int3
+1198-
+1199-0000000000017720 <__rustc::__rust_alloc>:

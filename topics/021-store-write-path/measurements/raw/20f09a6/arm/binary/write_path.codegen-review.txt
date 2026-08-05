@@ -1,0 +1,19 @@
+architecture=aarch64
+presence_gate=temporal STP; advisory STNP; release publication STLR
+47:   192ac:	a9002a29 	stp	x9, x10, [x17]
+48:   192b0:	a901322b 	stp	x11, x12, [x17, #16]
+49:   192b4:	a9023a2d 	stp	x13, x14, [x17, #32]
+50:   192b8:	a903422f 	stp	x15, x16, [x17, #48]
+55:   192cc:	c89ffc48 	stlr	x8, [x2]
+105:   191ac:	a8002a29 	stnp	x9, x10, [x17]
+106:   191b0:	a801322b 	stnp	x11, x12, [x17, #16]
+107:   191b4:	a8023a2d 	stnp	x13, x14, [x17, #32]
+108:   191b8:	a803422f 	stnp	x15, x16, [x17, #48]
+113:   191cc:	c89ffc48 	stlr	x8, [x2]
+manual_geometry_gate=inspect LDUR #0 exact and LDUR #4 partial below
+127:00000000000191e0 <topic21_stlf_exact>:
+129:   191e4:	f8400002 	ldur	x2, [x0]
+131:   191ec:	54ffffa1 	b.ne	191e0 <topic21_stlf_exact>  // b.any
+146:0000000000019200 <topic21_stlf_partial>:
+148:   19204:	f8404002 	ldur	x2, [x0, #4]
+150:   1920c:	54ffffa1 	b.ne	19200 <topic21_stlf_partial>  // b.any
