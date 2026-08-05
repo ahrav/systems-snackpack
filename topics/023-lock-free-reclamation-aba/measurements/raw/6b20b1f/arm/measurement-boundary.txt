@@ -1,0 +1,5 @@
+Fresh process per treatment application.
+Startup and warmup are outside the timed region.
+Each timed process runs 5,000,000 iterations with two successful 64-bit CAS operations per iteration.
+The atomic is private, hot, uncontended, and pinned to CPU 0.
+The run does not measure reclamation, allocation, destruction, stalls, or contention.

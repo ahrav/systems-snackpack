@@ -1,0 +1,55 @@
+{
+  "comparisons": [
+    {
+      "block_log_sd": 0.001477964861210281,
+      "blocks": 12,
+      "ci95_high": 1.0038804260421121,
+      "ci95_low": 1.0019967994197736,
+      "estimand": "B/A",
+      "geometric_mean_ratio": 1.002938170524163,
+      "max_block_ratio": 1.0060961221948392,
+      "min_block_ratio": 1.0003228864630147,
+      "phase": "ab",
+      "processes": 48
+    },
+    {
+      "block_log_sd": 0.0014665124789104656,
+      "blocks": 6,
+      "ci95_high": 1.0022089451551057,
+      "ci95_low": 0.9991288677542215,
+      "estimand": "R/L",
+      "geometric_mean_ratio": 1.0006677213870614,
+      "max_block_ratio": 1.0023271429531053,
+      "min_block_ratio": 0.9986386055673527,
+      "phase": "aa",
+      "processes": 24
+    }
+  ],
+  "parameters": {
+    "aa_templates": [
+      "LRRL",
+      "RLLR",
+      "LRRL",
+      "RLLR",
+      "RLLR",
+      "LRRL"
+    ],
+    "ab_templates": [
+      "ABBA",
+      "ABBA",
+      "ABBA",
+      "BAAB",
+      "ABBA",
+      "ABBA",
+      "BAAB",
+      "BAAB",
+      "ABBA",
+      "BAAB",
+      "BAAB",
+      "BAAB"
+    ],
+    "cpu": "0",
+    "iterations_per_process": 5000000,
+    "timed_region": "one in-process kernel call after warmup"
+  }
+}

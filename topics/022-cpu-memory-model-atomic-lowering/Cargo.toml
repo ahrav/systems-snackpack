@@ -1,0 +1,21 @@
+[package]
+name = "cpu-memory-model-atomic-lowering"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "atomic_lowering"
+path = "src/lib.rs"
+
+[[bin]]
+name = "atomic-cost"
+path = "src/bin/atomic_cost.rs"
+
+[[bin]]
+name = "store-buffering"
+path = "src/bin/store_buffering.rs"
+
+[lints]
+workspace = true

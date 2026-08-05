@@ -1,0 +1,478 @@
+186:0000000000410200 <main>:
+187-  410200:	d10d03ff 	sub	sp, sp, #0x340
+188-  410204:	a90e7bfd 	stp	x29, x30, [sp, #224]
+189-  410208:	910383fd 	add	x29, sp, #0xe0
+190-  41020c:	a90f53f3 	stp	x19, x20, [sp, #240]
+191-  410210:	aa0103f3 	mov	x19, x1
+192-  410214:	71001c1f 	cmp	w0, #0x7
+193-  410218:	54001021 	b.ne	41041c <main+0x21c>  // b.any
+194-  41021c:	90000081 	adrp	x1, 420000 <_IO_stdin_used>
+195-  410220:	a91163f7 	stp	x23, x24, [sp, #272]
+196-  410224:	91050021 	add	x1, x1, #0x140
+197-  410228:	a9408a77 	ldp	x23, x2, [x19, #8]
+198-  41022c:	a9105bf5 	stp	x21, x22, [sp, #256]
+199-  410230:	f9400e60 	ldr	x0, [x19, #24]
+200-  410234:	f900b3e2 	str	x2, [sp, #352]
+201-  410238:	940001aa 	bl	4108e0 <parse_size>
+202-  41023c:	aa0003e2 	mov	x2, x0
+203-  410240:	90000081 	adrp	x1, 420000 <_IO_stdin_used>
+204-  410244:	f9401260 	ldr	x0, [x19, #32]
+205-  410248:	91052021 	add	x1, x1, #0x148
+206-  41024c:	f900b7e2 	str	x2, [sp, #360]
+207-  410250:	940001a4 	bl	4108e0 <parse_size>
+208-  410254:	aa0003e2 	mov	x2, x0
+209-  410258:	90000081 	adrp	x1, 420000 <_IO_stdin_used>
+210-  41025c:	f9401660 	ldr	x0, [x19, #40]
+211-  410260:	91054021 	add	x1, x1, #0x150
+212-  410264:	f900bbe2 	str	x2, [sp, #368]
+213-  410268:	9400019e 	bl	4108e0 <parse_size>
+214-  41026c:	90000081 	adrp	x1, 420000 <_IO_stdin_used>
+215-  410270:	aa0003f5 	mov	x21, x0
+216-  410274:	f9401a60 	ldr	x0, [x19, #48]
+217-  410278:	91056021 	add	x1, x1, #0x158
+218-  41027c:	94000199 	bl	4108e0 <parse_size>
+219-  410280:	f2400ea1 	ands	x1, x21, #0xf
+220-  410284:	aa0003f4 	mov	x20, x0
+221-  410288:	f900abe1 	str	x1, [sp, #336]
+222-  41028c:	54000ac1 	b.ne	4103e4 <main+0x1e4>  // b.any
+223-  410290:	f100041f 	cmp	x0, #0x1
+224-  410294:	92fc0000 	mov	x0, #0x1fffffffffffffff    	// #2305843009213693951
+225-  410298:	fa4082a2 	ccmp	x21, x0, #0x2, hi	// hi = pmore
+226-  41029c:	54000a48 	b.hi	4103e4 <main+0x1e4>  // b.pmore
+227-  4102a0:	52800021 	mov	w1, #0x1                   	// #1
+228-  4102a4:	128000e0 	mov	w0, #0xfffffff8            	// #-8
+229-  4102a8:	97ffffae 	bl	410160 <mallopt@plt>
+230-  4102ac:	2a0003f3 	mov	w19, w0
+231-  4102b0:	52800001 	mov	w1, #0x0                   	// #0
+232-  4102b4:	12800060 	mov	w0, #0xfffffffc            	// #-4
+233-  4102b8:	97ffffaa 	bl	410160 <mallopt@plt>
+234-  4102bc:	12800001 	mov	w1, #0xffffffff            	// #-1
+235-  4102c0:	2a0003f6 	mov	w22, w0
+236-  4102c4:	2a0103e0 	mov	w0, w1
+237-  4102c8:	97ffffa6 	bl	410160 <mallopt@plt>
+238-  4102cc:	7100027f 	cmp	w19, #0x0
+239-  4102d0:	2a0003e4 	mov	w4, w0
+240-  4102d4:	7a401ac4 	ccmp	w22, #0x0, #0x4, ne	// ne = any
+241-  4102d8:	7a401804 	ccmp	w0, #0x0, #0x4, ne	// ne = any
+242-  4102dc:	54001b40 	b.eq	410644 <main+0x444>  // b.none
+243-  4102e0:	d2800101 	mov	x1, #0x8                   	// #8
+244-  4102e4:	aa1503e0 	mov	x0, x21
+245-  4102e8:	97ffff82 	bl	4100f0 <calloc@plt>
+246-  4102ec:	aa0003f6 	mov	x22, x0
+247-  4102f0:	b40024c0 	cbz	x0, 410788 <main+0x588>
+248-  4102f4:	9106c3e8 	add	x8, sp, #0x1b0
+249-  4102f8:	940001b2 	bl	4109c0 <read_smaps_rollup>
+250-  4102fc:	940001a2 	bl	410984 <now_ns>
+251-  410300:	f900cbe0 	str	x0, [sp, #400]
+252-  410304:	b4001df5 	cbz	x21, 4106c0 <main+0x4c0>
+253-  410308:	d2800013 	mov	x19, #0x0                   	// #0
+254-  41030c:	52800238 	mov	w24, #0x11                  	// #17
+255-  410310:	a9126bf9 	stp	x25, x26, [sp, #288]
+256-  410314:	a91373fb 	stp	x27, x28, [sp, #304]
+257-  410318:	14000002 	b	410320 <main+0x120>
+258-  41031c:	aa0003f3 	mov	x19, x0
+259-  410320:	aa1403e0 	mov	x0, x20
+260-  410324:	97ffff6b 	bl	4100d0 <malloc@plt>
+261-  410328:	aa0003f9 	mov	x25, x0
+262-  41032c:	b4002160 	cbz	x0, 410758 <main+0x558>
+263-  410330:	12001f01 	and	w1, w24, #0xff
+264-  410334:	aa1403e2 	mov	x2, x20
+265-  410338:	97ffff6a 	bl	4100e0 <memset@plt>
+266-  41033c:	91000660 	add	x0, x19, #0x1
+267-  410340:	f8337ad9 	str	x25, [x22, x19, lsl #3]
+268-  410344:	11020f18 	add	w24, w24, #0x83
+269-  410348:	eb0002bf 	cmp	x21, x0
+270-  41034c:	54fffe81 	b.ne	41031c <main+0x11c>  // b.any
+271-  410350:	9400018d 	bl	410984 <now_ns>
+272-  410354:	f900d3e0 	str	x0, [sp, #416]
+273-  410358:	d344fea0 	lsr	x0, x21, #4
+274-  41035c:	910763e8 	add	x8, sp, #0x1d8
+275-  410360:	90000098 	adrp	x24, 420000 <_IO_stdin_used>
+276-  410364:	90000099 	adrp	x25, 420000 <_IO_stdin_used>
+277-  410368:	f900afe0 	str	x0, [sp, #344]
+278-  41036c:	d280001a 	mov	x26, #0x0                   	// #0
+279-  410370:	91082318 	add	x24, x24, #0x208
+280-  410374:	94000193 	bl	4109c0 <read_smaps_rollup>
+281-  410378:	910943e8 	add	x8, sp, #0x250
+282-  41037c:	91084339 	add	x25, x25, #0x210
+283-  410380:	97ffff30 	bl	410040 <mallinfo2@plt>
+284-  410384:	94000180 	bl	410984 <now_ns>
+285-  410388:	f900d7e0 	str	x0, [sp, #424]
+286-  41038c:	1400000b 	b	4103b8 <main+0x1b8>
+287-  410390:	aa1903e1 	mov	x1, x25
+288-  410394:	aa1703e0 	mov	x0, x23
+289-  410398:	97ffff66 	bl	410130 <strcmp@plt>
+290-  41039c:	35001e40 	cbnz	w0, 410764 <main+0x564>
+291-  4103a0:	f2400f5f 	tst	x26, #0xf
+292-  4103a4:	54000181 	b.ne	4103d4 <main+0x1d4>  // b.any
+293-  4103a8:	91000740 	add	x0, x26, #0x1
+294-  4103ac:	eb1a027f 	cmp	x19, x26
+295-  4103b0:	54000460 	b.eq	41043c <main+0x23c>  // b.none
+296-  4103b4:	aa0003fa 	mov	x26, x0
+297-  4103b8:	aa1803e1 	mov	x1, x24
+298-  4103bc:	aa1703e0 	mov	x0, x23
+299-  4103c0:	97ffff5c 	bl	410130 <strcmp@plt>
+300-  4103c4:	35fffe60 	cbnz	w0, 410390 <main+0x190>
+301-  4103c8:	f940afe0 	ldr	x0, [sp, #344]
+302-  4103cc:	eb1a001f 	cmp	x0, x26
+303-  4103d0:	54fffec8 	b.hi	4103a8 <main+0x1a8>  // b.pmore
+304-  4103d4:	f87a7ac0 	ldr	x0, [x22, x26, lsl #3]
+305-  4103d8:	97ffff5a 	bl	410140 <free@plt>
+306-  4103dc:	f83a7adf 	str	xzr, [x22, x26, lsl #3]
+307-  4103e0:	17fffff2 	b	4103a8 <main+0x1a8>
+308-  4103e4:	90000181 	adrp	x1, 440000 <mallinfo2@GLIBC_2.33>
+309-  4103e8:	90000080 	adrp	x0, 420000 <_IO_stdin_used>
+310-  4103ec:	f9406c23 	ldr	x3, [x1, #216]
+311-  4103f0:	9105a000 	add	x0, x0, #0x168
+312-  4103f4:	d2800742 	mov	x2, #0x3a                  	// #58
+313-  4103f8:	d2800021 	mov	x1, #0x1                   	// #1
+314-  4103fc:	97ffff5d 	bl	410170 <fwrite@plt>
+315-  410400:	a9505bf5 	ldp	x21, x22, [sp, #256]
+316-  410404:	52800040 	mov	w0, #0x2                   	// #2
+317-  410408:	a95163f7 	ldp	x23, x24, [sp, #272]
+318-  41040c:	a94e7bfd 	ldp	x29, x30, [sp, #224]
+319-  410410:	a94f53f3 	ldp	x19, x20, [sp, #240]
+320-  410414:	910d03ff 	add	sp, sp, #0x340
+321-  410418:	d65f03c0 	ret
+322-  41041c:	90000081 	adrp	x1, 420000 <_IO_stdin_used>
+323-  410420:	90000180 	adrp	x0, 440000 <mallinfo2@GLIBC_2.33>
+324-  410424:	f9400262 	ldr	x2, [x19]
+325-  410428:	91042021 	add	x1, x1, #0x108
+326-  41042c:	f9406c00 	ldr	x0, [x0, #216]
+327-  410430:	97ffff60 	bl	4101b0 <fprintf@plt>
+328-  410434:	52800040 	mov	w0, #0x2                   	// #2
+329-  410438:	17fffff5 	b	41040c <main+0x20c>
+330-  41043c:	94000152 	bl	410984 <now_ns>
+331-  410440:	910803e8 	add	x8, sp, #0x200
+332-  410444:	f900c3e0 	str	x0, [sp, #384]
+333-  410448:	d280001b 	mov	x27, #0x0                   	// #0
+334-  41044c:	9400015d 	bl	4109c0 <read_smaps_rollup>
+335-  410450:	910a83e8 	add	x8, sp, #0x2a0
+336-  410454:	f900a7ff 	str	xzr, [sp, #328]
+337-  410458:	d2800019 	mov	x25, #0x0                   	// #0
+338-  41045c:	97fffef9 	bl	410040 <mallinfo2@plt>
+339-  410460:	94000149 	bl	410984 <now_ns>
+340-  410464:	aa0003e1 	mov	x1, x0
+341-  410468:	d2800000 	mov	x0, #0x0                   	// #0
+342-  41046c:	d2800018 	mov	x24, #0x0                   	// #0
+343-  410470:	d280001a 	mov	x26, #0x0                   	// #0
+344-  410474:	f900bfe1 	str	x1, [sp, #376]
+345-  410478:	5280023c 	mov	w28, #0x11                  	// #17
+346-  41047c:	97ffff29 	bl	410120 <malloc_trim@plt>
+347-  410480:	b9018fe0 	str	w0, [sp, #396]
+348-  410484:	94000140 	bl	410984 <now_ns>
+349-  410488:	9108a3e8 	add	x8, sp, #0x228
+350-  41048c:	f900cfe0 	str	x0, [sp, #408]
+351-  410490:	9400014c 	bl	4109c0 <read_smaps_rollup>
+352-  410494:	910bc3e8 	add	x8, sp, #0x2f0
+353-  410498:	97fffeea 	bl	410040 <mallinfo2@plt>
+354-  41049c:	14000002 	b	4104a4 <main+0x2a4>
+355-  4104a0:	aa0003fb 	mov	x27, x0
+356-  4104a4:	f87b7ac0 	ldr	x0, [x22, x27, lsl #3]
+357-  4104a8:	b40001e0 	cbz	x0, 4104e4 <main+0x2e4>
+358-  4104ac:	39400003 	ldrb	w3, [x0]
+359-  4104b0:	6b1c007f 	cmp	w3, w28
+360-  4104b4:	54000de1 	b.ne	410670 <main+0x470>  // b.any
+361-  4104b8:	8b140003 	add	x3, x0, x20
+362-  4104bc:	385ff063 	ldurb	w3, [x3, #-1]
+363-  4104c0:	6b1c007f 	cmp	w3, w28
+364-  4104c4:	54000d61 	b.ne	410670 <main+0x470>  // b.any
+365-  4104c8:	97fffefa 	bl	4100b0 <malloc_usable_size@plt>
+366-  4104cc:	8b3c075a 	add	x26, x26, w28, uxtb #1
+367-  4104d0:	8b3c4718 	add	x24, x24, w28, uxtw #1
+368-  4104d4:	f940a7e1 	ldr	x1, [sp, #328]
+369-  4104d8:	91000739 	add	x25, x25, #0x1
+370-  4104dc:	8b000020 	add	x0, x1, x0
+371-  4104e0:	f900a7e0 	str	x0, [sp, #328]
+372-  4104e4:	5101f781 	sub	w1, w28, #0x7d
+373-  4104e8:	91000760 	add	x0, x27, #0x1
+374-  4104ec:	12001c3c 	and	w28, w1, #0xff
+375-  4104f0:	eb1b027f 	cmp	x19, x27
+376-  4104f4:	54fffd61 	b.ne	4104a0 <main+0x2a0>  // b.any
+377-  4104f8:	f940afe0 	ldr	x0, [sp, #344]
+378-  4104fc:	eb00033f 	cmp	x25, x0
+379-  410500:	540011c1 	b.ne	410738 <main+0x538>  // b.any
+380-  410504:	eb18035f 	cmp	x26, x24
+381-  410508:	54000cc1 	b.ne	4106a0 <main+0x4a0>  // b.any
+382-  41050c:	a9526bf9 	ldp	x25, x26, [sp, #288]
+383-  410510:	a95373fb 	ldp	x27, x28, [sp, #304]
+384-  410514:	97fffee3 	bl	4100a0 <getpid@plt>
+385-  410518:	f940bfe2 	ldr	x2, [sp, #376]
+386-  41051c:	93407c05 	sxtw	x5, w0
+387-  410520:	90000080 	adrp	x0, 420000 <_IO_stdin_used>
+388-  410524:	a95693e3 	ldp	x3, x4, [sp, #360]
+389-  410528:	910b4000 	add	x0, x0, #0x2d0
+390-  41052c:	f940cfe1 	ldr	x1, [sp, #408]
+391-  410530:	f9411be8 	ldr	x8, [sp, #560]
+392-  410534:	f9419fe9 	ldr	x9, [sp, #824]
+393-  410538:	cb02002a 	sub	x10, x1, x2
+394-  41053c:	f940c3e1 	ldr	x1, [sp, #384]
+395-  410540:	f90037e8 	str	x8, [sp, #104]
+396-  410544:	f940d7e2 	ldr	x2, [sp, #424]
+397-  410548:	f9006be9 	str	x9, [sp, #208]
+398-  41054c:	f9411fee 	ldr	x14, [sp, #568]
+399-  410550:	f94123e8 	ldr	x8, [sp, #576]
+400-  410554:	cb02002b 	sub	x11, x1, x2
+401-  410558:	f9419be9 	ldr	x9, [sp, #816]
+402-  41055c:	f9003fee 	str	x14, [sp, #120]
+403-  410560:	f940cbe2 	ldr	x2, [sp, #400]
+404-  410564:	f9003be8 	str	x8, [sp, #112]
+405-  410568:	f940d3e1 	ldr	x1, [sp, #416]
+406-  41056c:	f90067e9 	str	x9, [sp, #200]
+407-  410570:	f94103e7 	ldr	x7, [sp, #512]
+408-  410574:	f94117e6 	ldr	x6, [sp, #552]
+409-  410578:	cb02002c 	sub	x12, x1, x2
+410-  41057c:	aa1703e1 	mov	x1, x23
+411-  410580:	f94127ee 	ldr	x14, [sp, #584]
+412-  410584:	f9412be8 	ldr	x8, [sp, #592]
+413-  410588:	a9059be7 	stp	x7, x6, [sp, #88]
+414-  41058c:	aa1403e7 	mov	x7, x20
+415-  410590:	aa1503e6 	mov	x6, x21
+416-  410594:	f94197e9 	ldr	x9, [sp, #808]
+417-  410598:	f90043ee 	str	x14, [sp, #128]
+418-  41059c:	f940afef 	ldr	x15, [sp, #344]
+419-  4105a0:	f90047e8 	str	x8, [sp, #136]
+420-  4105a4:	f940b3e2 	ldr	x2, [sp, #352]
+421-  4105a8:	f90063e9 	str	x9, [sp, #192]
+422-  4105ac:	f94147ee 	ldr	x14, [sp, #648]
+423-  4105b0:	9b0f7e8d 	mul	x13, x20, x15
+424-  4105b4:	f9417be9 	ldr	x9, [sp, #752]
+425-  4105b8:	f9414be8 	ldr	x8, [sp, #656]
+426-  4105bc:	a90037ef 	stp	x15, x13, [sp]
+427-  4105c0:	f940a7ed 	ldr	x13, [sp, #328]
+428-  4105c4:	a90923ee 	stp	x14, x8, [sp, #144]
+429-  4105c8:	f9005fe9 	str	x9, [sp, #184]
+430-  4105cc:	f94153ee 	ldr	x14, [sp, #672]
+431-  4105d0:	f9000bed 	str	x13, [sp, #16]
+432-  4105d4:	f9416fe8 	ldr	x8, [sp, #728]
+433-  4105d8:	a901e3f8 	stp	x24, x24, [sp, #24]
+434-  4105dc:	f94173e9 	ldr	x9, [sp, #736]
+435-  4105e0:	a90a23ee 	stp	x14, x8, [sp, #160]
+436-  4105e4:	b9418fed 	ldr	w13, [sp, #396]
+437-  4105e8:	f9005be9 	str	x9, [sp, #176]
+438-  4105ec:	f940dbe9 	ldr	x9, [sp, #432]
+439-  4105f0:	a9032fec 	stp	x12, x11, [sp, #48]
+440-  4105f4:	f940efe8 	ldr	x8, [sp, #472]
+441-  4105f8:	b9002bed 	str	w13, [sp, #40]
+442-  4105fc:	f90023ea 	str	x10, [sp, #64]
+443-  410600:	a904a3e9 	stp	x9, x8, [sp, #72]
+444-  410604:	97fffee3 	bl	410190 <printf@plt>
+445-  410608:	14000006 	b	410620 <main+0x420>
+446-  41060c:	f940abe1 	ldr	x1, [sp, #336]
+--
+573:  4107f8:	17fffe82 	b	410200 <main>
+574-  4107fc:	d503201f 	nop
+575-
+576-0000000000410800 <_dl_relocate_static_pie>:
+577-  410800:	d503245f 	bti	c
+578-  410804:	d65f03c0 	ret
+579-
+580-0000000000410808 <call_weak_fn>:
+581-  410808:	f0000160 	adrp	x0, 43f000 <__FRAME_END__+0x1e878>
+582-  41080c:	f947ec00 	ldr	x0, [x0, #4056]
+583-  410810:	b4000040 	cbz	x0, 410818 <call_weak_fn+0x10>
+584-  410814:	17fffe3b 	b	410100 <__gmon_start__@plt>
+585-  410818:	d65f03c0 	ret
+586-  41081c:	d503201f 	nop
+587-
+588-0000000000410820 <deregister_tm_clones>:
+589-  410820:	90000180 	adrp	x0, 440000 <mallinfo2@GLIBC_2.33>
+590-  410824:	90000181 	adrp	x1, 440000 <mallinfo2@GLIBC_2.33>
+591-  410828:	91036000 	add	x0, x0, #0xd8
+592-  41082c:	91036021 	add	x1, x1, #0xd8
+593-  410830:	eb00003f 	cmp	x1, x0
+594-  410834:	540000c0 	b.eq	41084c <deregister_tm_clones+0x2c>  // b.none
+595-  410838:	f0000161 	adrp	x1, 43f000 <__FRAME_END__+0x1e878>
+596-  41083c:	f947e821 	ldr	x1, [x1, #4048]
+597-  410840:	b4000061 	cbz	x1, 41084c <deregister_tm_clones+0x2c>
+598-  410844:	aa0103f0 	mov	x16, x1
+599-  410848:	d61f0200 	br	x16
+600-  41084c:	d65f03c0 	ret
+601-
+602-0000000000410850 <register_tm_clones>:
+603-  410850:	90000180 	adrp	x0, 440000 <mallinfo2@GLIBC_2.33>
+604-  410854:	90000181 	adrp	x1, 440000 <mallinfo2@GLIBC_2.33>
+605-  410858:	91036000 	add	x0, x0, #0xd8
+606-  41085c:	91036021 	add	x1, x1, #0xd8
+607-  410860:	cb000021 	sub	x1, x1, x0
+608-  410864:	d37ffc22 	lsr	x2, x1, #63
+609-  410868:	8b810c41 	add	x1, x2, x1, asr #3
+610-  41086c:	9341fc21 	asr	x1, x1, #1
+611-  410870:	b40000c1 	cbz	x1, 410888 <register_tm_clones+0x38>
+612-  410874:	f0000162 	adrp	x2, 43f000 <__FRAME_END__+0x1e878>
+613-  410878:	f947f042 	ldr	x2, [x2, #4064]
+614-  41087c:	b4000062 	cbz	x2, 410888 <register_tm_clones+0x38>
+615-  410880:	aa0203f0 	mov	x16, x2
+616-  410884:	d61f0200 	br	x16
+617-  410888:	d65f03c0 	ret
+618-
+619-000000000041088c <__do_global_dtors_aux>:
+620-  41088c:	d503233f 	paciasp
+621-  410890:	a9be7bfd 	stp	x29, x30, [sp, #-32]!
+622-  410894:	910003fd 	mov	x29, sp
+623-  410898:	f9000bf3 	str	x19, [sp, #16]
+624-  41089c:	90000193 	adrp	x19, 440000 <mallinfo2@GLIBC_2.33>
+625-  4108a0:	39438260 	ldrb	w0, [x19, #224]
+626-  4108a4:	35000080 	cbnz	w0, 4108b4 <__do_global_dtors_aux+0x28>
+627-  4108a8:	97ffffde 	bl	410820 <deregister_tm_clones>
+628-  4108ac:	52800020 	mov	w0, #0x1                   	// #1
+629-  4108b0:	39038260 	strb	w0, [x19, #224]
+630-  4108b4:	f9400bf3 	ldr	x19, [sp, #16]
+631-  4108b8:	a8c27bfd 	ldp	x29, x30, [sp], #32
+632-  4108bc:	d50323bf 	autiasp
+633-  4108c0:	d65f03c0 	ret
+634-
+635-00000000004108c4 <frame_dummy>:
+636-  4108c4:	d503245f 	bti	c
+637-  4108c8:	17ffffe2 	b	410850 <register_tm_clones>
+638-  4108cc:	d503201f 	nop
+639-  4108d0:	d503201f 	nop
+640-  4108d4:	d503201f 	nop
+641-  4108d8:	d503201f 	nop
+642-  4108dc:	d503201f 	nop
+643-
+644-00000000004108e0 <parse_size>:
+645-  4108e0:	a9bc7bfd 	stp	x29, x30, [sp, #-64]!
+646-  4108e4:	910003fd 	mov	x29, sp
+647-  4108e8:	a90153f3 	stp	x19, x20, [sp, #16]
+648-  4108ec:	aa0003f3 	mov	x19, x0
+649-  4108f0:	f90013f5 	str	x21, [sp, #32]
+650-  4108f4:	aa0103f5 	mov	x21, x1
+651-  4108f8:	97fffe2a 	bl	4101a0 <__errno_location@plt>
+652-  4108fc:	aa0003f4 	mov	x20, x0
+653-  410900:	52800142 	mov	w2, #0xa                   	// #10
+654-  410904:	f9001fff 	str	xzr, [sp, #56]
+655-  410908:	aa1303e0 	mov	x0, x19
+656-  41090c:	9100e3e1 	add	x1, sp, #0x38
+657-  410910:	b900029f 	str	wzr, [x20]
+658-  410914:	97fffe0f 	bl	410150 <strtoull@plt>
+659-  410918:	b9400283 	ldr	w3, [x20]
+660-  41091c:	35000183 	cbnz	w3, 41094c <parse_size+0x6c>
+661-  410920:	f9401fe3 	ldr	x3, [sp, #56]
+662-  410924:	eb13007f 	cmp	x3, x19
+663-  410928:	54000120 	b.eq	41094c <parse_size+0x6c>  // b.none
+664-  41092c:	39400061 	ldrb	w1, [x3]
+665-  410930:	7100003f 	cmp	w1, #0x0
+666-  410934:	fa400804 	ccmp	x0, #0x0, #0x4, eq	// eq = none
+667-  410938:	540000a0 	b.eq	41094c <parse_size+0x6c>  // b.none
+668-  41093c:	a94153f3 	ldp	x19, x20, [sp, #16]
+669-  410940:	f94013f5 	ldr	x21, [sp, #32]
+670-  410944:	a8c47bfd 	ldp	x29, x30, [sp], #64
+671-  410948:	d65f03c0 	ret
+672-  41094c:	90000081 	adrp	x1, 420000 <_IO_stdin_used>
+673-  410950:	90000180 	adrp	x0, 440000 <mallinfo2@GLIBC_2.33>
+674-  410954:	f9406c00 	ldr	x0, [x0, #216]
+675-  410958:	aa1303e3 	mov	x3, x19
+676-  41095c:	aa1503e2 	mov	x2, x21
+677-  410960:	91004021 	add	x1, x1, #0x10
+678-  410964:	97fffe13 	bl	4101b0 <fprintf@plt>
+679-  410968:	52800040 	mov	w0, #0x2                   	// #2
+680-  41096c:	97fffdb9 	bl	410050 <exit@plt>
+681-
+682-0000000000410970 <die>:
+683-  410970:	a9bf7bfd 	stp	x29, x30, [sp, #-16]!
+684-  410974:	910003fd 	mov	x29, sp
+685-  410978:	97fffdbe 	bl	410070 <perror@plt>
+686-  41097c:	52800040 	mov	w0, #0x2                   	// #2
+687-  410980:	97fffdb4 	bl	410050 <exit@plt>
+688-
+689-0000000000410984 <now_ns>:
+690-  410984:	a9be7bfd 	stp	x29, x30, [sp, #-32]!
+691-  410988:	52800080 	mov	w0, #0x4                   	// #4
+692-  41098c:	910003fd 	mov	x29, sp
+693-  410990:	910043e1 	add	x1, sp, #0x10
+694-  410994:	97fffdbb 	bl	410080 <clock_gettime@plt>
+695-  410998:	350000e0 	cbnz	w0, 4109b4 <now_ns+0x30>
+696-  41099c:	a94107e2 	ldp	x2, x1, [sp, #16]
+697-  4109a0:	d2994000 	mov	x0, #0xca00                	// #51712
+698-  4109a4:	f2a77340 	movk	x0, #0x3b9a, lsl #16
+699-  4109a8:	a8c27bfd 	ldp	x29, x30, [sp], #32
+700-  4109ac:	9b000440 	madd	x0, x2, x0, x1
+701-  4109b0:	d65f03c0 	ret
+702-  4109b4:	90000080 	adrp	x0, 420000 <_IO_stdin_used>
+703-  4109b8:	91008000 	add	x0, x0, #0x20
+704-  4109bc:	97ffffed 	bl	410970 <die>
+705-
+706-00000000004109c0 <read_smaps_rollup>:
+707-  4109c0:	90000081 	adrp	x1, 420000 <_IO_stdin_used>
+708-  4109c4:	90000080 	adrp	x0, 420000 <_IO_stdin_used>
+709-  4109c8:	a9aa7bfd 	stp	x29, x30, [sp, #-352]!
+710-  4109cc:	9100e021 	add	x1, x1, #0x38
+711-  4109d0:	910003fd 	mov	x29, sp
+712-  4109d4:	91010000 	add	x0, x0, #0x40
+713-  4109d8:	a90153f3 	stp	x19, x20, [sp, #16]
+714-  4109dc:	a9025bf5 	stp	x21, x22, [sp, #32]
+715-  4109e0:	aa0803f6 	mov	x22, x8
+716-  4109e4:	97fffdb7 	bl	4100c0 <fopen@plt>
+717-  4109e8:	b40006a0 	cbz	x0, 410abc <read_smaps_rollup+0xfc>
+718-  4109ec:	90000095 	adrp	x21, 420000 <_IO_stdin_used>
+719-  4109f0:	90000094 	adrp	x20, 420000 <_IO_stdin_used>
+720-  4109f4:	a903ffff 	stp	xzr, xzr, [sp, #56]
+721-  4109f8:	aa0003f3 	mov	x19, x0
+722-  4109fc:	9101c2b5 	add	x21, x21, #0x70
+723-  410a00:	91020294 	add	x20, x20, #0x80
+724-  410a04:	a904ffff 	stp	xzr, xzr, [sp, #72]
+725-  410a08:	f9002fff 	str	xzr, [sp, #88]
+726-  410a0c:	14000018 	b	410a6c <read_smaps_rollup+0xac>
+727-  410a10:	9100e3e2 	add	x2, sp, #0x38
+728-  410a14:	aa1503e1 	mov	x1, x21
+729-  410a18:	910183e0 	add	x0, sp, #0x60
+730-  410a1c:	97fffdd9 	bl	410180 <__isoc99_sscanf@plt>
+731-  410a20:	910103e2 	add	x2, sp, #0x40
+732-  410a24:	aa1403e1 	mov	x1, x20
+733-  410a28:	910183e0 	add	x0, sp, #0x60
+734-  410a2c:	97fffdd5 	bl	410180 <__isoc99_sscanf@plt>
+735-  410a30:	90000081 	adrp	x1, 420000 <_IO_stdin_used>
+736-  410a34:	910123e2 	add	x2, sp, #0x48
+737-  410a38:	91024021 	add	x1, x1, #0x90
+738-  410a3c:	910183e0 	add	x0, sp, #0x60
+739-  410a40:	97fffdd0 	bl	410180 <__isoc99_sscanf@plt>
+740-  410a44:	90000081 	adrp	x1, 420000 <_IO_stdin_used>
+741-  410a48:	910143e2 	add	x2, sp, #0x50
+742-  410a4c:	9102a021 	add	x1, x1, #0xa8
+743-  410a50:	910183e0 	add	x0, sp, #0x60
+744-  410a54:	97fffdcb 	bl	410180 <__isoc99_sscanf@plt>
+745-  410a58:	90000081 	adrp	x1, 420000 <_IO_stdin_used>
+746-  410a5c:	910163e2 	add	x2, sp, #0x58
+747-  410a60:	91030021 	add	x1, x1, #0xc0
+748-  410a64:	910183e0 	add	x0, sp, #0x60
+749-  410a68:	97fffdc6 	bl	410180 <__isoc99_sscanf@plt>
+750-  410a6c:	aa1303e2 	mov	x2, x19
+751-  410a70:	52802001 	mov	w1, #0x100                 	// #256
+752-  410a74:	910183e0 	add	x0, sp, #0x60
+753-  410a78:	97fffdd2 	bl	4101c0 <fgets@plt>
+754-  410a7c:	b5fffca0 	cbnz	x0, 410a10 <read_smaps_rollup+0x50>
+755-  410a80:	aa1303e0 	mov	x0, x19
+756-  410a84:	97fffdd3 	bl	4101d0 <ferror@plt>
+757-  410a88:	35000260 	cbnz	w0, 410ad4 <read_smaps_rollup+0x114>
+758-  410a8c:	aa1303e0 	mov	x0, x19
+759-  410a90:	97fffd80 	bl	410090 <fclose@plt>
+760-  410a94:	350001a0 	cbnz	w0, 410ac8 <read_smaps_rollup+0x108>
+761-  410a98:	9100e3e1 	add	x1, sp, #0x38
+762-  410a9c:	f9402fe0 	ldr	x0, [sp, #88]
+763-  410aa0:	a94153f3 	ldp	x19, x20, [sp, #16]
+764-  410aa4:	ad400420 	ldp	q0, q1, [x1]
+765-  410aa8:	f90012c0 	str	x0, [x22, #32]
+766-  410aac:	ad0006c0 	stp	q0, q1, [x22]
+767-  410ab0:	a9425bf5 	ldp	x21, x22, [sp, #32]
+768-  410ab4:	a8d67bfd 	ldp	x29, x30, [sp], #352
+769-  410ab8:	d65f03c0 	ret
+770-  410abc:	90000080 	adrp	x0, 420000 <_IO_stdin_used>
+771-  410ac0:	91016000 	add	x0, x0, #0x58
+772-  410ac4:	97ffffab 	bl	410970 <die>
+773-  410ac8:	90000080 	adrp	x0, 420000 <_IO_stdin_used>
+774-  410acc:	9103c000 	add	x0, x0, #0xf0
+775-  410ad0:	97ffffa8 	bl	410970 <die>
+776-  410ad4:	90000080 	adrp	x0, 420000 <_IO_stdin_used>
+777-  410ad8:	91036000 	add	x0, x0, #0xd8
+778-  410adc:	97ffffa5 	bl	410970 <die>
+779-
+780-Disassembly of section .fini:
+781-
+782-0000000000410ae0 <_fini>:
+783-  410ae0:	d503233f 	paciasp
+784-  410ae4:	a9bf7bfd 	stp	x29, x30, [sp, #-16]!
+785-  410ae8:	910003fd 	mov	x29, sp
+786-  410aec:	a8c17bfd 	ldp	x29, x30, [sp], #16
+787-  410af0:	d50323bf 	autiasp
+788-  410af4:	d65f03c0 	ret

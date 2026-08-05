@@ -7,6 +7,10 @@ name = "advanced-benchmarking-methodology"
 version = "0.1.0"
 
 [[package]]
+name = "allocator-internals-fragmentation"
+version = "0.1.0"
+
+[[package]]
 name = "compiler-optimization-boundaries"
 version = "0.1.0"
 
@@ -15,7 +19,15 @@ name = "cpu-frontend-bottlenecks"
 version = "0.1.0"
 
 [[package]]
+name = "cpu-memory-model-atomic-lowering"
+version = "0.1.0"
+
+[[package]]
 name = "linkers-loaders-binary-layout"
+version = "0.1.0"
+
+[[package]]
+name = "lock-free-reclamation-aba"
 version = "0.1.0"
 
 [[package]]
@@ -84,4 +96,8 @@ version = "0.1.0"
 
 [[package]]
 name = "systems-snackpack-topic-014"
+version = "0.1.0"
+
+[[package]]
+name = "topic-021-store-write-path"
 version = "0.1.0"
