@@ -234,6 +234,7 @@ def verify_source_identity(evidence: Path, source_root: Path, binary_digest: str
     )
     archive_digests: dict[str, str] | None = None
     if reachable.returncode != 0:
+        verify_source_archive(evidence, identity_lines)
         archive_digests = experiment_digests_from_archive(evidence)
         if archive_digests is None:
             fail(
@@ -268,6 +269,26 @@ def verify_source_identity(evidence: Path, source_root: Path, binary_digest: str
             found.add(name)
     if found != expected_files:
         fail("source identity does not cover every experiment file")
+
+
+def verify_source_archive(evidence: Path, identity_lines: list[str]) -> None:
+    """Bind the retained source archive to both recorded digests."""
+    archive = evidence / "source.tar.gz"
+    if not archive.is_file():
+        return
+    observed = sha256(archive)
+    recorded_path = evidence / "source-archive.sha256"
+    if not recorded_path.is_file():
+        fail("bundle retains a source archive without source-archive.sha256")
+    recorded = recorded_path.read_text(encoding="utf-8").split()
+    if not recorded or recorded[0] != observed:
+        fail("source archive differs from source-archive.sha256")
+    for line in identity_lines:
+        if line.startswith("source_archive_sha256="):
+            if line.split("=", 1)[1].strip() != observed:
+                fail("source archive differs from the recorded source identity")
+            return
+    fail("source identity lacks the recorded source archive digest")
 
 
 def experiment_digests_from_archive(evidence: Path) -> dict[str, str] | None:

@@ -333,18 +333,36 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     binary_digest = sha256(binary)
-    describe = subprocess.run(
-        [str(binary), "--describe"], text=True, capture_output=True, check=False,
-        timeout=TIMEOUT_SECONDS,
-    )
+    describe_command = [str(binary), "--describe"]
+    describe_timed_out = False
+    try:
+        describe = subprocess.run(
+            describe_command, text=True, capture_output=True, check=False,
+            timeout=TIMEOUT_SECONDS,
+        )
+        describe_returncode: int | None = describe.returncode
+        describe_stdout = describe.stdout
+        describe_stderr = describe.stderr
+    except subprocess.TimeoutExpired as error:
+        # Retain the attempt even when the probe hangs; TimeoutExpired
+        # carries captured output as bytes even under text=True.
+        describe_timed_out = True
+        describe_returncode = None
+        describe_stdout = error.stdout or ""
+        describe_stderr = error.stderr or ""
+        if isinstance(describe_stdout, bytes):
+            describe_stdout = describe_stdout.decode("utf-8", errors="replace")
+        if isinstance(describe_stderr, bytes):
+            describe_stderr = describe_stderr.decode("utf-8", errors="replace")
     topology_attempt = {
-        "command": [str(binary), "--describe"], "returncode": describe.returncode,
-        "stdout": describe.stdout, "stderr": describe.stderr,
+        "command": describe_command, "returncode": describe_returncode,
+        "timed_out": describe_timed_out,
+        "stdout": describe_stdout, "stderr": describe_stderr,
     }
     write_json(args.output_dir / "topology-attempt.json", topology_attempt)
-    if describe.returncode != 0 or describe.stderr:
+    if describe_timed_out or describe_returncode != 0 or describe_stderr:
         fail("topology probe failed; raw attempt retained")
-    topology = exact_json_line(describe.stdout)
+    topology = exact_json_line(describe_stdout)
     validate_topology(topology)
     write_json(args.output_dir / "topology.json", topology)
 

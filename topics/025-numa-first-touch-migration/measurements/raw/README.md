@@ -13,8 +13,8 @@ and candidate. A complete bundle contains:
 - the predeclared schedule and seed, an append-only attempt ledger, raw process
   rows, placement queries, fault counts, checksums, standard output/error, and
   wrapper exit status;
-- the analysis program, summary, and a final `SHA256SUMS` covering every
-  retained file except the manifest itself.
+- the analysis program, summary, and a final `evidence.sha256` manifest
+  covering every retained file except the manifest itself.
 
 The bundle's status must say whether source verification, build, fixed schedule,
 placement, affinity, zero-fault read phase, checksum, analysis, and hashing
