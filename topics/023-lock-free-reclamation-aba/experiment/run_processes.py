@@ -38,7 +38,7 @@ def parse_line(line: str) -> dict[str, str]:
     return dict(field.split("=", 1) for field in fields[1:])
 
 
-def run_one(binary: Path, cpu: str, mode: str, iterations: int) -> dict[str, object]:
+def run_one(binary: Path, cpu: str, mode: str, iterations: int) -> dict[str, str | int | float]:
     started = time.monotonic_ns()
     process = subprocess.run(
         ["taskset", "--cpu-list", cpu, str(binary), "bench", mode, str(iterations)],
@@ -61,7 +61,9 @@ def run_one(binary: Path, cpu: str, mode: str, iterations: int) -> dict[str, obj
     }
 
 
-def summarize(rows: list[dict[str, object]], phase: str, numerator: str, denominator: str) -> dict[str, object]:
+def summarize(
+    rows: list[dict[str, str | int | float]], phase: str, numerator: str, denominator: str
+) -> dict[str, str | int | float]:
     blocks = sorted({int(row["block"]) for row in rows if row["phase"] == phase})
     contrasts: list[float] = []
     for block in blocks:
@@ -110,13 +112,15 @@ def main() -> None:
     parser.add_argument("--iterations", type=int, default=5_000_000)
     args = parser.parse_args()
 
+    if args.iterations <= 0:
+        raise SystemExit("--iterations must be positive")
     if shutil.which("taskset") is None:
         raise SystemExit("taskset is required; run this process harness on Linux")
 
     args.output_directory.mkdir(parents=True, exist_ok=True)
     if any(args.output_directory.iterdir()):
         raise SystemExit("output directory must be empty")
-    rows: list[dict[str, object]] = []
+    rows: list[dict[str, str | int | float]] = []
 
     for phase, templates in (("ab", AB_TEMPLATES), ("aa", AA_TEMPLATES)):
         for block, template in enumerate(templates, start=1):

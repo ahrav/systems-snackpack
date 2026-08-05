@@ -173,6 +173,7 @@ fn main() {
                 .unwrap_or("10000000")
                 .parse::<u64>()
                 .expect("iterations must be an integer");
+            assert!(iters > 0, "iterations must be positive");
             bench(mode, iters);
         }
         _ => panic!("usage: aba_lab check | aba_lab bench <raw|tagged> [iterations]"),

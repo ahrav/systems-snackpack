@@ -20,6 +20,16 @@ if [[ -e $output_directory ]]; then
   printf 'output directory already exists: %s\n' "$output_directory" >&2
   exit 2
 fi
+mkdir -p "$output_directory"
+output_directory=$(cd "$output_directory" && pwd -P)
+# A relative path must not silently resolve under the repository after the cd
+# below, and evidence inside the repository would corrupt the before/after
+# source-tree comparison with its own generated files.
+if [[ $output_directory == "$repository_root" || $output_directory == "$repository_root"/* ]]; then
+  rmdir "$output_directory" 2>/dev/null || true
+  printf 'OUTPUT_DIRECTORY must be outside the repository: %s\n' "$output_directory" >&2
+  exit 2
+fi
 mkdir -p "$output_directory"/{codegen,correctness,gates,processes}
 
 allowed_list=$(awk '/Cpus_allowed_list/ {print $2}' /proc/self/status)
@@ -35,7 +45,7 @@ if [[ $actual_archive_sha256 != "$SOURCE_ARCHIVE_SHA256" ]]; then
     "$SOURCE_ARCHIVE_SHA256" "$actual_archive_sha256" >&2
   exit 2
 fi
-rg --files -g '!target/**' | LC_ALL=C sort | xargs sha256sum \
+rg --files --hidden -g '!.git/**' -g '!target/**' | LC_ALL=C sort | xargs sha256sum \
   >"$output_directory/source-tree.before.sha256"
 actual_manifest_sha256=$(sha256sum "$output_directory/source-tree.before.sha256" | awk '{print $1}')
 if [[ $actual_manifest_sha256 != "$SOURCE_TREE_MANIFEST_SHA256" ]]; then
@@ -71,9 +81,33 @@ fi
   printf 'RUSTFLAGS=%s\n' "${RUSTFLAGS-<unset>}"
 } >"$output_directory/host.txt"
 
-rg --files "$topic" | LC_ALL=C sort | xargs sha256sum >"$output_directory/source-files.sha256"
+rg --files --hidden -g '!.git/**' "$topic" | LC_ALL=C sort | xargs sha256sum >"$output_directory/source-files.sha256"
 
-if git rev-parse --git-dir >/dev/null 2>&1; then
+# Cargo reads .cargo/config.toml from the working directory and its ancestors;
+# such a file changes the measured build without appearing in any recorded
+# input, so refuse to run under one. Caller build overrides are cleared for
+# the same reason. An in-repository config is caught by the hidden-file
+# source manifests above.
+config_dir=$repository_root
+while :; do
+  for config_name in config.toml config; do
+    if [[ -f "$config_dir/.cargo/$config_name" ]]; then
+      printf 'unrecorded Cargo configuration: %s\n' "$config_dir/.cargo/$config_name" >&2
+      exit 2
+    fi
+  done
+  if [[ $config_dir == / ]]; then
+    break
+  fi
+  config_dir=$(dirname "$config_dir")
+done
+unset CARGO_BUILD_RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_TARGET_DIR CARGO_BUILD_TARGET
+unset RUSTC RUSTC_WRAPPER RUSTDOC RUSTDOCFLAGS
+
+# An extracted archive without its own .git could sit under another checkout,
+# and git would silently walk up to that ancestor repository.
+git_toplevel=$(git rev-parse --show-toplevel 2>/dev/null || true)
+if [[ -n $git_toplevel && $(cd "$git_toplevel" && pwd -P) == "$repository_root" ]]; then
   git diff --check >"$output_directory/gates/git-diff-check.log" 2>&1
 else
   printf 'not applicable: extracted Git archive has no index\n' \
@@ -111,7 +145,7 @@ python3 "$topic/experiment/run_processes.py" \
 python3 "$topic/experiment/validate_receipts.py" "$output_directory" \
   >"$output_directory/receipt-validation.txt"
 
-rg --files -g '!target/**' | LC_ALL=C sort | xargs sha256sum \
+rg --files --hidden -g '!.git/**' -g '!target/**' | LC_ALL=C sort | xargs sha256sum \
   >"$output_directory/source-tree.after.sha256"
 cmp "$output_directory/source-tree.before.sha256" "$output_directory/source-tree.after.sha256"
 
