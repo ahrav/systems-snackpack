@@ -1,0 +1,19 @@
+0000000000015380 <pgo_probe::dispatch>:
+   15380:	push   %rax
+   15381:	mov    %rdi,(%rsp)
+   15385:	mov    %rsp,%rax
+   15388:	mov    %rsp,%rcx
+   1538b:	mov    (%rsp),%rax
+   1538f:	mov    %rsi,(%rsp)
+   15393:	lea    0x16(%rip),%rcx        # 153b0 <pgo_probe::alpha>
+   1539a:	mov    (%rsp),%rdi
+   1539e:	cmp    %rcx,%rax
+   153a1:	jne    153aa <pgo_probe::dispatch+0x2a>
+   153a3:	call   153b0 <pgo_probe::alpha>
+   153a8:	pop    %rcx
+   153a9:	ret
+   153aa:	call   *%rax
+   153ac:	pop    %rcx
+   153ad:	ret
+   153ae:	int3
+   153af:	int3

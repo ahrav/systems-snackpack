@@ -11,7 +11,19 @@ name = "compiler-optimization-boundaries"
 version = "0.1.0"
 
 [[package]]
+name = "cpu-frontend-bottlenecks"
+version = "0.1.0"
+
+[[package]]
 name = "linkers-loaders-binary-layout"
+version = "0.1.0"
+
+[[package]]
+name = "memory-level-parallelism"
+version = "0.1.0"
+
+[[package]]
+name = "pgo-post-link-optimization"
 version = "0.1.0"
 
 [[package]]

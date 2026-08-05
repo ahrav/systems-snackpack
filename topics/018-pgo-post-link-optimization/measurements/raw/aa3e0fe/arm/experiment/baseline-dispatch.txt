@@ -1,0 +1,17 @@
+00000000000155a0 <pgo_probe::dispatch>:
+   155a0:	sub	sp, sp, #0x20
+   155a4:	stp	x29, x30, [sp, #16]
+   155a8:	add	x29, sp, #0x10
+   155ac:	str	x0, [sp, #8]
+   155b0:	add	x8, sp, #0x8
+   155b4:	add	x9, sp, #0x8
+   155b8:	ldr	x8, [sp, #8]
+   155bc:	str	x1, [sp, #8]
+   155c0:	ldr	x0, [sp, #8]
+   155c4:	blr	x8
+   155c8:	ldp	x29, x30, [sp, #16]
+   155cc:	add	sp, sp, #0x20
+   155d0:	ret
+   155d4:	nop
+   155d8:	nop
+   155dc:	nop

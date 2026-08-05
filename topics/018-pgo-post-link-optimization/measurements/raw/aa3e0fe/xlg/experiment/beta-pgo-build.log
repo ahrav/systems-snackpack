@@ -1,0 +1,22 @@
+warning: linker stderr: rust-lld: relocation refers to a discarded section: .text
+         >>> referenced by /usr/lib/gcc/x86_64-amazon-linux/11/../../../../lib64/crti.o:(.rela.gnu.build.attributes+0x38)
+         
+         rust-lld: relocation refers to a discarded section: .text
+         >>> referenced by /usr/lib/gcc/x86_64-amazon-linux/11/../../../../lib64/crti.o:(.rela.gnu.build.attributes+0x40)
+         
+         rust-lld: relocation refers to a discarded section: .text
+         >>> referenced by /usr/lib/gcc/x86_64-amazon-linux/11/crtendS.o:(.rela.gnu.build.attributes+0xc8)
+         
+         rust-lld: relocation refers to a discarded section: .text
+         >>> referenced by /usr/lib/gcc/x86_64-amazon-linux/11/crtendS.o:(.rela.gnu.build.attributes+0xd0)
+         
+         rust-lld: relocation refers to a discarded section: .text
+         >>> referenced by /usr/lib/gcc/x86_64-amazon-linux/11/../../../../lib64/crtn.o:(.rela.gnu.build.attributes+0xec)
+         
+         rust-lld: relocation refers to a discarded section: .text
+         >>> referenced by /usr/lib/gcc/x86_64-amazon-linux/11/../../../../lib64/crtn.o:(.rela.gnu.build.attributes+0xf4)
+  |
+  = note: `#[warn(linker_messages)]` on by default
+
+warning: 1 warning emitted
+

@@ -1,0 +1,13 @@
+{
+  "baseline_indirect": true,
+  "pgo_alpha": {
+    "comparison": true,
+    "direct_trained_target": true,
+    "indirect_fallback": true
+  },
+  "pgo_beta": {
+    "comparison": true,
+    "direct_trained_target": true,
+    "indirect_fallback": true
+  }
+}

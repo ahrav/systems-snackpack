@@ -1,0 +1,2 @@
+lanes=1 steady_ns=16240542 ns_per_load=15.488187790 sink=22274
+lanes=8 steady_ns=1631750 ns_per_load=1.556158066 sink=34041
