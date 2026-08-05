@@ -168,6 +168,23 @@ export CARGO_HOME="$scratch_dir/cargo-home"
 export CARGO_NET_OFFLINE=true
 mkdir -p -- "$CARGO_HOME"
 
+# When cargo on PATH is a standalone binary rather than the rustup shim, the
+# repository's rust-toolchain.toml pin is silently ignored and a host-default
+# compiler changes the measured code generation. Fail closed on a mismatch.
+if [[ -f "$repo_root/rust-toolchain.toml" ]]; then
+    pinned_toolchain="$(sed -n 's/^channel = "\(.*\)"$/\1/p' "$repo_root/rust-toolchain.toml")"
+    if [[ -z "$pinned_toolchain" ]]; then
+        printf 'rust-toolchain.toml exists but its channel could not be parsed\n' >&2
+        exit 2
+    fi
+    resolved_rustc="$(rustc --version | awk '{print $2}')"
+    if [[ "$resolved_rustc" != "$pinned_toolchain" ]]; then
+        printf 'resolved rustc %s does not match the pinned toolchain %s\n' \
+            "$resolved_rustc" "$pinned_toolchain" >&2
+        exit 2
+    fi
+fi
+
 gates_dir="$output_dir/gates"
 mkdir -p -- "$gates_dir"
 gate_target="$scratch_dir/gate-target"
@@ -320,7 +337,7 @@ if [[ -s "$gates_dir/focused-correctness.stderr" ]] \
     exit 1
 fi
 
-host_name="$(hostname -f)"
+host_name="$(hostname -f 2>/dev/null || hostname)"
 (
     printf 'host_alias=%s\n' "${HOST_ALIAS:-unspecified}"
     printf 'resolved_hostname=%s\n' "$host_name"

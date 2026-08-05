@@ -16,3 +16,8 @@ executable binaries, so that original manifest no longer matched and was not
 retained; each directory's `retained.sha256` re-seals the retained set and
 supersedes the runner's seal. Hashes of untransformed files are unchanged
 between the two manifests.
+
+The retained runs predate the runner's pinned-toolchain gate: the workspace
+pins rustc 1.93.1, while `xxl` measured with rustc 1.97.1 and `arm` with
+rustc 1.95.0, as recorded in each `host.txt`. The published intervals are
+bound to those recorded toolchains, not to the pin.
