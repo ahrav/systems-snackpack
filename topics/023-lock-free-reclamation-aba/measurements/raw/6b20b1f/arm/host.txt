@@ -1,0 +1,107 @@
+run_started_utc=2026-08-02T14:25:38.190876631Z
+host_label=arm_dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+source_commit=6b20b1f25478fe0026e9292f4268ff57010e7850
+source_archive_path=/tmp/topic23-exact-6b20b1f-arm.SjEfHr/source.tar
+source_archive_sha256=8f9ed7f7c49bf39a88a281e0ab51537905383937a8bf3a798fe925be6329bb5c
+source_tree_manifest_sha256=9f1e49f295831dc193989821db112e8219484ed8a2dac906389c4d6a732377ca
+hostname_fqdn=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+uname=Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.94-123.192.amzn2023.aarch64 #1 SMP Fri Jul 24 13:35:21 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+architecture=aarch64
+kernel=6.12.94-123.192.amzn2023.aarch64
+configured_cpus=64
+available_cpus=64
+allowed_cpu_list=0-63
+selected_cpu=0
+Architecture:                            aarch64
+CPU op-mode(s):                          32-bit, 64-bit
+Byte Order:                              Little Endian
+CPU(s):                                  64
+On-line CPU(s) list:                     0-63
+Vendor ID:                               ARM
+Model:                                   1
+Thread(s) per core:                      1
+Core(s) per socket:                      64
+Socket(s):                               1
+Stepping:                                r1p1
+BogoMIPS:                                2100.00
+Flags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng
+L1d cache:                               4 MiB (64 instances)
+L1i cache:                               4 MiB (64 instances)
+L2 cache:                                64 MiB (64 instances)
+L3 cache:                                32 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-63
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; CSV2, BHB
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x1
+CPU part	: 0xd40
+CPU revision	: 1
+MIDR_EL1=0x00000000411fd401
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+binary: rustc
+commit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf
+commit-date: 2026-02-11
+host: aarch64-unknown-linux-gnu
+release: 1.93.1
+LLVM version: 21.1.8
+cargo 1.93.1 (083ac5135 2025-12-15)
+gcc=11.5.0
+target_arch="aarch64"
+target_feature="aes"
+target_feature="bf16"
+target_feature="crc"
+target_feature="dit"
+target_feature="dotprod"
+target_feature="dpb"
+target_feature="dpb2"
+target_feature="fcma"
+target_feature="fhm"
+target_feature="flagm"
+target_feature="fp16"
+target_feature="i8mm"
+target_feature="jsconv"
+target_feature="lor"
+target_feature="lse"
+target_feature="neon"
+target_feature="paca"
+target_feature="pacg"
+target_feature="pan"
+target_feature="pmuv3"
+target_feature="rand"
+target_feature="ras"
+target_feature="rcpc"
+target_feature="rcpc2"
+target_feature="rdm"
+target_feature="sha2"
+target_feature="sha3"
+target_feature="sm4"
+target_feature="spe"
+target_feature="ssbs"
+target_feature="sve"
+target_feature="vh"
+target_has_atomic="128"
+target_has_atomic="16"
+target_has_atomic="32"
+target_has_atomic="64"
+target_has_atomic="8"
+target_has_atomic="ptr"
+target_pointer_width="64"
+RUSTFLAGS=<unset>
+run_finished_utc=2026-08-02T14:25:53.754022454Z

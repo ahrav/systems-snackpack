@@ -1,0 +1,275 @@
+5718:   1542c:	9400010d 	bl	15860 <bench_raw_kernel>
+5719-   15430:	f81a03a0 	stur	x0, [x29, #-96]
+5720-   15434:	d10183a8 	sub	x8, x29, #0x60
+5721-   15438:	f90013f5 	str	x21, [sp, #32]
+5722-   1543c:	94003a9c 	bl	23eac <std::time::Instant::now>
+5723-   15440:	f81a03a0 	stur	x0, [x29, #-96]
+5724-   15444:	b81a83a1 	stur	w1, [x29, #-88]
+5725-   15448:	910083e0 	add	x0, sp, #0x20
+5726-   1544c:	9101c3e1 	add	x1, sp, #0x70
+5727-   15450:	aa1403e2 	mov	x2, x20
+5728:   15454:	94000103 	bl	15860 <bench_raw_kernel>
+5729-   15458:	aa0003f5 	mov	x21, x0
+5730-   1545c:	d10183a0 	sub	x0, x29, #0x60
+5731-   15460:	94003a95 	bl	23eb4 <std::time::Instant::elapsed>
+5732-   15464:	14000034 	b	15534 <aba_lab::main+0x4f4>
+5733-   15468:	aa1f03f4 	mov	x20, xzr
+5734-   1546c:	5280014b 	mov	w11, #0xa                   	// #10
+5735-   15470:	d503201f 	nop
+5736-   15474:	d503201f 	nop
+5737-   15478:	d503201f 	nop
+5738-   1547c:	d503201f 	nop
+5739-   15480:	b4fffa29 	cbz	x9, 153c4 <aba_lab::main+0x384>
+5740-   15484:	3840150a 	ldrb	w10, [x8], #1
+5741-   15488:	5100c14a 	sub	w10, w10, #0x30
+5742-   1548c:	7100255f 	cmp	w10, #0x9
+5743-   15490:	54001128 	b.hi	156b4 <aba_lab::main+0x674>  // b.pmore
+5744-   15494:	9bcb7e8c 	umulh	x12, x20, x11
+5745-   15498:	eb0c03ff 	cmp	xzr, x12
+5746-   1549c:	8b140a8c 	add	x12, x20, x20, lsl #2
+5747-   154a0:	d37ff98c 	lsl	x12, x12, #1
+5748-   154a4:	1a9f07ed 	cset	w13, ne	// ne = any
+5749-   154a8:	ab2a4194 	adds	x20, x12, w10, uxtw
+5750-   154ac:	5280004a 	mov	w10, #0x2                   	// #2
+5751-   154b0:	1a9f37ec 	cset	w12, cs	// cs = hs, nlast
+5752-   154b4:	3700102d 	tbnz	w13, #0, 156b8 <aba_lab::main+0x678>
+5753-   154b8:	d1000529 	sub	x9, x9, #0x1
+5754-   154bc:	3607fe2c 	tbz	w12, #0, 15480 <aba_lab::main+0x440>
+5755-   154c0:	1400007e 	b	156b8 <aba_lab::main+0x678>
+5756-   154c4:	f100193f 	cmp	x9, #0x6
+5757-   154c8:	54000cc1 	b.ne	15660 <aba_lab::main+0x620>  // b.any
+5758-   154cc:	b9400109 	ldr	w9, [x8]
+5759-   154d0:	79400908 	ldrh	w8, [x8, #4]
+5760-   154d4:	528c2e8a 	mov	w10, #0x6174                	// #24948
+5761-   154d8:	72acecea 	movk	w10, #0x6767, lsl #16
+5762-   154dc:	6b0a013f 	cmp	w9, w10
+5763-   154e0:	528c8ca9 	mov	w9, #0x6465                	// #25701
+5764-   154e4:	7a490100 	ccmp	w8, w9, #0x0, eq	// eq = none
+5765-   154e8:	54000bc1 	b.ne	15660 <aba_lab::main+0x620>  // b.any
+5766-   154ec:	52800035 	mov	w21, #0x1                   	// #1
+5767-   154f0:	d101a3a0 	sub	x0, x29, #0x68
+5768-   154f4:	9101c3e1 	add	x1, sp, #0x70
+5769-   154f8:	f81983b5 	stur	x21, [x29, #-104]
+5770:   154fc:	94000109 	bl	15920 <bench_tagged_kernel>
+5771-   15500:	f81a03a0 	stur	x0, [x29, #-96]
+5772-   15504:	d10183a8 	sub	x8, x29, #0x60
+5773-   15508:	f90013f5 	str	x21, [sp, #32]
+5774-   1550c:	94003a68 	bl	23eac <std::time::Instant::now>
+5775-   15510:	f81a03a0 	stur	x0, [x29, #-96]
+5776-   15514:	b81a83a1 	stur	w1, [x29, #-88]
+5777-   15518:	910083e0 	add	x0, sp, #0x20
+5778-   1551c:	9101c3e1 	add	x1, sp, #0x70
+5779-   15520:	aa1403e2 	mov	x2, x20
+5780:   15524:	940000ff 	bl	15920 <bench_tagged_kernel>
+5781-   15528:	aa0003f5 	mov	x21, x0
+5782-   1552c:	d10183a0 	sub	x0, x29, #0x60
+5783-   15530:	94003a61 	bl	23eb4 <std::time::Instant::elapsed>
+5784-   15534:	f94013e8 	ldr	x8, [sp, #32]
+5785-   15538:	1e630021 	ucvtf	d1, w1
+5786-   1553c:	f9003ff5 	str	x21, [sp, #120]
+5787-   15540:	d000034a 	adrp	x10, 7f000 <__dso_handle+0x19a8>
+5788-   15544:	f81903a8 	stur	x8, [x29, #-112]
+5789-   15548:	52994008 	mov	w8, #0xca00                	// #51712
+5790-   1554c:	9e630000 	ucvtf	d0, x0
+5791-   15550:	72a77348 	movk	w8, #0x3b9a, lsl #16
+5792-   15554:	9bc87c09 	umulh	x9, x0, x8
+5793-   15558:	9b087c08 	mul	x8, x0, x8
+5794-   1555c:	ab214108 	adds	x8, x8, w1, uxtw
+5795-   15560:	9a893529 	cinc	x9, x9, cs	// cs = hs, nlast
+5796-   15564:	a90227e8 	stp	x8, x9, [sp, #32]
+5797-   15568:	d2d9aca8 	mov	x8, #0xcd6500000000        	// #225833675390976
+5798-   1556c:	f0ffffe9 	adrp	x9, 14000 <alloc::raw_vec::RawVec<T,A>::grow_one+0x54>
+5799-   15570:	913a0129 	add	x9, x9, #0xe80
+5800-   15574:	f2e839a8 	movk	x8, #0x41cd, lsl #48
+5801-   15578:	9e670102 	fmov	d2, x8
+5802-   1557c:	910163e8 	add	x8, sp, #0x58
+5803-   15580:	a93a27a8 	stp	x8, x9, [x29, #-96]
+5804-   15584:	d0000349 	adrp	x9, 7f000 <__dso_handle+0x19a8>
+5805-   15588:	9101a3e8 	add	x8, sp, #0x68
+5806-   1558c:	f947ad29 	ldr	x9, [x9, #3928]
+5807-   15590:	1e621821 	fdiv	d1, d1, d2
+5808-   15594:	1e602820 	fadd	d0, d1, d0
+5809-   15598:	9e630281 	ucvtf	d1, x20
+5810-   1559c:	a93b27a8 	stp	x8, x9, [x29, #-80]
+5811-   155a0:	f947c54a 	ldr	x10, [x10, #3976]
+5812-   155a4:	910083e8 	add	x8, sp, #0x20
+5813-   155a8:	a93c2ba8 	stp	x8, x10, [x29, #-64]
+5814-   155ac:	d000034a 	adrp	x10, 7f000 <__dso_handle+0x19a8>
+5815-   155b0:	f9477d4a 	ldr	x10, [x10, #3832]
+5816-   155b4:	d101a3a8 	sub	x8, x29, #0x68
+5817-   155b8:	a93d2ba8 	stp	x8, x10, [x29, #-48]
+5818-   155bc:	9101e3e8 	add	x8, sp, #0x78
+5819-   155c0:	a93e27a8 	stp	x8, x9, [x29, #-32]
+5820-   155c4:	d101c3a8 	sub	x8, x29, #0x70
+5821-   155c8:	a93f27a8 	stp	x8, x9, [x29, #-16]
+5822-   155cc:	1e620800 	fmul	d0, d0, d2
+5823-   155d0:	1e611800 	fdiv	d0, d0, d1
+5824-   155d4:	fc1983a0 	stur	d0, [x29, #-104]
+5825-   155d8:	b00001e0 	adrp	x0, 52000 <_fini+0x4858>
+5826-   155dc:	91041c00 	add	x0, x0, #0x107
+5827-   155e0:	d10183a1 	sub	x1, x29, #0x60
+5828-   155e4:	940026e4 	bl	1f174 <std::io::stdio::_print>
+5829-   155e8:	f9402bf4 	ldr	x20, [sp, #80]
+5830-   155ec:	b40001d4 	cbz	x20, 15624 <aba_lab::main+0x5e4>
+5831-   155f0:	91002275 	add	x21, x19, #0x8
+5832-   155f4:	14000006 	b	1560c <aba_lab::main+0x5cc>
+5833-   155f8:	d503201f 	nop
+5834-   155fc:	d503201f 	nop
+5835-   15600:	f1000694 	subs	x20, x20, #0x1
+5836-   15604:	910062b5 	add	x21, x21, #0x18
+5837-   15608:	540000e0 	b.eq	15624 <aba_lab::main+0x5e4>  // b.none
+5838-   1560c:	f85f82a1 	ldur	x1, [x21, #-8]
+5839-   15610:	b4ffff81 	cbz	x1, 15600 <aba_lab::main+0x5c0>
+5840-   15614:	f94002a0 	ldr	x0, [x21]
+5841-   15618:	52800022 	mov	w2, #0x1                   	// #1
+5842-   1561c:	94000111 	bl	15a60 <__rustc::__rust_dealloc>
+5843-   15620:	17fffff8 	b	15600 <aba_lab::main+0x5c0>
+5844-   15624:	f94023e8 	ldr	x8, [sp, #64]
+5845-   15628:	b40000c8 	cbz	x8, 15640 <aba_lab::main+0x600>
+5846-   1562c:	8b080508 	add	x8, x8, x8, lsl #1
+5847-   15630:	aa1303e0 	mov	x0, x19
+5848-   15634:	52800102 	mov	w2, #0x8                   	// #8
+5849-   15638:	d37df101 	lsl	x1, x8, #3
+5850-   1563c:	94000109 	bl	15a60 <__rustc::__rust_dealloc>
+5851-   15640:	a9544ff4 	ldp	x20, x19, [sp, #320]
+5852-   15644:	a95357f6 	ldp	x22, x21, [sp, #304]
+5853-   15648:	a9525ff8 	ldp	x24, x23, [sp, #288]
+5854-   1564c:	a95167fa 	ldp	x26, x25, [sp, #272]
+5855-   15650:	a9506ffc 	ldp	x28, x27, [sp, #256]
+5856-   15654:	a94f7bfd 	ldp	x29, x30, [sp, #240]
+5857-   15658:	910543ff 	add	sp, sp, #0x150
+5858-   1565c:	d65f03c0 	ret
+5859-   15660:	b00001e0 	adrp	x0, 52000 <_fini+0x4858>
+5860-   15664:	91057400 	add	x0, x0, #0x15d
+--
+5988:0000000000015860 <bench_raw_kernel>:
+5989-   15860:	d10083ff 	sub	sp, sp, #0x20
+5990-   15864:	a9017bfd 	stp	x29, x30, [sp, #16]
+5991-   15868:	910043fd 	add	x29, sp, #0x10
+5992-   1586c:	b4000442 	cbz	x2, 158f4 <bench_raw_kernel+0x94>
+5993-   15870:	aa0003e8 	mov	x8, x0
+5994-   15874:	aa1f03e0 	mov	x0, xzr
+5995-   15878:	aa1f03ea 	mov	x10, xzr
+5996-   1587c:	5280002b 	mov	w11, #0x1                   	// #1
+5997-   15880:	910023ec 	add	x12, sp, #0x8
+5998-   15884:	f940010d 	ldr	x13, [x8]
+5999-   15888:	9100054a 	add	x10, x10, #0x1
+6000-   1588c:	2a0d03e9 	mov	w9, w13
+6001-   15890:	f100093f 	cmp	x9, #0x2
+6002-   15894:	54000382 	b.cs	15904 <bench_raw_kernel+0xa4>  // b.hs, b.nlast
+6003-   15898:	b8697829 	ldr	w9, [x1, x9, lsl #2]
+6004-   1589c:	aa0d03ee 	mov	x14, x13
+6005-   158a0:	c8ae7d09 	cas	x14, x9, [x8]
+6006-   158a4:	eb0d01df 	cmp	x14, x13
+6007-   158a8:	aa0e03ed 	mov	x13, x14
+6008-   158ac:	54ffff01 	b.ne	1588c <bench_raw_kernel+0x2c>  // b.any
+6009-   158b0:	f940010d 	ldr	x13, [x8]
+6010-   158b4:	aa0d03e9 	mov	x9, x13
+6011-   158b8:	d503201f 	nop
+6012-   158bc:	d503201f 	nop
+6013-   158c0:	c8a97d0b 	cas	x9, x11, [x8]
+6014-   158c4:	eb0d013f 	cmp	x9, x13
+6015-   158c8:	aa0903ed 	mov	x13, x9
+6016-   158cc:	54ffffa1 	b.ne	158c0 <bench_raw_kernel+0x60>  // b.any
+6017-   158d0:	f9400109 	ldr	x9, [x8]
+6018-   158d4:	eb02015f 	cmp	x10, x2
+6019-   158d8:	f90007e9 	str	x9, [sp, #8]
+6020-   158dc:	f94007e9 	ldr	x9, [sp, #8]
+6021-   158e0:	8b000120 	add	x0, x9, x0
+6022-   158e4:	54fffd01 	b.ne	15884 <bench_raw_kernel+0x24>  // b.any
+6023-   158e8:	a9417bfd 	ldp	x29, x30, [sp, #16]
+6024-   158ec:	910083ff 	add	sp, sp, #0x20
+6025-   158f0:	d65f03c0 	ret
+6026-   158f4:	aa1f03e0 	mov	x0, xzr
+6027-   158f8:	a9417bfd 	ldp	x29, x30, [sp, #16]
+6028-   158fc:	910083ff 	add	sp, sp, #0x20
+6029-   15900:	d65f03c0 	ret
+6030-   15904:	90000342 	adrp	x2, 7d000 <GCC_except_table0+0x1c3e8>
+6031-   15908:	911ee042 	add	x2, x2, #0x7b8
+6032-   1590c:	aa0903e0 	mov	x0, x9
+6033-   15910:	52800041 	mov	w1, #0x2                   	// #2
+6034-   15914:	97fffc58 	bl	14a74 <core::panicking::panic_bounds_check>
+6035-   15918:	d4200020 	brk	#0x1
+6036-   1591c:	97fffca0 	bl	14b9c <core::panicking::panic_cannot_unwind>
+6037-
+6038:0000000000015920 <bench_tagged_kernel>:
+6039-   15920:	d10083ff 	sub	sp, sp, #0x20
+6040-   15924:	a9017bfd 	stp	x29, x30, [sp, #16]
+6041-   15928:	910043fd 	add	x29, sp, #0x10
+6042-   1592c:	b4000582 	cbz	x2, 159dc <bench_tagged_kernel+0xbc>
+6043-   15930:	aa0003e8 	mov	x8, x0
+6044-   15934:	aa1f03e0 	mov	x0, xzr
+6045-   15938:	aa1f03ea 	mov	x10, xzr
+6046-   1593c:	d2c0002b 	mov	x11, #0x100000000           	// #4294967296
+6047-   15940:	b20003ec 	mov	x12, #0x100000001           	// #4294967297
+6048-   15944:	910023ed 	add	x13, sp, #0x8
+6049-   15948:	f940010e 	ldr	x14, [x8]
+6050-   1594c:	9100054a 	add	x10, x10, #0x1
+6051-   15950:	d503201f 	nop
+6052-   15954:	d503201f 	nop
+6053-   15958:	d503201f 	nop
+6054-   1595c:	d503201f 	nop
+6055-   15960:	2a0e03e9 	mov	w9, w14
+6056-   15964:	f100093f 	cmp	x9, #0x2
+6057-   15968:	54000422 	b.cs	159ec <bench_tagged_kernel+0xcc>  // b.hs, b.nlast
+6058-   1596c:	b8697829 	ldr	w9, [x1, x9, lsl #2]
+6059-   15970:	92607dcf 	and	x15, x14, #0xffffffff00000000
+6060-   15974:	aa0901e9 	orr	x9, x15, x9
+6061-   15978:	aa0e03ef 	mov	x15, x14
+6062-   1597c:	8b0b0129 	add	x9, x9, x11
+6063-   15980:	c8af7d09 	cas	x15, x9, [x8]
+6064-   15984:	eb0e01ff 	cmp	x15, x14
+6065-   15988:	aa0f03ee 	mov	x14, x15
+6066-   1598c:	54fffea1 	b.ne	15960 <bench_tagged_kernel+0x40>  // b.any
+6067-   15990:	f940010e 	ldr	x14, [x8]
+6068-   15994:	aa0e03e9 	mov	x9, x14
+6069-   15998:	d503201f 	nop
+6070-   1599c:	d503201f 	nop
+6071-   159a0:	92607dcf 	and	x15, x14, #0xffffffff00000000
+6072-   159a4:	8b0c01ef 	add	x15, x15, x12
+6073-   159a8:	c8a97d0f 	cas	x9, x15, [x8]
+6074-   159ac:	eb0e013f 	cmp	x9, x14
+6075-   159b0:	aa0903ee 	mov	x14, x9
+6076-   159b4:	54ffff61 	b.ne	159a0 <bench_tagged_kernel+0x80>  // b.any
+6077-   159b8:	f9400109 	ldr	x9, [x8]
+6078-   159bc:	eb02015f 	cmp	x10, x2
+6079-   159c0:	f90007e9 	str	x9, [sp, #8]
+6080-   159c4:	f94007e9 	ldr	x9, [sp, #8]
+6081-   159c8:	8b000120 	add	x0, x9, x0
+6082-   159cc:	54fffbe1 	b.ne	15948 <bench_tagged_kernel+0x28>  // b.any
+6083-   159d0:	a9417bfd 	ldp	x29, x30, [sp, #16]
+6084-   159d4:	910083ff 	add	sp, sp, #0x20
+6085-   159d8:	d65f03c0 	ret
+6086-   159dc:	aa1f03e0 	mov	x0, xzr
+6087-   159e0:	a9417bfd 	ldp	x29, x30, [sp, #16]
+6088-   159e4:	910083ff 	add	sp, sp, #0x20
+6089-   159e8:	d65f03c0 	ret
+6090-   159ec:	90000342 	adrp	x2, 7d000 <GCC_except_table0+0x1c3e8>
+6091-   159f0:	911f4042 	add	x2, x2, #0x7d0
+6092-   159f4:	aa0903e0 	mov	x0, x9
+6093-   159f8:	52800041 	mov	w1, #0x2                   	// #2
+6094-   159fc:	97fffc1e 	bl	14a74 <core::panicking::panic_bounds_check>
+6095-   15a00:	d4200020 	brk	#0x1
+6096-   15a04:	97fffc66 	bl	14b9c <core::panicking::panic_cannot_unwind>
+6097-   15a08:	d503201f 	nop
+6098-   15a0c:	d503201f 	nop
+6099-
+6100-0000000000015a10 <main>:
+6101-   15a10:	d10083ff 	sub	sp, sp, #0x20
+6102-   15a14:	a9017bfd 	stp	x29, x30, [sp, #16]
+6103-   15a18:	910043fd 	add	x29, sp, #0x10
+6104-   15a1c:	aa0103e3 	mov	x3, x1
+6105-   15a20:	93407c02 	sxtw	x2, w0
+6106-   15a24:	90000008 	adrp	x8, 15000 <<core::num::error::ParseIntError as core::fmt::Debug>::fmt+0x20>
+6107-   15a28:	91010108 	add	x8, x8, #0x40
+6108-   15a2c:	f90007e8 	str	x8, [sp, #8]
+6109-   15a30:	90000341 	adrp	x1, 7d000 <GCC_except_table0+0x1c3e8>
+6110-   15a34:	91198021 	add	x1, x1, #0x660
+6111-   15a38:	910023e0 	add	x0, sp, #0x8
+6112-   15a3c:	2a1f03e4 	mov	w4, wzr
+6113-   15a40:	9400267a 	bl	1f428 <std::rt::lang_start_internal>
+6114-   15a44:	a9417bfd 	ldp	x29, x30, [sp, #16]
+6115-   15a48:	910083ff 	add	sp, sp, #0x20
+6116-   15a4c:	d65f03c0 	ret
+6117-
+6118-0000000000015a50 <__rustc::__rust_alloc>:
