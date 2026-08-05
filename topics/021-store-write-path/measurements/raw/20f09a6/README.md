@@ -9,3 +9,10 @@ The executable binaries are not checked in. Their SHA-256 values and generated
 code are retained. Each directory's checksum file covers every retained file
 except itself. Generated text with tool-emitted trailing whitespace is retained
 losslessly as a deterministic gzip stream so `git diff --check` remains clean.
+
+Chain of custody: the runner sealed its original outputs in `evidence.sha256`.
+Retention transformed some files (the gzip streams above) and dropped the
+executable binaries, so that original manifest no longer matched and was not
+retained; each directory's `retained.sha256` re-seals the retained set and
+supersedes the runner's seal. Hashes of untransformed files are unchanged
+between the two manifests.

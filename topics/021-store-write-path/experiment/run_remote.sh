@@ -239,40 +239,73 @@ for symbol in \
         exit 1
     fi
     objdump -d -C --disassemble="$symbol" "$binary" \
+        >"$binary_dir/write_path.$symbol.objdump.txt"
+    cat -- "$binary_dir/write_path.$symbol.objdump.txt" \
         >>"$binary_dir/write_path.focused-objdump.txt"
 done
 objdump -d -C "$binary" | gzip -9 >"$binary_dir/write_path.objdump.txt.gz"
+
+# Per-symbol codegen gates. Searching one concatenated disassembly would let
+# an instruction in the wrong function satisfy a treatment-specific check, so
+# every gate binds its pattern to a single function's disassembly, and the
+# treatment-defining instructions are also asserted absent from the control.
+codegen_gate() {
+    local requirement="$1" pattern="$2" symbol="$3"
+    local symbol_file="$binary_dir/write_path.$symbol.objdump.txt"
+    case "$requirement" in
+        present)
+            if ! rg -qi "$pattern" "$symbol_file"; then
+                printf 'codegen gate failed: %s lacks %s\n' "$symbol" "$pattern" >&2
+                exit 1
+            fi
+            ;;
+        absent)
+            if rg -qi "$pattern" "$symbol_file"; then
+                printf 'codegen gate failed: %s contains %s\n' "$symbol" "$pattern" >&2
+                exit 1
+            fi
+            ;;
+        *)
+            printf 'internal error: unknown gate requirement %s\n' "$requirement" >&2
+            exit 1
+            ;;
+    esac
+}
 
 codegen_review="$binary_dir/write_path.codegen-review.txt"
 case "$(uname -m)" in
     x86_64)
         {
             printf 'architecture=x86_64\n'
-            printf 'presence_gate=temporal VMOVAPS; non-temporal VMOVNTDQ then SFENCE\n'
+            printf 'presence_gate=per-function: temporal VMOVAPS without VMOVNTDQ; non-temporal VMOVNTDQ then SFENCE\n'
             rg -ni '\bvmovaps\b|\bvmovntdq\b|\bsfence\b' \
                 "$binary_dir/write_path.focused-objdump.txt"
             printf 'manual_geometry_gate=inspect exact [base] and partial [base+4] dependent loads below\n'
             rg -ni 'topic21_stlf_(exact|partial)|mov\s+(0x[0-9a-f]+)?\(%[a-z0-9]+\),%' \
                 "$binary_dir/write_path.focused-objdump.txt" || true
         } >"$codegen_review"
-        rg -qi '\bvmovaps\b' "$binary_dir/write_path.focused-objdump.txt"
-        rg -qi '\bvmovntdq\b' "$binary_dir/write_path.focused-objdump.txt"
-        rg -qi '\bsfence\b' "$binary_dir/write_path.focused-objdump.txt"
+        codegen_gate present '\bvmovaps\b' topic21_temporal_store
+        codegen_gate absent '\bvmovntdq\b' topic21_temporal_store
+        codegen_gate present '\bvmovntdq\b' topic21_nontemporal_store
+        codegen_gate present '\bsfence\b' topic21_nontemporal_store
         ;;
     aarch64)
         {
             printf 'architecture=aarch64\n'
-            printf 'presence_gate=temporal STP; advisory STNP; release publication STLR\n'
+            printf 'presence_gate=per-function: temporal STP without STNP; non-temporal STNP; STLR publication in both; LDUR in both STLF kernels\n'
             rg -ni '\bstp\b|\bstnp\b|\bstlr\b' \
                 "$binary_dir/write_path.focused-objdump.txt"
             printf 'manual_geometry_gate=inspect LDUR #0 exact and LDUR #4 partial below\n'
             rg -ni 'topic21_stlf_(exact|partial)|\bldur\b' \
                 "$binary_dir/write_path.focused-objdump.txt"
         } >"$codegen_review"
-        rg -qi '\bstnp\b' "$binary_dir/write_path.focused-objdump.txt"
-        rg -qi '\bstp\b' "$binary_dir/write_path.focused-objdump.txt"
-        rg -qi '\bstlr\b' "$binary_dir/write_path.focused-objdump.txt"
-        rg -qi '\bldur\b' "$binary_dir/write_path.focused-objdump.txt"
+        codegen_gate present '\bstp\b' topic21_temporal_store
+        codegen_gate absent '\bstnp\b' topic21_temporal_store
+        codegen_gate present '\bstnp\b' topic21_nontemporal_store
+        codegen_gate present '\bstlr\b' topic21_temporal_store
+        codegen_gate present '\bstlr\b' topic21_nontemporal_store
+        codegen_gate present '\bldur\b' topic21_stlf_exact
+        codegen_gate present '\bldur\b' topic21_stlf_partial
         ;;
     *)
         printf 'unsupported measurement architecture: %s\n' "$(uname -m)" >&2

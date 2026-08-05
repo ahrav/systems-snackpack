@@ -98,25 +98,44 @@ struct PhaseFaults {
     verify: Faults,
 }
 
-fn write_mode(name: &str) -> Option<(WriteMode, &'static str)> {
+fn write_mode(name: &str) -> Option<WriteMode> {
     match name {
-        "temporal" | "temporal_a" | "temporal_b" => Some((WriteMode::Temporal, "temporal")),
-        "nontemporal" => Some((WriteMode::NonTemporal, "nontemporal")),
+        "temporal" | "temporal_a" | "temporal_b" => Some(WriteMode::Temporal),
+        "nontemporal" => Some(WriteMode::NonTemporal),
         _ => None,
     }
 }
 
-fn stlf_mode(name: &str) -> Option<(StlfMode, &'static str)> {
+/// Derives the reported implementation label from the executed kernel
+/// selector itself, so an alias can never report one implementation while
+/// running another.
+fn write_implementation(mode: WriteMode) -> &'static str {
+    match mode {
+        WriteMode::Temporal => "temporal",
+        WriteMode::NonTemporal => "nontemporal",
+    }
+}
+
+fn stlf_mode(name: &str) -> Option<StlfMode> {
     match name {
-        "exact" | "exact_a" | "exact_b" => Some((StlfMode::Exact, "exact")),
-        "partial" => Some((StlfMode::Partial, "partial")),
+        "exact" | "exact_a" | "exact_b" => Some(StlfMode::Exact),
+        "partial" => Some(StlfMode::Partial),
         _ => None,
+    }
+}
+
+/// See [`write_implementation`]: the label is derived from the selector.
+fn stlf_implementation(mode: StlfMode) -> &'static str {
+    match mode {
+        StlfMode::Exact => "exact",
+        StlfMode::Partial => "partial",
     }
 }
 
 fn run_write(requested_mode: &str, mib: usize) -> Result<(), String> {
-    let (mode, implementation) = write_mode(requested_mode)
+    let mode = write_mode(requested_mode)
         .ok_or_else(|| format!("unknown write mode: {requested_mode}"))?;
+    let implementation = write_implementation(mode);
     if !write_kernels_supported() {
         return Err("required target features are unavailable".to_owned());
     }
@@ -233,8 +252,9 @@ fn run_write(requested_mode: &str, mib: usize) -> Result<(), String> {
 }
 
 fn run_stlf_benchmark(requested_mode: &str, iterations: u64) -> Result<(), String> {
-    let (mode, implementation) =
+    let mode =
         stlf_mode(requested_mode).ok_or_else(|| format!("unknown STLF mode: {requested_mode}"))?;
+    let implementation = stlf_implementation(mode);
     if iterations == 0 {
         return Err("STLF iterations must be nonzero".to_owned());
     }

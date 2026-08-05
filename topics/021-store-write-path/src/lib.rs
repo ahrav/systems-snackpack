@@ -487,8 +487,9 @@ pub fn write_kernels_supported() -> bool {
 /// Writes the complete pattern and release-publishes `ready = 1`.
 ///
 /// The destination must not be read or written concurrently. The wrapper
-/// checks alignment, size, and target-feature support before entering the
-/// architecture-specific kernel.
+/// checks target-feature support before entering the architecture-specific
+/// kernel; page alignment and whole-line size are `AlignedBuffer`
+/// constructor invariants.
 ///
 /// # Panics
 ///
@@ -569,6 +570,74 @@ mod tests {
             fence(Ordering::SeqCst);
             assert_eq!(ready.load(Ordering::Acquire), 1);
             assert_eq!(destination.verify_pattern().bad_words, 0);
+        }
+    }
+
+    #[test]
+    fn verify_pattern_detects_corruption() {
+        if !write_kernels_supported() {
+            return;
+        }
+        let mut destination = AlignedBuffer::new(64 * 1024);
+        destination.fill(0xa5);
+        // A dirty buffer must fail every word, so a stub verifier that
+        // always reports zero cannot pass this test.
+        assert_eq!(
+            destination.verify_pattern().bad_words,
+            destination.len() / 8
+        );
+        let ready = AtomicU64::new(0);
+        publish_pattern(WriteMode::Temporal, &mut destination, &ready);
+        fence(Ordering::SeqCst);
+        assert_eq!(destination.verify_pattern().bad_words, 0);
+        // Corrupting exactly one word must be detected as exactly one word.
+        // SAFETY: word 7 lies inside the 64 KiB allocation.
+        unsafe {
+            std::ptr::write_volatile(
+                destination.as_mut_ptr().cast::<u64>().add(7),
+                !PATTERN_WORDS[7],
+            );
+        }
+        assert_eq!(destination.verify_pattern().bad_words, 1);
+    }
+
+    #[test]
+    fn stlf_kernels_update_memory_and_track_small_iteration_counts() {
+        if !write_kernels_supported() {
+            return;
+        }
+        for mode in [StlfMode::Exact, StlfMode::Partial] {
+            for iterations in 1..=5_u64 {
+                let mut buffer = AlignedBuffer::new(64);
+                buffer.initialize_stlf_fixture();
+                let observed = run_stlf(mode, &mut buffer, iterations, STLF_SEED);
+                assert_eq!(
+                    observed,
+                    stlf_oracle(mode, iterations, STLF_SEED),
+                    "{mode:?} result for {iterations} iterations"
+                );
+                // The final store must have landed in the first word: it
+                // holds the value entering the last iteration, which is the
+                // oracle state one transition earlier. A kernel that never
+                // stores, or stores at the wrong address, fails here.
+                let expected_stored = if iterations == 1 {
+                    STLF_SEED
+                } else {
+                    stlf_oracle(mode, iterations - 1, STLF_SEED)
+                };
+                // SAFETY: the fixture initializes these 16 bytes.
+                let stored = unsafe { std::ptr::read(buffer.as_mut_ptr().cast::<u64>()) };
+                assert_eq!(stored, expected_stored, "{mode:?} memory image");
+                for index in 8..16 {
+                    // SAFETY: within the initialized fixture bytes.
+                    let byte = unsafe { std::ptr::read(buffer.as_mut_ptr().add(index)) };
+                    assert_eq!(
+                        byte,
+                        (index as u8).wrapping_mul(17).wrapping_add(3),
+                        "{mode:?} fixture byte {index} must stay untouched"
+                    );
+                }
+            }
         }
     }
 

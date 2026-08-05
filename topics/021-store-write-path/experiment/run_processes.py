@@ -9,8 +9,8 @@ block-level log time ratios, not inner-loop iterations.
 
 from __future__ import annotations
 
-import json
 import hashlib
+import json
 import math
 import os
 import re
@@ -21,7 +21,6 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, NoReturn, TextIO
-
 
 PRIMARY_BLOCKS = 12
 CONTROL_BLOCKS = 4
@@ -121,7 +120,10 @@ def validate_binary_record(
         fail(f"{run_id}: implementation does not match requested mode")
 
     for field in ("setup_ns", "scrub_ns", "timed_ns", "verify_ns"):
-        require_integer(record, field, positive=True)
+        # Only the timed phase must be strictly positive. Short setup, scrub,
+        # or verification phases may legitimately measure zero at the clock's
+        # resolution.
+        require_integer(record, field, positive=field == "timed_ns")
     for phase in ("setup", "scrub", "timed", "verify"):
         minor = require_integer(record, f"{phase}_minor_faults")
         major = require_integer(record, f"{phase}_major_faults")
@@ -233,7 +235,7 @@ def run_one(
         run_id=run_id,
     )
     internal_ns = sum(
-        require_integer(record, field, positive=True)
+        require_integer(record, field)
         for field in ("setup_ns", "scrub_ns", "timed_ns", "verify_ns")
     )
     if external_wall_ns < internal_ns:

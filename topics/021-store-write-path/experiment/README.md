@@ -47,11 +47,16 @@ uses:
 ```
 
 The copied benchmark binary receives its own SHA-256, file metadata, symbol
-table, complete disassembly, and complete focused-function disassembly. Presence
-gates require `VMOVAPS`, `VMOVNTDQ`, and `SFENCE` on x86-64 or `STP`, `STNP`,
-`STLR`, and `LDUR` on AArch64. The retained focused disassembly still requires
-manual confirmation that the fences and publication occur in order and that
-the STLF loads use exact and `+4` addresses in their respective functions.
+table, complete disassembly, per-function focused disassembly, and the
+concatenated focused file. Codegen gates bind each pattern to one function's
+disassembly: on x86-64 the temporal kernel must contain `VMOVAPS` and no
+`VMOVNTDQ`, and the non-temporal kernel must contain `VMOVNTDQ` and `SFENCE`;
+on AArch64 the temporal kernel must contain `STP` and no `STNP`, the
+non-temporal kernel must contain `STNP`, both write kernels must contain
+`STLR`, and both STLF kernels must contain `LDUR`. The retained focused
+disassembly still requires manual confirmation that the fences and publication
+occur in order and that the STLF loads use exact and `+4` addresses in their
+respective functions.
 
 ## Fixed schedule
 
