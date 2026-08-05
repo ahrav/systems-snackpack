@@ -1,0 +1,9 @@
+source_mode=clean-git-checkout
+source_commit=20f09a6ef066df02ba4a180cb04b06a96e4dc633
+workspace_gates=sanitized environment; --locked; offline; external target directory
+focused_build=--release RUSTFLAGS=-C target-cpu=native -C codegen-units=1 -C lto=off
+focused_binary_sha256=0a9b3cc369da1b6c700b1d83a2d757cea8168a7da854ffb44abbd347168799d0
+focused_affinity=taskset --cpu-list 0 per fresh process
+write_input=512 MiB
+stlf_input=500000000 dependent iterations
+schedule=4 A/A control blocks, then 12 primary blocks; odd ABBA, even BAAB

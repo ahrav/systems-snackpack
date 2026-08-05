@@ -1,0 +1,17 @@
+architecture=x86_64
+presence_gate=temporal VMOVAPS; non-temporal VMOVNTDQ then SFENCE
+11:   1d777:	c5 fc 28 05 61 d0 fe 	vmovaps -0x12f9f(%rip),%ymm0        # a7e0 <GCC_except_table386+0x1bc4>
+13:   1d77f:	c5 fc 28 0d 79 d0 fe 	vmovaps -0x12f87(%rip),%ymm1        # a800 <GCC_except_table386+0x1be4>
+17:   1d790:	c5 fc 29 04 07       	vmovaps %ymm0,(%rdi,%rax,1)
+18:   1d795:	c5 fc 29 4c 07 20    	vmovaps %ymm1,0x20(%rdi,%rax,1)
+41:   1d707:	c5 fc 28 05 d1 d0 fe 	vmovaps -0x12f2f(%rip),%ymm0        # a7e0 <GCC_except_table386+0x1bc4>
+43:   1d70f:	c5 fc 28 0d e9 d0 fe 	vmovaps -0x12f17(%rip),%ymm1        # a800 <GCC_except_table386+0x1be4>
+48:   1d724:	c5 fd e7 01          	vmovntdq %ymm0,(%rcx)
+50:   1d72d:	c5 fd e7 09          	vmovntdq %ymm1,(%rcx)
+54:   1d73a:	0f ae f8             	sfence
+manual_geometry_gate=inspect exact [base] and partial [base+4] dependent loads below
+70:000000000001d750 <topic21_stlf_exact>:
+75:   1d75c:	75 f5                	jne    1d753 <topic21_stlf_exact+0x3>
+89:000000000001d760 <topic21_stlf_partial>:
+92:   1d766:	48 8b 47 04          	mov    0x4(%rdi),%rax
+94:   1d76d:	75 f4                	jne    1d763 <topic21_stlf_partial+0x3>

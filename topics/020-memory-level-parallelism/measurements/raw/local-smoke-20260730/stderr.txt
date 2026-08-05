@@ -1,0 +1,2 @@
+    Finished `bench` profile [optimized] target(s) in 0.04s
+     Running benches/chain_sweep.rs (target/release/deps/chain_sweep-809c5b7ef3e7d60c)
