@@ -30,6 +30,7 @@ Run one process on glibc Linux:
 
 ```bash
 cc -std=c11 -O2 -g -Wall -Wextra -Werror -fno-omit-frame-pointer \
+  -fno-builtin-malloc -fno-builtin-free \
   experiment/allocator_frag_probe.c -o /tmp/allocator_frag_probe
 /tmp/allocator_frag_probe compact A 1 1 262144 256
 ```

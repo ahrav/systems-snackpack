@@ -1,29 +1,25 @@
 #!/usr/bin/env python3
-"""Validate Topic 24 process counts, controls, and summary receipts."""
+"""Validate Topic 24 process counts, controls, and summary receipts.
+
+Every check is exact: each receipt row is bound to its expected
+``(block, period)`` position in the predeclared schedule rebuilt from the
+templates in ``run_processes``, every probe control is checked, and the
+complete summary is recomputed from the NDJSON receipts before ``PASS`` is
+reported.
+"""
 
 from __future__ import annotations
 
 import argparse
 import json
 import math
+import sys
 from pathlib import Path
 from typing import Any
 
-AB_TEMPLATES = (
-    "BAAB",
-    "ABBA",
-    "ABBA",
-    "ABBA",
-    "BAAB",
-    "ABBA",
-    "ABBA",
-    "BAAB",
-    "BAAB",
-    "ABBA",
-    "BAAB",
-    "BAAB",
-)
-AA_TEMPLATES = ("BAAB", "ABBA", "BAAB", "ABBA")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from run_processes import AA_TEMPLATES, AB_TEMPLATES, summarize
 
 
 def load_rows(path: Path) -> list[dict[str, Any]]:
@@ -40,20 +36,27 @@ def require(condition: bool, message: str) -> None:
 def validate_rows(
     rows: list[dict[str, Any]], phase: str, templates: tuple[str, ...]
 ) -> None:
-    """Validate assignments, treatment identity, and probe controls."""
-    require(len(rows) == 4 * len(templates), f"wrong {phase} process count")
-    for row in rows:
-        block = int(row["block"])
-        period = int(row["period"])
-        require(1 <= block <= len(templates), f"invalid {phase} block")
-        require(1 <= period <= 4, f"invalid {phase} period")
-        template = templates[block - 1]
-        label = template[period - 1]
+    """Bind each receipt to its scheduled position and check probe controls."""
+    expected_positions = [
+        (block, period, template, template[period - 1])
+        for block, template in enumerate(templates, start=1)
+        for period in range(1, 5)
+    ]
+    require(len(rows) == len(expected_positions), f"wrong {phase} process count")
+    # pi-lens-ignore: B905
+    for number, (row, position) in enumerate(zip(rows, expected_positions), start=1):
+        block, period, template, label = position
         pattern = "scattered" if phase == "ab" and label == "B" else "compact"
-        require(row["phase"] == phase, f"wrong phase in {phase} receipt")
-        require(row["template"] == template, f"wrong template in {phase} receipt")
-        require(row["label"] == label, f"wrong label in {phase} receipt")
-        require(row["pattern"] == pattern, f"wrong treatment in {phase} receipt")
+        require(
+            int(row["block"]) == block and int(row["period"]) == period,
+            f"{phase} receipt {number} is out of schedule order",
+        )
+        require(row["phase"] == phase, f"wrong phase in {phase} receipt {number}")
+        require(
+            row["template"] == template, f"wrong template in {phase} receipt {number}"
+        )
+        require(row["label"] == label, f"wrong label in {phase} receipt {number}")
+        require(row["pattern"] == pattern, f"wrong treatment in {phase} receipt {number}")
         require(int(row["count"]) == 262_144, "allocation count changed")
         require(int(row["block_size"]) == 256, "requested size changed")
         require(int(row["survivors"]) == 16_384, "survivor count changed")
@@ -76,6 +79,34 @@ def validate_rows(
             require(int(row[key]) > 0, f"nonpositive {key}")
 
 
+def require_equal(expected: Any, actual: Any, context: str) -> None:
+    """Require deep equality with float tolerance."""
+    if isinstance(expected, float) or isinstance(actual, float):
+        require(
+            isinstance(actual, (int, float))
+            and isinstance(expected, (int, float))
+            and math.isclose(float(actual), float(expected), rel_tol=1e-9, abs_tol=1e-12),
+            f"summary {context} does not match the receipts",
+        )
+    elif isinstance(expected, dict):
+        require(
+            isinstance(actual, dict) and set(actual) == set(expected),
+            f"summary {context} keys do not match the receipts",
+        )
+        for key in expected:
+            require_equal(expected[key], actual[key], f"{context}.{key}")
+    elif isinstance(expected, list):
+        require(
+            isinstance(actual, list) and len(actual) == len(expected),
+            f"summary {context} length does not match the receipts",
+        )
+        # pi-lens-ignore: B905
+        for index, (expected_item, actual_item) in enumerate(zip(expected, actual)):
+            require_equal(expected_item, actual_item, f"{context}[{index}]")
+    else:
+        require(actual == expected, f"summary {context} does not match the receipts")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("process_directory", type=Path)
@@ -89,21 +120,16 @@ def main() -> None:
     require(len({int(row["pid"]) for row in all_rows}) == 64, "PIDs are not unique")
 
     summary = json.loads((args.process_directory / "summary.json").read_text())
-    require(summary["parameters"]["ab_templates"] == list(AB_TEMPLATES), "A/B schedule drift")
-    require(summary["parameters"]["aa_templates"] == list(AA_TEMPLATES), "A/A schedule drift")
-    comparisons = {entry["phase"]: entry for entry in summary["comparisons"]}
-    require(comparisons["ab"]["blocks"] == 12, "A/B block count changed")
-    require(comparisons["aa"]["blocks"] == 4, "A/A block count changed")
-    for entry in comparisons.values():
-        for key in ("rss_trimmed_kb_ratio", "alloc_ns_ratio"):
-            result = entry[key]
-            values = (result["ci95_low"], result["estimate"], result["ci95_high"])
-            require(all(math.isfinite(value) and value > 0 for value in values), "invalid ratio")
-            require(values[0] <= values[1] <= values[2], "unordered ratio interval")
-        result = entry["rss_trimmed_kb_difference"]
-        values = (result["ci95_low"], result["estimate"], result["ci95_high"])
-        require(all(math.isfinite(value) for value in values), "invalid difference")
-        require(values[0] <= values[1] <= values[2], "unordered difference interval")
+    # A stale or fabricated summary must not pass: rebuild the complete
+    # summary from the validated receipts and require agreement.
+    recomputed = summarize(all_rows)
+    for section in ("comparisons", "treatment_medians"):
+        require_equal(recomputed[section], summary.get(section), section)
+    for key, value in recomputed["parameters"].items():
+        if key == "probe_environment_blocklist" and key not in summary["parameters"]:
+            # Receipts recorded before the blocklist parameter existed.
+            continue
+        require_equal(value, summary["parameters"].get(key), f"parameters.{key}")
 
     print("receipt validation: PASS")
 

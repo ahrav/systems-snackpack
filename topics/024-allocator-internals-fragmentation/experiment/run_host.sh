@@ -16,11 +16,29 @@ topic=topics/024-allocator-internals-fragmentation
 : "${SOURCE_ARCHIVE_SHA256:?set SOURCE_ARCHIVE_SHA256 to the sender archive digest}"
 : "${SOURCE_TREE_MANIFEST_SHA256:?set SOURCE_TREE_MANIFEST_SHA256 to the sender manifest digest}"
 
+# Resolve a relative archive path against the caller's directory now; after
+# the cd into the repository below it would name the wrong location.
+SOURCE_ARCHIVE_PATH=$(cd "$(dirname -- "$SOURCE_ARCHIVE_PATH")" && pwd -P)/$(basename -- "$SOURCE_ARCHIVE_PATH")
+
+# Python bytecode caches written during validation would dirty the source
+# tree between the before and after manifests.
+export PYTHONDONTWRITEBYTECODE=1
+
 if [[ -e $output_directory ]]; then
   printf 'output directory already exists: %s\n' "$output_directory" >&2
   exit 2
 fi
-mkdir -p "$output_directory"/{codegen,correctness,gates,processes}
+mkdir -p "$output_directory"
+output_directory=$(cd "$output_directory" && pwd -P)
+# A relative output path must not silently resolve under the repository after
+# the cd below, and in-tree evidence would corrupt the before/after
+# source-tree comparison with its own generated files.
+if [[ $output_directory == "$repository_root" || $output_directory == "$repository_root"/* ]]; then
+  rmdir "$output_directory" 2>/dev/null || true
+  printf 'OUTPUT_DIRECTORY must be outside the repository: %s\n' "$output_directory" >&2
+  exit 2
+fi
+mkdir -p "$output_directory"/{binaries,codegen,correctness,gates,processes}
 
 allowed_list=$(awk '/Cpus_allowed_list/ {print $2}' /proc/self/status)
 cpu=${allowed_list%%,*}
@@ -42,8 +60,8 @@ if [[ $archive_commit != "$source_commit" ]]; then
   exit 2
 fi
 
-rg --files -g '!target/**' | LC_ALL=C sort | xargs sha256sum \
-  >"$output_directory/source-tree.before.sha256"
+rg --files --hidden --no-ignore -g '!.git/**' -g '!target/**' -0 | LC_ALL=C sort -z \
+  | xargs -0 sha256sum >"$output_directory/source-tree.before.sha256"
 actual_manifest_sha256=$(sha256sum "$output_directory/source-tree.before.sha256" | awk '{print $1}')
 if [[ $actual_manifest_sha256 != "$SOURCE_TREE_MANIFEST_SHA256" ]]; then
   printf 'source manifest mismatch: expected %s, observed %s\n' \
@@ -86,10 +104,19 @@ fi
   cargo -V
   rustc -C target-cpu=native --print cfg | rg '^(target_arch|target_feature|target_has_atomic|target_pointer_width)'
   printf 'RUSTFLAGS=%s\n' "${RUSTFLAGS-<unset>}"
+  printf 'ambient_GLIBC_TUNABLES=%s\n' "${GLIBC_TUNABLES-<unset>}"
+  printf 'ambient_LD_PRELOAD=%s\n' "${LD_PRELOAD-<unset>}"
+  printf 'ambient_LD_LIBRARY_PATH=%s\n' "${LD_LIBRARY_PATH-<unset>}"
 } >"$output_directory/host.txt"
 
-rg --files "$topic" | LC_ALL=C sort | xargs sha256sum \
-  >"$output_directory/source-files.sha256"
+# Caller overrides must not leak into the gates or any probe process; the
+# ambient values are recorded above.
+unset CARGO_BUILD_RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_TARGET_DIR CARGO_BUILD_TARGET
+unset RUSTC RUSTC_WRAPPER RUSTDOC RUSTDOCFLAGS RUSTFLAGS
+unset GLIBC_TUNABLES LD_PRELOAD LD_LIBRARY_PATH
+
+rg --files --hidden --no-ignore -g '!.git/**' -0 "$topic" | LC_ALL=C sort -z \
+  | xargs -0 sha256sum >"$output_directory/source-files.sha256"
 
 printf 'not applicable: extracted Git archive has no index\n' \
   >"$output_directory/gates/git-diff-check.log"
@@ -113,7 +140,13 @@ cc -std=c11 -O2 -g -Wall -Wextra -Werror -fno-omit-frame-pointer \
   -fno-builtin-malloc -fno-builtin-free \
   "$topic/experiment/allocator_frag_probe.c" -o "$binary" \
   >"$output_directory/build.log" 2>&1
-sha256sum "$binary" >"$output_directory/binary.sha256"
+# Retain the measured binary inside the bundle with a bundle-relative
+# receipt, so the receipt is verifiable without the build host.
+cp "$binary" "$output_directory/binaries/allocator_frag_probe"
+(
+  cd "$output_directory"
+  sha256sum binaries/allocator_frag_probe >binary.sha256
+)
 
 for replicate in 1 2 3 4; do
   taskset --cpu-list "$cpu" "$binary" compact A "$replicate" 1 262144 256
@@ -137,8 +170,8 @@ python3 "$topic/experiment/run_processes.py" \
 python3 "$topic/experiment/validate_receipts.py" "$output_directory/processes" \
   >"$output_directory/receipt-validation.txt"
 
-rg --files -g '!target/**' | LC_ALL=C sort | xargs sha256sum \
-  >"$output_directory/source-tree.after.sha256"
+rg --files --hidden --no-ignore -g '!.git/**' -g '!target/**' -0 | LC_ALL=C sort -z \
+  | xargs -0 sha256sum >"$output_directory/source-tree.after.sha256"
 cmp "$output_directory/source-tree.before.sha256" "$output_directory/source-tree.after.sha256"
 
 {
@@ -156,5 +189,9 @@ run_finished_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)
 printf 'run_finished_utc=%s\n' "$run_finished_utc" >>"$output_directory/host.txt"
 (
   cd "$output_directory"
-  rg --files -g '!evidence.sha256' | LC_ALL=C sort | xargs sha256sum >evidence.sha256
+  rg --files --hidden --no-ignore -g '!evidence.sha256' -g '!evidence-verification.txt' -0 \
+    | LC_ALL=C sort -z | xargs -0 sha256sum >evidence.sha256
+  # The reports state that evidence-hash validation passed; retain the proof.
+  sha256sum --check --quiet evidence.sha256 >evidence-verification.txt 2>&1
+  printf 'evidence manifest verified\n' >>evidence-verification.txt
 )

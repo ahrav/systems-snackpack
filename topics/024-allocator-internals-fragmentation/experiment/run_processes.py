@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import shutil
 import statistics
 import subprocess
@@ -31,6 +32,21 @@ AA_TEMPLATES = ("BAAB", "ABBA", "BAAB", "ABBA")
 T95 = {12: 2.2009851601, 4: 3.1824463053}
 COUNT = 262_144
 BLOCK_SIZE = 256
+# Inherited allocator controls would change probe behavior while the source
+# and binary hashes still match; every probe runs without them.
+PROBE_ENV_BLOCKLIST = (
+    "GLIBC_TUNABLES",
+    "LD_PRELOAD",
+    "LD_LIBRARY_PATH",
+    "MALLOC_CHECK_",
+    "MALLOC_PERTURB_",
+    "MALLOC_ARENA_MAX",
+    "MALLOC_ARENA_TEST",
+    "MALLOC_MMAP_THRESHOLD_",
+    "MALLOC_TRIM_THRESHOLD_",
+    "MALLOC_TOP_PAD_",
+    "MALLOC_MMAP_MAX_",
+)
 
 
 def run_one(
@@ -57,7 +73,14 @@ def run_one(
         str(BLOCK_SIZE),
     ]
     started = time.monotonic_ns()
-    process = subprocess.run(command, check=True, capture_output=True, text=True)
+    probe_env = {
+        key: value
+        for key, value in os.environ.items()
+        if key not in PROBE_ENV_BLOCKLIST
+    }
+    process = subprocess.run(
+        command, check=True, capture_output=True, text=True, env=probe_env
+    )
     process_wall_ns = time.monotonic_ns() - started
     row = json.loads(process.stdout)
     expected = {
@@ -175,6 +198,7 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
             "survivor_spacing": 16,
             "ab_templates": list(AB_TEMPLATES),
             "aa_templates": list(AA_TEMPLATES),
+            "probe_environment_blocklist": list(PROBE_ENV_BLOCKLIST),
             "treatment_application": "one fresh process",
             "analysis_unit": "one complete four-process block contrast",
         },
