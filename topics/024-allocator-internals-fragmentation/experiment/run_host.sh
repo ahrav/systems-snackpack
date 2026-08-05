@@ -113,7 +113,31 @@ fi
 # ambient values are recorded above.
 unset CARGO_BUILD_RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_TARGET_DIR CARGO_BUILD_TARGET
 unset RUSTC RUSTC_WRAPPER RUSTDOC RUSTDOCFLAGS RUSTFLAGS
-unset GLIBC_TUNABLES LD_PRELOAD LD_LIBRARY_PATH
+unset GLIBC_TUNABLES LD_PRELOAD LD_LIBRARY_PATH LD_AUDIT
+# Compiler search-path overrides would let cc consume unrecorded headers,
+# subprograms, or libraries.
+unset CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH COMPILER_PATH GCC_EXEC_PREFIX LIBRARY_PATH
+# Replacement modules on the Python import path could bias both summary
+# generation and receipt validation.
+unset PYTHONPATH PYTHONHOME PYTHONSTARTUP
+# Cargo merges $HOME/.cargo and ancestor .cargo configuration into the gate
+# commands even with the explicit variables cleared; refuse ancestor configs
+# and give the gates a fresh CARGO_HOME.
+config_dir=$repository_root
+while :; do
+  for config_name in config.toml config; do
+    if [[ -f "$config_dir/.cargo/$config_name" ]]; then
+      printf 'unrecorded Cargo configuration: %s\n' "$config_dir/.cargo/$config_name" >&2
+      exit 2
+    fi
+  done
+  if [[ $config_dir == / ]]; then
+    break
+  fi
+  config_dir=$(dirname "$config_dir")
+done
+export CARGO_HOME="$repository_root/../cargo-home"
+mkdir -p "$CARGO_HOME"
 
 rg --files --hidden --no-ignore -g '!.git/**' -0 "$topic" | LC_ALL=C sort -z \
   | xargs -0 sha256sum >"$output_directory/source-files.sha256"
