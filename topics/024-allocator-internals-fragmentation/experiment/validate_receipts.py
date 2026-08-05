@@ -21,6 +21,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from run_processes import AA_TEMPLATES, AB_TEMPLATES, summarize
 
+# Literal protocol constants, asserted independently of the imported
+# templates so a template edit in run_processes cannot silently validate
+# itself against a different design.
+PROTOCOL_AB_BLOCKS = 12
+PROTOCOL_AA_BLOCKS = 4
+PROTOCOL_PERIODS = 4
+
 
 def load_rows(path: Path) -> list[dict[str, Any]]:
     """Load newline-delimited JSON receipts."""
@@ -114,12 +121,41 @@ def main() -> None:
 
     ab_rows = load_rows(args.process_directory / "ab.ndjson")
     aa_rows = load_rows(args.process_directory / "aa.ndjson")
+    require(
+        len(AB_TEMPLATES) == PROTOCOL_AB_BLOCKS
+        and len(AA_TEMPLATES) == PROTOCOL_AA_BLOCKS
+        and all(len(t) == PROTOCOL_PERIODS for t in AB_TEMPLATES + AA_TEMPLATES),
+        "run_processes templates deviate from the predeclared protocol",
+    )
+    require(
+        len(ab_rows) == PROTOCOL_AB_BLOCKS * PROTOCOL_PERIODS
+        and len(aa_rows) == PROTOCOL_AA_BLOCKS * PROTOCOL_PERIODS,
+        "receipt counts deviate from the predeclared protocol",
+    )
     validate_rows(ab_rows, "ab", AB_TEMPLATES)
     validate_rows(aa_rows, "aa", AA_TEMPLATES)
     all_rows = ab_rows + aa_rows
     require(len({int(row["pid"]) for row in all_rows}) == 64, "PIDs are not unique")
 
     summary = json.loads((args.process_directory / "summary.json").read_text())
+    # Independent shape checks first: these do not rely on the producer's
+    # summarize logic, so an inverted interval cannot validate itself.
+    comparisons = {entry["phase"]: entry for entry in summary["comparisons"]}
+    require(comparisons["ab"]["blocks"] == PROTOCOL_AB_BLOCKS, "A/B block count changed")
+    require(comparisons["aa"]["blocks"] == PROTOCOL_AA_BLOCKS, "A/A block count changed")
+    for entry in comparisons.values():
+        for key in ("rss_trimmed_kb_ratio", "alloc_ns_ratio"):
+            result = entry[key]
+            values = (result["ci95_low"], result["estimate"], result["ci95_high"])
+            require(
+                all(math.isfinite(value) and value > 0 for value in values),
+                "invalid ratio",
+            )
+            require(values[0] <= values[1] <= values[2], "unordered ratio interval")
+        result = entry["rss_trimmed_kb_difference"]
+        values = (result["ci95_low"], result["estimate"], result["ci95_high"])
+        require(all(math.isfinite(value) for value in values), "invalid difference")
+        require(values[0] <= values[1] <= values[2], "unordered difference interval")
     # A stale or fabricated summary must not pass: rebuild the complete
     # summary from the validated receipts and require agreement.
     recomputed = summarize(all_rows)

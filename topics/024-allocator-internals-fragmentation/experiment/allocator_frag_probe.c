@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -41,19 +42,35 @@ static struct rss_sample read_smaps_rollup(void)
     }
 
     struct rss_sample out = {0};
+    /* A missing field must not masquerade as a measured zero. */
+    int seen = 0;
     char line[256];
     while (fgets(line, sizeof(line), f) != NULL) {
-        (void)sscanf(line, "Rss: %ld kB", &out.rss_kb);
-        (void)sscanf(line, "Pss: %ld kB", &out.pss_kb);
-        (void)sscanf(line, "Private_Dirty: %ld kB", &out.private_dirty_kb);
-        (void)sscanf(line, "Anonymous: %ld kB", &out.anonymous_kb);
-        (void)sscanf(line, "AnonHugePages: %ld kB", &out.anon_huge_kb);
+        if (sscanf(line, "Rss: %ld kB", &out.rss_kb) == 1) {
+            seen |= 1 << 0;
+        }
+        if (sscanf(line, "Pss: %ld kB", &out.pss_kb) == 1) {
+            seen |= 1 << 1;
+        }
+        if (sscanf(line, "Private_Dirty: %ld kB", &out.private_dirty_kb) == 1) {
+            seen |= 1 << 2;
+        }
+        if (sscanf(line, "Anonymous: %ld kB", &out.anonymous_kb) == 1) {
+            seen |= 1 << 3;
+        }
+        if (sscanf(line, "AnonHugePages: %ld kB", &out.anon_huge_kb) == 1) {
+            seen |= 1 << 4;
+        }
     }
     if (ferror(f)) {
         die("fgets smaps_rollup");
     }
     if (fclose(f) != 0) {
         die("fclose smaps_rollup");
+    }
+    if (seen != 0x1f) {
+        fprintf(stderr, "smaps_rollup lacked a required field: mask=%d\n", seen);
+        exit(2);
     }
     return out;
 }
@@ -70,17 +87,17 @@ static size_t parse_size(const char *s, const char *name)
     return (size_t)value;
 }
 
-static int is_survivor(const char *pattern, size_t index, size_t survivor_count,
-                       size_t group)
+enum pattern_kind { PATTERN_COMPACT, PATTERN_SCATTERED };
+
+/* The survivor decision runs inside the timed free loop; it must not do
+ * treatment-dependent string work there. */
+static int is_survivor(enum pattern_kind pattern, size_t index,
+                       size_t survivor_count, size_t group)
 {
-    if (strcmp(pattern, "compact") == 0) {
+    if (pattern == PATTERN_COMPACT) {
         return index < survivor_count;
     }
-    if (strcmp(pattern, "scattered") == 0) {
-        return index % group == 0;
-    }
-    fprintf(stderr, "pattern must be compact or scattered\n");
-    exit(2);
+    return index % group == 0;
 }
 
 int main(int argc, char **argv)
@@ -94,6 +111,15 @@ int main(int argc, char **argv)
 
     const char *pattern = argv[1];
     const char *label = argv[2];
+    enum pattern_kind pattern_kind;
+    if (strcmp(pattern, "compact") == 0) {
+        pattern_kind = PATTERN_COMPACT;
+    } else if (strcmp(pattern, "scattered") == 0) {
+        pattern_kind = PATTERN_SCATTERED;
+    } else {
+        fprintf(stderr, "pattern must be compact or scattered\n");
+        return 2;
+    }
     size_t block_id = parse_size(argv[3], "block");
     size_t period = parse_size(argv[4], "period");
     size_t count = parse_size(argv[5], "count");
@@ -115,9 +141,13 @@ int main(int argc, char **argv)
         return 2;
     }
 
-    void **ptrs = calloc(count, sizeof(*ptrs));
-    if (ptrs == NULL) {
-        die("calloc pointer table");
+    /* The pointer table lives outside the measured arena: an in-arena table
+     * would sit inside every RSS, arena, and uordblks sample as a constant
+     * additive term in both arms, diluting the ratio estimand toward one. */
+    void **ptrs = mmap(NULL, count * sizeof(*ptrs), PROT_READ | PROT_WRITE,
+                       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (ptrs == MAP_FAILED) {
+        die("mmap pointer table");
     }
 
     struct rss_sample start = read_smaps_rollup();
@@ -136,7 +166,7 @@ int main(int argc, char **argv)
 
     uint64_t free_start = now_ns();
     for (size_t i = 0; i < count; ++i) {
-        if (!is_survivor(pattern, i, survivor_count, group)) {
+        if (!is_survivor(pattern_kind, i, survivor_count, group)) {
             free(ptrs[i]);
             ptrs[i] = NULL;
         }
@@ -159,12 +189,14 @@ int main(int argc, char **argv)
         if (ptrs[i] != NULL) {
             unsigned char expected = (unsigned char)((i * 131U + 17U) & 0xffU);
             unsigned char *p = ptrs[i];
-            if (p[0] != expected || p[block_size - 1] != expected) {
-                fprintf(stderr, "payload corruption at index %zu\n", i);
-                return 3;
+            /* Sum every byte; the expected value comes from the fill formula
+             * alone, so interior corruption cannot cancel out. */
+            uint64_t block_sum = 0;
+            for (size_t j = 0; j < block_size; ++j) {
+                block_sum += (uint64_t)p[j];
             }
-            checksum += (uint64_t)p[0] + (uint64_t)p[block_size - 1];
-            expected_checksum += (uint64_t)expected * 2U;
+            checksum += block_sum;
+            expected_checksum += (uint64_t)expected * (uint64_t)block_size;
             live_usable += malloc_usable_size(p);
             ++seen;
         }
@@ -210,6 +242,8 @@ int main(int argc, char **argv)
     for (size_t i = 0; i < count; ++i) {
         free(ptrs[i]);
     }
-    free(ptrs);
+    if (munmap(ptrs, count * sizeof(*ptrs)) != 0) {
+        die("munmap pointer table");
+    }
     return 0;
 }

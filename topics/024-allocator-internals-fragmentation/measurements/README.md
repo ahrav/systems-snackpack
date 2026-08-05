@@ -28,3 +28,23 @@ Exact-source records for commit `c7187b178fd75cea08462e4e77cdad225c1e7522`:
 - [AArch64 host](arm-2026-08-03.md)
 - [cross-host comparison](comparison-2026-08-03.md)
 - [raw receipts](raw/c7187b1/)
+
+Provenance notes for the `c7187b1` receipts:
+
+- Raw receipts are immutable snapshots bound to their evidence commit.
+  Review commits changed the harness and probe after measurement; those
+  changes apply to future runs only and the retained bundles are not
+  regenerated. The strengthened validator re-passes both retained sets;
+  its probe-environment blocklist parameter check is waived only for
+  receipts recorded before that parameter existed.
+- In the retained runs, the probe's pointer table lived inside the measured
+  arena as an equal additive term in both arms, diluting the RSS ratio
+  toward one; the retained scattered/compact contrast is therefore
+  conservative. The probe now places the table in a separate mapping.
+- The retained `free_ns` diagnostic included per-iteration pattern string
+  comparisons (one per compact free, two per scattered free); the probe now
+  resolves the pattern before timing. The primary RSS estimand is
+  unaffected.
+- The retained payload checksum covered each survivor's first and last
+  bytes; the probe now sums every byte against a formula-derived
+  expectation.
