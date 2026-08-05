@@ -31,6 +31,7 @@ AB_BLOCKS_PER_COMPARISON = 8
 AA_BLOCKS = 4
 SCHEDULE_SEED = 26_202_608_05
 TIMEOUT_SECONDS = 120
+SOURCE_ARCHIVE_PATHS = ("Cargo.toml", "Cargo.lock", "topics/026-nic-datapath")
 FIXED_ATTEMPTS = 2 * AB_BLOCKS_PER_COMPARISON * 4 + AA_BLOCKS * 4 + 2
 IDENTITY_KEYS = {
     "sequence",
@@ -369,15 +370,20 @@ def verify_source_identity(
     ).splitlines()
     recorded = None
     recorded_tree = None
+    recorded_scope = None
     for line in identity_lines:
         if line.startswith("source_commit="):
             recorded = line.split("=", 1)[1].strip()
         elif line.startswith("source_tree="):
             recorded_tree = line.split("=", 1)[1].strip()
+        elif line.startswith("source_archive_scope="):
+            recorded_scope = line.split("=", 1)[1].strip()
     if recorded is None or len(recorded) not in {40, 64}:
         fail("source identity lacks a recorded source commit")
     if recorded_tree is None or len(recorded_tree) not in {40, 64}:
         fail("source identity lacks a recorded source tree")
+    if recorded_scope != " ".join(SOURCE_ARCHIVE_PATHS):
+        fail("source identity has the wrong archive scope")
     verify_source_archive(evidence, identity_lines)
     archive_digests = experiment_digests_from_archive(evidence)
 
@@ -404,7 +410,16 @@ def verify_source_identity(
     if tree.returncode != 0 or tree.stdout.strip() != recorded_tree:
         fail("recorded source tree differs from the source commit")
     archived = subprocess.run(
-        ["git", "-C", str(source_root), "archive", "--format=tar", recorded],
+        [
+            "git",
+            "-C",
+            str(source_root),
+            "archive",
+            "--format=tar",
+            recorded,
+            "--",
+            *SOURCE_ARCHIVE_PATHS,
+        ],
         capture_output=True,
         check=False,
     )
@@ -417,7 +432,7 @@ def verify_source_identity(
     if normalized_tar_entries(retained_tar, "retained source archive") != (
         normalized_tar_entries(archived.stdout, "recorded commit archive")
     ):
-        fail("retained source archive differs from the complete recorded commit")
+        fail("retained source archive differs from the recorded topic source")
 
     expected_files = {
         "udp_batch.c",

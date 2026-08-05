@@ -6,7 +6,8 @@ candidate and host. A complete bundle contains:
 - `host.txt` with requested and resolved targets, CPU, kernel, toolchain,
   affinity, interface, driver, queues, steering, socket, backlog, NAPI,
   busy-poll, and loopback state;
-- `source-identity.txt`, `source.tar.gz`, its SHA-256, and sorted
+- `source-identity.txt`, a `source.tar.gz` containing the root Cargo manifests
+  and exact topic directory, its SHA-256, and sorted
   `source-files.before.sha256` and `source-files.after.sha256` manifests;
 - `build-flags.txt`, final binary SHA-256, Executable and Linkable Format (ELF)
   headers, symbols, linked-image disassembly excerpts, and compressed full

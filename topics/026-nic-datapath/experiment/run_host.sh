@@ -17,6 +17,7 @@ output_dir="$(realpath -m -- "$2")"
 topic_rel="topics/026-nic-datapath"
 experiment_rel="$topic_rel/experiment"
 experiment_dir="$repo_root/$experiment_rel"
+source_archive_paths=(Cargo.toml Cargo.lock "$topic_rel")
 
 for tool in \
     awk bash cargo cat cc cmp date getconf git gzip hostname lscpu mkdir mktemp mv \
@@ -127,7 +128,8 @@ if [[ -n "$worktree_status" ]]; then
 fi
 
 source_manifest >"$output_dir/source-files.before.sha256"
-git -C "$repo_root" archive --format=tar "$source_commit" \
+git -C "$repo_root" archive --format=tar "$source_commit" -- \
+    "${source_archive_paths[@]}" \
     >"$scratch_dir/source.tar"
 gzip -n -9 <"$scratch_dir/source.tar" >"$output_dir/source.tar.gz"
 sha256sum "$output_dir/source.tar.gz" >"$output_dir/source-archive.sha256"
@@ -332,6 +334,7 @@ export PYTHONDONTWRITEBYTECODE=1
 
 {
     printf 'source_commit=%s\nsource_tree=%s\n' "$source_commit" "$source_tree"
+    printf 'source_archive_scope=Cargo.toml Cargo.lock %s\n' "$topic_rel"
     printf 'source_archive_sha256=%s\n' \
         "$(awk '{print $1}' "$output_dir/source-archive.sha256")"
     sha256sum \
