@@ -1,0 +1,9 @@
+   Compiling cpu-memory-model-atomic-lowering v0.1.0 (/tmp/topic22-5f93fdb-xxl/topics/022-cpu-memory-model-atomic-lowering)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+     Running unittests src/lib.rs (target/debug/deps/atomic_lowering-cc819e9b8ee0d3e6)
+     Running unittests src/bin/atomic_cost.rs (target/debug/deps/atomic_cost-e2a7b39e27b8400f)
+     Running unittests src/bin/store_buffering.rs (target/debug/deps/store_buffering-5579d9476890e347)
+     Running unittests examples/publication.rs (target/debug/examples/publication-3d00d47275148cac)
+   Compiling cpu-memory-model-atomic-lowering v0.1.0 (/tmp/topic22-5f93fdb-xxl/topics/022-cpu-memory-model-atomic-lowering)
+    Finished `release` profile [optimized] target(s) in 0.21s
+     Running `target/release/examples/publication 100000`
