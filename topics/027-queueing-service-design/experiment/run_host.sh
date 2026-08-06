@@ -415,7 +415,7 @@ python3 -m py_compile \
 bash -n "$topic/experiment/run_host.sh" \
   > "$output_directory/gates/bash-syntax.log" 2>&1
 
-export RUSTFLAGS='-C target-cpu=native -C codegen-units=1 -C lto=fat -C panic=abort'
+export RUSTFLAGS='-C target-cpu=native -C codegen-units=1 -C embed-bitcode=yes -C lto=fat -C panic=abort'
 {
   printf 'RUSTFLAGS=%q\n' "$RUSTFLAGS"
   printf 'CARGO_TARGET_DIR=%q\n' "$CARGO_TARGET_DIR"
