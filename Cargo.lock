@@ -43,6 +43,10 @@ name = "pgo-post-link-optimization"
 version = "0.1.0"
 
 [[package]]
+name = "queueing-service-design"
+version = "0.1.0"
+
+[[package]]
 name = "systems-snackpack-topic-001"
 version = "0.1.0"
 

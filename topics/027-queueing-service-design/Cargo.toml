@@ -1,0 +1,17 @@
+[package]
+name = "queueing-service-design"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "queueing_service_design"
+path = "src/lib.rs"
+
+[[bin]]
+name = "queue-probe"
+path = "src/bin/queue_probe.rs"
+
+[lints]
+workspace = true
