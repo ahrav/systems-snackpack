@@ -1,8 +1,9 @@
 # Measurements
 
-No exact-candidate host result is retained yet. This directory intentionally
-contains only the measurement contract until one committed candidate completes
-the fixed schedule on both exact hosts.
+Exact-source commit `bf9392143112fc4fa358c50c5fa6dc9b7d0fd0d3`
+completed the fixed schedule on both required hosts. The source and receipt
+validators, final-image inspection, clean-tree checks, and sealed evidence
+manifests passed on both.
 
 ## Required host record
 
@@ -46,7 +47,10 @@ ISA or vendor effects without a design that supports that claim.
 
 ## Retained records
 
-None. Pending the exact post-commit two-host rerun.
+- [Arm host](bf93921-arm.md)
+- [`xxl` host](bf93921-xxl.md)
+- [Cross-host comparison](bf93921-comparison.md)
+- [Raw archive checksums](raw/bf93921/SHA256SUMS)
 
-Raw evidence belongs under `raw/<source-prefix>/<host-label>/` and follows the
+Raw evidence belongs under `raw/<source-prefix>/` and follows the
 [raw bundle contract](raw/README.md).

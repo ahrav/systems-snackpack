@@ -1,7 +1,7 @@
 # Queueing service design
 
-Equal mean service demand does not imply equal waiting time. A few long jobs
-can hold an FCFS worker while short jobs accumulate behind them. With a bounded
+Equal mean service demand does not imply equal waiting time. Long jobs can hold
+an FCFS worker while short jobs accumulate behind them. With a bounded
 queue, that delay becomes rejection and lost goodput once the waiting slots
 fill.
 
@@ -97,9 +97,22 @@ queue-probe \
 The complete assignment, estimator, and failure policy are predeclared in
 [round 1](rounds/01.md).
 
+## Exact-candidate result
+
+Commit `bf93921` completed the full schedule on the literal Arm host and on
+`xxl`, resolved at run time to
+`dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com`. At matched offered mean loop
+work, the variable service shape increased block-level mean queue wait by about
+`0.508 ms` on Arm and `0.500 ms` on `xxl`, increased rejection by `21.6664`
+and `22.6492` percentage points, and reduced goodput to `0.782825` and
+`0.773017` of the fixed treatment. These are two source-, host-, workload-,
+and run-window-specific observations, not architecture effects. The full
+[comparison and intervals](measurements/bf93921-comparison.md) keep those
+boundaries explicit.
+
 ## Exact-candidate rerun gate
 
-A local run is a harness check. Host results may be added only after the exact
+A local run is a harness check. Host results enter only after the exact
 candidate is committed, archived, hashed, and rerun without source changes on:
 
 - runtime alias `xxl`, with its backing hostname resolved and recorded at run
