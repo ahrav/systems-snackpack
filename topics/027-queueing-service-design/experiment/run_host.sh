@@ -209,6 +209,24 @@ trap 'failure_reason="received SIGINT"; exit 130' INT
 trap 'failure_reason="received SIGTERM"; exit 143' TERM
 trap 'finalize_run "$?"' EXIT
 
+# GIT_* variables can repoint the identity checks below at a different tree,
+# and a PATH wrapper can misreport source identity. Record Git's PATH
+# resolution, then clear GIT_* variables before the source-identity checks.
+git_path=$(command -v git)
+{
+  printf 'git_path=%s\n' "$git_path"
+  printf 'git_resolved_path=%s\n' "$(readlink -f "$git_path")"
+  git --version
+  while IFS= read -r environment_name; do
+    case "$environment_name" in
+      GIT_*)
+        printf '%s=%q\n' "$environment_name" "${!environment_name}"
+        unset "$environment_name"
+        ;;
+    esac
+  done < <(compgen -e)
+} > "$output_directory/git-provenance.txt"
+
 cd "$repository_root"
 git rev-parse HEAD > "$output_directory/source-head.before.txt"
 if [[ $(<"$output_directory/source-head.before.txt") != "$source_commit" ]]; then
