@@ -970,6 +970,22 @@ fn self_check(output: &mut impl Write) -> Result<(), Box<dyn Error>> {
     {
         return Err(io::Error::other("Q=1 propagation self-check failed").into());
     }
+
+    // A zero-token budget must exhaust after the first physical attempt
+    // without touching the retry-token decrement.
+    let zero_tokens = self_check_config(Treatment::Controlled, 8, 4, 0, 4);
+    let zero_receipt = run_wave(&zero_tokens)?;
+    verify_counts(&zero_tokens, &zero_receipt)?;
+    if zero_receipt.attempts.len() != 1
+        || zero_receipt
+            .logical
+            .iter()
+            .filter(|record| record.status == "retry_exhausted")
+            .count()
+            != 4
+    {
+        return Err(io::Error::other("Q=0 exhaustion self-check failed").into());
+    }
     writeln!(output, "self-check: PASS")?;
     Ok(())
 }

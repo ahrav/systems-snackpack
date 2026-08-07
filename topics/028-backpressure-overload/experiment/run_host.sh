@@ -140,6 +140,36 @@ if [[ $output_directory == "$repository_root" || $output_directory == "$reposito
 fi
 mkdir -p "$output_directory"/{artifacts,codegen,gates}
 
+# GIT_* variables (GIT_DIR, GIT_WORK_TREE, object/index/graft/replace
+# redirection) can repoint every identity check below at a different tree, and
+# a PATH wrapper can misreport source identity. This block records Git's PATH
+# resolution, clears GIT_* variables, and disables replace refs before the
+# repository identity checks.
+git_path=$(command -v git)
+git_path=$(readlink -f "$git_path")
+{
+  printf 'git_path=%s\n' "$(command -v git)"
+  printf 'git_resolved_path=%s\n' "$git_path"
+  "$git_path" --version
+  while IFS= read -r environment_name; do
+    case "$environment_name" in
+      GIT_*)
+        printf '%s=%q\n' "$environment_name" "${!environment_name}"
+        unset "$environment_name"
+        ;;
+    esac
+  done < <(compgen -e)
+} > "$output_directory/git-provenance.txt"
+export GIT_NO_REPLACE_OBJECTS=1
+
+# A repository subdirectory would scope git ls-files and the output-directory
+# guard to a prefix, leaving the exact-source evidence incomplete.
+repository_toplevel=$(git -C "$repository_root" rev-parse --show-toplevel)
+repository_toplevel=$(cd "$repository_toplevel" && pwd -P)
+if [[ $repository_toplevel != "$repository_root" ]]; then
+  fail 'repository root must be the top-level checkout'
+fi
+
 trap 'capture_error "$?" "$LINENO" "$BASH_COMMAND"' ERR
 trap 'failure_reason="received SIGINT"; exit 130' INT
 trap 'failure_reason="received SIGTERM"; exit 143' TERM
@@ -297,7 +327,7 @@ current_clocksource=$(<"$clocksource_file")
   printf 'cargo_path=%s\n' "$(command -v cargo)"
   cargo -Vv
   printf 'python_path=%s\n' "$(command -v python3)"
-  python3 -VV 2>&1
+  python3 -I -S -VV 2>&1
   if command -v cc > /dev/null 2>&1; then cc --version 2>&1; fi
   if command -v ld > /dev/null 2>&1; then ld --version 2>&1 | sed -n '1,4p'; fi
   if command -v nm > /dev/null 2>&1; then nm --version 2>&1 | sed -n '1,4p'; fi
@@ -323,7 +353,7 @@ RUSTDOCFLAGS='-D warnings' cargo doc --locked --workspace --no-deps \
   > "$output_directory/gates/cargo-doc.log" 2>&1
 cargo bench --locked --workspace --no-run \
   > "$output_directory/gates/cargo-bench-no-run.log" 2>&1
-python3 -m py_compile \
+python3 -I -S -X "pycache_prefix=$scratch_directory/python-cache" -m py_compile \
   "$topic/experiment/run_processes.py" \
   "$topic/experiment/analyze.py" \
   "$topic/experiment/validate_receipts.py" \
@@ -364,18 +394,22 @@ gzip -n -9 "$output_directory/codegen/final-binary.txt"
 if [[ -n $cpu_list ]]; then
   taskset --cpu-list "$cpu_list" "$retained_binary" --self-check \
     > "$output_directory/gates/self-check.log" 2>&1
-  python3 "$topic/experiment/run_processes.py" \
+  python3 -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
+    "$topic/experiment/run_processes.py" \
     "$retained_binary" "$output_directory/processes" "$cpu_list" \
     > "$output_directory/process-driver.log" 2>&1
 else
   "$retained_binary" --self-check > "$output_directory/gates/self-check.log" 2>&1
-  python3 "$topic/experiment/run_processes.py" \
+  python3 -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
+    "$topic/experiment/run_processes.py" \
     "$retained_binary" "$output_directory/processes" \
     > "$output_directory/process-driver.log" 2>&1
 fi
-python3 "$topic/experiment/analyze.py" "$output_directory/processes" \
+python3 -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
+  "$topic/experiment/analyze.py" "$output_directory/processes" \
   > "$output_directory/processes/analysis.json"
-python3 "$topic/experiment/validate_receipts.py" "$output_directory/processes" \
+python3 -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
+  "$topic/experiment/validate_receipts.py" "$output_directory/processes" \
   > "$output_directory/receipt-validation.txt"
 (
   cd "$output_directory/processes"

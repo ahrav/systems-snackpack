@@ -8,8 +8,24 @@ import csv
 import json
 import math
 import statistics
+import sys
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from run_processes import (
+    AA_SCHEDULE_SEED,
+    AA_TEMPLATES,
+    CALLERS,
+    KEY_DIGEST,
+    MAIN_SCHEDULE_SEED,
+    MAIN_TEMPLATES,
+    MAX_ATTEMPTS,
+    ORIGIN_CAPACITY,
+    RETRY_TOKENS,
+    WAITER_CAP,
+)
 
 T95_N8 = 2.364624251
 
@@ -21,21 +37,82 @@ def load_summaries(process_directory: Path) -> list[dict[str, Any]]:
     ) as handle:
         rows: list[dict[str, Any]] = list(csv.DictReader(handle))
     for row in rows:
-        row["block"] = int(row["block"])
-        row["period"] = int(row["period"])
-        row["burst_ns"] = int(row["burst_ns"])
-        row["setup_ns"] = int(row["setup_ns"])
-        for field in (
-            "completed",
-            "shed",
-            "leaders",
-            "followers",
-            "flights",
-            "origin_attempts",
-            "retry_attempts",
-        ):
-            row[field] = int(row[field])
+        try:
+            row["block"] = int(row["block"])
+            row["period"] = int(row["period"])
+            row["burst_ns"] = int(row["burst_ns"])
+            row["setup_ns"] = int(row["setup_ns"])
+            for field in (
+                "completed",
+                "shed",
+                "leaders",
+                "followers",
+                "flights",
+                "origin_attempts",
+                "retry_attempts",
+            ):
+                row[field] = int(row[field])
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError(f"summaries.csv row has invalid numeric fields: {error}") from error
     return rows
+
+
+def check_design(rows: list[dict[str, Any]]) -> None:
+    """Reject input that does not match the predeclared complete-block design."""
+    expected: dict[tuple[str, str, int], int] = {}
+    expected_periods: dict[tuple[str, int, int], int] = {}
+    for block in range(1, 9):
+        expected[("main", "naive", block)] = 2
+        expected[("main", "controlled", block)] = 2
+        for period in range(1, 5):
+            expected_periods[("main", block, period)] = 1
+    for block in range(1, 5):
+        expected[("aa", "A", block)] = 2
+        expected[("aa", "B", block)] = 2
+        for period in range(1, 5):
+            expected_periods[("aa", block, period)] = 1
+    counts: dict[tuple[str, str, int], int] = {}
+    period_counts: dict[tuple[str, int, int], int] = {}
+    for row in rows:
+        group = row["treatment"] if row["phase"] == "main" else row["label"]
+        key = (row["phase"], group, row["block"])
+        counts[key] = counts.get(key, 0) + 1
+        period_key = (row["phase"], row["block"], row["period"])
+        period_counts[period_key] = period_counts.get(period_key, 0) + 1
+    if counts != expected or period_counts != expected_periods:
+        raise ValueError(
+            "summaries do not match the predeclared complete-block design "
+            "of 8 main and 4 A/A blocks with 2 periods per group and "
+            "periods 1..4 exactly once per block"
+        )
+    templates = {"main": MAIN_TEMPLATES, "aa": AA_TEMPLATES}
+    seeds = {"main": MAIN_SCHEDULE_SEED, "aa": AA_SCHEDULE_SEED}
+    for row in rows:
+        expected_label = templates[row["phase"]][row["block"] - 1][row["period"] - 1]
+        expected_treatment = (
+            "naive" if row["phase"] == "main" and expected_label == "A" else "controlled"
+        )
+        try:
+            settings_match = (
+                row["label"] == expected_label
+                and row["treatment"] == expected_treatment
+                and int(row["seed"]) == seeds[row["phase"]] * 100 + row["block"]
+                and int(row["callers"]) == CALLERS
+                and int(row["waiter_cap"]) == WAITER_CAP
+                and int(row["origin_capacity"]) == ORIGIN_CAPACITY
+                and int(row["max_attempts"]) == MAX_ATTEMPTS
+                and int(row["retry_tokens"]) == RETRY_TOKENS
+                and int(row["key_digest"]) == KEY_DIGEST
+            )
+        except (KeyError, TypeError, ValueError):
+            settings_match = False
+        if not settings_match:
+            raise ValueError(
+                "summaries do not follow the predeclared templates, workload "
+                "configuration, or seeds"
+            )
+    if len({row["work_iters"] for row in rows}) != 1:
+        raise ValueError("summaries mix more than one calibration")
 
 
 def block_group_means(
@@ -152,6 +229,7 @@ def treatment_counts(rows: list[dict[str, Any]], treatment: str) -> dict[str, An
 def build_analysis(process_directory: Path) -> dict[str, Any]:
     """Build the predeclared single-host analysis document."""
     rows = load_summaries(process_directory)
+    check_design(rows)
     main = log_block_contrasts(
         rows,
         "main",
