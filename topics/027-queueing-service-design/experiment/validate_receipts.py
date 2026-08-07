@@ -242,8 +242,11 @@ def main() -> None:
         for arrival, admitted_before in admission_events:
             while started_index < len(service_starts_in_order) and service_starts_in_order[started_index] <= arrival:
                 started_index += 1
+            # The single worker can have dequeued a job before stamping its
+            # service_start_ns, so one admitted job may look waiting during
+            # that handoff gap; allow exactly one job of slack.
             require(
-                admitted_before - started_index < QUEUE_CAPACITY,
+                admitted_before - started_index <= QUEUE_CAPACITY,
                 "admission recorded with a full queue",
             )
         require(offered_work_x4 == int(summary["offered_work_x4"]) == REQUESTS * 4, "offered work is not matched")

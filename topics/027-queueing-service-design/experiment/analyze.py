@@ -14,7 +14,13 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from run_processes import AA_TEMPLATES, MAIN_TEMPLATES
+from run_processes import (
+    AA_TEMPLATES,
+    MAIN_TEMPLATES,
+    QUEUE_CAPACITY,
+    REQUESTS,
+    SCHEDULE_SEED,
+)
 
 T95 = {8: 2.364624251, 4: 3.182446305}
 NUMERIC_FIELDS = (
@@ -74,10 +80,20 @@ def check_design(rows: list[dict[str, Any]]) -> None:
         expected_mode = (
             "variable" if row["phase"] == "main" and expected_label == "B" else "fixed"
         )
-        if row["label"] != expected_label or row["mode"] != expected_mode:
+        seed_prefix = SCHEDULE_SEED if row["phase"] == "main" else SCHEDULE_SEED + 1
+        if (
+            row["label"] != expected_label
+            or row["mode"] != expected_mode
+            or int(row["requests"]) != REQUESTS
+            or int(row["queue_cap"]) != QUEUE_CAPACITY
+            or int(row["seed"]) != seed_prefix * 100 + row["block"]
+        ):
             raise ValueError(
-                "summaries do not follow the predeclared period-to-label templates"
+                "summaries do not follow the predeclared templates, workload "
+                "configuration, or seeds"
             )
+    if len({row["base_iters"] for row in rows}) != 1 or len({row["interval_ns"] for row in rows}) != 1:
+        raise ValueError("summaries mix more than one calibration")
 
 
 def block_values(
