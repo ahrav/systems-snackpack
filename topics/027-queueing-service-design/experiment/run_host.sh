@@ -57,8 +57,8 @@ capture_error() {
 write_tracked_source_manifest() {
   local manifest=$1
   (
-    cd "$repository_root"
-    git ls-files | LC_ALL=C sort | while IFS= read -r source_file; do
+  cd "$repository_root"
+  "${git_path:-git}" ls-files | LC_ALL=C sort | while IFS= read -r source_file; do
       sha256sum -- "$source_file" || exit 1
     done
   ) > "$manifest"
@@ -138,7 +138,7 @@ finalize_run() {
     append_failure_reason 'could not record the final tracked source manifest'
   fi
 
-  if current_head=$(git -C "$repository_root" rev-parse HEAD 2>/dev/null); then
+  if current_head=$("${git_path:-git}" -C "$repository_root" rev-parse HEAD 2>/dev/null); then
     printf '%s\n' "$current_head" > "$output_directory/source-head.after.txt"
     if [[ $current_head == "$source_commit" ]]; then
       head_match=passed
@@ -153,7 +153,7 @@ finalize_run() {
     append_failure_reason 'could not resolve final HEAD'
   fi
 
-  if git -C "$repository_root" status --porcelain=v1 --untracked-files=all \
+  if "${git_path:-git}" -C "$repository_root" status --porcelain=v1 --untracked-files=all \
     > "$output_directory/source-status.after.txt"; then
     if [[ -s $output_directory/source-status.after.txt ]]; then
       clean_worktree=failed
@@ -228,18 +228,18 @@ git_path=$(command -v git)
 } > "$output_directory/git-provenance.txt"
 
 cd "$repository_root"
-git rev-parse HEAD > "$output_directory/source-head.before.txt"
+"$git_path" rev-parse HEAD > "$output_directory/source-head.before.txt"
 if [[ $(<"$output_directory/source-head.before.txt") != "$source_commit" ]]; then
   fail 'source commit does not match HEAD'
 fi
-git status --porcelain=v1 --untracked-files=all \
+"$git_path" status --porcelain=v1 --untracked-files=all \
   > "$output_directory/source-status.before.txt"
 if [[ -s $output_directory/source-status.before.txt ]]; then
   fail 'exact-source run requires a clean worktree'
 fi
 write_tracked_source_manifest "$output_directory/source-files.before.sha256"
 
-git archive --format=tar "$source_commit" \
+"$git_path" archive --format=tar "$source_commit" \
   | gzip -n -9 > "$output_directory/source.tar.gz"
 (
   cd "$output_directory"
@@ -367,6 +367,7 @@ if [[ ! -r $clocksource_file ]]; then
   fail "current clocksource is not readable: $clocksource_file"
 fi
 current_clocksource=$(<"$clocksource_file")
+taskset_path=$(command -v taskset)
 {
   printf 'alias_label=%s\n' "$host_label"
   printf 'resolved_hostname=%s\n' "$resolved_hostname"
@@ -394,7 +395,7 @@ current_clocksource=$(<"$clocksource_file")
       printf 'cpu_%s=%s\n' "$cpu_state" "$(</sys/devices/system/cpu/$cpu_state)"
     fi
   done
-  taskset -pc "$$"
+  "$taskset_path" -pc "$$"
   awk '/^Cpus_allowed(_list)?:/ {print}' /proc/self/status
   printf 'proc_version=%s\n' "$(</proc/version)"
   lscpu
@@ -421,14 +422,17 @@ python_path=$(command -v python3)
   printf 'cargo_path=%s\n' "$cargo_path"
   printf 'cargo_resolved_path=%s\n' "$(readlink -f "$cargo_path")"
   cargo -Vv
+  printf 'taskset_path=%s\n' "$taskset_path"
+  printf 'taskset_resolved_path=%s\n' "$(readlink -f "$taskset_path")"
+  "$taskset_path" --version
   printf 'python_path=%s\n' "$python_path"
   printf 'python_resolved_path=%s\n' "$(readlink -f "$python_path")"
   python3 -I -VV 2>&1
   python3 -I -c 'import platform, sys; print(f"python_executable={sys.executable}"); print(f"python_prefix={sys.prefix}"); print(f"python_platform={platform.platform()}")'
 } > "$output_directory/toolchain.txt"
-taskset --cpu-list "$cpu_list" rustc -C target-cpu=native --print cfg \
+"$taskset_path" --cpu-list "$cpu_list" rustc -C target-cpu=native --print cfg \
   | LC_ALL=C sort > "$output_directory/rustc-native-cfg.txt"
-taskset --cpu-list "$cpu_list" rustc -C target-cpu=native --print target-features \
+"$taskset_path" --cpu-list "$cpu_list" rustc -C target-cpu=native --print target-features \
   > "$output_directory/rustc-native-target-features.txt"
 
 if ! command -v rg > /dev/null 2>&1; then
@@ -448,7 +452,7 @@ while :; do
   config_scan_directory=$(dirname "$config_scan_directory")
 done
 
-git diff --check > "$output_directory/gates/git-diff-check.log" 2>&1
+"$git_path" diff --check > "$output_directory/gates/git-diff-check.log" 2>&1
 cargo fmt --package queueing-service-design -- --check \
   > "$output_directory/gates/cargo-fmt.log" 2>&1
 cargo test --locked --package queueing-service-design --lib --bins \
@@ -473,7 +477,7 @@ export RUSTFLAGS='-C target-cpu=native -C codegen-units=1 -C embed-bitcode=yes -
   printf 'CARGO_TARGET_DIR=%q\n' "$CARGO_TARGET_DIR"
   printf 'CARGO_HOME=%q\n' "$CARGO_HOME"
 } > "$output_directory/build-environment.txt"
-taskset --cpu-list "$cpu_list" \
+"$taskset_path" --cpu-list "$cpu_list" \
   cargo build --locked --release --package queueing-service-design --bin queue-probe \
   > "$output_directory/build.log" 2>&1
 built_binary="$CARGO_TARGET_DIR/release/queue-probe"

@@ -8,8 +8,13 @@ import csv
 import json
 import math
 import statistics
+import sys
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from run_processes import AA_TEMPLATES, MAIN_TEMPLATES
 
 T95 = {8: 2.364624251, 4: 3.182446305}
 NUMERIC_FIELDS = (
@@ -63,6 +68,16 @@ def check_design(rows: list[dict[str, Any]]) -> None:
             "of 8 main and 4 A/A blocks with 2 periods per group and "
             "periods 1..4 exactly once per block"
         )
+    templates = {"main": MAIN_TEMPLATES, "aa": AA_TEMPLATES}
+    for row in rows:
+        expected_label = templates[row["phase"]][row["block"] - 1][row["period"] - 1]
+        expected_mode = (
+            "variable" if row["phase"] == "main" and expected_label == "B" else "fixed"
+        )
+        if row["label"] != expected_label or row["mode"] != expected_mode:
+            raise ValueError(
+                "summaries do not follow the predeclared period-to-label templates"
+            )
 
 
 def block_values(
