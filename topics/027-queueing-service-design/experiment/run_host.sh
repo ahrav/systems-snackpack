@@ -283,6 +283,11 @@ fi
 if [[ -s $output_directory/source-status.before.txt ]]; then
   fail 'exact-source run requires a clean worktree'
 fi
+# git status misses files flagged assume-unchanged or skip-worktree, which
+# would let hidden local edits pass the clean-worktree gate.
+if "$git_path" ls-files -v | grep -Eq '^(S|[a-z]) '; then
+  fail 'exact-source run refuses assume-unchanged or skip-worktree files'
+fi
 write_tracked_source_manifest "$output_directory/source-files.before.sha256"
 
 "$git_path" archive --format=tar "$source_commit" \

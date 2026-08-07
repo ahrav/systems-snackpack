@@ -156,6 +156,8 @@ def main() -> None:
         waits: list[int] = []
         services: list[int] = []
         completion_times: list[int] = []
+        admitted_times: list[int] = []
+        rejected_arrivals: list[int] = []
         completed_sequence: list[tuple[int, int, int]] = []
         offered_work_x4 = 0
         checksum = 0
@@ -194,6 +196,7 @@ def main() -> None:
                 waits.append(service_start_ns - admitted_ns)
                 services.append(completion_ns - service_start_ns)
                 completion_times.append(completion_ns)
+                admitted_times.append(admitted_ns)
                 completed_sequence.append((request_id, service_start_ns, completion_ns))
                 checksum ^= int(receipt["checksum"])
             else:
@@ -212,7 +215,20 @@ def main() -> None:
                     ),
                     "rejected request has completion fields",
                 )
-        require(statuses["completed"] == completed and statuses["rejected"] == rejected, "raw status counts differ")
+                rejected_arrivals.append(actual)
+            require(statuses["completed"] == completed and statuses["rejected"] == rejected, "raw status counts differ")
+            completions_in_order = sorted(completion_times)
+            admit_index = 0
+            complete_index = 0
+            for arrival in rejected_arrivals:
+                while admit_index < len(admitted_times) and admitted_times[admit_index] <= arrival:
+                    admit_index += 1
+                while complete_index < len(completions_in_order) and completions_in_order[complete_index] <= arrival:
+                    complete_index += 1
+                require(
+                    admit_index - complete_index >= QUEUE_CAPACITY,
+                    "rejection recorded without a full queue",
+                )
         require(offered_work_x4 == int(summary["offered_work_x4"]) == REQUESTS * 4, "offered work is not matched")
         require(checksum == int(summary["checksum"]), "summary checksum differs from raw receipts")
         require_rounded(summary, "rejection_pct", 100.0 * rejected / REQUESTS, 9)
