@@ -1,0 +1,59 @@
+{
+  "attempt_count": 82,
+  "binary_sha256": "84fc4bec70137cfc975ab017cd19cfc4aaa2837141273eceaf8c19e9c0ff6472",
+  "gro_control": {
+    "coalesced_delivery_observed": true,
+    "same_logical_payload": true,
+    "timing_claim": null
+  },
+  "mode_diagnostics": {
+    "scalar": {
+      "median_data_receive_syscalls": 27827.5,
+      "median_data_send_syscalls": 32000.0,
+      "median_ns_per_datagram": 2612.845781,
+      "processes": 32
+    },
+    "sendmmsg": {
+      "median_data_receive_syscalls": 19228.5,
+      "median_data_send_syscalls": 1000.0,
+      "median_ns_per_datagram": 2439.4702660000003,
+      "processes": 32
+    },
+    "udp_segment": {
+      "median_data_receive_syscalls": 1000.0,
+      "median_data_send_syscalls": 1000.0,
+      "median_ns_per_datagram": 2044.1613284999999,
+      "processes": 16
+    }
+  },
+  "primary_gro_enabled": false,
+  "schema": 1,
+  "summaries": {
+    "aa_right_over_aa_left": {
+      "geometric_mean_ratio": 0.9925127138473745,
+      "log_sd": 0.007823077940332265,
+      "log_t_95_high": 1.0049449924790732,
+      "log_t_95_low": 0.9802342362228283,
+      "mean_log_contrast": -0.007515456581050017,
+      "n_complete_blocks": 4,
+      "scope": "same binary and sendmmsg command through both labels; mechanical path-asymmetry diagnostic, not long-run null calibration"
+    },
+    "sendmmsg_over_scalar": {
+      "geometric_mean_ratio": 0.9338465147858014,
+      "log_sd": 0.0053118559955581835,
+      "log_t_95_high": 0.938002783423636,
+      "log_t_95_low": 0.9297086624781687,
+      "mean_log_contrast": -0.06844318532157567,
+      "n_complete_blocks": 8
+    },
+    "udp_segment_over_scalar": {
+      "geometric_mean_ratio": 0.7846061152732673,
+      "log_sd": 0.007960245222372198,
+      "log_t_95_high": 0.7898450282290512,
+      "log_t_95_low": 0.7794019511707106,
+      "mean_log_contrast": -0.24257345110850004,
+      "n_complete_blocks": 8
+    }
+  },
+  "valid_observation_count": 82
+}

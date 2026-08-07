@@ -1,0 +1,224 @@
+{
+  "aa_schedule": [
+    {
+      "baseline_label": "aa_left",
+      "baseline_mode": "sendmmsg",
+      "block": 1,
+      "candidate_label": "aa_right",
+      "candidate_mode": "sendmmsg",
+      "comparison": "aa_right_over_aa_left",
+      "template": "ABBA"
+    },
+    {
+      "baseline_label": "aa_left",
+      "baseline_mode": "sendmmsg",
+      "block": 2,
+      "candidate_label": "aa_right",
+      "candidate_mode": "sendmmsg",
+      "comparison": "aa_right_over_aa_left",
+      "template": "BAAB"
+    },
+    {
+      "baseline_label": "aa_left",
+      "baseline_mode": "sendmmsg",
+      "block": 3,
+      "candidate_label": "aa_right",
+      "candidate_mode": "sendmmsg",
+      "comparison": "aa_right_over_aa_left",
+      "template": "BAAB"
+    },
+    {
+      "baseline_label": "aa_left",
+      "baseline_mode": "sendmmsg",
+      "block": 4,
+      "candidate_label": "aa_right",
+      "candidate_mode": "sendmmsg",
+      "comparison": "aa_right_over_aa_left",
+      "template": "ABBA"
+    }
+  ],
+  "aa_scope": "same binary and sendmmsg command through both labels; mechanical path-asymmetry diagnostic, not long-run null calibration",
+  "analysis_unit": "one complete four-process ABBA or BAAB block",
+  "assignment": "seed-shuffled restricted randomization with equal ABBA and BAAB counts inside each comparison",
+  "binary_sha256": "84fc4bec70137cfc975ab017cd19cfc4aaa2837141273eceaf8c19e9c0ff6472",
+  "estimands": [
+    "geometric-mean sendmmsg/scalar elapsed ratio",
+    "geometric-mean UDP_SEGMENT/scalar elapsed ratio"
+  ],
+  "fixed_attempt_count": 82,
+  "gro_control_rounds": 4,
+  "gro_control_schedule": [
+    {
+      "gro_enabled": false,
+      "label": "gro_disabled",
+      "mode": "udp_segment"
+    },
+    {
+      "gro_enabled": true,
+      "label": "gro_enabled",
+      "mode": "udp_segment"
+    }
+  ],
+  "gro_control_scope": "payload and coalesced-delivery semantics only; elapsed values do not enter a performance estimate",
+  "interval": "two-sided 95% Student-t interval over complete-block log contrasts; a descriptive run-window interval whose repeated-block independence and normality are assumptions, not established by fresh processes; variation covers process blocks on this host and run window",
+  "invalid_attempt_policy": "retain every attempt; any invalid attempt or incomplete block fails the run",
+  "measured_rounds_per_primary_process": 1000,
+  "primary_receive_semantics": "UDP_GRO disabled for every timed comparison",
+  "primary_schedule": [
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 1,
+      "candidate_label": "sendmmsg",
+      "candidate_mode": "sendmmsg",
+      "comparison": "sendmmsg_over_scalar",
+      "template": "ABBA"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 2,
+      "candidate_label": "sendmmsg",
+      "candidate_mode": "sendmmsg",
+      "comparison": "sendmmsg_over_scalar",
+      "template": "BAAB"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 3,
+      "candidate_label": "sendmmsg",
+      "candidate_mode": "sendmmsg",
+      "comparison": "sendmmsg_over_scalar",
+      "template": "ABBA"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 4,
+      "candidate_label": "sendmmsg",
+      "candidate_mode": "sendmmsg",
+      "comparison": "sendmmsg_over_scalar",
+      "template": "BAAB"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 5,
+      "candidate_label": "sendmmsg",
+      "candidate_mode": "sendmmsg",
+      "comparison": "sendmmsg_over_scalar",
+      "template": "BAAB"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 6,
+      "candidate_label": "sendmmsg",
+      "candidate_mode": "sendmmsg",
+      "comparison": "sendmmsg_over_scalar",
+      "template": "BAAB"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 7,
+      "candidate_label": "sendmmsg",
+      "candidate_mode": "sendmmsg",
+      "comparison": "sendmmsg_over_scalar",
+      "template": "ABBA"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 8,
+      "candidate_label": "sendmmsg",
+      "candidate_mode": "sendmmsg",
+      "comparison": "sendmmsg_over_scalar",
+      "template": "ABBA"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 1,
+      "candidate_label": "udp_segment",
+      "candidate_mode": "udp_segment",
+      "comparison": "udp_segment_over_scalar",
+      "template": "BAAB"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 2,
+      "candidate_label": "udp_segment",
+      "candidate_mode": "udp_segment",
+      "comparison": "udp_segment_over_scalar",
+      "template": "ABBA"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 3,
+      "candidate_label": "udp_segment",
+      "candidate_mode": "udp_segment",
+      "comparison": "udp_segment_over_scalar",
+      "template": "BAAB"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 4,
+      "candidate_label": "udp_segment",
+      "candidate_mode": "udp_segment",
+      "comparison": "udp_segment_over_scalar",
+      "template": "ABBA"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 5,
+      "candidate_label": "udp_segment",
+      "candidate_mode": "udp_segment",
+      "comparison": "udp_segment_over_scalar",
+      "template": "BAAB"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 6,
+      "candidate_label": "udp_segment",
+      "candidate_mode": "udp_segment",
+      "comparison": "udp_segment_over_scalar",
+      "template": "ABBA"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 7,
+      "candidate_label": "udp_segment",
+      "candidate_mode": "udp_segment",
+      "comparison": "udp_segment_over_scalar",
+      "template": "BAAB"
+    },
+    {
+      "baseline_label": "scalar",
+      "baseline_mode": "scalar",
+      "block": 8,
+      "candidate_label": "udp_segment",
+      "candidate_mode": "udp_segment",
+      "comparison": "udp_segment_over_scalar",
+      "template": "ABBA"
+    }
+  ],
+  "randomization_unit": "one block receives an ABBA or BAAB template",
+  "schedule_seed": 2620260805,
+  "schema": 1,
+  "segment_bytes": 1200,
+  "segments_per_batch": 32,
+  "stopping": "fixed 8 blocks per primary comparison, 4 A/A blocks, and two semantic controls; no peeking, retry, or replacement",
+  "subsamples": "rounds inside a process are workload repetition, not independent samples",
+  "timing_boundary": "payloads are prebuilt during setup; CLOCK_MONOTONIC_RAW covers one contiguous sequence of measured sender/receiver/ack rounds after warmup; process setup and payload construction are excluded",
+  "transport": "UDP/IPv4 loopback",
+  "treatment_application_unit": "one fresh process invocation",
+  "warmup_rounds_per_primary_process": 100
+}

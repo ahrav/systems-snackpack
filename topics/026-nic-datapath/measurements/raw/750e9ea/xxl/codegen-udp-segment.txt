@@ -1,0 +1,60 @@
+
+/tmp/tmp.pFhbxexfAJ/udp-batch:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000402dc0 <topic26_send_gso_batch>:
+  402dc0:	55                   	push   %rbp
+  402dc1:	66 0f ef c0          	pxor   %xmm0,%xmm0
+  402dc5:	48 89 e5             	mov    %rsp,%rbp
+  402dc8:	41 55                	push   %r13
+  402dca:	41 89 fd             	mov    %edi,%r13d
+  402dcd:	41 54                	push   %r12
+  402dcf:	48 8d 85 70 ff ff ff 	lea    -0x90(%rbp),%rax
+  402dd6:	45 31 e4             	xor    %r12d,%r12d
+  402dd9:	53                   	push   %rbx
+  402dda:	48 83 ec 78          	sub    $0x78,%rsp
+  402dde:	48 89 45 b0          	mov    %rax,-0x50(%rbp)
+  402de2:	48 8d 45 80          	lea    -0x80(%rbp),%rax
+  402de6:	48 89 45 c0          	mov    %rax,-0x40(%rbp)
+  402dea:	48 8b 05 1f 0c 00 00 	mov    0xc1f(%rip),%rax        # 403a10 <CSWTCH.43+0x200>
+  402df1:	48 89 b5 70 ff ff ff 	mov    %rsi,-0x90(%rbp)
+  402df8:	48 c7 85 78 ff ff ff 00 96 00 00 	movq   $0x9600,-0x88(%rbp)
+  402e03:	48 c7 45 d0 00 00 00 00 	movq   $0x0,-0x30(%rbp)
+  402e0b:	48 c7 45 b8 01 00 00 00 	movq   $0x1,-0x48(%rbp)
+  402e13:	48 c7 45 c8 18 00 00 00 	movq   $0x18,-0x38(%rbp)
+  402e1b:	48 c7 45 80 12 00 00 00 	movq   $0x12,-0x80(%rbp)
+  402e23:	48 89 45 88          	mov    %rax,-0x78(%rbp)
+  402e27:	48 c7 45 90 b0 04 00 00 	movq   $0x4b0,-0x70(%rbp)
+  402e2f:	0f 29 45 a0          	movaps %xmm0,-0x60(%rbp)
+  402e33:	eb 0d                	jmp    402e42 <topic26_send_gso_batch+0x82>
+  402e35:	0f 1f 00             	nopl   (%rax)
+  402e38:	e8 13 e2 ff ff       	call   401050 <__errno_location@plt>
+  402e3d:	83 38 04             	cmpl   $0x4,(%rax)
+  402e40:	75 1a                	jne    402e5c <topic26_send_gso_batch+0x9c>
+  402e42:	31 d2                	xor    %edx,%edx
+  402e44:	48 8d 75 a0          	lea    -0x60(%rbp),%rsi
+  402e48:	44 89 ef             	mov    %r13d,%edi
+  402e4b:	49 83 c4 01          	add    $0x1,%r12
+  402e4f:	e8 1c e2 ff ff       	call   401070 <sendmsg@plt>
+  402e54:	48 89 c3             	mov    %rax,%rbx
+  402e57:	48 85 c0             	test   %rax,%rax
+  402e5a:	78 dc                	js     402e38 <topic26_send_gso_batch+0x78>
+  402e5c:	48 39 9d 78 ff ff ff 	cmp    %rbx,-0x88(%rbp)
+  402e63:	75 0e                	jne    402e73 <topic26_send_gso_batch+0xb3>
+  402e65:	48 83 c4 78          	add    $0x78,%rsp
+  402e69:	4c 89 e0             	mov    %r12,%rax
+  402e6c:	5b                   	pop    %rbx
+  402e6d:	41 5c                	pop    %r12
+  402e6f:	41 5d                	pop    %r13
+  402e71:	5d                   	pop    %rbp
+  402e72:	c3                   	ret
+  402e73:	bf 1d 31 40 00       	mov    $0x40311d,%edi
+  402e78:	e8 d3 f1 ff ff       	call   402050 <fail_errno>
+
+Disassembly of section .fini:

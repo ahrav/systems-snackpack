@@ -1,0 +1,51 @@
+
+/tmp/tmp.pFhbxexfAJ/udp-batch:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000402b30 <topic26_send_scalar_batch>:
+  402b30:	55                   	push   %rbp
+  402b31:	48 89 e5             	mov    %rsp,%rbp
+  402b34:	41 56                	push   %r14
+  402b36:	4c 8d b6 00 96 00 00 	lea    0x9600(%rsi),%r14
+  402b3d:	41 55                	push   %r13
+  402b3f:	41 89 fd             	mov    %edi,%r13d
+  402b42:	41 54                	push   %r12
+  402b44:	45 31 e4             	xor    %r12d,%r12d
+  402b47:	53                   	push   %rbx
+  402b48:	48 89 f3             	mov    %rsi,%rbx
+  402b4b:	eb 0d                	jmp    402b5a <topic26_send_scalar_batch+0x2a>
+  402b4d:	0f 1f 00             	nopl   (%rax)
+  402b50:	e8 fb e4 ff ff       	call   401050 <__errno_location@plt>
+  402b55:	83 38 04             	cmpl   $0x4,(%rax)
+  402b58:	75 3e                	jne    402b98 <topic26_send_scalar_batch+0x68>
+  402b5a:	31 c9                	xor    %ecx,%ecx
+  402b5c:	ba b0 04 00 00       	mov    $0x4b0,%edx
+  402b61:	48 89 de             	mov    %rbx,%rsi
+  402b64:	44 89 ef             	mov    %r13d,%edi
+  402b67:	e8 54 e5 ff ff       	call   4010c0 <send@plt>
+  402b6c:	49 83 c4 01          	add    $0x1,%r12
+  402b70:	48 85 c0             	test   %rax,%rax
+  402b73:	78 db                	js     402b50 <topic26_send_scalar_batch+0x20>
+  402b75:	48 3d b0 04 00 00    	cmp    $0x4b0,%rax
+  402b7b:	75 1b                	jne    402b98 <topic26_send_scalar_batch+0x68>
+  402b7d:	48 81 c3 b0 04 00 00 	add    $0x4b0,%rbx
+  402b84:	4c 39 f3             	cmp    %r14,%rbx
+  402b87:	75 d1                	jne    402b5a <topic26_send_scalar_batch+0x2a>
+  402b89:	5b                   	pop    %rbx
+  402b8a:	4c 89 e0             	mov    %r12,%rax
+  402b8d:	41 5c                	pop    %r12
+  402b8f:	41 5d                	pop    %r13
+  402b91:	41 5e                	pop    %r14
+  402b93:	5d                   	pop    %rbp
+  402b94:	c3                   	ret
+  402b95:	0f 1f 00             	nopl   (%rax)
+  402b98:	bf 08 31 40 00       	mov    $0x403108,%edi
+  402b9d:	e8 ae f4 ff ff       	call   402050 <fail_errno>
+
+Disassembly of section .fini:

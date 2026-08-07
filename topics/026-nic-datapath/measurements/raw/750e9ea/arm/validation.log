@@ -1,0 +1,1 @@
+{"affinity": "verified", "attempts": 82, "codegen": "linked-symbols-present", "complete_aa_blocks": 4, "complete_primary_blocks": 16, "cpu_pair": [0, 1], "gro_control": "coalesced-delivery-observed", "payloads": "verified", "primary_gro": "disabled", "source_identity": "match", "status": "pass"}

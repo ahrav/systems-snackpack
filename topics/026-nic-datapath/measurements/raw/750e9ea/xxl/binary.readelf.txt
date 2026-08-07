@@ -1,0 +1,189 @@
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              EXEC (Executable file)
+  Machine:                           Advanced Micro Devices X86-64
+  Version:                           0x1
+  Entry point address:               0x401f60
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          21088 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         13
+  Size of section headers:           64 (bytes)
+  Number of section headers:         32
+  Section header string table index: 31
+
+Section Headers:
+  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+  [ 1] .interp           PROGBITS        0000000000400318 000318 00001c 00   A  0   0  1
+  [ 2] .note.gnu.property NOTE            0000000000400338 000338 000040 00   A  0   0  8
+  [ 3] .note.gnu.build-id NOTE            0000000000400378 000378 000024 00   A  0   0  4
+  [ 4] .note.ABI-tag     NOTE            000000000040039c 00039c 000020 00   A  0   0  4
+  [ 5] .gnu.hash         GNU_HASH        00000000004003c0 0003c0 000024 00   A  6   0  8
+  [ 6] .dynsym           DYNSYM          00000000004003e8 0003e8 0003c0 18   A  7   1  8
+  [ 7] .dynstr           STRTAB          00000000004007a8 0007a8 000233 00   A  0   0  1
+  [ 8] .gnu.version      VERSYM          00000000004009dc 0009dc 000050 02   A  6   0  2
+  [ 9] .gnu.version_r    VERNEED         0000000000400a30 000a30 000090 00   A  7   1  8
+  [10] .rela.dyn         RELA            0000000000400ac0 000ac0 000078 18   A  6   0  8
+  [11] .rela.plt         RELA            0000000000400b38 000b38 000330 18  AI  6  23  8
+  [12] .init             PROGBITS        0000000000401000 001000 00001b 00  AX  0   0  4
+  [13] .plt              PROGBITS        0000000000401020 001020 000230 10  AX  0   0 16
+  [14] .text             PROGBITS        0000000000401250 001250 001c2d 00  AX  0   0 16
+  [15] .fini             PROGBITS        0000000000402e80 002e80 00000d 00  AX  0   0  4
+  [16] .rodata           PROGBITS        0000000000403000 003000 000a20 00   A  0   0 16
+  [17] .eh_frame_hdr     PROGBITS        0000000000403a20 003a20 00008c 00   A  0   0  4
+  [18] .eh_frame         PROGBITS        0000000000403ab0 003ab0 000280 00   A  0   0  8
+  [19] .init_array       INIT_ARRAY      0000000000404de8 003de8 000008 08  WA  0   0  8
+  [20] .fini_array       FINI_ARRAY      0000000000404df0 003df0 000008 08  WA  0   0  8
+  [21] .dynamic          DYNAMIC         0000000000404df8 003df8 0001d0 10  WA  7   0  8
+  [22] .got              PROGBITS        0000000000404fc8 003fc8 000020 08  WA  0   0  8
+  [23] .got.plt          PROGBITS        0000000000404fe8 003fe8 000128 08  WA  0   0  8
+  [24] .data             PROGBITS        0000000000405110 004110 000004 00  WA  0   0  1
+  [25] .bss              NOBITS          0000000000405120 004114 000010 00  WA  0   0 32
+  [26] .comment          PROGBITS        0000000000000000 004114 00002e 01  MS  0   0  1
+  [27] .annobin.notes    STRTAB          0000000000000000 004142 00013e 01  MS  0   0  1
+  [28] .gnu.build.attributes NOTE            0000000000407130 004280 000144 00      0   0  4
+  [29] .symtab           SYMTAB          0000000000000000 0043c8 0007c8 18     30  31  8
+  [30] .strtab           STRTAB          0000000000000000 004b90 000591 00      0   0  1
+  [31] .shstrtab         STRTAB          0000000000000000 005121 00013b 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), l (large), p (processor specific)
+
+Symbol table '.dynsym' contains 40 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND free@GLIBC_2.2.5 (2)
+     2: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND recv@GLIBC_2.2.5 (2)
+     3: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.34 (3)
+     4: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __errno_location@GLIBC_2.2.5 (2)
+     5: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTable
+     6: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_barrier_init@GLIBC_2.34 (3)
+     7: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sendmsg@GLIBC_2.2.5 (2)
+     8: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_barrier_wait@GLIBC_2.34 (3)
+     9: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND setsockopt@GLIBC_2.2.5 (2)
+    10: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND clock_gettime@GLIBC_2.17 (4)
+    11: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __sched_cpucount@GLIBC_2.6 (5)
+    12: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND send@GLIBC_2.2.5 (2)
+    13: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND printf@GLIBC_2.2.5 (2)
+    14: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_barrier_destroy@GLIBC_2.34 (3)
+    15: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sendto@GLIBC_2.2.5 (2)
+    16: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND close@GLIBC_2.2.5 (2)
+    17: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sched_setaffinity@GLIBC_2.3.4 (6)
+    18: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getsockopt@GLIBC_2.2.5 (2)
+    19: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strtoull@GLIBC_2.2.5 (2)
+    20: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strcmp@GLIBC_2.2.5 (2)
+    21: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fprintf@GLIBC_2.2.5 (2)
+    22: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+    23: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sendmmsg@GLIBC_2.14 (7)
+    24: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND recvmsg@GLIBC_2.2.5 (2)
+    25: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND bind@GLIBC_2.2.5 (2)
+    26: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_create@GLIBC_2.34 (3)
+    27: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getrusage@GLIBC_2.2.5 (2)
+    28: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND recvmmsg@GLIBC_2.12 (8)
+    29: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getsockname@GLIBC_2.2.5 (2)
+    30: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sched_getcpu@GLIBC_2.6 (5)
+    31: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND exit@GLIBC_2.2.5 (2)
+    32: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND connect@GLIBC_2.2.5 (2)
+    33: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable
+    34: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND aligned_alloc@GLIBC_2.16 (9)
+    35: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sched_getaffinity@GLIBC_2.3.4 (6)
+    36: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_join@GLIBC_2.34 (3)
+    37: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strerror@GLIBC_2.2.5 (2)
+    38: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND socket@GLIBC_2.2.5 (2)
+    39: 0000000000405120     8 OBJECT  GLOBAL DEFAULT   25 stderr@GLIBC_2.2.5 (2)
+
+Symbol table '.symtab' contains 83 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crt1.o
+     2: 000000000040039c    32 OBJECT  LOCAL  DEFAULT    4 __abi_tag
+     3: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS udp_batch.c
+     4: 0000000000402050    60 FUNC    LOCAL  DEFAULT   14 fail_errno
+     5: 0000000000402090    36 FUNC    LOCAL  DEFAULT   14 fail_message
+     6: 00000000004020c0    50 FUNC    LOCAL  DEFAULT   14 socket_value
+     7: 0000000000402100    50 FUNC    LOCAL  DEFAULT   14 now_ns
+     8: 0000000000402140   149 FUNC    LOCAL  DEFAULT   14 parse_u32
+     9: 00000000004021e0  1176 FUNC    LOCAL  DEFAULT   14 receive_gro_round
+    10: 0000000000402680   169 FUNC    LOCAL  DEFAULT   14 pin_to_cpu
+    11: 0000000000402730   788 FUNC    LOCAL  DEFAULT   14 receive_normal_round
+    12: 0000000000402a50   217 FUNC    LOCAL  DEFAULT   14 receiver_main
+    13: 0000000000402b30   114 FUNC    LOCAL  DEFAULT   14 topic26_send_scalar_batch
+    14: 0000000000402bb0   514 FUNC    LOCAL  DEFAULT   14 topic26_send_mmsg_batch
+    15: 0000000000402dc0   189 FUNC    LOCAL  DEFAULT   14 topic26_send_gso_batch
+    16: 0000000000403810    24 OBJECT  LOCAL  DEFAULT   16 CSWTCH.43
+    17: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+    18: 0000000000401fa0     0 FUNC    LOCAL  DEFAULT   14 deregister_tm_clones
+    19: 0000000000401fd0     0 FUNC    LOCAL  DEFAULT   14 register_tm_clones
+    20: 0000000000402010     0 FUNC    LOCAL  DEFAULT   14 __do_global_dtors_aux
+    21: 0000000000405128     1 OBJECT  LOCAL  DEFAULT   25 completed.0
+    22: 0000000000404df0     0 OBJECT  LOCAL  DEFAULT   20 __do_global_dtors_aux_fini_array_entry
+    23: 0000000000402040     0 FUNC    LOCAL  DEFAULT   14 frame_dummy
+    24: 0000000000404de8     0 OBJECT  LOCAL  DEFAULT   19 __frame_dummy_init_array_entry
+    25: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS crtstuff.c
+    26: 0000000000403d2c     0 OBJECT  LOCAL  DEFAULT   18 __FRAME_END__
+    27: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS 
+    28: 0000000000404df8     0 OBJECT  LOCAL  DEFAULT   21 _DYNAMIC
+    29: 0000000000403a20     0 NOTYPE  LOCAL  DEFAULT   17 __GNU_EH_FRAME_HDR
+    30: 0000000000404fe8     0 OBJECT  LOCAL  DEFAULT   23 _GLOBAL_OFFSET_TABLE_
+    31: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND free@GLIBC_2.2.5
+    32: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND recv@GLIBC_2.2.5
+    33: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.34
+    34: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __errno_location@GLIBC_2.2.5
+    35: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_deregisterTMCloneTable
+    36: 0000000000405110     0 NOTYPE  WEAK   DEFAULT   24 data_start
+    37: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_barrier_init@GLIBC_2.34
+    38: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sendmsg@GLIBC_2.2.5
+    39: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_barrier_wait@GLIBC_2.34
+    40: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND setsockopt@GLIBC_2.2.5
+    41: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND clock_gettime@GLIBC_2.17
+    42: 0000000000405114     0 NOTYPE  GLOBAL DEFAULT   24 _edata
+    43: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __sched_cpucount@GLIBC_2.6
+    44: 0000000000402e80     0 FUNC    GLOBAL HIDDEN    15 _fini
+    45: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND send@GLIBC_2.2.5
+    46: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND printf@GLIBC_2.2.5
+    47: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_barrier_destroy@GLIBC_2.34
+    48: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sendto@GLIBC_2.2.5
+    49: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND close@GLIBC_2.2.5
+    50: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sched_setaffinity@GLIBC_2.3.4
+    51: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getsockopt@GLIBC_2.2.5
+    52: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strtoull@GLIBC_2.2.5
+    53: 0000000000405110     0 NOTYPE  GLOBAL DEFAULT   24 __data_start
+    54: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strcmp@GLIBC_2.2.5
+    55: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND fprintf@GLIBC_2.2.5
+    56: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND __gmon_start__
+    57: 0000000000403008     0 OBJECT  GLOBAL HIDDEN    16 __dso_handle
+    58: 0000000000403000     4 OBJECT  GLOBAL DEFAULT   16 _IO_stdin_used
+    59: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sendmmsg@GLIBC_2.14
+    60: 0000000000405130     0 NOTYPE  GLOBAL DEFAULT   25 _end
+    61: 0000000000401f90     5 FUNC    GLOBAL HIDDEN    14 _dl_relocate_static_pie
+    62: 0000000000401f60    38 FUNC    GLOBAL DEFAULT   14 _start
+    63: 0000000000405114     0 NOTYPE  GLOBAL DEFAULT   25 __bss_start
+    64: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND recvmsg@GLIBC_2.2.5
+    65: 0000000000401250  3329 FUNC    GLOBAL DEFAULT   14 main
+    66: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND bind@GLIBC_2.2.5
+    67: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_create@GLIBC_2.34
+    68: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getrusage@GLIBC_2.2.5
+    69: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND recvmmsg@GLIBC_2.12
+    70: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND getsockname@GLIBC_2.2.5
+    71: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sched_getcpu@GLIBC_2.6
+    72: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND exit@GLIBC_2.2.5
+    73: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND connect@GLIBC_2.2.5
+    74: 0000000000405118     0 OBJECT  GLOBAL HIDDEN    24 __TMC_END__
+    75: 0000000000000000     0 NOTYPE  WEAK   DEFAULT  UND _ITM_registerTMCloneTable
+    76: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND aligned_alloc@GLIBC_2.16
+    77: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND sched_getaffinity@GLIBC_2.3.4
+    78: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND pthread_join@GLIBC_2.34
+    79: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strerror@GLIBC_2.2.5
+    80: 0000000000401000     0 FUNC    GLOBAL HIDDEN    12 _init
+    81: 0000000000405120     8 OBJECT  GLOBAL DEFAULT   25 stderr@GLIBC_2.2.5
+    82: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND socket@GLIBC_2.2.5

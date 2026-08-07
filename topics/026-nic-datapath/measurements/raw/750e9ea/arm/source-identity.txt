@@ -1,0 +1,8 @@
+source_commit=750e9ea8729063d118409f9f73537d76cb8ad392
+source_tree=74926ef177f0fd9329e13a35e38069dc38fb152a
+source_archive_scope=Cargo.toml Cargo.lock topics/026-nic-datapath
+source_archive_sha256=76507ad35016e704c81c4e1d125a321de14305b1821da8cb05705c3e47f6e210
+96fcbfe50e3044b01b285cd093244c45335e38cbfa23fd5b3f1e2d0f7d605777  /tmp/topic26-exact-750e9ea-run1/repo/topics/026-nic-datapath/experiment/udp_batch.c
+49be237d34eb4b5b6931b86acfd7af917be941441ef4468c2d4e7b56e729418c  /tmp/topic26-exact-750e9ea-run1/repo/topics/026-nic-datapath/experiment/run_processes.py
+0367cd35d3416cc1d2ed63589f9a0e4821ab1d0674b801bf053d1ef5524a9e3b  /tmp/topic26-exact-750e9ea-run1/repo/topics/026-nic-datapath/experiment/validate_receipts.py
+7ad53cd72024d77e5513bdcea4d4eea8997c412f23723141ca015ee32a8c73c8  /tmp/topic26-exact-750e9ea-run1/repo/topics/026-nic-datapath/experiment/run_host.sh

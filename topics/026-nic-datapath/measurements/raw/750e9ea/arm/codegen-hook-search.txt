@@ -1,0 +1,23 @@
+592:  4107f4:	940003df 	bl	411770 <topic26_send_scalar_batch>
+682:  41095c:	940003f4 	bl	41192c <topic26_send_gso_batch>
+686:  41096c:	940003a5 	bl	411800 <topic26_send_mmsg_batch>
+1618:0000000000411770 <topic26_send_scalar_batch>:
+1628:  411794:	14000005 	b	4117a8 <topic26_send_scalar_batch+0x38>
+1632:  4117a4:	54000241 	b.ne	4117ec <topic26_send_scalar_batch+0x7c>  // b.any
+1639:  4117c0:	b7fffec0 	tbnz	x0, #63, 411798 <topic26_send_scalar_batch+0x28>
+1641:  4117c8:	54000121 	b.ne	4117ec <topic26_send_scalar_batch+0x7c>  // b.any
+1644:  4117d4:	54fffea1 	b.ne	4117a8 <topic26_send_scalar_batch+0x38>  // b.any
+1656:0000000000411800 <topic26_send_mmsg_batch>:
+1682:  411864:	54ffff41 	b.ne	41184c <topic26_send_mmsg_batch+0x4c>  // b.any
+1692:  41188c:	14000005 	b	4118a0 <topic26_send_mmsg_batch+0xa0>
+1696:  41189c:	54000421 	b.ne	411920 <topic26_send_mmsg_batch+0x120>  // b.any
+1704:  4118bc:	54fffeab 	b.lt	411890 <topic26_send_mmsg_batch+0x90>  // b.tstop
+1705:  4118c0:	54000300 	b.eq	411920 <topic26_send_mmsg_batch+0x120>  // b.none
+1711:  4118d8:	540001e1 	b.ne	411914 <topic26_send_mmsg_batch+0x114>  // b.any
+1714:  4118e4:	54ffff2c 	b.gt	4118c8 <topic26_send_mmsg_batch+0xc8>
+1717:  4118f0:	54fffc89 	b.ls	411880 <topic26_send_mmsg_batch+0x80>  // b.plast
+1733:000000000041192c <topic26_send_gso_batch>:
+1759:  411990:	14000005 	b	4119a4 <topic26_send_gso_batch+0x78>
+1763:  4119a0:	54000101 	b.ne	4119c0 <topic26_send_gso_batch+0x94>  // b.any
+1770:  4119bc:	b7fffec0 	tbnz	x0, #63, 411994 <topic26_send_gso_batch+0x68>
+1773:  4119c8:	540000c1 	b.ne	4119e0 <topic26_send_gso_batch+0xb4>  // b.any

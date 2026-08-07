@@ -1,0 +1,4 @@
+# Preserve retained runner output byte-for-byte.
+**/* -text -whitespace
+*.gz binary
+
