@@ -132,7 +132,7 @@ git -C "$repo_root" archive --format=tar "$source_commit" -- \
     "${source_archive_paths[@]}" \
     >"$scratch_dir/source.tar"
 gzip -n -9 <"$scratch_dir/source.tar" >"$output_dir/source.tar.gz"
-sha256sum "$output_dir/source.tar.gz" >"$output_dir/source-archive.sha256"
+(cd "$output_dir" && sha256sum source.tar.gz) >"$output_dir/source-archive.sha256"
 
 swept_variables=()
 while IFS= read -r variable; do
@@ -337,15 +337,26 @@ export PYTHONDONTWRITEBYTECODE=1
     printf 'source_archive_scope=Cargo.toml Cargo.lock %s\n' "$topic_rel"
     printf 'source_archive_sha256=%s\n' \
         "$(awk '{print $1}' "$output_dir/source-archive.sha256")"
-    sha256sum \
-        "$experiment_dir/udp_batch.c" \
-        "$experiment_dir/run_processes.py" \
-        "$experiment_dir/validate_receipts.py" \
-        "$experiment_dir/run_host.sh"
+    (
+        cd "$repo_root" && sha256sum \
+            "$experiment_rel/udp_batch.c" \
+            "$experiment_rel/run_processes.py" \
+            "$experiment_rel/validate_receipts.py" \
+            "$experiment_rel/run_host.sh"
+    )
 } >"$output_dir/source-identity.txt"
 
 gates_dir="$output_dir/gates"
 mkdir -p -- "$gates_dir"
+pinned_toolchain="$(sed -n 's/^channel *= *"\(.*\)"$/\1/p' \
+    "$repo_root/rust-toolchain.toml")"
+resolved_rustc="$(cd "$repo_root" && rustc --version)"
+if [[ -z "$pinned_toolchain" \
+    || "$resolved_rustc" != "rustc $pinned_toolchain "* ]]; then
+    printf 'resolved "%s" does not match the pinned toolchain "%s"\n' \
+        "$resolved_rustc" "$pinned_toolchain" >&2
+    exit 2
+fi
 (cd "$repo_root" && git diff --check) >"$gates_dir/git-diff-check.log" 2>&1
 (cd "$repo_root" && cargo fmt --all -- --check) \
     >"$gates_dir/cargo-fmt.log" 2>&1
@@ -383,7 +394,7 @@ build_flags=(
 binary="$scratch_dir/udp-batch"
 cc "${build_flags[@]}" "$experiment_dir/udp_batch.c" -o "$binary" \
     >"$output_dir/native-build.log" 2>&1
-sha256sum "$binary" >"$output_dir/binary.sha256"
+(cd "$scratch_dir" && sha256sum udp-batch) >"$output_dir/binary.sha256"
 readelf -hSWs "$binary" >"$output_dir/binary.readelf.txt"
 nm -an "$binary" >"$output_dir/binary.symbols.txt"
 objdump -drwC "$binary" >"$output_dir/codegen.txt"

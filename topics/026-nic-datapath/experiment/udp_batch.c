@@ -135,6 +135,29 @@ static void barrier_wait(pthread_barrier_t *barrier)
     }
 }
 
+static int read_topology_id(int cpu, const char *leaf)
+{
+    char path[128];
+    const int written = snprintf(
+        path, sizeof(path),
+        "/sys/devices/system/cpu/cpu%d/topology/%s", cpu, leaf);
+    if (written < 0 || (size_t)written >= sizeof(path)) {
+        fail_message("CPU topology path is too long");
+    }
+    FILE *stream = fopen(path, "re");
+    if (stream == NULL) {
+        fail_errno("cannot open CPU topology entry");
+    }
+    int value = -1;
+    if (fscanf(stream, "%d", &value) != 1 || value < 0) {
+        fail_message("CPU topology entry is not a nonnegative integer");
+    }
+    if (fclose(stream) != 0) {
+        fail_errno("fclose");
+    }
+    return value;
+}
+
 static void choose_cpus(int *sender_cpu, int *receiver_cpu)
 {
     cpu_set_t allowed;
@@ -144,19 +167,30 @@ static void choose_cpus(int *sender_cpu, int *receiver_cpu)
 
     *sender_cpu = -1;
     *receiver_cpu = -1;
+    int sender_package = -1;
+    int sender_core = -1;
     for (int cpu = 0; cpu < CPU_SETSIZE; ++cpu) {
         if (!CPU_ISSET(cpu, &allowed)) {
             continue;
         }
         if (*sender_cpu < 0) {
             *sender_cpu = cpu;
-        } else {
-            *receiver_cpu = cpu;
-            break;
+            sender_package = read_topology_id(cpu, "physical_package_id");
+            sender_core = read_topology_id(cpu, "core_id");
+            continue;
         }
+        /* Reject SMT siblings of the sender: the experiment requires two
+         * distinct physical cores, not merely two logical CPU IDs. */
+        if (read_topology_id(cpu, "physical_package_id") == sender_package &&
+            read_topology_id(cpu, "core_id") == sender_core) {
+            continue;
+        }
+        *receiver_cpu = cpu;
+        break;
     }
     if (*sender_cpu < 0 || *receiver_cpu < 0) {
-        fail_message("the experiment needs two allowed CPUs");
+        fail_message(
+            "the experiment needs two allowed CPUs on distinct physical cores");
     }
 }
 

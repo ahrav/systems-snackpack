@@ -378,16 +378,25 @@ def verify_source_identity(
             recorded_tree = line.split("=", 1)[1].strip()
         elif line.startswith("source_archive_scope="):
             recorded_scope = line.split("=", 1)[1].strip()
-    if recorded is None or len(recorded) not in {40, 64}:
+    def is_hex_digest(candidate: str) -> bool:
+        return len(candidate) in {40, 64} and all(
+            character in "0123456789abcdef" for character in candidate
+        )
+
+    if recorded is None or not is_hex_digest(recorded):
         fail("source identity lacks a recorded source commit")
-    if recorded_tree is None or len(recorded_tree) not in {40, 64}:
+    if recorded_tree is None or not is_hex_digest(recorded_tree):
         fail("source identity lacks a recorded source tree")
     if recorded_scope != " ".join(SOURCE_ARCHIVE_PATHS):
         fail("source identity has the wrong archive scope")
     verify_source_archive(evidence, identity_lines)
     archive_digests = experiment_digests_from_archive(evidence)
 
-    commit_exists = subprocess.run(
+    # The validating repository may lack the recorded collection commit
+    # (shallow clone, squash merge). When the commit is reachable, bind the
+    # receipts to its blobs; otherwise rely on the retained source archive,
+    # which verify_source_archive binds to both recorded digests.
+    commit_reachable = subprocess.run(
         [
             "git",
             "-C",
@@ -399,40 +408,39 @@ def verify_source_identity(
         capture_output=True,
         check=False,
     ).returncode == 0
-    if not commit_exists:
-        fail("recorded source commit is unavailable in the validating repository")
-    tree = subprocess.run(
-        ["git", "-C", str(source_root), "rev-parse", f"{recorded}^{{tree}}"],
-        capture_output=True,
-        check=False,
-        text=True,
-    )
-    if tree.returncode != 0 or tree.stdout.strip() != recorded_tree:
-        fail("recorded source tree differs from the source commit")
-    archived = subprocess.run(
-        [
-            "git",
-            "-C",
-            str(source_root),
-            "archive",
-            "--format=tar",
-            recorded,
-            "--",
-            *SOURCE_ARCHIVE_PATHS,
-        ],
-        capture_output=True,
-        check=False,
-    )
-    if archived.returncode != 0:
-        fail("cannot archive the recorded source commit")
-    try:
-        retained_tar = gzip.decompress((evidence / "source.tar.gz").read_bytes())
-    except (OSError, EOFError) as error:
-        fail(f"cannot decompress retained source archive: {error}")
-    if normalized_tar_entries(retained_tar, "retained source archive") != (
-        normalized_tar_entries(archived.stdout, "recorded commit archive")
-    ):
-        fail("retained source archive differs from the recorded topic source")
+    if commit_reachable:
+        tree = subprocess.run(
+            ["git", "-C", str(source_root), "rev-parse", f"{recorded}^{{tree}}"],
+            capture_output=True,
+            check=False,
+            text=True,
+        )
+        if tree.returncode != 0 or tree.stdout.strip() != recorded_tree:
+            fail("recorded source tree differs from the source commit")
+        archived = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(source_root),
+                "archive",
+                "--format=tar",
+                recorded,
+                "--",
+                *SOURCE_ARCHIVE_PATHS,
+            ],
+            capture_output=True,
+            check=False,
+        )
+        if archived.returncode != 0:
+            fail("cannot archive the recorded source commit")
+        try:
+            retained_tar = gzip.decompress((evidence / "source.tar.gz").read_bytes())
+        except (OSError, EOFError) as error:
+            fail(f"cannot decompress retained source archive: {error}")
+        if normalized_tar_entries(retained_tar, "retained source archive") != (
+            normalized_tar_entries(archived.stdout, "recorded commit archive")
+        ):
+            fail("retained source archive differs from the recorded topic source")
 
     expected_files = {
         "udp_batch.c",
@@ -450,21 +458,22 @@ def verify_source_identity(
             continue
         if archive_digests.get(name) != parts[0]:
             fail(f"source archive identity differs for {name}")
-        blob = subprocess.run(
-            [
-                "git",
-                "-C",
-                str(source_root),
-                "show",
-                f"{recorded}:topics/026-nic-datapath/experiment/{name}",
-            ],
-            capture_output=True,
-            check=False,
-        )
-        if blob.returncode != 0:
-            fail(f"recorded source commit lacks {name}")
-        if hashlib.sha256(blob.stdout).hexdigest() != parts[0]:
-            fail(f"recorded source identity differs for {name}")
+        if commit_reachable:
+            blob = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(source_root),
+                    "show",
+                    f"{recorded}:topics/026-nic-datapath/experiment/{name}",
+                ],
+                capture_output=True,
+                check=False,
+            )
+            if blob.returncode != 0:
+                fail(f"recorded source commit lacks {name}")
+            if hashlib.sha256(blob.stdout).hexdigest() != parts[0]:
+                fail(f"recorded source identity differs for {name}")
         found.add(name)
     if found != expected_files:
         fail("source identity does not cover every experiment file")
@@ -534,7 +543,11 @@ def validate_design(design: dict[str, Any]) -> None:
     ):
         fail("design binary digest is invalid")
     required_phrases = {
-        "stopping": ("fixed 8 blocks", "4 A/A blocks", "no peeking", "no", "replacement"),
+        "stopping": (
+            "fixed 8 blocks",
+            "4 A/A blocks",
+            "no peeking, retry, or replacement",
+        ),
         "invalid_attempt_policy": ("retain every attempt", "fails the run"),
         "primary_receive_semantics": ("UDP_GRO disabled",),
         "interval": ("Student-t", "complete-block", "run window"),
@@ -613,7 +626,7 @@ def validate_schedules(
     ):
         fail("A/A schedule is not position balanced")
     for index, block in enumerate(aa, start=1):
-        expected = {
+        expected_block = {
             "comparison": "aa_right_over_aa_left",
             "baseline_label": "aa_left",
             "baseline_mode": "sendmmsg",
@@ -622,7 +635,7 @@ def validate_schedules(
             "block": index,
             "template": block["template"],
         }
-        if block != expected:
+        if block != expected_block:
             fail("A/A schedule mapping differs")
 
     expected: list[tuple[Any, ...]] = []
