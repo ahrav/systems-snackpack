@@ -29,6 +29,7 @@ def load_summaries(process_directory: Path) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = list(csv.DictReader(handle))
     for row in rows:
         row["block"] = int(row["block"])
+        row["period"] = int(row["period"])
         for field in NUMERIC_FIELDS:
             row[field] = float(row[field])
     return rows
@@ -37,21 +38,30 @@ def load_summaries(process_directory: Path) -> list[dict[str, Any]]:
 def check_design(rows: list[dict[str, Any]]) -> None:
     """Reject input that does not match the predeclared complete-block design."""
     expected: dict[tuple[str, str, int], int] = {}
+    expected_periods: dict[tuple[str, int, int], int] = {}
     for block in range(1, 9):
         expected[("main", "fixed", block)] = 2
         expected[("main", "variable", block)] = 2
+        for period in range(1, 5):
+            expected_periods[("main", block, period)] = 1
     for block in range(1, 5):
         expected[("aa", "A", block)] = 2
         expected[("aa", "B", block)] = 2
+        for period in range(1, 5):
+            expected_periods[("aa", block, period)] = 1
     counts: dict[tuple[str, str, int], int] = {}
+    period_counts: dict[tuple[str, int, int], int] = {}
     for row in rows:
         group = row["mode"] if row["phase"] == "main" else row["label"]
         key = (row["phase"], group, row["block"])
         counts[key] = counts.get(key, 0) + 1
-    if counts != expected:
+        period_key = (row["phase"], row["block"], row["period"])
+        period_counts[period_key] = period_counts.get(period_key, 0) + 1
+    if counts != expected or period_counts != expected_periods:
         raise ValueError(
             "summaries do not match the predeclared complete-block design "
-            "of 8 main and 4 A/A blocks with 2 periods per group per block"
+            "of 8 main and 4 A/A blocks with 2 periods per group and "
+            "periods 1..4 exactly once per block"
         )
 
 
