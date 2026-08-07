@@ -95,3 +95,9 @@ measurements/
 Never overwrite a failed or superseded bundle. A corrected source gets a new
 commit and source prefix. Host and comparison notes must link to the sealed raw
 evidence instead of copying only summary values.
+
+## Retained candidate
+
+- [`64ec37b` required Arm result](64ec37b-arm.md)
+- [`64ec37b` runtime-resolved `xxl` result](64ec37b-xxl.md)
+- [`64ec37b` two-host boundary and comparison](64ec37b-comparison.md)
