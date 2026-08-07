@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# BASH_ENV/ENV run unrecorded shell code before this script; re-exec clean.
+# BASH_ENV/ENV startup hooks run before line 1 and can mutate arguments or
+# shadow commands; re-exec cannot undo them, so refuse instead.
 if [[ -n ${BASH_ENV-} || -n ${ENV-} ]]; then
-  exec env -u BASH_ENV -u ENV "${BASH:-bash}" "$0" "$@"
+  printf 'refusing to run: BASH_ENV or ENV startup hooks are unrecorded\n' >&2
+  exit 2
+fi
+if [[ -n $(declare -F) ]]; then
+  printf 'refusing to run: inherited shell functions are unrecorded\n' >&2
+  exit 2
 fi
 
 if [[ $# -ne 4 ]]; then
@@ -273,6 +279,11 @@ for environment_name in "${swept_environment_names[@]}"; do
   unset "$environment_name"
 done
 
+# glibc preloads /etc/ld.so.preload entries even with LD_PRELOAD unset.
+if [[ -s /etc/ld.so.preload ]]; then
+  fail 'non-empty /etc/ld.so.preload would interpose unrecorded libraries'
+fi
+
 export CARGO_HOME="$cargo_scratch_directory/cargo-home"
 export CARGO_INCREMENTAL=0
 export CARGO_NET_OFFLINE=true
@@ -394,8 +405,8 @@ python_path=$(command -v python3)
   cargo -Vv
   printf 'python_path=%s\n' "$python_path"
   printf 'python_resolved_path=%s\n' "$(readlink -f "$python_path")"
-  python3 -VV 2>&1
-  python3 -c 'import platform, sys; print(f"python_executable={sys.executable}"); print(f"python_prefix={sys.prefix}"); print(f"python_platform={platform.platform()}")'
+  python3 -I -VV 2>&1
+  python3 -I -c 'import platform, sys; print(f"python_executable={sys.executable}"); print(f"python_prefix={sys.prefix}"); print(f"python_platform={platform.platform()}")'
 } > "$output_directory/toolchain.txt"
 taskset --cpu-list "$cpu_list" rustc -C target-cpu=native --print cfg \
   | LC_ALL=C sort > "$output_directory/rustc-native-cfg.txt"
@@ -430,7 +441,7 @@ cargo clippy --locked --package queueing-service-design --all-targets -- -D warn
   > "$output_directory/gates/cargo-clippy.log" 2>&1
 RUSTDOCFLAGS='-D warnings' cargo doc --locked --package queueing-service-design --no-deps \
   > "$output_directory/gates/cargo-doc.log" 2>&1
-python3 -I -m py_compile \
+python3 -I -X "pycache_prefix=$cargo_scratch_directory/python-cache" -m py_compile \
   "$topic/experiment/run_processes.py" \
   "$topic/experiment/analyze.py" \
   "$topic/experiment/validate_receipts.py" \
@@ -468,12 +479,15 @@ rg -n 'topic27_do_work' "$output_directory/codegen/final-binary.txt" \
   > "$output_directory/codegen/do-work-calls.txt"
 gzip -n -9 "$output_directory/codegen/final-binary.txt"
 
-python3 -I "$topic/experiment/run_processes.py" \
+python3 -I -X "pycache_prefix=$cargo_scratch_directory/python-cache" \
+  "$topic/experiment/run_processes.py" \
   "$retained_binary" "$output_directory/processes" "$cpu_list" \
   > "$output_directory/process-driver.log"
-python3 -I "$topic/experiment/analyze.py" "$output_directory/processes" \
+python3 -I -X "pycache_prefix=$cargo_scratch_directory/python-cache" \
+  "$topic/experiment/analyze.py" "$output_directory/processes" \
   > "$output_directory/processes/analysis.json"
-python3 -I "$topic/experiment/validate_receipts.py" "$output_directory/processes" \
+python3 -I -X "pycache_prefix=$cargo_scratch_directory/python-cache" \
+  "$topic/experiment/validate_receipts.py" "$output_directory/processes" \
   > "$output_directory/receipt-validation.txt"
 
 {

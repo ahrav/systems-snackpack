@@ -33,5 +33,10 @@ promoted here. Commit `bf93921` added `-C embed-bitcode=yes`; each host then
 reran 48 fresh processes from the beginning, 96 processes across both hosts,
 with no period replacement.
 
+Review-hardening commits merged after these runs changed the probe, analyzer,
+and runner sources. This promoted result therefore describes only the
+`bf93921` tree, binary, and analysis; the current tree has not been rerun on
+either host and holds no promoted result of its own.
+
 See the [Arm record](bf93921-arm.md), [`xxl` record](bf93921-xxl.md), and
 [raw archive checksums](raw/bf93921/SHA256SUMS).

@@ -111,8 +111,10 @@ def main() -> None:
     parser.add_argument("cpu_list")
     args = parser.parse_args()
 
-    if shutil.which("taskset") is None:
+    taskset_path = shutil.which("taskset")
+    if taskset_path is None:
         raise SystemExit("taskset is required; run this harness on Linux")
+    taskset_path = str(Path(taskset_path).resolve())
     binary = args.binary.resolve(strict=True)
     output = args.output_directory.resolve(strict=False)
     if output.exists():
@@ -132,13 +134,14 @@ def main() -> None:
         "treatment_application": "one fresh process",
         "analysis_unit": "one complete four-process block contrast",
         "replacement_policy": "none",
+        "taskset_path": taskset_path,
     }
     (output / "design.json").write_text(
         json.dumps(design, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
 
     calibration_command = [
-        "taskset",
+        taskset_path,
         "--cpu-list",
         args.cpu_list,
         str(binary),
@@ -205,7 +208,7 @@ def main() -> None:
                 )
                 raw_path = raw_directory / f"{run_id}.csv"
                 command = [
-                    "taskset",
+                    taskset_path,
                     "--cpu-list",
                     args.cpu_list,
                     str(binary),
