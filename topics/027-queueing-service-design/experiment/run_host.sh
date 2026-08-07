@@ -209,14 +209,60 @@ trap 'failure_reason="received SIGINT"; exit 130' INT
 trap 'failure_reason="received SIGTERM"; exit 143' TERM
 trap 'finalize_run "$?"' EXIT
 
+environment_candidates=(
+  AR ARFLAGS AS CC CFLAGS CPP CPPFLAGS CXX CXXFLAGS LD LDFLAGS LIBRARY_PATH
+  CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH DYLD_LIBRARY_PATH GLIBC_TUNABLES
+  LD_AUDIT LD_LIBRARY_PATH LD_PRELOAD
+  MALLOC_ARENA_MAX MALLOC_ARENA_TEST MALLOC_CHECK_ MALLOC_MMAP_MAX_
+  MALLOC_MMAP_THRESHOLD_ MALLOC_PERTURB_ MALLOC_TOP_PAD_ MALLOC_TRIM_THRESHOLD_
+  LANG LANGUAGE LC_ALL LC_CTYPE MACOSX_DEPLOYMENT_TARGET MAKEFLAGS NM NUM_JOBS OBJCOPY OBJDUMP PKG_CONFIG
+  PKG_CONFIG_PATH RANLIB SDKROOT SOURCE_DATE_EPOCH STRIP TZ ZERO_AR_DATE
+  CARGO CARGO_BUILD_JOBS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET CARGO_ENCODED_RUSTFLAGS
+  CARGO_HOME CARGO_INCREMENTAL CARGO_MAKEFLAGS CARGO_NET_OFFLINE CARGO_TARGET_DIR
+  RUSTC RUSTC_BOOTSTRAP RUSTC_LOG RUSTC_WRAPPER RUSTC_WORKSPACE_WRAPPER
+  RUSTDOC RUSTDOCFLAGS RUSTFLAGS RUSTUP_TOOLCHAIN
+  CONDA_PREFIX PYTHONBREAKPOINT PYTHONCOERCECLOCALE PYTHONDONTWRITEBYTECODE
+  PYTHONHASHSEED PYTHONHOME PYTHONINSPECT PYTHONINTMAXSTRDIGITS PYTHONIOENCODING
+  PYTHONMALLOC PYTHONOPTIMIZE PYTHONPATH PYTHONPYCACHEPREFIX PYTHONSAFEPATH
+  PYTHONSTARTUP PYTHONUTF8 PYTHONWARNINGS VIRTUAL_ENV
+)
+while IFS= read -r environment_name; do
+  case "$environment_name" in
+    CARGO_BUILD_*|CARGO_PROFILE_*|CARGO_TARGET_*)
+      environment_candidates+=("$environment_name")
+      ;;
+  esac
+done < <(compgen -e)
+mapfile -t swept_environment_names < <(
+  printf '%s\n' "${environment_candidates[@]}" | LC_ALL=C sort -u
+)
+{
+  for environment_name in "${swept_environment_names[@]}"; do
+    if [[ -v $environment_name ]]; then
+      printf '%s=%q\n' "$environment_name" "${!environment_name}"
+    else
+      printf '%s=<unset>\n' "$environment_name"
+    fi
+  done
+} > "$output_directory/environment.swept.txt"
+for environment_name in "${swept_environment_names[@]}"; do
+  unset "$environment_name"
+done
+
+# glibc preloads /etc/ld.so.preload entries even with LD_PRELOAD unset.
+if [[ -s /etc/ld.so.preload ]]; then
+  fail 'non-empty /etc/ld.so.preload would interpose unrecorded libraries'
+fi
+
 # GIT_* variables can repoint the identity checks below at a different tree,
 # and a PATH wrapper can misreport source identity. Record Git's PATH
 # resolution, then clear GIT_* variables before the source-identity checks.
 git_path=$(command -v git)
+git_path=$(readlink -f "$git_path")
 {
-  printf 'git_path=%s\n' "$git_path"
-  printf 'git_resolved_path=%s\n' "$(readlink -f "$git_path")"
-  git --version
+  printf 'git_path=%s\n' "$(command -v git)"
+  printf 'git_resolved_path=%s\n' "$git_path"
+  "$git_path" --version
   while IFS= read -r environment_name; do
     case "$environment_name" in
       GIT_*)
@@ -258,49 +304,6 @@ if [[ $cargo_scratch_directory == "$repository_root" \
 fi
 touch "$cargo_scratch_directory/.topic27-cargo-scratch"
 mkdir -p "$cargo_scratch_directory"/{cargo-home,python-cache,target}
-
-environment_candidates=(
-  AR ARFLAGS AS CC CFLAGS CPP CPPFLAGS CXX CXXFLAGS LD LDFLAGS LIBRARY_PATH
-  CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH DYLD_LIBRARY_PATH GLIBC_TUNABLES
-  LD_AUDIT LD_LIBRARY_PATH LD_PRELOAD
-  LANG LANGUAGE LC_ALL LC_CTYPE MACOSX_DEPLOYMENT_TARGET MAKEFLAGS NM NUM_JOBS OBJCOPY OBJDUMP PKG_CONFIG
-  PKG_CONFIG_PATH RANLIB SDKROOT SOURCE_DATE_EPOCH STRIP TZ ZERO_AR_DATE
-  CARGO CARGO_BUILD_JOBS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET CARGO_ENCODED_RUSTFLAGS
-  CARGO_HOME CARGO_INCREMENTAL CARGO_MAKEFLAGS CARGO_NET_OFFLINE CARGO_TARGET_DIR
-  RUSTC RUSTC_BOOTSTRAP RUSTC_LOG RUSTC_WRAPPER RUSTC_WORKSPACE_WRAPPER
-  RUSTDOC RUSTDOCFLAGS RUSTFLAGS RUSTUP_TOOLCHAIN
-  CONDA_PREFIX PYTHONBREAKPOINT PYTHONCOERCECLOCALE PYTHONDONTWRITEBYTECODE
-  PYTHONHASHSEED PYTHONHOME PYTHONINSPECT PYTHONINTMAXSTRDIGITS PYTHONIOENCODING
-  PYTHONMALLOC PYTHONOPTIMIZE PYTHONPATH PYTHONPYCACHEPREFIX PYTHONSAFEPATH
-  PYTHONSTARTUP PYTHONUTF8 PYTHONWARNINGS VIRTUAL_ENV
-)
-while IFS= read -r environment_name; do
-  case "$environment_name" in
-    CARGO_BUILD_*|CARGO_PROFILE_*|CARGO_TARGET_*)
-      environment_candidates+=("$environment_name")
-      ;;
-  esac
-done < <(compgen -e)
-mapfile -t swept_environment_names < <(
-  printf '%s\n' "${environment_candidates[@]}" | LC_ALL=C sort -u
-)
-{
-  for environment_name in "${swept_environment_names[@]}"; do
-    if [[ -v $environment_name ]]; then
-      printf '%s=%q\n' "$environment_name" "${!environment_name}"
-    else
-      printf '%s=<unset>\n' "$environment_name"
-    fi
-  done
-} > "$output_directory/environment.swept.txt"
-for environment_name in "${swept_environment_names[@]}"; do
-  unset "$environment_name"
-done
-
-# glibc preloads /etc/ld.so.preload entries even with LD_PRELOAD unset.
-if [[ -s /etc/ld.so.preload ]]; then
-  fail 'non-empty /etc/ld.so.preload would interpose unrecorded libraries'
-fi
 
 export CARGO_HOME="$cargo_scratch_directory/cargo-home"
 export CARGO_INCREMENTAL=0
@@ -368,6 +371,7 @@ if [[ ! -r $clocksource_file ]]; then
 fi
 current_clocksource=$(<"$clocksource_file")
 taskset_path=$(command -v taskset)
+taskset_path=$(readlink -f "$taskset_path")
 {
   printf 'alias_label=%s\n' "$host_label"
   printf 'resolved_hostname=%s\n' "$resolved_hostname"
@@ -422,8 +426,8 @@ python_path=$(command -v python3)
   printf 'cargo_path=%s\n' "$cargo_path"
   printf 'cargo_resolved_path=%s\n' "$(readlink -f "$cargo_path")"
   cargo -Vv
-  printf 'taskset_path=%s\n' "$taskset_path"
-  printf 'taskset_resolved_path=%s\n' "$(readlink -f "$taskset_path")"
+  printf 'taskset_path=%s\n' "$(command -v taskset)"
+  printf 'taskset_resolved_path=%s\n' "$taskset_path"
   "$taskset_path" --version
   printf 'python_path=%s\n' "$python_path"
   printf 'python_resolved_path=%s\n' "$(readlink -f "$python_path")"
