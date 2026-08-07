@@ -10,8 +10,9 @@ import json
 import shutil
 import subprocess
 import time
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 MAIN_TEMPLATES = (
     "BAAB",
@@ -28,7 +29,7 @@ SCHEDULE_SEED = 27_082_026
 REQUESTS = 8_000
 QUEUE_CAPACITY = 4
 TARGET_SERVICE_NS = 200_000
-SUMMARY_FIELDS = (
+SUMMARY_FIELDS: tuple[str, ...] = (
     "pid",
     "label",
     "phase",
@@ -88,7 +89,7 @@ def parse_summary(stdout: str) -> dict[str, str]:
         raise ValueError(f"probe emitted {len(lines)} summary lines")
     reader = csv.DictReader(io.StringIO(",".join(SUMMARY_FIELDS) + "\n" + stdout))
     rows = list(reader)
-    if len(rows) != 1 or None in rows[0]:
+    if len(rows) != 1 or None in rows[0] or None in rows[0].values():
         raise ValueError(f"malformed probe summary: {stdout!r}")
     return rows[0]
 
@@ -265,7 +266,7 @@ def main() -> None:
                     attempts.write(json.dumps(attempt, sort_keys=True) + "\n")
                 if process.returncode != 0:
                     raise RuntimeError(f"{run_id} failed; no replacement is permitted")
-                row = parse_summary(process.stdout)
+                row: dict[str, Any] = parse_summary(process.stdout)
                 row.update(
                     {
                         "template": assignment["template"],

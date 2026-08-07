@@ -135,7 +135,19 @@ fn parse_args() -> Result<RunConfig, Box<dyn Error>> {
         block,
         period,
         seed: parse_u64("--seed")?,
-        raw_path: PathBuf::from(value("--raw")?),
+        raw_path: {
+            let raw = value("--raw")?;
+            // Hand-joined summary CSV rows cannot represent raw paths that
+            // contain commas, quotes, or line breaks.
+            if raw.contains([',', '"', '\n', '\r']) {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    "raw path must not contain commas, quotes, or line breaks",
+                )
+                .into());
+            }
+            PathBuf::from(raw)
+        },
     })
 }
 
@@ -215,12 +227,16 @@ fn run(config: &RunConfig, output: &mut impl Write) -> Result<(), Box<dyn Error>
     }
     black_box(warmup_checksum);
 
-    let experiment_origin = Instant::now()
-        .checked_add(Duration::from_millis(50))
-        .ok_or_else(|| io::Error::other("experiment origin is outside Instant range"))?;
-    let worker_origin = experiment_origin;
+    let (ready_sender, ready_receiver) = sync_channel::<()>(0);
+    let (origin_sender, origin_receiver) = sync_channel::<Instant>(0);
     let (sender, receiver) = sync_channel::<Job>(experiment.queue_capacity());
     let worker = thread::spawn(move || {
+        ready_sender
+            .send(())
+            .expect("runner must wait for worker readiness");
+        let worker_origin = origin_receiver
+            .recv()
+            .expect("runner must send the experiment origin");
         let mut completed = Vec::new();
         while let Ok(job) = receiver.recv() {
             let service_start = Instant::now();
@@ -242,6 +258,13 @@ fn run(config: &RunConfig, output: &mut impl Write) -> Result<(), Box<dyn Error>
         }
         completed
     });
+    // The runner sets the arrival origin only after worker readiness, so
+    // worker startup latency cannot masquerade as queue wait or rejection.
+    ready_receiver.recv()?;
+    let experiment_origin = Instant::now()
+        .checked_add(Duration::from_millis(50))
+        .ok_or_else(|| io::Error::other("experiment origin is outside Instant range"))?;
+    origin_sender.send(experiment_origin)?;
 
     let requests = experiment.requests();
     let mut actual_arrival = vec![0_u64; requests];

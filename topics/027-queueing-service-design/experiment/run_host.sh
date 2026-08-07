@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# BASH_ENV/ENV run unrecorded shell code before this script; re-exec clean.
+if [[ -n ${BASH_ENV-} || -n ${ENV-} ]]; then
+  exec env -u BASH_ENV -u ENV "${BASH:-bash}" "$0" "$@"
+fi
+
 if [[ $# -ne 4 ]]; then
   printf 'usage: %s REPOSITORY_ROOT OUTPUT_DIRECTORY HOST_LABEL SOURCE_COMMIT\n' "$0" >&2
   exit 2
@@ -232,7 +237,8 @@ mkdir -p "$cargo_scratch_directory"/{cargo-home,python-cache,target}
 
 environment_candidates=(
   AR ARFLAGS AS CC CFLAGS CPP CPPFLAGS CXX CXXFLAGS LD LDFLAGS LIBRARY_PATH
-  CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH DYLD_LIBRARY_PATH LD_LIBRARY_PATH
+  CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH DYLD_LIBRARY_PATH GLIBC_TUNABLES
+  LD_AUDIT LD_LIBRARY_PATH LD_PRELOAD
   LANG LANGUAGE LC_ALL LC_CTYPE MACOSX_DEPLOYMENT_TARGET MAKEFLAGS NM NUM_JOBS OBJCOPY OBJDUMP PKG_CONFIG
   PKG_CONFIG_PATH RANLIB SDKROOT SOURCE_DATE_EPOCH STRIP TZ ZERO_AR_DATE
   CARGO CARGO_BUILD_JOBS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET CARGO_ENCODED_RUSTFLAGS
@@ -391,10 +397,27 @@ python_path=$(command -v python3)
   python3 -VV 2>&1
   python3 -c 'import platform, sys; print(f"python_executable={sys.executable}"); print(f"python_prefix={sys.prefix}"); print(f"python_platform={platform.platform()}")'
 } > "$output_directory/toolchain.txt"
-rustc -C target-cpu=native --print cfg \
+taskset --cpu-list "$cpu_list" rustc -C target-cpu=native --print cfg \
   | LC_ALL=C sort > "$output_directory/rustc-native-cfg.txt"
-rustc -C target-cpu=native --print target-features \
+taskset --cpu-list "$cpu_list" rustc -C target-cpu=native --print target-features \
   > "$output_directory/rustc-native-target-features.txt"
+
+if ! command -v rg > /dev/null 2>&1; then
+  fail 'rg is required to record symbol references'
+fi
+# Cargo merges ancestor .cargo configs that the source archive cannot record.
+config_scan_directory=$repository_root
+while :; do
+  for cargo_config in "$config_scan_directory/.cargo/config.toml" "$config_scan_directory/.cargo/config"; do
+    if [[ -e $cargo_config ]]; then
+      fail "unrecorded Cargo config would alter builds: $cargo_config"
+    fi
+  done
+  if [[ $config_scan_directory == / ]]; then
+    break
+  fi
+  config_scan_directory=$(dirname "$config_scan_directory")
+done
 
 git diff --check > "$output_directory/gates/git-diff-check.log" 2>&1
 cargo fmt --package queueing-service-design -- --check \
@@ -407,7 +430,7 @@ cargo clippy --locked --package queueing-service-design --all-targets -- -D warn
   > "$output_directory/gates/cargo-clippy.log" 2>&1
 RUSTDOCFLAGS='-D warnings' cargo doc --locked --package queueing-service-design --no-deps \
   > "$output_directory/gates/cargo-doc.log" 2>&1
-python3 -m py_compile \
+python3 -I -m py_compile \
   "$topic/experiment/run_processes.py" \
   "$topic/experiment/analyze.py" \
   "$topic/experiment/validate_receipts.py" \
@@ -421,7 +444,8 @@ export RUSTFLAGS='-C target-cpu=native -C codegen-units=1 -C embed-bitcode=yes -
   printf 'CARGO_TARGET_DIR=%q\n' "$CARGO_TARGET_DIR"
   printf 'CARGO_HOME=%q\n' "$CARGO_HOME"
 } > "$output_directory/build-environment.txt"
-cargo build --locked --release --package queueing-service-design --bin queue-probe \
+taskset --cpu-list "$cpu_list" \
+  cargo build --locked --release --package queueing-service-design --bin queue-probe \
   > "$output_directory/build.log" 2>&1
 built_binary="$CARGO_TARGET_DIR/release/queue-probe"
 retained_binary="$output_directory/artifacts/queue-probe"
@@ -444,12 +468,12 @@ rg -n 'topic27_do_work' "$output_directory/codegen/final-binary.txt" \
   > "$output_directory/codegen/do-work-calls.txt"
 gzip -n -9 "$output_directory/codegen/final-binary.txt"
 
-python3 "$topic/experiment/run_processes.py" \
+python3 -I "$topic/experiment/run_processes.py" \
   "$retained_binary" "$output_directory/processes" "$cpu_list" \
   > "$output_directory/process-driver.log"
-python3 "$topic/experiment/analyze.py" "$output_directory/processes" \
+python3 -I "$topic/experiment/analyze.py" "$output_directory/processes" \
   > "$output_directory/processes/analysis.json"
-python3 "$topic/experiment/validate_receipts.py" "$output_directory/processes" \
+python3 -I "$topic/experiment/validate_receipts.py" "$output_directory/processes" \
   > "$output_directory/receipt-validation.txt"
 
 {

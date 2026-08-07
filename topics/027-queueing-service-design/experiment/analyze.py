@@ -34,6 +34,27 @@ def load_summaries(process_directory: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def check_design(rows: list[dict[str, Any]]) -> None:
+    """Reject input that does not match the predeclared complete-block design."""
+    expected: dict[tuple[str, str, int], int] = {}
+    for block in range(1, 9):
+        expected[("main", "fixed", block)] = 2
+        expected[("main", "variable", block)] = 2
+    for block in range(1, 5):
+        expected[("aa", "A", block)] = 2
+        expected[("aa", "B", block)] = 2
+    counts: dict[tuple[str, str, int], int] = {}
+    for row in rows:
+        group = row["mode"] if row["phase"] == "main" else row["label"]
+        key = (row["phase"], group, row["block"])
+        counts[key] = counts.get(key, 0) + 1
+    if counts != expected:
+        raise ValueError(
+            "summaries do not match the predeclared complete-block design "
+            "of 8 main and 4 A/A blocks with 2 periods per group per block"
+        )
+
+
 def block_values(
     rows: list[dict[str, Any]], phase: str, group_field: str, group: str, metric: str
 ) -> dict[int, float]:
@@ -135,6 +156,7 @@ def pooled_treatment(process_directory: Path, rows: list[dict[str, Any]], mode: 
 def build_analysis(process_directory: Path) -> dict[str, Any]:
     """Build the complete predeclared analysis document."""
     rows = load_summaries(process_directory)
+    check_design(rows)
     return {
         "parameters": {
             "main_blocks": 8,

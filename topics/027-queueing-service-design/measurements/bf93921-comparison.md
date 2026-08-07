@@ -29,8 +29,9 @@ They do not identify an instruction-set, vendor, or processor-family effect.
 The first exact commit, `388531c`, passed the focused source gates on both
 hosts but failed before measurement because fat link-time optimization lacked
 embedded bitcode. Its failure bundles were sealed and source-stable but are not
-promoted here. Commit `bf93921` added `-C embed-bitcode=yes`; both hosts then
-reran all 48 fresh processes from the beginning with no period replacement.
+promoted here. Commit `bf93921` added `-C embed-bitcode=yes`; each host then
+reran 48 fresh processes from the beginning, 96 processes across both hosts,
+with no period replacement.
 
 See the [Arm record](bf93921-arm.md), [`xxl` record](bf93921-xxl.md), and
 [raw archive checksums](raw/bf93921/SHA256SUMS).
