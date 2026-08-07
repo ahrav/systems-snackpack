@@ -163,6 +163,13 @@ def main() -> None:
         raise SystemExit(f"invalid calibration receipt: {calibration.stdout!r}") from error
     if base_iterations <= 0 or base_iterations % 4 or calibrated_mean_ns <= 0:
         raise SystemExit("invalid calibration values")
+    # ponytail: +/-25% bound; tighten if hosts calibrate more precisely.
+    drift_ok = 0.75 * TARGET_SERVICE_NS <= calibrated_mean_ns <= 1.25 * TARGET_SERVICE_NS
+    if not drift_ok:
+        raise SystemExit(
+            f"calibrated mean {calibrated_mean_ns}ns misses the "
+            f"{TARGET_SERVICE_NS}ns target by more than 25%"
+        )
     interval_ns = (calibrated_mean_ns * 10 + 8) // 9
     with (output / "calibration.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)

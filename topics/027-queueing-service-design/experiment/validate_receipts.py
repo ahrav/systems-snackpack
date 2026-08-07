@@ -157,9 +157,10 @@ def main() -> None:
         waits: list[int] = []
         services: list[int] = []
         completion_times: list[int] = []
-        admitted_times: list[int] = []
+        admitted_count = 0
         service_start_times: list[int] = []
-        rejected_arrivals: list[int] = []
+        admission_events: list[tuple[int, int]] = []
+        rejected_events: list[tuple[int, int]] = []
         completed_sequence: list[tuple[int, int, int]] = []
         offered_work_x4 = 0
         checksum = 0
@@ -198,7 +199,8 @@ def main() -> None:
                 waits.append(service_start_ns - admitted_ns)
                 services.append(completion_ns - service_start_ns)
                 completion_times.append(completion_ns)
-                admitted_times.append(admitted_ns)
+                admission_events.append((actual, admitted_count))
+                admitted_count += 1
                 service_start_times.append(service_start_ns)
                 completed_sequence.append((request_id, service_start_ns, completion_ns))
                 checksum ^= int(receipt["checksum"])
@@ -218,21 +220,31 @@ def main() -> None:
                     ),
                     "rejected request has completion fields",
                 )
-                rejected_arrivals.append(actual)
+                rejected_events.append((actual, admitted_count))
         require(statuses["completed"] == completed and statuses["rejected"] == rejected, "raw status counts differ")
         # A rejection needs all four waiting slots occupied; the job in
-        # service does not hold a waiting slot.
+        # service does not hold a waiting slot. Admissions are counted in
+        # raw attempt order so equal-timestamp rows cannot inflate the
+        # occupancy seen by an earlier attempt. At equal timestamps,
+        # rejections count only strictly earlier service starts and
+        # admissions count service starts at the arrival, so valid traces
+        # never fail on a same-nanosecond worker handoff.
         service_starts_in_order = sorted(service_start_times)
-        admit_index = 0
         started_index = 0
-        for arrival in rejected_arrivals:
-            while admit_index < len(admitted_times) and admitted_times[admit_index] <= arrival:
-                admit_index += 1
+        for arrival, admitted_before in rejected_events:
+            while started_index < len(service_starts_in_order) and service_starts_in_order[started_index] < arrival:
+                started_index += 1
+            require(
+                admitted_before - started_index >= QUEUE_CAPACITY,
+                "rejection recorded without a full queue",
+            )
+        started_index = 0
+        for arrival, admitted_before in admission_events:
             while started_index < len(service_starts_in_order) and service_starts_in_order[started_index] <= arrival:
                 started_index += 1
             require(
-                admit_index - started_index >= QUEUE_CAPACITY,
-                "rejection recorded without a full queue",
+                admitted_before - started_index < QUEUE_CAPACITY,
+                "admission recorded with a full queue",
             )
         require(offered_work_x4 == int(summary["offered_work_x4"]) == REQUESTS * 4, "offered work is not matched")
         require(checksum == int(summary["checksum"]), "summary checksum differs from raw receipts")
