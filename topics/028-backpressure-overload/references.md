@@ -74,7 +74,7 @@
   spurious wakeups. Controlled followers recheck the terminal predicate while
   holding the flight mutex.
 - Rust's [`Mutex`](https://doc.rust-lang.org/std/sync/struct.Mutex.html),
-  [`AtomicUsize`](https://doc.rust-lang.org/std/sync/atomic/struct.AtomicUsize.html),
+  [`AtomicUsize`](https://doc.rust-lang.org/std/sync/atomic/type.AtomicUsize.html),
   and [`Instant`](https://doc.rust-lang.org/std/time/struct.Instant.html)
   define the state protection, peak counters, and monotonic process-local
   timestamps used in receipts. Nanosecond units do not imply nanosecond timer

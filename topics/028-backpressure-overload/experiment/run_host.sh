@@ -36,7 +36,7 @@ write_source_manifest() {
   local destination=$1
   (
     cd "$repository_root"
-    git ls-files -z | LC_ALL=C sort -z | xargs -0 sha256sum
+    git ls-files -z | LC_ALL=C sort -z | xargs -0 sha256sum --
   ) > "$destination"
 }
 

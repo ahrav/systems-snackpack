@@ -85,7 +85,10 @@ def read_csv(path: Path, expected_fields: tuple[str, ...]) -> list[dict[str, str
         reader = csv.DictReader(handle)
         require(tuple(reader.fieldnames or ()) == expected_fields, f"wrong CSV schema: {path}")
         rows = list(reader)
-    require(all(None not in row for row in rows), f"malformed CSV row: {path}")
+    require(
+        all(None not in row and None not in row.values() for row in rows),
+        f"malformed CSV row: {path}",
+    )
     return rows
 
 

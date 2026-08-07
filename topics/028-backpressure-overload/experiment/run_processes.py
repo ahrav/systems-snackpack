@@ -11,8 +11,9 @@ import json
 import shutil
 import subprocess
 import time
+from collections.abc import Iterator, Sequence
 from pathlib import Path
-from typing import Any, Iterator, Sequence
+from typing import Any
 
 MAIN_TEMPLATES = (
     "ABBA",
@@ -133,7 +134,7 @@ def parse_summary(stdout: str) -> dict[str, str]:
         raise ValueError(f"probe emitted {len(lines)} summary lines")
     header = io.StringIO(",".join(PROBE_SUMMARY_FIELDS) + "\n" + stdout)
     rows = list(csv.DictReader(header))
-    if len(rows) != 1 or None in rows[0]:
+    if len(rows) != 1 or None in rows[0] or None in rows[0].values():
         raise ValueError(f"malformed probe summary: {stdout!r}")
     return rows[0]
 
@@ -568,6 +569,21 @@ def main() -> None:
         raise
 
     if sha256_file(binary) != binary_sha256:
+        (output / "run-status.json").write_text(
+            json.dumps(
+                {
+                    "status": "failed",
+                    "completed_periods": completed_periods,
+                    "completed_semantic_controls": completed_semantic_controls,
+                    "error": "binary changed during the process schedule",
+                    "replacement_permitted": False,
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
         raise RuntimeError("binary changed during the process schedule")
     (output / "run-status.json").write_text(
         json.dumps(
