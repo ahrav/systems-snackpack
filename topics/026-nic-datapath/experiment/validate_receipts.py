@@ -18,6 +18,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, NoReturn
 
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from run_processes import MEASUREMENT_KEYS
@@ -479,13 +480,15 @@ def verify_source_identity(
         fail("source identity does not cover every experiment file")
 
 
-def verify_evidence_manifest(evidence: Path) -> None:
+def verify_evidence_manifest(evidence: Path, allow_unsealed: bool) -> None:
     manifest_path = evidence / "evidence.sha256"
     status_path = evidence / "run.status"
     if not manifest_path.is_file():
         if status_path.exists():
             fail("run.status is present but evidence.sha256 is missing")
-        return
+        if allow_unsealed:
+            return
+        fail("bundle is not sealed: evidence.sha256 and run.status are absent")
     if not status_path.is_file():
         fail("sealed bundle lacks run.status")
     before = evidence / "source-files.before.sha256"
@@ -934,14 +937,16 @@ def validate_host_receipt(path: Path) -> None:
 
 def validate_codegen(evidence: Path) -> None:
     expected = {
-        "codegen-scalar.txt": "topic26_send_scalar_batch",
-        "codegen-sendmmsg.txt": "topic26_send_mmsg_batch",
-        "codegen-udp-segment.txt": "topic26_send_gso_batch",
+        "codegen-scalar.txt": ("topic26_send_scalar_batch", "send"),
+        "codegen-sendmmsg.txt": ("topic26_send_mmsg_batch", "sendmmsg"),
+        "codegen-udp-segment.txt": ("topic26_send_gso_batch", "sendmsg"),
     }
-    for name, symbol in expected.items():
+    for name, (symbol, stub) in expected.items():
         text = (evidence / name).read_text(encoding="utf-8")
         if f"<{symbol}>:" not in text:
             fail(f"{name} does not contain linked symbol {symbol}")
+        if f"<{stub}@plt>" not in text and f"<{stub}>" not in text:
+            fail(f"{name} does not call the {stub} stub")
     if not (evidence / "codegen.txt.gz").is_file() or (
         evidence / "codegen.txt.gz"
     ).stat().st_size == 0:
@@ -974,6 +979,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--evidence-dir", required=True, type=Path)
     parser.add_argument("--source-root", required=True, type=Path)
+    parser.add_argument(
+        "--allow-unsealed",
+        action="store_true",
+        help="accept a bundle whose evidence seal is not written yet, as during "
+        "collection before finalize",
+    )
     args = parser.parse_args()
     evidence = args.evidence_dir.resolve()
     source_root = args.source_root.resolve()
@@ -998,7 +1009,7 @@ def main() -> None:
         fail("attempt or observation count differs from fixed stopping")
     validate_schedules(design, observations)
     verify_source_identity(evidence, source_root, design["binary_sha256"])
-    verify_evidence_manifest(evidence)
+    verify_evidence_manifest(evidence, args.allow_unsealed)
 
     for attempt, observation in zip(attempts, observations):
         if set(attempt) != IDENTITY_KEYS | ATTEMPT_EXTRA_KEYS:

@@ -428,6 +428,7 @@ python3 "$experiment_dir/run_processes.py" \
 python3 "$experiment_dir/validate_receipts.py" \
     --evidence-dir "$output_dir" \
     --source-root "$repo_root" \
+    --allow-unsealed \
     >"$output_dir/validation.log" 2>&1
 
 printf 'source_commit=%s\noutput=%s\n' "$source_commit" "$output_dir"
