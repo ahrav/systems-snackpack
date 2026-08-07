@@ -1,0 +1,17 @@
+[package]
+name = "backpressure-overload"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "backpressure_overload"
+path = "src/lib.rs"
+
+[[bin]]
+name = "overload-probe"
+path = "src/bin/overload_probe.rs"
+
+[lints]
+workspace = true
