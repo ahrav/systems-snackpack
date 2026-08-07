@@ -37,6 +37,11 @@ vendors, instruction sets, or fleet performance. They establish only that the
 one-key count invariants and the predeclared timing contrast reproduced for the
 two retained host-specific artifacts and run windows.
 
+Review-hardening commits merged after these runs changed the probe, analyzer,
+and runner sources. This promoted result therefore describes only the
+`64ec37b` tree, binary, and analysis; the current tree has not been rerun on
+either host and holds no promoted result of its own.
+
 Evidence:
 
 - [Arm record](64ec37b-arm.md)

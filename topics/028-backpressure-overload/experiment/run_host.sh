@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# BASH_ENV/ENV startup hooks and exported shell functions run before line 1
+# and can mutate arguments or shadow commands; re-exec cannot undo them, so
+# refuse instead.
+if [[ -n ${BASH_ENV-} || -n ${ENV-} ]]; then
+  printf 'refusing to run: BASH_ENV or ENV startup hooks are unrecorded\n' >&2
+  exit 2
+fi
+if [[ -n $(declare -F) ]]; then
+  printf 'refusing to run: inherited shell functions are unrecorded\n' >&2
+  exit 2
+fi
+
 if [[ $# -ne 4 ]]; then
   printf 'usage: %s REPOSITORY_ROOT OUTPUT_DIRECTORY HOST_LABEL SOURCE_COMMIT\n' "$0" >&2
   exit 2
@@ -36,7 +48,7 @@ write_source_manifest() {
   local destination=$1
   (
     cd "$repository_root"
-    git ls-files -z | LC_ALL=C sort -z | xargs -0 sha256sum --
+    "${git_path:-git}" ls-files -z | LC_ALL=C sort -z | xargs -0 sha256sum --
   ) > "$destination"
 }
 
@@ -70,13 +82,13 @@ finalize() {
   set +e
 
   if [[ -d $output_directory ]]; then
-    git -C "$repository_root" rev-parse HEAD > "$output_directory/source-head.after.txt" 2>&1
+    "${git_path:-git}" -C "$repository_root" rev-parse HEAD > "$output_directory/source-head.after.txt" 2>&1
     if [[ $(<"$output_directory/source-head.after.txt") == "$source_commit" ]]; then
       head_match=passed
     else
       status=1
     fi
-    git -C "$repository_root" status --porcelain=v1 --untracked-files=all \
+    "${git_path:-git}" -C "$repository_root" status --porcelain=v1 --untracked-files=all \
       > "$output_directory/source-status.after.txt" 2>&1
     if [[ ! -s $output_directory/source-status.after.txt ]]; then
       clean_tree=passed
@@ -164,7 +176,7 @@ export GIT_NO_REPLACE_OBJECTS=1
 
 # A repository subdirectory would scope git ls-files and the output-directory
 # guard to a prefix, leaving the exact-source evidence incomplete.
-repository_toplevel=$(git -C "$repository_root" rev-parse --show-toplevel)
+repository_toplevel=$("$git_path" -C "$repository_root" rev-parse --show-toplevel)
 repository_toplevel=$(cd "$repository_toplevel" && pwd -P)
 if [[ $repository_toplevel != "$repository_root" ]]; then
   fail 'repository root must be the top-level checkout'
@@ -176,21 +188,21 @@ trap 'failure_reason="received SIGTERM"; exit 143' TERM
 trap finalize EXIT
 
 cd "$repository_root"
-git rev-parse HEAD > "$output_directory/source-head.before.txt"
+"$git_path" rev-parse HEAD > "$output_directory/source-head.before.txt"
 if [[ $(<"$output_directory/source-head.before.txt") != "$source_commit" ]]; then
   fail 'HEAD does not equal the requested source commit'
 fi
-git status --porcelain=v1 --untracked-files=all > "$output_directory/source-status.before.txt"
+"$git_path" status --porcelain=v1 --untracked-files=all > "$output_directory/source-status.before.txt"
 if [[ -s $output_directory/source-status.before.txt ]]; then
   fail 'exact-source measurement requires a clean worktree'
 fi
 write_source_manifest "$output_directory/source-files.before.sha256"
-git ls-tree -r --full-tree "$source_commit" > "$output_directory/source-tree.txt"
+"$git_path" ls-tree -r --full-tree "$source_commit" > "$output_directory/source-tree.txt"
 (
   cd "$output_directory"
   sha256sum source-tree.txt > source-tree.sha256
 )
-git archive --format=tar "$source_commit" | gzip -n -9 > "$output_directory/source.tar.gz"
+"$git_path" archive --format=tar "$source_commit" | gzip -n -9 > "$output_directory/source.tar.gz"
 (
   cd "$output_directory"
   sha256sum source.tar.gz > source-archive.sha256
@@ -338,7 +350,7 @@ rustc -C target-cpu=native --print cfg | LC_ALL=C sort \
 rustc -C target-cpu=native --print target-features \
   > "$output_directory/rustc-native-target-features.txt"
 
-git diff --check > "$output_directory/gates/git-diff-check.log" 2>&1
+"$git_path" diff --check > "$output_directory/gates/git-diff-check.log" 2>&1
 cargo fmt --all -- --check \
   > "$output_directory/gates/cargo-fmt.log" 2>&1
 cargo test --locked --workspace --lib --examples \
