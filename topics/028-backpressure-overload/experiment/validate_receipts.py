@@ -112,6 +112,20 @@ def exhausted_digest(key_digest: int) -> int:
     return mix64(key_digest ^ 0x4558484155535445)
 
 
+def origin_work(iterations: int, seed: int) -> int:
+    """Mirror the probe's calibrated origin work loop."""
+    value = (seed ^ 0x9E3779B97F4A7C15) & MASK64
+    for _ in range(iterations):
+        value = (value * 0xD6E8FEB86659FD93 + 0xA0761D6478BD642F) & MASK64
+        value ^= ((value << 23) | (value >> 41)) & MASK64
+    return value
+
+
+def work_seed(seed: int, flight_id: int, attempt_no: int) -> int:
+    """Mirror the probe's per-attempt work-seed derivation."""
+    return mix64((seed ^ ((flight_id * 0x9E3779B9) & MASK64) ^ attempt_no) & MASK64)
+
+
 def require_equal(expected: Any, actual: Any, context: str) -> None:
     """Require recursive JSON equality with tight float tolerance."""
     if isinstance(expected, float) or isinstance(actual, float):
@@ -187,6 +201,8 @@ def validate_process_receipts(
     max_attempts = int(summary["max_attempts"])
     retry_tokens = int(summary["retry_tokens"])
     key_digest = int(summary["key_digest"])
+    seed = int(summary["seed"])
+    work_iters = int(summary["work_iters"])
     treatment = summary["treatment"]
     require(len(logical) == callers, "logical receipt population differs from callers")
     logical_ids = [int(row["logical_id"]) for row in logical]
@@ -218,7 +234,24 @@ def validate_process_receipts(
         active = int(row["active_at_start"])
         require(1 <= active <= origin_capacity, "origin active count exceeds permit cap")
         require(row["outcome"] in ("transient", "success"), "unknown attempt outcome")
-        require(int(row["work_checksum"]) >= 0, "invalid work checksum")
+        require(
+            int(row["work_checksum"])
+            == origin_work(work_iters, work_seed(seed, flight_id, int(row["attempt_no"]))),
+            "work checksum does not match the calibrated origin loop",
+        )
+
+    # The recorded active counter cannot prove cap conformance; interval overlap validates the origin cap.
+    active_attempts = 0
+    for _, delta in sorted(
+        event
+        for row in attempts
+        for event in ((int(row["start_ns"]), 1), (int(row["end_ns"]), -1))
+    ):
+        active_attempts += delta
+        require(
+            active_attempts <= origin_capacity,
+            "physical attempt intervals exceed the origin cap",
+        )
 
     for flight_id, flight_attempts in attempts_by_flight.items():
         flight_attempts.sort(key=lambda row: int(row["attempt_no"]))
@@ -264,7 +297,7 @@ def validate_process_receipts(
             require(role == "shed", "shed logical caller has a non-shed role")
             require(not row["flight_id"] and not row["result_digest"], "shed caller has flight work")
             continue
-        require(row["flight_id"], "admitted caller has no flight")
+        require(bool(row["flight_id"]), "admitted caller has no flight")
         flight_id = int(row["flight_id"])
         require(flight_id in attempts_by_flight, "logical caller refers to missing flight")
         digest = int(row["result_digest"])
@@ -513,7 +546,10 @@ def main() -> None:
     require(status["completed_periods"] == 48, "run status period count differs")
     require(status["completed_semantic_controls"] == 2, "run status control count differs")
     require(status["failed_period"] is None, "run status retains a failed period")
-    require(status["replacement_permitted"] is False, "replacement policy changed")
+    require(
+        isinstance(status["replacement_permitted"], bool) and not status["replacement_permitted"],
+        "replacement policy changed",
+    )
     require(status["binary_sha256"] == binary_hash, "run status binary differs")
     require(status["settings_sha256"] == settings_hash, "run status settings differs")
 

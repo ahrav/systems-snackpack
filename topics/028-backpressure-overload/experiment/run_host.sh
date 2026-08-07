@@ -221,7 +221,10 @@ mkdir -p "$scratch_directory"/{cargo-home,target,python-cache}
 
 environment_candidates=(
   AR ARFLAGS AS CC CFLAGS CPP CPPFLAGS CXX CXXFLAGS LD LDFLAGS LIBRARY_PATH
-  CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH DYLD_LIBRARY_PATH LD_LIBRARY_PATH
+  CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH DYLD_LIBRARY_PATH GLIBC_TUNABLES
+  LD_AUDIT LD_LIBRARY_PATH LD_PRELOAD
+  MALLOC_ARENA_MAX MALLOC_ARENA_TEST MALLOC_CHECK_ MALLOC_MMAP_MAX_
+  MALLOC_MMAP_THRESHOLD_ MALLOC_PERTURB_ MALLOC_TOP_PAD_ MALLOC_TRIM_THRESHOLD_
   LANG LANGUAGE LC_ALL LC_CTYPE MAKEFLAGS NM NUM_JOBS OBJCOPY OBJDUMP
   PKG_CONFIG PKG_CONFIG_PATH RANLIB SOURCE_DATE_EPOCH STRIP TZ ZERO_AR_DATE
   CARGO CARGO_BUILD_JOBS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET
@@ -277,32 +280,35 @@ allowed_list=$(awk '/^Cpus_allowed_list:/ {print $2}' /proc/self/status)
 if [[ -z $allowed_list ]]; then
   fail 'could not read Cpus_allowed_list from procfs'
 fi
-cpu_list=
-affinity_mode=unavailable
-if command -v taskset > /dev/null 2>&1; then
-  selected_cpus=()
-  IFS=',' read -r -a cpu_parts <<< "$allowed_list"
-  for part in "${cpu_parts[@]}"; do
-    if [[ $part =~ ^([0-9]+)-([0-9]+)$ ]]; then
-      first=${BASH_REMATCH[1]}
-      last=${BASH_REMATCH[2]}
-      for ((cpu=first; cpu<=last; cpu++)); do
-        selected_cpus+=("$cpu")
-        if (( ${#selected_cpus[@]} == 4 )); then break 2; fi
-      done
-    elif [[ $part =~ ^[0-9]+$ ]]; then
-      selected_cpus+=("$part")
-      if (( ${#selected_cpus[@]} == 4 )); then break; fi
-    else
-      fail "invalid CPU affinity component: $part"
-    fi
-  done
-  if (( ${#selected_cpus[@]} != 4 )); then
-    fail 'taskset is available but fewer than four allowed CPUs were found'
-  fi
-  cpu_list=$(IFS=,; printf '%s' "${selected_cpus[*]}")
-  affinity_mode=taskset-four-cpus
+# The retained-host protocol records a pinned four-CPU boundary; an unpinned
+# run would seal evidence that misstates the calibration and treatment CPUs.
+if ! command -v taskset > /dev/null 2>&1; then
+  fail 'the retained host protocol requires taskset to pin the CPU set'
 fi
+taskset_path=$(command -v taskset)
+taskset_path=$(readlink -f "$taskset_path")
+selected_cpus=()
+IFS=',' read -r -a cpu_parts <<< "$allowed_list"
+for part in "${cpu_parts[@]}"; do
+  if [[ $part =~ ^([0-9]+)-([0-9]+)$ ]]; then
+    first=${BASH_REMATCH[1]}
+    last=${BASH_REMATCH[2]}
+    for ((cpu=first; cpu<=last; cpu++)); do
+      selected_cpus+=("$cpu")
+      if (( ${#selected_cpus[@]} == 4 )); then break 2; fi
+    done
+  elif [[ $part =~ ^[0-9]+$ ]]; then
+    selected_cpus+=("$part")
+    if (( ${#selected_cpus[@]} == 4 )); then break; fi
+  else
+    fail "invalid CPU affinity component: $part"
+  fi
+done
+if (( ${#selected_cpus[@]} != 4 )); then
+  fail 'fewer than four allowed CPUs were found for the pinned run'
+fi
+cpu_list=$(IFS=,; printf '%s' "${selected_cpus[*]}")
+affinity_mode=taskset-four-cpus
 clocksource_file=/sys/devices/system/clocksource/clocksource0/current_clocksource
 if [[ ! -r $clocksource_file ]]; then
   fail "current clocksource is not readable: $clocksource_file"
@@ -329,43 +335,58 @@ current_clocksource=$(<"$clocksource_file")
       "$(</sys/devices/system/clocksource/clocksource0/available_clocksource)"
   fi
   awk '/^Cpus_allowed(_list)?:/ {print}' /proc/self/status
-  if command -v taskset > /dev/null 2>&1; then taskset -pc "$$"; fi
+  if command -v taskset > /dev/null 2>&1; then "$taskset_path" -pc "$$"; fi
   lscpu
   awk -F: '/^(vendor_id|model name|cpu family|model|stepping|CPU implementer|CPU architecture|CPU variant|CPU part|CPU revision)/ { if (!seen[$1]++) print }' /proc/cpuinfo
 } > "$output_directory/host.txt"
+# A PATH wrapper around the build or analysis tools could substitute a
+# different binary while the source receipts stay internally consistent, so
+# resolve and invoke the same executables the receipts record.
+rustc_path=$(command -v rustc)
+rustc_path=$(readlink -f "$rustc_path")
+cargo_path=$(command -v cargo)
+cargo_path=$(readlink -f "$cargo_path")
+python3_path=$(command -v python3)
+python3_path=$(readlink -f "$python3_path")
 {
   printf 'rustc_path=%s\n' "$(command -v rustc)"
-  rustc -vV
+  printf 'rustc_resolved_path=%s\n' "$rustc_path"
+  "$rustc_path" -vV
   printf 'cargo_path=%s\n' "$(command -v cargo)"
-  cargo -Vv
+  printf 'cargo_resolved_path=%s\n' "$cargo_path"
+  "$cargo_path" -Vv
   printf 'python_path=%s\n' "$(command -v python3)"
-  python3 -I -S -VV 2>&1
+  printf 'python_resolved_path=%s\n' "$python3_path"
+  printf 'taskset_path=%s\n' "$(command -v taskset)"
+  printf 'taskset_resolved_path=%s\n' "$taskset_path"
+  "$taskset_path" --version
+  "$python3_path" -I -S -VV 2>&1
   if command -v cc > /dev/null 2>&1; then cc --version 2>&1; fi
   if command -v ld > /dev/null 2>&1; then ld --version 2>&1 | sed -n '1,4p'; fi
   if command -v nm > /dev/null 2>&1; then nm --version 2>&1 | sed -n '1,4p'; fi
   if command -v objdump > /dev/null 2>&1; then objdump --version 2>&1 | sed -n '1,4p'; fi
 } > "$output_directory/toolchain.txt"
-rustc -C target-cpu=native --print cfg | LC_ALL=C sort \
+"$rustc_path" -C target-cpu=native --print cfg | LC_ALL=C sort \
   > "$output_directory/rustc-native-cfg.txt"
-rustc -C target-cpu=native --print target-features \
+"$rustc_path" -C target-cpu=native --print target-features \
   > "$output_directory/rustc-native-target-features.txt"
 
 "$git_path" diff --check > "$output_directory/gates/git-diff-check.log" 2>&1
-cargo fmt --all -- --check \
+"$cargo_path" fmt --all -- --check \
   > "$output_directory/gates/cargo-fmt.log" 2>&1
-cargo test --locked --workspace --lib --examples \
+"$cargo_path" test --locked --workspace --lib --examples \
   > "$output_directory/gates/cargo-test-workspace-lib-examples.log" 2>&1
-cargo test --locked --package backpressure-overload --bin overload-probe \
+"$cargo_path" test --locked --package backpressure-overload --bin overload-probe \
   > "$output_directory/gates/cargo-test-probe.log" 2>&1
-cargo test --locked --workspace --doc \
+"$cargo_path" test --locked --workspace --doc \
   > "$output_directory/gates/cargo-test-workspace-doc.log" 2>&1
-cargo clippy --locked --workspace --all-targets -- -D warnings \
+"$cargo_path" clippy --locked --workspace --all-targets -- -D warnings \
   > "$output_directory/gates/cargo-clippy.log" 2>&1
-RUSTDOCFLAGS='-D warnings' cargo doc --locked --workspace --no-deps \
+RUSTDOCFLAGS='-D warnings' "$cargo_path" doc --locked --workspace --no-deps \
   > "$output_directory/gates/cargo-doc.log" 2>&1
-cargo bench --locked --workspace --no-run \
+"$cargo_path" bench --locked --workspace --no-run \
   > "$output_directory/gates/cargo-bench-no-run.log" 2>&1
-python3 -I -S -X "pycache_prefix=$scratch_directory/python-cache" -m py_compile \
+"$python3_path" -I -S -X "pycache_prefix=$scratch_directory/python-cache" -m py_compile \
   "$topic/experiment/run_processes.py" \
   "$topic/experiment/analyze.py" \
   "$topic/experiment/validate_receipts.py" \
@@ -375,7 +396,7 @@ bash -n "$topic/experiment/run_host.sh" \
 
 export RUSTFLAGS='-C target-cpu=native -C codegen-units=1 -C embed-bitcode=yes -C lto=fat -C panic=abort'
 printf 'RUSTFLAGS=%q\n' "$RUSTFLAGS" > "$output_directory/build-environment.txt"
-cargo build --locked --release --package backpressure-overload --bin overload-probe \
+"$cargo_path" build --locked --release --package backpressure-overload --bin overload-probe \
   > "$output_directory/build.log" 2>&1
 built_binary="$CARGO_TARGET_DIR/release/overload-probe"
 retained_binary="$output_directory/artifacts/overload-probe"
@@ -403,24 +424,16 @@ test -s "$output_directory/codegen/origin-work-symbol.txt"
 test -s "$output_directory/codegen/origin-work-callsites.txt"
 gzip -n -9 "$output_directory/codegen/final-binary.txt"
 
-if [[ -n $cpu_list ]]; then
-  taskset --cpu-list "$cpu_list" "$retained_binary" --self-check \
-    > "$output_directory/gates/self-check.log" 2>&1
-  python3 -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
-    "$topic/experiment/run_processes.py" \
-    "$retained_binary" "$output_directory/processes" "$cpu_list" \
-    > "$output_directory/process-driver.log" 2>&1
-else
-  "$retained_binary" --self-check > "$output_directory/gates/self-check.log" 2>&1
-  python3 -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
-    "$topic/experiment/run_processes.py" \
-    "$retained_binary" "$output_directory/processes" \
-    > "$output_directory/process-driver.log" 2>&1
-fi
-python3 -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
+"$taskset_path" --cpu-list "$cpu_list" "$retained_binary" --self-check \
+  > "$output_directory/gates/self-check.log" 2>&1
+"$python3_path" -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
+  "$topic/experiment/run_processes.py" \
+  "$retained_binary" "$output_directory/processes" "$cpu_list" \
+  > "$output_directory/process-driver.log" 2>&1
+"$python3_path" -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
   "$topic/experiment/analyze.py" "$output_directory/processes" \
   > "$output_directory/processes/analysis.json"
-python3 -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
+"$python3_path" -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
   "$topic/experiment/validate_receipts.py" "$output_directory/processes" \
   > "$output_directory/receipt-validation.txt"
 (
