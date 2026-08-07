@@ -99,7 +99,8 @@ def require_rounded(
     """Check a decimal summary field at its declared output precision."""
     tolerance = 0.5 * 10 ** (-places) + 1e-12
     require(
-        math.isclose(float(summary[field]), expected, rel_tol=0.0, abs_tol=tolerance),
+        summary[field] == f"{expected:.{places}f}"
+        or math.isclose(float(summary[field]), expected, rel_tol=0.0, abs_tol=tolerance),
         f"summary {field} differs from raw receipts",
     )
 
@@ -157,6 +158,7 @@ def main() -> None:
         services: list[int] = []
         completion_times: list[int] = []
         admitted_times: list[int] = []
+        service_start_times: list[int] = []
         rejected_arrivals: list[int] = []
         completed_sequence: list[tuple[int, int, int]] = []
         offered_work_x4 = 0
@@ -197,6 +199,7 @@ def main() -> None:
                 services.append(completion_ns - service_start_ns)
                 completion_times.append(completion_ns)
                 admitted_times.append(admitted_ns)
+                service_start_times.append(service_start_ns)
                 completed_sequence.append((request_id, service_start_ns, completion_ns))
                 checksum ^= int(receipt["checksum"])
             else:
@@ -217,16 +220,18 @@ def main() -> None:
                 )
                 rejected_arrivals.append(actual)
         require(statuses["completed"] == completed and statuses["rejected"] == rejected, "raw status counts differ")
-        completions_in_order = sorted(completion_times)
+        # A rejection needs all four waiting slots occupied; the job in
+        # service does not hold a waiting slot.
+        service_starts_in_order = sorted(service_start_times)
         admit_index = 0
-        complete_index = 0
+        started_index = 0
         for arrival in rejected_arrivals:
             while admit_index < len(admitted_times) and admitted_times[admit_index] <= arrival:
                 admit_index += 1
-            while complete_index < len(completions_in_order) and completions_in_order[complete_index] <= arrival:
-                complete_index += 1
+            while started_index < len(service_starts_in_order) and service_starts_in_order[started_index] <= arrival:
+                started_index += 1
             require(
-                admit_index - complete_index >= QUEUE_CAPACITY,
+                admit_index - started_index >= QUEUE_CAPACITY,
                 "rejection recorded without a full queue",
             )
         require(offered_work_x4 == int(summary["offered_work_x4"]) == REQUESTS * 4, "offered work is not matched")

@@ -288,6 +288,13 @@ fi
 if "$git_path" ls-files -v | grep -Eq '^(S|[a-z]) '; then
   fail 'exact-source run refuses assume-unchanged or skip-worktree files'
 fi
+# git status reports a clean tree even when gitignored files exist, but Cargo
+# can consume such a file (for example an ignored build.rs) during the build.
+"$git_path" ls-files --others --ignored --exclude-standard -- "$topic" \
+  > "$output_directory/source-ignored.before.txt"
+if [[ -s $output_directory/source-ignored.before.txt ]]; then
+  fail 'exact-source run refuses gitignored files under the topic directory'
+fi
 write_tracked_source_manifest "$output_directory/source-files.before.sha256"
 
 "$git_path" archive --format=tar "$source_commit" \
@@ -309,6 +316,16 @@ if [[ $cargo_scratch_directory == "$repository_root" \
 fi
 touch "$cargo_scratch_directory/.topic27-cargo-scratch"
 mkdir -p "$cargo_scratch_directory"/{cargo-home,python-cache,target}
+
+# git archive honors untracked attribute files (for example export-ignore in
+# .git/info/attributes), so prove the archive matches the tracked manifest.
+archive_check_directory="$cargo_scratch_directory/source-archive-check"
+mkdir -p "$archive_check_directory"
+tar -xzf "$output_directory/source.tar.gz" -C "$archive_check_directory"
+(
+  cd "$archive_check_directory"
+  sha256sum --check --quiet "$output_directory/source-files.before.sha256"
+)
 
 export CARGO_HOME="$cargo_scratch_directory/cargo-home"
 export CARGO_INCREMENTAL=0
