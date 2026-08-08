@@ -28,11 +28,14 @@ def fail(message: str) -> None:
 def main() -> int:
     """Recompute process counts, outputs, and hashes from raw files."""
 
-    if len(sys.argv) != 2:
-        print("usage: validate_receipts.py OUTPUT_DIRECTORY", file=sys.stderr)
+    if len(sys.argv) != 3:
+        print("usage: validate_receipts.py OUTPUT_DIRECTORY BINARY", file=sys.stderr)
         return 2
 
     output = Path(sys.argv[1]).resolve()
+    binary = Path(sys.argv[2]).resolve()
+    if not binary.is_file():
+        fail(f"binary does not exist: {binary}")
     expected = EXPECTED.encode()
     if (output / "expected.txt").read_bytes() != expected:
         fail("retained expected output differs from the source contract")
@@ -70,8 +73,11 @@ def main() -> int:
 
     binary_line = (output / "binary.sha256").read_text(encoding="utf-8").strip()
     fields = binary_line.split()
-    if len(fields) != 2 or fields[0] != summary.get("binary_sha256"):
-        fail("binary identity differs from summary")
+    binary_sha256 = sha256_bytes(binary.read_bytes())
+    if len(fields) != 2 or fields[1] != binary.name:
+        fail("recorded binary name differs from the validated binary")
+    if fields[0] != binary_sha256 or summary.get("binary_sha256") != binary_sha256:
+        fail("binary identity differs from the validated binary")
 
     print("receipt validation: PASS")
     return 0

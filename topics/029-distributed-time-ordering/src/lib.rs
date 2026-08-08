@@ -607,7 +607,7 @@ pub extern "C" fn topic29_lww_choice(left_ms: u64, right_ms: u64) -> u8 {
 #[unsafe(no_mangle)]
 #[inline(never)]
 pub extern "C" fn topic29_lamport_receive(local: u64, remote: u64) -> u64 {
-    local.max(remote).checked_add(1).unwrap_or(0)
+    LamportClock::new(local).receive(remote).unwrap_or(0)
 }
 
 /// Classifies two vector clocks for final-image inspection.
@@ -660,6 +660,9 @@ mod tests {
         let tied_a = LwwStamp::new(200, Replica::A);
         let tied_b = LwwStamp::new(200, Replica::B);
         assert_eq!(wall_clock_lww(tied_a, tied_b), tied_b);
+        assert_eq!(tied_a.physical_ms(), 200);
+        assert_eq!(Replica::A.as_str(), "A");
+        assert_eq!(Replica::B.as_str(), "B");
     }
 
     #[test]
@@ -688,11 +691,17 @@ mod tests {
         assert_eq!(a.relation(a), VectorRelation::Equal);
         assert_eq!(a.relation(b), VectorRelation::Concurrent);
         assert_eq!(b.relation(a), VectorRelation::Concurrent);
+        assert_eq!(VectorRelation::Equal.as_str(), "equal");
+        assert_eq!(VectorRelation::Concurrent.as_str(), "concurrent");
 
         b.receive(Replica::B, a)?;
         assert_eq!(a.relation(b), VectorRelation::Before);
         assert_eq!(b.relation(a), VectorRelation::After);
+        assert_eq!(VectorRelation::Before.as_str(), "before");
+        assert_eq!(VectorRelation::After.as_str(), "after");
         assert_eq!(b.counters(), [1, 2]);
+        assert_eq!(b.counter(Replica::A), 1);
+        assert_eq!(b.counter(Replica::B), 2);
         Ok(())
     }
 
@@ -714,6 +723,8 @@ mod tests {
         let mut sender = HybridLogicalClock::new();
         let sent = sender.local(100)?;
         assert_eq!(sent, HybridTimestamp::new(100, 0));
+        assert_eq!(sent.physical_ms(), 100);
+        assert_eq!(sent.logical(), 0);
         assert_eq!(sender.local(100)?, HybridTimestamp::new(100, 1));
         assert_eq!(sender.local(80)?, HybridTimestamp::new(100, 2));
         assert_eq!(sender.local(101)?, HybridTimestamp::new(101, 0));
@@ -769,11 +780,22 @@ mod tests {
         let first = UncertaintyInterval::new(10, 20).unwrap();
         let touching = UncertaintyInterval::new(20, 30).unwrap();
         let later = UncertaintyInterval::new(21, 30).unwrap();
+        assert_eq!(first.earliest_ms(), 10);
+        assert_eq!(first.latest_ms(), 20);
         assert!(!first.definitely_before(touching));
         assert_eq!(first.relation(touching), IntervalRelation::Indeterminate);
+        assert_eq!(IntervalRelation::Indeterminate.as_str(), "indeterminate");
         assert!(first.definitely_before(later));
         assert_eq!(first.relation(later), IntervalRelation::DefinitelyBefore);
+        assert_eq!(
+            IntervalRelation::DefinitelyBefore.as_str(),
+            "definitely-before"
+        );
         assert_eq!(later.relation(first), IntervalRelation::DefinitelyAfter);
+        assert_eq!(
+            IntervalRelation::DefinitelyAfter.as_str(),
+            "definitely-after"
+        );
     }
 
     #[test]
@@ -781,6 +803,7 @@ mod tests {
         assert_eq!(topic29_lww_choice(1_000, 900), 0);
         assert_eq!(topic29_lww_choice(1_000, 1_001), 1);
         assert_eq!(topic29_lamport_receive(0, 1), 2);
+        assert_eq!(topic29_lamport_receive(5, 1), 6);
         assert_eq!(topic29_lamport_receive(0, u64::MAX), 0);
         assert_eq!(topic29_vector_relation(1, 0, 0, 1), 3);
         assert_eq!(

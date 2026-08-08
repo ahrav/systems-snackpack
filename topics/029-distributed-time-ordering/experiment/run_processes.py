@@ -10,13 +10,7 @@ import sys
 from pathlib import Path
 
 RUNS = 8
-EXPECTED = """wall LWW: paid@1000 beats packed@900 -> causal predecessor selected
-Lamport: paid=1, packed=2 -> causal order preserved
-vector: [1,0] < [1,1]; [1,0] || [0,1]
-HLC: paid=(1000,0), packed=(1000,1) with B wall=900
-interval: [990,1010] and [1000,1020] overlap -> physical order unknown
-self-check: PASS
-"""
+EXPECTED = Path(__file__).with_name("expected.txt").read_text(encoding="utf-8")
 
 
 def sha256_bytes(data: bytes) -> str:

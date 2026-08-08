@@ -124,7 +124,8 @@ python3 topics/029-distributed-time-ordering/experiment/run_processes.py \
   /tmp/topic29-local
 
 python3 topics/029-distributed-time-ordering/experiment/validate_receipts.py \
-  /tmp/topic29-local
+  /tmp/topic29-local \
+  target/release/ordering-probe
 ```
 
 The output directory must not exist. The local command launches eight fresh

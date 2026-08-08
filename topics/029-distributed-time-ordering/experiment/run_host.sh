@@ -13,6 +13,7 @@ source_commit=$4
 source_archive_sha256=not-recorded
 run_started_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)
 cargo_home=
+run_completed=0
 
 seal_evidence() {
     (
@@ -49,9 +50,12 @@ finalize() {
     trap - EXIT
     set +e
     if [[ -d $output ]]; then
-        if (( exit_code == 0 )); then
+        if (( exit_code == 0 && run_completed == 1 )); then
             write_run_status success 0
         else
+            if (( exit_code == 0 )); then
+                exit_code=1
+            fi
             write_run_status failed "$exit_code"
         fi
         if ! seal_evidence; then
@@ -97,6 +101,9 @@ fi
 
 mkdir -p "$output/gates"
 trap finalize EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+trap 'exit 129' HUP
 
 repository_root=$(git -C "$repository" rev-parse --show-toplevel)
 if [[ $(realpath "$repository_root") != "$repository" ]]; then
@@ -112,7 +119,8 @@ if [[ -n $(git -C "$repository" status --porcelain=v1 --untracked-files=all) ]];
     echo "exact-source measurement requires a clean worktree" >&2
     exit 2
 fi
-if git -C "$repository" ls-files -v | grep -Eq '^(S|[a-z]) '; then
+marked_files=$(git -C "$repository" ls-files -v)
+if grep -Eq '^(S|[a-z]) ' <<<"$marked_files"; then
     echo "exact-source measurement refuses assume-unchanged or skip-worktree files" >&2
     exit 2
 fi
@@ -235,7 +243,8 @@ python3 "$topic/experiment/run_processes.py" \
     "$generic_binary" \
     "$output/experiment-generic" >"$output/process-runner.generic.log" 2>&1
 python3 "$topic/experiment/validate_receipts.py" \
-    "$output/experiment-generic" >"$output/validation.generic.log" 2>&1
+    "$output/experiment-generic" "$generic_binary" \
+    >"$output/validation.generic.log" 2>&1
 generic_recorded_sha256=$(awk 'NR == 1 { print $1 }' \
     "$output/experiment-generic/binary.sha256")
 generic_actual_sha256=$(sha256sum "$output/ordering-probe.generic" \
@@ -270,7 +279,8 @@ done
 python3 "$topic/experiment/run_processes.py" "$binary" \
     "$output/experiment-native" >"$output/process-runner.native.log" 2>&1
 python3 "$topic/experiment/validate_receipts.py" \
-    "$output/experiment-native" >"$output/validation.native.log" 2>&1
+    "$output/experiment-native" "$binary" \
+    >"$output/validation.native.log" 2>&1
 native_recorded_sha256=$(awk 'NR == 1 { print $1 }' \
     "$output/experiment-native/binary.sha256")
 native_actual_sha256=$(sha256sum "$output/ordering-probe.native" \
@@ -287,4 +297,5 @@ run_gate cargo-doc env "RUSTDOCFLAGS=-D warnings" cargo doc --workspace --no-dep
 source_manifest >"$output/source-files.after.sha256"
 cmp "$output/source-files.before.sha256" "$output/source-files.after.sha256"
 
+run_completed=1
 echo "host run: PASS"

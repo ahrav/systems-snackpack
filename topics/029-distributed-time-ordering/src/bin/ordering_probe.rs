@@ -20,6 +20,9 @@ use std::fmt::{self, Display, Formatter};
 use std::io::{self, BufWriter, Write};
 use std::process::ExitCode;
 
+#[cfg(test)]
+const EXPECTED_OUTPUT: &str = include_str!("../../experiment/expected.txt");
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct SelfCheckError(&'static str);
 
@@ -156,16 +159,6 @@ mod tests {
     fn self_check_output_is_stable() {
         let mut output = Vec::new();
         run_self_check(&mut output).unwrap();
-        assert_eq!(
-            String::from_utf8(output).unwrap(),
-            concat!(
-                "wall LWW: paid@1000 beats packed@900 -> causal predecessor selected\n",
-                "Lamport: paid=1, packed=2 -> causal order preserved\n",
-                "vector: [1,0] < [1,1]; [1,0] || [0,1]\n",
-                "HLC: paid=(1000,0), packed=(1000,1) with B wall=900\n",
-                "interval: [990,1010] and [1000,1020] overlap -> physical order unknown\n",
-                "self-check: PASS\n",
-            )
-        );
+        assert_eq!(String::from_utf8(output).unwrap(), EXPECTED_OUTPUT);
     }
 }
