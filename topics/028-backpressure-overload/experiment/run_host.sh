@@ -224,10 +224,13 @@ export GIT_NO_REPLACE_OBJECTS=1
 # A PATH wrapper can hash bytes different from the retained files.
 sha256sum_path=$(command -v sha256sum)
 sha256sum_path=$(readlink -f "$sha256sum_path")
-printf 'sha256sum_path=%s\nsha256sum_resolved_path=%s\n' \
-  "$(command -v sha256sum)" "$sha256sum_path" \
+gzip_path=$(command -v gzip)
+gzip_path=$(readlink -f "$gzip_path")
+printf 'sha256sum_path=%s\nsha256sum_resolved_path=%s\ngzip_resolved_path=%s\n' \
+  "$(command -v sha256sum)" "$sha256sum_path" "$gzip_path" \
   > "$output_directory/checksum-provenance.txt"
 "$sha256sum_path" --version | sed -n 1p >> "$output_directory/checksum-provenance.txt"
+"$gzip_path" --version 2>&1 | sed -n 1p >> "$output_directory/checksum-provenance.txt"
 
 # A repository subdirectory would scope git ls-files and the output-directory
 # guard to a prefix, leaving the exact-source evidence incomplete.
@@ -269,7 +272,7 @@ write_source_manifest "$output_directory/source-files.before.sha256"
   cd "$output_directory"
   "$sha256sum_path" source-tree.txt > source-tree.sha256
 )
-"$git_path" archive --format=tar "$source_commit" | gzip -n -9 > "$output_directory/source.tar.gz"
+"$git_path" archive --format=tar "$source_commit" | "$gzip_path" -n -9 > "$output_directory/source.tar.gz"
 (
   cd "$output_directory"
   "$sha256sum_path" source.tar.gz > source-archive.sha256
@@ -376,6 +379,16 @@ current_clocksource=$(<"$clocksource_file")
 rustc_path=$(command -v rustc)
 cargo_path=$(command -v cargo)
 python3_path=$(command -v python3)
+# Record resolved paths and versions for tools that generate retained
+# receipts.
+nm_path=$(command -v nm)
+nm_path=$(readlink -f "$nm_path")
+objdump_path=$(command -v objdump)
+objdump_path=$(readlink -f "$objdump_path")
+grep_path=$(command -v grep)
+grep_path=$(readlink -f "$grep_path")
+file_path=$(command -v file)
+file_path=$(readlink -f "$file_path")
 {
   printf 'rustc_path=%s\n' "$rustc_path"
   printf 'rustc_resolved_path=%s\n' "$(readlink -f "$rustc_path")"
@@ -389,10 +402,16 @@ python3_path=$(command -v python3)
   printf 'taskset_resolved_path=%s\n' "$taskset_path"
   "$taskset_path" --version
   "$python3_path" -I -S -VV 2>&1
+  printf 'nm_resolved_path=%s\n' "$nm_path"
+  "$nm_path" --version 2>&1 | sed -n 1p
+  printf 'objdump_resolved_path=%s\n' "$objdump_path"
+  "$objdump_path" --version 2>&1 | sed -n 1p
+  printf 'grep_resolved_path=%s\n' "$grep_path"
+  "$grep_path" --version 2>&1 | sed -n 1p
+  printf 'file_resolved_path=%s\n' "$file_path"
+  "$file_path" --version 2>&1 | sed -n 1p
   if command -v cc > /dev/null 2>&1; then cc --version 2>&1; fi
   if command -v ld > /dev/null 2>&1; then ld --version 2>&1 | sed -n '1,4p'; fi
-  if command -v nm > /dev/null 2>&1; then nm --version 2>&1 | sed -n '1,4p'; fi
-  if command -v objdump > /dev/null 2>&1; then objdump --version 2>&1 | sed -n '1,4p'; fi
 } > "$output_directory/toolchain.txt"
 "$rustc_path" -C target-cpu=native --print cfg | LC_ALL=C sort \
   > "$output_directory/rustc-native-cfg.txt"
@@ -450,21 +469,21 @@ cmp --silent "$built_binary" "$retained_binary"
   "$sha256sum_path" --check --quiet binary.sha256
 )
 {
-  file "$retained_binary"
+  "$file_path" "$retained_binary"
   if command -v readelf > /dev/null 2>&1; then readelf -h -d -Ws "$retained_binary"; fi
-  nm -C "$retained_binary"
+  "$nm_path" -C "$retained_binary"
 } > "$output_directory/codegen/final-symbols.txt"
-objdump -drwC "$retained_binary" > "$output_directory/codegen/final-binary.txt"
-objdump -d --disassemble=topic28_origin_work "$retained_binary" \
+"$objdump_path" -drwC "$retained_binary" > "$output_directory/codegen/final-binary.txt"
+"$objdump_path" -d --disassemble=topic28_origin_work "$retained_binary" \
   > "$output_directory/codegen/origin-work-loop.txt"
-grep -n 'topic28_origin_work' "$output_directory/codegen/final-symbols.txt" \
+"$grep_path" -n 'topic28_origin_work' "$output_directory/codegen/final-symbols.txt" \
   > "$output_directory/codegen/origin-work-symbol.txt"
-grep -nE '(call|bl).*topic28_origin_work' "$output_directory/codegen/final-binary.txt" \
+"$grep_path" -nE '(call|bl).*topic28_origin_work' "$output_directory/codegen/final-binary.txt" \
   > "$output_directory/codegen/origin-work-callsites.txt"
 test -s "$output_directory/codegen/origin-work-loop.txt"
 test -s "$output_directory/codegen/origin-work-symbol.txt"
 test -s "$output_directory/codegen/origin-work-callsites.txt"
-gzip -n -9 "$output_directory/codegen/final-binary.txt"
+"$gzip_path" -n -9 "$output_directory/codegen/final-binary.txt"
 
 "$taskset_path" --cpu-list "$cpu_list" "$retained_binary" --self-check \
   > "$output_directory/gates/self-check.log" 2>&1

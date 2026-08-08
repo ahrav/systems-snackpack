@@ -26,6 +26,7 @@ from run_processes import (
     ORIGIN_CAPACITY,
     PROBE_SUMMARY_FIELDS,
     RETRY_TOKENS,
+    SEMANTIC_CONTROL_SPECS,
     SUMMARY_FIELDS,
     TARGET_ATTEMPT_NS,
     WAITER_CAP,
@@ -148,6 +149,14 @@ def origin_work(iterations: int, seed: int) -> int:
 def work_seed(seed: int, flight_id: int, attempt_no: int) -> int:
     """Mirror the probe's per-attempt work-seed derivation."""
     return mix64((seed ^ ((flight_id * 0x9E3779B9) & MASK64) ^ attempt_no) & MASK64)
+
+
+def calibration_checksum(iterations: int) -> int:
+    """Mirror the probe's 512-repetition calibration checksum."""
+    checksum = 0
+    for repetition in range(512):
+        checksum ^= origin_work(iterations, mix64((repetition + 28) & MASK64))
+    return checksum
 
 
 def require_equal(expected: Any, actual: Any, context: str) -> None:
@@ -481,6 +490,11 @@ def main() -> None:
         "calibration iterations differ from the sealed settings",
     )
     require(as_int(calibration_row, "calibrated_mean_ns") > 0, "invalid calibration duration")
+    require(
+        as_int(calibration_row, "calibration_checksum")
+        == calibration_checksum(schedule_work_iters),
+        "calibration checksum does not match the calibrated origin loop",
+    )
     require(calibration_row["binary_sha256"] == binary_hash, "calibration binary differs")
     require(calibration_row["settings_sha256"] == settings_hash, "calibration settings differ")
 
@@ -520,6 +534,11 @@ def main() -> None:
     controls = read_csv(directory / "semantic-controls.csv", CONTROL_SUMMARY_FIELDS)
     control_specs = schedule_document["semantic_controls"]
     require(len(controls) == len(control_specs) == 2, "semantic controls are incomplete")
+    for spec, predeclared in zip(control_specs, SEMANTIC_CONTROL_SPECS):
+        require(
+            {key: spec.get(key) for key in predeclared} == predeclared,
+            "semantic control specification differs from the predeclared controls",
+        )
     for spec, summary in zip(control_specs, controls):
         require(summary["control_id"] == spec["control_id"], "semantic control identity differs")
         for field in ("phase", "label", "treatment"):
@@ -599,6 +618,32 @@ def main() -> None:
                 row["command"][:3] == [pinned_taskset, "--cpu-list", sealed_cpu_list],
                 "ledger command is not pinned to the sealed CPU list",
             )
+    executable_index = 3 if sealed_cpu_list else 0
+    ledger_executables = {row["command"][executable_index] for row in ledger}
+    require(
+        len(ledger_executables) == 1,
+        "ledger commands name more than one probe executable",
+    )
+    ledger_binary = Path(next(iter(ledger_executables)))
+    if ledger_binary.is_file():
+        try:
+            ledger_binary_hash = hashlib.sha256(ledger_binary.read_bytes()).hexdigest()
+        except OSError as error:
+            raise SystemExit(f"unreadable ledger probe executable: {error}") from error
+        require(
+            ledger_binary_hash == binary_hash,
+            "ledger probe executable differs from the sealed binary hash",
+        )
+    parent_artifact = directory.parent / "artifacts" / ledger_binary.name
+    if parent_artifact.is_file():
+        try:
+            artifact_hash = hashlib.sha256(parent_artifact.read_bytes()).hexdigest()
+        except OSError as error:
+            raise SystemExit(f"unreadable retained artifact: {error}") from error
+        require(
+            artifact_hash == binary_hash,
+            "retained artifact differs from the sealed binary hash",
+        )
     calibration_values = calibration_attempts[0]["stdout"].strip().split(",")
     require(len(calibration_values) == 3, "calibration ledger stdout is malformed")
     require(
@@ -642,7 +687,7 @@ def main() -> None:
     require(status["binary_sha256"] == binary_hash, "run status binary differs")
     require(status["settings_sha256"] == settings_hash, "run status settings differs")
 
-    retained_analysis = json.loads((directory / "analysis.json").read_text(encoding="utf-8"))
+    retained_analysis = load_json(directory / "analysis.json")
     require_equal(build_analysis(directory), retained_analysis, "analysis")
     print("receipt validation: PASS")
 

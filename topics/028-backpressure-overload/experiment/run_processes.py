@@ -90,6 +90,53 @@ CONTROL_SUMMARY_FIELDS = PROBE_SUMMARY_FIELDS + (
     "command",
 )
 
+SEMANTIC_CONTROL_SPECS = (
+    {
+        "control_id": "saturation-n128-w64-q2",
+        "phase": "aa",
+        "block": 9001,
+        "period": 1,
+        "label": "A",
+        "treatment": "controlled",
+        "seed": AA_SCHEDULE_SEED * 100 + 9001,
+        "callers": 128,
+        "waiter_cap": 64,
+        "retry_tokens": 2,
+        "expected": {
+            "completed": 64,
+            "shed": 64,
+            "leaders": 1,
+            "followers": 63,
+            "flights": 1,
+            "origin_attempts": 3,
+            "retry_attempts": 2,
+            "retry_exhausted": 0,
+        },
+    },
+    {
+        "control_id": "retry-exhaustion-n64-w64-q1",
+        "phase": "aa",
+        "block": 9002,
+        "period": 1,
+        "label": "A",
+        "treatment": "controlled",
+        "seed": AA_SCHEDULE_SEED * 100 + 9002,
+        "callers": 64,
+        "waiter_cap": 64,
+        "retry_tokens": 1,
+        "expected": {
+            "completed": 0,
+            "shed": 0,
+            "leaders": 1,
+            "followers": 63,
+            "flights": 1,
+            "origin_attempts": 2,
+            "retry_attempts": 1,
+            "retry_exhausted": 64,
+        },
+    },
+)
+
 
 def assignments() -> Iterator[dict[str, Any]]:
     """Yield all 32 main periods followed by all 16 A/A periods."""
@@ -309,50 +356,7 @@ def main() -> None:
         assignment["binary_sha256"] = binary_sha256
         assignment["settings_sha256"] = settings_sha256
     semantic_controls = [
-        {
-            "control_id": "saturation-n128-w64-q2",
-            "phase": "aa",
-            "block": 9001,
-            "period": 1,
-            "label": "A",
-            "treatment": "controlled",
-            "seed": AA_SCHEDULE_SEED * 100 + 9001,
-            "callers": 128,
-            "waiter_cap": 64,
-            "retry_tokens": 2,
-            "expected": {
-                "completed": 64,
-                "shed": 64,
-                "leaders": 1,
-                "followers": 63,
-                "flights": 1,
-                "origin_attempts": 3,
-                "retry_attempts": 2,
-                "retry_exhausted": 0,
-            },
-        },
-        {
-            "control_id": "retry-exhaustion-n64-w64-q1",
-            "phase": "aa",
-            "block": 9002,
-            "period": 1,
-            "label": "A",
-            "treatment": "controlled",
-            "seed": AA_SCHEDULE_SEED * 100 + 9002,
-            "callers": 64,
-            "waiter_cap": 64,
-            "retry_tokens": 1,
-            "expected": {
-                "completed": 0,
-                "shed": 0,
-                "leaders": 1,
-                "followers": 63,
-                "flights": 1,
-                "origin_attempts": 2,
-                "retry_attempts": 1,
-                "retry_exhausted": 64,
-            },
-        },
+        {**spec, "expected": dict(spec["expected"])} for spec in SEMANTIC_CONTROL_SPECS
     ]
     for control in semantic_controls:
         control_settings = {
