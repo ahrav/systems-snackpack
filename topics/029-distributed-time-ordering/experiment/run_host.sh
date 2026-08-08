@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
-if [[ $# -ne 5 ]]; then
-    echo "usage: run_host.sh REPOSITORY OUTPUT HOST_LABEL SOURCE_COMMIT SOURCE_ARCHIVE_SHA256" >&2
+if [[ $# -ne 4 ]]; then
+    echo "usage: run_host.sh REPOSITORY OUTPUT HOST_LABEL SOURCE_COMMIT" >&2
     exit 2
 fi
 
@@ -10,8 +10,52 @@ repository=$(realpath "$1")
 output=$(realpath -m "$2")
 host_label=$3
 source_commit=$4
-source_archive_sha256=$5
+source_archive_sha256=not-recorded
 run_started_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)
+
+seal_evidence() {
+    (
+        cd "$output"
+        find . -type f ! -name SHA256SUMS -print0 \
+            | LC_ALL=C sort -z \
+            | xargs -0 sha256sum >SHA256SUMS
+        sha256sum --check --quiet SHA256SUMS
+    )
+}
+
+write_run_status() {
+    local status=$1
+    local exit_code=$2
+    {
+        echo "status=$status"
+        echo "exit_code=$exit_code"
+        echo "run_started_utc=$run_started_utc"
+        echo "run_finished_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)"
+        echo "host_label=$host_label"
+        echo "source_commit=$source_commit"
+        echo "source_archive_sha256=$source_archive_sha256"
+    } >"$output/run.status"
+}
+
+finalize() {
+    local exit_code=$?
+    trap - EXIT
+    set +e
+    if [[ -d $output ]]; then
+        if (( exit_code == 0 )); then
+            write_run_status success 0
+        else
+            write_run_status failed "$exit_code"
+        fi
+        if ! seal_evidence; then
+            exit_code=1
+            write_run_status failed 1
+            printf 'failure_reason=evidence_seal_failed\n' >>"$output/run.status"
+            seal_evidence || true
+        fi
+    fi
+    exit "$exit_code"
+}
 
 if [[ $(uname -s) != Linux ]]; then
     echo "run_host.sh requires Linux" >&2
@@ -36,13 +80,32 @@ if [[ ! $source_commit =~ ^[0-9a-f]{40}$ ]]; then
     echo "source commit must be 40 lowercase hexadecimal characters" >&2
     exit 2
 fi
-if [[ ! $source_archive_sha256 =~ ^[0-9a-f]{64}$ ]]; then
-    echo "source archive SHA-256 must be 64 lowercase hexadecimal characters" >&2
+current_head=$(git -C "$repository" rev-parse HEAD)
+if [[ $current_head != "$source_commit" ]]; then
+    echo "HEAD does not equal the requested source commit" >&2
+    exit 2
+fi
+if [[ -n $(git -C "$repository" status --porcelain=v1 --untracked-files=all) ]]; then
+    echo "exact-source measurement requires a clean worktree" >&2
     exit 2
 fi
 
 mkdir -p "$output/gates"
+trap finalize EXIT
 topic="$repository/topics/029-distributed-time-ordering"
+
+pinned_toolchain=$(sed -n 's/^channel = "\(.*\)"$/\1/p' \
+    "$repository/rust-toolchain.toml")
+resolved_rustc=$(cd "$repository" && rustc --version | awk '{print $2}')
+if [[ -z $pinned_toolchain || $resolved_rustc != "$pinned_toolchain" ]]; then
+    printf 'resolved rustc %s does not match the pinned toolchain %s\n' \
+        "$resolved_rustc" "${pinned_toolchain:-unparsed}" >&2
+    exit 2
+fi
+
+git -C "$repository" archive --format=tar "$source_commit" \
+    | gzip -n -9 >"$output/source.tar.gz"
+source_archive_sha256=$(sha256sum "$output/source.tar.gz" | awk '{print $1}')
 
 controlled_environment=(
     CARGO_BUILD_RUSTFLAGS
@@ -122,7 +185,7 @@ generic_binary="$repository/target/release/ordering-probe"
 cp "$generic_binary" "$output/ordering-probe.generic"
 sha256sum "$output/ordering-probe.generic" >"$output/binary.generic.sha256"
 python3 "$topic/experiment/run_processes.py" \
-    "$output/ordering-probe.generic" \
+    "$generic_binary" \
     "$output/experiment-generic" >"$output/process-runner.generic.log" 2>&1
 python3 "$topic/experiment/validate_receipts.py" \
     "$output/experiment-generic" >"$output/validation.generic.log" 2>&1
@@ -180,22 +243,5 @@ run_gate cargo-doc env "RUSTDOCFLAGS=-D warnings" cargo doc --workspace --no-dep
 
 source_manifest >"$output/source-files.after.sha256"
 cmp "$output/source-files.before.sha256" "$output/source-files.after.sha256"
-
-{
-    echo "status=PASS"
-    echo "run_started_utc=$run_started_utc"
-    echo "run_finished_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)"
-    echo "host_label=$host_label"
-    echo "source_commit=$source_commit"
-    echo "source_archive_sha256=$source_archive_sha256"
-} >"$output/run.status"
-(
-    cd "$output"
-    rg --files -0 -g '!SHA256SUMS' \
-        | sort -z \
-        | xargs -0 sha256sum \
-        >SHA256SUMS
-    sha256sum --check --quiet SHA256SUMS
-)
 
 echo "host run: PASS"

@@ -8,7 +8,9 @@ import json
 import sys
 from pathlib import Path
 
-RUNS = 8
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from run_processes import EXPECTED, RUNS
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -31,7 +33,9 @@ def main() -> int:
         return 2
 
     output = Path(sys.argv[1]).resolve()
-    expected = (output / "expected.txt").read_bytes()
+    expected = EXPECTED.encode()
+    if (output / "expected.txt").read_bytes() != expected:
+        fail("retained expected output differs from the source contract")
     rows = [
         json.loads(line)
         for line in (output / "processes.jsonl").read_text(encoding="utf-8").splitlines()

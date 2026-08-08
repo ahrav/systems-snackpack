@@ -137,7 +137,7 @@ fn main() -> ExitCode {
 
     let stdout = io::stdout();
     let mut output = BufWriter::new(stdout.lock());
-    match run_self_check(&mut output) {
+    match run_self_check(&mut output).and_then(|()| output.flush().map_err(Into::into)) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             eprintln!("ordering-probe: {error}");
