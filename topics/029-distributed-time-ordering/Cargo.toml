@@ -1,0 +1,17 @@
+[package]
+name = "distributed-time-ordering"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "distributed_time_ordering"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ordering-probe"
+path = "src/bin/ordering_probe.rs"
+
+[lints]
+workspace = true
