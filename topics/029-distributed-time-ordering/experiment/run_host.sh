@@ -12,6 +12,7 @@ host_label=$3
 source_commit=$4
 source_archive_sha256=not-recorded
 run_started_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)
+cargo_home=
 
 seal_evidence() {
     (
@@ -59,6 +60,9 @@ finalize() {
             printf 'failure_reason=evidence_seal_failed\n' >>"$output/run.status"
             seal_evidence || true
         fi
+    fi
+    if [[ -n $cargo_home && -f $cargo_home/.topic29-cargo-home ]]; then
+        rm -rf "$cargo_home"
     fi
     exit "$exit_code"
 }
@@ -108,6 +112,10 @@ if [[ -n $(git -C "$repository" status --porcelain=v1 --untracked-files=all) ]];
     echo "exact-source measurement requires a clean worktree" >&2
     exit 2
 fi
+if git -C "$repository" ls-files -v | grep -Eq '^(S|[a-z]) '; then
+    echo "exact-source measurement refuses assume-unchanged or skip-worktree files" >&2
+    exit 2
+fi
 
 topic="$repository/topics/029-distributed-time-ordering"
 
@@ -127,6 +135,7 @@ source_archive_sha256=$(sha256sum "$output/source.tar.gz" | awk '{print $1}')
 controlled_environment=(
     CARGO_BUILD_RUSTFLAGS
     CARGO_ENCODED_RUSTFLAGS
+    CARGO_HOME
     CARGO_TARGET_DIR
     RUSTC_WRAPPER
     RUSTC_WORKSPACE_WRAPPER
@@ -141,6 +150,27 @@ for variable in "${controlled_environment[@]}"; do
     fi
     unset "$variable"
 done >"$output/environment.before.txt"
+
+cargo_home=$(mktemp -d "${TMPDIR:-/tmp}/topic29-cargo-home.XXXXXXXX")
+touch "$cargo_home/.topic29-cargo-home"
+export CARGO_HOME="$cargo_home"
+printf 'CARGO_HOME=%q\n' "$CARGO_HOME" >"$output/environment.effective.txt"
+
+config_scan_directory=$repository
+while :; do
+    for cargo_config in \
+        "$config_scan_directory/.cargo/config.toml" \
+        "$config_scan_directory/.cargo/config"; do
+        if [[ -e $cargo_config ]]; then
+            echo "unrecorded Cargo config would alter builds: $cargo_config" >&2
+            exit 2
+        fi
+    done
+    if [[ $config_scan_directory == / ]]; then
+        break
+    fi
+    config_scan_directory=$(dirname "$config_scan_directory")
+done
 
 {
     printf 'host_label=%q\n' "$host_label"
@@ -248,7 +278,7 @@ native_actual_sha256=$(sha256sum "$output/ordering-probe.native" \
 [[ $native_recorded_sha256 == "$native_actual_sha256" ]]
 
 unset RUSTFLAGS
-run_gate cargo-test-lib-examples cargo test --workspace --lib --examples
+run_gate cargo-test-lib-examples cargo test --workspace --lib --bins --examples
 run_gate cargo-test-doc cargo test --workspace --doc
 run_gate cargo-clippy cargo clippy --workspace --all-targets -- -D warnings
 run_gate cargo-bench-no-run cargo bench --workspace --no-run

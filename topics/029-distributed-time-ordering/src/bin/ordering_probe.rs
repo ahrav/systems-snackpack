@@ -72,7 +72,9 @@ fn run_self_check(output: &mut impl Write) -> Result<(), Box<dyn Error>> {
     let concurrent_relation = vector_a.relation(independent_b);
     ensure(
         causal_relation == VectorRelation::Before
-            && concurrent_relation == VectorRelation::Concurrent,
+            && concurrent_relation == VectorRelation::Concurrent
+            && vector_a.counters() == [1, 0]
+            && vector_b.counters() == [1, 1],
         "vector-clock relation changed",
     )?;
 
