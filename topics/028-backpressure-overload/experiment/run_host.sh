@@ -48,7 +48,8 @@ write_source_manifest() {
   local destination=$1
   (
     cd "$repository_root"
-    "${git_path:-git}" ls-files -z | LC_ALL=C sort -z | xargs -0 "${sha256sum_path:-sha256sum}" --
+    "${git_path:-git}" ls-files -z | LC_ALL=C "${sort_path:-sort}" -z \
+      | "${xargs_path:-xargs}" -0 "${sha256sum_path:-sha256sum}" --
   ) > "$destination"
 }
 
@@ -66,9 +67,9 @@ cleanup_scratch() {
 seal_evidence() {
   (
     cd "$output_directory"
-    find . -type f ! -path './evidence.sha256' -print0 \
-      | LC_ALL=C sort -z \
-      | xargs -0 "${sha256sum_path:-sha256sum}" > evidence.sha256
+    "${find_path:-find}" . -type f ! -path './evidence.sha256' -print0 \
+      | LC_ALL=C "${sort_path:-sort}" -z \
+      | "${xargs_path:-xargs}" -0 "${sha256sum_path:-sha256sum}" > evidence.sha256
     "${sha256sum_path:-sha256sum}" --check --quiet evidence.sha256
   )
 }
@@ -226,8 +227,17 @@ sha256sum_path=$(command -v sha256sum)
 sha256sum_path=$(readlink -f "$sha256sum_path")
 gzip_path=$(command -v gzip)
 gzip_path=$(readlink -f "$gzip_path")
-printf 'sha256sum_path=%s\nsha256sum_resolved_path=%s\ngzip_resolved_path=%s\n' \
-  "$(command -v sha256sum)" "$sha256sum_path" "$gzip_path" \
+grep_path=$(command -v grep)
+grep_path=$(readlink -f "$grep_path")
+find_path=$(command -v find)
+find_path=$(readlink -f "$find_path")
+sort_path=$(command -v sort)
+sort_path=$(readlink -f "$sort_path")
+xargs_path=$(command -v xargs)
+xargs_path=$(readlink -f "$xargs_path")
+printf 'sha256sum_path=%s\nsha256sum_resolved_path=%s\ngzip_resolved_path=%s\ngrep_resolved_path=%s\nfind_resolved_path=%s\nsort_resolved_path=%s\nxargs_resolved_path=%s\n' \
+  "$(command -v sha256sum)" "$sha256sum_path" "$gzip_path" "$grep_path" \
+  "$find_path" "$sort_path" "$xargs_path" \
   > "$output_directory/checksum-provenance.txt"
 "$sha256sum_path" --version | sed -n 1p >> "$output_directory/checksum-provenance.txt"
 "$gzip_path" --version 2>&1 | sed -n 1p >> "$output_directory/checksum-provenance.txt"
@@ -256,7 +266,7 @@ if [[ -s $output_directory/source-status.before.txt ]]; then
 fi
 # git status misses files flagged assume-unchanged or skip-worktree, which
 # would let hidden local edits pass the clean-tree gate.
-if "$git_path" ls-files -v | grep -Eq '^(S|[a-z]) '; then
+if "$git_path" ls-files -v | "$grep_path" -Eq '^(S|[a-z]) '; then
   fail 'exact-source measurement refuses assume-unchanged or skip-worktree files'
 fi
 # git status reports a clean tree even when gitignored files exist, but the
@@ -266,13 +276,24 @@ fi
 if [[ -s $output_directory/source-ignored.before.txt ]]; then
   fail 'exact-source measurement refuses gitignored files under the topic directory'
 fi
+# Clean/smudge filters make the built worktree bytes differ from the HEAD
+# blobs while git status stays empty.
+if "$git_path" config --get-regexp '^filter\.' > "$output_directory/git-filters.txt" 2>/dev/null; then
+  fail 'exact-source measurement refuses clean/smudge filter configuration'
+fi
+# Caller-local attributes can drop or rewrite tracked files inside the
+# archive via export-ignore/export-subst without dirtying the worktree.
+if [[ -s $repository_root/.git/info/attributes ]]; then
+  fail 'exact-source measurement refuses local .git/info/attributes'
+fi
 write_source_manifest "$output_directory/source-files.before.sha256"
 "$git_path" ls-tree -r --full-tree "$source_commit" > "$output_directory/source-tree.txt"
 (
   cd "$output_directory"
   "$sha256sum_path" source-tree.txt > source-tree.sha256
 )
-"$git_path" archive --format=tar "$source_commit" | "$gzip_path" -n -9 > "$output_directory/source.tar.gz"
+"$git_path" -c core.attributesFile=/dev/null archive --format=tar "$source_commit" \
+  | "$gzip_path" -n -9 > "$output_directory/source.tar.gz"
 (
   cd "$output_directory"
   "$sha256sum_path" source.tar.gz > source-archive.sha256
@@ -385,8 +406,6 @@ nm_path=$(command -v nm)
 nm_path=$(readlink -f "$nm_path")
 objdump_path=$(command -v objdump)
 objdump_path=$(readlink -f "$objdump_path")
-grep_path=$(command -v grep)
-grep_path=$(readlink -f "$grep_path")
 file_path=$(command -v file)
 file_path=$(readlink -f "$file_path")
 {

@@ -634,10 +634,19 @@ def main() -> None:
             ledger_binary_hash == binary_hash,
             "ledger probe executable differs from the sealed binary hash",
         )
-    parent_artifact = directory.parent / "artifacts" / ledger_binary.name
-    if parent_artifact.is_file():
+    parent_artifacts = directory.parent / "artifacts"
+    if parent_artifacts.is_dir():
+        require(
+            ledger_binary.parts[-2:] == ("artifacts", ledger_binary.name),
+            "ledger probe executable is not the retained bundle artifact",
+        )
+        retained_artifact = parent_artifacts / ledger_binary.name
+        require(
+            retained_artifact.is_file(),
+            "retained bundle is missing the probe artifact the ledger names",
+        )
         try:
-            artifact_hash = hashlib.sha256(parent_artifact.read_bytes()).hexdigest()
+            artifact_hash = hashlib.sha256(retained_artifact.read_bytes()).hexdigest()
         except OSError as error:
             raise SystemExit(f"unreadable retained artifact: {error}") from error
         require(
