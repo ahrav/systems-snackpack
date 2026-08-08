@@ -27,7 +27,14 @@ not compare processor architectures or establish live clock accuracy.
 Raw logs are retained as one compressed archive per host. The outer
 `SHA256SUMS` file verifies those archives after retrieval.
 
-## Promoted result
+## Historical result (superseded)
+
+These records describe source commit `b9bb526`, before the probe added an
+explicit stdout flush. They do not attest the current probe source. The hosts
+also resolved rustc 1.95.0 and 1.97.1 rather than the workspace's pinned 1.93.1,
+so their workspace gates do not attest the pinned toolchain. A replacement
+record must use the current exact-source and pinned-toolchain gates before it is
+promoted.
 
 - [Arm exact-source record](b9bb526-arm.md)
 - [`xxl` exact-source record](b9bb526-xxl.md)

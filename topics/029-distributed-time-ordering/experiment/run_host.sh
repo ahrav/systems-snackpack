@@ -16,10 +16,16 @@ run_started_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)
 seal_evidence() {
     (
         cd "$output"
-        find . -type f ! -name SHA256SUMS -print0 \
+        manifest=.SHA256SUMS.tmp
+        rm -f "$manifest"
+        if ! find . -type f ! -name SHA256SUMS ! -name "$manifest" -print0 \
             | LC_ALL=C sort -z \
-            | xargs -0 sha256sum >SHA256SUMS
-        sha256sum --check --quiet SHA256SUMS
+            | xargs -0 sha256sum >"$manifest"; then
+            rm -f "$manifest"
+            return 1
+        fi
+        mv "$manifest" SHA256SUMS || return 1
+        sha256sum --check --quiet SHA256SUMS || return 1
     )
 }
 
@@ -31,7 +37,7 @@ write_run_status() {
         echo "exit_code=$exit_code"
         echo "run_started_utc=$run_started_utc"
         echo "run_finished_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)"
-        echo "host_label=$host_label"
+        printf 'host_label=%q\n' "$host_label"
         echo "source_commit=$source_commit"
         echo "source_archive_sha256=$source_archive_sha256"
     } >"$output/run.status"
@@ -80,6 +86,19 @@ if [[ ! $source_commit =~ ^[0-9a-f]{40}$ ]]; then
     echo "source commit must be 40 lowercase hexadecimal characters" >&2
     exit 2
 fi
+if [[ -z $host_label || $host_label == *$'\n'* || $host_label == *$'\r'* ]]; then
+    echo "host label must be non-empty and single-line" >&2
+    exit 2
+fi
+
+mkdir -p "$output/gates"
+trap finalize EXIT
+
+repository_root=$(git -C "$repository" rev-parse --show-toplevel)
+if [[ $(realpath "$repository_root") != "$repository" ]]; then
+    echo "repository must be the root of its Git worktree" >&2
+    exit 2
+fi
 current_head=$(git -C "$repository" rev-parse HEAD)
 if [[ $current_head != "$source_commit" ]]; then
     echo "HEAD does not equal the requested source commit" >&2
@@ -90,8 +109,6 @@ if [[ -n $(git -C "$repository" status --porcelain=v1 --untracked-files=all) ]];
     exit 2
 fi
 
-mkdir -p "$output/gates"
-trap finalize EXIT
 topic="$repository/topics/029-distributed-time-ordering"
 
 pinned_toolchain=$(sed -n 's/^channel = "\(.*\)"$/\1/p' \
@@ -126,13 +143,13 @@ for variable in "${controlled_environment[@]}"; do
 done >"$output/environment.before.txt"
 
 {
-    echo "host_label=$host_label"
+    printf 'host_label=%q\n' "$host_label"
     echo "source_commit=$source_commit"
     echo "source_archive_sha256=$source_archive_sha256"
 } >"$output/source_identity.txt"
 
 {
-    echo "host_label=$host_label"
+    printf 'host_label=%q\n' "$host_label"
     hostname -f
     uname -a
     uname -m
@@ -205,22 +222,18 @@ binary="$repository/target/release/ordering-probe"
 cp "$binary" "$output/ordering-probe.native"
 sha256sum "$output/ordering-probe.native" >"$output/binary.native.sha256"
 nm -n "$binary" >"$output/binary.symbols.txt"
-for symbol in \
-    topic29_lww_choice \
-    topic29_lamport_receive \
-    topic29_vector_relation \
+symbols=(
+    topic29_lww_choice
+    topic29_lamport_receive
+    topic29_vector_relation
     topic29_hlc_receive
-do
+)
+for symbol in "${symbols[@]}"; do
     rg -q "[[:space:]][Tt][[:space:]]${symbol}$" \
         "$output/binary.symbols.txt"
     objdump -d --no-show-raw-insn --disassemble="$symbol" "$binary"
 done >"$output/codegen.txt" 2>&1
-for symbol in \
-    topic29_lww_choice \
-    topic29_lamport_receive \
-    topic29_vector_relation \
-    topic29_hlc_receive
-do
+for symbol in "${symbols[@]}"; do
     rg -q "<${symbol}>:" "$output/codegen.txt"
 done
 
