@@ -216,6 +216,11 @@ def main() -> None:
         default="",
         help="taskset CPU list; omit only for a local correctness run without taskset",
     )
+    parser.add_argument(
+        "--taskset",
+        default="",
+        help="absolute taskset executable to pin measured processes with",
+    )
     args = parser.parse_args()
 
     binary = args.binary.resolve(strict=True)
@@ -228,9 +233,11 @@ def main() -> None:
 
     taskset_prefix: list[str] = []
     if args.cpu_list:
-        if shutil.which("taskset") is None:
+        taskset_binary = args.taskset or shutil.which("taskset")
+        if not taskset_binary:
             raise SystemExit("a CPU list was supplied but taskset is unavailable")
-        taskset_prefix = ["taskset", "--cpu-list", args.cpu_list]
+        taskset_binary = str(Path(taskset_binary).resolve(strict=True))
+        taskset_prefix = [taskset_binary, "--cpu-list", args.cpu_list]
 
     binary_sha256 = sha256_file(binary)
     calibration_command = taskset_prefix + [

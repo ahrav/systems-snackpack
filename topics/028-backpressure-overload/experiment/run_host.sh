@@ -48,7 +48,7 @@ write_source_manifest() {
   local destination=$1
   (
     cd "$repository_root"
-    "${git_path:-git}" ls-files -z | LC_ALL=C sort -z | xargs -0 sha256sum --
+    "${git_path:-git}" ls-files -z | LC_ALL=C sort -z | xargs -0 "${sha256sum_path:-sha256sum}" --
   ) > "$destination"
 }
 
@@ -68,8 +68,8 @@ seal_evidence() {
     cd "$output_directory"
     find . -type f ! -path './evidence.sha256' -print0 \
       | LC_ALL=C sort -z \
-      | xargs -0 sha256sum > evidence.sha256
-    sha256sum --check --quiet evidence.sha256
+      | xargs -0 "${sha256sum_path:-sha256sum}" > evidence.sha256
+    "${sha256sum_path:-sha256sum}" --check --quiet evidence.sha256
   )
 }
 
@@ -174,6 +174,14 @@ git_path=$(readlink -f "$git_path")
 } > "$output_directory/git-provenance.txt"
 export GIT_NO_REPLACE_OBJECTS=1
 
+# A PATH wrapper can hash bytes different from the retained files.
+sha256sum_path=$(command -v sha256sum)
+sha256sum_path=$(readlink -f "$sha256sum_path")
+printf 'sha256sum_path=%s\nsha256sum_resolved_path=%s\n' \
+  "$(command -v sha256sum)" "$sha256sum_path" \
+  > "$output_directory/checksum-provenance.txt"
+"$sha256sum_path" --version | sed -n 1p >> "$output_directory/checksum-provenance.txt"
+
 # A repository subdirectory would scope git ls-files and the output-directory
 # guard to a prefix, leaving the exact-source evidence incomplete.
 repository_toplevel=$("$git_path" -C "$repository_root" rev-parse --show-toplevel)
@@ -200,13 +208,13 @@ write_source_manifest "$output_directory/source-files.before.sha256"
 "$git_path" ls-tree -r --full-tree "$source_commit" > "$output_directory/source-tree.txt"
 (
   cd "$output_directory"
-  sha256sum source-tree.txt > source-tree.sha256
+  "$sha256sum_path" source-tree.txt > source-tree.sha256
 )
 "$git_path" archive --format=tar "$source_commit" | gzip -n -9 > "$output_directory/source.tar.gz"
 (
   cd "$output_directory"
-  sha256sum source.tar.gz > source-archive.sha256
-  sha256sum --check --quiet source-tree.sha256 source-archive.sha256
+  "$sha256sum_path" source.tar.gz > source-archive.sha256
+  "$sha256sum_path" --check --quiet source-tree.sha256 source-archive.sha256
 )
 
 scratch_parent=${TMPDIR:-/tmp}
@@ -231,9 +239,9 @@ environment_candidates=(
   CARGO_ENCODED_RUSTFLAGS CARGO_HOME CARGO_INCREMENTAL CARGO_MAKEFLAGS
   CARGO_NET_OFFLINE CARGO_TARGET_DIR RUSTC RUSTC_BOOTSTRAP RUSTC_LOG
   RUSTC_WRAPPER RUSTC_WORKSPACE_WRAPPER RUSTDOC RUSTDOCFLAGS RUSTFLAGS
-  RUSTUP_TOOLCHAIN PYTHONHASHSEED PYTHONHOME PYTHONINSPECT PYTHONIOENCODING
-  PYTHONMALLOC PYTHONOPTIMIZE PYTHONPATH PYTHONPYCACHEPREFIX PYTHONSAFEPATH
-  PYTHONSTARTUP PYTHONUTF8 PYTHONWARNINGS VIRTUAL_ENV
+  RUSTUP_HOME RUSTUP_TOOLCHAIN PYTHONHASHSEED PYTHONHOME PYTHONINSPECT
+  PYTHONIOENCODING PYTHONMALLOC PYTHONOPTIMIZE PYTHONPATH PYTHONPYCACHEPREFIX
+  PYTHONSAFEPATH PYTHONSTARTUP PYTHONUTF8 PYTHONWARNINGS VIRTUAL_ENV
 )
 while IFS= read -r environment_name; do
   case "$environment_name" in
@@ -403,8 +411,8 @@ cp --preserve=mode,timestamps -- "$built_binary" "$retained_binary"
 cmp --silent "$built_binary" "$retained_binary"
 (
   cd "$output_directory"
-  sha256sum artifacts/overload-probe > binary.sha256
-  sha256sum --check --quiet binary.sha256
+  "$sha256sum_path" artifacts/overload-probe > binary.sha256
+  "$sha256sum_path" --check --quiet binary.sha256
 )
 {
   file "$retained_binary"
@@ -427,6 +435,7 @@ gzip -n -9 "$output_directory/codegen/final-binary.txt"
   > "$output_directory/gates/self-check.log" 2>&1
 "$python3_path" -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
   "$topic/experiment/run_processes.py" \
+  --taskset "$taskset_path" \
   "$retained_binary" "$output_directory/processes" "$cpu_list" \
   > "$output_directory/process-driver.log" 2>&1
 "$python3_path" -I -S -X "pycache_prefix=$scratch_directory/python-cache" \
@@ -437,7 +446,7 @@ gzip -n -9 "$output_directory/codegen/final-binary.txt"
   > "$output_directory/receipt-validation.txt"
 (
   cd "$output_directory/processes"
-  sha256sum --check --quiet settings.sha256
+  "$sha256sum_path" --check --quiet settings.sha256
 )
 {
   printf 'Measured: release-through-all-settled-rendezvous burst_ns, including end-barrier release overhead, for this retained host, source, binary, settings, CPU set, and run window.\n'
