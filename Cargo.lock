@@ -11,6 +11,10 @@ name = "allocator-internals-fragmentation"
 version = "0.1.0"
 
 [[package]]
+name = "backpressure-overload"
+version = "0.1.0"
+
+[[package]]
 name = "compiler-optimization-boundaries"
 version = "0.1.0"
 
