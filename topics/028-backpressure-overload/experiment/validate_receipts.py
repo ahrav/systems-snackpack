@@ -79,6 +79,30 @@ def require(condition: bool, message: str) -> None:
         raise SystemExit(message)
 
 
+def as_int(record: Any, field: str) -> int:
+    """Convert one receipt field to an integer, stopping on malformed input."""
+    try:
+        return int(record[field])
+    except (KeyError, TypeError, ValueError) as error:
+        raise SystemExit(f"malformed receipt field {field!r}: {error}") from error
+
+
+def load_json(path: Path) -> Any:
+    """Load one retained JSON document, stopping on malformed input."""
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        raise SystemExit(f"unreadable retained document {path.name}: {error}") from error
+
+
+def read_receipt_text(path: Path) -> str:
+    """Read one retained text receipt, stopping on a missing file."""
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError as error:
+        raise SystemExit(f"unreadable retained receipt {path.name}: {error}") from error
+
+
 def read_csv(path: Path, expected_fields: tuple[str, ...]) -> list[dict[str, str]]:
     """Load one CSV and require its exact field order."""
     with path.open(newline="", encoding="utf-8") as handle:
@@ -158,7 +182,7 @@ def modeled_counts(
 ) -> dict[str, int]:
     """Return the independent closed-form count model."""
     admitted = min(callers, waiter_cap)
-    flights = admitted if treatment == "naive" else int(admitted != 0)
+    flights = admitted if treatment == "naive" else (1 if admitted != 0 else 0)
     attempts_per_flight = min(MAX_ATTEMPTS, retry_tokens + 1, 3)
     succeeds = attempts_per_flight == 3
     return {
@@ -195,24 +219,24 @@ def validate_process_receipts(
     logical = read_csv(logical_path, LOGICAL_FIELDS)
     attempts = read_csv(attempt_path, ATTEMPT_FIELDS)
 
-    callers = int(summary["callers"])
-    waiter_cap = int(summary["waiter_cap"])
-    origin_capacity = int(summary["origin_capacity"])
-    max_attempts = int(summary["max_attempts"])
-    retry_tokens = int(summary["retry_tokens"])
-    key_digest = int(summary["key_digest"])
-    seed = int(summary["seed"])
-    work_iters = int(summary["work_iters"])
+    callers = as_int(summary, "callers")
+    waiter_cap = as_int(summary, "waiter_cap")
+    origin_capacity = as_int(summary, "origin_capacity")
+    max_attempts = as_int(summary, "max_attempts")
+    retry_tokens = as_int(summary, "retry_tokens")
+    key_digest = as_int(summary, "key_digest")
+    seed = as_int(summary, "seed")
+    work_iters = as_int(summary, "work_iters")
     treatment = summary["treatment"]
     require(len(logical) == callers, "logical receipt population differs from callers")
-    logical_ids = [int(row["logical_id"]) for row in logical]
+    logical_ids = [as_int(row, "logical_id") for row in logical]
     require(logical_ids == list(range(callers)), "logical IDs are not unique contiguous IDs")
     require(max_attempts == MAX_ATTEMPTS, "maximum attempts changed")
     require(origin_capacity == ORIGIN_CAPACITY, "origin capacity changed")
     require(key_digest == KEY_DIGEST, "one-key identity changed")
-    require(int(summary["work_iters"]) > 0, "work iterations are not positive")
-    require(int(summary["burst_ns"]) > 0, "burst duration is not positive")
-    require(int(summary["setup_ns"]) > 0, "setup duration is not positive")
+    require(as_int(summary, "work_iters") > 0, "work iterations are not positive")
+    require(as_int(summary, "burst_ns") > 0, "burst duration is not positive")
+    require(as_int(summary, "setup_ns") > 0, "setup duration is not positive")
 
     identity_fields = ("pid", "phase", "block", "period", "label", "treatment")
     for row in logical:
@@ -225,18 +249,18 @@ def validate_process_receipts(
 
     attempts_by_flight: dict[int, list[dict[str, str]]] = defaultdict(list)
     for row in attempts:
-        flight_id = int(row["flight_id"])
+        flight_id = as_int(row, "flight_id")
         attempts_by_flight[flight_id].append(row)
-        queued_ns = int(row["queued_ns"])
-        start_ns = int(row["start_ns"])
-        end_ns = int(row["end_ns"])
+        queued_ns = as_int(row, "queued_ns")
+        start_ns = as_int(row, "start_ns")
+        end_ns = as_int(row, "end_ns")
         require(0 <= queued_ns <= start_ns < end_ns, "attempt timestamps are not strictly ordered")
-        active = int(row["active_at_start"])
+        active = as_int(row, "active_at_start")
         require(1 <= active <= origin_capacity, "origin active count exceeds permit cap")
         require(row["outcome"] in ("transient", "success"), "unknown attempt outcome")
         require(
-            int(row["work_checksum"])
-            == origin_work(work_iters, work_seed(seed, flight_id, int(row["attempt_no"]))),
+            as_int(row, "work_checksum")
+            == origin_work(work_iters, work_seed(seed, flight_id, as_int(row, "attempt_no"))),
             "work checksum does not match the calibrated origin loop",
         )
 
@@ -245,7 +269,7 @@ def validate_process_receipts(
     for _, delta in sorted(
         event
         for row in attempts
-        for event in ((int(row["start_ns"]), 1), (int(row["end_ns"]), -1))
+        for event in ((as_int(row, "start_ns"), 1), (as_int(row, "end_ns"), -1))
     ):
         active_attempts += delta
         require(
@@ -253,9 +277,16 @@ def validate_process_receipts(
             "physical attempt intervals exceed the origin cap",
         )
 
+    if attempts:
+        first_queue_ns = min(as_int(row, "queued_ns") for row in attempts)
+        require(
+            max(as_int(row, "admission_ns") for row in logical) <= first_queue_ns,
+            "physical attempts began before every admission decision",
+        )
+
     for flight_id, flight_attempts in attempts_by_flight.items():
-        flight_attempts.sort(key=lambda row: int(row["attempt_no"]))
-        numbers = [int(row["attempt_no"]) for row in flight_attempts]
+        flight_attempts.sort(key=lambda row: as_int(row, "attempt_no"))
+        numbers = [as_int(row, "attempt_no") for row in flight_attempts]
         require(
             numbers == list(range(1, len(flight_attempts) + 1)),
             f"flight {flight_id} does not contain an exact attempt prefix",
@@ -263,10 +294,10 @@ def validate_process_receipts(
         require(len(numbers) <= max_attempts, "flight exceeded maximum attempts")
         previous_end = -1
         for row in flight_attempts:
-            attempt_no = int(row["attempt_no"])
-            charged = int(row["retry_token_charged"])
-            tokens_after = int(row["retry_tokens_after"])
-            require(charged == int(attempt_no > 1), "retry-token charge flag is wrong")
+            attempt_no = as_int(row, "attempt_no")
+            charged = as_int(row, "retry_token_charged")
+            tokens_after = as_int(row, "retry_tokens_after")
+            require(charged == (1 if attempt_no > 1 else 0), "retry-token charge flag is wrong")
             require(
                 tokens_after == retry_tokens - max(0, attempt_no - 1),
                 "retry-token balance is wrong",
@@ -274,8 +305,8 @@ def validate_process_receipts(
             require(tokens_after >= 0, "retry-token balance is negative")
             expected_outcome = "success" if attempt_no == 3 else "transient"
             require(row["outcome"] == expected_outcome, "synthetic outcome prefix changed")
-            require(int(row["queued_ns"]) >= previous_end, "one flight's attempts overlap")
-            previous_end = int(row["end_ns"])
+            require(as_int(row, "queued_ns") >= previous_end, "one flight's attempts overlap")
+            previous_end = as_int(row, "end_ns")
 
     success_digest = completed_digest(key_digest)
     error_digest = exhausted_digest(key_digest)
@@ -283,10 +314,10 @@ def validate_process_receipts(
     roles = defaultdict(int)
     checksum = 0
     for row in logical:
-        admission_ns = int(row["admission_ns"])
-        settled_ns = int(row["settled_ns"])
+        admission_ns = as_int(row, "admission_ns")
+        settled_ns = as_int(row, "settled_ns")
         require(0 <= admission_ns <= settled_ns, "logical timestamps are not monotone")
-        require(settled_ns <= int(summary["burst_ns"]), "logical settled after burst end")
+        require(settled_ns <= as_int(summary, "burst_ns"), "logical settled after burst end")
         status = row["status"]
         role = row["role"]
         require(status in ("completed", "retry_exhausted", "shed"), "unknown logical status")
@@ -298,15 +329,15 @@ def validate_process_receipts(
             require(not row["flight_id"] and not row["result_digest"], "shed caller has flight work")
             continue
         require(bool(row["flight_id"]), "admitted caller has no flight")
-        flight_id = int(row["flight_id"])
+        flight_id = as_int(row, "flight_id")
         require(flight_id in attempts_by_flight, "logical caller refers to missing flight")
-        flight_end = max(int(attempt["end_ns"]) for attempt in attempts_by_flight[flight_id])
+        flight_end = max(as_int(attempt, "end_ns") for attempt in attempts_by_flight[flight_id])
         require(
             settled_ns >= flight_end,
             "logical caller settled before its flight's final attempt ended",
         )
-        digest = int(row["result_digest"])
-        checksum = (checksum + mix64(digest ^ int(row["logical_id"]))) & MASK64
+        digest = as_int(row, "result_digest")
+        checksum = (checksum + mix64(digest ^ as_int(row, "logical_id"))) & MASK64
         outcomes = [attempt["outcome"] for attempt in attempts_by_flight[flight_id]]
         if status == "completed":
             require(outcomes.count("success") == 1, "completed caller lacks one successful flight")
@@ -319,12 +350,12 @@ def validate_process_receipts(
         require(roles["leader"] == roles["follower"] == 0, "naive role taxonomy changed")
         require(roles["independent"] == callers - statuses["shed"], "naive independent count differs")
         non_shed_flights = {
-            int(row["flight_id"]) for row in logical if row["status"] != "shed"
+            as_int(row, "flight_id") for row in logical if row["status"] != "shed"
         }
         require(len(non_shed_flights) == callers - statuses["shed"], "naive callers share a flight")
     else:
         require(roles["independent"] == 0, "controlled caller is marked independent")
-        require(roles["leader"] == int(callers > statuses["shed"]), "controlled leader count differs")
+        require(roles["leader"] == (1 if callers > statuses["shed"] else 0), "controlled leader count differs")
         require(
             roles["follower"] == callers - statuses["shed"] - roles["leader"],
             "controlled follower count differs",
@@ -338,11 +369,11 @@ def validate_process_receipts(
         "followers": roles["follower"],
         "flights": len(attempts_by_flight),
         "origin_attempts": len(attempts),
-        "retry_attempts": sum(int(row["retry_token_charged"]) for row in attempts),
+        "retry_attempts": sum(as_int(row, "retry_token_charged") for row in attempts),
         "transient_attempts": sum(row["outcome"] == "transient" for row in attempts),
         "successful_attempts": sum(row["outcome"] == "success" for row in attempts),
         "peak_origin_active": max(
-            (int(row["active_at_start"]) for row in attempts), default=0
+            (as_int(row, "active_at_start") for row in attempts), default=0
         ),
         "peak_admitted": callers - statuses["shed"],
         "result_checksum": checksum,
@@ -361,7 +392,7 @@ def validate_process_receipts(
         "peak_admitted",
         "result_checksum",
     ):
-        require(int(summary[field]) == recomputed[field], f"summary {field} differs from raw")
+        require(as_int(summary, field) == recomputed[field], f"summary {field} differs from raw")
     require(recomputed["peak_origin_active"] <= origin_capacity, "origin peak exceeds capacity")
     if treatment == "controlled":
         require(recomputed["peak_admitted"] <= waiter_cap, "controlled admitted peak exceeds W")
@@ -369,8 +400,8 @@ def validate_process_receipts(
     for field, value in expected.items():
         require(recomputed[field] == value, f"runtime {field} differs from closed-form model")
     require(
-        max((int(row["end_ns"]) for row in attempts), default=0)
-        <= int(summary["burst_ns"]),
+        max((as_int(row, "end_ns") for row in attempts), default=0)
+        <= as_int(summary, "burst_ns"),
         "physical attempt ended after burst timing",
     )
     return recomputed
@@ -383,7 +414,7 @@ def main() -> None:
     args = parser.parse_args()
     directory = args.process_directory
 
-    schedule_document = json.loads((directory / "schedule.json").read_text(encoding="utf-8"))
+    schedule_document = load_json(directory / "schedule.json")
     expected_assignments = list(assignments())
     require(schedule_document["main_templates"] == list(MAIN_TEMPLATES), "main templates changed")
     require(schedule_document["aa_templates"] == list(AA_TEMPLATES), "A/A templates changed")
@@ -393,18 +424,27 @@ def main() -> None:
     binary_hash = schedule_document["binary_sha256"]
     settings_hash = schedule_document["settings_sha256"]
     require(canonical_hash(schedule_document["settings"]) == settings_hash, "settings hash differs")
-    settings_bytes = (directory / "settings.json").read_bytes()
+    try:
+        settings_bytes = (directory / "settings.json").read_bytes()
+    except OSError as error:
+        raise SystemExit(f"unreadable retained document settings.json: {error}") from error
     require(hashlib.sha256(settings_bytes).hexdigest() == settings_hash, "settings file hash differs")
     require(
-        (directory / "settings.sha256").read_text(encoding="utf-8").strip()
+        read_receipt_text(directory / "settings.sha256").strip()
         == f"{settings_hash}  settings.json",
         "settings hash receipt differs",
     )
     require(
-        (directory / "binary.sha256").read_text(encoding="utf-8").split()[0]
+        read_receipt_text(directory / "binary.sha256").split()[0]
         == binary_hash,
         "binary hash receipt differs",
     )
+    parent_binary_receipt = directory.parent / "binary.sha256"
+    if parent_binary_receipt.is_file():
+        require(
+            read_receipt_text(parent_binary_receipt).split()[0] == binary_hash,
+            "process binary differs from the retained host artifact",
+        )
     require(
         schedule_document["settings"]
         == {
@@ -419,7 +459,7 @@ def main() -> None:
         },
             "timing settings changed",
         )
-    schedule_work_iters = int(schedule_document["settings"]["work_iters"])
+    schedule_work_iters = as_int(schedule_document["settings"], "work_iters")
     require(schedule_work_iters > 0, "sealed work iterations are not positive")
 
     calibration = read_csv(
@@ -435,12 +475,12 @@ def main() -> None:
     )
     require(len(calibration) == 1, "calibration must contain one row")
     calibration_row = calibration[0]
-    require(int(calibration_row["target_attempt_ns"]) == TARGET_ATTEMPT_NS, "target changed")
+    require(as_int(calibration_row, "target_attempt_ns") == TARGET_ATTEMPT_NS, "target changed")
     require(
-        int(calibration_row["work_iters"]) == schedule_work_iters,
+        as_int(calibration_row, "work_iters") == schedule_work_iters,
         "calibration iterations differ from the sealed settings",
     )
-    require(int(calibration_row["calibrated_mean_ns"]) > 0, "invalid calibration duration")
+    require(as_int(calibration_row, "calibrated_mean_ns") > 0, "invalid calibration duration")
     require(calibration_row["binary_sha256"] == binary_hash, "calibration binary differs")
     require(calibration_row["settings_sha256"] == settings_hash, "calibration settings differ")
 
@@ -457,24 +497,24 @@ def main() -> None:
         for field in ("phase", "label", "treatment", "template"):
             require(summary[field] == str(expected[field]), f"summary period {position} wrong {field}")
         for field in ("block", "period", "seed"):
-            require(int(summary[field]) == int(expected[field]), f"summary period {position} wrong {field}")
+            require(as_int(summary, field) == as_int(expected, field), f"summary period {position} wrong {field}")
         require(summary["binary_sha256"] == binary_hash, "summary binary hash differs")
         require(summary["settings_sha256"] == settings_hash, "summary settings hash differs")
-        require(int(summary["callers"]) == CALLERS, "scheduled callers changed")
-        require(int(summary["waiter_cap"]) == WAITER_CAP, "scheduled waiter cap changed")
-        require(int(summary["retry_tokens"]) == RETRY_TOKENS, "scheduled retry budget changed")
+        require(as_int(summary, "callers") == CALLERS, "scheduled callers changed")
+        require(as_int(summary, "waiter_cap") == WAITER_CAP, "scheduled waiter cap changed")
+        require(as_int(summary, "retry_tokens") == RETRY_TOKENS, "scheduled retry budget changed")
         require(
-            int(summary["work_iters"]) == schedule_work_iters,
+            as_int(summary, "work_iters") == schedule_work_iters,
             "scheduled work iterations differ from the sealed settings",
         )
         require(summary["pid"] not in seen_pids, "scheduled process PID was reused")
         seen_pids.add(summary["pid"])
         require(
-            int(summary["process_started_utc_ns"])
-            <= int(summary["process_ended_utc_ns"]),
+            as_int(summary, "process_started_utc_ns")
+            <= as_int(summary, "process_ended_utc_ns"),
             "process timestamps are not monotone",
         )
-        require(int(summary["process_wall_ns"]) > 0, "process wall time is not positive")
+        require(as_int(summary, "process_wall_ns") > 0, "process wall time is not positive")
         validate_process_receipts(directory, summary)
 
     controls = read_csv(directory / "semantic-controls.csv", CONTROL_SUMMARY_FIELDS)
@@ -485,7 +525,7 @@ def main() -> None:
         for field in ("phase", "label", "treatment"):
             require(summary[field] == str(spec[field]), f"semantic control wrong {field}")
         for field in ("block", "period", "seed", "callers", "waiter_cap", "retry_tokens"):
-            require(int(summary[field]) == int(spec[field]), f"semantic control wrong {field}")
+            require(as_int(summary, field) == as_int(spec, field), f"semantic control wrong {field}")
         require(summary["binary_sha256"] == binary_hash, "semantic control binary differs")
         require(
             summary["control_settings_sha256"] == spec["control_settings_sha256"],
@@ -502,7 +542,7 @@ def main() -> None:
             "semantic control settings hash is invalid",
         )
         require(
-            int(summary["work_iters"]) == schedule_work_iters,
+            as_int(summary, "work_iters") == schedule_work_iters,
             "semantic control work iterations differ from the sealed settings",
         )
         require(summary["pid"] not in seen_pids, "semantic control PID was reused")
@@ -512,11 +552,14 @@ def main() -> None:
             require(recomputed[field] == value, f"semantic control {spec['control_id']} wrong {field}")
 
     require(len(seen_pids) == 50, "fresh process population is not 50 unique PIDs")
-    ledger = [
-        json.loads(line)
-        for line in (directory / "subprocess-attempts.jsonl").read_text(encoding="utf-8").splitlines()
-        if line
-    ]
+    ledger = []
+    for line in read_receipt_text(directory / "subprocess-attempts.jsonl").splitlines():
+        if not line:
+            continue
+        try:
+            ledger.append(json.loads(line))
+        except ValueError as error:
+            raise SystemExit(f"malformed subprocess ledger line: {error}") from error
     calibration_attempts = [row for row in ledger if row["stage"] == "calibration"]
     period_attempts = [row for row in ledger if row["stage"] == "period"]
     control_attempts = [row for row in ledger if row["stage"] == "semantic-control"]
@@ -548,6 +591,14 @@ def main() -> None:
         require(row["elapsed_ns"] > 0 and row["timeout_seconds"] > 0, "ledger timing invalid")
         require(isinstance(row["command"], list) and row["command"], "ledger command missing")
         require("stdout" in row and "stderr" in row, "ledger capture missing")
+    sealed_cpu_list = schedule_document["cpu_list"]
+    if sealed_cpu_list:
+        pinned_taskset = ledger[0]["command"][0]
+        for row in ledger:
+            require(
+                row["command"][:3] == [pinned_taskset, "--cpu-list", sealed_cpu_list],
+                "ledger command is not pinned to the sealed CPU list",
+            )
     calibration_values = calibration_attempts[0]["stdout"].strip().split(",")
     require(len(calibration_values) == 3, "calibration ledger stdout is malformed")
     require(
@@ -565,13 +616,21 @@ def main() -> None:
         attempted_summary = parse_summary(attempt["stdout"].strip())
         for field in PROBE_SUMMARY_FIELDS:
             require(attempted_summary[field] == summary[field], f"ledger stdout differs at {field}")
+        require(
+            as_int(summary, "setup_ns") + as_int(summary, "burst_ns") <= attempt["elapsed_ns"],
+            "summary durations exceed the subprocess elapsed time",
+        )
     for spec, attempt, summary in zip(control_specs, control_attempts, controls):
         require(attempt["control_id"] == spec["control_id"], "control ledger identity differs")
         attempted_summary = parse_summary(attempt["stdout"].strip())
         for field in PROBE_SUMMARY_FIELDS:
             require(attempted_summary[field] == summary[field], f"control stdout differs at {field}")
+        require(
+            as_int(summary, "setup_ns") + as_int(summary, "burst_ns") <= attempt["elapsed_ns"],
+            "control durations exceed the subprocess elapsed time",
+        )
 
-    status = json.loads((directory / "run-status.json").read_text(encoding="utf-8"))
+    status = load_json(directory / "run-status.json")
     require(status["status"] == "complete", "run status is not complete")
     require(status["completed_periods"] == 48, "run status period count differs")
     require(status["completed_semantic_controls"] == 2, "run status control count differs")

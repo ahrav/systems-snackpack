@@ -152,6 +152,53 @@ if [[ $output_directory == "$repository_root" || $output_directory == "$reposito
 fi
 mkdir -p "$output_directory"/{artifacts,codegen,gates}
 
+# Loader interposition and toolchain overrides are recorded and cleared
+# before the first source receipt; a shim active during archive or checksum
+# generation can forge the receipts the bundle vouches for.
+environment_candidates=(
+  AR ARFLAGS AS CC CFLAGS CPP CPPFLAGS CXX CXXFLAGS LD LDFLAGS LIBRARY_PATH
+  CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH DYLD_LIBRARY_PATH GLIBC_TUNABLES
+  LD_AUDIT LD_LIBRARY_PATH LD_PRELOAD
+  MALLOC_ARENA_MAX MALLOC_ARENA_TEST MALLOC_CHECK_ MALLOC_MMAP_MAX_
+  MALLOC_MMAP_THRESHOLD_ MALLOC_PERTURB_ MALLOC_TOP_PAD_ MALLOC_TRIM_THRESHOLD_
+  LANG LANGUAGE LC_ALL LC_CTYPE MAKEFLAGS NM NUM_JOBS OBJCOPY OBJDUMP
+  PKG_CONFIG PKG_CONFIG_PATH RANLIB SOURCE_DATE_EPOCH STRIP TZ ZERO_AR_DATE
+  CARGO CARGO_BUILD_JOBS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET
+  CARGO_ENCODED_RUSTFLAGS CARGO_HOME CARGO_INCREMENTAL CARGO_MAKEFLAGS
+  CARGO_NET_OFFLINE CARGO_TARGET_DIR RUSTC RUSTC_BOOTSTRAP RUSTC_LOG
+  RUSTC_WRAPPER RUSTC_WORKSPACE_WRAPPER RUSTDOC RUSTDOCFLAGS RUSTFLAGS
+  RUSTUP_HOME RUSTUP_TOOLCHAIN PYTHONHASHSEED PYTHONHOME PYTHONINSPECT
+  PYTHONIOENCODING PYTHONMALLOC PYTHONOPTIMIZE PYTHONPATH PYTHONPYCACHEPREFIX
+  PYTHONSAFEPATH PYTHONSTARTUP PYTHONUTF8 PYTHONWARNINGS VIRTUAL_ENV
+)
+while IFS= read -r environment_name; do
+  case "$environment_name" in
+    CARGO_BUILD_*|CARGO_PROFILE_*|CARGO_TARGET_*)
+      environment_candidates+=("$environment_name")
+      ;;
+  esac
+done < <(compgen -e)
+mapfile -t swept_environment_names < <(
+  printf '%s\n' "${environment_candidates[@]}" | LC_ALL=C sort -u
+)
+{
+  for environment_name in "${swept_environment_names[@]}"; do
+    if [[ -v $environment_name ]]; then
+      printf '%s=%q\n' "$environment_name" "${!environment_name}"
+    else
+      printf '%s=<unset>\n' "$environment_name"
+    fi
+  done
+} > "$output_directory/environment.swept.txt"
+for environment_name in "${swept_environment_names[@]}"; do
+  unset "$environment_name"
+done
+
+# glibc preloads /etc/ld.so.preload entries even with LD_PRELOAD unset.
+if [[ -s /etc/ld.so.preload ]]; then
+  fail 'non-empty /etc/ld.so.preload would interpose unrecorded libraries'
+fi
+
 # GIT_* variables (GIT_DIR, GIT_WORK_TREE, object/index/graft/replace
 # redirection) can repoint every identity check below at a different tree, and
 # a PATH wrapper can misreport source identity. This block records Git's PATH
@@ -204,6 +251,18 @@ fi
 if [[ -s $output_directory/source-status.before.txt ]]; then
   fail 'exact-source measurement requires a clean worktree'
 fi
+# git status misses files flagged assume-unchanged or skip-worktree, which
+# would let hidden local edits pass the clean-tree gate.
+if "$git_path" ls-files -v | grep -Eq '^(S|[a-z]) '; then
+  fail 'exact-source measurement refuses assume-unchanged or skip-worktree files'
+fi
+# git status reports a clean tree even when gitignored files exist, but the
+# build can consume such a file during compilation.
+"$git_path" ls-files --others --ignored --exclude-standard -- "$topic" \
+  > "$output_directory/source-ignored.before.txt"
+if [[ -s $output_directory/source-ignored.before.txt ]]; then
+  fail 'exact-source measurement refuses gitignored files under the topic directory'
+fi
 write_source_manifest "$output_directory/source-files.before.sha256"
 "$git_path" ls-tree -r --full-tree "$source_commit" > "$output_directory/source-tree.txt"
 (
@@ -227,44 +286,6 @@ fi
 touch "$scratch_directory/.topic28-scratch"
 mkdir -p "$scratch_directory"/{cargo-home,target,python-cache}
 
-environment_candidates=(
-  AR ARFLAGS AS CC CFLAGS CPP CPPFLAGS CXX CXXFLAGS LD LDFLAGS LIBRARY_PATH
-  CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH DYLD_LIBRARY_PATH GLIBC_TUNABLES
-  LD_AUDIT LD_LIBRARY_PATH LD_PRELOAD
-  MALLOC_ARENA_MAX MALLOC_ARENA_TEST MALLOC_CHECK_ MALLOC_MMAP_MAX_
-  MALLOC_MMAP_THRESHOLD_ MALLOC_PERTURB_ MALLOC_TOP_PAD_ MALLOC_TRIM_THRESHOLD_
-  LANG LANGUAGE LC_ALL LC_CTYPE MAKEFLAGS NM NUM_JOBS OBJCOPY OBJDUMP
-  PKG_CONFIG PKG_CONFIG_PATH RANLIB SOURCE_DATE_EPOCH STRIP TZ ZERO_AR_DATE
-  CARGO CARGO_BUILD_JOBS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET
-  CARGO_ENCODED_RUSTFLAGS CARGO_HOME CARGO_INCREMENTAL CARGO_MAKEFLAGS
-  CARGO_NET_OFFLINE CARGO_TARGET_DIR RUSTC RUSTC_BOOTSTRAP RUSTC_LOG
-  RUSTC_WRAPPER RUSTC_WORKSPACE_WRAPPER RUSTDOC RUSTDOCFLAGS RUSTFLAGS
-  RUSTUP_HOME RUSTUP_TOOLCHAIN PYTHONHASHSEED PYTHONHOME PYTHONINSPECT
-  PYTHONIOENCODING PYTHONMALLOC PYTHONOPTIMIZE PYTHONPATH PYTHONPYCACHEPREFIX
-  PYTHONSAFEPATH PYTHONSTARTUP PYTHONUTF8 PYTHONWARNINGS VIRTUAL_ENV
-)
-while IFS= read -r environment_name; do
-  case "$environment_name" in
-    CARGO_BUILD_*|CARGO_PROFILE_*|CARGO_TARGET_*)
-      environment_candidates+=("$environment_name")
-      ;;
-  esac
-done < <(compgen -e)
-mapfile -t swept_environment_names < <(
-  printf '%s\n' "${environment_candidates[@]}" | LC_ALL=C sort -u
-)
-{
-  for environment_name in "${swept_environment_names[@]}"; do
-    if [[ -v $environment_name ]]; then
-      printf '%s=%q\n' "$environment_name" "${!environment_name}"
-    else
-      printf '%s=<unset>\n' "$environment_name"
-    fi
-  done
-} > "$output_directory/environment.swept.txt"
-for environment_name in "${swept_environment_names[@]}"; do
-  unset "$environment_name"
-done
 export CARGO_HOME="$scratch_directory/cargo-home"
 export CARGO_INCREMENTAL=0
 export CARGO_NET_OFFLINE=true
@@ -377,6 +398,20 @@ python3_path=$(command -v python3)
   > "$output_directory/rustc-native-cfg.txt"
 "$rustc_path" -C target-cpu=native --print target-features \
   > "$output_directory/rustc-native-target-features.txt"
+
+# Cargo merges ancestor .cargo configs that the source archive cannot record.
+config_scan_directory=$repository_root
+while :; do
+  for cargo_config in "$config_scan_directory/.cargo/config.toml" "$config_scan_directory/.cargo/config"; do
+    if [[ -e $cargo_config ]]; then
+      fail "unrecorded Cargo config would alter builds: $cargo_config"
+    fi
+  done
+  if [[ $config_scan_directory == / ]]; then
+    break
+  fi
+  config_scan_directory=$(dirname "$config_scan_directory")
+done
 
 "$git_path" diff --check > "$output_directory/gates/git-diff-check.log" 2>&1
 "$cargo_path" fmt --all -- --check \
