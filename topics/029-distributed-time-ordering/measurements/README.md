@@ -26,3 +26,10 @@ not compare processor architectures or establish live clock accuracy.
 
 Raw logs are retained as one compressed archive per host. The outer
 `SHA256SUMS` file verifies those archives after retrieval.
+
+## Promoted result
+
+- [Arm exact-source record](b9bb526-arm.md)
+- [`xxl` exact-source record](b9bb526-xxl.md)
+- [Two-host comparison](b9bb526-comparison.md)
+- [Raw archive hashes](raw/b9bb526/SHA256SUMS)
