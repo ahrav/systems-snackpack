@@ -230,7 +230,7 @@ def validate_process_receipts(
         queued_ns = int(row["queued_ns"])
         start_ns = int(row["start_ns"])
         end_ns = int(row["end_ns"])
-        require(0 <= queued_ns <= start_ns <= end_ns, "attempt timestamps are not monotone")
+        require(0 <= queued_ns <= start_ns < end_ns, "attempt timestamps are not strictly ordered")
         active = int(row["active_at_start"])
         require(1 <= active <= origin_capacity, "origin active count exceeds permit cap")
         require(row["outcome"] in ("transient", "success"), "unknown attempt outcome")
@@ -300,6 +300,11 @@ def validate_process_receipts(
         require(bool(row["flight_id"]), "admitted caller has no flight")
         flight_id = int(row["flight_id"])
         require(flight_id in attempts_by_flight, "logical caller refers to missing flight")
+        flight_end = max(int(attempt["end_ns"]) for attempt in attempts_by_flight[flight_id])
+        require(
+            settled_ns >= flight_end,
+            "logical caller settled before its flight's final attempt ended",
+        )
         digest = int(row["result_digest"])
         checksum = (checksum + mix64(digest ^ int(row["logical_id"]))) & MASK64
         outcomes = [attempt["outcome"] for attempt in attempts_by_flight[flight_id]]
@@ -412,8 +417,10 @@ def main() -> None:
             "waiter_cap": WAITER_CAP,
             "work_iters": schedule_document["settings"]["work_iters"],
         },
-        "timing settings changed",
-    )
+            "timing settings changed",
+        )
+    schedule_work_iters = int(schedule_document["settings"]["work_iters"])
+    require(schedule_work_iters > 0, "sealed work iterations are not positive")
 
     calibration = read_csv(
         directory / "calibration.csv",
@@ -429,7 +436,10 @@ def main() -> None:
     require(len(calibration) == 1, "calibration must contain one row")
     calibration_row = calibration[0]
     require(int(calibration_row["target_attempt_ns"]) == TARGET_ATTEMPT_NS, "target changed")
-    require(int(calibration_row["work_iters"]) > 0, "invalid calibrated iterations")
+    require(
+        int(calibration_row["work_iters"]) == schedule_work_iters,
+        "calibration iterations differ from the sealed settings",
+    )
     require(int(calibration_row["calibrated_mean_ns"]) > 0, "invalid calibration duration")
     require(calibration_row["binary_sha256"] == binary_hash, "calibration binary differs")
     require(calibration_row["settings_sha256"] == settings_hash, "calibration settings differ")
@@ -453,6 +463,10 @@ def main() -> None:
         require(int(summary["callers"]) == CALLERS, "scheduled callers changed")
         require(int(summary["waiter_cap"]) == WAITER_CAP, "scheduled waiter cap changed")
         require(int(summary["retry_tokens"]) == RETRY_TOKENS, "scheduled retry budget changed")
+        require(
+            int(summary["work_iters"]) == schedule_work_iters,
+            "scheduled work iterations differ from the sealed settings",
+        )
         require(summary["pid"] not in seen_pids, "scheduled process PID was reused")
         seen_pids.add(summary["pid"])
         require(
@@ -487,6 +501,10 @@ def main() -> None:
             canonical_hash(control_settings) == spec["control_settings_sha256"],
             "semantic control settings hash is invalid",
         )
+        require(
+            int(summary["work_iters"]) == schedule_work_iters,
+            "semantic control work iterations differ from the sealed settings",
+        )
         require(summary["pid"] not in seen_pids, "semantic control PID was reused")
         seen_pids.add(summary["pid"])
         recomputed = validate_process_receipts(directory, summary)
@@ -509,6 +527,18 @@ def main() -> None:
         and len(ledger) == 51,
         "subprocess ledger implies a missing or replacement attempt",
     )
+    require(
+        [row["stage"] for row in ledger]
+        == ["calibration"] + ["period"] * 48 + ["semantic-control"] * 2,
+        "subprocess ledger stage order differs from the fixed schedule",
+    )
+    previous_ended_utc_ns = 0
+    for row in ledger:
+        require(
+            row["started_utc_ns"] >= previous_ended_utc_ns,
+            "subprocess windows overlap or run out of schedule order",
+        )
+        previous_ended_utc_ns = row["ended_utc_ns"]
     require(
         all(row["returncode"] == 0 and not row["timed_out"] for row in ledger),
         "subprocess ledger contains a failure or timeout",

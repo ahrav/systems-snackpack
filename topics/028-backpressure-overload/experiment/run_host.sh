@@ -341,22 +341,21 @@ current_clocksource=$(<"$clocksource_file")
 } > "$output_directory/host.txt"
 # A PATH wrapper around the build or analysis tools could substitute a
 # different binary while the source receipts stay internally consistent, so
-# resolve and invoke the same executables the receipts record.
+# pin the absolute PATH resolutions and record their symlink targets. The
+# rustup proxies dispatch on argv[0], so cargo/rustc keep their proxy names
+# rather than being collapsed through readlink.
 rustc_path=$(command -v rustc)
-rustc_path=$(readlink -f "$rustc_path")
 cargo_path=$(command -v cargo)
-cargo_path=$(readlink -f "$cargo_path")
 python3_path=$(command -v python3)
-python3_path=$(readlink -f "$python3_path")
 {
-  printf 'rustc_path=%s\n' "$(command -v rustc)"
-  printf 'rustc_resolved_path=%s\n' "$rustc_path"
+  printf 'rustc_path=%s\n' "$rustc_path"
+  printf 'rustc_resolved_path=%s\n' "$(readlink -f "$rustc_path")"
   "$rustc_path" -vV
-  printf 'cargo_path=%s\n' "$(command -v cargo)"
-  printf 'cargo_resolved_path=%s\n' "$cargo_path"
+  printf 'cargo_path=%s\n' "$cargo_path"
+  printf 'cargo_resolved_path=%s\n' "$(readlink -f "$cargo_path")"
   "$cargo_path" -Vv
-  printf 'python_path=%s\n' "$(command -v python3)"
-  printf 'python_resolved_path=%s\n' "$python3_path"
+  printf 'python_path=%s\n' "$python3_path"
+  printf 'python_resolved_path=%s\n' "$(readlink -f "$python3_path")"
   printf 'taskset_path=%s\n' "$(command -v taskset)"
   printf 'taskset_resolved_path=%s\n' "$taskset_path"
   "$taskset_path" --version
