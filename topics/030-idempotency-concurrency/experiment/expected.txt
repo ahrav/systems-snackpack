@@ -1,0 +1,8 @@
+concurrent same key: winner=OWNER duplicate=IN_PROGRESS
+lost reply: first=UNKNOWN retry=REPLAY resource=1 effects=1
+same key changed payload: PARAMETER_MISMATCH effects=1
+new key same payload: CREATED resource=2 effects=2
+expired owner: stale=FENCED current=CREATED resource=3 effects=3
+unsafe effect-before-receipt: effects=2 result=DUPLICATE
+unsafe receipt-before-effect: effects=0 result=FALSE_REPLAY
+invariants: PASS
