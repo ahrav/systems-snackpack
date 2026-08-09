@@ -48,6 +48,8 @@
 ## Artifact boundary
 
 The sources justify algorithm contracts and failure boundaries. They do not
-validate this implementation. Unit tests, fresh-process receipts, source and
-binary hashes, and two-host generated-code records validate the checked-in
-artifact within its declared scope.
+validate this implementation. Unit tests, fresh-process receipts, and source and
+binary hashes validate the checked-in artifact within its declared scope. The
+retained two-host generated-code records describe superseded commit `b9bb526`
+and a non-pinned toolchain (see `measurements/README.md`); they do not validate
+the current artifact until regenerated for the final exact source.

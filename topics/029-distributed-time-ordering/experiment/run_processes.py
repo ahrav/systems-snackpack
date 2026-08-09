@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -38,7 +39,11 @@ def main() -> int:
     output.mkdir(parents=True)
     expected_bytes = EXPECTED.encode()
     (output / "expected.txt").write_bytes(expected_bytes)
-    binary_digest = sha256_bytes(binary.read_bytes())
+    # A private copy prevents a concurrent Cargo rebuild from swapping the
+    # binary between hashing and spawning. commentlint: allow(JUDGE)
+    executed = output / "binary-under-test"
+    shutil.copy2(binary, executed)
+    binary_digest = sha256_bytes(executed.read_bytes())
     (output / "binary.sha256").write_text(
         f"{binary_digest}  {binary.name}\n", encoding="utf-8"
     )
@@ -49,7 +54,7 @@ def main() -> int:
         for run in range(1, RUNS + 1):
             try:
                 result = subprocess.run(
-                    [str(binary), "--self-check"],
+                    [str(executed), "--self-check"],
                     capture_output=True,
                     check=False,
                     timeout=10,
@@ -97,6 +102,7 @@ def main() -> int:
     (output / "summary.json").write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    executed.unlink()
     print(json.dumps(summary, sort_keys=True))
     return int(failures != 0)
 

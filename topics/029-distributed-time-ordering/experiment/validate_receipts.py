@@ -7,6 +7,7 @@ import hashlib
 import json
 import sys
 from pathlib import Path
+from typing import NoReturn
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -19,7 +20,7 @@ def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def fail(message: str) -> None:
+def fail(message: str) -> NoReturn:
     """Abort validation with one stable diagnostic."""
 
     raise ValueError(message)
@@ -39,11 +40,16 @@ def main() -> int:
     expected = EXPECTED.encode()
     if (output / "expected.txt").read_bytes() != expected:
         fail("retained expected output differs from the source contract")
-    rows = [
-        json.loads(line)
-        for line in (output / "processes.jsonl").read_text(encoding="utf-8").splitlines()
-        if line
-    ]
+    try:
+        rows = [
+            json.loads(line)
+            for line in (output / "processes.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if line
+        ]
+    except json.JSONDecodeError as error:
+        fail(f"process ledger is not valid JSON lines: {error}")
     if len(rows) != RUNS:
         fail(f"expected {RUNS} process rows, found {len(rows)}")
 
@@ -52,9 +58,9 @@ def main() -> int:
             fail(f"unexpected run identity at row {expected_run}")
         stdout = (output / f"run-{expected_run:02d}.stdout").read_bytes()
         stderr = (output / f"run-{expected_run:02d}.stderr").read_bytes()
-        if row.get("exit_code") != 0 or row.get("timed_out") is not False:
+        if row.get("exit_code") != 0 or row.get("timed_out", True):
             fail(f"run {expected_run} did not exit normally")
-        if row.get("passed") is not True:
+        if not row.get("passed"):
             fail(f"run {expected_run} was not marked passed")
         if stdout != expected or stderr != b"":
             fail(f"run {expected_run} output differs from the contract")
@@ -63,7 +69,10 @@ def main() -> int:
         if row.get("stderr_sha256") != sha256_bytes(stderr):
             fail(f"run {expected_run} stderr digest differs")
 
-    summary = json.loads((output / "summary.json").read_text(encoding="utf-8"))
+    try:
+        summary = json.loads((output / "summary.json").read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        fail(f"summary is not valid JSON: {error}")
     if summary.get("runs_planned") != RUNS or summary.get("runs_completed") != RUNS:
         fail("summary process count differs")
     if summary.get("failures") != 0:
@@ -74,8 +83,10 @@ def main() -> int:
     binary_line = (output / "binary.sha256").read_text(encoding="utf-8").strip()
     fields = binary_line.split()
     binary_sha256 = sha256_bytes(binary.read_bytes())
-    if len(fields) != 2 or fields[1] != binary.name:
-        fail("recorded binary name differs from the validated binary")
+    if len(fields) != 2:
+        fail("recorded binary identity is malformed")
+    # The SHA-256 digest, rather than the recorded basename, defines binary
+    # identity.
     if fields[0] != binary_sha256 or summary.get("binary_sha256") != binary_sha256:
         fail("binary identity differs from the validated binary")
 

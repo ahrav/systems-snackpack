@@ -76,6 +76,16 @@ if [[ $(uname -s) != Linux ]]; then
     exit 2
 fi
 
+if [[ -n ${BASH_ENV:-} ]]; then
+    echo "exact-source measurement refuses a BASH_ENV startup hook" >&2
+    exit 2
+fi
+if [[ -n $(compgen -A function) ]]; then
+    echo "exact-source measurement refuses inherited shell functions" >&2
+    exit 2
+fi
+export GIT_NO_REPLACE_OBJECTS=1
+
 if [[ ! -d "$repository/topics/029-distributed-time-ordering" ]]; then
     echo "Topic 29 source is absent from repository: $repository" >&2
     exit 2
@@ -124,8 +134,31 @@ if grep -Eq '^(S|[a-z]) ' <<<"$marked_files"; then
     echo "exact-source measurement refuses assume-unchanged or skip-worktree files" >&2
     exit 2
 fi
+if ! git -C "$repository" ls-files -z \
+    | git -C "$repository" check-attr --stdin -z \
+        filter ident export-ignore export-subst \
+    | tr '\0' '\n' \
+    | awk 'NR % 3 == 0 && $0 != "unspecified" && $0 != "unset" { bad = 1 } END { exit bad }'; then
+    echo "exact-source measurement refuses content-transforming Git attributes" >&2
+    exit 2
+fi
 
 topic="$repository/topics/029-distributed-time-ordering"
+
+{
+    echo "swept_prefixes=CARGO_ RUST"
+    while IFS= read -r variable; do
+        case $variable in
+            RUSTUP_HOME)
+                printf 'kept %s=%q\n' "$variable" "${!variable}"
+                ;;
+            CARGO_* | RUST*)
+                printf 'unset %s=%q\n' "$variable" "${!variable}"
+                unset "$variable"
+                ;;
+        esac
+    done < <(compgen -e | LC_ALL=C sort)
+} >"$output/environment.before.txt"
 
 pinned_toolchain=$(sed -n 's/^channel = "\(.*\)"$/\1/p' \
     "$repository/rust-toolchain.toml")
@@ -139,25 +172,6 @@ fi
 git -C "$repository" archive --format=tar "$source_commit" \
     | gzip -n -9 >"$output/source.tar.gz"
 source_archive_sha256=$(sha256sum "$output/source.tar.gz" | awk '{print $1}')
-
-controlled_environment=(
-    CARGO_BUILD_RUSTFLAGS
-    CARGO_ENCODED_RUSTFLAGS
-    CARGO_HOME
-    CARGO_TARGET_DIR
-    RUSTC_WRAPPER
-    RUSTC_WORKSPACE_WRAPPER
-    RUSTFLAGS
-    RUSTDOCFLAGS
-)
-for variable in "${controlled_environment[@]}"; do
-    if [[ -v $variable ]]; then
-        printf '%s=%q\n' "$variable" "${!variable}"
-    else
-        printf '%s=<unset>\n' "$variable"
-    fi
-    unset "$variable"
-done >"$output/environment.before.txt"
 
 cargo_home=$(mktemp -d "${TMPDIR:-/tmp}/topic29-cargo-home.XXXXXXXX")
 touch "$cargo_home/.topic29-cargo-home"
@@ -186,7 +200,8 @@ done
     echo "source_archive_sha256=$source_archive_sha256"
 } >"$output/source_identity.txt"
 
-{
+(
+    cd "$repository"
     printf 'host_label=%q\n' "$host_label"
     hostname -f
     uname -a
@@ -200,7 +215,7 @@ done
     objdump --version
     rustc --print cfg
     rustc -C target-cpu=native --print cfg
-} >"$output/host.txt" 2>&1
+) >"$output/host.txt" 2>&1
 
 {
     echo "generic: RUSTFLAGS unset"
@@ -208,16 +223,30 @@ done
     echo "workspace gates: RUSTFLAGS unset"
 } >"$output/build-flags.txt"
 
-source_manifest() {
+source_files() {
     (
         cd "$repository"
-        rg --files Cargo.toml Cargo.lock topics/029-distributed-time-ordering \
-            | sort \
-            | xargs sha256sum
+        rg --files -0 --hidden --no-ignore \
+            -g '!.git/**' -g '!/target/**' \
+            -g '!**/__pycache__/**' -g '!**/.ruff_cache/**' \
+            | LC_ALL=C sort -z
     )
 }
 
+source_manifest() {
+    source_files | (cd "$repository" && xargs -0 sha256sum)
+}
+
 source_manifest >"$output/source-files.before.sha256"
+
+untracked_inputs=$(LC_ALL=C comm -13 \
+    <(git -C "$repository" ls-files -z | tr '\0' '\n' | LC_ALL=C sort) \
+    <(source_files | tr '\0' '\n'))
+if [[ -n $untracked_inputs ]]; then
+    printf 'untracked files would be measured as build inputs:\n%s\n' \
+        "$untracked_inputs" >&2
+    exit 2
+fi
 
 run_gate() {
     local name=$1
@@ -243,7 +272,7 @@ python3 "$topic/experiment/run_processes.py" \
     "$generic_binary" \
     "$output/experiment-generic" >"$output/process-runner.generic.log" 2>&1
 python3 "$topic/experiment/validate_receipts.py" \
-    "$output/experiment-generic" "$generic_binary" \
+    "$output/experiment-generic" "$output/ordering-probe.generic" \
     >"$output/validation.generic.log" 2>&1
 generic_recorded_sha256=$(awk 'NR == 1 { print $1 }' \
     "$output/experiment-generic/binary.sha256")
@@ -279,7 +308,7 @@ done
 python3 "$topic/experiment/run_processes.py" "$binary" \
     "$output/experiment-native" >"$output/process-runner.native.log" 2>&1
 python3 "$topic/experiment/validate_receipts.py" \
-    "$output/experiment-native" "$binary" \
+    "$output/experiment-native" "$output/ordering-probe.native" \
     >"$output/validation.native.log" 2>&1
 native_recorded_sha256=$(awk 'NR == 1 { print $1 }' \
     "$output/experiment-native/binary.sha256")
@@ -296,6 +325,15 @@ run_gate cargo-doc env "RUSTDOCFLAGS=-D warnings" cargo doc --workspace --no-dep
 
 source_manifest >"$output/source-files.after.sha256"
 cmp "$output/source-files.before.sha256" "$output/source-files.after.sha256"
+
+if [[ $(git -C "$repository" rev-parse HEAD) != "$source_commit" ]]; then
+    echo "HEAD changed during the measurement run" >&2
+    exit 1
+fi
+if [[ -n $(git -C "$repository" status --porcelain=v1 --untracked-files=all) ]]; then
+    echo "worktree changed during the measurement run" >&2
+    exit 1
+fi
 
 run_completed=1
 echo "host run: PASS"
