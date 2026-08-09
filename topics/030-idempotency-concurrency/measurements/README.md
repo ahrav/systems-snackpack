@@ -28,4 +28,14 @@ performance claim.
 Raw logs are retained as one compressed archive per required host. The outer
 `SHA256SUMS` verifies those archives after retrieval.
 
-No promoted record exists until exact-source validation completes.
+The compact archives omit the source snapshot. They retain each host's reported
+snapshot hash, before-and-after source manifests, binaries, process receipts,
+generated code, gate logs, and CPU identity. Their internal checksums were
+regenerated and checked after compaction.
+
+## Promoted result
+
+- [Arm exact-source record](ad25198-arm.md)
+- [`xxl` exact-source record](ad25198-xxl.md)
+- [Two-host comparison](ad25198-comparison.md)
+- [Raw archive hashes](raw/ad25198/SHA256SUMS)

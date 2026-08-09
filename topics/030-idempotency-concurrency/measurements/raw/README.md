@@ -5,4 +5,4 @@ plus an outer `SHA256SUMS`. Extract an archive to inspect host metadata, source
 identity, process receipts, generated code, validation output, and workspace
 gate logs.
 
-No raw archive exists until exact-source validation completes.
+The promoted `ad25198` archives are under [`ad25198/`](ad25198/).
