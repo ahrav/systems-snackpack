@@ -62,6 +62,14 @@ finalize() {
     local exit_code=$?
     trap - EXIT
     set +e
+    # Scratch trees are removed before sealing so a scratch path under
+    # $output can never leave SHA256SUMS naming deleted files.
+    if [[ -n $cargo_home && -f $cargo_home/.topic29-cargo-home ]]; then
+        rm -rf "$cargo_home"
+    fi
+    if [[ -n $build_root && -f $build_root/.topic29-build-root ]]; then
+        rm -rf "$build_root"
+    fi
     if [[ -d $output ]]; then
         if (( exit_code == 0 && run_completed == 1 )); then
             write_run_status success 0
@@ -77,12 +85,6 @@ finalize() {
             printf 'failure_reason=evidence_seal_failed\n' >>"$output/run.status"
             seal_evidence || true
         fi
-    fi
-    if [[ -n $cargo_home && -f $cargo_home/.topic29-cargo-home ]]; then
-        rm -rf "$cargo_home"
-    fi
-    if [[ -n $build_root && -f $build_root/.topic29-build-root ]]; then
-        rm -rf "$build_root"
     fi
     exit "$exit_code"
 }
@@ -286,10 +288,10 @@ run_gate cargo-build-package-generic cargo build --locked --release \
 generic_binary="$build_root/target/release/ordering-probe"
 cp "$generic_binary" "$output/ordering-probe.generic"
 sha256sum "$output/ordering-probe.generic" >"$output/binary.generic.sha256"
-python3 "$topic/experiment/run_processes.py" \
+python3 -I "$topic/experiment/run_processes.py" \
     "$generic_binary" \
     "$output/experiment-generic" >"$output/process-runner.generic.log" 2>&1
-python3 "$topic/experiment/validate_receipts.py" \
+python3 -I "$topic/experiment/validate_receipts.py" \
     "$output/experiment-generic" "$output/ordering-probe.generic" \
     >"$output/validation.generic.log" 2>&1
 generic_recorded_sha256=$(awk 'NR == 1 { print $1 }' \
@@ -307,7 +309,7 @@ run_gate cargo-build-package-native cargo build --locked --release \
 binary="$build_root/target/release/ordering-probe"
 cp "$binary" "$output/ordering-probe.native"
 sha256sum "$output/ordering-probe.native" >"$output/binary.native.sha256"
-nm -n "$binary" >"$output/binary.symbols.txt"
+nm -n "$output/ordering-probe.native" >"$output/binary.symbols.txt"
 symbols=(
     topic29_lww_choice
     topic29_lamport_receive
@@ -317,15 +319,16 @@ symbols=(
 for symbol in "${symbols[@]}"; do
     rg -q "[[:space:]][Tt][[:space:]]${symbol}$" \
         "$output/binary.symbols.txt"
-    objdump -d --no-show-raw-insn --disassemble="$symbol" "$binary"
+        objdump -d --no-show-raw-insn --disassemble="$symbol" \
+            "$output/ordering-probe.native"
 done >"$output/codegen.txt" 2>&1
 for symbol in "${symbols[@]}"; do
     rg -q "<${symbol}>:" "$output/codegen.txt"
 done
 
-python3 "$topic/experiment/run_processes.py" "$binary" \
+python3 -I "$topic/experiment/run_processes.py" "$binary" \
     "$output/experiment-native" >"$output/process-runner.native.log" 2>&1
-python3 "$topic/experiment/validate_receipts.py" \
+python3 -I "$topic/experiment/validate_receipts.py" \
     "$output/experiment-native" "$output/ordering-probe.native" \
     >"$output/validation.native.log" 2>&1
 native_recorded_sha256=$(awk 'NR == 1 { print $1 }' \
