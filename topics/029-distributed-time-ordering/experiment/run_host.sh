@@ -123,6 +123,21 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 trap 'exit 129' HUP
 
+{
+    echo "swept_prefixes=CARGO_ GIT_ RUST"
+    while IFS= read -r variable; do
+        case $variable in
+            RUSTUP_HOME | GIT_NO_REPLACE_OBJECTS)
+                printf 'kept %s=%q\n' "$variable" "${!variable}"
+                ;;
+            CARGO_* | GIT_* | RUST*)
+                printf 'unset %s=%q\n' "$variable" "${!variable}"
+                unset "$variable"
+                ;;
+        esac
+    done < <(compgen -e | LC_ALL=C sort)
+} >"$output/environment.before.txt"
+
 repository_root=$(git -C "$repository" rev-parse --show-toplevel)
 if [[ $(realpath "$repository_root") != "$repository" ]]; then
     echo "repository must be the root of its Git worktree" >&2
@@ -159,21 +174,6 @@ build_root=$(mktemp -d "${TMPDIR:-/tmp}/topic29-build-root.XXXXXXXX")
 touch "$build_root/.topic29-build-root"
 tar -xzf "$output/source.tar.gz" -C "$build_root"
 topic="$build_root/topics/029-distributed-time-ordering"
-
-{
-    echo "swept_prefixes=CARGO_ RUST"
-    while IFS= read -r variable; do
-        case $variable in
-            RUSTUP_HOME)
-                printf 'kept %s=%q\n' "$variable" "${!variable}"
-                ;;
-            CARGO_* | RUST*)
-                printf 'unset %s=%q\n' "$variable" "${!variable}"
-                unset "$variable"
-                ;;
-        esac
-    done < <(compgen -e | LC_ALL=C sort)
-} >"$output/environment.before.txt"
 
 pinned_toolchain=$(sed -n 's/^channel = "\(.*\)"$/\1/p' \
     "$build_root/rust-toolchain.toml")
