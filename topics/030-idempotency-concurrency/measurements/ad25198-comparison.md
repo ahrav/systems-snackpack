@@ -1,7 +1,10 @@
 # Two-host correctness comparison: `ad25198`
 
-Both required Linux targets ran the same source commit and source archive. The
-`xxl` alias resolved at run time to
+Both required Linux targets ran the same source commit and source archive.
+This is historical evidence for commit
+`ad2519824f2e309a287c9b7dc957bdd80eec86c9`; it does not attest later branch
+commits or the eventual merge or squash commit. The `xxl` alias resolved at run
+time to
 `dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com` and reported `x86_64`. The
 literal Arm target reported `aarch64`.
 

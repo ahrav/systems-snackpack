@@ -10,9 +10,10 @@ network implementation.
 
 ## One running example
 
-`CreateCharge(order-42, 2000 cents)` carries key `K`. The key means that every
-attempt carrying `K` belongs to one logical charge. A different key represents
-a different intent even when the order and amount match.
+`CreateCharge(order-42, 2000 cents)` carries key `K`. The caller composes `K`
+from service, tenant, operation, and its caller-generated key. Every attempt
+carrying `K` belongs to one logical charge. A different key represents a
+different intent even when the order and amount match.
 
 ```text
 ABSENT --conditional claim--> IN_PROGRESS(generation)
@@ -31,12 +32,14 @@ parameters.
 
 ## Safety conditions
 
-- The lookup key includes caller or tenant, operation, service scope, and the
-  caller-generated key.
+- The caller composes the lookup key from caller or tenant, operation, service
+  scope, and the caller-generated key. The store treats this string as opaque.
 - One conditional claim selects the in-progress owner.
 - The local effect and completed receipt share one atomic commit.
 - A takeover increments a generation and rejects stale completion.
-- The API documents key retention and late-retry behavior.
+- Production APIs document key retention and late-retry behavior.
+- This model retains records for the process lifetime and models no expiry. A
+  retry after process or store loss creates a new claim rather than a replay.
 - A remote effect accepts the same logical key or uses an outbox and an
   idempotent consumer.
 
@@ -56,8 +59,8 @@ attempt rate            ~= lambda * (1 + R)
 ```
 
 Idempotency keeps committed effects at one per retained key. It does not remove
-retry traffic. Concurrent attempts for one key also serialize at its receipt
-record.
+retry traffic. All attempts serialize at the store mutex, including attempts
+for different keys. This model does not represent per-key parallelism.
 
 ## Failure boundaries
 
@@ -96,5 +99,5 @@ without trusting the summary. No timing metric is reported because an in-memory
 lock does not estimate durable transaction or network cost.
 
 See [`rounds/01.md`](rounds/01.md) for the acceptance contract,
-[`measurements/README.md`](measurements/README.md) for exact-source promotion,
+[`measurements/README.md`](measurements/README.md) for retained exact-source evidence,
 and [`references.md`](references.md) for source boundaries.

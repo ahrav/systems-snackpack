@@ -11,6 +11,42 @@ if [[ -n $(compgen -A function) ]]; then
 	echo "exact-source measurement refuses inherited shell functions" >&2
 	exit 2
 fi
+
+loader_environment_names=()
+loader_environment_values=()
+while IFS= read -r variable; do
+	case $variable in
+	LD_* | DYLD_* | GLIBC_TUNABLES)
+		loader_environment_names+=("$variable")
+		loader_environment_values+=("${!variable}")
+		unset "$variable"
+		;;
+	esac
+done < <(compgen -e)
+if [[ -s /etc/ld.so.preload ]]; then
+	echo "exact-source measurement refuses /etc/ld.so.preload interposition" >&2
+	exit 2
+fi
+
+required_tools=(
+	awk cargo cc cmp cp date dirname env find getconf git grep gzip hostname
+	lscpu mkdir mktemp mv nm objdump python3 realpath rg rm rustc sed sha256sum
+	sort tar touch tr uname xargs
+)
+declare -A tool_paths
+for tool in "${required_tools[@]}"; do
+	if ! tool_path=$(type -P "$tool"); then
+		echo "required tool is absent from PATH: $tool" >&2
+		exit 2
+	fi
+	if [[ $tool_path != /* ]]; then
+		echo "required tool did not resolve to an absolute path: $tool_path" >&2
+		exit 2
+	fi
+	tool_paths[$tool]=$tool_path
+	hash -p "$tool_path" "$tool"
+done
+readonly PATH
 export GIT_NO_REPLACE_OBJECTS=1
 
 if [[ $# -ne 4 ]]; then
@@ -124,19 +160,41 @@ trap 'exit 143' TERM
 trap 'exit 129' HUP
 
 {
-	echo "swept_prefixes=CARGO_ GIT_ RUST"
+	echo "swept_prefixes=CARGO_ GIT_ RUST LD_ DYLD_"
+	for variable_index in "${!loader_environment_names[@]}"; do
+		printf 'unset %s=%q\n' \
+			"${loader_environment_names[$variable_index]}" \
+			"${loader_environment_values[$variable_index]}"
+	done
 	while IFS= read -r variable; do
 		case $variable in
 		RUSTUP_HOME | GIT_NO_REPLACE_OBJECTS)
 			printf 'kept %s=%q\n' "$variable" "${!variable}"
 			;;
-		CARGO_* | GIT_* | RUST*)
+		AR | ARFLAGS | AS | CC | CFLAGS | CPP | CPPFLAGS | CXX | CXXFLAGS | \
+			LD | LDFLAGS | LIBRARY_PATH | CPATH | C_INCLUDE_PATH | \
+			CPLUS_INCLUDE_PATH | MAKEFLAGS | NM | OBJCOPY | OBJDUMP | \
+			PKG_CONFIG | PKG_CONFIG_PATH | RANLIB | STRIP | PYTHON* | \
+			VIRTUAL_ENV | CARGO_* | GIT_* | RUST*)
 			printf 'unset %s=%q\n' "$variable" "${!variable}"
 			unset "$variable"
 			;;
 		esac
 	done < <(compgen -e | LC_ALL=C sort)
 } >"$output/environment.before.txt"
+
+{
+	printf 'bash_path=%q\nbash_version=%q\nPATH=%q\n' \
+		"$BASH" "$BASH_VERSION" "$PATH"
+	for tool in "${required_tools[@]}"; do
+		tool_path=${tool_paths[$tool]}
+		resolved_tool_path=$(realpath "$tool_path")
+		tool_sha256=$(sha256sum "$resolved_tool_path" | awk '{ print $1 }')
+		printf '%s_path=%q\n%s_resolved_path=%q\n%s_sha256=%s\n' \
+			"$tool" "$tool_path" "$tool" "$resolved_tool_path" \
+			"$tool" "$tool_sha256"
+	done
+} >"$output/tool-provenance.txt"
 
 repository_root=$(git -C "$repository" rev-parse --show-toplevel)
 if [[ $(realpath "$repository_root") != "$repository" ]]; then

@@ -33,7 +33,11 @@ snapshot hash, before-and-after source manifests, binaries, process receipts,
 generated code, gate logs, and CPU identity. Their internal checksums were
 regenerated and checked after compaction.
 
-## Promoted result
+## Retained historical result
+
+These records attest source commit
+`ad2519824f2e309a287c9b7dc957bdd80eec86c9` only. They do not attest later
+commits on this branch or the eventual merge or squash commit.
 
 - [Arm exact-source record](ad25198-arm.md)
 - [`xxl` exact-source record](ad25198-xxl.md)

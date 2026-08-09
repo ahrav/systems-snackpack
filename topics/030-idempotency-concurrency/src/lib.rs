@@ -314,10 +314,8 @@ impl IdempotencyStore {
                 }
             });
         let effects_valid = inner.effects.iter().all(|effect| {
-            matches!(
-                inner.records.get(&effect.key).map(|record| record.status),
-                Some(RecordStatus::Complete(resource)) if resource == effect.resource
-            )
+            inner.records.get(&effect.key).map(|record| record.status)
+                == Some(RecordStatus::Complete(effect.resource))
         });
         records_valid && effects_valid
     }
@@ -423,6 +421,29 @@ mod tests {
         store.complete(second).unwrap();
         assert_eq!(store.effect_count(), 2);
         assert!(store.invariants_hold());
+    }
+
+    #[test]
+    fn scoped_keys_do_not_share_state() {
+        let store = IdempotencyStore::new();
+        let tenant_a = "billing:tenant-a:create-charge:order-42";
+        let tenant_b = "billing:tenant-b:create-charge:order-42";
+
+        let first = owner(store.begin(tenant_a, RequestFingerprint(2_000)));
+        let second = owner(store.begin(tenant_b, RequestFingerprint(2_001)));
+        let first_resource = store.complete(first).unwrap();
+        let second_resource = store.complete(second).unwrap();
+
+        assert_ne!(first_resource, second_resource);
+        assert_eq!(
+            store.begin(tenant_a, RequestFingerprint(2_000)),
+            BeginResult::Replay(first_resource)
+        );
+        assert_eq!(
+            store.begin(tenant_b, RequestFingerprint(2_001)),
+            BeginResult::Replay(second_resource)
+        );
+        assert_eq!(store.effect_count(), 2);
     }
 
     #[test]
