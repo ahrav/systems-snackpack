@@ -6,4 +6,6 @@ identity, process receipts, generated code, validation output, and workspace
 gate logs.
 
 The historical `ad25198` archives are under [`ad25198/`](ad25198/). They
-attest that source commit only, not later branch or merge commits.
+retain pre-protocol outputs for that source commit only. They predate the
+current runner's loader and absolute-tool provenance controls and do not attest
+later branch or merge commits.

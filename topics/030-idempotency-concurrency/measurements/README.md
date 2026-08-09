@@ -35,11 +35,15 @@ regenerated and checked after compaction.
 
 ## Retained historical result
 
-These records attest source commit
+These records retain outputs for source commit
 `ad2519824f2e309a287c9b7dc957bdd80eec86c9` only. They do not attest later
-commits on this branch or the eventual merge or squash commit.
+commits on this branch or the eventual merge or squash commit. The archives
+also predate the current runner's loader sweep and `tool-provenance.txt` receipt.
+Treat them as pre-protocol historical outputs, not proof that the current host
+protocol ran. Regenerate them with the current runner before promotion under
+this contract.
 
-- [Arm exact-source record](ad25198-arm.md)
-- [`xxl` exact-source record](ad25198-xxl.md)
+- [Arm historical host output](ad25198-arm.md)
+- [`xxl` historical host output](ad25198-xxl.md)
 - [Two-host comparison](ad25198-comparison.md)
 - [Raw archive hashes](raw/ad25198/SHA256SUMS)

@@ -99,5 +99,6 @@ without trusting the summary. No timing metric is reported because an in-memory
 lock does not estimate durable transaction or network cost.
 
 See [`rounds/01.md`](rounds/01.md) for the acceptance contract,
-[`measurements/README.md`](measurements/README.md) for retained exact-source evidence,
+[`measurements/README.md`](measurements/README.md) for historical outputs and
+protocol limits,
 and [`references.md`](references.md) for source boundaries.
