@@ -16,7 +16,7 @@ Each promoted host record names:
 - independent receipt validation for both builds;
 - retained binary hashes, exported inspection symbols, and disassembly;
 - all workspace-gate outcomes; and
-- a before/after source manifest proving the run did not rewrite source.
+- a before/after source manifest showing identical source bytes at both checks.
 
 ## Interpretation
 

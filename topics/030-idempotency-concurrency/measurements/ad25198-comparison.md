@@ -26,10 +26,11 @@ literal Arm target reported `aarch64`.
 | Literal Arm host | `aarch64`; 64 CPUs; Arm `0x41:0xd40`, r1p1 | `6.12.95-124.187.amzn2023.aarch64` | conditional branches plus `cinc`, `csel`, `ccmp`, and `cset` |
 | `xxl` alias | `x86_64`; 192 CPUs; Intel Xeon Platinum 8488C under KVM | `6.12.94-123.180.amzn2023.x86_64` | conditional branches plus `sete`, arithmetic, and `and` |
 
-The instruction sequences differ because LLVM 21.1.8 targeted different
-instruction set architectures and native feature sets. Both implement the same
-tested return-value contract. This is observed code generation, not evidence
-that one host or architecture is faster.
+LLVM 21.1.8 emitted different sequences for the two instruction set
+architectures. Both implement the same tested return-value contract. The
+receipts also record different native feature sets, but these two hooks contain
+no identified native-only instruction. This is observed code generation, not
+evidence that one host or architecture is faster.
 
 ## Why there is no timing interval
 
