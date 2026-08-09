@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# The guards precede function definitions so compgen sees only inherited
+# functions.
+if [[ -n ${BASH_ENV:-} ]]; then
+    echo "exact-source measurement refuses a BASH_ENV startup hook" >&2
+    exit 2
+fi
+if [[ -n $(compgen -A function) ]]; then
+    echo "exact-source measurement refuses inherited shell functions" >&2
+    exit 2
+fi
+export GIT_NO_REPLACE_OBJECTS=1
+
 if [[ $# -ne 4 ]]; then
     echo "usage: run_host.sh REPOSITORY OUTPUT HOST_LABEL SOURCE_COMMIT" >&2
     exit 2
@@ -13,6 +25,7 @@ source_commit=$4
 source_archive_sha256=not-recorded
 run_started_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)
 cargo_home=
+build_root=
 run_completed=0
 
 seal_evidence() {
@@ -68,6 +81,9 @@ finalize() {
     if [[ -n $cargo_home && -f $cargo_home/.topic29-cargo-home ]]; then
         rm -rf "$cargo_home"
     fi
+    if [[ -n $build_root && -f $build_root/.topic29-build-root ]]; then
+        rm -rf "$build_root"
+    fi
     exit "$exit_code"
 }
 
@@ -75,16 +91,6 @@ if [[ $(uname -s) != Linux ]]; then
     echo "run_host.sh requires Linux" >&2
     exit 2
 fi
-
-if [[ -n ${BASH_ENV:-} ]]; then
-    echo "exact-source measurement refuses a BASH_ENV startup hook" >&2
-    exit 2
-fi
-if [[ -n $(compgen -A function) ]]; then
-    echo "exact-source measurement refuses inherited shell functions" >&2
-    exit 2
-fi
-export GIT_NO_REPLACE_OBJECTS=1
 
 if [[ ! -d "$repository/topics/029-distributed-time-ordering" ]]; then
     echo "Topic 29 source is absent from repository: $repository" >&2
@@ -143,7 +149,14 @@ if ! git -C "$repository" ls-files -z \
     exit 2
 fi
 
-topic="$repository/topics/029-distributed-time-ordering"
+git -C "$repository" archive --format=tar "$source_commit" \
+    | gzip -n -9 >"$output/source.tar.gz"
+source_archive_sha256=$(sha256sum "$output/source.tar.gz" | awk '{print $1}')
+
+build_root=$(mktemp -d "${TMPDIR:-/tmp}/topic29-build-root.XXXXXXXX")
+touch "$build_root/.topic29-build-root"
+tar -xzf "$output/source.tar.gz" -C "$build_root"
+topic="$build_root/topics/029-distributed-time-ordering"
 
 {
     echo "swept_prefixes=CARGO_ RUST"
@@ -161,24 +174,20 @@ topic="$repository/topics/029-distributed-time-ordering"
 } >"$output/environment.before.txt"
 
 pinned_toolchain=$(sed -n 's/^channel = "\(.*\)"$/\1/p' \
-    "$repository/rust-toolchain.toml")
-resolved_rustc=$(cd "$repository" && rustc --version | awk '{print $2}')
+    "$build_root/rust-toolchain.toml")
+resolved_rustc=$(cd "$build_root" && rustc --version | awk '{print $2}')
 if [[ -z $pinned_toolchain || $resolved_rustc != "$pinned_toolchain" ]]; then
     printf 'resolved rustc %s does not match the pinned toolchain %s\n' \
         "$resolved_rustc" "${pinned_toolchain:-unparsed}" >&2
     exit 2
 fi
 
-git -C "$repository" archive --format=tar "$source_commit" \
-    | gzip -n -9 >"$output/source.tar.gz"
-source_archive_sha256=$(sha256sum "$output/source.tar.gz" | awk '{print $1}')
-
 cargo_home=$(mktemp -d "${TMPDIR:-/tmp}/topic29-cargo-home.XXXXXXXX")
 touch "$cargo_home/.topic29-cargo-home"
 export CARGO_HOME="$cargo_home"
 printf 'CARGO_HOME=%q\n' "$CARGO_HOME" >"$output/environment.effective.txt"
 
-config_scan_directory=$repository
+config_scan_directory=$build_root
 while :; do
     for cargo_config in \
         "$config_scan_directory/.cargo/config.toml" \
@@ -201,7 +210,7 @@ done
 } >"$output/source_identity.txt"
 
 (
-    cd "$repository"
+    cd "$build_root"
     printf 'host_label=%q\n' "$host_label"
     hostname -f
     uname -a
@@ -233,12 +242,6 @@ source_files() {
     )
 }
 
-source_manifest() {
-    source_files | (cd "$repository" && xargs -0 sha256sum)
-}
-
-source_manifest >"$output/source-files.before.sha256"
-
 untracked_inputs=$(LC_ALL=C comm -13 \
     <(git -C "$repository" ls-files -z | tr '\0' '\n' | LC_ALL=C sort) \
     <(source_files | tr '\0' '\n'))
@@ -248,11 +251,26 @@ if [[ -n $untracked_inputs ]]; then
     exit 2
 fi
 
+source_manifest() {
+    (
+        cd "$build_root"
+        find . -type f \
+            ! -path './target/*' \
+            ! -path '*/__pycache__/*' \
+            ! -name .topic29-build-root \
+            -print0 \
+            | LC_ALL=C sort -z \
+            | xargs -0 sha256sum
+    )
+}
+
+source_manifest >"$output/source-files.before.sha256"
+
 run_gate() {
     local name=$1
     shift
     (
-        cd "$repository"
+        cd "$build_root"
         "$@"
     ) >"$output/gates/$name.log" 2>&1
 }
@@ -265,7 +283,7 @@ run_gate cargo-test-package-generic cargo test --locked \
 run_gate cargo-build-package-generic cargo build --locked --release \
     --package distributed-time-ordering --bin ordering-probe
 
-generic_binary="$repository/target/release/ordering-probe"
+generic_binary="$build_root/target/release/ordering-probe"
 cp "$generic_binary" "$output/ordering-probe.generic"
 sha256sum "$output/ordering-probe.generic" >"$output/binary.generic.sha256"
 python3 "$topic/experiment/run_processes.py" \
@@ -286,7 +304,7 @@ run_gate cargo-test-package-native cargo test --locked \
 run_gate cargo-build-package-native cargo build --locked --release \
     --package distributed-time-ordering --bin ordering-probe
 
-binary="$repository/target/release/ordering-probe"
+binary="$build_root/target/release/ordering-probe"
 cp "$binary" "$output/ordering-probe.native"
 sha256sum "$output/ordering-probe.native" >"$output/binary.native.sha256"
 nm -n "$binary" >"$output/binary.symbols.txt"
