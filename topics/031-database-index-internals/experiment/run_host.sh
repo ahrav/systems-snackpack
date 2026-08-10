@@ -237,7 +237,7 @@ run_gate cargo-test-lib-examples cargo test --workspace --lib --examples
 run_gate cargo-test-doc cargo test --workspace --doc
 run_gate cargo-clippy cargo clippy --workspace --all-targets -- -D warnings
 run_gate cargo-bench-no-run cargo bench --workspace --no-run
-run_gate cargo-doc env RUSTDOCFLAGS=-D warnings cargo doc --workspace --no-deps
+run_gate cargo-doc env "RUSTDOCFLAGS=-D warnings" cargo doc --workspace --no-deps
 
 source_manifest >"$output/source-files.after.sha256"
 cmp "$output/source-files.before.sha256" "$output/source-files.after.sha256"
