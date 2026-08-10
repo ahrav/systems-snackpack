@@ -38,3 +38,14 @@ instruction-set architecture or processor family.
 Raw logs are retained as one compressed archive per required host. An outer
 `SHA256SUMS` checksum manifest verifies each archive after retrieval. Host and
 comparison notes are added only after exact-source runs pass this contract.
+
+## Retained exact-source result
+
+The following records cover source commit
+`e88c3633d6a12b9787c31ec0612bccd810d5533d`. Later documentation commits do not
+change what those records attest.
+
+- [Required Arm host](e88c363-arm.md)
+- [Runtime-resolved `xxl` host](e88c363-xxl.md)
+- [Two-host comparison](e88c363-comparison.md)
+- [Raw archive hashes](raw/e88c363/SHA256SUMS)
