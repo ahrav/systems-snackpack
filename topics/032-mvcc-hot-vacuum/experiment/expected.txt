@@ -1,0 +1,11 @@
+MODEL_BOUNDARY=committed monotonic XIDs plus one in-progress list; excludes aborts, subtransactions, command IDs, wraparound/freezing, hint bits, row locks/MultiXacts, page headers/redirects, WAL, index/lock details, and concurrent vacuum
+HOT_LIKE versions=3 same_page=true index_entries_before=1 keys=7,7,7 chain=0->1->2
+NON_HOT versions=3 same_page=true index_entries_before=3 keys=7,8,9 chains=none
+SNAPSHOT name=old xmin=15 xmax=20 visible_version=0 value=100
+SNAPSHOT name=middle xmin=25 xmax=25 visible_version=1 value=120
+SNAPSHOT name=new xmin=35 xmax=35 visible_version=2 value=140
+IN_PROGRESS xid=20 xmin=20 xmax=25 visible=false
+VACUUM oldest_xmin=20 hot_reclaimable=0 non_hot_reclaimable=0
+VACUUM oldest_xmin=40 hot_reclaimable=2 non_hot_reclaimable=2
+AFTER_RELEASED_HORIZON live_heap_versions=1 hot_index_entries=1 non_hot_index_entries=1
+CHECK=PASS
