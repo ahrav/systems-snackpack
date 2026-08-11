@@ -20,7 +20,8 @@ record names:
 - independent receipt validation for both builds;
 - retained binary hashes, exported inspection symbols, and linked disassembly;
 - all workspace-gate outcomes; and
-- before-and-after source manifests that prove unchanged source bytes.
+- before-and-after source manifests that record matching file digests at the
+  run endpoints.
 
 ## Interpretation
 

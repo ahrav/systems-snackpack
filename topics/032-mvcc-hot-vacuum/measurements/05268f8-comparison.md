@@ -1,9 +1,9 @@
 # Two-host comparison: `05268f8`
 
-Both required Linux targets ran the same pushed source commit and source
-archive. Each host produced eight generic-build and eight native-build
-fresh-process receipts. This is a correctness and generated-code comparison,
-not a timing benchmark.
+Both required Linux targets checked out the same pushed source commit and
+recorded the same source-archive digest. Each host produced eight generic-build
+and eight native-build fresh-process receipts. This is a correctness and
+generated-code comparison, not a timing benchmark.
 
 | Retained observation | Required Arm | Runtime-resolved `xxl` |
 | --- | --- | --- |
