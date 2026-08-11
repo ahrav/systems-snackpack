@@ -203,3 +203,10 @@ designs.
 See [`rounds/01.md`](rounds/01.md) for the acceptance contract,
 [`measurements/README.md`](measurements/README.md) for the evidence boundary,
 and [`references.md`](references.md) for versioned primary sources.
+
+The retained two-host result for source commit `05268f8` found matching output
+on the required Arm and runtime-resolved `xxl` hosts. The linked native
+executables used different instruction sequences for the snapshot-bound
+predicate. See the
+[`05268f8` comparison](measurements/05268f8-comparison.md) for the exact host,
+compiler, process, generated-code, and no-timing boundaries.

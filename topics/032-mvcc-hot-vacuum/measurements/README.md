@@ -39,4 +39,15 @@ Raw logs are retained as one compressed archive per required host. An outer
 
 ## Retained exact-source result
 
-No exact-source result has been promoted yet.
+Source commit `05268f84c4333556bbe52207dcc6d7953b52de8b` passed on
+both required hosts:
+
+- [Arm exact-source record](05268f8-arm.md)
+- [`xxl` exact-source record](05268f8-xxl.md)
+- [Two-host comparison](05268f8-comparison.md)
+- [Raw archive hashes](raw/05268f8/SHA256SUMS)
+
+The promoted archives omit the redundant source-archive payload while
+retaining its digest, the exact commit, both source manifests, all process
+receipts, and all validation evidence. Each archive records the omission and
+has a regenerated internal checksum manifest.
