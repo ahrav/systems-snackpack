@@ -64,6 +64,8 @@ def result_error(record: dict, metadata: dict) -> str | None:
         value = result.get(field)
         if not isinstance(value, int) or isinstance(value, bool):
             return f"missing or non-integer {field}"
+        if not 0 <= value < 1 << 64:
+            return f"{field} is outside the unsigned 64-bit domain the probe emits"
     ns_per_lookup = result.get("ns_per_lookup")
     if (
         not isinstance(ns_per_lookup, float)
@@ -115,6 +117,14 @@ def main() -> int:
     blocks = metadata.get("blocks")
     if not isinstance(blocks, int) or isinstance(blocks, bool) or blocks <= 0:
         print("ERROR: metadata blocks must be a positive integer")
+        return 1
+    protocol = metadata.get("protocol")
+    if not isinstance(protocol, str) or not protocol:
+        print("ERROR: metadata protocol must be a non-empty string")
+        return 1
+    seed = metadata.get("seed")
+    if not isinstance(seed, int) or isinstance(seed, bool):
+        print("ERROR: metadata seed must be an integer")
         return 1
     errors: list[str] = []
     if check.get("exit_code") != 0 or "CHECK_OK" not in check.get("stdout", ""):

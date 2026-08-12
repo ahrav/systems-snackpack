@@ -326,21 +326,6 @@ if rustup_path=$(type -P rustup); then
 		fi
 	done
 fi
-if [[ ! -d $sysroot/lib ]]; then
-	echo "toolchain sysroot library directory is absent: $sysroot/lib" >&2
-	exit 2
-fi
-(
-	cd "$sysroot/lib"
-	rg --files -0 --hidden --no-ignore |
-		LC_ALL=C sort -z |
-		xargs -0 sha256sum
-) >"$output/toolchain-sysroot.sha256"
-{
-	printf 'toolchain_sysroot=%q\n' "$sysroot"
-	printf 'toolchain_sysroot_manifest_sha256=%s\n' \
-		"$(sha256sum "$output/toolchain-sysroot.sha256" | awk '{print $1}')"
-} >>"$output/tool-provenance.txt"
 
 {
 	printf 'host_label=%q\n' "$host_label"

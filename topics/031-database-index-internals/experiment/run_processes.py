@@ -74,6 +74,8 @@ def result_matches_contract(
         value = parsed.get(field)
         if not isinstance(value, int) or isinstance(value, bool):
             return False
+        if not 0 <= value < 1 << 64:
+            return False
     ns_per_lookup = parsed.get("ns_per_lookup")
     if not isinstance(ns_per_lookup, float) or not math.isfinite(ns_per_lookup):
         return False
