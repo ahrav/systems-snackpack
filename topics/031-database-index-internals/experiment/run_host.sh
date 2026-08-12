@@ -33,6 +33,26 @@ fi
 
 export GIT_NO_REPLACE_OBJECTS=1
 
+# Bind required commands before use so PATH cannot select different executables.
+required_tools=(
+	awk bash cargo cc cmp cp date env git gzip hostname lscpu mkdir mktemp mv nm
+	objdump python3 realpath rg rm rustc sed sha256sum sort tar taskset touch tr uname xargs
+)
+declare -A tool_paths
+for tool in "${required_tools[@]}"; do
+	if ! tool_path=$(type -P "$tool"); then
+		echo "required tool is absent from PATH: $tool" >&2
+		exit 2
+	fi
+	if [[ $tool_path != /* ]]; then
+		echo "required tool did not resolve to an absolute path: $tool_path" >&2
+		exit 2
+	fi
+	tool_paths[$tool]=$tool_path
+	hash -p "$tool_path" "$tool"
+done
+readonly PATH
+
 if [[ $# -ne 4 ]]; then
 	echo "usage: run_host.sh REPOSITORY OUTPUT HOST_LABEL SOURCE_COMMIT" >&2
 	exit 2
@@ -88,25 +108,6 @@ case "$output/" in
 	exit 2
 	;;
 esac
-
-required_tools=(
-	awk bash cargo cc cmp cp date env git gzip hostname lscpu mkdir mktemp mv nm
-	objdump python3 realpath rg rm rustc sed sha256sum sort tar taskset touch tr uname xargs
-)
-declare -A tool_paths
-for tool in "${required_tools[@]}"; do
-	if ! tool_path=$(type -P "$tool"); then
-		echo "required tool is absent from PATH: $tool" >&2
-		exit 2
-	fi
-	if [[ $tool_path != /* ]]; then
-		echo "required tool did not resolve to an absolute path: $tool_path" >&2
-		exit 2
-	fi
-	tool_paths[$tool]=$tool_path
-	hash -p "$tool_path" "$tool"
-done
-readonly PATH
 
 seal_evidence() {
 	(
@@ -183,7 +184,7 @@ trap 'exit 129' HUP
 			CPATH | CPLUS_INCLUDE_PATH | CXX | CXXFLAGS | C_INCLUDE_PATH | \
 			GCC_EXEC_PREFIX | LD | LDFLAGS | LIBRARY_PATH | MAKEFLAGS | NM | \
 			OBJCOPY | OBJDUMP | PKG_CONFIG | PKG_CONFIG_PATH | RANLIB | \
-			RIPGREP_CONFIG_PATH | STRIP | \
+			RIPGREP_CONFIG_PATH | STRIP | TAR_OPTIONS | GZIP | \
 			VIRTUAL_ENV | PYTHON* | CARGO_* | GIT_* | RUST*)
 			printf 'unset %s=%q\n' "$variable" "${!variable}"
 			unset "$variable"
