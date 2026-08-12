@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("binary", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--blocks", type=int, default=12)
-    parser.add_argument("--cpu", type=int, default=0)
+    parser.add_argument("--cpu", type=int, default=None)
     parser.add_argument("--entries", type=int, default=1 << 20)
     parser.add_argument("--queries", type=int, default=1 << 16)
     parser.add_argument("--reps", type=int, default=8)
@@ -67,6 +67,13 @@ def result_matches_contract(
         return False
     if ns_per_lookup <= 0:
         return False
+    lookups = parsed["lookups"]
+    if lookups <= 0 or lookups != parsed["queries"] * parsed["reps"]:
+        return False
+    if not math.isclose(
+        ns_per_lookup, parsed["steady_ns"] / lookups, rel_tol=1e-9, abs_tol=1e-6
+    ):
+        return False
     return (
         parsed["entries"] == args.entries
         and parsed["queries"] == args.queries
@@ -88,6 +95,16 @@ def main() -> int:
             raise SystemExit(f"--{name} must be positive")
     if args.entries & (args.entries - 1):
         raise SystemExit("--entries must be a power of two")
+    prefix: list[str] = []
+    if sys.platform.startswith("linux") and shutil.which("taskset"):
+        # Default to an allowed CPU because taskset rejects CPUs outside the
+        # affinity mask before the probe starts.
+        allowed = sorted(os.sched_getaffinity(0))
+        cpu = allowed[0] if args.cpu is None else args.cpu
+        if cpu not in allowed:
+            raise SystemExit(f"--cpu {cpu} is outside the allowed CPUs {allowed}")
+        args.cpu = cpu
+        prefix = ["taskset", "-c", str(cpu)]
 
     args.output.mkdir(parents=True)
     env = os.environ.copy()
@@ -98,10 +115,6 @@ def main() -> int:
             "TOPIC31_REPS": str(args.reps),
         }
     )
-    prefix: list[str] = []
-    if sys.platform.startswith("linux") and shutil.which("taskset"):
-        prefix = ["taskset", "-c", str(args.cpu)]
-
     metadata = {
         "protocol": "topic31-paired-v1",
         "seed": SEED,

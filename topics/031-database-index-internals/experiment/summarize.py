@@ -59,6 +59,13 @@ def result_error(record: dict, metadata: dict) -> str | None:
         or ns_per_lookup <= 0
     ):
         return "missing or non-finite ns_per_lookup"
+    lookups = result["lookups"]
+    if lookups <= 0 or lookups != result["queries"] * result["reps"]:
+        return "lookups does not equal queries times reps"
+    if not math.isclose(
+        ns_per_lookup, result["steady_ns"] / lookups, rel_tol=1e-9, abs_tol=1e-6
+    ):
+        return "ns_per_lookup contradicts steady_ns divided by lookups"
     for name in ("entries", "queries", "reps"):
         if result[name] != metadata.get(name):
             return f"{name} does not match run metadata"

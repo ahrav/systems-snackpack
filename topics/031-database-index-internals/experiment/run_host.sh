@@ -12,6 +12,25 @@ if [[ -n $(compgen -A function) ]]; then
 	exit 2
 fi
 
+# LD_PRELOAD, LD_AUDIT, and GLIBC_TUNABLES change allocator and libc behavior in
+# Cargo, rustc, and every probe process, which would silently move the timings
+# the run promotes as evidence.
+loader_environment_names=()
+loader_environment_values=()
+while IFS= read -r variable; do
+	case $variable in
+	LD_* | DYLD_* | GLIBC_TUNABLES | MALLOC_*)
+		loader_environment_names+=("$variable")
+		loader_environment_values+=("${!variable}")
+		unset "$variable"
+		;;
+	esac
+done < <(compgen -e)
+if [[ -s /etc/ld.so.preload ]]; then
+	echo "exact-source measurement refuses /etc/ld.so.preload interposition" >&2
+	exit 2
+fi
+
 export GIT_NO_REPLACE_OBJECTS=1
 
 if [[ $# -ne 4 ]]; then
@@ -72,7 +91,7 @@ esac
 
 required_tools=(
 	awk bash cargo cc cmp cp date env git gzip hostname lscpu mkdir mktemp mv nm
-	objdump python3 realpath rg rm rustc sed sha256sum sort tar taskset touch uname xargs
+	objdump python3 realpath rg rm rustc sed sha256sum sort tar taskset touch tr uname xargs
 )
 for tool in "${required_tools[@]}"; do
 	if ! type -P "$tool" >/dev/null; then
@@ -141,7 +160,12 @@ trap 'exit 143' TERM
 trap 'exit 129' HUP
 
 {
-	echo "swept_prefixes=CARGO_ GIT_ RUST"
+	echo "swept_prefixes=CARGO_ GIT_ RUST LD_ DYLD_ MALLOC_"
+	for variable_index in "${!loader_environment_names[@]}"; do
+		printf 'unset %s=%q\n' \
+			"${loader_environment_names[$variable_index]}" \
+			"${loader_environment_values[$variable_index]}"
+	done
 	while IFS= read -r variable; do
 		case $variable in
 		RUSTUP_HOME | GIT_NO_REPLACE_OBJECTS)
@@ -170,6 +194,15 @@ if [[ -n $(git -C "$repository" status --porcelain=v1 --untracked-files=all) ]];
 fi
 if git -C "$repository" ls-files -v | rg -q '^(S|[a-z]) '; then
 	echo "exact-source measurement refuses skip-worktree or assume-unchanged files" >&2
+	exit 2
+fi
+
+if ! git -C "$repository" ls-files -z |
+	git -C "$repository" check-attr --stdin -z \
+		filter ident export-ignore export-subst |
+	tr '\0' '\n' |
+	awk 'NR % 3 == 0 && $0 != "unspecified" && $0 != "unset" { bad = 1 } END { exit bad }'; then
+	echo "exact-source measurement refuses content-transforming Git attributes" >&2
 	exit 2
 fi
 
