@@ -1,0 +1,21 @@
+[package]
+name = "database-index-internals"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "database_index_internals"
+path = "src/lib.rs"
+
+[[bin]]
+name = "index-layout-probe"
+path = "src/main.rs"
+
+[[bench]]
+name = "lookup"
+harness = false
+
+[lints]
+workspace = true

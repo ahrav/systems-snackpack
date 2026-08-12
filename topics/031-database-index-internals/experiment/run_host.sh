@@ -1,0 +1,462 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+# The guards precede function definitions so compgen sees only inherited
+# functions.
+if [[ -n ${BASH_ENV:-} ]]; then
+	echo "exact-source measurement refuses a BASH_ENV startup hook" >&2
+	exit 2
+fi
+if [[ -n $(compgen -A function) ]]; then
+	echo "exact-source measurement refuses inherited shell functions" >&2
+	exit 2
+fi
+
+# LD_PRELOAD, LD_AUDIT, and GLIBC_TUNABLES change allocator and libc behavior in
+# Cargo, rustc, and every probe process, which would silently move the timings
+# the run promotes as evidence.
+loader_environment_names=()
+loader_environment_values=()
+while IFS= read -r variable; do
+	case $variable in
+	LD_* | DYLD_* | GLIBC_TUNABLES | MALLOC_*)
+		loader_environment_names+=("$variable")
+		loader_environment_values+=("${!variable}")
+		unset "$variable"
+		;;
+	esac
+done < <(compgen -e)
+if [[ -s /etc/ld.so.preload ]]; then
+	echo "exact-source measurement refuses /etc/ld.so.preload interposition" >&2
+	exit 2
+fi
+
+export GIT_NO_REPLACE_OBJECTS=1
+
+# Bind required commands before use so PATH cannot select different executables.
+required_tools=(
+	awk bash cargo cc cmp cp date env git gzip hostname lscpu mkdir mktemp mv nm
+	objdump python3 realpath rg rm rustc sed sha256sum sort tar taskset touch tr uname xargs
+	cargo-clippy cargo-fmt
+)
+declare -A tool_paths
+for tool in "${required_tools[@]}"; do
+	if ! tool_path=$(type -P "$tool"); then
+		echo "required tool is absent from PATH: $tool" >&2
+		exit 2
+	fi
+	if [[ $tool_path != /* ]]; then
+		echo "required tool did not resolve to an absolute path: $tool_path" >&2
+		exit 2
+	fi
+	tool_paths[$tool]=$tool_path
+	hash -p "$tool_path" "$tool"
+done
+readonly PATH
+
+if [[ $# -ne 4 ]]; then
+	echo "usage: run_host.sh REPOSITORY OUTPUT HOST_LABEL SOURCE_COMMIT" >&2
+	exit 2
+fi
+
+repository=$(realpath "$1")
+output=$(realpath -m "$2")
+host_label=$3
+source_commit=$4
+run_started_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)
+source_archive_sha256=not-recorded
+cargo_home=
+build_root=
+run_completed=0
+
+if [[ $(uname -s) != Linux ]]; then
+	echo "run_host.sh requires Linux" >&2
+	exit 2
+fi
+if [[ ! $source_commit =~ ^[0-9a-f]{40}$ ]]; then
+	echo "source commit must be 40 lowercase hexadecimal characters" >&2
+	exit 2
+fi
+if [[ -z $host_label || $host_label == *$'\n'* || $host_label == *$'\r'* ]]; then
+	echo "host label must be non-empty and single-line" >&2
+	exit 2
+fi
+machine_architecture=$(uname -m)
+case $host_label in
+arm | arm-required) expected_architecture=aarch64 ;;
+xxl | xxl-resolved) expected_architecture=x86_64 ;;
+*)
+	echo "host label must be arm, arm-required, xxl, or xxl-resolved" >&2
+	exit 2
+	;;
+esac
+if [[ $machine_architecture != "$expected_architecture" ]]; then
+	printf 'host label %s requires architecture %s, found %s\n' \
+		"$host_label" "$expected_architecture" "$machine_architecture" >&2
+	exit 2
+fi
+if [[ ! -d $repository/topics/031-database-index-internals ]]; then
+	echo "Topic 31 source is absent from repository: $repository" >&2
+	exit 2
+fi
+if [[ -e $output ]]; then
+	echo "output already exists: $output" >&2
+	exit 2
+fi
+case "$output/" in
+"$repository/"*)
+	echo "output must be outside the source tree" >&2
+	exit 2
+	;;
+esac
+
+seal_evidence() {
+	(
+		cd "$output"
+		rg --no-config --files -0 --hidden --no-ignore \
+			-g '!SHA256SUMS' -g '!SHA256SUMS.tmp' |
+			LC_ALL=C sort -z |
+			xargs -0 sha256sum >SHA256SUMS.tmp
+		mv SHA256SUMS.tmp SHA256SUMS
+		sha256sum --check --quiet SHA256SUMS
+	)
+}
+
+write_run_status() {
+	local status=$1
+	local exit_code=$2
+	{
+		echo "status=$status"
+		echo "exit_code=$exit_code"
+		echo "run_started_utc=$run_started_utc"
+		echo "run_finished_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)"
+		printf 'host_label=%q\n' "$host_label"
+		echo "source_commit=$source_commit"
+		echo "source_archive_sha256=$source_archive_sha256"
+	} >"$output/run.status"
+}
+
+finish() {
+	local exit_code=$?
+	trap - EXIT
+	set +e
+	if [[ -n $cargo_home && -f $cargo_home/.topic31-cargo-home ]]; then
+		rm -rf "$cargo_home"
+	fi
+	if [[ -n $build_root && -f $build_root/.topic31-build-root ]]; then
+		rm -rf "$build_root"
+	fi
+	if [[ -d $output ]]; then
+		if ((exit_code == 0 && run_completed == 1)); then
+			write_run_status success 0
+		else
+			((exit_code == 0)) && exit_code=1
+			write_run_status failed "$exit_code"
+		fi
+		if ! seal_evidence; then
+			exit_code=1
+			write_run_status failed 1
+			printf 'failure_reason=evidence_seal_failed\n' >>"$output/run.status"
+			seal_evidence || true
+		fi
+	fi
+	exit "$exit_code"
+}
+
+mkdir -p "$output/gates"
+trap finish EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+trap 'exit 129' HUP
+
+{
+	echo "swept_prefixes=CARGO_ GIT_ RUST LD_ DYLD_ MALLOC_ PYTHON"
+	for variable_index in "${!loader_environment_names[@]}"; do
+		printf 'unset %s=%q\n' \
+			"${loader_environment_names[$variable_index]}" \
+			"${loader_environment_values[$variable_index]}"
+	done
+	while IFS= read -r variable; do
+		case $variable in
+		RUSTUP_HOME | GIT_NO_REPLACE_OBJECTS)
+			printf 'kept %s=%q\n' "$variable" "${!variable}"
+			;;
+		AR | ARFLAGS | AS | CC | CFLAGS | COMPILER_PATH | CPP | CPPFLAGS | \
+			CPATH | CPLUS_INCLUDE_PATH | CXX | CXXFLAGS | C_INCLUDE_PATH | \
+			GCC_EXEC_PREFIX | LD | LDFLAGS | LIBRARY_PATH | MAKEFLAGS | NM | \
+			OBJCOPY | OBJDUMP | PKG_CONFIG | PKG_CONFIG_PATH | RANLIB | \
+			RIPGREP_CONFIG_PATH | STRIP | TAR_OPTIONS | GZIP | \
+			VIRTUAL_ENV | PYTHON* | CARGO_* | GIT_* | RUST*)
+			printf 'unset %s=%q\n' "$variable" "${!variable}"
+			unset "$variable"
+			;;
+		esac
+	done < <(compgen -e | LC_ALL=C sort)
+} >"$output/environment.before.txt"
+
+{
+	printf 'interpreter_path=%q\ninterpreter_resolved_path=%q\n' \
+		"$BASH" "$(realpath "$BASH")"
+	printf 'interpreter_sha256=%s\n' \
+		"$(sha256sum "$(realpath "$BASH")" | awk '{print $1}')"
+	printf 'interpreter_version=%q\nPATH=%q\n' "$BASH_VERSION" "$PATH"
+	for tool in "${required_tools[@]}"; do
+		tool_path=${tool_paths[$tool]}
+		resolved_tool_path=$(realpath "$tool_path")
+		tool_sha256=$(sha256sum "$resolved_tool_path" | awk '{print $1}')
+		printf '%s_path=%q\n%s_resolved_path=%q\n%s_sha256=%s\n' \
+			"$tool" "$tool_path" "$tool" "$resolved_tool_path" \
+			"$tool" "$tool_sha256"
+	done
+} >"$output/tool-provenance.txt"
+
+if [[ $(realpath "$BASH") != $(realpath "${tool_paths[bash]}") ]]; then
+	printf 'running interpreter %s is not the bound bash %s\n' \
+		"$BASH" "${tool_paths[bash]}" >&2
+	exit 2
+fi
+
+repository_root=$(git -C "$repository" rev-parse --show-toplevel)
+if [[ $(realpath "$repository_root") != "$repository" ]]; then
+	echo "repository must be the root of its Git worktree" >&2
+	exit 2
+fi
+if [[ $(git -C "$repository" rev-parse HEAD) != "$source_commit" ]]; then
+	echo "HEAD does not equal requested source commit" >&2
+	exit 2
+fi
+if [[ -n $(git -C "$repository" status --porcelain=v1 --untracked-files=all) ]]; then
+	echo "exact-source measurement requires a clean worktree" >&2
+	exit 2
+fi
+if git -C "$repository" ls-files -v | rg --no-config -q '^(S|[a-z]) '; then
+	echo "exact-source measurement refuses skip-worktree or assume-unchanged files" >&2
+	exit 2
+fi
+
+if ! git -C "$repository" ls-files -z |
+	git -C "$repository" check-attr --stdin -z \
+		filter ident export-ignore export-subst text eol working-tree-encoding |
+	tr '\0' '\n' |
+	awk 'NR % 3 == 0 && $0 != "unspecified" && $0 != "unset" { bad = 1 } END { exit bad }'; then
+	echo "exact-source measurement refuses content-transforming Git attributes" >&2
+	exit 2
+fi
+
+git -C "$repository" ls-files -z >"$output/tracked-files.z"
+# core.autocrlf=true rewrites blob bytes into the archive.
+git -C "$repository" -c core.autocrlf=false -c core.eol=lf \
+	archive --format=tar "$source_commit" |
+	gzip -n -9 >"$output/source.tar.gz"
+source_archive_sha256=$(sha256sum "$output/source.tar.gz" | awk '{print $1}')
+
+build_root=$(realpath "$(mktemp -d "${TMPDIR:-/tmp}/topic31-build-root.XXXXXXXX")")
+touch "$build_root/.topic31-build-root"
+cargo_home=$(realpath "$(mktemp -d "${TMPDIR:-/tmp}/topic31-cargo-home.XXXXXXXX")")
+touch "$cargo_home/.topic31-cargo-home"
+export CARGO_HOME="$cargo_home"
+printf 'CARGO_HOME=%q\n' "$CARGO_HOME" >"$output/environment.effective.txt"
+tar -xzf "$output/source.tar.gz" -C "$build_root"
+topic="$build_root/topics/031-database-index-internals"
+
+# Cargo reads .cargo/config.toml from the working directory and every ancestor
+# before $CARGO_HOME, so a config above the caller-controlled TMPDIR would add
+# rustflags or a wrapper that no recorded input names.
+config_dir=$build_root
+while :; do
+	for config_name in config.toml config; do
+		if [[ -f $config_dir/.cargo/$config_name ]]; then
+			printf 'unrecorded Cargo configuration: %s\n' \
+				"$config_dir/.cargo/$config_name" >&2
+			exit 2
+		fi
+	done
+	if [[ $config_dir == / ]]; then
+		break
+	fi
+	config_dir=${config_dir%/*}
+	config_dir=${config_dir:-/}
+done
+
+pinned_toolchain=$(sed -n 's/^channel = "\(.*\)"$/\1/p' \
+	"$build_root/rust-toolchain.toml")
+resolved_rustc=$(cd "$build_root" && rustc --version | awk '{print $2}')
+if [[ -z $pinned_toolchain || $resolved_rustc != "$pinned_toolchain" ]]; then
+	printf 'resolved rustc %s does not match pinned toolchain %s\n' \
+		"$resolved_rustc" "${pinned_toolchain:-unparsed}" >&2
+	exit 2
+fi
+
+# Cargo links rlibs and dylibs out of the selected toolchain's sysroot, and a
+# front-end digest does not change when those bytes do. The invoked compiler
+# reports the sysroot itself, so no helper is trusted to name it.
+sysroot=$(cd "$build_root" && rustc --print sysroot)
+# cargo runs fmt and clippy as external cargo-<command> executables.
+selected_tools=(rustc cargo cargo-fmt cargo-clippy rustfmt clippy-driver)
+if [[ ! -d $sysroot/lib ]]; then
+	echo "toolchain sysroot library directory is absent: $sysroot/lib" >&2
+	exit 2
+fi
+for tool in "${selected_tools[@]}"; do
+	if [[ ! -x $sysroot/bin/$tool ]]; then
+		echo "toolchain sysroot lacks an executable $tool: $sysroot/bin/$tool" >&2
+		exit 2
+	fi
+done
+(
+	cd "$sysroot/lib"
+	rg --no-config --files -0 --hidden --no-ignore |
+		LC_ALL=C sort -z |
+		xargs -0 sha256sum
+) >"$output/toolchain-sysroot.sha256"
+{
+	printf 'toolchain_sysroot=%q\n' "$sysroot"
+	for tool in "${selected_tools[@]}"; do
+		selected_tool_path=$(realpath "$sysroot/bin/$tool")
+		selected_tool_sha256=$(sha256sum "$selected_tool_path" | awk '{print $1}')
+		printf 'selected_%s_path=%q\nselected_%s_sha256=%s\n' \
+			"$tool" "$selected_tool_path" "$tool" "$selected_tool_sha256"
+	done
+	printf 'toolchain_sysroot_manifest_sha256=%s\n' \
+		"$(sha256sum "$output/toolchain-sysroot.sha256" | awk '{print $1}')"
+} >>"$output/tool-provenance.txt"
+
+# rustup is optional and unbound, so its answer is recorded and cross-checked
+# against the sysroot rather than believed.
+if rustup_path=$(type -P rustup); then
+	{
+		printf 'rustup_path=%q\n' "$rustup_path"
+		printf 'rustup_sha256=%s\n' \
+			"$(sha256sum "$(realpath "$rustup_path")" | awk '{print $1}')"
+		for tool in "${selected_tools[@]}"; do
+			rustup_selected_path=$(cd "$build_root" && "$rustup_path" which "$tool")
+			printf 'rustup_selected_%s_path=%q\n' "$tool" "$rustup_selected_path"
+		done
+	} >>"$output/tool-provenance.txt"
+	for tool in "${selected_tools[@]}"; do
+		rustup_selected_path=$(cd "$build_root" && "$rustup_path" which "$tool")
+		if [[ $(realpath "$rustup_selected_path") != $(realpath "$sysroot/bin/$tool") ]]; then
+			printf 'rustup which %s reports %s, sysroot holds %s\n' \
+				"$tool" "$rustup_selected_path" "$sysroot/bin/$tool" >&2
+			exit 2
+		fi
+	done
+fi
+
+{
+	printf 'host_label=%q\n' "$host_label"
+	echo "expected_architecture=$expected_architecture"
+	echo "machine_architecture=$machine_architecture"
+	echo "source_commit=$source_commit"
+	echo "source_archive_sha256=$source_archive_sha256"
+} >"$output/source_identity.txt"
+
+(
+	cd "$build_root"
+	printf 'host_label=%q\n' "$host_label"
+	hostname -f
+	uname -a
+	uname -m
+	lscpu
+	rustc -vV
+	cargo -V
+	cc --version
+	objdump --version
+	rustc --print cfg
+	rustc -C target-cpu=native --print cfg
+	cc -march=native -Q --help=target
+) >"$output/host.txt" 2>&1
+
+{
+	echo "generic: CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1; RUSTFLAGS unset"
+	echo "native: CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1; RUSTFLAGS=-C target-cpu=native"
+	echo "runner: 12 blocks; alternating ABBA/BAAB; taskset pins the first CPU in the runner affinity mask, recorded per run in experiment-*/metadata.json"
+	echo "dataset: TOPIC31_ENTRIES=1048576 TOPIC31_QUERIES=65536 TOPIC31_REPS=8"
+} >"$output/build-flags.txt"
+
+source_manifest() {
+	(
+		cd "$build_root"
+		xargs -0 sha256sum <"$output/tracked-files.z"
+	)
+}
+source_manifest >"$output/source-files.before.sha256"
+
+run_gate() {
+	local name=$1
+	shift
+	(
+		cd "$build_root"
+		"$@"
+	) >"$output/gates/$name.log" 2>&1
+}
+
+export CARGO_NET_OFFLINE=true
+export CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1
+run_gate cargo-fmt cargo fmt --all -- --check
+run_gate cargo-test-package-generic cargo test --locked \
+	--package database-index-internals
+run_gate cargo-build-package-generic env \
+	CARGO_TARGET_DIR="$build_root/target-generic" \
+	cargo build --locked --release --package database-index-internals \
+	--bin index-layout-probe
+
+generic_binary="$build_root/target-generic/release/index-layout-probe"
+cp "$generic_binary" "$output/index-layout-probe.generic"
+sha256sum "$output/index-layout-probe.generic" >"$output/binary.generic.sha256"
+python3 -I "$topic/experiment/run_processes.py" \
+	"$output/index-layout-probe.generic" "$output/experiment-generic" \
+	>"$output/process-runner.generic.log" 2>&1
+python3 -I "$topic/experiment/summarize.py" \
+	"$output/experiment-generic" >"$output/summary.generic.log" 2>&1
+
+export RUSTFLAGS="-C target-cpu=native"
+run_gate cargo-test-package-native env \
+	CARGO_TARGET_DIR="$build_root/target-native" \
+	cargo test --locked --package database-index-internals
+run_gate cargo-build-package-native env \
+	CARGO_TARGET_DIR="$build_root/target-native" \
+	cargo build --locked --release --package database-index-internals \
+	--bin index-layout-probe
+
+native_binary="$build_root/target-native/release/index-layout-probe"
+cp "$native_binary" "$output/index-layout-probe.native"
+sha256sum "$output/index-layout-probe.native" >"$output/binary.native.sha256"
+nm -n "$output/index-layout-probe.native" >"$output/binary.symbols.txt"
+symbols=(topic31_narrow_lookup topic31_covering_lookup)
+for symbol in "${symbols[@]}"; do
+	rg --no-config -q "[[:space:]][Tt][[:space:]]${symbol}$" "$output/binary.symbols.txt"
+	objdump -d --no-show-raw-insn --disassemble="$symbol" \
+		"$output/index-layout-probe.native"
+done >"$output/codegen.txt" 2>&1
+for symbol in "${symbols[@]}"; do
+	rg --no-config -q "<${symbol}>:" "$output/codegen.txt"
+done
+
+python3 -I "$topic/experiment/run_processes.py" \
+	"$output/index-layout-probe.native" "$output/experiment-native" \
+	>"$output/process-runner.native.log" 2>&1
+python3 -I "$topic/experiment/summarize.py" \
+	"$output/experiment-native" >"$output/summary.native.log" 2>&1
+
+unset RUSTFLAGS
+unset CARGO_TARGET_DIR || true
+run_gate cargo-test-lib-examples cargo test --workspace --lib --examples
+run_gate cargo-test-doc cargo test --workspace --doc
+run_gate cargo-clippy cargo clippy --workspace --all-targets -- -D warnings
+run_gate cargo-bench-no-run cargo bench --workspace --no-run
+run_gate cargo-doc env "RUSTDOCFLAGS=-D warnings" cargo doc --workspace --no-deps
+
+source_manifest >"$output/source-files.after.sha256"
+cmp "$output/source-files.before.sha256" "$output/source-files.after.sha256"
+if [[ $(git -C "$repository" rev-parse HEAD) != "$source_commit" ]]; then
+	echo "HEAD changed during measurement" >&2
+	exit 1
+fi
+if [[ -n $(git -C "$repository" status --porcelain=v1 --untracked-files=all) ]]; then
+	echo "source worktree changed during measurement" >&2
+	exit 1
+fi
+
+run_completed=1
+echo "host run: PASS"
