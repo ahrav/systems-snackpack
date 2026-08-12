@@ -37,6 +37,7 @@ export GIT_NO_REPLACE_OBJECTS=1
 required_tools=(
 	awk bash cargo cc cmp cp date env git gzip hostname lscpu mkdir mktemp mv nm
 	objdump python3 realpath rg rm rustc sed sha256sum sort tar taskset touch tr uname xargs
+	cargo-clippy cargo-fmt
 )
 declare -A tool_paths
 for tool in "${required_tools[@]}"; do
@@ -194,8 +195,11 @@ trap 'exit 129' HUP
 } >"$output/environment.before.txt"
 
 {
-	printf 'bash_path=%q\nbash_version=%q\nPATH=%q\n' \
-		"$BASH" "$BASH_VERSION" "$PATH"
+	printf 'interpreter_path=%q\ninterpreter_resolved_path=%q\n' \
+		"$BASH" "$(realpath "$BASH")"
+	printf 'interpreter_sha256=%s\n' \
+		"$(sha256sum "$(realpath "$BASH")" | awk '{print $1}')"
+	printf 'interpreter_version=%q\nPATH=%q\n' "$BASH_VERSION" "$PATH"
 	for tool in "${required_tools[@]}"; do
 		tool_path=${tool_paths[$tool]}
 		resolved_tool_path=$(realpath "$tool_path")
@@ -205,6 +209,12 @@ trap 'exit 129' HUP
 			"$tool" "$tool_sha256"
 	done
 } >"$output/tool-provenance.txt"
+
+if [[ $(realpath "$BASH") != $(realpath "${tool_paths[bash]}") ]]; then
+	printf 'running interpreter %s is not the bound bash %s\n' \
+		"$BASH" "${tool_paths[bash]}" >&2
+	exit 2
+fi
 
 repository_root=$(git -C "$repository" rev-parse --show-toplevel)
 if [[ $(realpath "$repository_root") != "$repository" ]]; then
@@ -226,7 +236,7 @@ fi
 
 if ! git -C "$repository" ls-files -z |
 	git -C "$repository" check-attr --stdin -z \
-		filter ident export-ignore export-subst |
+		filter ident export-ignore export-subst text eol working-tree-encoding |
 	tr '\0' '\n' |
 	awk 'NR % 3 == 0 && $0 != "unspecified" && $0 != "unset" { bad = 1 } END { exit bad }'; then
 	echo "exact-source measurement refuses content-transforming Git attributes" >&2
@@ -234,7 +244,9 @@ if ! git -C "$repository" ls-files -z |
 fi
 
 git -C "$repository" ls-files -z >"$output/tracked-files.z"
-git -C "$repository" archive --format=tar "$source_commit" |
+# core.autocrlf=true rewrites blob bytes into the archive.
+git -C "$repository" -c core.autocrlf=false -c core.eol=lf \
+	archive --format=tar "$source_commit" |
 	gzip -n -9 >"$output/source.tar.gz"
 source_archive_sha256=$(sha256sum "$output/source.tar.gz" | awk '{print $1}')
 
@@ -279,11 +291,13 @@ fi
 # front-end digest does not change when those bytes do. The invoked compiler
 # reports the sysroot itself, so no helper is trusted to name it.
 sysroot=$(cd "$build_root" && rustc --print sysroot)
+# cargo runs fmt and clippy as external cargo-<command> executables.
+selected_tools=(rustc cargo cargo-fmt cargo-clippy rustfmt clippy-driver)
 if [[ ! -d $sysroot/lib ]]; then
 	echo "toolchain sysroot library directory is absent: $sysroot/lib" >&2
 	exit 2
 fi
-for tool in rustc cargo; do
+for tool in "${selected_tools[@]}"; do
 	if [[ ! -x $sysroot/bin/$tool ]]; then
 		echo "toolchain sysroot lacks an executable $tool: $sysroot/bin/$tool" >&2
 		exit 2
@@ -297,7 +311,7 @@ done
 ) >"$output/toolchain-sysroot.sha256"
 {
 	printf 'toolchain_sysroot=%q\n' "$sysroot"
-	for tool in rustc cargo; do
+	for tool in "${selected_tools[@]}"; do
 		selected_tool_path=$(realpath "$sysroot/bin/$tool")
 		selected_tool_sha256=$(sha256sum "$selected_tool_path" | awk '{print $1}')
 		printf 'selected_%s_path=%q\nselected_%s_sha256=%s\n' \
@@ -314,12 +328,12 @@ if rustup_path=$(type -P rustup); then
 		printf 'rustup_path=%q\n' "$rustup_path"
 		printf 'rustup_sha256=%s\n' \
 			"$(sha256sum "$(realpath "$rustup_path")" | awk '{print $1}')"
-		for tool in rustc cargo; do
+		for tool in "${selected_tools[@]}"; do
 			rustup_selected_path=$(cd "$build_root" && "$rustup_path" which "$tool")
 			printf 'rustup_selected_%s_path=%q\n' "$tool" "$rustup_selected_path"
 		done
 	} >>"$output/tool-provenance.txt"
-	for tool in rustc cargo; do
+	for tool in "${selected_tools[@]}"; do
 		rustup_selected_path=$(cd "$build_root" && "$rustup_path" which "$tool")
 		if [[ $(realpath "$rustup_selected_path") != $(realpath "$sysroot/bin/$tool") ]]; then
 			printf 'rustup which %s reports %s, sysroot holds %s\n' \
