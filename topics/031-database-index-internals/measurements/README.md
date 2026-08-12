@@ -49,3 +49,21 @@ change what those records attest.
 - [Runtime-resolved `xxl` host](e88c363-xxl.md)
 - [Two-host comparison](e88c363-comparison.md)
 - [Raw archive hashes](raw/e88c363/SHA256SUMS)
+
+### Pre-hardening environment attestation
+
+Those runs used the `run_host.sh` of commit
+`e88c3633d6a12b9787c31ec0612bccd810d5533d`, before commits `f40e7bc`, `5e2bd13`,
+and `56dd099` added the inherited-state guards. That runner did not sweep or
+record the ambient environment, so the archives contain no
+`environment.before.txt` and no `tool-provenance.txt`, and the run did not refuse
+a `BASH_ENV` hook, inherited shell functions, `LD_*`/`DYLD_*`/`GLIBC_TUNABLES`
+interposition, `/etc/ld.so.preload`, or content-transforming Git attributes.
+
+What those records still attest is unchanged: source commit and archive digest,
+clean worktree before and after, host and toolchain identity, build flags,
+binary hashes and disassembly, gate outcomes, and the 48 retained fresh-process
+results per host. What they do not attest is the absence of inherited
+environment state during the August 10 runs. Treat them as pre-hardening
+evidence: a rerun under the current runner is required before any record here
+can claim a swept and recorded measurement environment.

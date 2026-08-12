@@ -93,12 +93,20 @@ required_tools=(
 	awk bash cargo cc cmp cp date env git gzip hostname lscpu mkdir mktemp mv nm
 	objdump python3 realpath rg rm rustc sed sha256sum sort tar taskset touch tr uname xargs
 )
+declare -A tool_paths
 for tool in "${required_tools[@]}"; do
-	if ! type -P "$tool" >/dev/null; then
+	if ! tool_path=$(type -P "$tool"); then
 		echo "required tool is absent from PATH: $tool" >&2
 		exit 2
 	fi
+	if [[ $tool_path != /* ]]; then
+		echo "required tool did not resolve to an absolute path: $tool_path" >&2
+		exit 2
+	fi
+	tool_paths[$tool]=$tool_path
+	hash -p "$tool_path" "$tool"
 done
+readonly PATH
 
 seal_evidence() {
 	(
@@ -179,6 +187,19 @@ trap 'exit 129' HUP
 	done < <(compgen -e | LC_ALL=C sort)
 } >"$output/environment.before.txt"
 
+{
+	printf 'bash_path=%q\nbash_version=%q\nPATH=%q\n' \
+		"$BASH" "$BASH_VERSION" "$PATH"
+	for tool in "${required_tools[@]}"; do
+		tool_path=${tool_paths[$tool]}
+		resolved_tool_path=$(realpath "$tool_path")
+		tool_sha256=$(sha256sum "$resolved_tool_path" | awk '{print $1}')
+		printf '%s_path=%q\n%s_resolved_path=%q\n%s_sha256=%s\n' \
+			"$tool" "$tool_path" "$tool" "$resolved_tool_path" \
+			"$tool" "$tool_sha256"
+	done
+} >"$output/tool-provenance.txt"
+
 repository_root=$(git -C "$repository" rev-parse --show-toplevel)
 if [[ $(realpath "$repository_root") != "$repository" ]]; then
 	echo "repository must be the root of its Git worktree" >&2
@@ -256,7 +277,7 @@ fi
 {
 	echo "generic: CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1; RUSTFLAGS unset"
 	echo "native: CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1; RUSTFLAGS=-C target-cpu=native"
-	echo "runner: 12 blocks; alternating ABBA/BAAB; taskset -c 0"
+	echo "runner: 12 blocks; alternating ABBA/BAAB; taskset pins the first CPU in the runner affinity mask, recorded per run in experiment-*/metadata.json"
 	echo "dataset: TOPIC31_ENTRIES=1048576 TOPIC31_QUERIES=65536 TOPIC31_REPS=8"
 } >"$output/build-flags.txt"
 
