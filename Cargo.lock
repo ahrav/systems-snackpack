@@ -125,3 +125,7 @@ version = "0.1.0"
 [[package]]
 name = "topic-021-store-write-path"
 version = "0.1.0"
+
+[[package]]
+name = "topic-033-wal-crash-consistency"
+version = "0.1.0"
