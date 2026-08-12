@@ -44,7 +44,7 @@ receipt.
 
 ## Promoted result
 
-- [Arm record](4f54c4d-arm.md)
-- [`xxl` record](4f54c4d-xxl.md)
-- [Cross-host comparison](4f54c4d-comparison.md)
-- [Raw archive manifest](raw/4f54c4d/SHA256SUMS)
+- [Arm record](2c67633-arm.md)
+- [`xxl` record](2c67633-xxl.md)
+- [Cross-host comparison](2c67633-comparison.md)
+- [Raw archive manifest](raw/2c67633/SHA256SUMS)
