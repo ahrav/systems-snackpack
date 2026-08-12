@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import platform
 import shutil
@@ -13,8 +14,23 @@ import sys
 import time
 from pathlib import Path
 
-
 SEED = 31082026
+RESULT_INT_FIELDS = (
+    "entries",
+    "queries",
+    "reps",
+    "lookups",
+    "setup_ns",
+    "nonsteady_ns",
+    "steady_ns",
+    "checksum",
+    "logical_narrow_index",
+    "logical_heap",
+    "logical_covering_index",
+    "rust_narrow_entry",
+    "rust_payload",
+    "rust_covering_entry",
+)
 ORDERS = ("narrow", "covering", "covering", "narrow"), (
     "covering",
     "narrow",
@@ -35,6 +51,29 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def result_matches_contract(
+    parsed: object, treatment: str, args: argparse.Namespace
+) -> bool:
+    """Reject probe output that is incomplete or contradicts the run contract."""
+
+    if not isinstance(parsed, dict) or parsed.get("treatment") != treatment:
+        return False
+    for field in RESULT_INT_FIELDS:
+        value = parsed.get(field)
+        if not isinstance(value, int) or isinstance(value, bool):
+            return False
+    ns_per_lookup = parsed.get("ns_per_lookup")
+    if not isinstance(ns_per_lookup, float) or not math.isfinite(ns_per_lookup):
+        return False
+    if ns_per_lookup <= 0:
+        return False
+    return (
+        parsed["entries"] == args.entries
+        and parsed["queries"] == args.queries
+        and parsed["reps"] == args.reps
+    )
+
+
 def main() -> int:
     args = parse_args()
     binary = args.binary.resolve()
@@ -47,6 +86,8 @@ def main() -> int:
     for name in ("entries", "queries", "reps"):
         if getattr(args, name) <= 0:
             raise SystemExit(f"--{name} must be positive")
+    if args.entries & (args.entries - 1):
+        raise SystemExit("--entries must be a power of two")
 
     args.output.mkdir(parents=True)
     env = os.environ.copy()
@@ -101,7 +142,7 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    failures = int(check.returncode != 0)
+    failures = 1 if check.returncode != 0 else 0
     runs_path = args.output / "runs.jsonl"
     with runs_path.open("w", encoding="utf-8") as runs_file:
         for block in range(args.blocks):
@@ -138,7 +179,9 @@ def main() -> int:
                 }
                 runs_file.write(json.dumps(record, sort_keys=True) + "\n")
                 runs_file.flush()
-                if completed.returncode != 0 or parsed is None:
+                if completed.returncode != 0 or not result_matches_contract(
+                    parsed, treatment, args
+                ):
                     failures += 1
 
     print(

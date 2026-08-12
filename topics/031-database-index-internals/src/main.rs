@@ -23,6 +23,11 @@ fn run() -> Result<(), String> {
     let entries = env_usize("TOPIC31_ENTRIES", DEFAULT_ENTRIES)?;
     let queries = env_usize("TOPIC31_QUERIES", DEFAULT_QUERIES)?;
     let reps = env_usize("TOPIC31_REPS", DEFAULT_REPS)?;
+    if !entries.is_power_of_two() {
+        return Err(format!(
+            "TOPIC31_ENTRIES must be a power of two, got {entries}"
+        ));
+    }
 
     if command == "check" {
         let corpus = Corpus::new(entries);

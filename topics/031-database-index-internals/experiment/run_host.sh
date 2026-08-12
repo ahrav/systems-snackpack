@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+export GIT_NO_REPLACE_OBJECTS=1
+
 if [[ $# -ne 4 ]]; then
 	echo "usage: run_host.sh REPOSITORY OUTPUT HOST_LABEL SOURCE_COMMIT" >&2
 	exit 2
@@ -25,6 +27,20 @@ if [[ ! $source_commit =~ ^[0-9a-f]{40}$ ]]; then
 fi
 if [[ -z $host_label || $host_label == *$'\n'* || $host_label == *$'\r'* ]]; then
 	echo "host label must be non-empty and single-line" >&2
+	exit 2
+fi
+machine_architecture=$(uname -m)
+case $host_label in
+arm) expected_architecture=aarch64 ;;
+xxl) expected_architecture=x86_64 ;;
+*)
+	echo "host label must be arm or xxl" >&2
+	exit 2
+	;;
+esac
+if [[ $machine_architecture != "$expected_architecture" ]]; then
+	printf 'host label %s requires architecture %s, found %s\n' \
+		"$host_label" "$expected_architecture" "$machine_architecture" >&2
 	exit 2
 fi
 if [[ ! -d $repository/topics/031-database-index-internals ]]; then
@@ -99,6 +115,21 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 trap 'exit 129' HUP
 
+{
+	echo "swept_prefixes=CARGO_ GIT_ RUST"
+	while IFS= read -r variable; do
+		case $variable in
+		CARGO_HOME | RUSTUP_HOME | GIT_NO_REPLACE_OBJECTS)
+			printf 'kept %s=%q\n' "$variable" "${!variable}"
+			;;
+		CARGO_* | GIT_* | RUST*)
+			echo "unset $variable"
+			unset "$variable"
+			;;
+		esac
+	done < <(compgen -e | LC_ALL=C sort)
+} >"$output/environment.before.txt"
+
 repository_root=$(git -C "$repository" rev-parse --show-toplevel)
 if [[ $(realpath "$repository_root") != "$repository" ]]; then
 	echo "repository must be the root of its Git worktree" >&2
@@ -138,6 +169,8 @@ fi
 
 {
 	printf 'host_label=%q\n' "$host_label"
+	echo "expected_architecture=$expected_architecture"
+	echo "machine_architecture=$machine_architecture"
 	echo "source_commit=$source_commit"
 	echo "source_archive_sha256=$source_archive_sha256"
 } >"$output/source_identity.txt"
@@ -184,7 +217,6 @@ run_gate() {
 
 export CARGO_NET_OFFLINE=true
 export CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1
-unset RUSTFLAGS || true
 run_gate cargo-fmt cargo fmt --all -- --check
 run_gate cargo-test-package-generic cargo test --locked \
 	--package database-index-internals

@@ -10,7 +10,6 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
-
 EXPECTED_ORDERS = {
     "ABBA": ("narrow", "covering", "covering", "narrow"),
     "BAAB": ("covering", "narrow", "narrow", "covering"),
@@ -23,6 +22,16 @@ LAYOUT_FIELDS = (
     "rust_payload",
     "rust_covering_entry",
 )
+RESULT_INT_FIELDS = (
+    "entries",
+    "queries",
+    "reps",
+    "lookups",
+    "setup_ns",
+    "nonsteady_ns",
+    "steady_ns",
+    "checksum",
+) + LAYOUT_FIELDS
 
 
 def geometric_mean(values: list[float]) -> float:
@@ -31,20 +40,59 @@ def geometric_mean(values: list[float]) -> float:
     return math.exp(statistics.fmean(math.log(value) for value in values))
 
 
+def result_error(record: dict, metadata: dict) -> str | None:
+    """Return why a record's result violates the probe contract, or None."""
+
+    result = record.get("result")
+    if record.get("exit_code") != 0 or not isinstance(result, dict):
+        return "did not complete"
+    if result.get("treatment") != record["treatment"]:
+        return "treatment mismatch"
+    for field in RESULT_INT_FIELDS:
+        value = result.get(field)
+        if not isinstance(value, int) or isinstance(value, bool):
+            return f"missing or non-integer {field}"
+    ns_per_lookup = result.get("ns_per_lookup")
+    if (
+        not isinstance(ns_per_lookup, float)
+        or not math.isfinite(ns_per_lookup)
+        or ns_per_lookup <= 0
+    ):
+        return "missing or non-finite ns_per_lookup"
+    for name in ("entries", "queries", "reps"):
+        if result[name] != metadata.get(name):
+            return f"{name} does not match run metadata"
+    return None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("output", type=Path)
     args = parser.parse_args()
-    metadata = json.loads((args.output / "metadata.json").read_text(encoding="utf-8"))
-    check = json.loads((args.output / "check.json").read_text(encoding="utf-8"))
-    records = [
-        json.loads(line)
-        for line in (args.output / "runs.jsonl").read_text(encoding="utf-8").splitlines()
-        if line
-    ]
-    blocks = int(metadata["blocks"])
+    try:
+        metadata = json.loads(
+            (args.output / "metadata.json").read_text(encoding="utf-8")
+        )
+        check = json.loads((args.output / "check.json").read_text(encoding="utf-8"))
+        records = [
+            json.loads(line)
+            for line in (args.output / "runs.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if line
+        ]
+    except (OSError, json.JSONDecodeError) as error:
+        print(f"ERROR: cannot load run evidence: {error}")
+        return 1
+    if not isinstance(metadata, dict) or not isinstance(check, dict):
+        print("ERROR: metadata.json and check.json must hold JSON objects")
+        return 1
+    blocks = metadata.get("blocks")
+    if not isinstance(blocks, int) or isinstance(blocks, bool) or blocks <= 0:
+        print("ERROR: metadata blocks must be a positive integer")
+        return 1
     errors: list[str] = []
-    if check["exit_code"] != 0 or "CHECK_OK" not in check["stdout"]:
+    if check.get("exit_code") != 0 or "CHECK_OK" not in check.get("stdout", ""):
         errors.append("fresh-process correctness check failed")
     if len(records) != blocks * 4:
         errors.append(f"expected {blocks * 4} records, found {len(records)}")
@@ -53,23 +101,31 @@ def main() -> int:
     treatments: dict[str, list[dict]] = defaultdict(list)
     checksum = None
     layout = None
-    for record in records:
-        block = int(record["block"])
-        by_block[block].append(record)
-        result = record.get("result")
-        if record["exit_code"] != 0 or not isinstance(result, dict):
-            errors.append(f"block {block} slot {record['slot']} did not complete")
+    for index, record in enumerate(records):
+        block = record.get("block")
+        slot = record.get("slot")
+        if (
+            not isinstance(block, int)
+            or not isinstance(slot, int)
+            or record.get("treatment") not in ("narrow", "covering")
+        ):
+            errors.append(f"record {index}: malformed run record")
             continue
-        if result.get("treatment") != record["treatment"]:
-            errors.append(f"block {block} slot {record['slot']} treatment mismatch")
-        value = result.get("checksum")
+        by_block[block].append(record)
+        problem = result_error(record, metadata)
+        if problem is not None:
+            errors.append(f"block {block} slot {slot} {problem}")
+            continue
+        record["result_valid"] = True
+        result = record["result"]
+        value = result["checksum"]
         checksum = value if checksum is None else checksum
         if value != checksum:
-            errors.append(f"block {block} slot {record['slot']} checksum mismatch")
-        current_layout = tuple(result.get(field) for field in LAYOUT_FIELDS)
+            errors.append(f"block {block} slot {slot} checksum mismatch")
+        current_layout = tuple(result[field] for field in LAYOUT_FIELDS)
         layout = current_layout if layout is None else layout
         if current_layout != layout:
-            errors.append(f"block {block} slot {record['slot']} layout mismatch")
+            errors.append(f"block {block} slot {slot} layout mismatch")
         treatments[record["treatment"]].append(result)
 
     block_ratios: list[float] = []
@@ -83,15 +139,15 @@ def main() -> int:
                 f"block {block}: expected {EXPECTED_ORDERS[order_name]}, found {observed}"
             )
             continue
-        if any(not isinstance(row.get("result"), dict) for row in block_records):
+        if any(not row.get("result_valid") for row in block_records):
             continue
         narrow = [
-            float(row["result"]["ns_per_lookup"])
+            row["result"]["ns_per_lookup"]
             for row in block_records
             if row["treatment"] == "narrow"
         ]
         covering = [
-            float(row["result"]["ns_per_lookup"])
+            row["result"]["ns_per_lookup"]
             for row in block_records
             if row["treatment"] == "covering"
         ]
@@ -107,7 +163,9 @@ def main() -> int:
             )
     if len(block_ratios) != blocks:
         errors.append(f"expected {blocks} complete block ratios, found {len(block_ratios)}")
-    if errors:
+    if checksum is None or layout is None:
+        errors.append("no valid probe results retained")
+    if errors or checksum is None or layout is None:
         for error in errors:
             print(f"ERROR: {error}")
         return 1
@@ -130,13 +188,13 @@ def main() -> int:
         per_treatment[treatment] = {
             "processes": len(results),
             "median_ns_per_lookup": statistics.median(
-                float(row["ns_per_lookup"]) for row in results
+                row["ns_per_lookup"] for row in results
             ),
             "median_setup_ms": statistics.median(
-                int(row["setup_ns"]) / 1_000_000 for row in results
+                row["setup_ns"] / 1_000_000 for row in results
             ),
             "median_nonsteady_ms": statistics.median(
-                int(row["nonsteady_ns"]) / 1_000_000 for row in results
+                row["nonsteady_ns"] / 1_000_000 for row in results
             ),
         }
 
@@ -162,7 +220,7 @@ def main() -> int:
         "fresh_processes": len(records),
         "processes_per_treatment": blocks * 2,
         "checksum": checksum,
-        "layout": dict(zip(LAYOUT_FIELDS, layout)),
+        "layout": {field: layout[i] for i, field in enumerate(LAYOUT_FIELDS)},
         "treatments": per_treatment,
         "narrow_over_covering": contrast,
     }
