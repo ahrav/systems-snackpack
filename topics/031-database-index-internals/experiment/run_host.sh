@@ -111,7 +111,7 @@ readonly PATH
 seal_evidence() {
 	(
 		cd "$output"
-		rg --files -0 --hidden --no-ignore \
+		rg --no-config --files -0 --hidden --no-ignore \
 			-g '!SHA256SUMS' -g '!SHA256SUMS.tmp' |
 			LC_ALL=C sort -z |
 			xargs -0 sha256sum >SHA256SUMS.tmp
@@ -182,7 +182,8 @@ trap 'exit 129' HUP
 		AR | ARFLAGS | AS | CC | CFLAGS | COMPILER_PATH | CPP | CPPFLAGS | \
 			CPATH | CPLUS_INCLUDE_PATH | CXX | CXXFLAGS | C_INCLUDE_PATH | \
 			GCC_EXEC_PREFIX | LD | LDFLAGS | LIBRARY_PATH | MAKEFLAGS | NM | \
-			OBJCOPY | OBJDUMP | PKG_CONFIG | PKG_CONFIG_PATH | RANLIB | STRIP | \
+			OBJCOPY | OBJDUMP | PKG_CONFIG | PKG_CONFIG_PATH | RANLIB | \
+			RIPGREP_CONFIG_PATH | STRIP | \
 			VIRTUAL_ENV | PYTHON* | CARGO_* | GIT_* | RUST*)
 			printf 'unset %s=%q\n' "$variable" "${!variable}"
 			unset "$variable"
@@ -217,7 +218,7 @@ if [[ -n $(git -C "$repository" status --porcelain=v1 --untracked-files=all) ]];
 	echo "exact-source measurement requires a clean worktree" >&2
 	exit 2
 fi
-if git -C "$repository" ls-files -v | rg -q '^(S|[a-z]) '; then
+if git -C "$repository" ls-files -v | rg --no-config -q '^(S|[a-z]) '; then
 	echo "exact-source measurement refuses skip-worktree or assume-unchanged files" >&2
 	exit 2
 fi
@@ -289,7 +290,7 @@ for tool in rustc cargo; do
 done
 (
 	cd "$sysroot/lib"
-	rg --files -0 --hidden --no-ignore |
+	rg --no-config --files -0 --hidden --no-ignore |
 		LC_ALL=C sort -z |
 		xargs -0 sha256sum
 ) >"$output/toolchain-sysroot.sha256"
@@ -409,12 +410,12 @@ sha256sum "$output/index-layout-probe.native" >"$output/binary.native.sha256"
 nm -n "$output/index-layout-probe.native" >"$output/binary.symbols.txt"
 symbols=(topic31_narrow_lookup topic31_covering_lookup)
 for symbol in "${symbols[@]}"; do
-	rg -q "[[:space:]][Tt][[:space:]]${symbol}$" "$output/binary.symbols.txt"
+	rg --no-config -q "[[:space:]][Tt][[:space:]]${symbol}$" "$output/binary.symbols.txt"
 	objdump -d --no-show-raw-insn --disassemble="$symbol" \
 		"$output/index-layout-probe.native"
 done >"$output/codegen.txt" 2>&1
 for symbol in "${symbols[@]}"; do
-	rg -q "<${symbol}>:" "$output/codegen.txt"
+	rg --no-config -q "<${symbol}>:" "$output/codegen.txt"
 done
 
 python3 -I "$topic/experiment/run_processes.py" \
