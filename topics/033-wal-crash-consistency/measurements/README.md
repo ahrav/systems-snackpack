@@ -36,3 +36,8 @@ contract.
 
 Raw logs are retained as one compressed archive per host. An outer
 `SHA256SUMS` file verifies the archives after retrieval.
+
+The host runner reads Git's embedded commit identifier from the transferred
+archive and requires it to match the recorded source commit. It records the
+archive digest but does not copy the full repository archive into each host
+receipt.

@@ -108,12 +108,16 @@ if [[ $actual_archive_sha256 != "$expected_archive_sha256" ]]; then
 	echo "source archive digest mismatch" >&2
 	exit 2
 fi
+archive_commit=$(gzip -dc "$source_archive" | git get-tar-commit-id)
+if [[ $archive_commit != "$source_commit" ]]; then
+	echo "Git archive commit $archive_commit does not match $source_commit" >&2
+	exit 2
+fi
 
 mkdir -p "$output/gates"
 trap finalize EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-cp "$source_archive" "$output/source.tar.gz"
 
 build_root=$(mktemp -d "${TMPDIR:-/tmp}/topic33-build-root.XXXXXXXX")
 touch "$build_root/.topic33-build-root"
