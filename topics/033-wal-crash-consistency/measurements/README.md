@@ -41,3 +41,10 @@ The host runner reads Git's embedded commit identifier from the transferred
 archive and requires it to match the recorded source commit. It records the
 archive digest but does not copy the full repository archive into each host
 receipt.
+
+## Promoted result
+
+- [Arm record](4f54c4d-arm.md)
+- [`xxl` record](4f54c4d-xxl.md)
+- [Cross-host comparison](4f54c4d-comparison.md)
+- [Raw archive manifest](raw/4f54c4d/SHA256SUMS)
