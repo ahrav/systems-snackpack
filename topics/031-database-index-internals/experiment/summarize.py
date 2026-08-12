@@ -32,6 +32,18 @@ RESULT_INT_FIELDS = (
     "steady_ns",
     "checksum",
 ) + LAYOUT_FIELDS
+# `Corpus::layout` reports `size_of` values for the three Rust entry types, and
+# `src/lib.rs` asserts the same three sizes.
+EXPECTED_ENTRY_BYTES = {
+    "rust_narrow_entry": 16,
+    "rust_payload": 16,
+    "rust_covering_entry": 24,
+}
+LOGICAL_ENTRY_SOURCE = {
+    "logical_narrow_index": "rust_narrow_entry",
+    "logical_heap": "rust_payload",
+    "logical_covering_index": "rust_covering_entry",
+}
 
 
 def geometric_mean(values: list[float]) -> float:
@@ -66,6 +78,12 @@ def result_error(record: dict, metadata: dict) -> str | None:
         ns_per_lookup, result["steady_ns"] / lookups, rel_tol=1e-9, abs_tol=1e-6
     ):
         return "ns_per_lookup contradicts steady_ns divided by lookups"
+    for field, expected in EXPECTED_ENTRY_BYTES.items():
+        if result[field] != expected:
+            return f"{field} is {result[field]}, expected {expected}"
+    for logical, entry in LOGICAL_ENTRY_SOURCE.items():
+        if result[logical] != result["entries"] * result[entry]:
+            return f"{logical} does not equal entries times {entry}"
     for name in ("entries", "queries", "reps"):
         if result[name] != metadata.get(name):
             return f"{name} does not match run metadata"

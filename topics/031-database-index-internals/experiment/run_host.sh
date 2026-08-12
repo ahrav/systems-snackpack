@@ -168,7 +168,7 @@ trap 'exit 143' TERM
 trap 'exit 129' HUP
 
 {
-	echo "swept_prefixes=CARGO_ GIT_ RUST LD_ DYLD_ MALLOC_"
+	echo "swept_prefixes=CARGO_ GIT_ RUST LD_ DYLD_ MALLOC_ PYTHON"
 	for variable_index in "${!loader_environment_names[@]}"; do
 		printf 'unset %s=%q\n' \
 			"${loader_environment_names[$variable_index]}" \
@@ -179,8 +179,12 @@ trap 'exit 129' HUP
 		RUSTUP_HOME | GIT_NO_REPLACE_OBJECTS)
 			printf 'kept %s=%q\n' "$variable" "${!variable}"
 			;;
-		CARGO_* | GIT_* | RUST*)
-			echo "unset $variable"
+		AR | ARFLAGS | AS | CC | CFLAGS | COMPILER_PATH | CPP | CPPFLAGS | \
+			CPATH | CPLUS_INCLUDE_PATH | CXX | CXXFLAGS | C_INCLUDE_PATH | \
+			GCC_EXEC_PREFIX | LD | LDFLAGS | LIBRARY_PATH | MAKEFLAGS | NM | \
+			OBJCOPY | OBJDUMP | PKG_CONFIG | PKG_CONFIG_PATH | RANLIB | STRIP | \
+			VIRTUAL_ENV | PYTHON* | CARGO_* | GIT_* | RUST*)
+			printf 'unset %s=%q\n' "$variable" "${!variable}"
 			unset "$variable"
 			;;
 		esac
@@ -248,6 +252,19 @@ if [[ -z $pinned_toolchain || $resolved_rustc != "$pinned_toolchain" ]]; then
 	printf 'resolved rustc %s does not match pinned toolchain %s\n' \
 		"$resolved_rustc" "${pinned_toolchain:-unparsed}" >&2
 	exit 2
+fi
+
+# On a rustup host, cargo and rustc on PATH are shims.
+if rustup_path=$(type -P rustup); then
+	{
+		printf 'rustup_path=%q\n' "$rustup_path"
+		for tool in rustc cargo; do
+			selected_tool_path=$(cd "$build_root" && "$rustup_path" which "$tool")
+			selected_tool_sha256=$(sha256sum "$selected_tool_path" | awk '{print $1}')
+			printf 'rustup_selected_%s_path=%q\nrustup_selected_%s_sha256=%s\n' \
+				"$tool" "$selected_tool_path" "$tool" "$selected_tool_sha256"
+		done
+	} >>"$output/tool-provenance.txt"
 fi
 
 {

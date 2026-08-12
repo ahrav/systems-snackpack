@@ -31,6 +31,18 @@ RESULT_INT_FIELDS = (
     "rust_payload",
     "rust_covering_entry",
 )
+# `Corpus::layout` reports `size_of` values for the three Rust entry types, and
+# `src/lib.rs` asserts the same three sizes.
+EXPECTED_ENTRY_BYTES = {
+    "rust_narrow_entry": 16,
+    "rust_payload": 16,
+    "rust_covering_entry": 24,
+}
+LOGICAL_ENTRY_SOURCE = {
+    "logical_narrow_index": "rust_narrow_entry",
+    "logical_heap": "rust_payload",
+    "logical_covering_index": "rust_covering_entry",
+}
 ORDERS = ("narrow", "covering", "covering", "narrow"), (
     "covering",
     "narrow",
@@ -74,6 +86,12 @@ def result_matches_contract(
         ns_per_lookup, parsed["steady_ns"] / lookups, rel_tol=1e-9, abs_tol=1e-6
     ):
         return False
+    for field, expected in EXPECTED_ENTRY_BYTES.items():
+        if parsed[field] != expected:
+            return False
+    for logical, entry in LOGICAL_ENTRY_SOURCE.items():
+        if parsed[logical] != parsed["entries"] * parsed[entry]:
+            return False
     return (
         parsed["entries"] == args.entries
         and parsed["queries"] == args.queries
