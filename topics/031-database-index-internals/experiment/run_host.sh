@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# The guards precede function definitions so compgen sees only inherited
+# functions.
+if [[ -n ${BASH_ENV:-} ]]; then
+	echo "exact-source measurement refuses a BASH_ENV startup hook" >&2
+	exit 2
+fi
+if [[ -n $(compgen -A function) ]]; then
+	echo "exact-source measurement refuses inherited shell functions" >&2
+	exit 2
+fi
+
 export GIT_NO_REPLACE_OBJECTS=1
 
 if [[ $# -ne 4 ]]; then
@@ -14,6 +25,7 @@ host_label=$3
 source_commit=$4
 run_started_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)
 source_archive_sha256=not-recorded
+cargo_home=
 build_root=
 run_completed=0
 
@@ -31,10 +43,10 @@ if [[ -z $host_label || $host_label == *$'\n'* || $host_label == *$'\r'* ]]; the
 fi
 machine_architecture=$(uname -m)
 case $host_label in
-arm) expected_architecture=aarch64 ;;
-xxl) expected_architecture=x86_64 ;;
+arm | arm-required) expected_architecture=aarch64 ;;
+xxl | xxl-resolved) expected_architecture=x86_64 ;;
 *)
-	echo "host label must be arm or xxl" >&2
+	echo "host label must be arm, arm-required, xxl, or xxl-resolved" >&2
 	exit 2
 	;;
 esac
@@ -81,30 +93,43 @@ seal_evidence() {
 	)
 }
 
+write_run_status() {
+	local status=$1
+	local exit_code=$2
+	{
+		echo "status=$status"
+		echo "exit_code=$exit_code"
+		echo "run_started_utc=$run_started_utc"
+		echo "run_finished_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)"
+		printf 'host_label=%q\n' "$host_label"
+		echo "source_commit=$source_commit"
+		echo "source_archive_sha256=$source_archive_sha256"
+	} >"$output/run.status"
+}
+
 finish() {
 	local exit_code=$?
 	trap - EXIT
 	set +e
+	if [[ -n $cargo_home && -f $cargo_home/.topic31-cargo-home ]]; then
+		rm -rf "$cargo_home"
+	fi
 	if [[ -n $build_root && -f $build_root/.topic31-build-root ]]; then
 		rm -rf "$build_root"
 	fi
 	if [[ -d $output ]]; then
 		if ((exit_code == 0 && run_completed == 1)); then
-			status=success
+			write_run_status success 0
 		else
-			status=failed
 			((exit_code == 0)) && exit_code=1
+			write_run_status failed "$exit_code"
 		fi
-		{
-			echo "status=$status"
-			echo "exit_code=$exit_code"
-			echo "run_started_utc=$run_started_utc"
-			echo "run_finished_utc=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ)"
-			printf 'host_label=%q\n' "$host_label"
-			echo "source_commit=$source_commit"
-			echo "source_archive_sha256=$source_archive_sha256"
-		} >"$output/run.status"
-		seal_evidence || exit_code=1
+		if ! seal_evidence; then
+			exit_code=1
+			write_run_status failed 1
+			printf 'failure_reason=evidence_seal_failed\n' >>"$output/run.status"
+			seal_evidence || true
+		fi
 	fi
 	exit "$exit_code"
 }
@@ -119,7 +144,7 @@ trap 'exit 129' HUP
 	echo "swept_prefixes=CARGO_ GIT_ RUST"
 	while IFS= read -r variable; do
 		case $variable in
-		CARGO_HOME | RUSTUP_HOME | GIT_NO_REPLACE_OBJECTS)
+		RUSTUP_HOME | GIT_NO_REPLACE_OBJECTS)
 			printf 'kept %s=%q\n' "$variable" "${!variable}"
 			;;
 		CARGO_* | GIT_* | RUST*)
@@ -155,6 +180,10 @@ source_archive_sha256=$(sha256sum "$output/source.tar.gz" | awk '{print $1}')
 
 build_root=$(mktemp -d "${TMPDIR:-/tmp}/topic31-build-root.XXXXXXXX")
 touch "$build_root/.topic31-build-root"
+cargo_home=$(mktemp -d "${TMPDIR:-/tmp}/topic31-cargo-home.XXXXXXXX")
+touch "$cargo_home/.topic31-cargo-home"
+export CARGO_HOME="$cargo_home"
+printf 'CARGO_HOME=%q\n' "$CARGO_HOME" >"$output/environment.effective.txt"
 tar -xzf "$output/source.tar.gz" -C "$build_root"
 topic="$build_root/topics/031-database-index-internals"
 
