@@ -236,9 +236,9 @@ git -C "$repository" archive --format=tar "$source_commit" |
 	gzip -n -9 >"$output/source.tar.gz"
 source_archive_sha256=$(sha256sum "$output/source.tar.gz" | awk '{print $1}')
 
-build_root=$(mktemp -d "${TMPDIR:-/tmp}/topic31-build-root.XXXXXXXX")
+build_root=$(realpath "$(mktemp -d "${TMPDIR:-/tmp}/topic31-build-root.XXXXXXXX")")
 touch "$build_root/.topic31-build-root"
-cargo_home=$(mktemp -d "${TMPDIR:-/tmp}/topic31-cargo-home.XXXXXXXX")
+cargo_home=$(realpath "$(mktemp -d "${TMPDIR:-/tmp}/topic31-cargo-home.XXXXXXXX")")
 touch "$cargo_home/.topic31-cargo-home"
 export CARGO_HOME="$cargo_home"
 printf 'CARGO_HOME=%q\n' "$CARGO_HOME" >"$output/environment.effective.txt"
@@ -260,7 +260,8 @@ while :; do
 	if [[ $config_dir == / ]]; then
 		break
 	fi
-	config_dir=$(dirname "$config_dir")
+	config_dir=${config_dir%/*}
+	config_dir=${config_dir:-/}
 done
 
 pinned_toolchain=$(sed -n 's/^channel = "\(.*\)"$/\1/p' \
@@ -272,22 +273,59 @@ if [[ -z $pinned_toolchain || $resolved_rustc != "$pinned_toolchain" ]]; then
 	exit 2
 fi
 
-# On a rustup host, cargo and rustc on PATH are shims.
+# Cargo links rlibs and dylibs out of the selected toolchain's sysroot, and a
+# front-end digest does not change when those bytes do. The invoked compiler
+# reports the sysroot itself, so no helper is trusted to name it.
+sysroot=$(cd "$build_root" && rustc --print sysroot)
+if [[ ! -d $sysroot/lib ]]; then
+	echo "toolchain sysroot library directory is absent: $sysroot/lib" >&2
+	exit 2
+fi
+for tool in rustc cargo; do
+	if [[ ! -x $sysroot/bin/$tool ]]; then
+		echo "toolchain sysroot lacks an executable $tool: $sysroot/bin/$tool" >&2
+		exit 2
+	fi
+done
+(
+	cd "$sysroot/lib"
+	rg --files -0 --hidden --no-ignore |
+		LC_ALL=C sort -z |
+		xargs -0 sha256sum
+) >"$output/toolchain-sysroot.sha256"
+{
+	printf 'toolchain_sysroot=%q\n' "$sysroot"
+	for tool in rustc cargo; do
+		selected_tool_path=$(realpath "$sysroot/bin/$tool")
+		selected_tool_sha256=$(sha256sum "$selected_tool_path" | awk '{print $1}')
+		printf 'selected_%s_path=%q\nselected_%s_sha256=%s\n' \
+			"$tool" "$selected_tool_path" "$tool" "$selected_tool_sha256"
+	done
+	printf 'toolchain_sysroot_manifest_sha256=%s\n' \
+		"$(sha256sum "$output/toolchain-sysroot.sha256" | awk '{print $1}')"
+} >>"$output/tool-provenance.txt"
+
+# rustup is optional and unbound, so its answer is recorded and cross-checked
+# against the sysroot rather than believed.
 if rustup_path=$(type -P rustup); then
 	{
 		printf 'rustup_path=%q\n' "$rustup_path"
+		printf 'rustup_sha256=%s\n' \
+			"$(sha256sum "$(realpath "$rustup_path")" | awk '{print $1}')"
 		for tool in rustc cargo; do
-			selected_tool_path=$(cd "$build_root" && "$rustup_path" which "$tool")
-			selected_tool_sha256=$(sha256sum "$selected_tool_path" | awk '{print $1}')
-			printf 'rustup_selected_%s_path=%q\nrustup_selected_%s_sha256=%s\n' \
-				"$tool" "$selected_tool_path" "$tool" "$selected_tool_sha256"
+			rustup_selected_path=$(cd "$build_root" && "$rustup_path" which "$tool")
+			printf 'rustup_selected_%s_path=%q\n' "$tool" "$rustup_selected_path"
 		done
 	} >>"$output/tool-provenance.txt"
+	for tool in rustc cargo; do
+		rustup_selected_path=$(cd "$build_root" && "$rustup_path" which "$tool")
+		if [[ $(realpath "$rustup_selected_path") != $(realpath "$sysroot/bin/$tool") ]]; then
+			printf 'rustup which %s reports %s, sysroot holds %s\n' \
+				"$tool" "$rustup_selected_path" "$sysroot/bin/$tool" >&2
+			exit 2
+		fi
+	done
 fi
-
-# Cargo links rlibs and dylibs out of the selected toolchain's sysroot, and the
-# front-end digests above do not change when those bytes do.
-sysroot=$(cd "$build_root" && rustc --print sysroot)
 if [[ ! -d $sysroot/lib ]]; then
 	echo "toolchain sysroot library directory is absent: $sysroot/lib" >&2
 	exit 2
