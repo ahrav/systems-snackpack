@@ -99,6 +99,7 @@ def main() -> int:
 
     by_block: dict[int, list[dict]] = defaultdict(list)
     treatments: dict[str, list[dict]] = defaultdict(list)
+    seen_slots: set[tuple[int, int]] = set()
     checksum = None
     layout = None
     for index, record in enumerate(records):
@@ -106,11 +107,20 @@ def main() -> int:
         slot = record.get("slot")
         if (
             not isinstance(block, int)
+            or isinstance(block, bool)
             or not isinstance(slot, int)
+            or isinstance(slot, bool)
             or record.get("treatment") not in ("narrow", "covering")
         ):
             errors.append(f"record {index}: malformed run record")
             continue
+        if not 0 <= block < blocks or not 0 <= slot < 4:
+            errors.append(f"record {index}: block {block} slot {slot} out of range")
+            continue
+        if (block, slot) in seen_slots:
+            errors.append(f"record {index}: duplicate block {block} slot {slot}")
+            continue
+        seen_slots.add((block, slot))
         by_block[block].append(record)
         problem = result_error(record, metadata)
         if problem is not None:
