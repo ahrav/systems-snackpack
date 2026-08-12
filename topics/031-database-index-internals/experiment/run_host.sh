@@ -245,6 +245,24 @@ printf 'CARGO_HOME=%q\n' "$CARGO_HOME" >"$output/environment.effective.txt"
 tar -xzf "$output/source.tar.gz" -C "$build_root"
 topic="$build_root/topics/031-database-index-internals"
 
+# Cargo reads .cargo/config.toml from the working directory and every ancestor
+# before $CARGO_HOME, so a config above the caller-controlled TMPDIR would add
+# rustflags or a wrapper that no recorded input names.
+config_dir=$build_root
+while :; do
+	for config_name in config.toml config; do
+		if [[ -f $config_dir/.cargo/$config_name ]]; then
+			printf 'unrecorded Cargo configuration: %s\n' \
+				"$config_dir/.cargo/$config_name" >&2
+			exit 2
+		fi
+	done
+	if [[ $config_dir == / ]]; then
+		break
+	fi
+	config_dir=$(dirname "$config_dir")
+done
+
 pinned_toolchain=$(sed -n 's/^channel = "\(.*\)"$/\1/p' \
 	"$build_root/rust-toolchain.toml")
 resolved_rustc=$(cd "$build_root" && rustc --version | awk '{print $2}')
@@ -266,6 +284,25 @@ if rustup_path=$(type -P rustup); then
 		done
 	} >>"$output/tool-provenance.txt"
 fi
+
+# Cargo links rlibs and dylibs out of the selected toolchain's sysroot, and the
+# front-end digests above do not change when those bytes do.
+sysroot=$(cd "$build_root" && rustc --print sysroot)
+if [[ ! -d $sysroot/lib ]]; then
+	echo "toolchain sysroot library directory is absent: $sysroot/lib" >&2
+	exit 2
+fi
+(
+	cd "$sysroot/lib"
+	rg --files -0 --hidden --no-ignore |
+		LC_ALL=C sort -z |
+		xargs -0 sha256sum
+) >"$output/toolchain-sysroot.sha256"
+{
+	printf 'toolchain_sysroot=%q\n' "$sysroot"
+	printf 'toolchain_sysroot_manifest_sha256=%s\n' \
+		"$(sha256sum "$output/toolchain-sysroot.sha256" | awk '{print $1}')"
+} >>"$output/tool-provenance.txt"
 
 {
 	printf 'host_label=%q\n' "$host_label"
