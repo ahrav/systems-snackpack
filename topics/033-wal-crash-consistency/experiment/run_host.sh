@@ -23,12 +23,12 @@ while IFS= read -r variable; do
 	case $variable in
 	RUSTUP_HOME) ;;
 	LD_* | DYLD_* | GLIBC_TUNABLES | MALLOC_* | \
-		AR | ARFLAGS | AS | CC | CFLAGS | CPP | CPPFLAGS | CXX | CXXFLAGS | \
-		LD | LDFLAGS | LIBRARY_PATH | CPATH | C_INCLUDE_PATH | \
-		CPLUS_INCLUDE_PATH | MAKEFLAGS | NM | OBJCOPY | OBJDUMP | \
-		PKG_CONFIG | PKG_CONFIG_PATH | RANLIB | RIPGREP_CONFIG_PATH | \
-		STRIP | TAR_OPTIONS | GZIP | PYTHON* | VIRTUAL_ENV | CARGO_* | \
-		GIT_* | RUST*)
+		AR | ARFLAGS | AS | CC | CFLAGS | COMPILER_PATH | CPP | CPPFLAGS | \
+		CXX | CXXFLAGS | GCC_EXEC_PREFIX | LD | LDFLAGS | LIBRARY_PATH | \
+		CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | MAKEFLAGS | NM | \
+		OBJCOPY | OBJDUMP | PKG_CONFIG | PKG_CONFIG_PATH | RANLIB | \
+		RIPGREP_CONFIG_PATH | STRIP | TAR_OPTIONS | GZIP | PYTHON* | \
+		VIRTUAL_ENV | CARGO_* | GIT_* | RUST*)
 		swept_environment_names+=("$variable")
 		unset "$variable"
 		;;
@@ -38,6 +38,29 @@ if [[ -s /etc/ld.so.preload ]]; then
 	echo "exact-source measurement refuses /etc/ld.so.preload interposition" >&2
 	exit 2
 fi
+
+# Bind required commands to absolute paths before use so PATH cannot select
+# different executables between the presence check and the call, and so the
+# recorded toolchain identities come from the same binaries the gates run.
+required_tools=(
+	awk bash cargo cc cmp cp date dirname env find findmnt getconf git gzip
+	hostname lsblk lscpu mkdir mktemp mv nm objdump python3 realpath rg rm
+	rustc sed sha256sum sort tar touch uname xargs cargo-clippy cargo-fmt
+)
+declare -A tool_paths
+for tool in "${required_tools[@]}"; do
+	if ! tool_path=$(type -P "$tool"); then
+		echo "required tool is absent from PATH: $tool" >&2
+		exit 2
+	fi
+	if [[ $tool_path != /* ]]; then
+		echo "required tool did not resolve to an absolute path: $tool_path" >&2
+		exit 2
+	fi
+	tool_paths[$tool]=$tool_path
+	hash -p "$tool_path" "$tool"
+done
+readonly PATH
 
 if [[ $# -ne 5 ]]; then
 	echo "usage: run_host.sh SOURCE.tar.gz OUTPUT HOST_LABEL SOURCE_COMMIT EXPECTED_ARCHIVE_SHA256" >&2
@@ -160,6 +183,23 @@ trap 'exit 143' TERM
 	fi
 } >"$output/environment.before.txt"
 
+{
+	printf 'bash_path=%q\nbash_version=%q\nPATH=%q\n' \
+		"$BASH" "$BASH_VERSION" "$PATH"
+	resolved_bash_path=$(realpath "$BASH")
+	printf 'bash_resolved_path=%q\nbash_sha256=%s\n' \
+		"$resolved_bash_path" \
+		"$(sha256sum "$resolved_bash_path" | awk '{print $1}')"
+	for tool in "${required_tools[@]}"; do
+		tool_path=${tool_paths[$tool]}
+		resolved_tool_path=$(realpath "$tool_path")
+		tool_sha256=$(sha256sum "$resolved_tool_path" | awk '{print $1}')
+		printf '%s_path=%q\n%s_resolved_path=%q\n%s_sha256=%s\n' \
+			"$tool" "$tool_path" "$tool" "$resolved_tool_path" \
+			"$tool" "$tool_sha256"
+	done
+} >"$output/tool-provenance.txt"
+
 build_root=$(mktemp -d "${TMPDIR:-/tmp}/topic33-build-root.XXXXXXXX")
 touch "$build_root/.topic33-build-root"
 tar -xzf "$source_archive" -C "$build_root"
@@ -168,6 +208,27 @@ if [[ ! -d $topic ]]; then
 	echo "Topic 33 source is absent from archive" >&2
 	exit 2
 fi
+
+# Cargo reads .cargo/config.toml from the working directory and every ancestor
+# before $CARGO_HOME, so a config above the caller-controlled TMPDIR could add
+# rustflags, a rustc wrapper, or source replacement that no recorded input
+# names.
+config_scan_directory=$build_root
+while :; do
+	for cargo_config in \
+		"$config_scan_directory/.cargo/config.toml" \
+		"$config_scan_directory/.cargo/config"; do
+		if [[ -e $cargo_config ]]; then
+			echo "unrecorded Cargo config would alter builds: $cargo_config" >&2
+			exit 2
+		fi
+	done
+	if [[ $config_scan_directory == / ]]; then
+		break
+	fi
+	config_scan_directory=$(dirname "$config_scan_directory")
+done
+
 pinned_toolchain=$(sed -n 's/^channel = "\(.*\)"$/\1/p' "$build_root/rust-toolchain.toml")
 if [[ -z $pinned_toolchain ]]; then
 	echo "could not parse pinned Rust toolchain" >&2

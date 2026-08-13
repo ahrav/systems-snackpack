@@ -56,12 +56,14 @@ The promoted records ran the source of commit
 history. That runner predates two later changes: the environment hardening
 that sweeps inherited loader and toolchain variables (`LD_*`, `DYLD_*`,
 `GLIBC_TUNABLES`, `CARGO_*`, `RUST*`, `RIPGREP_CONFIG_PATH`, `TAR_OPTIONS`,
-`GZIP`), refuses `/etc/ld.so.preload` interposition, and passes `--no-config`
-to ripgrep; and the recovery check that rejects frames with nonzero flags or
-reserved header fields. Those archives therefore contain no
-`environment.before.txt` and do not attest the absence of inherited
-environment state, and the measured binaries accept nonzero flags that the
-current source rejects.
+`GZIP`, `COMPILER_PATH`, `GCC_EXEC_PREFIX`), refuses `/etc/ld.so.preload`
+interposition, binds required tools to recorded absolute paths, rejects
+ancestor `.cargo/config.toml` files above the build root, and passes
+`--no-config` to ripgrep; and the recovery check that rejects frames with
+nonzero flags or reserved header fields. Those archives therefore contain no
+`environment.before.txt` and no `tool-provenance.txt`, and do not attest the
+absence of inherited environment state, and the measured binaries accept
+nonzero flags that the current source rejects.
 
 Everything else the records attest is unchanged: source commit and archive
 digest, host and toolchain identity, build flags, binary hashes and
