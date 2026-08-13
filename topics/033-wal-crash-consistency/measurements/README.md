@@ -52,15 +52,20 @@ receipt.
 ### Pre-hardening attestation scope
 
 The promoted records ran the source of commit
-`2c67633c2dbb7b5d56a247767d06293687e4827c`, which remains an ancestor of this
-history. That runner and probe predate the review-driven hardening series:
+`2c67633c2dbb7b5d56a247767d06293687e4827c`, an ancestor of this branch. The
+commit stays reproducible in the merged history only under this repository's
+merge-commit convention; a squash or rebase merge would drop it, and these
+records would then attest an unreachable source object and need relabeling
+against a reachable commit before promotion. That runner and probe predate
+the review-driven hardening series:
 loader and toolchain environment sweeps that run before any external command,
 the `BASH_ENV` sanitizing re-exec, binding and hashing of every required tool
 and of the rustup-dispatched `rustc`, `cargo`, `rustdoc`, `cargo-fmt`, and
 `cargo-clippy`, refusal of ambient `.cargo`, rustfmt, and Clippy configs in
 ancestor directories, verify-then-extract handling of a private archive copy,
 the fail-closed tmpfs gate, hermetic (`-I -S`) receipt validation, the
-probe's direct `SIGKILL` with waited-signal verification, and the recovery
+probe's direct `SIGKILL` with waited-signal verification and per-cut
+durability floors, and the recovery
 check that rejects frames with nonzero flags or reserved header fields. Those
 archives therefore contain no `environment.before.txt`,
 `tool-provenance.txt`, or `toolchain-dispatch.txt`, do not attest the absence

@@ -89,7 +89,7 @@ fn wait_at_cut(requested: &str, current: &str) -> Result<(), String> {
     Ok(())
 }
 
-fn run_crash_case(directory: &Path, cut: &str) -> Result<(), String> {
+fn run_crash_case(directory: &Path, cut: &str, cut_floor_lsn: u64) -> Result<(), String> {
     let executable = env::current_exe().map_err(|error| error.to_string())?;
     let path = directory.join(format!("process-crash-{}-{cut}.wal", std::process::id()));
     let mut child = Command::new(executable)
@@ -144,14 +144,19 @@ fn run_crash_case(directory: &Path, cut: &str) -> Result<(), String> {
     if status.signal() != Some(SIGKILL) {
         return Err(format!("writer_not_sigkilled:{status}"));
     }
-    let recovered_lsn = recover_file(&path, observed_ack)?;
-    if recovered_lsn < observed_ack {
+    // The externally observed ACK is one durability witness; the cut itself
+    // is another. At after_sync_N the child's fdatasync for N returned before
+    // the kill, so N must survive even though ACK,N was never emitted —
+    // requiring only observed_ack would let a lost synchronized record pass.
+    let required_lsn = observed_ack.max(cut_floor_lsn);
+    let recovered_lsn = recover_file(&path, required_lsn)?;
+    if recovered_lsn < required_lsn {
         return Err(format!(
-            "acknowledged_history_missing:ack={observed_ack}:recovered={recovered_lsn}"
+            "durable_history_missing:required={required_lsn}:ack={observed_ack}:recovered={recovered_lsn}"
         ));
     }
     println!(
-        "PROCESS_CRASH,status=pass,cut={cut},external_ack_lsn={observed_ack},recovered_lsn={recovered_lsn},model=SIGKILL_live_kernel_not_power_loss"
+        "PROCESS_CRASH,status=pass,cut={cut},external_ack_lsn={observed_ack},required_lsn={required_lsn},recovered_lsn={recovered_lsn},model=SIGKILL_live_kernel_not_power_loss"
     );
     Ok(())
 }
@@ -159,8 +164,15 @@ fn run_crash_case(directory: &Path, cut: &str) -> Result<(), String> {
 fn process_crash(directory: &Path) -> Result<(), String> {
     fs::create_dir_all(directory)
         .map_err(|error| format!("create directory {}: {error}", directory.display()))?;
-    for cut in ["after_write_2", "after_sync_2", "after_ack_2"] {
-        run_crash_case(directory, cut)?;
+    // after_write_2: LSN 2 is written but unsynchronized, so only the
+    // acknowledged history is required. after_sync_2 and after_ack_2: the
+    // fdatasync for LSN 2 completed before the kill, so LSN 2 is required.
+    for (cut, cut_floor_lsn) in [
+        ("after_write_2", 0),
+        ("after_sync_2", 2),
+        ("after_ack_2", 2),
+    ] {
+        run_crash_case(directory, cut, cut_floor_lsn)?;
     }
     println!(
         "PROCESS_CRASH_SCOPE,status=pass,kernel_and_filesystem_remained_live=true,kernel_writeback_after_kill=possible,power_loss=false"

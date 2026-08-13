@@ -4,12 +4,14 @@ set -Eeuo pipefail
 # A BASH_ENV hook is sourced before this script's first line runs and can
 # unset BASH_ENV, so an in-script check cannot prove the hook's absence.
 # Re-exec once with BASH_ENV removed from the environment so the executing
-# shell never sourced a hook; aliases, options, and functions a hook set do
-# not survive the exec. Inherited loader variables are unset with shell
-# builtins first — /usr/bin/env and the new bash are dynamically linked, so
-# an interposed loader would otherwise run inside the sanitizing exec itself.
-# The swept names ride through the exec (names only, never values) so the
-# evidence record still lists them.
+# shell never sourced a hook; aliases, options, functions, traps, and
+# disabled builtins a hook set do not survive the exec. The exec target is
+# /proc/self/exe — the kernel-provided path of the running bash image — not
+# "$BASH", which a hook can reassign to a wrapper. Inherited loader variables
+# are unset with shell builtins first — /usr/bin/env and the re-executed
+# interpreter are dynamically linked, so an interposed loader would otherwise
+# run inside the sanitizing exec itself. The swept names ride through the
+# exec (names only, never values) so the evidence record still lists them.
 if [[ -z ${TOPIC33_BASH_ENV_SANITIZED:-} ]]; then
 	pre_exec_swept=()
 	while IFS= read -r variable; do
@@ -22,7 +24,7 @@ if [[ -z ${TOPIC33_BASH_ENV_SANITIZED:-} ]]; then
 	done < <(compgen -e)
 	TOPIC33_BASH_ENV_SANITIZED=1 \
 		TOPIC33_PRE_EXEC_SWEPT="${pre_exec_swept[*]}" \
-		exec /usr/bin/env -u BASH_ENV "$BASH" "$0" "$@"
+		exec /usr/bin/env -u BASH_ENV /proc/self/exe "$0" "$@"
 fi
 # Fires only when the sentinel was pre-set from outside, which skips the
 # re-exec above.
@@ -32,11 +34,17 @@ if [[ -n ${BASH_ENV:-} ]]; then
 fi
 # The sentinel is caller-forgeable: a host can pre-set it so a hook runs and
 # the re-exec is skipped. Neutralize what a hook leaves behind instead of
-# trusting the marker — the backslash on the command word defeats alias
-# expansion even when a hook enabled it, and the function refusal below
-# rejects hook-defined functions.
+# trusting the marker — re-enable the builtins the sweep depends on (a hook
+# could have run `enable -n compgen`; if `enable` itself is disabled this
+# line fails and errexit refuses the run), clear aliases with a
+# backslash-escaped command word so alias expansion cannot rewrite it, and
+# drop hook-installed DEBUG/ERR/RETURN traps that would otherwise run around
+# every later command. The function refusal below rejects hook-defined
+# functions.
+\enable compgen read unset unalias shopt trap type hash printf echo exec
 \unalias -a
 \shopt -u expand_aliases
+\trap - DEBUG ERR RETURN
 if [[ -n $(compgen -A function) ]]; then
 	echo "exact-source measurement refuses inherited shell functions" >&2
 	exit 2
