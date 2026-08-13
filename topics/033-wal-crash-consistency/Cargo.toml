@@ -1,0 +1,17 @@
+[package]
+name = "topic-033-wal-crash-consistency"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "wal_crash_consistency"
+path = "src/lib.rs"
+
+[[bin]]
+name = "wal-crash-probe"
+path = "src/bin/wal_crash_probe.rs"
+
+[lints]
+workspace = true
