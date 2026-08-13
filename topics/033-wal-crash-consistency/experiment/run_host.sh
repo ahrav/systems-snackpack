@@ -19,12 +19,21 @@ set -Eeuo pipefail
 # no in-process check survives that adversary. The defense there is the
 # operator contract plus the recorded tool and environment provenance.
 bash_env_was_present=0
+env_scrub_args=()
 while IFS= read -r -d '' environ_entry; do
 	case $environ_entry in
-	BASH_ENV=*) bash_env_was_present=1 ;;
+	BASH_ENV=*)
+		bash_env_was_present=1
+		;;
+	# Exported functions (BASH_FUNC_name%%=() {...}) shadow builtins —
+	# including the guards below — the moment bash imports them, so they
+	# must be stripped by re-exec, not tested for in-shell.
+	BASH_FUNC_*%%=*)
+		env_scrub_args+=(-u "${environ_entry%%=*}")
+		;;
 	esac
 done </proc/self/environ
-if ((bash_env_was_present)); then
+if ((bash_env_was_present || ${#env_scrub_args[@]} > 0)); then
 	pre_exec_swept=()
 	while IFS= read -r variable; do
 		case $variable in
@@ -35,10 +44,10 @@ if ((bash_env_was_present)); then
 		esac
 	done < <(compgen -e)
 	TOPIC33_PRE_EXEC_SWEPT="${pre_exec_swept[*]}" \
-		exec /usr/bin/env -u BASH_ENV /proc/self/exe "$0" "$@"
+		exec /usr/bin/env -u BASH_ENV ${env_scrub_args[@]+"${env_scrub_args[@]}"} \
+		/proc/self/exe "$0" "$@"
 fi
-# Exported functions (BASH_FUNC_* environment entries) arrive without any
-# BASH_ENV hook, so this refusal is needed even on the hook-free path.
+# Backstop only: the re-exec above strips every importable function source.
 if [[ -n $(compgen -A function) ]]; then
 	echo "exact-source measurement refuses inherited shell functions" >&2
 	exit 2
@@ -85,10 +94,10 @@ fi
 # execute different bytes than the hashed resolved target. realpath resolves
 # first because the loop needs it.
 required_tools=(
-	awk bash cargo cc cmp cp date dirname find findmnt getconf git gzip
-	hostname lsblk lscpu mkdir mktemp mv nm objdump python3 realpath rg rm
-	rustc rustdoc sed sha256sum sort tar touch uname xargs cargo-clippy
-	cargo-fmt
+	awk bash cargo cc clippy-driver cmp cp date dirname find findmnt getconf
+	git gzip hostname lsblk lscpu mkdir mktemp mv nm objdump python3 realpath
+	rg rm rustc rustdoc rustfmt sed sha256sum sort tar touch uname xargs
+	cargo-clippy cargo-fmt
 )
 if ! realpath_path=$(type -P realpath) || [[ $realpath_path != /* ]]; then
 	echo "required tool realpath is absent from PATH" >&2
@@ -269,7 +278,10 @@ trap 'exit 143' TERM
 	done
 } >"$output/tool-provenance.txt"
 
-tar -xzf "$verified_archive" -C "$build_root"
+# Decompress with the shell-bound gzip and hand tar the plain stream: tar -z
+# starts its own gzip through PATH, outside the hash binding, and pipefail
+# propagates a gzip failure.
+gzip -dc "$verified_archive" | tar -xf - -C "$build_root"
 topic="$build_root/topics/033-wal-crash-consistency"
 if [[ ! -d $topic ]]; then
 	echo "Topic 33 source is absent from archive" >&2
@@ -315,27 +327,38 @@ fi
 # The bound rustc/cargo paths are rustup proxies, so their hashes do not
 # identify the compiler rustup dispatches to; an ambient RUSTUP_HOME could
 # supply an unrecorded toolchain that reports the pinned version. Record the
-# dispatched binaries and check the version against the dispatched compiler.
+# dispatched binaries, check the version against the dispatched compiler, and
+# export the RUSTC/RUSTDOC/RUSTFMT overrides so Cargo and cargo-fmt run the
+# hashed executables instead of repeating their own PATH lookups, which the
+# shell's hash binding does not cover.
 {
 	if rustup_path=$(type -P rustup); then
-		printf 'rustup_path=%q\nrustup_sha256=%s\n' \
-			"$rustup_path" \
-			"$(sha256sum "$(realpath "$rustup_path")" | awk '{print $1}')"
-		for component in rustc cargo rustdoc cargo-fmt cargo-clippy; do
-			dispatched_path=$(rustup which "$component")
-			resolved_dispatched_path=$(realpath "$dispatched_path")
+		# rustup is queried through its resolved path: the PATH name is a
+		# mutable symlink that could otherwise be swapped between this hash
+		# and the which queries below.
+		resolved_rustup_path=$("$realpath_path" "$rustup_path")
+		printf 'rustup_path=%q\nrustup_resolved_path=%q\nrustup_sha256=%s\n' \
+			"$rustup_path" "$resolved_rustup_path" \
+			"$(sha256sum "$resolved_rustup_path" | awk '{print $1}')"
+		for component in rustc cargo rustdoc rustfmt cargo-fmt cargo-clippy clippy-driver; do
+			dispatched_path=$("$resolved_rustup_path" which "$component")
+			resolved_dispatched_path=$("$realpath_path" "$dispatched_path")
 			printf '%s_dispatched_path=%q\n%s_dispatched_sha256=%s\n' \
 				"$component" "$resolved_dispatched_path" \
 				"$component" \
 				"$(sha256sum "$resolved_dispatched_path" | awk '{print $1}')"
-			if [[ $component == rustc ]]; then
+			case $component in
+			rustc)
 				dispatched_rustc_path=$resolved_dispatched_path
-			fi
-			# Cargo resolves rustdoc from PATH unless RUSTDOC names it, so
-			# pin the doc gates to the hashed component.
-			if [[ $component == rustdoc ]]; then
+				export RUSTC="$resolved_dispatched_path"
+				;;
+			rustdoc)
 				export RUSTDOC="$resolved_dispatched_path"
-			fi
+				;;
+			rustfmt)
+				export RUSTFMT="$resolved_dispatched_path"
+				;;
+			esac
 		done
 		dispatched_rustc_version=$("$dispatched_rustc_path" --version | awk '{print $2}')
 		printf 'rustc_dispatched_version=%q\n' "$dispatched_rustc_version"
@@ -356,7 +379,11 @@ fi
 		fi
 		echo "rustup_path=absent"
 		echo "rustc_dispatch=direct"
+		export RUSTC="${tool_resolved_paths[rustc]}"
+		export RUSTDOC="${tool_resolved_paths[rustdoc]}"
+		export RUSTFMT="${tool_resolved_paths[rustfmt]}"
 	fi
+	printf 'RUSTC=%q\nRUSTDOC=%q\nRUSTFMT=%q\n' "$RUSTC" "$RUSTDOC" "$RUSTFMT"
 	# The sysroot supplies the standard-library rlibs linked into every
 	# retained binary; an unchanged rustc in front of modified lib/rustlib
 	# bytes would otherwise leave no trace in the receipt.
