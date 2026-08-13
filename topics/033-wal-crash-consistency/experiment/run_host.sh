@@ -1,39 +1,36 @@
-#!/usr/bin/env bash
+#!/bin/bash -p
 set -Eeuo pipefail
 
-# Bash sources a BASH_ENV hook before this script's first line runs, and the
-# hook can unset BASH_ENV, alias or shadow builtins, and mutate any shell
-# variable — so no in-shell state can prove the hook's absence. Decide from
-# /proc/self/environ instead: the kernel fixes that snapshot at exec time, a
-# hook cannot rewrite it, and bash sources BASH_ENV only when the variable
-# appears in that startup environment. When it does appear, re-exec once
-# through /usr/bin/env -u BASH_ENV and /proc/self/exe (kernel-provided paths;
-# "$BASH" is hook-mutable): the re-executed interpreter's environ lacks
-# BASH_ENV, so it never sourced a hook, nothing hook-created survives the
-# exec, and this branch is not taken again. Inherited loader variables are
-# unset with shell builtins first — /usr/bin/env and the interpreter are
-# dynamically linked, so an interposed loader would otherwise run inside the
-# sanitizing exec itself; the swept names ride through the exec (names only,
-# never values) so the evidence record still lists them. Boundary: a hook
-# hostile enough to shadow read or exec can sabotage these statements too —
-# no in-process check survives that adversary. The defense there is the
-# operator contract plus the recorded tool and environment provenance.
-bash_env_was_present=0
+# Privileged mode (-p) is the structural guard: bash started with -p neither
+# imports exported functions (BASH_FUNC_*) nor sources a BASH_ENV hook, and
+# it ignores inherited SHELLOPTS/BASHOPTS, so nothing attacker-supplied runs
+# or shadows a builtin before this script's first line. Direct execution gets
+# -p from the shebang. When the script is started as `bash run_host.sh`, the
+# shebang is bypassed and a hook or imported function may already be live —
+# and could in principle shadow the very statements below; that residue is
+# unavoidable in-process and is covered by the operator contract plus the
+# recorded provenance. The recovery path re-execs once into a privileged
+# interpreter through fixed root-owned paths (/usr/bin/env and /bin/bash,
+# the shebang interpreter; "$BASH" is hook-mutable, and /proc/self/exe
+# cannot name the shell here because env resolves it after the first exec,
+# when it points at env itself), scrubbing BASH_ENV and every BASH_FUNC_*
+# entry named by the kernel's environ snapshot so child processes never see
+# them either. The re-exec also fires from a privileged shell whose
+# environment still carries those entries, so gates and probes inherit a
+# clean environment. Inherited loader variables are unset with shell
+# builtins first — /usr/bin/env and the interpreter are dynamically linked,
+# so an interposed loader would otherwise run inside the sanitizing exec
+# itself; the swept names ride through the exec (names only, never values)
+# so the evidence record still lists them.
 env_scrub_args=()
 while IFS= read -r -d '' environ_entry; do
 	case $environ_entry in
-	BASH_ENV=*)
-		bash_env_was_present=1
-		;;
-	# Exported functions (BASH_FUNC_name%%=() {...}) shadow builtins —
-	# including the guards below — the moment bash imports them, so they
-	# must be stripped by re-exec, not tested for in-shell.
-	BASH_FUNC_*%%=*)
+	BASH_ENV=* | BASH_FUNC_*%%=*)
 		env_scrub_args+=(-u "${environ_entry%%=*}")
 		;;
 	esac
 done </proc/self/environ
-if ((bash_env_was_present || ${#env_scrub_args[@]} > 0)); then
+if [[ $- != *p* ]] || ((${#env_scrub_args[@]} > 0)); then
 	pre_exec_swept=()
 	while IFS= read -r variable; do
 		case $variable in
@@ -44,10 +41,10 @@ if ((bash_env_was_present || ${#env_scrub_args[@]} > 0)); then
 		esac
 	done < <(compgen -e)
 	TOPIC33_PRE_EXEC_SWEPT="${pre_exec_swept[*]}" \
-		exec /usr/bin/env -u BASH_ENV ${env_scrub_args[@]+"${env_scrub_args[@]}"} \
-		/proc/self/exe "$0" "$@"
+		exec /usr/bin/env ${env_scrub_args[@]+"${env_scrub_args[@]}"} \
+		/bin/bash -p "$0" "$@"
 fi
-# Backstop only: the re-exec above strips every importable function source.
+# Backstop only: privileged mode already refuses function import.
 if [[ -n $(compgen -A function) ]]; then
 	echo "exact-source measurement refuses inherited shell functions" >&2
 	exit 2
@@ -140,9 +137,11 @@ seal_evidence() {
 		cd "$output"
 		manifest=.SHA256SUMS.tmp
 		rm -f "$manifest"
+		# xargs performs its own PATH lookup for a bare command name, so it
+		# gets the recorded resolved sha256sum path.
 		find . -type f ! -name SHA256SUMS ! -name "$manifest" -print0 |
 			LC_ALL=C sort -z |
-			xargs -0 sha256sum >"$manifest"
+			xargs -0 "${tool_resolved_paths[sha256sum]}" >"$manifest"
 		mv "$manifest" SHA256SUMS
 		sha256sum --check --quiet SHA256SUMS
 	)
@@ -352,6 +351,12 @@ fi
 				dispatched_rustc_path=$resolved_dispatched_path
 				export RUSTC="$resolved_dispatched_path"
 				;;
+			cargo)
+				# cargo-fmt and cargo-clippy start `cargo` through the
+				# CARGO variable or their own PATH lookup; pin them to the
+				# hashed component.
+				export CARGO="$resolved_dispatched_path"
+				;;
 			rustdoc)
 				export RUSTDOC="$resolved_dispatched_path"
 				;;
@@ -380,10 +385,24 @@ fi
 		echo "rustup_path=absent"
 		echo "rustc_dispatch=direct"
 		export RUSTC="${tool_resolved_paths[rustc]}"
+		export CARGO="${tool_resolved_paths[cargo]}"
 		export RUSTDOC="${tool_resolved_paths[rustdoc]}"
 		export RUSTFMT="${tool_resolved_paths[rustfmt]}"
 	fi
-	printf 'RUSTC=%q\nRUSTDOC=%q\nRUSTFMT=%q\n' "$RUSTC" "$RUSTDOC" "$RUSTFMT"
+	# rustc launches the system linker through its own PATH lookup, which the
+	# shell's hash binding does not cover; pin it to the recorded cc for the
+	# host target so the retained binaries are linked by the hashed bytes.
+	host_target_triple=$(rustc -vV | sed -n 's/^host: //p')
+	if [[ -z $host_target_triple ]]; then
+		echo "could not determine the host target triple" >&2
+		exit 2
+	fi
+	linker_variable=CARGO_TARGET_${host_target_triple//-/_}_LINKER
+	linker_variable=${linker_variable^^}
+	export "$linker_variable"="${tool_resolved_paths[cc]}"
+	printf '%s=%q\n' "$linker_variable" "${tool_resolved_paths[cc]}"
+	printf 'RUSTC=%q\nCARGO=%q\nRUSTDOC=%q\nRUSTFMT=%q\n' \
+		"$RUSTC" "$CARGO" "$RUSTDOC" "$RUSTFMT"
 	# The sysroot supplies the standard-library rlibs linked into every
 	# retained binary; an unchanged rustc in front of modified lib/rustlib
 	# bytes would otherwise leave no trace in the receipt.
@@ -392,7 +411,7 @@ fi
 	printf 'sysroot_lib_sha256=%s\n' "$(
 		cd "$rust_sysroot" &&
 			find lib -type f -print0 | LC_ALL=C sort -z |
-			xargs -0 sha256sum | sha256sum | awk '{print $1}'
+			xargs -0 "${tool_resolved_paths[sha256sum]}" | sha256sum | awk '{print $1}'
 	)"
 } >"$output/toolchain-dispatch.txt"
 
@@ -455,7 +474,7 @@ source_manifest() {
 		find . -type f ! -path './target/*' ! -name .topic33-build-root \
 			! -path ./source.tar.gz -print0 |
 			LC_ALL=C sort -z |
-			xargs -0 sha256sum
+			xargs -0 "${tool_resolved_paths[sha256sum]}"
 	)
 }
 source_manifest >"$output/source-files.before.sha256"
