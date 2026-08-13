@@ -9,3 +9,7 @@ validation, binary hashes, and linked-code inspection.
 The archives support only their named source commit, hosts, binaries, inputs,
 and run windows. They are not evidence for later source changes or for other
 processor families.
+
+The [`b8d7f88` directory](b8d7f88/) contains the two promoted archives and
+their outer Secure Hash Algorithm 256-bit (SHA-256) digests. Each archive's
+internal 379-entry manifest also verified after retrieval.

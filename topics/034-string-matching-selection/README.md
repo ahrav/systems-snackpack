@@ -145,3 +145,10 @@ instructions.
 See [`rounds/01.md`](rounds/01.md) for the acceptance contract,
 [`measurements/README.md`](measurements/README.md) for the evidence boundary,
 and [`references.md`](references.md) for primary sources and version limits.
+
+The retained exact-source result for commit `b8d7f88` passed on both required
+Linux hosts. Horspool's candidate-to-left-to-right ratio ranged from 0.318 on a
+favorable uniform-looking case to 50.269 on its opposing periodic trap. KMP led
+only on the repeated-prefix trap. See the
+[`b8d7f88` comparison](measurements/b8d7f88-comparison.md) for complete ratios,
+dispersion, host boundaries, generated code, and raw evidence.

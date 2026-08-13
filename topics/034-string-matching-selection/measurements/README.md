@@ -43,3 +43,13 @@ distribution.
 
 Raw logs are stored as one compressed archive per required host. An outer
 `SHA256SUMS` file verifies each retrieved archive.
+
+## Retained exact-source result
+
+Source commit `b8d7f88a25aede60fb589099239c771285450293` passed on both
+required hosts:
+
+- [Arm exact-source record](b8d7f88-arm.md)
+- [`xxl` exact-source record](b8d7f88-xxl.md)
+- [Two-host comparison](b8d7f88-comparison.md)
+- [Raw archive hashes](raw/b8d7f88/SHA256SUMS)
