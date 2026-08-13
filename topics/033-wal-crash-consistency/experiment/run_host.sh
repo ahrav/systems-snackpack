@@ -79,16 +79,22 @@ if [[ -s /etc/ld.so.preload ]]; then
 	exit 2
 fi
 
-# Bind required commands to absolute paths before use so PATH cannot select
-# different executables between the presence check and the call, and so the
-# recorded toolchain identities come from the same binaries the gates run.
+# Bind required commands to fully resolved absolute paths before use. Binding
+# the resolved target rather than the PATH name closes the window where a
+# mutable symlink is swapped after provenance is written: later gates would
+# execute different bytes than the hashed resolved target. realpath resolves
+# first because the loop needs it.
 required_tools=(
-	awk bash cargo cc cmp cp date dirname env find findmnt getconf git gzip
+	awk bash cargo cc cmp cp date dirname find findmnt getconf git gzip
 	hostname lsblk lscpu mkdir mktemp mv nm objdump python3 realpath rg rm
 	rustc rustdoc sed sha256sum sort tar touch uname xargs cargo-clippy
 	cargo-fmt
 )
-declare -A tool_paths
+if ! realpath_path=$(type -P realpath) || [[ $realpath_path != /* ]]; then
+	echo "required tool realpath is absent from PATH" >&2
+	exit 2
+fi
+declare -A tool_paths tool_resolved_paths
 for tool in "${required_tools[@]}"; do
 	if ! tool_path=$(type -P "$tool"); then
 		echo "required tool is absent from PATH: $tool" >&2
@@ -98,8 +104,10 @@ for tool in "${required_tools[@]}"; do
 		echo "required tool did not resolve to an absolute path: $tool_path" >&2
 		exit 2
 	fi
+	resolved_tool_path=$("$realpath_path" "$tool_path")
 	tool_paths[$tool]=$tool_path
-	hash -p "$tool_path" "$tool"
+	tool_resolved_paths[$tool]=$resolved_tool_path
+	hash -p "$resolved_tool_path" "$tool"
 done
 readonly PATH
 
@@ -246,16 +254,17 @@ trap 'exit 143' TERM
 {
 	printf 'bash_path=%q\nbash_version=%q\nPATH=%q\n' \
 		"$BASH" "$BASH_VERSION" "$PATH"
-	resolved_bash_path=$(realpath "$BASH")
+	resolved_bash_path=$("$realpath_path" "$BASH")
 	printf 'bash_resolved_path=%q\nbash_sha256=%s\n' \
 		"$resolved_bash_path" \
 		"$(sha256sum "$resolved_bash_path" | awk '{print $1}')"
+	# The hashes cover the same stored resolved paths the binding loop gave
+	# to hash -p, so the recorded bytes are the bytes the gates execute.
 	for tool in "${required_tools[@]}"; do
-		tool_path=${tool_paths[$tool]}
-		resolved_tool_path=$(realpath "$tool_path")
+		resolved_tool_path=${tool_resolved_paths[$tool]}
 		tool_sha256=$(sha256sum "$resolved_tool_path" | awk '{print $1}')
 		printf '%s_path=%q\n%s_resolved_path=%q\n%s_sha256=%s\n' \
-			"$tool" "$tool_path" "$tool" "$resolved_tool_path" \
+			"$tool" "${tool_paths[$tool]}" "$tool" "$resolved_tool_path" \
 			"$tool" "$tool_sha256"
 	done
 } >"$output/tool-provenance.txt"
@@ -335,9 +344,29 @@ fi
 			exit 2
 		fi
 	else
+		# rustup installs every proxy as one multiplexer binary, so rustc
+		# and cargo resolving to the same file means dispatch flows through
+		# a rustup home this run cannot interrogate: no rustup name is in
+		# PATH to prove which components would run. A copied multiplexer at
+		# distinct paths defeats this test; that residue is covered by the
+		# recorded tool and sysroot hashes.
+		if [[ ${tool_resolved_paths[rustc]} == "${tool_resolved_paths[cargo]}" ]]; then
+			echo "rustc and cargo resolve to one multiplexer binary but rustup is absent from PATH; cannot prove the dispatched toolchain" >&2
+			exit 2
+		fi
 		echo "rustup_path=absent"
 		echo "rustc_dispatch=direct"
 	fi
+	# The sysroot supplies the standard-library rlibs linked into every
+	# retained binary; an unchanged rustc in front of modified lib/rustlib
+	# bytes would otherwise leave no trace in the receipt.
+	rust_sysroot=$(rustc --print sysroot)
+	printf 'sysroot_path=%q\n' "$rust_sysroot"
+	printf 'sysroot_lib_sha256=%s\n' "$(
+		cd "$rust_sysroot" &&
+			find lib -type f -print0 | LC_ALL=C sort -z |
+			xargs -0 sha256sum | sha256sum | awk '{print $1}'
+	)"
 } >"$output/toolchain-dispatch.txt"
 
 cargo_home=$(mktemp -d "${TMPDIR:-/tmp}/topic33-cargo-home.XXXXXXXX")
@@ -410,7 +439,10 @@ run_gate() {
 	(cd "$build_root" && "$@") >"$output/gates/$name.log" 2>&1
 }
 
-run_gate cargo-fmt cargo fmt --all -- --check
+# cargo-fmt runs as the bound command, not `cargo fmt`: Cargo resolves
+# external subcommands from PATH, which would bypass the hash-bound resolved
+# target the receipt records.
+run_gate cargo-fmt cargo-fmt --all -- --check
 # The top-of-script sweep already cleared RUSTFLAGS and every other Cargo flag
 # variable, so the generic build runs with the recorded generic flags.
 run_gate cargo-test-package-generic cargo test --locked --package topic-033-wal-crash-consistency
@@ -452,9 +484,10 @@ python3 -I -S "$topic/experiment/validate_receipts.py" \
 unset RUSTFLAGS
 run_gate cargo-test-lib-bins-examples cargo test --locked --workspace --lib --bins --examples
 run_gate cargo-test-doc cargo test --locked --workspace --doc
-run_gate cargo-clippy cargo clippy --locked --workspace --all-targets -- -D warnings
+# cargo-clippy runs as the bound command for the same reason as cargo-fmt.
+run_gate cargo-clippy cargo-clippy --locked --workspace --all-targets -- -D warnings
 run_gate cargo-bench-no-run cargo bench --locked --workspace --no-run
-run_gate cargo-doc env "RUSTDOCFLAGS=-D warnings" cargo doc --locked --workspace --no-deps
+RUSTDOCFLAGS="-D warnings" run_gate cargo-doc cargo doc --locked --workspace --no-deps
 
 source_manifest >"$output/source-files.after.sha256"
 cmp "$output/source-files.before.sha256" "$output/source-files.after.sha256"
