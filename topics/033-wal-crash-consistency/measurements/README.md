@@ -53,20 +53,19 @@ receipt.
 
 The promoted records ran the source of commit
 `2c67633c2dbb7b5d56a247767d06293687e4827c`, which remains an ancestor of this
-history. That runner and probe predate later hardening: the environment sweep
-of inherited loader and toolchain variables (`LD_*`, `DYLD_*`,
-`GLIBC_TUNABLES`, `CARGO_*`, `RUST*`, `RIPGREP_CONFIG_PATH`, `TAR_OPTIONS`,
-`GZIP`, `COMPILER_PATH`, `GCC_EXEC_PREFIX`) that runs before any external
-command, the `/etc/ld.so.preload` refusal, the `BASH_ENV` sanitizing re-exec,
-tool binding to recorded absolute paths, dispatched-toolchain hashing under
-rustup, the ancestor `.cargo/config.toml` refusal, verify-then-extract of a
-private archive copy, `--no-config` ripgrep gates, the probe's direct
-`SIGKILL` with waited-signal verification, and the recovery check that
-rejects frames with nonzero flags or reserved header fields. Those archives
-therefore contain no `environment.before.txt`, `tool-provenance.txt`, or
-`toolchain-dispatch.txt`, do not attest the absence of inherited environment
-state, and their measured binaries accept nonzero flags that the current
-source rejects.
+history. That runner and probe predate the review-driven hardening series:
+loader and toolchain environment sweeps that run before any external command,
+the `BASH_ENV` sanitizing re-exec, binding and hashing of every required tool
+and of the rustup-dispatched `rustc`, `cargo`, `rustdoc`, `cargo-fmt`, and
+`cargo-clippy`, refusal of ambient `.cargo`, rustfmt, and Clippy configs in
+ancestor directories, verify-then-extract handling of a private archive copy,
+the fail-closed tmpfs gate, hermetic (`-I -S`) receipt validation, the
+probe's direct `SIGKILL` with waited-signal verification, and the recovery
+check that rejects frames with nonzero flags or reserved header fields. Those
+archives therefore contain no `environment.before.txt`,
+`tool-provenance.txt`, or `toolchain-dispatch.txt`, do not attest the absence
+of inherited environment state, and their measured binaries accept nonzero
+flags that the current source rejects.
 
 Everything else the records attest is unchanged: source commit and archive
 digest, host and toolchain identity, build flags, binary hashes and

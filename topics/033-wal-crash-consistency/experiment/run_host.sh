@@ -5,9 +5,24 @@ set -Eeuo pipefail
 # unset BASH_ENV, so an in-script check cannot prove the hook's absence.
 # Re-exec once with BASH_ENV removed from the environment so the executing
 # shell never sourced a hook; aliases, options, and functions a hook set do
-# not survive the exec.
+# not survive the exec. Inherited loader variables are unset with shell
+# builtins first — /usr/bin/env and the new bash are dynamically linked, so
+# an interposed loader would otherwise run inside the sanitizing exec itself.
+# The swept names ride through the exec (names only, never values) so the
+# evidence record still lists them.
 if [[ -z ${TOPIC33_BASH_ENV_SANITIZED:-} ]]; then
-	TOPIC33_BASH_ENV_SANITIZED=1 exec /usr/bin/env -u BASH_ENV "$BASH" "$0" "$@"
+	pre_exec_swept=()
+	while IFS= read -r variable; do
+		case $variable in
+		LD_* | DYLD_* | GLIBC_TUNABLES)
+			pre_exec_swept+=("$variable")
+			unset "$variable"
+			;;
+		esac
+	done < <(compgen -e)
+	TOPIC33_BASH_ENV_SANITIZED=1 \
+		TOPIC33_PRE_EXEC_SWEPT="${pre_exec_swept[*]}" \
+		exec /usr/bin/env -u BASH_ENV "$BASH" "$0" "$@"
 fi
 # Fires only when the sentinel was pre-set from outside, which skips the
 # re-exec above.
@@ -15,6 +30,13 @@ if [[ -n ${BASH_ENV:-} ]]; then
 	echo "exact-source measurement refuses a BASH_ENV startup hook" >&2
 	exit 2
 fi
+# The sentinel is caller-forgeable: a host can pre-set it so a hook runs and
+# the re-exec is skipped. Neutralize what a hook leaves behind instead of
+# trusting the marker — the backslash on the command word defeats alias
+# expansion even when a hook enabled it, and the function refusal below
+# rejects hook-defined functions.
+\unalias -a
+\shopt -u expand_aliases
 if [[ -n $(compgen -A function) ]]; then
 	echo "exact-source measurement refuses inherited shell functions" >&2
 	exit 2
@@ -30,6 +52,11 @@ fi
 # recorded into the evidence later; values never are, because swept variables
 # include common secrets such as CARGO_ registry tokens.
 swept_environment_names=()
+# Names of loader variables the pre-exec sweep already removed.
+if [[ -n ${TOPIC33_PRE_EXEC_SWEPT:-} ]]; then
+	read -r -a swept_environment_names <<<"$TOPIC33_PRE_EXEC_SWEPT"
+fi
+unset TOPIC33_PRE_EXEC_SWEPT TOPIC33_BASH_ENV_SANITIZED
 while IFS= read -r variable; do
 	case $variable in
 	RUSTUP_HOME) ;;
@@ -39,7 +66,7 @@ while IFS= read -r variable; do
 		CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | MAKEFLAGS | NM | \
 		OBJCOPY | OBJDUMP | PKG_CONFIG | PKG_CONFIG_PATH | RANLIB | \
 		RIPGREP_CONFIG_PATH | STRIP | TAR_OPTIONS | GZIP | PYTHON* | \
-		VIRTUAL_ENV | CARGO_* | GIT_* | RUST*)
+		VIRTUAL_ENV | CLIPPY_CONF_DIR | CARGO_* | GIT_* | RUST*)
 		swept_environment_names+=("$variable")
 		unset "$variable"
 		;;
@@ -56,7 +83,8 @@ fi
 required_tools=(
 	awk bash cargo cc cmp cp date dirname env find findmnt getconf git gzip
 	hostname lsblk lscpu mkdir mktemp mv nm objdump python3 realpath rg rm
-	rustc sed sha256sum sort tar touch uname xargs cargo-clippy cargo-fmt
+	rustc rustdoc sed sha256sum sort tar touch uname xargs cargo-clippy
+	cargo-fmt
 )
 declare -A tool_paths
 for tool in "${required_tools[@]}"; do
@@ -203,7 +231,7 @@ trap 'exit 143' TERM
 # variables this host actually had set.
 {
 	echo "swept_prefix_globs=CARGO_* GIT_* RUST* LD_* DYLD_* MALLOC_* PYTHON*"
-	echo "swept_exact_names=GLIBC_TUNABLES VIRTUAL_ENV RIPGREP_CONFIG_PATH TAR_OPTIONS GZIP AR ARFLAGS AS CC CFLAGS COMPILER_PATH CPP CPPFLAGS CXX CXXFLAGS GCC_EXEC_PREFIX LD LDFLAGS LIBRARY_PATH CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH MAKEFLAGS NM OBJCOPY OBJDUMP PKG_CONFIG PKG_CONFIG_PATH RANLIB STRIP"
+	echo "swept_exact_names=GLIBC_TUNABLES VIRTUAL_ENV RIPGREP_CONFIG_PATH TAR_OPTIONS GZIP CLIPPY_CONF_DIR AR ARFLAGS AS CC CFLAGS COMPILER_PATH CPP CPPFLAGS CXX CXXFLAGS GCC_EXEC_PREFIX LD LDFLAGS LIBRARY_PATH CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH MAKEFLAGS NM OBJCOPY OBJDUMP PKG_CONFIG PKG_CONFIG_PATH RANLIB STRIP"
 	echo "kept_names=RUSTUP_HOME"
 	for variable_name in "${swept_environment_names[@]}"; do
 		printf 'unset %s\n' "$variable_name"
@@ -237,17 +265,22 @@ if [[ ! -d $topic ]]; then
 	exit 2
 fi
 
-# Cargo reads .cargo/config.toml from the working directory and every ancestor
-# before $CARGO_HOME, so a config above the caller-controlled TMPDIR could add
-# rustflags, a rustc wrapper, or source replacement that no recorded input
-# names.
+# Cargo reads .cargo/config.toml from the working directory and every
+# ancestor before $CARGO_HOME, and rustfmt and Clippy likewise discover
+# rustfmt.toml and clippy.toml in ancestor directories, so a config above the
+# caller-controlled TMPDIR could add rustflags, a rustc wrapper, source
+# replacement, or lint and format rules that no recorded input names.
 config_scan_directory=$build_root
 while :; do
-	for cargo_config in \
+	for ambient_config in \
 		"$config_scan_directory/.cargo/config.toml" \
-		"$config_scan_directory/.cargo/config"; do
-		if [[ -e $cargo_config ]]; then
-			echo "unrecorded Cargo config would alter builds: $cargo_config" >&2
+		"$config_scan_directory/.cargo/config" \
+		"$config_scan_directory/rustfmt.toml" \
+		"$config_scan_directory/.rustfmt.toml" \
+		"$config_scan_directory/clippy.toml" \
+		"$config_scan_directory/.clippy.toml"; do
+		if [[ -e $ambient_config ]]; then
+			echo "unrecorded toolchain config would alter gates: $ambient_config" >&2
 			exit 2
 		fi
 	done
@@ -277,7 +310,7 @@ fi
 		printf 'rustup_path=%q\nrustup_sha256=%s\n' \
 			"$rustup_path" \
 			"$(sha256sum "$(realpath "$rustup_path")" | awk '{print $1}')"
-		for component in rustc cargo; do
+		for component in rustc cargo rustdoc cargo-fmt cargo-clippy; do
 			dispatched_path=$(rustup which "$component")
 			resolved_dispatched_path=$(realpath "$dispatched_path")
 			printf '%s_dispatched_path=%q\n%s_dispatched_sha256=%s\n' \
@@ -286,6 +319,11 @@ fi
 				"$(sha256sum "$resolved_dispatched_path" | awk '{print $1}')"
 			if [[ $component == rustc ]]; then
 				dispatched_rustc_path=$resolved_dispatched_path
+			fi
+			# Cargo resolves rustdoc from PATH unless RUSTDOC names it, so
+			# pin the doc gates to the hashed component.
+			if [[ $component == rustdoc ]]; then
+				export RUSTDOC="$resolved_dispatched_path"
 			fi
 		done
 		dispatched_rustc_version=$("$dispatched_rustc_path" --version | awk '{print $2}')
@@ -402,7 +440,10 @@ nm -D "$output/wal-crash-probe.native" >"$output/binary.dynamic-symbols.txt" 2>&
 "$native_binary" bench-run "$output/wal-data/native-bench" \
 	"$output/benchmark.csv" 8 128 256 1 8 330033 \
 	>"$output/benchmark-run.log" 2>&1
-python3 -I "$topic/experiment/validate_receipts.py" \
+# -I isolates argv[0] path injection and user site-packages but still imports
+# site; -S suppresses sitecustomize and .pth hooks that could patch the
+# validator's interpreter.
+python3 -I -S "$topic/experiment/validate_receipts.py" \
 	"$output/benchmark.csv" "$output/benchmark-summary.json" \
 	>"$output/benchmark-validation.log" 2>&1
 
