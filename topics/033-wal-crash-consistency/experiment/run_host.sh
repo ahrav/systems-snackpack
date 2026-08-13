@@ -1,18 +1,30 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# A BASH_ENV hook is sourced before this script's first line runs and can
-# unset BASH_ENV, so an in-script check cannot prove the hook's absence.
-# Re-exec once with BASH_ENV removed from the environment so the executing
-# shell never sourced a hook; aliases, options, functions, traps, and
-# disabled builtins a hook set do not survive the exec. The exec target is
-# /proc/self/exe — the kernel-provided path of the running bash image — not
-# "$BASH", which a hook can reassign to a wrapper. Inherited loader variables
-# are unset with shell builtins first — /usr/bin/env and the re-executed
-# interpreter are dynamically linked, so an interposed loader would otherwise
-# run inside the sanitizing exec itself. The swept names ride through the
-# exec (names only, never values) so the evidence record still lists them.
-if [[ -z ${TOPIC33_BASH_ENV_SANITIZED:-} ]]; then
+# Bash sources a BASH_ENV hook before this script's first line runs, and the
+# hook can unset BASH_ENV, alias or shadow builtins, and mutate any shell
+# variable — so no in-shell state can prove the hook's absence. Decide from
+# /proc/self/environ instead: the kernel fixes that snapshot at exec time, a
+# hook cannot rewrite it, and bash sources BASH_ENV only when the variable
+# appears in that startup environment. When it does appear, re-exec once
+# through /usr/bin/env -u BASH_ENV and /proc/self/exe (kernel-provided paths;
+# "$BASH" is hook-mutable): the re-executed interpreter's environ lacks
+# BASH_ENV, so it never sourced a hook, nothing hook-created survives the
+# exec, and this branch is not taken again. Inherited loader variables are
+# unset with shell builtins first — /usr/bin/env and the interpreter are
+# dynamically linked, so an interposed loader would otherwise run inside the
+# sanitizing exec itself; the swept names ride through the exec (names only,
+# never values) so the evidence record still lists them. Boundary: a hook
+# hostile enough to shadow read or exec can sabotage these statements too —
+# no in-process check survives that adversary. The defense there is the
+# operator contract plus the recorded tool and environment provenance.
+bash_env_was_present=0
+while IFS= read -r -d '' environ_entry; do
+	case $environ_entry in
+	BASH_ENV=*) bash_env_was_present=1 ;;
+	esac
+done </proc/self/environ
+if ((bash_env_was_present)); then
 	pre_exec_swept=()
 	while IFS= read -r variable; do
 		case $variable in
@@ -22,29 +34,11 @@ if [[ -z ${TOPIC33_BASH_ENV_SANITIZED:-} ]]; then
 			;;
 		esac
 	done < <(compgen -e)
-	TOPIC33_BASH_ENV_SANITIZED=1 \
-		TOPIC33_PRE_EXEC_SWEPT="${pre_exec_swept[*]}" \
+	TOPIC33_PRE_EXEC_SWEPT="${pre_exec_swept[*]}" \
 		exec /usr/bin/env -u BASH_ENV /proc/self/exe "$0" "$@"
 fi
-# Fires only when the sentinel was pre-set from outside, which skips the
-# re-exec above.
-if [[ -n ${BASH_ENV:-} ]]; then
-	echo "exact-source measurement refuses a BASH_ENV startup hook" >&2
-	exit 2
-fi
-# The sentinel is caller-forgeable: a host can pre-set it so a hook runs and
-# the re-exec is skipped. Neutralize what a hook leaves behind instead of
-# trusting the marker — re-enable the builtins the sweep depends on (a hook
-# could have run `enable -n compgen`; if `enable` itself is disabled this
-# line fails and errexit refuses the run), clear aliases with a
-# backslash-escaped command word so alias expansion cannot rewrite it, and
-# drop hook-installed DEBUG/ERR/RETURN traps that would otherwise run around
-# every later command. The function refusal below rejects hook-defined
-# functions.
-\enable compgen read unset unalias shopt trap type hash printf echo exec
-\unalias -a
-\shopt -u expand_aliases
-\trap - DEBUG ERR RETURN
+# Exported functions (BASH_FUNC_* environment entries) arrive without any
+# BASH_ENV hook, so this refusal is needed even on the hook-free path.
 if [[ -n $(compgen -A function) ]]; then
 	echo "exact-source measurement refuses inherited shell functions" >&2
 	exit 2
@@ -64,7 +58,7 @@ swept_environment_names=()
 if [[ -n ${TOPIC33_PRE_EXEC_SWEPT:-} ]]; then
 	read -r -a swept_environment_names <<<"$TOPIC33_PRE_EXEC_SWEPT"
 fi
-unset TOPIC33_PRE_EXEC_SWEPT TOPIC33_BASH_ENV_SANITIZED
+unset TOPIC33_PRE_EXEC_SWEPT
 while IFS= read -r variable; do
 	case $variable in
 	RUSTUP_HOME) ;;
