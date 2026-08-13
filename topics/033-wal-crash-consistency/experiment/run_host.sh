@@ -17,19 +17,35 @@ set -Eeuo pipefail
 # entry named by the kernel's environ snapshot so child processes never see
 # them either. The re-exec also fires from a privileged shell whose
 # environment still carries those entries, so gates and probes inherit a
-# clean environment. Inherited loader variables are unset with shell
-# builtins first — /usr/bin/env and the interpreter are dynamically linked,
-# so an interposed loader would otherwise run inside the sanitizing exec
-# itself; the swept names ride through the exec (names only, never values)
-# so the evidence record still lists them.
+# clean environment. Code-injecting loader variables (LD_PRELOAD, LD_AUDIT,
+# LD_LIBRARY_PATH) refuse the run outright before the re-exec — the loader
+# already applied them to this interpreter. The remaining inherited loader
+# variables are unset with shell builtins before the exec — /usr/bin/env and
+# the interpreter are dynamically linked, so leftover loader state would
+# otherwise act inside the sanitizing exec itself; the swept names ride
+# through the exec (names only, never values) so the evidence record still
+# lists them.
 env_scrub_args=()
+loader_interposition_names=()
 while IFS= read -r -d '' environ_entry; do
 	case $environ_entry in
 	BASH_ENV=* | BASH_FUNC_*%%=*)
 		env_scrub_args+=(-u "${environ_entry%%=*}")
 		;;
+	# These load or substitute code inside every dynamically linked process
+	# — including the interpreter running this line, which the loader
+	# already processed before the script started. No in-process unset can
+	# undo that, so their presence at startup refuses the run below.
+	LD_PRELOAD=* | LD_AUDIT=* | LD_LIBRARY_PATH=*)
+		loader_interposition_names+=("${environ_entry%%=*}")
+		;;
 	esac
 done </proc/self/environ
+if ((${#loader_interposition_names[@]} > 0)); then
+	echo "exact-source measurement refuses loader interposition variables set at startup: ${loader_interposition_names[*]}" >&2
+	echo "start from a clean environment (e.g. env -u LD_PRELOAD -u LD_AUDIT -u LD_LIBRARY_PATH ...)" >&2
+	exit 2
+fi
 if [[ $- != *p* ]] || ((${#env_scrub_args[@]} > 0)); then
 	pre_exec_swept=()
 	while IFS= read -r variable; do
@@ -50,13 +66,15 @@ if [[ -n $(compgen -A function) ]]; then
 	exit 2
 fi
 
-# LD_PRELOAD, LD_AUDIT, and GLIBC_TUNABLES let the host interpose code into
-# every dynamically linked tool and probe child, Cargo reads flag variables
-# beyond RUSTFLAGS (CARGO_ENCODED_RUSTFLAGS, CARGO_BUILD_RUSTFLAGS), and
-# tar/gzip/ripgrep honor TAR_OPTIONS, GZIP, and RIPGREP_CONFIG_PATH, so
+# LD_PRELOAD, LD_AUDIT, and LD_LIBRARY_PATH refuse the run at startup above
+# — the loader applied them to this interpreter before its first line, so
+# sweeping them here would only protect children while the sealing process
+# itself ran interposed. The remaining inherited variables are swept for the
+# children: GLIBC_TUNABLES and MALLOC_* alter libc behavior, Cargo reads flag
+# variables beyond RUSTFLAGS (CARGO_ENCODED_RUSTFLAGS, CARGO_BUILD_RUSTFLAGS),
+# and tar/gzip/ripgrep honor TAR_OPTIONS, GZIP, and RIPGREP_CONFIG_PATH, so
 # inherited values could build, extract, or gate with unrecorded behavior.
-# The sweep runs before any external command, including sort: an interposed
-# loader would already run inside the first external process. Swept names are
+# The sweep runs before any external command, including sort. Swept names are
 # recorded into the evidence later; values never are, because swept variables
 # include common secrets such as CARGO_ registry tokens.
 swept_environment_names=()
@@ -92,9 +110,9 @@ fi
 # first because the loop needs it.
 required_tools=(
 	awk bash cargo cc clippy-driver cmp cp date dirname find findmnt getconf
-	git gzip hostname lsblk lscpu mkdir mktemp mv nm objdump python3 realpath
-	rg rm rustc rustdoc rustfmt sed sha256sum sort tar touch uname xargs
-	cargo-clippy cargo-fmt
+	git gzip hostname ld ln lsblk lscpu mkdir mktemp mv nm objdump python3
+	realpath rg rm rustc rustdoc rustfmt sed sha256sum sort tar touch uname
+	xargs cargo-clippy cargo-fmt
 )
 if ! realpath_path=$(type -P realpath) || [[ $realpath_path != /* ]]; then
 	echo "required tool realpath is absent from PATH" >&2
@@ -115,7 +133,6 @@ for tool in "${required_tools[@]}"; do
 	tool_resolved_paths[$tool]=$resolved_tool_path
 	hash -p "$resolved_tool_path" "$tool"
 done
-readonly PATH
 
 if [[ $# -ne 5 ]]; then
 	echo "usage: run_host.sh SOURCE.tar.gz OUTPUT HOST_LABEL SOURCE_COMMIT EXPECTED_ARCHIVE_SHA256" >&2
@@ -218,6 +235,11 @@ fi
 # a replacement between the checks and the extraction build unverified bytes
 # while the receipts record the earlier digest.
 build_root=$(mktemp -d "${TMPDIR:-/tmp}/topic33-build-root.XXXXXXXX")
+# Canonicalize before anything derives from this path: a symlinked TMPDIR
+# makes the textual mktemp path and the physical directory children see via
+# getcwd diverge, and Cargo, rustfmt, and Clippy probe ancestor configs from
+# the physical parents — which the ancestor scan below must therefore walk.
+build_root=$("$realpath_path" "$build_root")
 touch "$build_root/.topic33-build-root"
 verified_archive="$build_root/source.tar.gz"
 if ! cp "$source_archive" "$verified_archive"; then
@@ -238,6 +260,20 @@ if [[ $archive_commit != "$source_commit" ]]; then
 	exit 2
 fi
 
+# cc launches its ld subprogram through its own search, which falls back to
+# PATH when the driver's prefix directories hold no ld — so a mutable PATH ld
+# shim could link the retained binaries with unrecorded bytes while the
+# receipt hashes only cc. A directory holding a single symlink to the hashed
+# resolved ld goes first in PATH, so that fallback lookup can only reach the
+# recorded bytes. It lives inside the build root (rides its cleanup) and the
+# symlink is invisible to the source manifests, which match regular files
+# only. A driver-internal ld bypasses PATH; toolchain-dispatch.txt records
+# which case applies.
+mkdir "$build_root/.topic33-linker-pin-bin"
+ln -s "${tool_resolved_paths[ld]}" "$build_root/.topic33-linker-pin-bin/ld"
+PATH="$build_root/.topic33-linker-pin-bin:$PATH"
+readonly PATH
+
 mkdir -p "$output/gates"
 trap finalize EXIT
 trap 'exit 130' INT
@@ -248,6 +284,7 @@ trap 'exit 143' TERM
 # record the full sweep pattern; the unset lines record which of those
 # variables this host actually had set.
 {
+	echo "refused_startup_names=LD_PRELOAD LD_AUDIT LD_LIBRARY_PATH"
 	echo "swept_prefix_globs=CARGO_* GIT_* RUST* LD_* DYLD_* MALLOC_* PYTHON*"
 	echo "swept_exact_names=GLIBC_TUNABLES VIRTUAL_ENV RIPGREP_CONFIG_PATH TAR_OPTIONS GZIP CLIPPY_CONF_DIR AR ARFLAGS AS CC CFLAGS COMPILER_PATH CPP CPPFLAGS CXX CXXFLAGS GCC_EXEC_PREFIX LD LDFLAGS LIBRARY_PATH CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH MAKEFLAGS NM OBJCOPY OBJDUMP PKG_CONFIG PKG_CONFIG_PATH RANLIB STRIP"
 	echo "kept_names=RUSTUP_HOME"
@@ -326,10 +363,13 @@ fi
 # The bound rustc/cargo paths are rustup proxies, so their hashes do not
 # identify the compiler rustup dispatches to; an ambient RUSTUP_HOME could
 # supply an unrecorded toolchain that reports the pinned version. Record the
-# dispatched binaries, check the version against the dispatched compiler, and
-# export the RUSTC/RUSTDOC/RUSTFMT overrides so Cargo and cargo-fmt run the
-# hashed executables instead of repeating their own PATH lookups, which the
-# shell's hash binding does not cover.
+# dispatched binaries, check the version against the dispatched compiler,
+# export the RUSTC/CARGO/RUSTDOC/RUSTFMT overrides for the tools' own child
+# lookups, and hold the dispatched cargo, cargo-fmt, and cargo-clippy paths
+# for the gates to invoke directly: a rustup in PATH does not prove the
+# PATH-bound cargo words are its proxies, so gates run the recorded
+# dispatched bytes, never a command word.
+declare -A gate_tool_paths
 {
 	if rustup_path=$(type -P rustup); then
 		# rustup is queried through its resolved path: the PATH name is a
@@ -356,6 +396,13 @@ fi
 				# CARGO variable or their own PATH lookup; pin them to the
 				# hashed component.
 				export CARGO="$resolved_dispatched_path"
+				gate_tool_paths[cargo]=$resolved_dispatched_path
+				;;
+			cargo-fmt)
+				gate_tool_paths[cargo-fmt]=$resolved_dispatched_path
+				;;
+			cargo-clippy)
+				gate_tool_paths[cargo-clippy]=$resolved_dispatched_path
 				;;
 			rustdoc)
 				export RUSTDOC="$resolved_dispatched_path"
@@ -388,11 +435,17 @@ fi
 		export CARGO="${tool_resolved_paths[cargo]}"
 		export RUSTDOC="${tool_resolved_paths[rustdoc]}"
 		export RUSTFMT="${tool_resolved_paths[rustfmt]}"
+		gate_tool_paths[cargo]=${tool_resolved_paths[cargo]}
+		gate_tool_paths[cargo-fmt]=${tool_resolved_paths[cargo-fmt]}
+		gate_tool_paths[cargo-clippy]=${tool_resolved_paths[cargo-clippy]}
 	fi
+	printf 'gate_cargo=%q\ngate_cargo_fmt=%q\ngate_cargo_clippy=%q\n' \
+		"${gate_tool_paths[cargo]}" "${gate_tool_paths[cargo-fmt]}" \
+		"${gate_tool_paths[cargo-clippy]}"
 	# rustc launches the system linker through its own PATH lookup, which the
 	# shell's hash binding does not cover; pin it to the recorded cc for the
 	# host target so the retained binaries are linked by the hashed bytes.
-	host_target_triple=$(rustc -vV | sed -n 's/^host: //p')
+	host_target_triple=$("$RUSTC" -vV | sed -n 's/^host: //p')
 	if [[ -z $host_target_triple ]]; then
 		echo "could not determine the host target triple" >&2
 		exit 2
@@ -401,12 +454,25 @@ fi
 	linker_variable=${linker_variable^^}
 	export "$linker_variable"="${tool_resolved_paths[cc]}"
 	printf '%s=%q\n' "$linker_variable" "${tool_resolved_paths[cc]}"
+	# Which ld the pinned cc will launch: an absolute -print-prog-name answer
+	# is a driver-internal linker (record and hash it); a bare name falls back
+	# to PATH at link time, where the pinned first entry serves the recorded
+	# resolved ld already hashed in tool-provenance.txt.
+	cc_reported_ld=$(cc -print-prog-name=ld)
+	printf 'cc_reported_ld=%q\n' "$cc_reported_ld"
+	if [[ $cc_reported_ld == /* ]]; then
+		resolved_cc_ld=$("$realpath_path" "$cc_reported_ld")
+		printf 'cc_ld_resolved_path=%q\ncc_ld_sha256=%s\n' "$resolved_cc_ld" \
+			"$(sha256sum "$resolved_cc_ld" | awk '{print $1}')"
+	else
+		printf 'cc_ld_resolution=path_pinned\n'
+	fi
 	printf 'RUSTC=%q\nCARGO=%q\nRUSTDOC=%q\nRUSTFMT=%q\n' \
 		"$RUSTC" "$CARGO" "$RUSTDOC" "$RUSTFMT"
 	# The sysroot supplies the standard-library rlibs linked into every
 	# retained binary; an unchanged rustc in front of modified lib/rustlib
 	# bytes would otherwise leave no trace in the receipt.
-	rust_sysroot=$(rustc --print sysroot)
+	rust_sysroot=$("$RUSTC" --print sysroot)
 	printf 'sysroot_path=%q\n' "$rust_sysroot"
 	printf 'sysroot_lib_sha256=%s\n' "$(
 		cd "$rust_sysroot" &&
@@ -436,12 +502,12 @@ export CARGO_NET_OFFLINE=true
 	uname -r
 	getconf _NPROCESSORS_ONLN || true
 	lscpu || true
-	rustc -vV
-	cargo -V
+	"$RUSTC" -vV
+	"${gate_tool_paths[cargo]}" -V
 	cc --version
 	objdump --version
-	rustc --print cfg
-	rustc -C target-cpu=native --print cfg
+	"$RUSTC" --print cfg
+	"$RUSTC" -C target-cpu=native --print cfg
 	findmnt -T "$output" || true
 	findmnt -T "$output" -n -o SOURCE,FSTYPE,OPTIONS || true
 	lsblk -o NAME,TYPE,SIZE,ROTA,MODEL,FSTYPE,MOUNTPOINTS || true
@@ -485,14 +551,15 @@ run_gate() {
 	(cd "$build_root" && "$@") >"$output/gates/$name.log" 2>&1
 }
 
-# cargo-fmt runs as the bound command, not `cargo fmt`: Cargo resolves
-# external subcommands from PATH, which would bypass the hash-bound resolved
-# target the receipt records.
-run_gate cargo-fmt cargo-fmt --all -- --check
+# Gates invoke the recorded dispatched paths, never a command word: a rustup
+# in PATH does not prove the PATH-bound cargo words are its proxies, and
+# `cargo fmt`/`cargo clippy` would additionally resolve their external
+# subcommands from PATH.
+run_gate cargo-fmt "${gate_tool_paths[cargo-fmt]}" --all -- --check
 # The top-of-script sweep already cleared RUSTFLAGS and every other Cargo flag
 # variable, so the generic build runs with the recorded generic flags.
-run_gate cargo-test-package-generic cargo test --locked --package topic-033-wal-crash-consistency
-run_gate cargo-build-package-generic cargo build --locked --release \
+run_gate cargo-test-package-generic "${gate_tool_paths[cargo]}" test --locked --package topic-033-wal-crash-consistency
+run_gate cargo-build-package-generic "${gate_tool_paths[cargo]}" build --locked --release \
 	--package topic-033-wal-crash-consistency --bin wal-crash-probe
 generic_binary="$build_root/target/release/wal-crash-probe"
 cp "$generic_binary" "$output/wal-crash-probe.generic"
@@ -502,8 +569,8 @@ sha256sum "$output/wal-crash-probe.generic" >"$output/binary.generic.sha256"
 	>"$output/process-crash.generic.log" 2>&1
 
 export RUSTFLAGS="-C target-cpu=native"
-run_gate cargo-test-package-native cargo test --locked --package topic-033-wal-crash-consistency
-run_gate cargo-build-package-native cargo build --locked --release \
+run_gate cargo-test-package-native "${gate_tool_paths[cargo]}" test --locked --package topic-033-wal-crash-consistency
+run_gate cargo-build-package-native "${gate_tool_paths[cargo]}" build --locked --release \
 	--package topic-033-wal-crash-consistency --bin wal-crash-probe
 native_binary="$build_root/target/release/wal-crash-probe"
 cp "$native_binary" "$output/wal-crash-probe.native"
@@ -528,12 +595,11 @@ python3 -I -S "$topic/experiment/validate_receipts.py" \
 	>"$output/benchmark-validation.log" 2>&1
 
 unset RUSTFLAGS
-run_gate cargo-test-lib-bins-examples cargo test --locked --workspace --lib --bins --examples
-run_gate cargo-test-doc cargo test --locked --workspace --doc
-# cargo-clippy runs as the bound command for the same reason as cargo-fmt.
-run_gate cargo-clippy cargo-clippy --locked --workspace --all-targets -- -D warnings
-run_gate cargo-bench-no-run cargo bench --locked --workspace --no-run
-RUSTDOCFLAGS="-D warnings" run_gate cargo-doc cargo doc --locked --workspace --no-deps
+run_gate cargo-test-lib-bins-examples "${gate_tool_paths[cargo]}" test --locked --workspace --lib --bins --examples
+run_gate cargo-test-doc "${gate_tool_paths[cargo]}" test --locked --workspace --doc
+run_gate cargo-clippy "${gate_tool_paths[cargo-clippy]}" --locked --workspace --all-targets -- -D warnings
+run_gate cargo-bench-no-run "${gate_tool_paths[cargo]}" bench --locked --workspace --no-run
+RUSTDOCFLAGS="-D warnings" run_gate cargo-doc "${gate_tool_paths[cargo]}" doc --locked --workspace --no-deps
 
 source_manifest >"$output/source-files.after.sha256"
 cmp "$output/source-files.before.sha256" "$output/source-files.after.sha256"
