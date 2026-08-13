@@ -53,17 +53,20 @@ receipt.
 
 The promoted records ran the source of commit
 `2c67633c2dbb7b5d56a247767d06293687e4827c`, which remains an ancestor of this
-history. That runner predates two later changes: the environment hardening
-that sweeps inherited loader and toolchain variables (`LD_*`, `DYLD_*`,
+history. That runner and probe predate later hardening: the environment sweep
+of inherited loader and toolchain variables (`LD_*`, `DYLD_*`,
 `GLIBC_TUNABLES`, `CARGO_*`, `RUST*`, `RIPGREP_CONFIG_PATH`, `TAR_OPTIONS`,
-`GZIP`, `COMPILER_PATH`, `GCC_EXEC_PREFIX`), refuses `/etc/ld.so.preload`
-interposition, binds required tools to recorded absolute paths, rejects
-ancestor `.cargo/config.toml` files above the build root, and passes
-`--no-config` to ripgrep; and the recovery check that rejects frames with
-nonzero flags or reserved header fields. Those archives therefore contain no
-`environment.before.txt` and no `tool-provenance.txt`, and do not attest the
-absence of inherited environment state, and the measured binaries accept
-nonzero flags that the current source rejects.
+`GZIP`, `COMPILER_PATH`, `GCC_EXEC_PREFIX`) that runs before any external
+command, the `/etc/ld.so.preload` refusal, the `BASH_ENV` sanitizing re-exec,
+tool binding to recorded absolute paths, dispatched-toolchain hashing under
+rustup, the ancestor `.cargo/config.toml` refusal, verify-then-extract of a
+private archive copy, `--no-config` ripgrep gates, the probe's direct
+`SIGKILL` with waited-signal verification, and the recovery check that
+rejects frames with nonzero flags or reserved header fields. Those archives
+therefore contain no `environment.before.txt`, `tool-provenance.txt`, or
+`toolchain-dispatch.txt`, do not attest the absence of inherited environment
+state, and their measured binaries accept nonzero flags that the current
+source rejects.
 
 Everything else the records attest is unchanged: source commit and archive
 digest, host and toolchain identity, build flags, binary hashes and

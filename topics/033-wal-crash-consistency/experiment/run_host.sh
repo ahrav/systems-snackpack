@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# A BASH_ENV hook is sourced before this script's first line runs and can
+# unset BASH_ENV, so an in-script check cannot prove the hook's absence.
+# Re-exec once with BASH_ENV removed from the environment so the executing
+# shell never sourced a hook; aliases, options, and functions a hook set do
+# not survive the exec.
+if [[ -z ${TOPIC33_BASH_ENV_SANITIZED:-} ]]; then
+	TOPIC33_BASH_ENV_SANITIZED=1 exec /usr/bin/env -u BASH_ENV "$BASH" "$0" "$@"
+fi
+# Fires only when the sentinel was pre-set from outside, which skips the
+# re-exec above.
 if [[ -n ${BASH_ENV:-} ]]; then
 	echo "exact-source measurement refuses a BASH_ENV startup hook" >&2
 	exit 2
@@ -15,9 +25,10 @@ fi
 # beyond RUSTFLAGS (CARGO_ENCODED_RUSTFLAGS, CARGO_BUILD_RUSTFLAGS), and
 # tar/gzip/ripgrep honor TAR_OPTIONS, GZIP, and RIPGREP_CONFIG_PATH, so
 # inherited values could build, extract, or gate with unrecorded behavior.
-# The sweep runs before any of those tools. Swept names are recorded into the
-# evidence later; values never are, because swept variables include common
-# secrets such as CARGO_ registry tokens.
+# The sweep runs before any external command, including sort: an interposed
+# loader would already run inside the first external process. Swept names are
+# recorded into the evidence later; values never are, because swept variables
+# include common secrets such as CARGO_ registry tokens.
 swept_environment_names=()
 while IFS= read -r variable; do
 	case $variable in
@@ -33,7 +44,7 @@ while IFS= read -r variable; do
 		unset "$variable"
 		;;
 	esac
-done < <(compgen -e | LC_ALL=C sort)
+done < <(compgen -e)
 if [[ -s /etc/ld.so.preload ]]; then
 	echo "exact-source measurement refuses /etc/ld.so.preload interposition" >&2
 	exit 2
@@ -155,13 +166,28 @@ if [[ -z $host_label || $host_label == *$'\n'* || $host_label == *$'\r'* ]]; the
 	echo "host label must be non-empty and single-line" >&2
 	exit 2
 fi
-actual_archive_sha256=$(sha256sum "$source_archive" | awk '{print $1}')
+
+# Copy the archive into the private build root first, then verify and extract
+# only the copy: verifying the caller's path and extracting it later would let
+# a replacement between the checks and the extraction build unverified bytes
+# while the receipts record the earlier digest.
+build_root=$(mktemp -d "${TMPDIR:-/tmp}/topic33-build-root.XXXXXXXX")
+touch "$build_root/.topic33-build-root"
+verified_archive="$build_root/source.tar.gz"
+if ! cp "$source_archive" "$verified_archive"; then
+	rm -rf "$build_root"
+	echo "could not copy source archive into the build root" >&2
+	exit 2
+fi
+actual_archive_sha256=$(sha256sum "$verified_archive" | awk '{print $1}')
 if [[ $actual_archive_sha256 != "$expected_archive_sha256" ]]; then
+	rm -rf "$build_root"
 	echo "source archive digest mismatch" >&2
 	exit 2
 fi
-archive_commit=$(git get-tar-commit-id < <(gzip -dc "$source_archive"))
+archive_commit=$(git get-tar-commit-id < <(gzip -dc "$verified_archive"))
 if [[ $archive_commit != "$source_commit" ]]; then
+	rm -rf "$build_root"
 	echo "Git archive commit $archive_commit does not match $source_commit" >&2
 	exit 2
 fi
@@ -200,9 +226,7 @@ trap 'exit 143' TERM
 	done
 } >"$output/tool-provenance.txt"
 
-build_root=$(mktemp -d "${TMPDIR:-/tmp}/topic33-build-root.XXXXXXXX")
-touch "$build_root/.topic33-build-root"
-tar -xzf "$source_archive" -C "$build_root"
+tar -xzf "$verified_archive" -C "$build_root"
 topic="$build_root/topics/033-wal-crash-consistency"
 if [[ ! -d $topic ]]; then
 	echo "Topic 33 source is absent from archive" >&2
@@ -240,6 +264,37 @@ if [[ $resolved_rustc != "$pinned_toolchain" ]]; then
 	echo "resolved rustc $resolved_rustc does not match $pinned_toolchain" >&2
 	exit 2
 fi
+# The bound rustc/cargo paths are rustup proxies, so their hashes do not
+# identify the compiler rustup dispatches to; an ambient RUSTUP_HOME could
+# supply an unrecorded toolchain that reports the pinned version. Record the
+# dispatched binaries and check the version against the dispatched compiler.
+{
+	if rustup_path=$(type -P rustup); then
+		printf 'rustup_path=%q\nrustup_sha256=%s\n' \
+			"$rustup_path" \
+			"$(sha256sum "$(realpath "$rustup_path")" | awk '{print $1}')"
+		for component in rustc cargo; do
+			dispatched_path=$(rustup which "$component")
+			resolved_dispatched_path=$(realpath "$dispatched_path")
+			printf '%s_dispatched_path=%q\n%s_dispatched_sha256=%s\n' \
+				"$component" "$resolved_dispatched_path" \
+				"$component" \
+				"$(sha256sum "$resolved_dispatched_path" | awk '{print $1}')"
+			if [[ $component == rustc ]]; then
+				dispatched_rustc_path=$resolved_dispatched_path
+			fi
+		done
+		dispatched_rustc_version=$("$dispatched_rustc_path" --version | awk '{print $2}')
+		printf 'rustc_dispatched_version=%q\n' "$dispatched_rustc_version"
+		if [[ $dispatched_rustc_version != "$pinned_toolchain" ]]; then
+			echo "dispatched rustc $dispatched_rustc_version does not match $pinned_toolchain" >&2
+			exit 2
+		fi
+	else
+		echo "rustup_path=absent"
+		echo "rustc_dispatch=direct"
+	fi
+} >"$output/toolchain-dispatch.txt"
 
 cargo_home=$(mktemp -d "${TMPDIR:-/tmp}/topic33-cargo-home.XXXXXXXX")
 touch "$cargo_home/.topic33-cargo-home"
@@ -284,7 +339,10 @@ fi
 source_manifest() {
 	(
 		cd "$build_root"
-		find . -type f ! -path './target/*' ! -name .topic33-build-root -print0 |
+		# The verified archive copy sits beside the extracted tree; the
+		# manifest covers only the extracted source bytes.
+		find . -type f ! -path './target/*' ! -name .topic33-build-root \
+			! -path ./source.tar.gz -print0 |
 			LC_ALL=C sort -z |
 			xargs -0 sha256sum
 	)

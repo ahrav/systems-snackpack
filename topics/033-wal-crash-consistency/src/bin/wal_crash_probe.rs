@@ -3,6 +3,7 @@
 use std::env;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, BufRead, BufReader, Read, Write};
+use std::os::unix::process::ExitStatusExt;
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::time::Instant;
@@ -129,19 +130,19 @@ fn run_crash_case(directory: &Path, cut: &str) -> Result<(), String> {
             String::from_utf8_lossy(&output.stderr)
         ));
     }
-    let kill_status = Command::new("kill")
-        .arg("-KILL")
-        .arg(child.id().to_string())
-        .status()
-        .map_err(|error| format!("invoke kill: {error}"))?;
-    if !kill_status.success() {
-        return Err(format!("kill_failed:{kill_status}"));
-    }
+    // Child::kill sends SIGKILL directly through the kernel, so no PATH
+    // lookup can substitute a different sender, and the waited status must
+    // name SIGKILL itself: an exit for any other reason would let the
+    // receipt claim a SIGKILL case that never happened.
+    child
+        .kill()
+        .map_err(|error| format!("kill writer: {error}"))?;
     let status = child
         .wait()
         .map_err(|error| format!("wait child: {error}"))?;
-    if status.success() {
-        return Err(format!("writer_not_killed:{status}"));
+    const SIGKILL: i32 = 9;
+    if status.signal() != Some(SIGKILL) {
+        return Err(format!("writer_not_sigkilled:{status}"));
     }
     let recovered_lsn = recover_file(&path, observed_ack)?;
     if recovered_lsn < observed_ack {
