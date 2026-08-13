@@ -1,0 +1,17 @@
+[package]
+name = "mvcc-hot-vacuum"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "mvcc_hot_vacuum"
+path = "src/lib.rs"
+
+[[bin]]
+name = "mvcc-hot-vacuum-probe"
+path = "src/bin/mvcc_hot_vacuum_probe.rs"
+
+[lints]
+workspace = true
