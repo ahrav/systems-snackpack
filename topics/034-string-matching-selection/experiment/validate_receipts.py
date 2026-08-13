@@ -170,7 +170,7 @@ def validate(root: Path) -> None:
     observed = summary["analyses"]
     if len(expected) != len(observed):
         raise ValueError("analysis row count mismatch")
-    for left, right in zip(expected, observed, strict=True):
+    for left, right in zip(expected, observed):
         for field in ("family", "case", "mode", "n_complete_blocks"):
             if left[field] != right[field]:
                 raise ValueError(f"analysis identity mismatch: {field}")
@@ -185,7 +185,7 @@ def validate(root: Path) -> None:
             raise ValueError("contrast count mismatch")
         if not all(
             close(float(a), float(b))
-            for a, b in zip(left["log_contrasts"], right["log_contrasts"], strict=True)
+            for a, b in zip(left["log_contrasts"], right["log_contrasts"])
         ):
             raise ValueError("block contrast mismatch")
 
