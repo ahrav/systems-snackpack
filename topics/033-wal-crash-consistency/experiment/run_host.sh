@@ -10,6 +10,35 @@ if [[ -n $(compgen -A function) ]]; then
 	exit 2
 fi
 
+# LD_PRELOAD, LD_AUDIT, and GLIBC_TUNABLES let the host interpose code into
+# every dynamically linked tool and probe child, Cargo reads flag variables
+# beyond RUSTFLAGS (CARGO_ENCODED_RUSTFLAGS, CARGO_BUILD_RUSTFLAGS), and
+# tar/gzip/ripgrep honor TAR_OPTIONS, GZIP, and RIPGREP_CONFIG_PATH, so
+# inherited values could build, extract, or gate with unrecorded behavior.
+# The sweep runs before any of those tools. Swept names are recorded into the
+# evidence later; values never are, because swept variables include common
+# secrets such as CARGO_ registry tokens.
+swept_environment_names=()
+while IFS= read -r variable; do
+	case $variable in
+	RUSTUP_HOME) ;;
+	LD_* | DYLD_* | GLIBC_TUNABLES | MALLOC_* | \
+		AR | ARFLAGS | AS | CC | CFLAGS | CPP | CPPFLAGS | CXX | CXXFLAGS | \
+		LD | LDFLAGS | LIBRARY_PATH | CPATH | C_INCLUDE_PATH | \
+		CPLUS_INCLUDE_PATH | MAKEFLAGS | NM | OBJCOPY | OBJDUMP | \
+		PKG_CONFIG | PKG_CONFIG_PATH | RANLIB | RIPGREP_CONFIG_PATH | \
+		STRIP | TAR_OPTIONS | GZIP | PYTHON* | VIRTUAL_ENV | CARGO_* | \
+		GIT_* | RUST*)
+		swept_environment_names+=("$variable")
+		unset "$variable"
+		;;
+	esac
+done < <(compgen -e | LC_ALL=C sort)
+if [[ -s /etc/ld.so.preload ]]; then
+	echo "exact-source measurement refuses /etc/ld.so.preload interposition" >&2
+	exit 2
+fi
+
 if [[ $# -ne 5 ]]; then
 	echo "usage: run_host.sh SOURCE.tar.gz OUTPUT HOST_LABEL SOURCE_COMMIT EXPECTED_ARCHIVE_SHA256" >&2
 	exit 2
@@ -119,6 +148,18 @@ trap finalize EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
+# Only names for swept variables: this file is sealed into the promoted
+# evidence archive and swept values include common secrets.
+{
+	echo "swept_prefixes=CARGO_ GIT_ RUST LD_ DYLD_ MALLOC_ PYTHON"
+	for variable_name in "${swept_environment_names[@]}"; do
+		printf 'unset %s\n' "$variable_name"
+	done
+	if [[ -n ${RUSTUP_HOME:-} ]]; then
+		printf 'kept RUSTUP_HOME=%q\n' "$RUSTUP_HOME"
+	fi
+} >"$output/environment.before.txt"
+
 build_root=$(mktemp -d "${TMPDIR:-/tmp}/topic33-build-root.XXXXXXXX")
 touch "$build_root/.topic33-build-root"
 tar -xzf "$source_archive" -C "$build_root"
@@ -167,7 +208,7 @@ export CARGO_NET_OFFLINE=true
 	findmnt -T "$output" -n -o SOURCE,FSTYPE,OPTIONS
 	lsblk -o NAME,TYPE,SIZE,ROTA,MODEL,FSTYPE,MOUNTPOINTS
 } >"$output/host.txt" 2>&1
-if findmnt -T "$output" -n -o FSTYPE | rg -q '^tmpfs$'; then
+if findmnt -T "$output" -n -o FSTYPE | rg --no-config -q '^tmpfs$'; then
 	echo "measurement output and WAL data must not use tmpfs" >&2
 	exit 2
 fi
@@ -196,7 +237,8 @@ run_gate() {
 }
 
 run_gate cargo-fmt cargo fmt --all -- --check
-unset RUSTFLAGS || true
+# The top-of-script sweep already cleared RUSTFLAGS and every other Cargo flag
+# variable, so the generic build runs with the recorded generic flags.
 run_gate cargo-test-package-generic cargo test --locked --package topic-033-wal-crash-consistency
 run_gate cargo-build-package-generic cargo build --locked --release \
 	--package topic-033-wal-crash-consistency --bin wal-crash-probe
@@ -215,10 +257,10 @@ native_binary="$build_root/target/release/wal-crash-probe"
 cp "$native_binary" "$output/wal-crash-probe.native"
 sha256sum "$output/wal-crash-probe.native" >"$output/binary.native.sha256"
 nm -n "$output/wal-crash-probe.native" >"$output/binary.symbols.txt"
-rg -q '[[:space:]][Tt][[:space:]]topic33_crc32c$' "$output/binary.symbols.txt"
+rg --no-config -q '[[:space:]][Tt][[:space:]]topic33_crc32c$' "$output/binary.symbols.txt"
 objdump -d --no-show-raw-insn --disassemble=topic33_crc32c \
 	"$output/wal-crash-probe.native" >"$output/codegen.txt" 2>&1
-rg -q '<topic33_crc32c>:' "$output/codegen.txt"
+rg --no-config -q '<topic33_crc32c>:' "$output/codegen.txt"
 nm -D "$output/wal-crash-probe.native" >"$output/binary.dynamic-symbols.txt" 2>&1 || true
 "$native_binary" model >"$output/model.native.log" 2>&1
 "$native_binary" process-crash "$output/wal-data/native-crash" \

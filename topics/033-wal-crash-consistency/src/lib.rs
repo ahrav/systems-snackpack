@@ -17,7 +17,9 @@ use std::fmt::{self, Display, Formatter};
 const MAGIC: &[u8; 4] = b"WAL1";
 const VERSION: u16 = 1;
 const HEADER_LEN: usize = 40;
+const FLAGS_OFFSET: usize = 28;
 const CHECKSUM_OFFSET: usize = 32;
+const RESERVED_OFFSET: usize = 36;
 const GENERATION: u64 = 7;
 const MAX_PAYLOAD: usize = 1 << 20;
 
@@ -175,9 +177,9 @@ pub fn encode_frame(lsn: u64, payload: &[u8]) -> Result<Vec<u8>, WalError> {
     put_u64(&mut out, 8, GENERATION);
     put_u64(&mut out, 16, lsn);
     put_u32(&mut out, 24, payload.len() as u32);
-    put_u32(&mut out, 28, 0);
+    put_u32(&mut out, FLAGS_OFFSET, 0);
     put_u32(&mut out, CHECKSUM_OFFSET, 0);
-    put_u32(&mut out, 36, 0);
+    put_u32(&mut out, RESERVED_OFFSET, 0);
     out[HEADER_LEN..].copy_from_slice(payload);
     let checksum = crc32c(&out);
     put_u32(&mut out, CHECKSUM_OFFSET, checksum);
@@ -201,6 +203,15 @@ fn inspect_frame(bytes: &[u8], offset: usize, expected_lsn: u64) -> Result<usize
     }
     if get_u64(header, 8) != GENERATION {
         return Err("wrong_generation".to_owned());
+    }
+    // Version 1 defines no flags and no reserved semantics, so a nonzero
+    // value marks a frame this reader does not understand even when its
+    // checksum verifies. Accepting it would replay an unknown format.
+    if get_u32(header, FLAGS_OFFSET) != 0 {
+        return Err("nonzero_flags".to_owned());
+    }
+    if get_u32(header, RESERVED_OFFSET) != 0 {
+        return Err("nonzero_reserved".to_owned());
     }
     let lsn = get_u64(header, 16);
     if lsn != expected_lsn {
@@ -238,7 +249,8 @@ fn inspect_frame(bytes: &[u8], offset: usize, expected_lsn: u64) -> Result<usize
 /// # Errors
 ///
 /// Returns an error when fewer than `required_lsn` contiguous records survive
-/// framing, sequence, length, generation, and checksum validation.
+/// framing, sequence, length, generation, flags, reserved-field, and checksum
+/// validation.
 ///
 /// # Examples
 ///
@@ -418,5 +430,25 @@ mod tests {
             encode_frame(1, &payload).unwrap_err().to_string(),
             format!("payload_too_large:{}:maximum:{MAX_PAYLOAD}", payload.len())
         );
+    }
+
+    #[test]
+    fn nonzero_flags_and_reserved_fail_even_with_valid_checksum() -> Result<(), WalError> {
+        for (offset, reason) in [
+            (FLAGS_OFFSET, "nonzero_flags"),
+            (RESERVED_OFFSET, "nonzero_reserved"),
+        ] {
+            let mut frame = encode_frame(1, b"one")?;
+            put_u32(&mut frame, offset, 1);
+            put_u32(&mut frame, CHECKSUM_OFFSET, 0);
+            let checksum = crc32c(&frame);
+            put_u32(&mut frame, CHECKSUM_OFFSET, checksum);
+
+            assert!(recover_prefix(&frame, 1).is_err());
+            let tail = recover_prefix(&frame, 0)?;
+            assert_eq!(tail.valid_lsn(), 0);
+            assert_eq!(tail.tail_reason(), Some(reason));
+        }
+        Ok(())
     }
 }

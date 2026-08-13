@@ -16,7 +16,8 @@ It acknowledges LSN 2 only after a successful durability barrier covers both
 records.
 
 Recovery accepts the longest contiguous sequence that has the right format,
-generation, length, LSN, and CRC-32C checksum. CRC-32C is the Castagnoli cyclic
+generation, zero flags and reserved fields, length, LSN, and CRC-32C checksum.
+CRC-32C is the Castagnoli cyclic
 redundancy check; it detects accidental byte changes but cannot repair them.
 Damage before the externally recorded commit LSN fails closed. Damage after it
 may be discarded as an uncommitted tail.

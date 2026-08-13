@@ -48,3 +48,24 @@ receipt.
 - [`xxl` record](2c67633-xxl.md)
 - [Cross-host comparison](2c67633-comparison.md)
 - [Raw archive manifest](raw/2c67633/SHA256SUMS)
+
+### Pre-hardening attestation scope
+
+The promoted records ran the source of commit
+`2c67633c2dbb7b5d56a247767d06293687e4827c`, which remains an ancestor of this
+history. That runner predates two later changes: the environment hardening
+that sweeps inherited loader and toolchain variables (`LD_*`, `DYLD_*`,
+`GLIBC_TUNABLES`, `CARGO_*`, `RUST*`, `RIPGREP_CONFIG_PATH`, `TAR_OPTIONS`,
+`GZIP`), refuses `/etc/ld.so.preload` interposition, and passes `--no-config`
+to ripgrep; and the recovery check that rejects frames with nonzero flags or
+reserved header fields. Those archives therefore contain no
+`environment.before.txt` and do not attest the absence of inherited
+environment state, and the measured binaries accept nonzero flags that the
+current source rejects.
+
+Everything else the records attest is unchanged: source commit and archive
+digest, host and toolchain identity, build flags, binary hashes and
+disassembly, gate outcomes, model and process-crash outputs, and the 32
+retained fresh-process rows per host. A rerun under the current runner is
+required before any record here can claim a swept and recorded measurement
+environment.
