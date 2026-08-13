@@ -13,12 +13,10 @@ if [[ -n $(compgen -A function) ]]; then
 fi
 
 loader_environment_names=()
-loader_environment_values=()
 while IFS= read -r variable; do
 	case $variable in
 	LD_* | DYLD_* | GLIBC_TUNABLES)
 		loader_environment_names+=("$variable")
-		loader_environment_values+=("${!variable}")
 		unset "$variable"
 		;;
 	esac
@@ -159,12 +157,13 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 trap 'exit 129' HUP
 
+# Swept values are never written: this file is sealed into the promoted
+# evidence archive, and swept variables include common secrets (PGPASSWORD,
+# CARGO_ registry tokens). Only names are recorded for unset variables.
 {
 	echo "swept_prefixes=CARGO_ GIT_ RUST LD_ DYLD_ PG"
-	for variable_index in "${!loader_environment_names[@]}"; do
-		printf 'unset %s=%q\n' \
-			"${loader_environment_names[$variable_index]}" \
-			"${loader_environment_values[$variable_index]}"
+	for variable_name in "${loader_environment_names[@]}"; do
+		printf 'unset %s\n' "$variable_name"
 	done
 	while IFS= read -r variable; do
 		case $variable in
@@ -176,7 +175,7 @@ trap 'exit 129' HUP
 			CPLUS_INCLUDE_PATH | MAKEFLAGS | NM | OBJCOPY | OBJDUMP | \
 			PKG_CONFIG | PKG_CONFIG_PATH | RANLIB | STRIP | PYTHON* | \
 			VIRTUAL_ENV | CARGO_* | GIT_* | RUST* | PG*)
-			printf 'unset %s=%q\n' "$variable" "${!variable}"
+			printf 'unset %s\n' "$variable"
 			unset "$variable"
 			;;
 		esac
