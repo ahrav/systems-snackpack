@@ -198,9 +198,13 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 
 # Only names for swept variables: this file is sealed into the promoted
-# evidence archive and swept values include common secrets.
+# evidence archive and swept values include common secrets. The policy lines
+# record the full sweep pattern; the unset lines record which of those
+# variables this host actually had set.
 {
-	echo "swept_prefixes=CARGO_ GIT_ RUST LD_ DYLD_ MALLOC_ PYTHON"
+	echo "swept_prefix_globs=CARGO_* GIT_* RUST* LD_* DYLD_* MALLOC_* PYTHON*"
+	echo "swept_exact_names=GLIBC_TUNABLES VIRTUAL_ENV RIPGREP_CONFIG_PATH TAR_OPTIONS GZIP AR ARFLAGS AS CC CFLAGS COMPILER_PATH CPP CPPFLAGS CXX CXXFLAGS GCC_EXEC_PREFIX LD LDFLAGS LIBRARY_PATH CPATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH MAKEFLAGS NM OBJCOPY OBJDUMP PKG_CONFIG PKG_CONFIG_PATH RANLIB STRIP"
+	echo "kept_names=RUSTUP_HOME"
 	for variable_name in "${swept_environment_names[@]}"; do
 		printf 'unset %s\n' "$variable_name"
 	done
@@ -308,23 +312,33 @@ export CARGO_NET_OFFLINE=true
 } >"$output/source-identity.txt"
 {
 	printf 'host_label=%q\n' "$host_label"
-	hostname -f
+	# Informational probes must not abort the run under set -e; a restricted
+	# host may lack an FQDN or block device visibility. Toolchain identity
+	# stays unguarded because a run without it is not valid evidence.
+	hostname -f || true
 	uname -a
 	uname -m
 	uname -r
-	getconf _NPROCESSORS_ONLN
-	lscpu
+	getconf _NPROCESSORS_ONLN || true
+	lscpu || true
 	rustc -vV
 	cargo -V
 	cc --version
 	objdump --version
 	rustc --print cfg
 	rustc -C target-cpu=native --print cfg
-	findmnt -T "$output"
-	findmnt -T "$output" -n -o SOURCE,FSTYPE,OPTIONS
-	lsblk -o NAME,TYPE,SIZE,ROTA,MODEL,FSTYPE,MOUNTPOINTS
+	findmnt -T "$output" || true
+	findmnt -T "$output" -n -o SOURCE,FSTYPE,OPTIONS || true
+	lsblk -o NAME,TYPE,SIZE,ROTA,MODEL,FSTYPE,MOUNTPOINTS || true
 } >"$output/host.txt" 2>&1
-if findmnt -T "$output" -n -o FSTYPE | rg --no-config -q '^tmpfs$'; then
+# Fail closed: an unreadable or empty filesystem type must refuse the run, not
+# skip the tmpfs check.
+output_fstype=$(findmnt -T "$output" -n -o FSTYPE || true)
+if [[ -z $output_fstype ]]; then
+	echo "could not determine the filesystem type for $output" >&2
+	exit 2
+fi
+if [[ $output_fstype == tmpfs ]]; then
 	echo "measurement output and WAL data must not use tmpfs" >&2
 	exit 2
 fi
@@ -334,6 +348,7 @@ fi
 	echo "workspace gates: RUSTFLAGS unset"
 	echo "benchmark: 8 blocks, 4 ABBA and 4 BAAB, 32 fresh processes"
 	echo "timed region: record writes plus fdatasync only"
+	printf 'output_fstype=%q\n' "$output_fstype"
 } >"$output/build-and-run-flags.txt"
 
 source_manifest() {

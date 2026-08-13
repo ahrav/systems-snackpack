@@ -300,9 +300,9 @@ pub fn recover_prefix(bytes: &[u8], required_lsn: u64) -> Result<Recovery, WalEr
 
 /// Executes the deterministic byte-state oracle and returns its stable receipt.
 ///
-/// The oracle enumerates every prefix cut and every single-bit flip in a
-/// three-frame log. It also checks committed-versus-uncommitted corruption,
-/// sequence gaps, and recovery idempotence.
+/// The oracle enumerates every prefix cut and one single-bit flip per byte
+/// (bit 0) in a three-frame log. It also checks committed-versus-uncommitted
+/// corruption, sequence gaps, and recovery idempotence.
 ///
 /// # Errors
 ///
