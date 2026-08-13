@@ -273,6 +273,12 @@ mkdir "$build_root/.topic33-linker-pin-bin"
 ln -s "${tool_resolved_paths[ld]}" "$build_root/.topic33-linker-pin-bin/ld"
 PATH="$build_root/.topic33-linker-pin-bin:$PATH"
 readonly PATH
+# Assigning to PATH clears every hashed filename, so the bindings above are
+# gone; rebind the recorded resolved targets or later bare-word calls would
+# resolve by a fresh PATH search a mutable shim could win.
+for tool in "${required_tools[@]}"; do
+	hash -p "${tool_resolved_paths[$tool]}" "$tool"
+done
 
 mkdir -p "$output/gates"
 trap finalize EXIT
