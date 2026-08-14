@@ -1,6 +1,35 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# The guards precede the function definitions below so compgen sees only
+# inherited functions. BASH_ENV runs startup code before this body, and an
+# inherited cargo/rustc function would affect every gate while the run still
+# records ordinary tool versions.
+if [[ -n ${BASH_ENV:-} ]]; then
+    echo "exact-source measurement refuses a BASH_ENV startup hook" >&2
+    exit 2
+fi
+if [[ -n $(compgen -A function) ]]; then
+    echo "exact-source measurement refuses inherited shell functions" >&2
+    exit 2
+fi
+
+# Loader interposition can replace bcmp, allocation, or clock behavior in the
+# exact binary whose hash is archived.
+loader_environment_names=()
+while IFS= read -r variable; do
+    case $variable in
+    LD_* | DYLD_* | GLIBC_TUNABLES)
+        loader_environment_names+=("$variable")
+        unset "$variable"
+        ;;
+    esac
+done < <(compgen -e)
+if [[ -s /etc/ld.so.preload ]]; then
+    echo "exact-source measurement refuses /etc/ld.so.preload interposition" >&2
+    exit 2
+fi
+
 if [[ $# -ne 3 ]]; then
     echo "usage: $0 OUTPUT_DIR SOURCE_COMMIT SOURCE_ARCHIVE_SHA256" >&2
     exit 2
@@ -13,9 +42,12 @@ source_archive_sha256=$3
 
 # Ambient codegen flags would silently contradict the recorded generic/native
 # flags; CARGO_ENCODED_RUSTFLAGS even overrides the native RUSTFLAGS below.
+# An exported empty RUSTFLAGS suppresses CARGO_TARGET_<TRIPLE>_RUSTFLAGS,
+# CARGO_BUILD_RUSTFLAGS, and cargo-config rustflags. Unsetting it does not.
 ambient_rustflags=${RUSTFLAGS-<unset>}
 ambient_encoded_rustflags=${CARGO_ENCODED_RUSTFLAGS-<unset>}
-unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET
+unset CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_TARGET
+export RUSTFLAGS=''
 
 if [[ -e "$output_dir" ]]; then
     echo "output already exists: $output_dir" >&2
@@ -105,7 +137,7 @@ run_gate() {
     echo "kernel=$(uname -r)"
     echo "available_cpu_count=$(nproc)"
     echo "shell=$BASH_VERSION"
-    echo "generic_flags=baseline target; no RUSTFLAGS"
+    echo "generic_flags=baseline target; RUSTFLAGS exported empty"
     echo "native_flags=-C target-cpu=native -C debuginfo=1"
 } >"$output_dir/host.txt"
 
@@ -126,7 +158,11 @@ record_optional rustup.txt rustup show active-toolchain
 {
     printf 'ambient_RUSTFLAGS=%s\n' "$ambient_rustflags"
     printf 'ambient_CARGO_ENCODED_RUSTFLAGS=%s\n' "$ambient_encoded_rustflags"
-    printf 'swept=RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET\n'
+    printf 'generic_rustflags=empty-exported-RUSTFLAGS\n'
+    printf 'swept=CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_TARGET\n'
+    for variable_name in ${loader_environment_names[@]+"${loader_environment_names[@]}"}; do
+        printf 'unset %s\n' "$variable_name"
+    done
     compgen -e | LC_ALL=C sort | while IFS= read -r name; do
         case $name in
         CARGO | CARGO_*) printf 'name-only %s\n' "$name" ;;
