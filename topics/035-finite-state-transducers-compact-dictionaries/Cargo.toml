@@ -1,0 +1,17 @@
+[package]
+name = "finite-state-transducers-compact-dictionaries"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "finite_state_transducers_compact_dictionaries"
+path = "src/lib.rs"
+
+[[bin]]
+name = "dictionary-probe"
+path = "src/bin/dictionary_probe.rs"
+
+[lints]
+workspace = true
