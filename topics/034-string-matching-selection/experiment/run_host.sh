@@ -24,7 +24,7 @@ while IFS= read -r variable; do
     RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | \
         CARGO_BUILD_* | CARGO_TARGET_* | CARGO_PROFILE_* | CARGO_UNSTABLE_* | \
         CARGO_INCREMENTAL | MALLOC_* | \
-        LD_* | DYLD_* | GLIBC_TUNABLES | GIT_* | RIPGREP_CONFIG_PATH)
+        LD_* | DYLD_* | GLIBC_TUNABLES | GIT_* | RIPGREP_CONFIG_PATH | CDPATH)
         swept_environment_names+=("$variable")
         unset "$variable"
         ;;
@@ -561,10 +561,12 @@ manifest_temp="$work_dir/SHA256SUMS"
     cd "$output_dir"
     # No ignore filtering: an ancestor .ignore/.gitignore outside the checkout
     # could otherwise drop promoted evidence files from this manifest.
-    rg --files --hidden --no-ignore -0 |
+    rg --files --hidden --no-ignore -g '!benchmark/**' -0 |
         LC_ALL=C sort -z |
         xargs -0 sha256sum
-) >"$manifest_temp"
+    # Benchmark digests come from the validated list, not a second tree walk.
+    awk '{ printf "%s  benchmark/%s\n", $1, $2 }' "$work_dir/benchmark_validated.sha256"
+) | LC_ALL=C sort -k 2 >"$manifest_temp"
 cp "$manifest_temp" "$output_dir/SHA256SUMS"
 
 # Checked last, after every recorded tool has produced its final output.

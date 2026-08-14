@@ -297,7 +297,8 @@ def receipts(
     """Check the per-process receipt files against the aggregate records."""
     attempts_root = root / "attempts"
     attempt_directories = sorted(entry.name for entry in attempts_root.iterdir())
-    if attempt_directories != [f"{as_int(record['sequence']):04d}" for record in processes]:
+    expected_directories = sorted(f"{as_int(record['sequence']):04d}" for record in processes)
+    if attempt_directories != expected_directories:
         raise ValueError("attempt directories do not match the retained processes")
     for record in processes:
         sequence = as_int(record["sequence"])
