@@ -124,20 +124,24 @@ esac
 
 # Cargo reads config files from the working directory upward, and settings such
 # as build.rustc-wrapper or a linker survive the empty RUSTFLAGS above.
-config_search_dir=$repo_root
-while :; do
-    for cargo_config in "$config_search_dir/.cargo/config.toml" "$config_search_dir/.cargo/config"; do
-        if [[ -e $cargo_config ]]; then
-            echo "refusing ambient cargo config: $cargo_config" >&2
-            exit 2
+refuse_ambient_cargo_config() {
+    local config_search_dir=$1 cargo_config
+    while :; do
+        for cargo_config in "$config_search_dir/.cargo/config.toml" "$config_search_dir/.cargo/config"; do
+            if [[ -e $cargo_config ]]; then
+                echo "refusing ambient cargo config: $cargo_config" >&2
+                exit 2
+            fi
+        done
+        if [[ $config_search_dir == / ]]; then
+            break
         fi
+        config_search_dir=${config_search_dir%/*}
+        config_search_dir=${config_search_dir:-/}
     done
-    if [[ $config_search_dir == / ]]; then
-        break
-    fi
-    config_search_dir=${config_search_dir%/*}
-    config_search_dir=${config_search_dir:-/}
-done
+}
+refuse_ambient_cargo_config "$repo_root"
+refuse_ambient_cargo_config "$build_root"
 
 # The caller-supplied commit is otherwise unchecked evidence.
 verify_worktree_identity() {
@@ -387,6 +391,8 @@ tar -C "$repo_root" --exclude=./target --exclude=./.git -cf - . |
     tar -C "$build_root" -xf -
 write_source_manifest "$work_dir/snapshot_manifest.sha256" "$build_root"
 cmp "$output_dir/source_manifest.before.sha256" "$work_dir/snapshot_manifest.sha256"
+# Cargo searches upward from $build_root; reject configs after creating the snapshot.
+refuse_ambient_cargo_config "$build_root"
 # verify_worktree_identity runs again after the manifest: a modification landing
 # between the first check and this manifest would appear in both manifests and
 # pass the cmp gate below.

@@ -26,17 +26,20 @@ MODES = ("reuse", "one_shot")
 
 
 def as_int(value: Any, label: str = "integer field") -> int:
-    """Accept only a JSON integer or a canonical integer string."""
-    if isinstance(value, bool):
+    """Accept only a JSON integer."""
+    if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"invalid {label}: {value!r}")
-    if isinstance(value, int):
-        return value
-    if isinstance(value, str) and re.fullmatch(r"-?[0-9]+", value):
-        try:
-            return int(value)
-        except ValueError as error:
-            raise ValueError(f"invalid {label}: {value!r}") from error
-    raise ValueError(f"invalid {label}: {value!r}")
+    return value
+
+
+def parse_int_text(text: str, label: str = "integer text") -> int:
+    """Parse a canonical integer from TSV or command output."""
+    if not isinstance(text, str) or not re.fullmatch(r"-?[0-9]+", text):
+        raise ValueError(f"invalid {label}: {text!r}")
+    try:
+        return int(text)
+    except ValueError as error:
+        raise ValueError(f"invalid {label}: {text!r}") from error
 
 
 def as_float(value: Any, label: str = "numeric field") -> float:
@@ -92,7 +95,7 @@ def calibration(path: Path) -> dict[tuple[str, str, str], int]:
     keys = [(row["method"], row["case"], row["mode"]) for row in rows]
     if keys != [(method, case, mode) for method in METHODS for case in CASES for mode in MODES]:
         raise ValueError(f"{path} does not list the method/case/mode grid exactly once")
-    return {key: as_int(rows[index]["reps"]) for index, key in enumerate(keys)}
+    return {key: parse_int_text(rows[index]["reps"], f"{path} reps") for index, key in enumerate(keys)}
 
 
 def recompute(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -275,7 +278,7 @@ def calibration_attempts(
         ]
         if len(reported) != 1:
             raise ValueError(f"calibration attempt lacks a single reps line for {key}")
-        if as_int(reported[0].split("=", 1)[1]) != repetitions[key]:
+        if parse_int_text(reported[0].split("=", 1)[1], "calibration reps line") != repetitions[key]:
             raise ValueError(f"calibration attempt disagrees with calibration.tsv for {key}")
 
 
