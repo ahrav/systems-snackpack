@@ -146,7 +146,20 @@ verify_worktree_identity() {
         printf '%s\n' "$extra_files" >&2
         exit 2
     fi
-    source_commit_verified="git-worktree-head-clean"
+    # The verifier rehashes working bytes against commit blobs because git's stat
+    # cache can report a modified file as clean.
+    local recorded_blobs rehashed_blobs
+    recorded_blobs=$("${git_verify[@]}" ls-tree -r HEAD |
+        awk -F'\t' '{ split($1, fields, " "); print fields[3] " " $2 }' | LC_ALL=C sort)
+    rehashed_blobs=$(cd "$repo_root" && paste -d' ' \
+        <("${git_verify[@]}" ls-tree -r --name-only HEAD | git hash-object --stdin-paths) \
+        <("${git_verify[@]}" ls-tree -r --name-only HEAD) | LC_ALL=C sort)
+    if [[ $recorded_blobs != "$rehashed_blobs" ]]; then
+        echo "working tree content differs from $source_commit:" >&2
+        comm -13 <(printf '%s\n' "$recorded_blobs") <(printf '%s\n' "$rehashed_blobs") >&2
+        exit 2
+    fi
+    source_commit_verified="git-worktree-head-rehashed"
 }
 
 verify_worktree_identity
@@ -261,7 +274,8 @@ export CARGO_HOME=$cargo_home
 # A PATH edit made before this script started cannot be detected from inside it.
 # The provenance record identifies the resolved tool binaries.
 {
-    for tool in bash cargo rustc python3 git rg nm objdump sha256sum awk cmp comm realpath; do
+    for tool in bash cargo rustc python3 git rg nm objdump sha256sum awk cmp comm realpath \
+        hostname uname lscpu nproc taskset paste sort xargs cat env; do
         if ! tool_path=$(type -P "$tool"); then
             echo "required tool is absent from PATH: $tool" >&2
             exit 2
