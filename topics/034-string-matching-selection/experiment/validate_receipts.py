@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
-from pathlib import Path
 import statistics
+from pathlib import Path
+from typing import Any
 
 CASES = (
     "uniform_absent_32",
@@ -20,7 +22,7 @@ CASES = (
 MODES = ("reuse", "one_shot")
 
 
-def load_jsonl(path: Path) -> list[dict[str, object]]:
+def load_jsonl(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
 
@@ -32,7 +34,7 @@ def calibration(path: Path) -> dict[tuple[str, str, str], int]:
         }
 
 
-def recompute(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+def recompute(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     result = []
     for family in sorted({str(row["family"]) for row in rows}):
         for case in CASES:
@@ -75,6 +77,59 @@ def recompute(rows: list[dict[str, object]]) -> list[dict[str, object]]:
     return result
 
 
+ENRICHED_FIELDS = (
+    "block",
+    "candidate",
+    "family",
+    "label",
+    "period",
+    "sequence",
+    "template",
+)
+
+
+def receipts(
+    root: Path,
+    processes: list[dict[str, Any]],
+    rows_by_sequence: dict[int, list[dict[str, Any]]],
+) -> None:
+    """Check the per-process receipt files against the aggregate records."""
+    attempts_root = root / "attempts"
+    attempt_directories = sorted(entry.name for entry in attempts_root.iterdir())
+    if attempt_directories != [f"{int(record['sequence']):04d}" for record in processes]:
+        raise ValueError("attempt directories do not match the retained processes")
+    for record in processes:
+        sequence = int(record["sequence"])
+        attempt = attempts_root / f"{sequence:04d}"
+        stdout_text = (attempt / "stdout.jsonl").read_text(encoding="utf-8")
+        stderr_text = (attempt / "stderr.txt").read_text(encoding="utf-8")
+        if hashlib.sha256(stdout_text.encode()).hexdigest() != record["stdout_sha256"]:
+            raise ValueError(f"stdout digest mismatch for sequence {sequence}")
+        if hashlib.sha256(stderr_text.encode()).hexdigest() != record["stderr_sha256"]:
+            raise ValueError(f"stderr digest mismatch for sequence {sequence}")
+        receipt_rows = [json.loads(line) for line in stdout_text.splitlines() if line.strip()]
+        aggregate_rows = rows_by_sequence[sequence]
+        if len(receipt_rows) != len(aggregate_rows):
+            raise ValueError(f"receipt row count mismatch for sequence {sequence}")
+        aggregate_by_cell = {
+            (str(row["case"]), str(row["mode"])): row for row in aggregate_rows
+        }
+        for receipt_row in receipt_rows:
+            key = (str(receipt_row["case"]), str(receipt_row["mode"]))
+            aggregate_row = aggregate_by_cell.get(key)
+            if aggregate_row is None:
+                raise ValueError(f"receipt cell absent from aggregate rows: {key}")
+            if set(aggregate_row) != set(receipt_row) | set(ENRICHED_FIELDS):
+                raise ValueError(f"receipt field set mismatch for sequence {sequence}")
+            for field, value in receipt_row.items():
+                if aggregate_row[field] != value:
+                    raise ValueError(
+                        f"receipt value mismatch for sequence {sequence} field {field}"
+                    )
+        if int(record["pid"]) not in {int(row["pid"]) for row in receipt_rows}:
+            raise ValueError(f"receipt PID mismatch for sequence {sequence}")
+
+
 def close(left: float, right: float) -> bool:
     return math.isclose(left, right, rel_tol=1e-12, abs_tol=1e-12)
 
@@ -111,9 +166,9 @@ def validate(root: Path) -> None:
             if process_record[field] != scheduled[field]:
                 raise ValueError(f"process schedule field mismatch: {field}")
 
-    rows_by_sequence: dict[int, list[dict[str, object]]] = {}
+    rows_by_sequence: dict[int, list[dict[str, Any]]] = {}
     case_inputs: dict[str, int] = {}
-    case_results: dict[str, object] = {}
+    case_results: dict[str, Any] = {}
     output_checksums: dict[tuple[str, str, str], int] = {}
     for row in rows:
         sequence = int(row["sequence"])
@@ -165,6 +220,8 @@ def validate(root: Path) -> None:
             int(processes[sequence]["pid"])
         }:
             raise ValueError(f"sequence {sequence} PID mismatch")
+
+    receipts(root, processes, rows_by_sequence)
 
     expected = recompute(rows)
     observed = summary["analyses"]

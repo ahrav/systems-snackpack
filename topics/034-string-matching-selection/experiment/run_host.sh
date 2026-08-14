@@ -86,6 +86,13 @@ if git -C "$repo_root" rev-parse --git-dir >/dev/null 2>&1; then
         echo "worktree is not clean; refusing exact-source evidence" >&2
         exit 2
     fi
+    # assume-unchanged and skip-worktree entries keep a modified file out of the
+    # status output while cargo still builds the working-tree bytes.
+    marked_entries=$(git -C "$repo_root" ls-files -v | rg -c '^[a-zS] ' || true)
+    if [[ ${marked_entries:-0} -ne 0 ]]; then
+        echo "worktree has $marked_entries assume-unchanged/skip-worktree entries" >&2
+        exit 2
+    fi
     source_commit_verified="git-worktree-head-clean"
 else
     # ponytail: extracted archives keep the caller's word; recompute the archive
@@ -247,7 +254,9 @@ cmp "$output_dir/source_manifest.before.sha256" "$output_dir/source_manifest.aft
 manifest_temp="$work_dir/SHA256SUMS"
 (
     cd "$output_dir"
-    rg --files -0 |
+    # No ignore filtering: an ancestor .ignore/.gitignore outside the checkout
+    # could otherwise drop promoted evidence files from this manifest.
+    rg --files --hidden --no-ignore -0 |
         LC_ALL=C sort -z |
         xargs -0 sha256sum
 ) >"$manifest_temp"
