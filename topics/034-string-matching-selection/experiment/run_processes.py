@@ -142,6 +142,9 @@ def calibrate(binary: Path, output: Path, target_ms: int, cpu: int | None) -> di
                     "external_wall_ns": wall_ns,
                 }
                 records.append(record)
+                (output / "calibration_attempts.json").write_text(
+                    json.dumps(records, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+                )
                 if completed.returncode != 0:
                     raise RuntimeError(f"calibration failed: {record}")
                 lines = [line for line in completed.stdout.splitlines() if line.startswith("reps=")]
@@ -152,9 +155,6 @@ def calibrate(binary: Path, output: Path, target_ms: int, cpu: int | None) -> di
                     raise RuntimeError(f"non-positive calibration: {record}")
                 calibration[(method, case, mode)] = repetitions
 
-    (output / "calibration_attempts.json").write_text(
-        json.dumps(records, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
     lines = ["method\tcase\tmode\treps"]
     for method in METHODS:
         for case in CASES:
@@ -286,16 +286,26 @@ def execute_schedule(
             )
             if completed.returncode != 0:
                 process_stream.write(json.dumps(process_record, sort_keys=True) + "\n")
+                process_stream.flush()
                 raise RuntimeError(f"process {sequence} failed; retained under {attempt}")
-            parsed = [parse_json(line, f"process {sequence} stdout") for line in completed.stdout.splitlines() if line.strip()]
-            if len(parsed) != len(CASES) * len(MODES):
-                raise RuntimeError(f"process {sequence} emitted {len(parsed)} rows")
-            pids = {as_int(row["pid"]) for row in parsed}
-            if len(pids) != 1:
-                raise RuntimeError(f"process {sequence} emitted multiple PIDs")
-            pid = pids.pop()
-            if pid in seen_pids:
-                raise RuntimeError(f"PID {pid} was reused inside the run window")
+            try:
+                parsed = [
+                    parse_json(line, f"process {sequence} stdout")
+                    for line in completed.stdout.splitlines()
+                    if line.strip()
+                ]
+                if len(parsed) != len(CASES) * len(MODES):
+                    raise RuntimeError(f"process {sequence} emitted {len(parsed)} rows")
+                pids = {as_int(row["pid"]) for row in parsed}
+                if len(pids) != 1:
+                    raise RuntimeError(f"process {sequence} emitted multiple PIDs")
+                pid = pids.pop()
+                if pid in seen_pids:
+                    raise RuntimeError(f"PID {pid} was reused inside the run window")
+            except Exception:
+                process_stream.write(json.dumps(process_record, sort_keys=True) + "\n")
+                process_stream.flush()
+                raise
             seen_pids.add(pid)
             process_record["pid"] = pid
             process_stream.write(json.dumps(process_record, sort_keys=True) + "\n")

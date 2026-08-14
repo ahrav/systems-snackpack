@@ -94,25 +94,27 @@ done
 
 # The caller-supplied commit is otherwise unchecked evidence.
 verify_worktree_identity() {
-    if ! git -C "$repo_root" rev-parse --git-dir >/dev/null 2>&1; then
+    # A configured core.fsmonitor hook can report a modified file as unchanged.
+    local git_verify=(git -c core.fsmonitor=false -c core.untrackedCache=false -C "$repo_root")
+    if ! "${git_verify[@]}" rev-parse --git-dir >/dev/null 2>&1; then
         # An extracted archive carries no git metadata, so the caller-supplied
         # commit is recorded as unverified.
         source_commit_verified="no-git-worktree-caller-supplied"
         return 0
     fi
     local head_commit marked_entries
-    head_commit=$(git -C "$repo_root" rev-parse HEAD)
+    head_commit=$("${git_verify[@]}" rev-parse HEAD)
     if [[ $head_commit != "$source_commit" ]]; then
         echo "worktree HEAD $head_commit does not match SOURCE_COMMIT $source_commit" >&2
         exit 2
     fi
-    if [[ -n $(git -C "$repo_root" status --porcelain) ]]; then
+    if [[ -n $("${git_verify[@]}" status --porcelain) ]]; then
         echo "worktree is not clean; refusing exact-source evidence" >&2
         exit 2
     fi
     # assume-unchanged and skip-worktree entries keep a modified file out of the
     # status output while cargo still builds the working-tree bytes.
-    marked_entries=$(git -C "$repo_root" ls-files -v |
+    marked_entries=$("${git_verify[@]}" ls-files -v |
         awk '$1 ~ /^[a-zS]$/ { count++ } END { print count + 0 }')
     if [[ $marked_entries -ne 0 ]]; then
         echo "worktree has $marked_entries assume-unchanged/skip-worktree entries" >&2
@@ -122,7 +124,7 @@ verify_worktree_identity() {
     # cargo still consumes them: an ignored build.rs runs during the build.
     local extra_files
     extra_files=$(comm -13 \
-        <(git -C "$repo_root" ls-tree -r --name-only HEAD | LC_ALL=C sort) \
+        <("${git_verify[@]}" ls-tree -r --name-only HEAD | LC_ALL=C sort) \
         <(cd "$repo_root" && rg --files --hidden --no-ignore -g '!target/**' -g '!.git/**' -g '!.git' |
             LC_ALL=C sort))
     if [[ -n $extra_files ]]; then
@@ -241,6 +243,19 @@ export CARGO_HOME=$cargo_home
     done
 } >>"$output_dir/build_environment.txt"
 
+# A PATH edit made before this script started cannot be detected from inside it.
+# The provenance record identifies the resolved tool binaries.
+{
+    for tool in bash cargo rustc python3 git rg nm objdump sha256sum awk cmp comm realpath; do
+        if ! tool_path=$(type -P "$tool"); then
+            echo "required tool is absent from PATH: $tool" >&2
+            exit 2
+        fi
+        printf '%s path=%s sha256=%s\n' "$tool" "$tool_path" \
+            "$(sha256sum "$(realpath "$tool_path")" | awk '{print $1}')"
+    done
+} >"$output_dir/tool_provenance.txt"
+
 write_source_manifest "$output_dir/source_manifest.before.sha256"
 # verify_worktree_identity runs again after the manifest: a modification landing
 # between the first check and this manifest would appear in both manifests and
@@ -286,6 +301,7 @@ python3 -I topics/034-string-matching-selection/experiment/run_processes.py \
     --target-ms 200 >"$output_dir/benchmark_runner.log" 2>&1
 
 python3 -I topics/034-string-matching-selection/experiment/validate_receipts.py \
+    --expect-binary-sha256 "$native_digest_before_timing" \
     "$output_dir/benchmark" >"$output_dir/receipt_validation.log" 2>&1
 
 # One executable must serve the whole timing run for the contrasts to compare
@@ -309,6 +325,13 @@ do
 done
 # Relative paths keep sha256sum -c usable after the directory is archived.
 (cd "$output_dir" && sha256sum ./*.asm) >"$output_dir/disassembly.sha256"
+
+# The disassembly must describe the binary the timings came from.
+native_digest_after_disassembly=$(sha256sum "$native_binary" | awk '{print $1}')
+if [[ $native_digest_after_disassembly != "$native_digest_before_timing" ]]; then
+    echo "native binary changed during linked-code inspection" >&2
+    exit 2
+fi
 
 write_source_manifest "$output_dir/source_manifest.after.sha256"
 cmp "$output_dir/source_manifest.before.sha256" "$output_dir/source_manifest.after.sha256"

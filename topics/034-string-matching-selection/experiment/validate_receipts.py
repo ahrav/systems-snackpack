@@ -293,6 +293,9 @@ def receipts(
         aggregate_rows = rows_by_sequence[sequence]
         if len(receipt_rows) != len(aggregate_rows):
             raise ValueError(f"receipt row count mismatch for sequence {sequence}")
+        receipt_cells = [(str(row["case"]), str(row["mode"])) for row in receipt_rows]
+        if receipt_cells != rotated_cells(as_int(record["block"])):
+            raise ValueError(f"receipt cell order does not follow the rotation for sequence {sequence}")
         aggregate_by_cell = {
             (str(row["case"]), str(row["mode"])): row for row in aggregate_rows
         }
@@ -319,7 +322,7 @@ def close(left: float, right: float) -> bool:
     return math.isclose(left, right, rel_tol=1e-12, abs_tol=1e-12)
 
 
-def validate(root: Path) -> None:
+def validate(root: Path, expected_binary_sha256: str | None = None) -> None:
     metadata = read_json(root / "run_metadata.json")
     schedule = read_json(root / "schedule.json")
     processes = load_jsonl(root / "processes.jsonl")
@@ -456,6 +459,8 @@ def validate(root: Path) -> None:
 
     if summary.get("run_metadata") != metadata:
         raise ValueError("summary run_metadata does not match run_metadata.json")
+    if expected_binary_sha256 is not None and metadata["binary_sha256"] != expected_binary_sha256:
+        raise ValueError("recorded binary digest does not match the host's timing binary")
 
     expected = recompute(rows)
     observed = summary["analyses"]
@@ -483,8 +488,12 @@ def validate(root: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("output", type=Path)
+    parser.add_argument(
+        "--expect-binary-sha256",
+        help="digest the host recorded for the timing binary",
+    )
     args = parser.parse_args()
-    validate(args.output.resolve(strict=True))
+    validate(args.output.resolve(strict=True), args.expect_binary_sha256)
     metadata = read_json(args.output / "run_metadata.json")
     print(
         "CHECK=PASS "
