@@ -518,7 +518,10 @@ def validate(
 
     if summary.get("run_metadata") != metadata:
         raise ValueError("summary run_metadata does not match run_metadata.json")
-    if expected_binary_sha256 is not None and metadata["binary_sha256"] != expected_binary_sha256:
+    recorded_digest = metadata["binary_sha256"]
+    if not isinstance(recorded_digest, str) or not re.fullmatch(r"[0-9a-f]{64}", recorded_digest):
+        raise ValueError(f"recorded binary digest is not a SHA-256 hex string: {recorded_digest!r}")
+    if expected_binary_sha256 is not None and recorded_digest != expected_binary_sha256:
         raise ValueError("recorded binary digest does not match the host's timing binary")
 
     expected = recompute(rows)

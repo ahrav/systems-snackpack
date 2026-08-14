@@ -24,7 +24,9 @@ while IFS= read -r variable; do
     RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | \
         CARGO_BUILD_* | CARGO_TARGET_* | CARGO_PROFILE_* | CARGO_UNSTABLE_* | \
         CARGO_INCREMENTAL | MALLOC_* | \
-        LD_* | DYLD_* | GLIBC_TUNABLES | GIT_* | RIPGREP_CONFIG_PATH | CDPATH)
+        LD_* | DYLD_* | GLIBC_TUNABLES | GIT_* | RIPGREP_CONFIG_PATH | CDPATH | \
+        COMPILER_PATH | GCC_EXEC_PREFIX | LIBRARY_PATH | CPATH | C_INCLUDE_PATH | \
+        CPLUS_INCLUDE_PATH | OBJC_INCLUDE_PATH)
         swept_environment_names+=("$variable")
         unset "$variable"
         ;;
@@ -44,7 +46,7 @@ record_tool_provenance() {
     {
         for tool in bash cargo rustc python3 git rg nm objdump sha256sum awk cmp comm realpath \
             hostname uname lscpu nproc taskset paste sort xargs cat env tar find gzip diff head ldd ln \
-            cp mkdir cc ld; do
+            cp mkdir chmod cc ld rustfmt cargo-fmt cargo-clippy clippy-driver; do
             if ! tool_path=$(type -P "$tool"); then
                 echo "required tool is absent from PATH: $tool" >&2
                 exit 2
@@ -379,8 +381,9 @@ record_toolchain_provenance() {
         while IFS= read -r artifact; do
             artifact_digest=$(sha256sum "$artifact" | awk '{print $1}')
             printf '%s sha256=%s\n' "$artifact" "$artifact_digest"
-        done < <(find "$rust_sysroot/lib" -type f \
-            \( -name '*.rlib' -o -name '*.so' -o -name 'rust-lld' -o -name 'ld.lld' \) |
+        done < <(find "$rust_sysroot/bin" "$rust_sysroot/lib" -type f \
+            \( -name '*.rlib' -o -name '*.so' -o -name 'rust-lld' -o -name 'ld.lld' \
+            -o -path "$rust_sysroot/bin/*" \) |
             LC_ALL=C sort)
     } >"$destination"
 }
@@ -398,6 +401,9 @@ tar -C "$repo_root" --exclude=./target --exclude=./.git -cf - . |
     tar -C "$build_root" -xf -
 write_source_manifest "$work_dir/snapshot_manifest.sha256" "$build_root"
 cmp "$output_dir/source_manifest.before.sha256" "$work_dir/snapshot_manifest.sha256"
+# Read-only snapshot files: a same-user rewrite during the build needs a chmod
+# first, and the after-manifest still covers a change that is not restored.
+find "$build_root" -type f -exec chmod a-w {} +
 # Cargo searches upward from $build_root; reject configs after creating the snapshot.
 refuse_ambient_cargo_config "$build_root"
 # verify_worktree_identity runs again after the manifest: a modification landing
@@ -465,7 +471,13 @@ python3 -I topics/034-string-matching-selection/experiment/validate_receipts.py 
 
 # The manifest must cover the same benchmark bytes the validator accepted.
 hash_benchmark_tree() {
-    local destination=$1
+    local destination=$1 symlinked_evidence
+    symlinked_evidence=$(find "$output_dir/benchmark" -type l -print | LC_ALL=C sort)
+    if [[ -n $symlinked_evidence ]]; then
+        echo "refusing symlinked benchmark evidence:" >&2
+        printf '%s\n' "$symlinked_evidence" >&2
+        exit 2
+    fi
     (
         cd "$output_dir/benchmark"
         rg --files --hidden --no-ignore -0 | LC_ALL=C sort -z | xargs -0 sha256sum
