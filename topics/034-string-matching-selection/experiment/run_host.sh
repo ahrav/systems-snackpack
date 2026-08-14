@@ -283,22 +283,24 @@ record_optional rustup.txt rustup show active-toolchain
 # mirrors, so its digest is recorded instead of refused.
 # A relative CARGO_HOME would resolve against a different directory once cargo
 # runs after the cd below.
-cargo_home=$(realpath -m -- "${CARGO_HOME:-$HOME/.cargo}")
+# The isolated CARGO_HOME bypasses config.toml and config in the original
+# CARGO_HOME; the registry cache is reused by symlink.
+real_cargo_home=$(realpath -m -- "${CARGO_HOME:-$HOME/.cargo}")
+cargo_home="$work_dir/cargo-home"
+mkdir -p "$cargo_home"
+for cache_entry in registry git; do
+    if [[ -e "$real_cargo_home/$cache_entry" ]]; then
+        ln -s "$real_cargo_home/$cache_entry" "$cargo_home/$cache_entry"
+    fi
+done
 export CARGO_HOME=$cargo_home
 {
     printf 'cargo_home=%s\n' "$cargo_home"
-    for cargo_config in "$cargo_home/config.toml" "$cargo_home/config"; do
+    printf 'cargo_home_isolated_from=%s\n' "$real_cargo_home"
+    for cargo_config in "$real_cargo_home/config.toml" "$real_cargo_home/config"; do
         if [[ -e $cargo_config ]]; then
-            # A wrapper, linker, or flags entry here would shape the measured
-            # binary without appearing in the recorded flags.
-            if rg -n '(rustc|rustc-wrapper|rustc-workspace-wrapper|rustdoc|linker|rustflags|rustdocflags|target-dir)' \
-                "$cargo_config" >"$work_dir/cargo-home-build-keys"; then
-                echo "refusing build-affecting settings in $cargo_config:" >&2
-                cat "$work_dir/cargo-home-build-keys" >&2
-                exit 2
-            fi
-            printf 'cargo_home_config=%s sha256=%s\n' "$cargo_config" \
-                "$(sha256sum "$cargo_config" | awk '{print $1}')"
+            config_digest=$(sha256sum "$cargo_config" | awk '{print $1}')
+            printf 'bypassed_cargo_home_config=%s sha256=%s\n' "$cargo_config" "$config_digest"
         fi
     done
 } >>"$output_dir/build_environment.txt"
@@ -307,15 +309,36 @@ export CARGO_HOME=$cargo_home
 # The provenance record identifies the resolved tool binaries.
 {
     for tool in bash cargo rustc python3 git rg nm objdump sha256sum awk cmp comm realpath \
-        hostname uname lscpu nproc taskset paste sort xargs cat env tar find gzip diff head ldd; do
+        hostname uname lscpu nproc taskset paste sort xargs cat env tar find gzip diff head ldd ln; do
         if ! tool_path=$(type -P "$tool"); then
             echo "required tool is absent from PATH: $tool" >&2
             exit 2
         fi
-        printf '%s path=%s sha256=%s\n' "$tool" "$tool_path" \
-            "$(sha256sum "$(realpath "$tool_path")" | awk '{print $1}')"
+        tool_digest=$(sha256sum "$(realpath "$tool_path")" | awk '{print $1}')
+        printf '%s path=%s sha256=%s\n' "$tool" "$tool_path" "$tool_digest"
     done
 } >"$output_dir/tool_provenance.txt"
+
+# rustup which records the selected tool binary when rustup manages it, and the
+# sysroot holds the linker and precompiled standard library used by the build.
+{
+    rust_sysroot=$(rustc --print sysroot)
+    printf 'sysroot=%s\n' "$rust_sysroot"
+    for proxied in cargo rustc rustdoc; do
+        if selected=$(rustup which "$proxied" 2>/dev/null); then
+            selected_digest=$(sha256sum "$selected" | awk '{print $1}')
+            printf '%s selected=%s sha256=%s\n' "$proxied" "$selected" "$selected_digest"
+        else
+            printf '%s selected=no-rustup-proxy\n' "$proxied"
+        fi
+    done
+    while IFS= read -r artifact; do
+        artifact_digest=$(sha256sum "$artifact" | awk '{print $1}')
+        printf '%s sha256=%s\n' "$artifact" "$artifact_digest"
+    done < <(find "$rust_sysroot/lib" -type f \
+        \( -name '*.rlib' -o -name '*.so' -o -name 'rust-lld' -o -name 'ld.lld' \) |
+        LC_ALL=C sort)
+} >"$output_dir/toolchain_provenance.txt"
 
 write_source_manifest "$output_dir/source_manifest.before.sha256"
 if [[ -n $source_archive ]]; then
@@ -357,14 +380,18 @@ native_digest_before_timing=$(sha256sum "$native_binary" | awk '{print $1}')
 sha256sum "$native_binary" >"$output_dir/native_binary.sha256"
 
 # The binary digest excludes shared libraries resolved at run time.
-ldd "$native_binary" >"$output_dir/native_libraries.txt" 2>&1
-{
+record_runtime_libraries() {
+    local listing=$1 digests=$2 library_path library_digest
+    ldd "$native_binary" >"$listing" 2>&1
+    : >"$digests"
     while IFS= read -r library_path; do
-        printf '%s sha256=%s\n' "$library_path" \
-            "$(sha256sum "$library_path" | awk '{print $1}')"
-    done < <(awk '$0 ~ /=> \// { print $3 } $1 ~ /^\// { print $1 }' "$output_dir/native_libraries.txt" |
+        library_digest=$(sha256sum "$library_path" | awk '{print $1}')
+        printf '%s sha256=%s\n' "$library_path" "$library_digest" >>"$digests"
+    done < <(awk '$0 ~ /=> \// { print $3 } $1 ~ /^\// { print $1 }' "$listing" |
         LC_ALL=C sort -u)
-} >"$output_dir/native_libraries.sha256"
+}
+record_runtime_libraries "$output_dir/native_libraries.txt" \
+    "$output_dir/native_libraries.sha256"
 
 python3 -I topics/034-string-matching-selection/experiment/run_processes.py \
     --binary "$native_binary" \
@@ -383,6 +410,15 @@ python3 -I topics/034-string-matching-selection/experiment/validate_receipts.py 
 native_digest_after_timing=$(sha256sum "$native_binary" | awk '{print $1}')
 if [[ $native_digest_after_timing != "$native_digest_before_timing" ]]; then
     echo "native binary changed during the timing run" >&2
+    exit 2
+fi
+
+# A library upgrade during the run would leave later processes on other bytes.
+record_runtime_libraries "$work_dir/native_libraries.after.txt" \
+    "$work_dir/native_libraries.after.sha256"
+if ! cmp -s "$output_dir/native_libraries.sha256" "$work_dir/native_libraries.after.sha256"; then
+    echo "runtime libraries changed during the timing run:" >&2
+    diff "$output_dir/native_libraries.sha256" "$work_dir/native_libraries.after.sha256" >&2 || true
     exit 2
 fi
 
