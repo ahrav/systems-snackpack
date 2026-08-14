@@ -85,7 +85,10 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 def calibration(path: Path) -> dict[tuple[str, str, str], int]:
     """Read the frozen repetition map, requiring the grid exactly once."""
     with path.open(encoding="utf-8", newline="") as source:
-        rows = list(csv.DictReader(source, delimiter="\t"))
+        reader = csv.DictReader(source, delimiter="\t")
+        if reader.fieldnames != ["method", "case", "mode", "reps"]:
+            raise ValueError(f"{path} has unexpected columns: {reader.fieldnames}")
+        rows = list(reader)
     keys = [(row["method"], row["case"], row["mode"]) for row in rows]
     if keys != [(method, case, mode) for method in METHODS for case in CASES for mode in MODES]:
         raise ValueError(f"{path} does not list the method/case/mode grid exactly once")
