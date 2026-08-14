@@ -49,13 +49,15 @@ source_archive_sha256=$3
 
 # The digest names bytes this script never sees unless the archive is passed too.
 if [[ $# -eq 4 ]]; then
-    archive_digest=$(sha256sum "$4" | awk '{print $1}')
+    source_archive=$(realpath -m -- "$4")
+    archive_digest=$(sha256sum "$source_archive" | awk '{print $1}')
     if [[ $archive_digest != "$source_archive_sha256" ]]; then
-        echo "archive $4 hashes to $archive_digest, not $source_archive_sha256" >&2
+        echo "archive $source_archive hashes to $archive_digest, not $source_archive_sha256" >&2
         exit 2
     fi
-    source_archive_verified="recomputed-from-$4"
+    source_archive_verified="digest-and-tree-compared"
 else
+    source_archive=""
     source_archive_verified="no-archive-supplied-caller-metadata"
 fi
 
@@ -170,12 +172,34 @@ native_target="$work_dir/native-target"
 
 write_source_manifest() {
     local destination=$1
+    local root=${2:-$repo_root}
     (
-        cd "$repo_root"
+        cd "$root"
         rg --files --hidden --no-ignore -g '!target/**' -g '!.git/**' -g '!.git' -0 |
             LC_ALL=C sort -z |
             xargs -0 sha256sum
     ) >"$destination"
+}
+
+# Hashing the archive says nothing about the tree cargo builds, so its contents
+# are compared with the pre-build manifest.
+verify_source_archive() {
+    local archive=$1 extract_dir="$work_dir/archive-source" runner_suffix archive_root marker
+    runner_suffix="topics/034-string-matching-selection/experiment/run_host.sh"
+    mkdir -p "$extract_dir"
+    tar -xzf "$archive" -C "$extract_dir"
+    marker=$(cd "$extract_dir" && find . -type f -path "*/$runner_suffix" | LC_ALL=C sort | head -1)
+    if [[ -z $marker ]]; then
+        echo "archive $archive does not contain $runner_suffix" >&2
+        exit 2
+    fi
+    archive_root=$(cd "$extract_dir" && cd "${marker%/"$runner_suffix"}" && pwd -P)
+    write_source_manifest "$work_dir/archive_manifest.sha256" "$archive_root"
+    if ! cmp -s "$output_dir/source_manifest.before.sha256" "$work_dir/archive_manifest.sha256"; then
+        echo "archive $archive does not match the source tree at $repo_root:" >&2
+        diff "$output_dir/source_manifest.before.sha256" "$work_dir/archive_manifest.sha256" >&2 || true
+        exit 2
+    fi
 }
 
 record_optional() {
@@ -265,6 +289,14 @@ export CARGO_HOME=$cargo_home
     printf 'cargo_home=%s\n' "$cargo_home"
     for cargo_config in "$cargo_home/config.toml" "$cargo_home/config"; do
         if [[ -e $cargo_config ]]; then
+            # A wrapper, linker, or flags entry here would shape the measured
+            # binary without appearing in the recorded flags.
+            if rg -n '^[[:space:]]*(rustc|rustc-wrapper|rustc-workspace-wrapper|rustdoc|linker|rustflags|rustdocflags|target-dir)[[:space:]]*=' \
+                "$cargo_config" >"$work_dir/cargo-home-build-keys"; then
+                echo "refusing build-affecting settings in $cargo_config:" >&2
+                cat "$work_dir/cargo-home-build-keys" >&2
+                exit 2
+            fi
             printf 'cargo_home_config=%s sha256=%s\n' "$cargo_config" \
                 "$(sha256sum "$cargo_config" | awk '{print $1}')"
         fi
@@ -286,6 +318,9 @@ export CARGO_HOME=$cargo_home
 } >"$output_dir/tool_provenance.txt"
 
 write_source_manifest "$output_dir/source_manifest.before.sha256"
+if [[ -n $source_archive ]]; then
+    verify_source_archive "$source_archive"
+fi
 # verify_worktree_identity runs again after the manifest: a modification landing
 # between the first check and this manifest would appear in both manifests and
 # pass the cmp gate below.
