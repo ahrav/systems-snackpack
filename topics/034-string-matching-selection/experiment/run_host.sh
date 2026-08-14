@@ -15,12 +15,14 @@ if [[ -n $(compgen -A function) ]]; then
 fi
 
 # Loader interposition can replace bcmp, allocation, or clock behavior in the
-# exact binary whose hash is archived.
-loader_environment_names=()
+# exact binary whose hash is archived. GIT_DIR and its siblings would redirect
+# the HEAD check below to a different repository than Cargo builds, and
+# RIPGREP_CONFIG_PATH can drop files from the source manifests.
+swept_environment_names=()
 while IFS= read -r variable; do
     case $variable in
-    LD_* | DYLD_* | GLIBC_TUNABLES)
-        loader_environment_names+=("$variable")
+    LD_* | DYLD_* | GLIBC_TUNABLES | GIT_* | RIPGREP_CONFIG_PATH)
+        swept_environment_names+=("$variable")
         unset "$variable"
         ;;
     esac
@@ -29,6 +31,8 @@ if [[ -s /etc/ld.so.preload ]]; then
     echo "exact-source measurement refuses /etc/ld.so.preload interposition" >&2
     exit 2
 fi
+# Replacement objects would let the checked-out content differ from the commit.
+export GIT_NO_REPLACE_OBJECTS=1
 
 if [[ $# -ne 3 ]]; then
     echo "usage: $0 OUTPUT_DIR SOURCE_COMMIT SOURCE_ARCHIVE_SHA256" >&2
@@ -160,7 +164,7 @@ record_optional rustup.txt rustup show active-toolchain
     printf 'ambient_CARGO_ENCODED_RUSTFLAGS=%s\n' "$ambient_encoded_rustflags"
     printf 'generic_rustflags=empty-exported-RUSTFLAGS\n'
     printf 'swept=CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_TARGET\n'
-    for variable_name in ${loader_environment_names[@]+"${loader_environment_names[@]}"}; do
+    for variable_name in ${swept_environment_names[@]+"${swept_environment_names[@]}"}; do
         printf 'unset %s\n' "$variable_name"
     done
     compgen -e | LC_ALL=C sort | while IFS= read -r name; do
@@ -229,15 +233,8 @@ sha256sum "$output_dir"/*.asm >"$output_dir/disassembly.sha256"
 write_source_manifest "$output_dir/source_manifest.after.sha256"
 cmp "$output_dir/source_manifest.before.sha256" "$output_dir/source_manifest.after.sha256"
 
-manifest_temp="$work_dir/SHA256SUMS"
-(
-    cd "$output_dir"
-    rg --files -0 |
-        LC_ALL=C sort -z |
-        xargs -0 sha256sum
-) >"$manifest_temp"
-cp "$manifest_temp" "$output_dir/SHA256SUMS"
-
+# Written before the manifest so SHA256SUMS covers the pass record; the final
+# stdout line below stays the run's success sentinel.
 {
     echo "CHECK=PASS"
     echo "source_commit=$source_commit"
@@ -246,5 +243,14 @@ cp "$manifest_temp" "$output_dir/SHA256SUMS"
     echo "aa_blocks=4"
     echo "timing_binary_sha256=$(sha256sum "$native_binary" | awk '{print $1}')"
 } >"$output_dir/run.status"
+
+manifest_temp="$work_dir/SHA256SUMS"
+(
+    cd "$output_dir"
+    rg --files -0 |
+        LC_ALL=C sort -z |
+        xargs -0 sha256sum
+) >"$manifest_temp"
+cp "$manifest_temp" "$output_dir/SHA256SUMS"
 
 echo "CHECK=PASS output=$output_dir"

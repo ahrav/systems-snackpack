@@ -77,4 +77,9 @@ diff <(sort /tmp/t34-recomputed.sha256) \
 ```
 
 The manifest covers every non-ignored file in the tree, so it constrains the
-source more tightly than a `git rev-parse HEAD` comparison would.
+source more tightly than a `git rev-parse HEAD` comparison would. It also names
+file contents rather than a commit object, so the check needs a tree with those
+digests, not the `b8d7f88` commit specifically. That commit is an ancestor of
+this branch and this repository merges topic branches with merge commits, which
+keeps it reachable from `main` after the merge; verifying from a squashed copy
+of the history means recovering the tree some other way first.
