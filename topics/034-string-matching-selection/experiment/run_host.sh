@@ -173,6 +173,16 @@ native_target="$work_dir/native-target"
 write_source_manifest() {
     local destination=$1
     local root=${2:-$repo_root}
+    local symlinked_inputs
+    # rg does not follow symlinks, so a symlinked input would be hashed nowhere.
+    # Cargo still compiles the symlink target.
+    symlinked_inputs=$(find "$root" \( -path "$root/target" -o -path "$root/.git" \) -prune -o \
+        -type l -print | LC_ALL=C sort)
+    if [[ -n $symlinked_inputs ]]; then
+        echo "refusing symlinked source inputs under $root:" >&2
+        printf '%s\n' "$symlinked_inputs" >&2
+        exit 2
+    fi
     (
         cd "$root"
         rg --files --hidden --no-ignore -g '!target/**' -g '!.git/**' -g '!.git' -0 |
@@ -309,7 +319,8 @@ export CARGO_HOME=$cargo_home
 # The provenance record identifies the resolved tool binaries.
 {
     for tool in bash cargo rustc python3 git rg nm objdump sha256sum awk cmp comm realpath \
-        hostname uname lscpu nproc taskset paste sort xargs cat env tar find gzip diff head ldd ln; do
+        hostname uname lscpu nproc taskset paste sort xargs cat env tar find gzip diff head ldd ln \
+        cc ld; do
         if ! tool_path=$(type -P "$tool"); then
             echo "required tool is absent from PATH: $tool" >&2
             exit 2
