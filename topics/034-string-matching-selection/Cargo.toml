@@ -1,0 +1,17 @@
+[package]
+name = "string-matching-selection"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "string_matching_selection"
+path = "src/lib.rs"
+
+[[bin]]
+name = "string-match-probe"
+path = "src/bin/string_match_probe.rs"
+
+[lints]
+workspace = true
