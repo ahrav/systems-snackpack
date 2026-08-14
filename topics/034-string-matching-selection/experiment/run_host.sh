@@ -21,7 +21,7 @@ fi
 swept_environment_names=()
 while IFS= read -r variable; do
     case $variable in
-    RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | \
+    RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | RUSTFMT | \
         CARGO_BUILD_* | CARGO_TARGET_* | CARGO_PROFILE_* | CARGO_UNSTABLE_* | \
         CARGO_INCREMENTAL | MALLOC_* | \
         LD_* | DYLD_* | GLIBC_TUNABLES | GIT_* | RIPGREP_CONFIG_PATH | CDPATH | \
