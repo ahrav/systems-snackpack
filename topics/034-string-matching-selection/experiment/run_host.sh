@@ -321,24 +321,28 @@ export CARGO_HOME=$cargo_home
 
 # rustup which records the selected tool binary when rustup manages it, and the
 # sysroot holds the linker and precompiled standard library used by the build.
-{
+record_toolchain_provenance() {
+    local destination=$1 rust_sysroot proxied selected selected_digest artifact artifact_digest
     rust_sysroot=$(rustc --print sysroot)
-    printf 'sysroot=%s\n' "$rust_sysroot"
-    for proxied in cargo rustc rustdoc; do
-        if selected=$(rustup which "$proxied" 2>/dev/null); then
-            selected_digest=$(sha256sum "$selected" | awk '{print $1}')
-            printf '%s selected=%s sha256=%s\n' "$proxied" "$selected" "$selected_digest"
-        else
-            printf '%s selected=no-rustup-proxy\n' "$proxied"
-        fi
-    done
-    while IFS= read -r artifact; do
-        artifact_digest=$(sha256sum "$artifact" | awk '{print $1}')
-        printf '%s sha256=%s\n' "$artifact" "$artifact_digest"
-    done < <(find "$rust_sysroot/lib" -type f \
-        \( -name '*.rlib' -o -name '*.so' -o -name 'rust-lld' -o -name 'ld.lld' \) |
-        LC_ALL=C sort)
-} >"$output_dir/toolchain_provenance.txt"
+    {
+        printf 'sysroot=%s\n' "$rust_sysroot"
+        for proxied in cargo rustc rustdoc; do
+            if selected=$(rustup which "$proxied" 2>/dev/null); then
+                selected_digest=$(sha256sum "$selected" | awk '{print $1}')
+                printf '%s selected=%s sha256=%s\n' "$proxied" "$selected" "$selected_digest"
+            else
+                printf '%s selected=no-rustup-proxy\n' "$proxied"
+            fi
+        done
+        while IFS= read -r artifact; do
+            artifact_digest=$(sha256sum "$artifact" | awk '{print $1}')
+            printf '%s sha256=%s\n' "$artifact" "$artifact_digest"
+        done < <(find "$rust_sysroot/lib" -type f \
+            \( -name '*.rlib' -o -name '*.so' -o -name 'rust-lld' -o -name 'ld.lld' \) |
+            LC_ALL=C sort)
+    } >"$destination"
+}
+record_toolchain_provenance "$output_dir/toolchain_provenance.txt"
 
 write_source_manifest "$output_dir/source_manifest.before.sha256"
 if [[ -n $source_archive ]]; then
@@ -410,6 +414,14 @@ python3 -I topics/034-string-matching-selection/experiment/validate_receipts.py 
 native_digest_after_timing=$(sha256sum "$native_binary" | awk '{print $1}')
 if [[ $native_digest_after_timing != "$native_digest_before_timing" ]]; then
     echo "native binary changed during the timing run" >&2
+    exit 2
+fi
+
+# A toolchain replacement mid-run would leave the builds on other bytes.
+record_toolchain_provenance "$work_dir/toolchain_provenance.after.txt"
+if ! cmp -s "$output_dir/toolchain_provenance.txt" "$work_dir/toolchain_provenance.after.txt"; then
+    echo "toolchain changed during the run:" >&2
+    diff "$output_dir/toolchain_provenance.txt" "$work_dir/toolchain_provenance.after.txt" >&2 || true
     exit 2
 fi
 

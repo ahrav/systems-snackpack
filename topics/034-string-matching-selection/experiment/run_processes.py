@@ -401,6 +401,8 @@ def main() -> int:
         json.dumps(schedule, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     rows = execute_schedule(binary, args.output, schedule, calibration, cpu)
+    if sha256(binary) != run_metadata["binary_sha256"]:
+        raise RuntimeError(f"{binary} changed during the schedule; rows span two executables")
     summary = {"run_metadata": run_metadata, "analyses": analyse(rows)}
     (args.output / "summary.json").write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
