@@ -95,6 +95,7 @@ def captured_text(stream: bytes | str | None) -> str:
 
 def run_command(command: list[str], cpu: int | None) -> tuple[subprocess.CompletedProcess[str], int]:
     started = time.monotonic_ns()
+    completed: subprocess.CompletedProcess[str]
     try:
         completed = subprocess.run(
             command,
@@ -105,7 +106,7 @@ def run_command(command: list[str], cpu: int | None) -> tuple[subprocess.Complet
             timeout=1800,
         )
     except subprocess.TimeoutExpired as expired:
-        completed = subprocess.CompletedProcess[str](
+        completed = subprocess.CompletedProcess(
             command,
             returncode=124,
             stdout=captured_text(expired.stdout),
