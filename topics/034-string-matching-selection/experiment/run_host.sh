@@ -291,7 +291,7 @@ export CARGO_HOME=$cargo_home
         if [[ -e $cargo_config ]]; then
             # A wrapper, linker, or flags entry here would shape the measured
             # binary without appearing in the recorded flags.
-            if rg -n '^[[:space:]]*(rustc|rustc-wrapper|rustc-workspace-wrapper|rustdoc|linker|rustflags|rustdocflags|target-dir)[[:space:]]*=' \
+            if rg -n '(rustc|rustc-wrapper|rustc-workspace-wrapper|rustdoc|linker|rustflags|rustdocflags|target-dir)' \
                 "$cargo_config" >"$work_dir/cargo-home-build-keys"; then
                 echo "refusing build-affecting settings in $cargo_config:" >&2
                 cat "$work_dir/cargo-home-build-keys" >&2
@@ -307,7 +307,7 @@ export CARGO_HOME=$cargo_home
 # The provenance record identifies the resolved tool binaries.
 {
     for tool in bash cargo rustc python3 git rg nm objdump sha256sum awk cmp comm realpath \
-        hostname uname lscpu nproc taskset paste sort xargs cat env; do
+        hostname uname lscpu nproc taskset paste sort xargs cat env tar find gzip diff head ldd; do
         if ! tool_path=$(type -P "$tool"); then
             echo "required tool is absent from PATH: $tool" >&2
             exit 2
@@ -355,6 +355,16 @@ native_binary="$native_target/release/string-match-probe"
 run_gate native_verify.log "$native_binary" verify
 native_digest_before_timing=$(sha256sum "$native_binary" | awk '{print $1}')
 sha256sum "$native_binary" >"$output_dir/native_binary.sha256"
+
+# The binary digest excludes shared libraries resolved at run time.
+ldd "$native_binary" >"$output_dir/native_libraries.txt" 2>&1
+{
+    while IFS= read -r library_path; do
+        printf '%s sha256=%s\n' "$library_path" \
+            "$(sha256sum "$library_path" | awk '{print $1}')"
+    done < <(awk '$0 ~ /=> \// { print $3 } $1 ~ /^\// { print $1 }' "$output_dir/native_libraries.txt" |
+        LC_ALL=C sort -u)
+} >"$output_dir/native_libraries.sha256"
 
 python3 -I topics/034-string-matching-selection/experiment/run_processes.py \
     --binary "$native_binary" \

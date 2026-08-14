@@ -343,6 +343,8 @@ def validate(root: Path, expected_binary_sha256: str | None = None) -> None:
         raise ValueError("recorded calibration target is not positive")
     if as_int(metadata["blocks"]) <= 0 or as_int(metadata["aa_blocks"]) <= 0:
         raise ValueError("recorded block counts are not positive")
+    if metadata["pinned_cpu"] is not None and as_int(metadata["pinned_cpu"]) < 0:
+        raise ValueError("recorded pinned CPU is negative")
     calibration_attempts(
         root / "calibration_attempts.json",
         str(metadata["binary"]),
