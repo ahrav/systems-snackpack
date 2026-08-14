@@ -61,13 +61,14 @@ in-run, so their `source_identity.txt` carries the caller-supplied commit
 without the `source_commit_verified` marker later runs record. The binding was
 instead confirmed after the fact from the archives themselves: each
 `results/source_manifest.before.sha256` matches the manifest recomputed at
-`b8d7f88`, entry for entry and digest for digest. The single difference is the
-local checkout's own `.git` pointer file, which the hosts' extracted trees did
-not contain.
+`b8d7f88`, entry for entry and digest for digest. The recomputation excludes the
+linked worktree's own `.git` pointer file, which the hosts' extracted trees did
+not contain, so the `diff` below exits cleanly on an intact archive.
 
 ```bash
 git worktree add --detach /tmp/t34-b8d7f88 b8d7f88
-(cd /tmp/t34-b8d7f88 && rg --files --hidden -g '!target/**' -g '!.git/**' -0 |
+(cd /tmp/t34-b8d7f88 &&
+    rg --files --hidden -g '!target/**' -g '!.git/**' -g '!.git' -0 |
     LC_ALL=C sort -z | xargs -0 sha256sum) >/tmp/t34-recomputed.sha256
 mkdir -p /tmp/t34-xxl && tar -xzf \
     topics/034-string-matching-selection/measurements/raw/b8d7f88/topic34-b8d7f88-xxl-results.tar.gz \

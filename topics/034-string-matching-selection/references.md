@@ -26,10 +26,10 @@ thresholds in production source are version-specific and are not API promises.
 
 ## Current implementations and platform contracts
 
-- [`memchr` 2.8.3 `memmem` documentation](https://docs.rs/memchr/latest/memchr/memmem/)
+- [`memchr` 2.8.3 `memmem` documentation](https://docs.rs/memchr/2.8.3/memchr/memmem/)
   states arbitrary-byte semantics, the public worst-case bound, reusable
   `Finder` behavior, and architecture support.
-- [`memchr` 2.8.3 searcher source](https://docs.rs/memchr/latest/src/memchr/memmem/searcher.rs.html)
+- [`memchr` 2.8.3 searcher source](https://docs.rs/memchr/2.8.3/src/memchr/memmem/searcher.rs.html)
   shows the current Rabin-Karp, one-byte, packed-pair, and Two-Way selection.
 - [glibc `memmem.c`](https://codebrowser.dev/glibc/glibc/string/memmem.c.html)
   shows generic GNU C Library handling for lengths zero, one, and two; a

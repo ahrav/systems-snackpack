@@ -88,8 +88,9 @@ if git -C "$repo_root" rev-parse --git-dir >/dev/null 2>&1; then
     fi
     # assume-unchanged and skip-worktree entries keep a modified file out of the
     # status output while cargo still builds the working-tree bytes.
-    marked_entries=$(git -C "$repo_root" ls-files -v | rg -c '^[a-zS] ' || true)
-    if [[ ${marked_entries:-0} -ne 0 ]]; then
+    marked_entries=$(git -C "$repo_root" ls-files -v |
+        awk '$1 ~ /^[a-zS]$/ { count++ } END { print count + 0 }')
+    if [[ $marked_entries -ne 0 ]]; then
         echo "worktree has $marked_entries assume-unchanged/skip-worktree entries" >&2
         exit 2
     fi
@@ -140,13 +141,20 @@ run_gate() {
     echo "host_runner=topics/034-string-matching-selection/experiment/run_host.sh"
 } >"$output_dir/source_identity.txt"
 
+# Captured before the write: echo returns 0 even when a substitution fails, so
+# an inline substitution would archive an empty host identity.
+resolved_hostname=$(hostname -f)
+uname_all=$(uname -a)
+host_architecture=$(uname -m)
+host_kernel=$(uname -r)
+host_cpu_count=$(nproc)
 {
     echo "ssh_target=${SSH_TARGET_LABEL:-not-recorded-by-caller}"
-    echo "resolved_hostname=$(hostname -f)"
-    echo "uname_a=$(uname -a)"
-    echo "architecture=$(uname -m)"
-    echo "kernel=$(uname -r)"
-    echo "available_cpu_count=$(nproc)"
+    echo "resolved_hostname=$resolved_hostname"
+    echo "uname_a=$uname_all"
+    echo "architecture=$host_architecture"
+    echo "kernel=$host_kernel"
+    echo "available_cpu_count=$host_cpu_count"
     echo "shell=$BASH_VERSION"
     echo "generic_flags=baseline target; RUSTFLAGS exported empty"
     echo "native_flags=-C target-cpu=native -C debuginfo=1"
@@ -235,7 +243,8 @@ do
         >"$output_dir/${symbol}.asm"
     rg -q "<$symbol>" "$output_dir/${symbol}.asm"
 done
-sha256sum "$output_dir"/*.asm >"$output_dir/disassembly.sha256"
+# Relative paths keep sha256sum -c usable after the directory is archived.
+(cd "$output_dir" && sha256sum ./*.asm) >"$output_dir/disassembly.sha256"
 
 write_source_manifest "$output_dir/source_manifest.after.sha256"
 cmp "$output_dir/source_manifest.before.sha256" "$output_dir/source_manifest.after.sha256"
