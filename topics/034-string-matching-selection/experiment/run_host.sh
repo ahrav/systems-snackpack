@@ -6,9 +6,16 @@ if [[ $# -ne 3 ]]; then
     exit 2
 fi
 
-output_dir=$1
+# Absolute: gate redirects and CARGO_TARGET_DIR are used after cd "$repo_root".
+output_dir=$(realpath -m -- "$1")
 source_commit=$2
 source_archive_sha256=$3
+
+# Ambient codegen flags would silently contradict the recorded generic/native
+# flags; CARGO_ENCODED_RUSTFLAGS even overrides the native RUSTFLAGS below.
+ambient_rustflags=${RUSTFLAGS-<unset>}
+ambient_encoded_rustflags=${CARGO_ENCODED_RUSTFLAGS-<unset>}
+unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET
 
 if [[ -e "$output_dir" ]]; then
     echo "output already exists: $output_dir" >&2
@@ -21,6 +28,33 @@ work_dir="${output_dir}.work"
 if [[ -e "$work_dir" ]]; then
     echo "work directory already exists: $work_dir" >&2
     exit 2
+fi
+
+# In-tree output would land in the source manifest, so before/after differ even
+# though no source file changed.
+case "$output_dir/" in
+"$repo_root"/*)
+    echo "output must live outside the repository: $output_dir" >&2
+    exit 2
+    ;;
+esac
+
+# The caller-supplied commit is otherwise unchecked evidence.
+if git -C "$repo_root" rev-parse --git-dir >/dev/null 2>&1; then
+    head_commit=$(git -C "$repo_root" rev-parse HEAD)
+    if [[ $head_commit != "$source_commit" ]]; then
+        echo "worktree HEAD $head_commit does not match SOURCE_COMMIT $source_commit" >&2
+        exit 2
+    fi
+    if [[ -n $(git -C "$repo_root" status --porcelain) ]]; then
+        echo "worktree is not clean; refusing exact-source evidence" >&2
+        exit 2
+    fi
+    source_commit_verified="git-worktree-head-clean"
+else
+    # ponytail: extracted archives keep the caller's word; recompute the archive
+    # digest here if the promotion path ever stops hashing it.
+    source_commit_verified="no-git-worktree-caller-supplied"
 fi
 
 mkdir -p "$output_dir" "$work_dir"
@@ -57,6 +91,7 @@ run_gate() {
 
 {
     echo "source_commit=$source_commit"
+    echo "source_commit_verified=$source_commit_verified"
     echo "source_archive_sha256=$source_archive_sha256"
     echo "repository_root=$repo_root"
     echo "host_runner=topics/034-string-matching-selection/experiment/run_host.sh"
@@ -86,7 +121,19 @@ record_optional clang.txt clang --version
 record_optional objdump.txt objdump --version
 record_optional nm.txt nm --version
 record_optional rustup.txt rustup show active-toolchain
-env | LC_ALL=C sort | rg '^(CARGO|CC|CFLAGS|PATH|RUST)' >"$output_dir/build_environment.txt" || true
+# CARGO_* values can carry registry tokens (CARGO_REGISTRIES_*_TOKEN) and this
+# file is promoted into the evidence archive, so record only their names.
+{
+    printf 'ambient_RUSTFLAGS=%s\n' "$ambient_rustflags"
+    printf 'ambient_CARGO_ENCODED_RUSTFLAGS=%s\n' "$ambient_encoded_rustflags"
+    printf 'swept=RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET\n'
+    compgen -e | LC_ALL=C sort | while IFS= read -r name; do
+        case $name in
+        CARGO | CARGO_*) printf 'name-only %s\n' "$name" ;;
+        CC | CFLAGS | PATH | RUST*) printf '%s=%s\n' "$name" "${!name}" ;;
+        esac
+    done
+} >"$output_dir/build_environment.txt"
 
 write_source_manifest "$output_dir/source_manifest.before.sha256"
 
