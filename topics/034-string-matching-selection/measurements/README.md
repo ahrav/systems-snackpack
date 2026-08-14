@@ -95,3 +95,21 @@ well:
 python3 -I topics/034-string-matching-selection/experiment/validate_receipts.py \
     /tmp/t34-xxl/results/benchmark
 ```
+
+### What the retained archives do not attest
+
+The host runner has since gained gates that these archives predate, and their
+contents show it: neither tarball contains `tool_provenance.txt`,
+`toolchain_provenance.txt`, or `native_libraries.sha256`, and their
+`source_identity.txt` files carry no verification markers. The retained
+`b8d7f88` evidence therefore attests:
+
+- correctness, workspace, timing, receipt, and linked-code outcomes on both
+  required hosts, re-checkable today for the `benchmark` subtree;
+- a source tree matching commit `b8d7f88` file for file, by the manifest
+  comparison above.
+
+It does not attest the runner's current environment, toolchain, linker,
+runtime-library, or archive-binding gates, because those did not exist when it
+was produced. A promotion that needs those gates requires a fresh two-host run
+with the current runner; this record is kept as measured, not relabelled.

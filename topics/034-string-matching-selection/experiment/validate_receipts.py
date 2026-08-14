@@ -348,7 +348,11 @@ def close(left: float, right: float) -> bool:
     return math.isclose(left, right, rel_tol=1e-12, abs_tol=1e-12)
 
 
-def validate(root: Path, expected_binary_sha256: str | None = None) -> None:
+def validate(
+    root: Path,
+    expected_binary_sha256: str | None = None,
+    expected_attempts_root: str | None = None,
+) -> None:
     metadata = read_json(root / "run_metadata.json")
     schedule = read_json(root / "schedule.json")
     processes = load_jsonl(root / "processes.jsonl")
@@ -435,6 +439,10 @@ def validate(root: Path, expected_binary_sha256: str | None = None) -> None:
         receipt_roots.add(str(command[3])[: -len(receipt_suffix)])
     if len(receipt_roots) != 1:
         raise ValueError(f"process commands name {len(receipt_roots)} receipt directories")
+    if expected_attempts_root is not None and receipt_roots != {expected_attempts_root}:
+        raise ValueError(
+            f"process commands name {receipt_roots} rather than {expected_attempts_root}"
+        )
 
     rows_by_sequence: dict[int, list[dict[str, Any]]] = {}
     case_inputs: dict[str, int] = {}
@@ -478,6 +486,8 @@ def validate(root: Path, expected_binary_sha256: str | None = None) -> None:
         if case_inputs.setdefault(case, input_checksum) != input_checksum:
             raise ValueError(f"input checksum mismatch for {case}")
         result = row["result"]
+        if result is not None and (isinstance(result, bool) or not isinstance(result, int)):
+            raise ValueError(f"result is not an integer or null for {case}: {result!r}")
         if result != oracle_results[case]:
             raise ValueError(f"result does not match the oracle for {case}")
         if case_results.setdefault(case, result) != result:
@@ -539,8 +549,16 @@ def main() -> int:
         "--expect-binary-sha256",
         help="digest the host recorded for the timing binary",
     )
+    parser.add_argument(
+        "--expect-attempts-root",
+        help="directory prefix the host used for the per-process receipts",
+    )
     args = parser.parse_args()
-    validate(args.output.resolve(strict=True), args.expect_binary_sha256)
+    validate(
+        args.output.resolve(strict=True),
+        args.expect_binary_sha256,
+        args.expect_attempts_root,
+    )
     metadata = read_json(args.output / "run_metadata.json")
     print(
         "CHECK=PASS "

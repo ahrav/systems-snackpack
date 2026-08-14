@@ -97,7 +97,7 @@ if [[ -e "$output_dir" ]]; then
     exit 2
 fi
 
-script_dir=$(cd -- "$(dirname -- "$0")" && pwd -P)
+script_dir=$(cd -- "$(printf '%s' "${0%/*}")" && pwd -P)
 repo_root=$(cd -- "$script_dir/../../.." && pwd -P)
 work_dir="${output_dir}.work"
 if [[ -e "$work_dir" ]]; then
@@ -127,7 +127,8 @@ while :; do
     if [[ $config_search_dir == / ]]; then
         break
     fi
-    config_search_dir=$(dirname "$config_search_dir")
+    config_search_dir=${config_search_dir%/*}
+    config_search_dir=${config_search_dir:-/}
 done
 
 # The caller-supplied commit is otherwise unchecked evidence.
@@ -428,6 +429,7 @@ python3 -I topics/034-string-matching-selection/experiment/run_processes.py \
 
 python3 -I topics/034-string-matching-selection/experiment/validate_receipts.py \
     --expect-binary-sha256 "$native_digest_before_timing" \
+    --expect-attempts-root "$output_dir/benchmark/" \
     "$output_dir/benchmark" >"$output_dir/receipt_validation.log" 2>&1
 
 # One executable must serve the whole timing run for the contrasts to compare
@@ -456,7 +458,7 @@ if ! cmp -s "$output_dir/native_libraries.sha256" "$work_dir/native_libraries.af
 fi
 
 nm -n "$native_binary" |
-    rg 'topic034_(left_to_right|kmp|horspool)_find' >"$output_dir/symbols.txt"
+    rg 'topic034_(left_to_right|kmp|horspool)_find|(KmpPlan|HorspoolPlan)3new' >"$output_dir/symbols.txt"
 for symbol in \
     topic034_left_to_right_find \
     topic034_kmp_find \
@@ -466,6 +468,15 @@ do
         >"$output_dir/${symbol}.asm"
     rg -q "<$symbol>" "$output_dir/${symbol}.asm"
 done
+plan_symbol_count=0
+while IFS= read -r plan_symbol; do
+    objdump -d --no-show-raw-insn --disassemble="$plan_symbol" "$native_binary" \
+        >"$output_dir/${plan_symbol}.asm"
+    rg -q "<$plan_symbol>" "$output_dir/${plan_symbol}.asm"
+    plan_symbol_count=$((plan_symbol_count + 1))
+done < <(nm "$native_binary" |
+    awk '$3 ~ /(KmpPlan|HorspoolPlan)3new/ { print $3 }' | LC_ALL=C sort -u)
+printf 'out_of_line_plan_constructors=%s\n' "$plan_symbol_count" >>"$output_dir/symbols.txt"
 # Relative paths keep sha256sum -c usable after the directory is archived.
 (cd "$output_dir" && sha256sum ./*.asm) >"$output_dir/disassembly.sha256"
 
