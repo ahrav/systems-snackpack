@@ -97,9 +97,17 @@ if [[ -e "$output_dir" ]]; then
     exit 2
 fi
 
-script_dir=$(cd -- "$(printf '%s' "${0%/*}")" && pwd -P)
+script_source=$0
+if [[ $script_source != */* ]]; then
+    if ! script_source=$(type -P "$script_source"); then
+        echo "cannot locate this script from $0" >&2
+        exit 2
+    fi
+fi
+script_dir=$(cd -- "${script_source%/*}" && pwd -P)
 repo_root=$(cd -- "$script_dir/../../.." && pwd -P)
 work_dir="${output_dir}.work"
+build_root="$work_dir/source-snapshot"
 if [[ -e "$work_dir" ]]; then
     echo "work directory already exists: $work_dir" >&2
     exit 2
@@ -260,6 +268,7 @@ run_gate() {
     echo "source_archive_sha256=$source_archive_sha256"
     echo "source_archive_verified=$source_archive_verified"
     echo "repository_root=$repo_root"
+    echo "build_root=$build_root"
     echo "host_runner=topics/034-string-matching-selection/experiment/run_host.sh"
 } >"$output_dir/source_identity.txt"
 
@@ -370,12 +379,20 @@ write_source_manifest "$output_dir/source_manifest.before.sha256"
 if [[ -n $source_archive ]]; then
     verify_source_archive "$source_archive"
 fi
+
+# Builds run from a snapshot, so a source change during them cannot reach the
+# compiler and vanish before the after-manifest.
+mkdir -p "$build_root"
+tar -C "$repo_root" --exclude=./target --exclude=./.git -cf - . |
+    tar -C "$build_root" -xf -
+write_source_manifest "$work_dir/snapshot_manifest.sha256" "$build_root"
+cmp "$output_dir/source_manifest.before.sha256" "$work_dir/snapshot_manifest.sha256"
 # verify_worktree_identity runs again after the manifest: a modification landing
 # between the first check and this manifest would appear in both manifests and
 # pass the cmp gate below.
 verify_worktree_identity
 
-cd "$repo_root"
+cd "$build_root"
 
 run_gate fmt.log cargo fmt --all -- --check
 run_gate test_lib_examples.log env CARGO_TARGET_DIR="$generic_target" \
@@ -487,7 +504,7 @@ if [[ $native_digest_after_disassembly != "$native_digest_before_timing" ]]; the
     exit 2
 fi
 
-write_source_manifest "$output_dir/source_manifest.after.sha256"
+write_source_manifest "$output_dir/source_manifest.after.sha256" "$build_root"
 cmp "$output_dir/source_manifest.before.sha256" "$output_dir/source_manifest.after.sha256"
 
 native_timing_digest=$(sha256sum "$native_binary" | awk '{print $1}')
