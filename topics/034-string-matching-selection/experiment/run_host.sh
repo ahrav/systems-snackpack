@@ -358,9 +358,16 @@ printf '%s\n' "$tool_provenance_baseline" >"$output_dir/tool_provenance.txt"
 # sysroot holds the linker and precompiled standard library used by the build.
 record_toolchain_provenance() {
     local destination=$1 rust_sysroot proxied selected selected_digest artifact artifact_digest
+    local rustup_path rustup_digest
     rust_sysroot=$(rustc --print sysroot)
     {
         printf 'sysroot=%s\n' "$rust_sysroot"
+        if rustup_path=$(type -P rustup); then
+            rustup_digest=$(sha256sum "$(realpath "$rustup_path")" | awk '{print $1}')
+            printf 'rustup path=%s sha256=%s\n' "$rustup_path" "$rustup_digest"
+        else
+            printf 'rustup=absent\n'
+        fi
         for proxied in cargo rustc rustdoc; do
             if selected=$(rustup which "$proxied" 2>/dev/null); then
                 selected_digest=$(sha256sum "$selected" | awk '{print $1}')

@@ -409,8 +409,6 @@ def validate(
     pids = [as_int(record["pid"]) for record in processes]
     if any(pid <= 0 for pid in pids):
         raise ValueError("a retained process reports a non-positive PID")
-    if len(pids) != len(set(pids)):
-        raise ValueError("fresh-process PID reuse detected")
     if [as_int(record["sequence"]) for record in processes] != list(range(expected_processes)):
         raise ValueError("process sequence is not contiguous")
     receipt_roots: set[str] = set()

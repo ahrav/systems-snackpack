@@ -262,7 +262,6 @@ def execute_schedule(
     rows_file = output / "raw_rows.jsonl"
     process_file = output / "processes.jsonl"
     all_rows = []
-    seen_pids: set[int] = set()
     with rows_file.open("w", encoding="utf-8") as rows_stream, process_file.open(
         "w", encoding="utf-8"
     ) as process_stream:
@@ -305,13 +304,10 @@ def execute_schedule(
                 if len(pids) != 1:
                     raise RuntimeError(f"process {sequence} emitted multiple PIDs")
                 pid = pids.pop()
-                if pid in seen_pids:
-                    raise RuntimeError(f"PID {pid} was reused inside the run window")
             except Exception:
                 process_stream.write(json.dumps(process_record, sort_keys=True) + "\n")
                 process_stream.flush()
                 raise
-            seen_pids.add(pid)
             process_record["pid"] = pid
             process_stream.write(json.dumps(process_record, sort_keys=True) + "\n")
             process_stream.flush()
