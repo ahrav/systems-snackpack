@@ -9,6 +9,7 @@ import hashlib
 import json
 import math
 import random
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -25,11 +26,17 @@ MODES = ("reuse", "one_shot")
 
 
 def as_int(value: Any, label: str = "integer field") -> int:
-    """Coerce a recorded value, naming the field when the evidence is malformed."""
-    try:
-        return int(value)
-    except (TypeError, ValueError) as error:
-        raise ValueError(f"invalid {label}: {value!r}") from error
+    """Accept only a JSON integer or a canonical integer string."""
+    if isinstance(value, bool):
+        raise ValueError(f"invalid {label}: {value!r}")
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and re.fullmatch(r"-?[0-9]+", value):
+        try:
+            return int(value)
+        except ValueError as error:
+            raise ValueError(f"invalid {label}: {value!r}") from error
+    raise ValueError(f"invalid {label}: {value!r}")
 
 
 def as_float(value: Any, label: str = "numeric field") -> float:
@@ -62,11 +69,13 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 
 def calibration(path: Path) -> dict[tuple[str, str, str], int]:
+    """Read the frozen repetition map, requiring the grid exactly once."""
     with path.open(encoding="utf-8", newline="") as source:
-        return {
-            (row["method"], row["case"], row["mode"]): as_int(row["reps"])
-            for row in csv.DictReader(source, delimiter="\t")
-        }
+        rows = list(csv.DictReader(source, delimiter="\t"))
+    keys = [(row["method"], row["case"], row["mode"]) for row in rows]
+    if keys != [(method, case, mode) for method in METHODS for case in CASES for mode in MODES]:
+        raise ValueError(f"{path} does not list the method/case/mode grid exactly once")
+    return {key: as_int(rows[index]["reps"]) for index, key in enumerate(keys)}
 
 
 def recompute(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -329,10 +338,15 @@ def validate(root: Path, expected_binary_sha256: str | None = None) -> None:
     rows = load_jsonl(root / "raw_rows.jsonl")
     summary = read_json(root / "summary.json")
     repetitions = calibration(root / "calibration.tsv")
+    target_ms = as_int(metadata["target_ms"])
+    if target_ms <= 0:
+        raise ValueError("recorded calibration target is not positive")
+    if as_int(metadata["blocks"]) <= 0 or as_int(metadata["aa_blocks"]) <= 0:
+        raise ValueError("recorded block counts are not positive")
     calibration_attempts(
         root / "calibration_attempts.json",
         str(metadata["binary"]),
-        as_int(metadata["target_ms"]),
+        target_ms,
         repetitions,
     )
     corpora = benchmark_cases()
@@ -377,7 +391,16 @@ def validate(root: Path, expected_binary_sha256: str | None = None) -> None:
         if as_int(process_record["exit_code"]) != 0:
             raise ValueError("a retained process failed")
         scheduled = schedule_by_sequence[as_int(process_record["sequence"])]
-        for field in ("family", "block", "period", "template", "label", "actual_method"):
+        for field in (
+            "family",
+            "block",
+            "period",
+            "template",
+            "label",
+            "actual_method",
+            "candidate",
+            "cell_rotation",
+        ):
             if process_record[field] != scheduled[field]:
                 raise ValueError(f"process schedule field mismatch: {field}")
         process_sequence = as_int(process_record["sequence"])

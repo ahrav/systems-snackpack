@@ -97,13 +97,18 @@ def run_command(command: list[str], cpu: int | None) -> tuple[subprocess.Complet
     started = time.monotonic_ns()
     completed: subprocess.CompletedProcess[str]
     try:
-        completed = subprocess.run(
+        raw = subprocess.run(
             command,
-            text=True,
             capture_output=True,
             check=False,
             preexec_fn=child_affinity(cpu),
             timeout=1800,
+        )
+        completed = subprocess.CompletedProcess(
+            command,
+            returncode=raw.returncode,
+            stdout=captured_text(raw.stdout),
+            stderr=captured_text(raw.stderr),
         )
     except subprocess.TimeoutExpired as expired:
         completed = subprocess.CompletedProcess(
