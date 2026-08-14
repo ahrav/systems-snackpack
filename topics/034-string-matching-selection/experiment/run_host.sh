@@ -22,6 +22,8 @@ swept_environment_names=()
 while IFS= read -r variable; do
     case $variable in
     RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | \
+        CARGO_BUILD_* | CARGO_TARGET_* | CARGO_PROFILE_* | CARGO_UNSTABLE_* | \
+        CARGO_INCREMENTAL | MALLOC_* | \
         LD_* | DYLD_* | GLIBC_TUNABLES | GIT_* | RIPGREP_CONFIG_PATH)
         swept_environment_names+=("$variable")
         unset "$variable"
@@ -35,8 +37,8 @@ fi
 # Replacement objects would let the checked-out content differ from the commit.
 export GIT_NO_REPLACE_OBJECTS=1
 
-if [[ $# -ne 3 ]]; then
-    echo "usage: $0 OUTPUT_DIR SOURCE_COMMIT SOURCE_ARCHIVE_SHA256" >&2
+if [[ $# -lt 3 || $# -gt 4 ]]; then
+    echo "usage: $0 OUTPUT_DIR SOURCE_COMMIT SOURCE_ARCHIVE_SHA256 [SOURCE_ARCHIVE]" >&2
     exit 2
 fi
 
@@ -44,6 +46,18 @@ fi
 output_dir=$(realpath -m -- "$1")
 source_commit=$2
 source_archive_sha256=$3
+
+# The digest names bytes this script never sees unless the archive is passed too.
+if [[ $# -eq 4 ]]; then
+    archive_digest=$(sha256sum "$4" | awk '{print $1}')
+    if [[ $archive_digest != "$source_archive_sha256" ]]; then
+        echo "archive $4 hashes to $archive_digest, not $source_archive_sha256" >&2
+        exit 2
+    fi
+    source_archive_verified="recomputed-from-$4"
+else
+    source_archive_verified="no-archive-supplied-caller-metadata"
+fi
 
 # Ambient codegen flags would silently contradict the recorded generic/native
 # flags; CARGO_ENCODED_RUSTFLAGS even overrides the native RUSTFLAGS below.
@@ -173,6 +187,7 @@ run_gate() {
     echo "source_commit=$source_commit"
     echo "source_commit_verified=$source_commit_verified"
     echo "source_archive_sha256=$source_archive_sha256"
+    echo "source_archive_verified=$source_archive_verified"
     echo "repository_root=$repo_root"
     echo "host_runner=topics/034-string-matching-selection/experiment/run_host.sh"
 } >"$output_dir/source_identity.txt"
