@@ -463,6 +463,16 @@ python3 -I topics/034-string-matching-selection/experiment/validate_receipts.py 
     --expect-attempts-root "$output_dir/benchmark/" \
     "$output_dir/benchmark" >"$output_dir/receipt_validation.log" 2>&1
 
+# The manifest must cover the same benchmark bytes the validator accepted.
+hash_benchmark_tree() {
+    local destination=$1
+    (
+        cd "$output_dir/benchmark"
+        rg --files --hidden --no-ignore -0 | LC_ALL=C sort -z | xargs -0 sha256sum
+    ) >"$destination"
+}
+hash_benchmark_tree "$work_dir/benchmark_validated.sha256"
+
 # One executable must serve the whole timing run for the contrasts to compare
 # the same bytes.
 native_digest_after_timing=$(sha256sum "$native_binary" | awk '{print $1}')
@@ -537,6 +547,14 @@ fi
     echo "aa_blocks=4"
     echo "timing_binary_sha256=$native_timing_digest"
 } >"$output_dir/run.status"
+
+hash_benchmark_tree "$work_dir/benchmark_final.sha256"
+if ! cmp -s "$work_dir/benchmark_validated.sha256" "$work_dir/benchmark_final.sha256"; then
+    echo "CHECK=FAIL benchmark_evidence_changed" >"$output_dir/run.status"
+    echo "benchmark evidence changed after receipt validation:" >&2
+    diff "$work_dir/benchmark_validated.sha256" "$work_dir/benchmark_final.sha256" >&2 || true
+    exit 2
+fi
 
 manifest_temp="$work_dir/SHA256SUMS"
 (
