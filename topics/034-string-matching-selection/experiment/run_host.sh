@@ -394,29 +394,30 @@ verify_worktree_identity
 
 cd "$build_root"
 
+# A PATH-resolved env shim that ignores its arguments exits 0 without running
+# the gate, so the variables are exported here instead.
+export CARGO_TARGET_DIR=$generic_target
 run_gate fmt.log cargo fmt --all -- --check
-run_gate test_lib_examples.log env CARGO_TARGET_DIR="$generic_target" \
-    cargo test --locked --workspace --lib --examples
-run_gate test_doc.log env CARGO_TARGET_DIR="$generic_target" \
-    cargo test --locked --workspace --doc
-run_gate clippy.log env CARGO_TARGET_DIR="$generic_target" \
-    cargo clippy --locked --workspace --all-targets -- -D warnings
-run_gate bench_build.log env CARGO_TARGET_DIR="$generic_target" \
-    cargo bench --locked --workspace --no-run
-run_gate doc_build.log env CARGO_TARGET_DIR="$generic_target" RUSTDOCFLAGS='-D warnings' \
-    cargo doc --locked --workspace --no-deps
+run_gate test_lib_examples.log cargo test --locked --workspace --lib --examples
+run_gate test_doc.log cargo test --locked --workspace --doc
+run_gate clippy.log cargo clippy --locked --workspace --all-targets -- -D warnings
+run_gate bench_build.log cargo bench --locked --workspace --no-run
+export RUSTDOCFLAGS='-D warnings'
+run_gate doc_build.log cargo doc --locked --workspace --no-deps
+unset RUSTDOCFLAGS
 
-run_gate generic_build.log env CARGO_TARGET_DIR="$generic_target" \
-    cargo build --locked --release --package string-matching-selection \
-    --bin string-match-probe
+run_gate generic_build.log cargo build --locked --release \
+    --package string-matching-selection --bin string-match-probe
 generic_binary="$generic_target/release/string-match-probe"
 run_gate generic_verify.log "$generic_binary" verify
 sha256sum "$generic_binary" >"$output_dir/generic_binary.sha256"
 
-run_gate native_build.log env CARGO_TARGET_DIR="$native_target" \
-    RUSTFLAGS='-C target-cpu=native -C debuginfo=1' \
-    cargo build --locked --release --package string-matching-selection \
-    --bin string-match-probe
+export CARGO_TARGET_DIR=$native_target
+export RUSTFLAGS='-C target-cpu=native -C debuginfo=1'
+run_gate native_build.log cargo build --locked --release \
+    --package string-matching-selection --bin string-match-probe
+export RUSTFLAGS=''
+unset CARGO_TARGET_DIR
 native_binary="$native_target/release/string-match-probe"
 run_gate native_verify.log "$native_binary" verify
 native_digest_before_timing=$(sha256sum "$native_binary" | awk '{print $1}')
