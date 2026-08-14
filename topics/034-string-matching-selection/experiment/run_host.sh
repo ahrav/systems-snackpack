@@ -118,6 +118,18 @@ verify_worktree_identity() {
         echo "worktree has $marked_entries assume-unchanged/skip-worktree entries" >&2
         exit 2
     fi
+    # Ignored files stay out of both git status and the ignore-aware manifest, yet
+    # cargo still consumes them: an ignored build.rs runs during the build.
+    local extra_files
+    extra_files=$(comm -13 \
+        <(git -C "$repo_root" ls-tree -r --name-only HEAD | LC_ALL=C sort) \
+        <(cd "$repo_root" && rg --files --hidden --no-ignore -g '!target/**' -g '!.git/**' -g '!.git' |
+            LC_ALL=C sort))
+    if [[ -n $extra_files ]]; then
+        echo "working tree has files absent from $source_commit:" >&2
+        printf '%s\n' "$extra_files" >&2
+        exit 2
+    fi
     source_commit_verified="git-worktree-head-clean"
 }
 
