@@ -46,9 +46,18 @@ def as_float(value: Any, label: str = "numeric field") -> float:
         raise ValueError(f"invalid {label}: {value!r}") from error
 
 
+def reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for name, value in pairs:
+        if name in result:
+            raise ValueError(f"duplicate JSON key: {name}")
+        result[name] = value
+    return result
+
+
 def parse_json(text: str, label: str) -> Any:
     try:
-        return json.loads(text)
+        return json.loads(text, object_pairs_hook=reject_duplicate_keys)
     except ValueError as error:
         raise ValueError(f"invalid JSON in {label}: {error}") from error
 

@@ -154,7 +154,8 @@ verify_worktree_identity() {
     recorded_blobs=$("${git_verify[@]}" ls-tree -r HEAD |
         awk -F'\t' '{ split($1, fields, " "); print fields[3] " " $2 }' | LC_ALL=C sort)
     rehashed_blobs=$(cd "$repo_root" && paste -d' ' \
-        <("${git_verify[@]}" ls-tree -r --name-only HEAD | git hash-object --stdin-paths) \
+        <("${git_verify[@]}" ls-tree -r --name-only HEAD |
+            git -C "$repo_root" hash-object --no-filters --stdin-paths) \
         <("${git_verify[@]}" ls-tree -r --name-only HEAD) | LC_ALL=C sort)
     if [[ $recorded_blobs != "$rehashed_blobs" ]]; then
         echo "working tree content differs from $source_commit:" >&2
@@ -317,18 +318,22 @@ export CARGO_HOME=$cargo_home
 
 # A PATH edit made before this script started cannot be detected from inside it.
 # The provenance record identifies the resolved tool binaries.
-{
-    for tool in bash cargo rustc python3 git rg nm objdump sha256sum awk cmp comm realpath \
-        hostname uname lscpu nproc taskset paste sort xargs cat env tar find gzip diff head ldd ln \
-        cc ld; do
-        if ! tool_path=$(type -P "$tool"); then
-            echo "required tool is absent from PATH: $tool" >&2
-            exit 2
-        fi
-        tool_digest=$(sha256sum "$(realpath "$tool_path")" | awk '{print $1}')
-        printf '%s path=%s sha256=%s\n' "$tool" "$tool_path" "$tool_digest"
-    done
-} >"$output_dir/tool_provenance.txt"
+record_tool_provenance() {
+    local destination=$1 tool tool_path tool_digest
+    {
+        for tool in bash cargo rustc python3 git rg nm objdump sha256sum awk cmp comm realpath \
+            hostname uname lscpu nproc taskset paste sort xargs cat env tar find gzip diff head ldd ln \
+            cc ld; do
+            if ! tool_path=$(type -P "$tool"); then
+                echo "required tool is absent from PATH: $tool" >&2
+                exit 2
+            fi
+            tool_digest=$(sha256sum "$(realpath "$tool_path")" | awk '{print $1}')
+            printf '%s path=%s sha256=%s\n' "$tool" "$tool_path" "$tool_digest"
+        done
+    } >"$destination"
+}
+record_tool_provenance "$output_dir/tool_provenance.txt"
 
 # rustup which records the selected tool binary when rustup manages it, and the
 # sysroot holds the linker and precompiled standard library used by the build.
@@ -466,8 +471,18 @@ if [[ $native_digest_after_disassembly != "$native_digest_before_timing" ]]; the
     exit 2
 fi
 
+# The recorded tools must be the ones every stage above actually used.
+record_tool_provenance "$work_dir/tool_provenance.after.txt"
+if ! cmp -s "$output_dir/tool_provenance.txt" "$work_dir/tool_provenance.after.txt"; then
+    echo "a recorded tool changed during the run:" >&2
+    diff "$output_dir/tool_provenance.txt" "$work_dir/tool_provenance.after.txt" >&2 || true
+    exit 2
+fi
+
 write_source_manifest "$output_dir/source_manifest.after.sha256"
 cmp "$output_dir/source_manifest.before.sha256" "$output_dir/source_manifest.after.sha256"
+
+native_timing_digest=$(sha256sum "$native_binary" | awk '{print $1}')
 
 # Written before the manifest so SHA256SUMS covers the pass record; the final
 # stdout line below stays the run's success sentinel.
@@ -477,7 +492,7 @@ cmp "$output_dir/source_manifest.before.sha256" "$output_dir/source_manifest.aft
     echo "source_archive_sha256=$source_archive_sha256"
     echo "benchmark_blocks=12"
     echo "aa_blocks=4"
-    echo "timing_binary_sha256=$(sha256sum "$native_binary" | awk '{print $1}')"
+    echo "timing_binary_sha256=$native_timing_digest"
 } >"$output_dir/run.status"
 
 manifest_temp="$work_dir/SHA256SUMS"
