@@ -21,7 +21,8 @@ fi
 swept_environment_names=()
 while IFS= read -r variable; do
     case $variable in
-    LD_* | DYLD_* | GLIBC_TUNABLES | GIT_* | RIPGREP_CONFIG_PATH)
+    RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | \
+        LD_* | DYLD_* | GLIBC_TUNABLES | GIT_* | RIPGREP_CONFIG_PATH)
         swept_environment_names+=("$variable")
         unset "$variable"
         ;;
@@ -75,8 +76,31 @@ case "$output_dir/" in
     ;;
 esac
 
+# Cargo reads config files from the working directory upward, and settings such
+# as build.rustc-wrapper or a linker survive the empty RUSTFLAGS above.
+config_search_dir=$repo_root
+while :; do
+    for cargo_config in "$config_search_dir/.cargo/config.toml" "$config_search_dir/.cargo/config"; do
+        if [[ -e $cargo_config ]]; then
+            echo "refusing ambient cargo config: $cargo_config" >&2
+            exit 2
+        fi
+    done
+    if [[ $config_search_dir == / ]]; then
+        break
+    fi
+    config_search_dir=$(dirname "$config_search_dir")
+done
+
 # The caller-supplied commit is otherwise unchecked evidence.
-if git -C "$repo_root" rev-parse --git-dir >/dev/null 2>&1; then
+verify_worktree_identity() {
+    if ! git -C "$repo_root" rev-parse --git-dir >/dev/null 2>&1; then
+        # An extracted archive carries no git metadata, so the caller-supplied
+        # commit is recorded as unverified.
+        source_commit_verified="no-git-worktree-caller-supplied"
+        return 0
+    fi
+    local head_commit marked_entries
     head_commit=$(git -C "$repo_root" rev-parse HEAD)
     if [[ $head_commit != "$source_commit" ]]; then
         echo "worktree HEAD $head_commit does not match SOURCE_COMMIT $source_commit" >&2
@@ -95,11 +119,9 @@ if git -C "$repo_root" rev-parse --git-dir >/dev/null 2>&1; then
         exit 2
     fi
     source_commit_verified="git-worktree-head-clean"
-else
-    # ponytail: extracted archives keep the caller's word; recompute the archive
-    # digest here if the promotion path ever stops hashing it.
-    source_commit_verified="no-git-worktree-caller-supplied"
-fi
+}
+
+verify_worktree_identity
 
 mkdir -p "$output_dir" "$work_dir"
 generic_target="$work_dir/generic-target"
@@ -190,7 +212,24 @@ record_optional rustup.txt rustup show active-toolchain
     done
 } >"$output_dir/build_environment.txt"
 
+# Cargo also reads $CARGO_HOME/config.toml, which legitimately carries registry
+# mirrors, so its digest is recorded instead of refused.
+cargo_home=${CARGO_HOME:-$HOME/.cargo}
+{
+    printf 'cargo_home=%s\n' "$cargo_home"
+    for cargo_config in "$cargo_home/config.toml" "$cargo_home/config"; do
+        if [[ -e $cargo_config ]]; then
+            printf 'cargo_home_config=%s sha256=%s\n' "$cargo_config" \
+                "$(sha256sum "$cargo_config" | awk '{print $1}')"
+        fi
+    done
+} >>"$output_dir/build_environment.txt"
+
 write_source_manifest "$output_dir/source_manifest.before.sha256"
+# verify_worktree_identity runs again after the manifest: a modification landing
+# between the first check and this manifest would appear in both manifests and
+# pass the cmp gate below.
+verify_worktree_identity
 
 cd "$repo_root"
 
@@ -219,6 +258,7 @@ run_gate native_build.log env CARGO_TARGET_DIR="$native_target" \
     --bin string-match-probe
 native_binary="$native_target/release/string-match-probe"
 run_gate native_verify.log "$native_binary" verify
+native_digest_before_timing=$(sha256sum "$native_binary" | awk '{print $1}')
 sha256sum "$native_binary" >"$output_dir/native_binary.sha256"
 
 python3 -I topics/034-string-matching-selection/experiment/run_processes.py \
@@ -231,6 +271,14 @@ python3 -I topics/034-string-matching-selection/experiment/run_processes.py \
 
 python3 -I topics/034-string-matching-selection/experiment/validate_receipts.py \
     "$output_dir/benchmark" >"$output_dir/receipt_validation.log" 2>&1
+
+# One executable must serve the whole timing run for the contrasts to compare
+# the same bytes.
+native_digest_after_timing=$(sha256sum "$native_binary" | awk '{print $1}')
+if [[ $native_digest_after_timing != "$native_digest_before_timing" ]]; then
+    echo "native binary changed during the timing run" >&2
+    exit 2
+fi
 
 nm -n "$native_binary" |
     rg 'topic034_(left_to_right|kmp|horspool)_find' >"$output_dir/symbols.txt"

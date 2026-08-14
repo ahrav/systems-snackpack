@@ -8,6 +8,7 @@ import csv
 import hashlib
 import json
 import math
+import random
 import statistics
 from pathlib import Path
 from typing import Any
@@ -75,6 +76,51 @@ def recompute(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     }
                 )
     return result
+
+
+def expected_schedule(blocks: int, aa_blocks: int, seed: int) -> list[dict[str, Any]]:
+    """Rebuild the deterministic schedule from the recorded design and seed."""
+
+    def balanced(count: int, rng: random.Random) -> list[str]:
+        templates = ["ABBA"] * (count // 2) + ["BAAB"] * (count // 2)
+        rng.shuffle(templates)
+        return templates
+
+    cell_count = len(CASES) * len(MODES)
+    rng = random.Random(seed)
+    families = (
+        ("left-to-right_vs_kmp", "kmp"),
+        ("left-to-right_vs_horspool", "horspool"),
+    )
+    family_templates = {name: balanced(blocks, rng) for name, _ in families}
+    first_family = rng.randrange(2)
+    schedule: list[dict[str, Any]] = []
+
+    def emit(family: str, candidate: str, block: int, template: str, baseline: str) -> None:
+        for period, label in enumerate(template, start=1):
+            schedule.append(
+                {
+                    "sequence": len(schedule),
+                    "family": family,
+                    "candidate": candidate,
+                    "block": block,
+                    "period": period,
+                    "template": template,
+                    "label": label,
+                    "actual_method": baseline if label == "A" else candidate,
+                    "cell_rotation": block % cell_count,
+                }
+            )
+
+    for block in range(blocks):
+        order = list(families)
+        if (block + first_family) % 2:
+            order.reverse()
+        for family, candidate in order:
+            emit(family, candidate, block, family_templates[family][block], "left-to-right")
+    for block, template in enumerate(balanced(aa_blocks, rng)):
+        emit("left-to-right_AA", "left-to-right", block, template, "left-to-right")
+    return schedule
 
 
 ENRICHED_FIELDS = (
@@ -152,6 +198,16 @@ def validate(root: Path) -> None:
     schedule_by_sequence = {int(item["sequence"]): item for item in schedule}
     if len(schedule_by_sequence) != expected_processes:
         raise ValueError("duplicate schedule sequence")
+    rebuilt = expected_schedule(
+        int(metadata["blocks"]), int(metadata["aa_blocks"]), int(metadata["seed"])
+    )
+    if len(rebuilt) != len(schedule):
+        raise ValueError("reconstructed schedule length mismatch")
+    for expected_item, recorded_item in zip(rebuilt, schedule):
+        if expected_item != recorded_item:
+            raise ValueError(
+                f"schedule does not match the recorded seed at sequence {expected_item['sequence']}"
+            )
 
     pids = [int(record["pid"]) for record in processes]
     if len(pids) != len(set(pids)):
