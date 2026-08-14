@@ -189,6 +189,7 @@ host_cpu_count=$(nproc)
     echo "architecture=$host_architecture"
     echo "kernel=$host_kernel"
     echo "available_cpu_count=$host_cpu_count"
+    echo "pid_max=$(cat /proc/sys/kernel/pid_max 2>/dev/null || echo not-readable)"
     echo "shell=$BASH_VERSION"
     echo "generic_flags=baseline target; RUSTFLAGS exported empty"
     echo "native_flags=-C target-cpu=native -C debuginfo=1"
@@ -226,7 +227,10 @@ record_optional rustup.txt rustup show active-toolchain
 
 # Cargo also reads $CARGO_HOME/config.toml, which legitimately carries registry
 # mirrors, so its digest is recorded instead of refused.
-cargo_home=${CARGO_HOME:-$HOME/.cargo}
+# A relative CARGO_HOME would resolve against a different directory once cargo
+# runs after the cd below.
+cargo_home=$(realpath -m -- "${CARGO_HOME:-$HOME/.cargo}")
+export CARGO_HOME=$cargo_home
 {
     printf 'cargo_home=%s\n' "$cargo_home"
     for cargo_config in "$cargo_home/config.toml" "$cargo_home/config"; do

@@ -8,12 +8,13 @@ import hashlib
 import json
 import math
 import os
-from pathlib import Path
 import random
 import statistics
 import subprocess
 import sys
 import time
+from pathlib import Path
+from typing import Any
 
 METHODS = ("left-to-right", "kmp", "horspool")
 CASES = (
@@ -63,16 +64,53 @@ def child_affinity(cpu: int | None):
     return pin
 
 
+def as_int(value: Any, label: str = "integer field") -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError) as error:
+        raise RuntimeError(f"invalid {label}: {value!r}") from error
+
+
+def as_float(value: Any, label: str = "numeric field") -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError) as error:
+        raise RuntimeError(f"invalid {label}: {value!r}") from error
+
+
+def parse_json(text: str, label: str) -> Any:
+    try:
+        return json.loads(text)
+    except ValueError as error:
+        raise RuntimeError(f"invalid JSON in {label}: {error}") from error
+
+
+def captured_text(stream: bytes | str | None) -> str:
+    if stream is None:
+        return ""
+    if isinstance(stream, bytes):
+        return stream.decode("utf-8", "replace")
+    return stream
+
+
 def run_command(command: list[str], cpu: int | None) -> tuple[subprocess.CompletedProcess[str], int]:
     started = time.monotonic_ns()
-    completed = subprocess.run(
-        command,
-        text=True,
-        capture_output=True,
-        check=False,
-        preexec_fn=child_affinity(cpu),
-        timeout=1800,
-    )
+    try:
+        completed = subprocess.run(
+            command,
+            text=True,
+            capture_output=True,
+            check=False,
+            preexec_fn=child_affinity(cpu),
+            timeout=1800,
+        )
+    except subprocess.TimeoutExpired as expired:
+        completed = subprocess.CompletedProcess[str](
+            command,
+            returncode=124,
+            stdout=captured_text(expired.stdout),
+            stderr=captured_text(expired.stderr) + f"\nTIMEOUT after {expired.timeout}s\n",
+        )
     return completed, time.monotonic_ns() - started
 
 
@@ -108,7 +146,7 @@ def calibrate(binary: Path, output: Path, target_ms: int, cpu: int | None) -> di
                 lines = [line for line in completed.stdout.splitlines() if line.startswith("reps=")]
                 if len(lines) != 1:
                     raise RuntimeError(f"invalid calibration output: {record}")
-                repetitions = int(lines[0].split("=", 1)[1])
+                repetitions = as_int(lines[0].split("=", 1)[1])
                 if repetitions < 1:
                     raise RuntimeError(f"non-positive calibration: {record}")
                 calibration[(method, case, mode)] = repetitions
@@ -137,7 +175,7 @@ def rotated_cells(block: int) -> list[tuple[str, str]]:
     return cells[offset:] + cells[:offset]
 
 
-def make_schedule(blocks: int, aa_blocks: int, seed: int) -> list[dict[str, object]]:
+def make_schedule(blocks: int, aa_blocks: int, seed: int) -> list[dict[str, Any]]:
     rng = random.Random(seed)
     families = (
         ("left-to-right_vs_kmp", "kmp"),
@@ -209,10 +247,10 @@ def write_process_calibration(
 def execute_schedule(
     binary: Path,
     output: Path,
-    schedule: list[dict[str, object]],
+    schedule: list[dict[str, Any]],
     calibration: dict[tuple[str, str, str], int],
     cpu: int | None,
-) -> list[dict[str, object]]:
+) -> list[dict[str, Any]]:
     attempts_dir = output / "attempts"
     attempts_dir.mkdir()
     rows_file = output / "raw_rows.jsonl"
@@ -223,13 +261,13 @@ def execute_schedule(
         "w", encoding="utf-8"
     ) as process_stream:
         for item in schedule:
-            sequence = int(item["sequence"])
+            sequence = as_int(item["sequence"])
             attempt = attempts_dir / f"{sequence:04d}"
             attempt.mkdir()
             calibration_path = attempt / "calibration.tsv"
             actual_method = str(item["actual_method"])
             write_process_calibration(
-                calibration_path, actual_method, int(item["block"]), calibration
+                calibration_path, actual_method, as_int(item["block"]), calibration
             )
             command = [str(binary), "process", actual_method, str(calibration_path)]
             completed, wall_ns = run_command(command, cpu)
@@ -248,10 +286,10 @@ def execute_schedule(
             if completed.returncode != 0:
                 process_stream.write(json.dumps(process_record, sort_keys=True) + "\n")
                 raise RuntimeError(f"process {sequence} failed; retained under {attempt}")
-            parsed = [json.loads(line) for line in completed.stdout.splitlines() if line.strip()]
+            parsed = [parse_json(line, f"process {sequence} stdout") for line in completed.stdout.splitlines() if line.strip()]
             if len(parsed) != len(CASES) * len(MODES):
                 raise RuntimeError(f"process {sequence} emitted {len(parsed)} rows")
-            pids = {int(row["pid"]) for row in parsed}
+            pids = {as_int(row["pid"]) for row in parsed}
             if len(pids) != 1:
                 raise RuntimeError(f"process {sequence} emitted multiple PIDs")
             pid = pids.pop()
@@ -280,7 +318,7 @@ def execute_schedule(
     return all_rows
 
 
-def analyse(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+def analyse(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     analyses = []
     families = sorted({str(row["family"]) for row in rows})
     for family in families:
@@ -291,16 +329,16 @@ def analyse(rows: list[dict[str, object]]) -> list[dict[str, object]]:
                     for row in rows
                     if row["family"] == family and row["case"] == case and row["mode"] == mode
                 ]
-                by_block: dict[int, list[dict[str, object]]] = {}
+                by_block: dict[int, list[dict[str, Any]]] = {}
                 for row in selected:
-                    by_block.setdefault(int(row["block"]), []).append(row)
+                    by_block.setdefault(as_int(row["block"]), []).append(row)
                 contrasts = []
                 for block in sorted(by_block):
-                    block_rows = sorted(by_block[block], key=lambda row: int(row["period"]))
+                    block_rows = sorted(by_block[block], key=lambda row: as_int(row["period"]))
                     if len(block_rows) != 4:
                         raise RuntimeError(f"incomplete block {family}/{block}/{case}/{mode}")
-                    a_logs = [math.log(float(row["ns_per_search"])) for row in block_rows if row["label"] == "A"]
-                    b_logs = [math.log(float(row["ns_per_search"])) for row in block_rows if row["label"] == "B"]
+                    a_logs = [math.log(as_float(row["ns_per_search"])) for row in block_rows if row["label"] == "A"]
+                    b_logs = [math.log(as_float(row["ns_per_search"])) for row in block_rows if row["label"] == "B"]
                     if len(a_logs) != 2 or len(b_logs) != 2:
                         raise RuntimeError(f"invalid treatment labels in {family}/{block}")
                     contrasts.append(sum(b_logs) / 2.0 - sum(a_logs) / 2.0)

@@ -357,8 +357,8 @@ def validate(root: Path) -> None:
     )
     if len(rebuilt) != len(schedule):
         raise ValueError("reconstructed schedule length mismatch")
-    for expected_item, recorded_item in zip(rebuilt, schedule):
-        if expected_item != recorded_item:
+    for index, expected_item in enumerate(rebuilt):
+        if expected_item != schedule[index]:
             raise ValueError(
                 f"schedule does not match the recorded seed at sequence {expected_item['sequence']}"
             )
@@ -375,6 +375,16 @@ def validate(root: Path) -> None:
         for field in ("family", "block", "period", "template", "label", "actual_method"):
             if process_record[field] != scheduled[field]:
                 raise ValueError(f"process schedule field mismatch: {field}")
+        process_sequence = as_int(process_record["sequence"])
+        command = list(process_record["command"])
+        if command[:3] != [str(metadata["binary"]), "process", str(scheduled["actual_method"])]:
+            raise ValueError(f"unexpected process command for sequence {process_sequence}")
+        if len(command) != 4 or not str(command[3]).endswith(
+            f"attempts/{process_sequence:04d}/calibration.tsv"
+        ):
+            raise ValueError(
+                f"process command names the wrong receipt for sequence {process_sequence}"
+            )
 
     rows_by_sequence: dict[int, list[dict[str, Any]]] = {}
     case_inputs: dict[str, int] = {}
@@ -398,8 +408,11 @@ def validate(root: Path) -> None:
         computed = as_int(row["elapsed_ns"]) / as_int(row["reps"])
         if not math.isclose(as_float(row["ns_per_search"]), computed, rel_tol=1e-8, abs_tol=1e-6):
             raise ValueError("ns/search does not match elapsed/repetitions")
+        logical_bytes = as_int(row["logical_bytes_per_search"])
+        if logical_bytes != len(corpora[str(row["case"])][0]):
+            raise ValueError(f"logical byte count does not match the corpus for {row['case']}")
         logical_gib_per_s = (
-            as_int(row["logical_bytes_per_search"])
+            logical_bytes
             / as_float(row["ns_per_search"])
             * 1_000_000_000.0
             / (1 << 30)
@@ -421,9 +434,10 @@ def validate(root: Path) -> None:
             raise ValueError(f"result mismatch for {case}")
         checksum_key = (actual, case, str(row["mode"]))
         checksum = as_int(row["checksum"])
-        if checksum not in output_checksums.values() or output_checksums.get(checksum_key) is None:
-            if checksum != folded_checksum(oracle_results[case], as_int(row["reps"])):
-                raise ValueError(f"output checksum does not fold the oracle result for {checksum_key}")
+        if checksum_key not in output_checksums and checksum != folded_checksum(
+            oracle_results[case], as_int(row["reps"])
+        ):
+            raise ValueError(f"output checksum does not fold the oracle result for {checksum_key}")
         if output_checksums.setdefault(checksum_key, checksum) != checksum:
             raise ValueError(f"output checksum mismatch for {checksum_key}")
 
@@ -447,7 +461,8 @@ def validate(root: Path) -> None:
     observed = summary["analyses"]
     if len(expected) != len(observed):
         raise ValueError("analysis row count mismatch")
-    for left, right in zip(expected, observed):
+    for index, left in enumerate(expected):
+        right = observed[index]
         for field in ("family", "case", "mode", "n_complete_blocks"):
             if left[field] != right[field]:
                 raise ValueError(f"analysis identity mismatch: {field}")
@@ -460,11 +475,9 @@ def validate(root: Path) -> None:
                 raise ValueError(f"analysis value mismatch: {field}")
         if len(left["log_contrasts"]) != len(right["log_contrasts"]):
             raise ValueError("contrast count mismatch")
-        if not all(
-            close(as_float(a), as_float(b))
-            for a, b in zip(left["log_contrasts"], right["log_contrasts"])
-        ):
-            raise ValueError("block contrast mismatch")
+        for contrast_index, left_contrast in enumerate(left["log_contrasts"]):
+            if not close(as_float(left_contrast), as_float(right["log_contrasts"][contrast_index])):
+                raise ValueError("block contrast mismatch")
 
 
 def main() -> int:
