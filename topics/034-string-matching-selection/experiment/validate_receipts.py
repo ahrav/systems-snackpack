@@ -134,10 +134,17 @@ ENRICHED_FIELDS = (
 )
 
 
+def rotated_cells(block: int) -> list[tuple[str, str]]:
+    cells = [(case, mode) for case in CASES for mode in MODES]
+    offset = block % len(cells)
+    return cells[offset:] + cells[:offset]
+
+
 def receipts(
     root: Path,
     processes: list[dict[str, Any]],
     rows_by_sequence: dict[int, list[dict[str, Any]]],
+    repetitions: dict[tuple[str, str, str], int],
 ) -> None:
     """Check the per-process receipt files against the aggregate records."""
     attempts_root = root / "attempts"
@@ -148,6 +155,16 @@ def receipts(
         sequence = int(record["sequence"])
         attempt = attempts_root / f"{sequence:04d}"
         stdout_text = (attempt / "stdout.jsonl").read_text(encoding="utf-8")
+        actual_method = str(record["actual_method"])
+        expected_calibration = "\n".join(
+            ["method\tcase\tmode\treps"]
+            + [
+                f"{actual_method}\t{case}\t{mode}\t{repetitions[(actual_method, case, mode)]}"
+                for case, mode in rotated_cells(int(record["block"]))
+            ]
+        )
+        if (attempt / "calibration.tsv").read_text(encoding="utf-8") != expected_calibration + "\n":
+            raise ValueError(f"calibration receipt mismatch for sequence {sequence}")
         stderr_text = (attempt / "stderr.txt").read_text(encoding="utf-8")
         if hashlib.sha256(stdout_text.encode()).hexdigest() != record["stdout_sha256"]:
             raise ValueError(f"stdout digest mismatch for sequence {sequence}")
@@ -174,6 +191,9 @@ def receipts(
                     )
         if int(record["pid"]) not in {int(row["pid"]) for row in receipt_rows}:
             raise ValueError(f"receipt PID mismatch for sequence {sequence}")
+        interval_total = sum(int(row["elapsed_ns"]) for row in aggregate_rows)
+        if int(record["external_wall_ns"]) < interval_total or interval_total <= 0:
+            raise ValueError(f"external wall time is impossible for sequence {sequence}")
 
 
 def close(left: float, right: float) -> bool:
@@ -277,7 +297,10 @@ def validate(root: Path) -> None:
         }:
             raise ValueError(f"sequence {sequence} PID mismatch")
 
-    receipts(root, processes, rows_by_sequence)
+    receipts(root, processes, rows_by_sequence, repetitions)
+
+    if summary.get("run_metadata") != metadata:
+        raise ValueError("summary run_metadata does not match run_metadata.json")
 
     expected = recompute(rows)
     observed = summary["analyses"]
