@@ -83,3 +83,14 @@ digests, not the `b8d7f88` commit specifically. That commit is an ancestor of
 this branch and this repository merges topic branches with merge commits, which
 keeps it reachable from `main` after the merge; verifying from a squashed copy
 of the history means recovering the tree some other way first.
+
+The archived `receipt_validation.log` files were produced before the validator
+checked per-process receipt digests. Re-running the current
+`experiment/validate_receipts.py` against both retained `benchmark` directories
+returns `CHECK=PASS`, so the retained receipts satisfy the stricter check as
+well:
+
+```bash
+python3 -I topics/034-string-matching-selection/experiment/validate_receipts.py \
+    /tmp/t34-xxl/results/benchmark
+```
