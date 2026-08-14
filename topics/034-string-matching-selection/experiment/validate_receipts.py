@@ -40,6 +40,11 @@ def as_int(value: Any, label: str = "integer field") -> int:
 
 
 def as_float(value: Any, label: str = "numeric field") -> float:
+    """Accept only a finite JSON number."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"invalid {label}: {value!r}")
+    if not math.isfinite(value):
+        raise ValueError(f"invalid {label}: {value!r}")
     try:
         return float(value)
     except (TypeError, ValueError) as error:
@@ -398,6 +403,7 @@ def validate(root: Path, expected_binary_sha256: str | None = None) -> None:
         raise ValueError("fresh-process PID reuse detected")
     if [as_int(record["sequence"]) for record in processes] != list(range(expected_processes)):
         raise ValueError("process sequence is not contiguous")
+    receipt_roots: set[str] = set()
     for process_record in processes:
         if as_int(process_record["exit_code"]) != 0:
             raise ValueError("a retained process failed")
@@ -418,12 +424,14 @@ def validate(root: Path, expected_binary_sha256: str | None = None) -> None:
         command = list(process_record["command"])
         if command[:3] != [str(metadata["binary"]), "process", str(scheduled["actual_method"])]:
             raise ValueError(f"unexpected process command for sequence {process_sequence}")
-        if len(command) != 4 or not str(command[3]).endswith(
-            f"attempts/{process_sequence:04d}/calibration.tsv"
-        ):
+        receipt_suffix = f"attempts/{process_sequence:04d}/calibration.tsv"
+        if len(command) != 4 or not str(command[3]).endswith(receipt_suffix):
             raise ValueError(
                 f"process command names the wrong receipt for sequence {process_sequence}"
             )
+        receipt_roots.add(str(command[3])[: -len(receipt_suffix)])
+    if len(receipt_roots) != 1:
+        raise ValueError(f"process commands name {len(receipt_roots)} receipt directories")
 
     rows_by_sequence: dict[int, list[dict[str, Any]]] = {}
     case_inputs: dict[str, int] = {}

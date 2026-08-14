@@ -471,14 +471,6 @@ if [[ $native_digest_after_disassembly != "$native_digest_before_timing" ]]; the
     exit 2
 fi
 
-# The recorded tools must be the ones every stage above actually used.
-record_tool_provenance "$work_dir/tool_provenance.after.txt"
-if ! cmp -s "$output_dir/tool_provenance.txt" "$work_dir/tool_provenance.after.txt"; then
-    echo "a recorded tool changed during the run:" >&2
-    diff "$output_dir/tool_provenance.txt" "$work_dir/tool_provenance.after.txt" >&2 || true
-    exit 2
-fi
-
 write_source_manifest "$output_dir/source_manifest.after.sha256"
 cmp "$output_dir/source_manifest.before.sha256" "$output_dir/source_manifest.after.sha256"
 
@@ -505,5 +497,13 @@ manifest_temp="$work_dir/SHA256SUMS"
         xargs -0 sha256sum
 ) >"$manifest_temp"
 cp "$manifest_temp" "$output_dir/SHA256SUMS"
+
+# Checked last, after every recorded tool has produced its final output.
+record_tool_provenance "$work_dir/tool_provenance.after.txt"
+if ! cmp -s "$output_dir/tool_provenance.txt" "$work_dir/tool_provenance.after.txt"; then
+    echo "a recorded tool changed during the run:" >&2
+    diff "$output_dir/tool_provenance.txt" "$work_dir/tool_provenance.after.txt" >&2 || true
+    exit 2
+fi
 
 echo "CHECK=PASS output=$output_dir"
