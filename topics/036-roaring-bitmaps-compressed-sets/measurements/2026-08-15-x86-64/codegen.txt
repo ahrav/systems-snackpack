@@ -1,0 +1,192 @@
+ARRAY_KERNEL
+
+/tmp/topic36-code-20260815-43919a-x86/target-native/release/bitmap-probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000001b760 <topic036_array_and_count>:
+   1b760:	48 85 f6             	test   %rsi,%rsi
+   1b763:	41 0f 94 c0          	sete   %r8b
+   1b767:	48 85 c9             	test   %rcx,%rcx
+   1b76a:	41 0f 94 c1          	sete   %r9b
+   1b76e:	31 c0                	xor    %eax,%eax
+   1b770:	45 08 c1             	or     %r8b,%r9b
+   1b773:	75 4d                	jne    1b7c2 <topic036_array_and_count+0x62>
+   1b775:	31 c0                	xor    %eax,%eax
+   1b777:	45 31 c0             	xor    %r8d,%r8d
+   1b77a:	45 31 c9             	xor    %r9d,%r9d
+   1b77d:	0f 1f 00             	nopl   (%rax)
+   1b780:	46 0f b7 14 47       	movzwl (%rdi,%r8,2),%r10d
+   1b785:	66 46 3b 14 4a       	cmp    (%rdx,%r9,2),%r10w
+   1b78a:	41 0f 97 c2          	seta   %r10b
+   1b78e:	41 80 da 00          	sbb    $0x0,%r10b
+   1b792:	74 1c                	je     1b7b0 <topic036_array_and_count+0x50>
+   1b794:	45 0f b6 d2          	movzbl %r10b,%r10d
+   1b798:	41 83 fa 01          	cmp    $0x1,%r10d
+   1b79c:	74 17                	je     1b7b5 <topic036_array_and_count+0x55>
+   1b79e:	49 ff c0             	inc    %r8
+   1b7a1:	49 39 f0             	cmp    %rsi,%r8
+   1b7a4:	72 17                	jb     1b7bd <topic036_array_and_count+0x5d>
+   1b7a6:	eb 1a                	jmp    1b7c2 <topic036_array_and_count+0x62>
+   1b7a8:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+   1b7af:	00 
+   1b7b0:	ff c0                	inc    %eax
+   1b7b2:	49 ff c0             	inc    %r8
+   1b7b5:	49 ff c1             	inc    %r9
+   1b7b8:	49 39 f0             	cmp    %rsi,%r8
+   1b7bb:	73 05                	jae    1b7c2 <topic036_array_and_count+0x62>
+   1b7bd:	49 39 c9             	cmp    %rcx,%r9
+   1b7c0:	72 be                	jb     1b780 <topic036_array_and_count+0x20>
+   1b7c2:	c3                   	ret
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section .plt:
+BITMAP_KERNEL
+
+/tmp/topic36-code-20260815-43919a-x86/target-native/release/bitmap-probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000001b7d0 <topic036_bitmap_and_count>:
+   1b7d0:	c5 f9 ef c0          	vpxor  %xmm0,%xmm0,%xmm0
+   1b7d4:	31 c0                	xor    %eax,%eax
+   1b7d6:	c5 f1 ef c9          	vpxor  %xmm1,%xmm1,%xmm1
+   1b7da:	c5 e9 ef d2          	vpxor  %xmm2,%xmm2,%xmm2
+   1b7de:	c5 e1 ef db          	vpxor  %xmm3,%xmm3,%xmm3
+   1b7e2:	66 66 66 66 66 2e 0f 	data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+   1b7e9:	1f 84 00 00 00 00 00 
+   1b7f0:	c5 fe 6f 24 c6       	vmovdqu (%rsi,%rax,8),%ymm4
+   1b7f5:	c5 fe 6f 6c c6 20    	vmovdqu 0x20(%rsi,%rax,8),%ymm5
+   1b7fb:	c5 fe 6f 74 c6 40    	vmovdqu 0x40(%rsi,%rax,8),%ymm6
+   1b801:	c5 fe 6f 7c c6 60    	vmovdqu 0x60(%rsi,%rax,8),%ymm7
+   1b807:	c5 dd db 24 c7       	vpand  (%rdi,%rax,8),%ymm4,%ymm4
+   1b80c:	c5 d5 db 6c c7 20    	vpand  0x20(%rdi,%rax,8),%ymm5,%ymm5
+   1b812:	c5 cd db 74 c7 40    	vpand  0x40(%rdi,%rax,8),%ymm6,%ymm6
+   1b818:	c5 c5 db 7c c7 60    	vpand  0x60(%rdi,%rax,8),%ymm7,%ymm7
+   1b81e:	62 f2 fd 28 55 e4    	vpopcntq %ymm4,%ymm4
+   1b824:	62 f2 fd 28 55 ed    	vpopcntq %ymm5,%ymm5
+   1b82a:	62 f2 fd 28 55 f6    	vpopcntq %ymm6,%ymm6
+   1b830:	62 f2 fd 28 55 ff    	vpopcntq %ymm7,%ymm7
+   1b836:	62 f2 7e 28 35 e4    	vpmovqd %ymm4,%xmm4
+   1b83c:	c5 f9 fe c4          	vpaddd %xmm4,%xmm0,%xmm0
+   1b840:	62 f2 7e 28 35 ec    	vpmovqd %ymm5,%xmm4
+   1b846:	c5 f1 fe cc          	vpaddd %xmm4,%xmm1,%xmm1
+   1b84a:	62 f2 7e 28 35 f4    	vpmovqd %ymm6,%xmm4
+   1b850:	c5 e9 fe d4          	vpaddd %xmm4,%xmm2,%xmm2
+   1b854:	62 f2 7e 28 35 fc    	vpmovqd %ymm7,%xmm4
+   1b85a:	c5 e1 fe dc          	vpaddd %xmm4,%xmm3,%xmm3
+   1b85e:	c5 fe 6f a4 c6 80 00 	vmovdqu 0x80(%rsi,%rax,8),%ymm4
+   1b865:	00 00 
+   1b867:	c5 fe 6f ac c6 a0 00 	vmovdqu 0xa0(%rsi,%rax,8),%ymm5
+   1b86e:	00 00 
+   1b870:	c5 fe 6f b4 c6 c0 00 	vmovdqu 0xc0(%rsi,%rax,8),%ymm6
+   1b877:	00 00 
+   1b879:	c5 fe 6f bc c6 e0 00 	vmovdqu 0xe0(%rsi,%rax,8),%ymm7
+   1b880:	00 00 
+   1b882:	c5 dd db a4 c7 80 00 	vpand  0x80(%rdi,%rax,8),%ymm4,%ymm4
+   1b889:	00 00 
+   1b88b:	c5 d5 db ac c7 a0 00 	vpand  0xa0(%rdi,%rax,8),%ymm5,%ymm5
+   1b892:	00 00 
+   1b894:	c5 cd db b4 c7 c0 00 	vpand  0xc0(%rdi,%rax,8),%ymm6,%ymm6
+   1b89b:	00 00 
+   1b89d:	c5 c5 db bc c7 e0 00 	vpand  0xe0(%rdi,%rax,8),%ymm7,%ymm7
+   1b8a4:	00 00 
+   1b8a6:	62 f2 fd 28 55 e4    	vpopcntq %ymm4,%ymm4
+   1b8ac:	62 f2 fd 28 55 ed    	vpopcntq %ymm5,%ymm5
+   1b8b2:	62 f2 fd 28 55 f6    	vpopcntq %ymm6,%ymm6
+   1b8b8:	62 f2 fd 28 55 ff    	vpopcntq %ymm7,%ymm7
+   1b8be:	62 f2 7e 28 35 e4    	vpmovqd %ymm4,%xmm4
+   1b8c4:	c5 f9 fe c4          	vpaddd %xmm4,%xmm0,%xmm0
+   1b8c8:	62 f2 7e 28 35 ec    	vpmovqd %ymm5,%xmm4
+   1b8ce:	c5 f1 fe cc          	vpaddd %xmm4,%xmm1,%xmm1
+   1b8d2:	62 f2 7e 28 35 f4    	vpmovqd %ymm6,%xmm4
+   1b8d8:	c5 e9 fe d4          	vpaddd %xmm4,%xmm2,%xmm2
+   1b8dc:	62 f2 7e 28 35 fc    	vpmovqd %ymm7,%xmm4
+   1b8e2:	c5 e1 fe dc          	vpaddd %xmm4,%xmm3,%xmm3
+   1b8e6:	48 83 c0 20          	add    $0x20,%rax
+   1b8ea:	48 3d 00 04 00 00    	cmp    $0x400,%rax
+   1b8f0:	0f 85 fa fe ff ff    	jne    1b7f0 <topic036_bitmap_and_count+0x20>
+   1b8f6:	c5 f1 fe c0          	vpaddd %xmm0,%xmm1,%xmm0
+   1b8fa:	c5 e9 fe c0          	vpaddd %xmm0,%xmm2,%xmm0
+   1b8fe:	c5 e1 fe c0          	vpaddd %xmm0,%xmm3,%xmm0
+   1b902:	c5 f9 70 c8 ee       	vpshufd $0xee,%xmm0,%xmm1
+   1b907:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   1b90b:	c5 f9 70 c8 55       	vpshufd $0x55,%xmm0,%xmm1
+   1b910:	c5 f9 fe c1          	vpaddd %xmm1,%xmm0,%xmm0
+   1b914:	c5 f9 7e c0          	vmovd  %xmm0,%eax
+   1b918:	c5 f8 77             	vzeroupper
+   1b91b:	c3                   	ret
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section .plt:
+RUN_KERNEL
+
+/tmp/topic36-code-20260815-43919a-x86/target-native/release/bitmap-probe:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000001b920 <topic036_run_and_count>:
+   1b920:	48 85 f6             	test   %rsi,%rsi
+   1b923:	41 0f 94 c0          	sete   %r8b
+   1b927:	48 85 c9             	test   %rcx,%rcx
+   1b92a:	41 0f 94 c1          	sete   %r9b
+   1b92e:	31 c0                	xor    %eax,%eax
+   1b930:	45 08 c1             	or     %r8b,%r9b
+   1b933:	0f 85 7f 00 00 00    	jne    1b9b8 <topic036_run_and_count+0x98>
+   1b939:	55                   	push   %rbp
+   1b93a:	41 57                	push   %r15
+   1b93c:	41 56                	push   %r14
+   1b93e:	53                   	push   %rbx
+   1b93f:	45 31 c0             	xor    %r8d,%r8d
+   1b942:	31 c0                	xor    %eax,%eax
+   1b944:	45 31 c9             	xor    %r9d,%r9d
+   1b947:	45 31 d2             	xor    %r10d,%r10d
+   1b94a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+   1b950:	4d 89 ce             	mov    %r9,%r14
+   1b953:	41 89 c3             	mov    %eax,%r11d
+   1b956:	42 0f b7 44 8f 02    	movzwl 0x2(%rdi,%r9,4),%eax
+   1b95c:	42 0f b7 6c 92 02    	movzwl 0x2(%rdx,%r10,4),%ebp
+   1b962:	66 39 c5             	cmp    %ax,%bp
+   1b965:	49 83 d9 ff          	sbb    $0xffffffffffffffff,%r9
+   1b969:	31 db                	xor    %ebx,%ebx
+   1b96b:	66 39 c5             	cmp    %ax,%bp
+   1b96e:	46 0f b7 34 b7       	movzwl (%rdi,%r14,4),%r14d
+   1b973:	46 0f b7 3c 92       	movzwl (%rdx,%r10,4),%r15d
+   1b978:	0f 42 c5             	cmovb  %ebp,%eax
+   1b97b:	40 0f 96 c5          	setbe  %bpl
+   1b97f:	66 45 39 f7          	cmp    %r14w,%r15w
+   1b983:	45 0f 47 f7          	cmova  %r15d,%r14d
+   1b987:	45 0f b7 f6          	movzwl %r14w,%r14d
+   1b98b:	44 0f b7 f8          	movzwl %ax,%r15d
+   1b98f:	44 89 f8             	mov    %r15d,%eax
+   1b992:	44 29 f0             	sub    %r14d,%eax
+   1b995:	ff c0                	inc    %eax
+   1b997:	66 45 39 fe          	cmp    %r15w,%r14w
+   1b99b:	41 0f 47 c0          	cmova  %r8d,%eax
+   1b99f:	44 01 d8             	add    %r11d,%eax
+   1b9a2:	49 39 f1             	cmp    %rsi,%r9
+   1b9a5:	73 0b                	jae    1b9b2 <topic036_run_and_count+0x92>
+   1b9a7:	40 88 eb             	mov    %bpl,%bl
+   1b9aa:	49 01 da             	add    %rbx,%r10
+   1b9ad:	49 39 ca             	cmp    %rcx,%r10
+   1b9b0:	72 9e                	jb     1b950 <topic036_run_and_count+0x30>
+   1b9b2:	5b                   	pop    %rbx
+   1b9b3:	41 5e                	pop    %r14
+   1b9b5:	41 5f                	pop    %r15
+   1b9b7:	5d                   	pop    %rbp
+   1b9b8:	c3                   	ret
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section .plt:

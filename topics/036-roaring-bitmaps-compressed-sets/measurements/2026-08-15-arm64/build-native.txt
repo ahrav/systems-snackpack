@@ -1,0 +1,2 @@
+   Compiling roaring-bitmaps-compressed-sets v0.1.0 (/tmp/topic36-code-20260815-43919a-arm/topics/036-roaring-bitmaps-compressed-sets)
+    Finished `release` profile [optimized] target(s) in 0.82s

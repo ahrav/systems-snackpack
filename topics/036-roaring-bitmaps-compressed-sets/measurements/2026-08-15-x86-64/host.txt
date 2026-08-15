@@ -1,0 +1,152 @@
+DATE_UTC=2026-08-15T16:56:44Z
+HOSTNAME=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+ARCHIVE_SHA256=43919a031a53d6ddef976d7e2ec4bf55fed565984c79181568925b01d83230a1
+BUILD_FLAGS_GENERIC=-C opt-level=3
+BUILD_FLAGS_NATIVE=-C target-cpu=native -C debuginfo=1
+UNAME_BEGIN
+Linux dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com 6.12.95-124.187.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Mon Jul 27 20:39:41 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+UNAME_END
+OS_RELEASE_BEGIN
+NAME="Amazon Linux"
+VERSION="2023"
+ID="amzn"
+ID_LIKE="fedora"
+VERSION_ID="2023"
+PLATFORM_ID="platform:al2023"
+PRETTY_NAME="Amazon Linux 2023.12.20260803"
+ANSI_COLOR="0;33"
+CPE_NAME="cpe:2.3:o:amazon:amazon_linux:2023:-:internal"
+HOME_URL="https://aws.amazon.com/linux/amazon-linux-2023/"
+DOCUMENTATION_URL="https://docs.aws.amazon.com/linux/"
+SUPPORT_URL="https://aws.amazon.com/premiumsupport/"
+BUG_REPORT_URL="https://github.com/amazonlinux/amazon-linux-2023"
+VENDOR_NAME="AWS"
+VENDOR_URL="https://aws.amazon.com/"
+SUPPORT_END="2029-06-30"
+VARIANT="internal"
+OS_RELEASE_END
+LSCPU_BEGIN
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           46 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  192
+On-line CPU(s) list:                     0-191
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Xeon(R) Platinum 8488C
+CPU family:                              6
+Model:                                   143
+Thread(s) per core:                      2
+Core(s) per socket:                      48
+Socket(s):                               2
+Stepping:                                8
+BogoMIPS:                                4800.00
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd ida arat avx512vbmi umip pku ospke waitpkg avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg tme avx512_vpopcntdq rdpid cldemote movdiri movdir64b md_clear serialize amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities
+Hypervisor vendor:                       KVM
+Virtualization type:                     full
+L1d cache:                               4.5 MiB (96 instances)
+L1i cache:                               3 MiB (96 instances)
+L2 cache:                                192 MiB (96 instances)
+L3 cache:                                210 MiB (2 instances)
+NUMA node(s):                            2
+NUMA node0 CPU(s):                       0-47,96-143
+NUMA node1 CPU(s):                       48-95,144-191
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+LSCPU_END
+NPROC=192
+AFFINITY=pid 2254136's current affinity list: 0-191
+RUSTC_BEGIN
+rustc 1.97.1 (8bab26f4f 2026-07-14)
+binary: rustc
+commit-hash: 8bab26f4f68e0e26f0bb7960be334d5b520ea452
+commit-date: 2026-07-14
+host: x86_64-unknown-linux-gnu
+release: 1.97.1
+LLVM version: 22.1.6
+RUSTC_END
+cargo 1.97.1 (c980f4866 2026-06-30)
+gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+GNU objdump version 2.41-50.amzn2023.0.5
+RUST_TARGET_CFG_BEGIN
+debug_assertions
+panic="unwind"
+target_abi=""
+target_arch="x86_64"
+target_endian="little"
+target_env="gnu"
+target_family="unix"
+target_feature="adx"
+target_feature="aes"
+target_feature="avx"
+target_feature="avx2"
+target_feature="avx512bf16"
+target_feature="avx512bitalg"
+target_feature="avx512bw"
+target_feature="avx512cd"
+target_feature="avx512dq"
+target_feature="avx512f"
+target_feature="avx512fp16"
+target_feature="avx512ifma"
+target_feature="avx512vbmi"
+target_feature="avx512vbmi2"
+target_feature="avx512vl"
+target_feature="avx512vnni"
+target_feature="avx512vpopcntdq"
+target_feature="avxvnni"
+target_feature="bmi1"
+target_feature="bmi2"
+target_feature="cmpxchg16b"
+target_feature="f16c"
+target_feature="fma"
+target_feature="fxsr"
+target_feature="gfni"
+target_feature="lzcnt"
+target_feature="movbe"
+target_feature="pclmulqdq"
+target_feature="popcnt"
+target_feature="rdrand"
+target_feature="rdseed"
+target_feature="sha"
+target_feature="sse"
+target_feature="sse2"
+target_feature="sse3"
+target_feature="sse4.1"
+target_feature="sse4.2"
+target_feature="ssse3"
+target_feature="vaes"
+target_feature="vpclmulqdq"
+target_feature="xsave"
+target_feature="xsavec"
+target_feature="xsaveopt"
+target_feature="xsaves"
+target_has_atomic="16"
+target_has_atomic="32"
+target_has_atomic="64"
+target_has_atomic="8"
+target_has_atomic="ptr"
+target_has_atomic_primitive_alignment="16"
+target_has_atomic_primitive_alignment="32"
+target_has_atomic_primitive_alignment="64"
+target_has_atomic_primitive_alignment="8"
+target_has_atomic_primitive_alignment="ptr"
+target_os="linux"
+target_pointer_width="64"
+target_vendor="unknown"
+unix
+RUST_TARGET_CFG_END
