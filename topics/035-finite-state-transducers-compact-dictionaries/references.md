@@ -17,6 +17,10 @@ performance examples do not rank these representations for another corpus.
 - [Skut, "Incremental Construction of Minimal Acyclic Sequential Transducers
   from Unsorted Data"](https://arxiv.org/pdf/cs/0408026)
   addresses output-bearing construction when inputs do not arrive sorted.
+- [Schulz and Mihov, "Fast String Correction with Levenshtein
+  Automata"](https://doi.org/10.1007/s10032-002-0082-8)
+  defines Levenshtein automata and dictionary traversal controlled by their
+  edit-distance states.
 
 ## Current implementations
 
@@ -28,7 +32,8 @@ performance examples do not rank these representations for another corpus.
 - [Lucene 10.4.0 `FSTCompiler`](https://lucene.apache.org/core/10_4_0/core/org/apache/lucene/util/fst/FSTCompiler.html)
   defines sorted construction and suffix-sharing controls.
 - [Lucene 10.4.0 `FST`](https://lucene.apache.org/core/10_4_0/core/org/apache/lucene/util/fst/FST.html)
-  defines variable, fixed, direct-addressed, and continuous arc encodings.
+  documents version-tagged ordinary, fixed-length binary-search,
+  direct-addressed, and continuous-label traversal cases.
 - [Lucene 10.4.0 `Outputs`](https://lucene.apache.org/core/10_4_0/core/org/apache/lucene/util/fst/Outputs.html)
   defines the output operations required by construction and traversal.
 - [OpenFST minimization documentation](https://openfst.org/twiki/bin/view/FST/MinimizeDoc)
@@ -47,6 +52,9 @@ performance examples do not rank these representations for another corpus.
 - [Unicode Standard Annex #15](https://unicode.org/reports/tr15/)
   defines normalization forms. Exact byte equality alone does not implement
   canonical text equivalence.
+- [Unicode Technical Standard #10](https://unicode.org/reports/tr10/)
+  defines collation weights and tailoring separately from normalization and
+  application-level key identity.
 - [Linux page-cache documentation](https://www.kernel.org/doc/html/latest/mm/page_cache.html)
   describes file pages shared by buffered I/O and memory mappings.
 - [Linux `mmap(2)`](https://man7.org/linux/man-pages/man2/mmap.2.html)
