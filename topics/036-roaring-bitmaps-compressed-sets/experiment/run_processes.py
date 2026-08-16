@@ -99,6 +99,7 @@ def quartiles(values):
 
 
 def validate_arguments(args):
+    args.binary = os.path.abspath(args.binary)
     if args.blocks < 2 or args.blocks % 2 != 0:
         raise ValueError(
             "--blocks must be an even count of at least 2 so the alternating AB "

@@ -26,10 +26,28 @@ that exact host and run window.
 
 After both promoted runs, `experiment/run_processes.py` gained a guard that
 rejects odd `--blocks`, because an odd count leaves the alternating schedule
-unbalanced. Its current digest therefore differs from the digest recorded in
-each `SHA256SUMS.txt`; both promoted runs used the even 12-block schedule the
-guard now requires, so the retained rows are unaffected. Every other measured
-source file still matches its recorded digest byte for byte.
+unbalanced, and it now resolves `--binary` to an absolute path so the hashed
+file is the executed file. Its current digest therefore differs from the digest
+recorded in each `SHA256SUMS.txt`; both promoted runs used the even 12-block
+schedule the guard now requires and passed an absolute binary path, so the
+retained rows are unaffected. Every other measured source file still matches its
+recorded digest byte for byte.
+
+Each `SHA256SUMS.txt` mixes two kinds of entry. The repository-relative source
+lines are verifiable from the repository root:
+
+```
+grep -v '^[0-9a-f]\{64\}  /tmp/' \
+  topics/036-roaring-bitmaps-compressed-sets/measurements/2026-08-15-x86-64/SHA256SUMS.txt \
+  | grep -v run_processes.py | sha256sum -c
+```
+
+The `/tmp` lines name the source archive and the generic and native binaries as
+they existed on the build host. Those bytes are deliberately not retained here:
+the archive was a transfer artifact and compiled binaries are not committed.
+Their digests remain the record that the timed rows, `verify-*.txt` output, and
+`symbols.txt` came from one specific build, and the paths are kept verbatim as
+produced rather than rewritten to paths that never existed.
 
 Generated instructions establish linked code shape, not causal attribution.
 CPU identity and feature flags are host evidence, not evidence for an entire
