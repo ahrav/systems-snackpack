@@ -1,0 +1,17 @@
+[package]
+name = "compression-systems-primitive"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "compression_systems_primitive"
+path = "src/lib.rs"
+
+[[bin]]
+name = "compression-contract-probe"
+path = "src/bin/compression_contract_probe.rs"
+
+[lints]
+workspace = true
