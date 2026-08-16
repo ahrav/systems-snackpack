@@ -2,7 +2,10 @@
 
 The papers define automaton and transducer correctness. Versioned official
 documentation and source define current implementation behavior. Project-owned
-performance examples do not rank these representations for another corpus.
+performance examples do not rank these representations for another corpus. The
+OpenFST project publishes documentation only as an unversioned wiki, so those
+two citations track current documentation; every other implementation citation
+names a release or tag.
 
 ## Construction and transducers
 
@@ -44,7 +47,7 @@ performance examples do not rank these representations for another corpus.
 - [MARISA 0.3.1 documentation](https://www.s-yata.jp/marisa-trie/docs/readme.en.html)
   defines static Patricia-trie search modes, cache choices, mapping, and format
   boundaries.
-- [Darts-clone implementation](https://github.com/s-yata/darts-clone/blob/master/include/darts.h)
+- [Darts-clone 0.32h implementation](https://github.com/s-yata/darts-clone/blob/v0.32h/include/darts.h)
   defines the double-array representation and direct transition arithmetic.
 
 ## Text and Linux lifecycle contracts

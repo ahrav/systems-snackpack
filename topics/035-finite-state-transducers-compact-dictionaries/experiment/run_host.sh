@@ -34,6 +34,15 @@ if [[ -e $work_dir ]]; then
     exit 2
 fi
 
+# In-tree output changes the source manifest even when no source file changes.
+output_abs=$(cd -- "$(dirname -- "$output_dir")" && pwd -P)/$(basename -- "$output_dir")
+case "$output_abs/" in
+"$repo_root"/*)
+    echo "output must live outside the repository: $output_abs" >&2
+    exit 2
+    ;;
+esac
+
 mkdir -p "$output_dir" "$work_dir"
 generic_target="$work_dir/generic-target"
 native_target="$work_dir/native-target"
