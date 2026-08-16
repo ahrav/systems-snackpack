@@ -1,0 +1,9 @@
+43919a031a53d6ddef976d7e2ec4bf55fed565984c79181568925b01d83230a1  /tmp/topic36-code-candidate-20260815-43919a.tar.gz
+f8f230d376d440700a80f1a13576cb39ce791ff794e54a95b01316761ce6e158  /tmp/topic36-code-20260815-43919a-arm/target-generic/release/bitmap-probe
+68360fac281a684489e6728eb45e65eb088751736ead0731d278525d9c6f46fa  /tmp/topic36-code-20260815-43919a-arm/target-native/release/bitmap-probe
+f4fafc36b3b192392e9596a60ea28331b976460c76a737ac6ae8b90fc5ca18c5  Cargo.toml
+04e1db782e5242225e9c5ecbd6c571d541ab3bbfb76d85e41d507baaa849438e  Cargo.lock
+51487ceafc7b1ee545ff2bf0c40c8c6c35497bfe5807deb8280eb7fafaaa83dd  topics/036-roaring-bitmaps-compressed-sets/Cargo.toml
+c77f455c208eb05d8997c1c5901fab1f15fe27d3e3e31554d29a849c093c8136  topics/036-roaring-bitmaps-compressed-sets/src/lib.rs
+689ebcc5614aa13ffe802fdbb277345404cc6a433544d69a72e47614e396d1e3  topics/036-roaring-bitmaps-compressed-sets/src/bin/bitmap_probe.rs
+9ca104079b35785b14de75ef408fa14f15c56dac7d79b6da73108253a3fa87c3  topics/036-roaring-bitmaps-compressed-sets/experiment/run_processes.py

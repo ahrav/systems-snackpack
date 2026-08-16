@@ -1,0 +1,155 @@
+ARRAY_KERNEL
+
+/tmp/topic36-code-20260815-43919a-arm/target-native/release/bitmap-probe:     file format elf64-littleaarch64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000016fc0 <topic036_array_and_count>:
+   16fc0:	aa0003e8 	mov	x8, x0
+   16fc4:	2a1f03e0 	mov	w0, wzr
+   16fc8:	b40003a1 	cbz	x1, 1703c <topic036_array_and_count+0x7c>
+   16fcc:	b4000383 	cbz	x3, 1703c <topic036_array_and_count+0x7c>
+   16fd0:	2a1f03e0 	mov	w0, wzr
+   16fd4:	aa1f03e9 	mov	x9, xzr
+   16fd8:	aa1f03ea 	mov	x10, xzr
+   16fdc:	d503201f 	nop
+   16fe0:	7869790b 	ldrh	w11, [x8, x9, lsl #1]
+   16fe4:	786a784c 	ldrh	w12, [x2, x10, lsl #1]
+   16fe8:	6b0c017f 	cmp	w11, w12
+   16fec:	1a9f97eb 	cset	w11, hi	// hi = pmore
+   16ff0:	5a9f216b 	csinv	w11, w11, wzr, cs	// cs = hs, nlast
+   16ff4:	72001d6b 	ands	w11, w11, #0xff
+   16ff8:	54000140 	b.eq	17020 <topic036_array_and_count+0x60>  // b.none
+   16ffc:	7100057f 	cmp	w11, #0x1
+   17000:	54000140 	b.eq	17028 <topic036_array_and_count+0x68>  // b.none
+   17004:	91000529 	add	x9, x9, #0x1
+   17008:	eb01013f 	cmp	x9, x1
+   1700c:	54000143 	b.cc	17034 <topic036_array_and_count+0x74>  // b.lo, b.ul, b.last
+   17010:	1400000b 	b	1703c <topic036_array_and_count+0x7c>
+   17014:	d503201f 	nop
+   17018:	d503201f 	nop
+   1701c:	d503201f 	nop
+   17020:	11000400 	add	w0, w0, #0x1
+   17024:	91000529 	add	x9, x9, #0x1
+   17028:	9100054a 	add	x10, x10, #0x1
+   1702c:	eb01013f 	cmp	x9, x1
+   17030:	54000062 	b.cs	1703c <topic036_array_and_count+0x7c>  // b.hs, b.nlast
+   17034:	eb03015f 	cmp	x10, x3
+   17038:	54fffd43 	b.cc	16fe0 <topic036_array_and_count+0x20>  // b.lo, b.ul, b.last
+   1703c:	d65f03c0 	ret
+
+Disassembly of section .fini:
+BITMAP_KERNEL
+
+/tmp/topic36-code-20260815-43919a-arm/target-native/release/bitmap-probe:     file format elf64-littleaarch64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000017040 <topic036_bitmap_and_count>:
+   17040:	04bf5028 	rdvl	x8, #1
+   17044:	d344fd08 	lsr	x8, x8, #4
+   17048:	f104011f 	cmp	x8, #0x100
+   1704c:	54000089 	b.ls	1705c <topic036_bitmap_and_count+0x1c>  // b.plast
+   17050:	2a1f03e8 	mov	w8, wzr
+   17054:	aa1f03e9 	mov	x9, xzr
+   17058:	1400001e 	b	170d0 <topic036_bitmap_and_count+0x90>
+   1705c:	04a0e3e8 	cntw	x8
+   17060:	6f00e400 	movi	v0.2d, #0x0
+   17064:	6f00e401 	movi	v1.2d, #0x0
+   17068:	aa0003ec 	mov	x12, x0
+   1706c:	aa0103ed 	mov	x13, x1
+   17070:	51000509 	sub	w9, w8, #0x1
+   17074:	25d8e3e0 	ptrue	p0.d
+   17078:	04bf504b 	rdvl	x11, #2
+   1707c:	9276012a 	and	x10, x9, #0x400
+   17080:	d2760149 	eor	x9, x10, #0x400
+   17084:	d276014e 	eor	x14, x10, #0x400
+   17088:	85804182 	ldr	z2, [x12]
+   1708c:	85804583 	ldr	z3, [x12, #1, mul vl]
+   17090:	eb0801ce 	subs	x14, x14, x8
+   17094:	8b0b018c 	add	x12, x12, x11
+   17098:	858041a4 	ldr	z4, [x13]
+   1709c:	04223082 	and	z2.d, z4.d, z2.d
+   170a0:	858045a5 	ldr	z5, [x13, #1, mul vl]
+   170a4:	042330a3 	and	z3.d, z5.d, z3.d
+   170a8:	8b0b01ad 	add	x13, x13, x11
+   170ac:	04daa042 	cnt	z2.d, p0/m, z2.d
+   170b0:	04daa063 	cnt	z3.d, p0/m, z3.d
+   170b4:	04e20000 	add	z0.d, z0.d, z2.d
+   170b8:	04e30021 	add	z1.d, z1.d, z3.d
+   170bc:	54fffe61 	b.ne	17088 <topic036_bitmap_and_count+0x48>  // b.any
+   170c0:	04e00020 	add	z0.d, z1.d, z0.d
+   170c4:	04c12000 	uaddv	d0, p0, z0.d
+   170c8:	1e260008 	fmov	w8, s0
+   170cc:	b40001ea 	cbz	x10, 17108 <topic036_bitmap_and_count+0xc8>
+   170d0:	25d8e3e0 	ptrue	p0.d
+   170d4:	d37df129 	lsl	x9, x9, #3
+   170d8:	d503201f 	nop
+   170dc:	d503201f 	nop
+   170e0:	f869680a 	ldr	x10, [x0, x9]
+   170e4:	f869682b 	ldr	x11, [x1, x9]
+   170e8:	91002129 	add	x9, x9, #0x8
+   170ec:	f140093f 	cmp	x9, #0x2, lsl #12
+   170f0:	8a0a016a 	and	x10, x11, x10
+   170f4:	9e670140 	fmov	d0, x10
+   170f8:	04daa000 	cnt	z0.d, p0/m, z0.d
+   170fc:	1e26000a 	fmov	w10, s0
+   17100:	0b0a0108 	add	w8, w8, w10
+   17104:	54fffee1 	b.ne	170e0 <topic036_bitmap_and_count+0xa0>  // b.any
+   17108:	2a0803e0 	mov	w0, w8
+   1710c:	d65f03c0 	ret
+
+Disassembly of section .fini:
+RUN_KERNEL
+
+/tmp/topic36-code-20260815-43919a-arm/target-native/release/bitmap-probe:     file format elf64-littleaarch64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .text:
+
+0000000000017120 <topic036_run_and_count>:
+   17120:	2a1f03e8 	mov	w8, wzr
+   17124:	b4000341 	cbz	x1, 1718c <topic036_run_and_count+0x6c>
+   17128:	b4000323 	cbz	x3, 1718c <topic036_run_and_count+0x6c>
+   1712c:	2a1f03e8 	mov	w8, wzr
+   17130:	aa1f03e9 	mov	x9, xzr
+   17134:	aa1f03ea 	mov	x10, xzr
+   17138:	d503201f 	nop
+   1713c:	d503201f 	nop
+   17140:	8b09080b 	add	x11, x0, x9, lsl #2
+   17144:	8b0a084d 	add	x13, x2, x10, lsl #2
+   17148:	7940016c 	ldrh	w12, [x11]
+   1714c:	794001ae 	ldrh	w14, [x13]
+   17150:	7940056b 	ldrh	w11, [x11, #2]
+   17154:	794005ad 	ldrh	w13, [x13, #2]
+   17158:	6b0c01df 	cmp	w14, w12
+   1715c:	1a8c81cc 	csel	w12, w14, w12, hi	// hi = pmore
+   17160:	6b0b01bf 	cmp	w13, w11
+   17164:	1a8b31ae 	csel	w14, w13, w11, cc	// cc = lo, ul, last
+   17168:	9a8a854a 	cinc	x10, x10, ls	// ls = plast
+   1716c:	6b0c01cc 	subs	w12, w14, w12
+   17170:	1a8c37ec 	csinc	w12, wzr, w12, cc	// cc = lo, ul, last
+   17174:	6b0d017f 	cmp	w11, w13
+   17178:	9a898529 	cinc	x9, x9, ls	// ls = plast
+   1717c:	0b080188 	add	w8, w12, w8
+   17180:	eb01013f 	cmp	x9, x1
+   17184:	fa433142 	ccmp	x10, x3, #0x2, cc	// cc = lo, ul, last
+   17188:	54fffdc3 	b.cc	17140 <topic036_run_and_count+0x20>  // b.lo, b.ul, b.last
+   1718c:	2a0803e0 	mov	w0, w8
+   17190:	d65f03c0 	ret
+
+Disassembly of section .fini:
