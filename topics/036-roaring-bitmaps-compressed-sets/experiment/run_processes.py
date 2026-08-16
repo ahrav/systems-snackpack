@@ -99,8 +99,11 @@ def quartiles(values):
 
 
 def validate_arguments(args):
-    if args.blocks < 2:
-        raise ValueError("--blocks must be at least 2")
+    if args.blocks < 2 or args.blocks % 2 != 0:
+        raise ValueError(
+            "--blocks must be an even count of at least 2 so the alternating AB "
+            "schedule places each method first in exactly half the blocks"
+        )
     if args.aa_blocks < 2:
         raise ValueError("--aa-blocks must be at least 2")
     if args.target_ms <= 0:

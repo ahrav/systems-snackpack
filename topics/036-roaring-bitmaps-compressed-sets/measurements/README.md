@@ -6,8 +6,9 @@ kernels.
 
 Each promoted host record names:
 
-- the source commit and shared source-archive Secure Hash Algorithm 256-bit
-  (SHA-256) digest;
+- the shared source-archive Secure Hash Algorithm 256-bit (SHA-256) digest and
+  the per-file SHA-256 digest of every measured source file, which pin the
+  measured bytes in place of a source commit identifier;
 - the Secure Shell (SSH) target, resolved hostname, architecture, kernel,
   central processing unit (CPU) model, target features, and available CPU count;
 - Rust, Cargo, C compiler, and binary-tools versions plus exact build flags;
@@ -22,6 +23,13 @@ process startup and the excluded work. The 12 paired process blocks are the
 analysis units. Inner iterations are subsamples and do not increase the run
 count. The inclusive interquartile range describes block-to-block variation in
 that exact host and run window.
+
+After both promoted runs, `experiment/run_processes.py` gained a guard that
+rejects odd `--blocks`, because an odd count leaves the alternating schedule
+unbalanced. Its current digest therefore differs from the digest recorded in
+each `SHA256SUMS.txt`; both promoted runs used the even 12-block schedule the
+guard now requires, so the retained rows are unaffected. Every other measured
+source file still matches its recorded digest byte for byte.
 
 Generated instructions establish linked code shape, not causal attribution.
 CPU identity and feature flags are host evidence, not evidence for an entire
