@@ -141,7 +141,7 @@ write_source_manifest() {
     local root=${2:-$repo_root}
     (
         cd "$root"
-        rg --files --hidden -g '!target/**' -g '!.git/**' -0 |
+        rg --files --hidden --no-ignore -g '!target/**' -g '!.git/**' -g '!.git' -0 |
             LC_ALL=C sort -z |
             xargs -0 sha256sum
     ) >"$destination"
