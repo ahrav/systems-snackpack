@@ -46,6 +46,38 @@ esac
 mkdir -p "$output_dir" "$work_dir"
 generic_target="$work_dir/generic-target"
 native_target="$work_dir/native-target"
+
+# Cargo reads config files from the working directory upward, and settings such
+# as build.rustc-wrapper or a linker survive an empty RUSTFLAGS.
+refuse_ambient_cargo_config() {
+    local search_dir=$1 cargo_config
+    while :; do
+        for cargo_config in "$search_dir/.cargo/config.toml" "$search_dir/.cargo/config"; do
+            if [[ -e $cargo_config ]]; then
+                echo "refusing ambient cargo config: $cargo_config" >&2
+                exit 2
+            fi
+        done
+        if [[ $search_dir == / ]]; then
+            break
+        fi
+        search_dir=${search_dir%/*}
+        search_dir=${search_dir:-/}
+    done
+}
+refuse_ambient_cargo_config "$repo_root"
+
+# $CARGO_HOME/config.toml legitimately carries registry mirrors, so an isolated
+# CARGO_HOME bypasses it and its digest is recorded instead of refused.
+real_cargo_home=$(realpath -m -- "${CARGO_HOME:-$HOME/.cargo}")
+cargo_home="$work_dir/cargo-home"
+mkdir -p "$cargo_home"
+for cache_entry in registry git; do
+    if [[ -e "$real_cargo_home/$cache_entry" ]]; then
+        ln -s "$real_cargo_home/$cache_entry" "$cargo_home/$cache_entry"
+    fi
+done
+export CARGO_HOME=$cargo_home
 architecture=$(uname -m)
 remote_hostname=$(hostname -f)
 
@@ -101,8 +133,36 @@ run_gate() {
     } >"$output_dir/$name" 2>&1
 }
 
+# The caller-supplied commit is otherwise unchecked evidence, and git diff alone
+# reports neither a staged change nor a different HEAD.
+git_verify=(git -c core.fsmonitor=false -c core.untrackedCache=false -C "$repo_root")
+if [[ $("${git_verify[@]}" rev-parse --show-toplevel 2>/dev/null || true) == "$repo_root" ]]; then
+    head_commit=$("${git_verify[@]}" rev-parse HEAD)
+    if ! expected_commit=$("${git_verify[@]}" rev-parse --verify --quiet "${source_commit}^{commit}"); then
+        echo "SOURCE_COMMIT $source_commit is not a commit in this worktree" >&2
+        exit 2
+    fi
+    if [[ $expected_commit != "$head_commit" ]]; then
+        echo "worktree HEAD $head_commit does not match SOURCE_COMMIT $expected_commit" >&2
+        exit 2
+    fi
+    if [[ -n $("${git_verify[@]}" status --porcelain) ]]; then
+        echo "worktree is not clean; refusing exact-source evidence" >&2
+        exit 2
+    fi
+    source_commit_verified=git-worktree-head-clean
+    run_gate git_diff_check.log "${git_verify[@]}" diff --check
+else
+    source_commit_verified=no-git-worktree-caller-supplied
+    {
+        echo "CHECK=NOT_APPLICABLE"
+        echo "reason=the measured source archive does not contain Git metadata"
+    } >"$output_dir/git_diff_check.log"
+fi
+
 {
     echo "source_commit=$source_commit"
+    echo "source_commit_verified=$source_commit_verified"
     echo "source_archive_sha256=${source_archive_sha256,,}"
     echo "repository_root=$repo_root"
     echo "host_runner=topics/035-finite-state-transducers-compact-dictionaries/experiment/run_host.sh"
@@ -157,20 +217,18 @@ record_optional rustup.txt rustup show active-toolchain
         fi
     done
 } >"$output_dir/build_environment.txt"
+{
+    printf 'cargo_home_isolated_from=%s\n' "$real_cargo_home"
+    for cargo_config in "$real_cargo_home/config.toml" "$real_cargo_home/config"; do
+        if [[ -e $cargo_config ]]; then
+            sha256sum "$cargo_config"
+        fi
+    done
+} >>"$output_dir/build_environment.txt"
 
 write_source_manifest "$output_dir/source_manifest.before.sha256"
 
 cd "$repo_root"
-
-git_top=$(git rev-parse --show-toplevel 2>/dev/null || true)
-if [[ $git_top == "$repo_root" ]]; then
-    run_gate git_diff_check.log git diff --check
-else
-    {
-        echo "CHECK=NOT_APPLICABLE"
-        echo "reason=the measured source archive does not contain Git metadata"
-    } >"$output_dir/git_diff_check.log"
-fi
 
 run_gate fmt.log cargo fmt --all -- --check
 run_gate test_lib_examples.log env CARGO_TARGET_DIR="$generic_target" \
