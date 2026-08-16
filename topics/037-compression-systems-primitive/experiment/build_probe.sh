@@ -17,14 +17,33 @@ if [[ -e $output_dir ]]; then
 fi
 script_dir=$(cd -- "$(dirname -- "$0")" && pwd -P)
 source_file="$script_dir/compression_probe.c"
-lz4_library=$(ldconfig -p | awk '$1 ~ /^liblz4\.so\.1$/ { print $NF; exit }')
-zstd_library=$(ldconfig -p | awk '$1 ~ /^libzstd\.so\.1$/ { print $NF; exit }')
-if [[ -z $lz4_library || -z $zstd_library ]]; then
-    echo "versioned LZ4 or zstd runtime library was not found" >&2
+
+# ldconfig lists every ABI variant of a soname, so on a multi-arch host the
+# first record for liblz4.so.1 can be a 32-bit library that this build cannot
+# link. The architecture tag in that listing is spelled differently per
+# platform, so ask the compiler instead: linking the candidate into an empty
+# shared object succeeds only when its ABI matches the one cc emits here.
+find_runtime_library() {
+    local soname=$1 candidate
+    while read -r candidate; do
+        [[ -e $candidate ]] || continue
+        if cc -shared -o /dev/null -x c /dev/null -x none "$candidate" \
+            >/dev/null 2>&1; then
+            realpath -- "$candidate"
+            return 0
+        fi
+    done < <(ldconfig -p | awk -v soname="$soname" '$1 == soname { print $NF }')
+    return 1
+}
+
+lz4_library=$(find_runtime_library liblz4.so.1) || {
+    echo "no liblz4.so.1 that cc can link for this target" >&2
     exit 2
-fi
-lz4_library=$(realpath "$lz4_library")
-zstd_library=$(realpath "$zstd_library")
+}
+zstd_library=$(find_runtime_library libzstd.so.1) || {
+    echo "no libzstd.so.1 that cc can link for this target" >&2
+    exit 2
+}
 
 mkdir -p "$output_dir"
 binary="$output_dir/compression-probe"

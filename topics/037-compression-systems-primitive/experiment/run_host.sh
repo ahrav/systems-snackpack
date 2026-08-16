@@ -65,11 +65,7 @@ if [[ $archive_digest != "$source_archive_sha256" ]]; then
 fi
 source_archive_verified=digest-verified-tree-gate-pending
 
-script_source=$0
-if [[ $script_source != */* ]]; then
-    script_source=$(type -P "$script_source")
-fi
-script_dir=$(cd -- "${script_source%/*}" && pwd -P)
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 repo_root=$(cd -- "$script_dir/../../.." && pwd -P)
 work_dir="${output_dir}.work"
 build_root="$work_dir/source-snapshot"
@@ -255,6 +251,24 @@ record_runtime_libraries() {
         LC_ALL=C sort -u)
 }
 
+# ldconfig lists every ABI variant of a soname, so on a multi-arch host the
+# first record for liblz4.so.1 can be a 32-bit library that this build cannot
+# link. The architecture tag in that listing is spelled differently per
+# platform, so ask the compiler instead: linking the candidate into an empty
+# shared object succeeds only when its ABI matches the one cc emits here.
+find_runtime_library() {
+    local soname=$1 candidate
+    while read -r candidate; do
+        [[ -e $candidate ]] || continue
+        if cc -shared -o /dev/null -x c /dev/null -x none "$candidate" \
+            >/dev/null 2>&1; then
+            realpath -- "$candidate"
+            return 0
+        fi
+    done < <(ldconfig -p | awk -v soname="$soname" '$1 == soname { print $NF }')
+    return 1
+}
+
 record_tools "$output_dir/tool_provenance.before.txt"
 {
     echo "ssh_alias=$SSH_TARGET_LABEL"
@@ -349,14 +363,14 @@ sha256sum "$rust_generic" "$rust_native" >"$output_dir/rust_binaries.sha256"
 probe_source=topics/037-compression-systems-primitive/experiment/compression_probe.c
 runner_source=topics/037-compression-systems-primitive/experiment/run_processes.py
 validator_source=topics/037-compression-systems-primitive/experiment/validate_receipts.py
-lz4_library=$(ldconfig -p | awk '$1 ~ /^liblz4\.so\.1$/ { print $NF; exit }')
-zstd_library=$(ldconfig -p | awk '$1 ~ /^libzstd\.so\.1$/ { print $NF; exit }')
-if [[ -z $lz4_library || -z $zstd_library ]]; then
-    echo "versioned LZ4 or zstd runtime library was not found" >&2
+lz4_library=$(find_runtime_library liblz4.so.1) || {
+    echo "no liblz4.so.1 that cc can link for this target" >&2
     exit 2
-fi
-lz4_library=$(realpath "$lz4_library")
-zstd_library=$(realpath "$zstd_library")
+}
+zstd_library=$(find_runtime_library libzstd.so.1) || {
+    echo "no libzstd.so.1 that cc can link for this target" >&2
+    exit 2
+}
 sha256sum "$probe_source" "$runner_source" "$validator_source" \
     "$lz4_library" "$zstd_library" >"$output_dir/native_inputs.before.sha256"
 cc -M "$probe_source" >"$output_dir/c_header_dependencies.before.txt"
