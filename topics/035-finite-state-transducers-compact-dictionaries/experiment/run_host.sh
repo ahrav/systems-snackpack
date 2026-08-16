@@ -6,7 +6,8 @@ if [[ $# -ne 3 ]]; then
     exit 2
 fi
 
-output_dir=$1
+# Gate redirects and CARGO_TARGET_DIR are evaluated after cd "$repo_root".
+output_dir=$(realpath -m -- "$1")
 source_commit=$2
 source_archive_sha256=$3
 
@@ -35,10 +36,9 @@ if [[ -e $work_dir ]]; then
 fi
 
 # In-tree output changes the source manifest even when no source file changes.
-output_abs=$(cd -- "$(dirname -- "$output_dir")" && pwd -P)/$(basename -- "$output_dir")
-case "$output_abs/" in
+case "$output_dir/" in
 "$repo_root"/*)
-    echo "output must live outside the repository: $output_abs" >&2
+    echo "output must live outside the repository: $output_dir" >&2
     exit 2
     ;;
 esac
@@ -214,8 +214,9 @@ python3 -I \
     topics/035-finite-state-transducers-compact-dictionaries/experiment/validate_receipts.py \
     "$output_dir/benchmark" >"$output_dir/receipt_validation.log" 2>&1
 
-nm -n "$native_binary" | rg 'topic035_flat_contains' >"$output_dir/symbols.txt"
-if [[ $(rg -c 'topic035_flat_contains' "$output_dir/symbols.txt") -ne 1 ]]; then
+# A missing symbol must reach the count check below, not abort the pipeline.
+nm -n "$native_binary" | { rg 'topic035_flat_contains' || true; } >"$output_dir/symbols.txt"
+if [[ $(rg -c 'topic035_flat_contains' "$output_dir/symbols.txt" || true) -ne 1 ]]; then
     echo "expected exactly one linked topic035_flat_contains symbol" >&2
     exit 1
 fi

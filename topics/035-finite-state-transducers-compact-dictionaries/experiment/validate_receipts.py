@@ -9,6 +9,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import random
 import statistics
 from typing import Any
 
@@ -127,8 +128,18 @@ def close(left: float, right: float) -> bool:
     return math.isclose(left, right, rel_tol=1e-12, abs_tol=1e-12)
 
 
+def seeded_templates(blocks: int, rng: random.Random) -> list[str]:
+    templates = ["ABBA"] * (blocks // 2) + ["BAAB"] * (blocks // 2)
+    rng.shuffle(templates)
+    return templates
+
+
 def validate_block_schedule(
-    schedule: list[dict[str, Any]], family: str, blocks: int, candidate: str
+    schedule: list[dict[str, Any]],
+    family: str,
+    blocks: int,
+    candidate: str,
+    expected: list[str],
 ) -> None:
     selected = [item for item in schedule if item["family"] == family]
     if len(selected) != blocks * 4:
@@ -156,8 +167,8 @@ def validate_block_schedule(
             if item["actual_method"] != expected_method:
                 raise ValueError(f"label/method mismatch for {family}/{block}")
         templates.append(template)
-    if templates.count("ABBA") != blocks // 2 or templates.count("BAAB") != blocks // 2:
-        raise ValueError(f"templates are not balanced for {family}")
+    if templates != expected:
+        raise ValueError(f"schedule does not follow the seeded template order for {family}")
 
 
 def recompute(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -208,7 +219,9 @@ def recompute(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return result
 
 
-def validate_calibration_attempts(root: Path, repetitions: dict[tuple[str, str], int]) -> None:
+def validate_calibration_attempts(
+    root: Path, repetitions: dict[tuple[str, str], int], pinned_cpu: int
+) -> None:
     attempts = json.loads((root / "calibration_attempts.json").read_text(encoding="utf-8"))
     if len(attempts) != len(METHODS) * len(DATASETS):
         raise ValueError("calibration attempt count mismatch")
@@ -218,6 +231,8 @@ def validate_calibration_attempts(root: Path, repetitions: dict[tuple[str, str],
         if key in seen or key not in repetitions:
             raise ValueError(f"invalid calibration attempt: {key}")
         seen.add(key)
+        if int(record["pinned_cpu"]) != pinned_cpu:
+            raise ValueError(f"calibration ran off the pinned processor: {key}")
         if int(record["exit_code"]) != 0 or int(record["external_wall_ns"]) <= 0:
             raise ValueError(f"failed calibration attempt: {key}")
         if record["timed_out"] or str(record["stderr"]):
@@ -320,7 +335,7 @@ def validate(root: Path) -> None:
     rows = load_jsonl(root / "raw_rows.jsonl")
     summary = json.loads((root / "summary.json").read_text(encoding="utf-8"))
     repetitions = read_calibration(root / "calibration.tsv")
-    validate_calibration_attempts(root, repetitions)
+    validate_calibration_attempts(root, repetitions, int(metadata["pinned_cpu"]))
 
     expected_processes = (EXPECTED_BLOCKS + EXPECTED_AA_BLOCKS) * 4
     if len(schedule) != expected_processes or len(processes) != expected_processes:
@@ -334,10 +349,22 @@ def validate(root: Path) -> None:
         raise ValueError("duplicate schedule sequence")
     if {str(item["family"]) for item in schedule} != {TREATMENT_FAMILY, AA_FAMILY}:
         raise ValueError("unexpected benchmark family")
+    # The schedule is a receipt, so re-derive its order from the frozen seed.
+    schedule_rng = random.Random(EXPECTED_SEED)
     validate_block_schedule(
-        schedule, TREATMENT_FAMILY, EXPECTED_BLOCKS, "minimal-dafsa"
+        schedule,
+        TREATMENT_FAMILY,
+        EXPECTED_BLOCKS,
+        "minimal-dafsa",
+        seeded_templates(EXPECTED_BLOCKS, schedule_rng),
     )
-    validate_block_schedule(schedule, AA_FAMILY, EXPECTED_AA_BLOCKS, "flat-trie")
+    validate_block_schedule(
+        schedule,
+        AA_FAMILY,
+        EXPECTED_AA_BLOCKS,
+        "flat-trie",
+        seeded_templates(EXPECTED_AA_BLOCKS, schedule_rng),
+    )
 
     pids = [int(record["pid"]) for record in processes]
     if len(pids) != len(set(pids)):
