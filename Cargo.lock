@@ -19,6 +19,10 @@ name = "compiler-optimization-boundaries"
 version = "0.1.0"
 
 [[package]]
+name = "compression-systems-primitive"
+version = "0.1.0"
+
+[[package]]
 name = "cpu-frontend-bottlenecks"
 version = "0.1.0"
 
