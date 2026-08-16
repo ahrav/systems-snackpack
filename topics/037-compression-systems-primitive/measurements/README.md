@@ -1,5 +1,12 @@
 # Topic 37 measurement contract
 
+Retained exact-source results:
+
+- [`2026-08-16-arm.md`](2026-08-16-arm.md)
+- [`2026-08-16-xxl.md`](2026-08-16-xxl.md)
+- [`2026-08-16-comparison.md`](2026-08-16-comparison.md)
+- [`raw/2026-08-16-febce369/`](raw/2026-08-16-febce369/)
+
 This experiment asks two narrow questions: how much byte reduction survives
 real per-unit metadata and raw fallback, and how much encode or decode time the
 same units cost on one pinned Linux processor. It does not simulate storage or
@@ -120,7 +127,8 @@ file manifest with the runner tree. Both modes build a read-only source snapshot
 outside the repository. The result records:
 
 - the requested Secure Shell (SSH) alias and runtime-resolved hostname;
-- architecture, kernel, CPU model, CPU counts, affinity, `/proc` status, and
+- architecture, kernel, central processing unit (CPU) model and counts,
+  affinity, `/proc` status, and
   available control group (cgroup) CPU, processor-set, and pressure files;
 - Rust, Cargo, Python, C compiler, linker, binary utilities, and resolved tool
   hashes;
