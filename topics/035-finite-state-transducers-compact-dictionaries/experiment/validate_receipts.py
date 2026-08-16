@@ -303,7 +303,7 @@ def validate_attempt(
         raise ValueError(f"attempt {sequence} did not use the frozen repetition map")
 
 
-def validate(root: Path) -> None:
+def validate(root: Path, binary: Path | None) -> None:
     required_files = {
         "calibration.tsv",
         "calibration_attempts.json",
@@ -326,9 +326,8 @@ def validate(root: Path) -> None:
         raise ValueError("run metadata does not match the frozen experiment contract")
     if len(str(metadata["binary_sha256"])) != 64 or int(metadata["pinned_cpu"]) < 0:
         raise ValueError("invalid binary identity or pinned processor metadata")
-    binary = Path(str(metadata["binary"]))
-    if binary.is_file() and sha256_file(binary) != metadata["binary_sha256"]:
-        raise ValueError("timing binary no longer matches its recorded checksum")
+    if binary is not None and sha256_file(binary) != metadata["binary_sha256"]:
+        raise ValueError("supplied binary does not match the recorded checksum")
 
     schedule = json.loads((root / "schedule.json").read_text(encoding="utf-8"))
     processes = load_jsonl(root / "processes.jsonl")
@@ -519,9 +518,10 @@ def validate(root: Path) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("output", type=Path)
+    parser.add_argument("--binary", type=Path)
     args = parser.parse_args()
     root = args.output.resolve(strict=True)
-    validate(root)
+    validate(root, args.binary)
     metadata = json.loads((root / "run_metadata.json").read_text(encoding="utf-8"))
     print(
         "CHECK=PASS "

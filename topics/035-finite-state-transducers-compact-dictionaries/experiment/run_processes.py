@@ -38,8 +38,10 @@ def parse_args() -> argparse.Namespace:
         parser.error("--blocks must be 12 for the predeclared design")
     if args.aa_blocks != 4:
         parser.error("--aa-blocks must be 4 for the predeclared design")
-    if args.target_ms < 1:
-        parser.error("--target-ms must be positive")
+    if args.target_ms != 200:
+        parser.error("--target-ms must be 200 for the predeclared design")
+    if args.seed != 350035:
+        parser.error("--seed must be 350035 for the predeclared design")
     return args
 
 

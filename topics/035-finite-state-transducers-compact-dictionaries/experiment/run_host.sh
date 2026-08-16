@@ -1,10 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -ne 3 ]]; then
-    echo "usage: $0 OUTPUT_DIR SOURCE_COMMIT SOURCE_ARCHIVE_SHA256" >&2
+if [[ $# -lt 3 || $# -gt 4 ]]; then
+    echo "usage: $0 OUTPUT_DIR SOURCE_COMMIT SOURCE_ARCHIVE_SHA256 [SOURCE_ARCHIVE]" >&2
     exit 2
 fi
+
+# Cargo takes the compiler, wrappers, and flags from the environment, and
+# CARGO_ENCODED_RUSTFLAGS overrides even the native RUSTFLAGS set per gate.
+swept_environment_names=()
+while IFS= read -r variable; do
+    case $variable in
+    RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | RUSTFMT | \
+        RUSTFLAGS | RUSTDOCFLAGS | CARGO_ENCODED_RUSTFLAGS | CARGO_INCREMENTAL | \
+        CARGO_BUILD_* | CARGO_TARGET_* | CARGO_PROFILE_* | CARGO_UNSTABLE_*)
+        swept_environment_names+=("$variable")
+        unset "$variable"
+        ;;
+    esac
+done < <(compgen -e)
+# An exported empty RUSTFLAGS suppresses cargo-config and per-target rustflags
+# that unsetting alone leaves in force.
+export RUSTFLAGS=''
 
 # Gate redirects and CARGO_TARGET_DIR are evaluated after cd "$repo_root".
 output_dir=$(realpath -m -- "$1")
@@ -17,6 +34,20 @@ source_archive_sha256=$3
 if [[ ! $source_archive_sha256 =~ ^[0-9a-fA-F]{64}$ ]]; then
     echo "SOURCE_ARCHIVE_SHA256 must contain 64 hexadecimal digits" >&2
     exit 2
+fi
+
+# The digest names bytes this script never sees unless the archive is passed too.
+if [[ $# -eq 4 ]]; then
+    source_archive=$(realpath -m -- "$4")
+    archive_digest=$(sha256sum "$source_archive" | awk '{print $1}')
+    if [[ $archive_digest != "${source_archive_sha256,,}" ]]; then
+        echo "archive $source_archive hashes to $archive_digest, not $source_archive_sha256" >&2
+        exit 2
+    fi
+    source_archive_verified=digest-and-tree-compared
+else
+    source_archive=""
+    source_archive_verified=no-archive-supplied-caller-metadata
 fi
 if [[ -z $source_commit ]]; then
     echo "SOURCE_COMMIT must not be empty" >&2
@@ -107,12 +138,34 @@ esac
 
 write_source_manifest() {
     local destination=$1
+    local root=${2:-$repo_root}
     (
-        cd "$repo_root"
+        cd "$root"
         rg --files --hidden -g '!target/**' -g '!.git/**' -0 |
             LC_ALL=C sort -z |
             xargs -0 sha256sum
     ) >"$destination"
+}
+
+# Hashing the archive says nothing about the tree cargo builds, so its contents
+# are compared with the pre-build manifest.
+verify_source_archive() {
+    local archive=$1 extract_dir="$work_dir/archive-source" runner_suffix archive_root marker
+    runner_suffix="topics/035-finite-state-transducers-compact-dictionaries/experiment/run_host.sh"
+    mkdir -p "$extract_dir"
+    tar -xzf "$archive" -C "$extract_dir"
+    marker=$(cd "$extract_dir" && find . -type f -path "*/$runner_suffix" | LC_ALL=C sort | head -1)
+    if [[ -z $marker ]]; then
+        echo "archive $archive does not contain $runner_suffix" >&2
+        exit 2
+    fi
+    archive_root=$(cd "$extract_dir" && cd "${marker%/"$runner_suffix"}" && pwd -P)
+    write_source_manifest "$work_dir/archive_manifest.sha256" "$archive_root"
+    if ! cmp -s "$output_dir/source_manifest.before.sha256" "$work_dir/archive_manifest.sha256"; then
+        echo "archive $archive does not match the source tree at $repo_root:" >&2
+        diff "$output_dir/source_manifest.before.sha256" "$work_dir/archive_manifest.sha256" >&2 || true
+        exit 2
+    fi
 }
 
 record_optional() {
@@ -164,6 +217,7 @@ fi
     echo "source_commit=$source_commit"
     echo "source_commit_verified=$source_commit_verified"
     echo "source_archive_sha256=${source_archive_sha256,,}"
+    echo "source_archive_verified=$source_archive_verified"
     echo "repository_root=$repo_root"
     echo "host_runner=topics/035-finite-state-transducers-compact-dictionaries/experiment/run_host.sh"
 } >"$output_dir/source_identity.txt"
@@ -219,6 +273,8 @@ record_optional rustup.txt rustup show active-toolchain
 } >"$output_dir/build_environment.txt"
 {
     printf 'cargo_home_isolated_from=%s\n' "$real_cargo_home"
+    printf 'swept=%s\n' "${swept_environment_names[*]-}"
+    printf 'RUSTFLAGS_exported_empty=yes\n'
     for cargo_config in "$real_cargo_home/config.toml" "$real_cargo_home/config"; do
         if [[ -e $cargo_config ]]; then
             sha256sum "$cargo_config"
@@ -227,6 +283,9 @@ record_optional rustup.txt rustup show active-toolchain
 } >>"$output_dir/build_environment.txt"
 
 write_source_manifest "$output_dir/source_manifest.before.sha256"
+if [[ -n $source_archive ]]; then
+    verify_source_archive "$source_archive"
+fi
 
 cd "$repo_root"
 
@@ -270,7 +329,7 @@ python3 -I \
 
 python3 -I \
     topics/035-finite-state-transducers-compact-dictionaries/experiment/validate_receipts.py \
-    "$output_dir/benchmark" >"$output_dir/receipt_validation.log" 2>&1
+    "$output_dir/benchmark" --binary "$native_binary" >"$output_dir/receipt_validation.log" 2>&1
 
 # A missing symbol must reach the count check below, not abort the pipeline.
 nm -n "$native_binary" | { rg 'topic035_flat_contains' || true; } >"$output_dir/symbols.txt"
