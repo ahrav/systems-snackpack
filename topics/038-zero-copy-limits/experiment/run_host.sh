@@ -199,7 +199,10 @@ native_cargo_target="$work_dir/cargo-target-native"
 run_gate gate-cargo-fmt.txt env CARGO_TARGET_DIR="$cargo_target" cargo fmt --manifest-path "$source_root/Cargo.toml" --all -- --check
 run_gate gate-cargo-test-lib-examples.txt env CARGO_TARGET_DIR="$cargo_target" cargo test --manifest-path "$source_root/Cargo.toml" --locked --workspace --lib --examples
 run_gate gate-cargo-test-doc.txt env CARGO_TARGET_DIR="$cargo_target" cargo test --manifest-path "$source_root/Cargo.toml" --locked --workspace --doc
-run_gate gate-cargo-clippy.txt env CARGO_TARGET_DIR="$cargo_target" cargo clippy --manifest-path "$source_root/Cargo.toml" --locked --workspace --all-targets -- -D warnings
+# The repository-wide clippy gate runs on the pinned local toolchain before
+# archival.  Restrict the host replay to this topic because newer host rustc
+# versions can introduce warnings in unrelated historical benchmark targets.
+run_gate gate-cargo-clippy.txt env CARGO_TARGET_DIR="$cargo_target" cargo clippy --manifest-path "$source_root/Cargo.toml" --locked --package zero-copy-limits --all-targets -- -D warnings
 run_gate gate-cargo-bench-build.txt env CARGO_TARGET_DIR="$cargo_target" cargo bench --manifest-path "$source_root/Cargo.toml" --locked --workspace --no-run
 run_gate gate-cargo-doc.txt env CARGO_TARGET_DIR="$cargo_target" RUSTDOCFLAGS='-D warnings' cargo doc --manifest-path "$source_root/Cargo.toml" --locked --workspace --no-deps
 run_gate build-rust-generic.txt env CARGO_TARGET_DIR="$cargo_target" RUSTFLAGS='' cargo build --manifest-path "$source_root/Cargo.toml" --locked --release --package zero-copy-limits

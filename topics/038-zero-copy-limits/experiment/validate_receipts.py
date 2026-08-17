@@ -132,7 +132,10 @@ def validate_runs(
         raise ValueError(f"unexpected pair counts: {per_pair}")
 
     blocks: dict[tuple[str, str], list[dict[str, str]]] = defaultdict(list)
-    for row, expected in zip(rows, expected_schedule, strict=True):
+    # Amazon Linux 2023 still ships Python 3.9 on the required Arm target.
+    # The equal-length check above supplies the guarantee that newer
+    # `zip(..., strict=True)` would otherwise provide.
+    for row, expected in zip(rows, expected_schedule):
         for field, expected_value in expected.items():
             if row[field] != expected_value:
                 raise ValueError(f"schedule drift in {row['run_id']} field {field}")
