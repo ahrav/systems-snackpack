@@ -173,63 +173,112 @@ cargo run --locked --package zero-copy-limits \
   reports copied fallback on loopback. It cannot establish network interface
   card (NIC), DMA, or remote-host behavior.
 
-## Preliminary two-host observation
+## Retained two-host observation
 
-The preliminary run asks one narrow question: for a prewarmed 512 MiB file in
+The retained run asks one narrow question: for a prewarmed 512 MiB file in
 memory-backed temporary storage, how did three file-to-loopback-socket paths
-compare on two named Linux machines? It does not test storage misses, a NIC,
-DMA, a remote receiver, TLS, congestion, production concurrency, or
-`MSG_ZEROCOPY` performance. Each process performed one transfer. Eight paired,
+compare on two named Linux machines? It does not test storage misses, a network
+interface card (NIC), direct memory access (DMA), a remote receiver, Transport
+Layer Security (TLS), congestion, production concurrency, or `MSG_ZEROCOPY`
+performance. Each process performed one transfer. Eight paired,
 order-balanced four-period blocks were the replication units. Inner receiver
 calls were not counted as independent samples.
 
+Both hosts ran source commit
+`c6b76b4429272814c7e3ab57a199c9d2c2d8ce66` from an archive with Secure Hash
+Algorithm 256-bit (SHA-256) digest
+`f6e75b525d82964437d23f74494758ccdddd1bc0da31e3b2971cdf4d9cd913e4`.
+SHA-256 is a content digest used here to identify exact bytes. The Arm result
+archive has digest
+`dcea29d8131846a50fd1f3da3a9efa618a0a0068d953bfd4734b9f159a494877`;
+the `xxl` result archive has digest
+`7403a907c3dd5f882b7dc77bdd8b977ef2571b784db3cd830a0fcff60592d995`.
+The later evidence-only commit retains those archives and this prose without
+changing the measured experiment source.
+
 The point estimate is the geometric mean of complete-block log ratios. A
 95-percent confidence interval (CI) is the Student-t working-model interval
-for those eight process-block contrasts. It describes variation in this one
-sequential run under approximate independence and normality assumptions; it is
-not a prediction interval for another host or another run. `A/A` means both
-labels executed the same buffered method and checks scheduling and analysis
+for those eight process-block contrasts. Standard deviation (SD) is the sample
+SD of those log contrasts. These derived summaries describe variation in this
+one sequential run under approximate independence and normality assumptions;
+they are not prediction intervals for another host or run. `A/A` means both
+labels executed the buffered method and checks scheduling and analysis
 plumbing.
 
-| Required target and observed identity | Candidate / buffered elapsed ratio | 95% CI | Median candidate / buffered elapsed |
-| --- | ---: | ---: | ---: |
-| `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`; `aarch64`; Linux `6.12.95-124.187.amzn2023.aarch64`; 64 available CPUs; DMI `c7g.16xlarge`; MIDR implementer `0x41`, part `0xd40`; GCC 11.5; Rust 1.95 | `sendfile`: 0.551930 | [0.542973, 0.561035] | 0.107419 s / 0.194543 s |
-| same Arm host | `splice`: 0.558441 | [0.548789, 0.568263] | 0.107724 s / 0.193719 s |
-| same Arm host | buffered A/A: 1.003497 | [0.995345, 1.011716] | same method |
-| Secure Shell (SSH) alias `xxl`, resolved at run time to `dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com`; `x86_64`; Linux `6.12.95-124.187.amzn2023.x86_64`; Intel Xeon Platinum 8488C; 192 available CPUs; GCC 11.5; Rust 1.97.1 | `sendfile`: 0.752378 | [0.735321, 0.769831] | 0.131577 s / 0.173519 s |
-| same `xxl` backing host | `splice`: 0.749593 | [0.745887, 0.753316] | 0.129701 s / 0.172815 s |
-| same `xxl` backing host | buffered A/A: 0.997731 | [0.979570, 1.016229] | same method |
+| Host and pair; ratio is B / A | Ratio | 95% CI | SD | Median A / B |
+| --- | ---: | ---: | ---: | ---: |
+| Arm host; buffered A, `sendfile` B | 0.535180981 | [0.528409683, 0.542039049] | 0.015228149 | 0.185384020 s / 0.099415578 s |
+| Arm host; buffered A, `splice` B | 0.538883052 | [0.536157533, 0.541622426] | 0.006064140 | 0.184253430 s / 0.099232702 s |
+| Arm host; buffered A, buffered B | 1.000467926 | [0.996529935, 1.004421478] | 0.004716735 | 0.184354762 s / 0.183927217 s |
+| `xxl` host; buffered A, `sendfile` B | 0.682472664 | [0.668834195, 0.696389240] | 0.024141832 | 0.141917248 s / 0.096720350 s |
+| `xxl` host; buffered A, `splice` B | 0.676646220 | [0.669328562, 0.684043880] | 0.013004189 | 0.141660406 s / 0.095911539 s |
+| `xxl` host; buffered A, buffered B | 0.994674852 | [0.989507348, 0.999869343] | 0.006229370 | 0.144373092 s / 0.144179088 s |
+
+The Arm A/A interval includes 1. The `xxl` A/A interval narrowly excludes 1
+under this working model. That small result exposes residual label, order, or
+run asymmetry; it is not a calibrated noise correction for the candidate
+ratios. The candidate effects are much larger, but the asymmetric treatment
+still prevents attributing them only to payload-copy removal.
+
+The exact Arm identity was
+`dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`, `aarch64`, Linux
+`6.12.95-124.187.amzn2023.aarch64`, 64 available CPUs, MIDR implementer
+`0x41` and part `0xd40`, GCC 11.5.0, and Rust 1.95.0. Secure Shell (SSH) alias
+`xxl` resolved at run time to
+`dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com`, `x86_64`, Linux
+`6.12.95-124.187.amzn2023.x86_64`, Intel Xeon Platinum 8488C under KVM, 192
+available CPUs, GCC 11.5.0, and Rust 1.97.1. KVM means Kernel-based Virtual
+Machine. The host notes retain exact toolchain, build-flag, executable, elapsed,
+and central processing unit (CPU) identities and medians.
 
 All 96 timing processes per host returned success. Separate exact-byte checks
 sent 16,777,219 bytes through every method. The requested chunk was 256 KiB;
-the observed pipe capacity was 64 KiB. The same preliminary source had Secure
-Hash Algorithm 256-bit (SHA-256) digest
+the observed pipe capacity was 64 KiB. The measured transfer C source had
+SHA-256 digest
 `3aa13f0ea4701617cfba297986404e3e44bdec37e6d2294f2ef913237eeafd16`.
-SHA-256 is a content digest used here to identify exact source bytes.
 
 The `transfer_sec` treatment deliberately includes allocation and release of
 the buffered path's application buffer and creation and close of the `splice`
-pipe. It excludes socket creation and file open. Those method-specific setup
-choices are asymmetric. The runner records separate `setup_sec`, `total_sec`,
-sender/receiver CPU, and outer process time so they remain visible. Do not
-attribute the elapsed ratios solely to removed payload copies.
+pipe. It starts after the sender has opened the file and connected its socket,
+but there is no separate receiver-ready barrier, so receiver `accept` and
+buffer allocation can overlap the beginning. It ends only after sender
+shutdown, receipt of the receiver report, and child-process exit. Those
+method-specific setup choices and endpoint-lifetime costs are part of the
+asymmetric treatment. Sender CPU covers this interval; receiver CPU covers the
+child's whole lifetime. The runner also records `setup_sec`, `total_sec`, and
+outer process time. Do not attribute the elapsed ratios solely to removed
+payload copies.
 
-The generated-code check observed linked calls to `pread`, `send`, `sendfile`,
-and two `splice` sites on both machines. This proves that the executable
-contains the intended external calls. It does not prove which path executed or
-explain a timing difference. The separate `MSG_ZEROCOPY` correctness control
+The generated-code check observed linked call sites for `pread`, `send`,
+`sendfile`, and two `splice` calls in generic and native executables on both
+machines. This proves that the executables contain the intended external call
+sites. It does not prove which path executed, which kernel path handled it, or
+why timings differ. The separate generic and native `MSG_ZEROCOPY` controls
 sent eight aligned 64 KiB buffers, verified all 524,288 bytes, held storage
-until every completion, and observed copied fallback on loopback on both hosts.
-No timing is reported for that control.
+until identifiers 0 through 7 completed, and observed copied fallback on
+loopback on both hosts. These were correctness and lifetime controls only; no
+timing was reported. Strict call-site receipts contained exactly five transfer
+calls and three completion-control calls for each generic and native executable
+on each host.
 
-These values remain **preliminary** until the checked-in source candidate is
-committed, archived, rerun on both required hosts, retrieved, and validated.
-They describe only the named machines. They do not establish a property of all
-Arm or x86-64 processors.
+Both validators passed. The source manifests before and after each run were
+byte-identical: each listed 1,773 source entries and had SHA-256 digest
+`0b2ceed67acaf154b8aaf1bbf75d05f629c1b39d279dc003555cc3690b222688`.
+The validators also recomputed the retained analyses exactly and checked that
+each zero-copy completion's `ee_code` agreed with its copied-fallback field.
+After retrieval, both archive digests matched, and every one of the 272 entries
+in each internal result manifest verified. Raw process times,
+byte counts, completed non-`EINTR` operation counts, CPU intervals, completion
+records, metadata, hashes, and call sites are measured. `EINTR` means a system
+call was interrupted before normal completion; the counters omit those retried
+attempts. Ratios, medians, SDs, and CIs are derived. Copy, cache,
+page-reference, protocol, and scheduler explanations remain inferred. The
+observations describe only the named machines; they do not establish a property
+of Arm or x86-64 processors.
 
 ## Focused Linux experiment
 
-The checked-in experiment preserves the preliminary treatment. It compares
+The checked-in experiment reproduces the retained treatment. It compares
 buffered `pread` plus `send`, `sendfile`, and `splice` over the same generated
 file and an Internet Protocol version 4 (IPv4) loopback Transmission Control
 Protocol (TCP) connection. IPv4 is the 32-bit Internet address format; TCP is
@@ -263,6 +312,15 @@ python3 -B -I topics/038-zero-copy-limits/experiment/analyze.py \
 python3 -B -I topics/038-zero-copy-limits/experiment/validate_receipts.py \
   /tmp/topic038-results \
   --binary /tmp/topic038-build/transfer-probe-native
+
+objdump -drwC /tmp/topic038-build/transfer-probe-native \
+  > /tmp/topic038-results/transfer-native.disassembly
+objdump -drwC /tmp/topic038-build/msgzc-control-native \
+  > /tmp/topic038-results/msgzc-native.disassembly
+rg -n '\b(call|bl)\b.*<(pread|send|sendfile|splice)@' \
+  /tmp/topic038-results/transfer-native.disassembly
+rg -n '\b(call|bl)\b.*<(setsockopt|sendmsg|recvmsg)@' \
+  /tmp/topic038-results/msgzc-native.disassembly
 ```
 
 Expected observations:
@@ -274,8 +332,8 @@ Expected observations:
   schedule, process results, analyses, and both completion controls;
 - `MSG_ZEROCOPY` loopback reports full completion coverage and can report the
   documented copied fallback; and
-- linked disassembly contains external call sites, but does not identify
-  shared-library or kernel internals.
+- the final `objdump` and `rg` commands show linked external call instructions,
+  but do not identify shared-library or kernel internals.
 
 Important controls are a prewarmed immutable payload, equal logical bytes and
 requested chunks, exact-byte correctness outside timing, fresh processes,
