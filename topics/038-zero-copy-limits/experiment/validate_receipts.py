@@ -14,6 +14,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from analyze import read_rows, summarize  # noqa: E402
 from schedule import ScheduledRun, make_schedule  # noqa: E402
 
 
@@ -186,10 +187,15 @@ def validate_runs(
 
 
 def validate_analysis(root: Path, blocks: int) -> None:
-    """Require complete block contrasts and summaries, including outer time."""
+    """Recompute and require exact retained contrasts and summaries."""
 
     contrasts = read_tsv(root / "contrasts.tsv")
     summaries = read_tsv(root / "summary.tsv")
+    expected_contrasts, expected_summaries = summarize(read_rows(root / "runs.tsv"))
+    if contrasts != expected_contrasts:
+        raise ValueError("contrasts.tsv differs from the recomputed analysis")
+    if summaries != expected_summaries:
+        raise ValueError("summary.tsv differs from the recomputed analysis")
     if len(contrasts) != 3 * blocks * 2:
         raise ValueError("contrast table has the wrong row count")
     expected_metrics = {
@@ -236,18 +242,27 @@ def validate_msgzc(path: Path) -> None:
     }:
         raise ValueError(f"{path.name} lacks a fallback report")
     covered: set[int] = set()
+    copied_observed = False
     for line in lines:
         matched = COMPLETION_PATTERN.fullmatch(line)
         if matched is None:
             continue
-        first, last, error_number, _code, _copied = matched.groups()
+        first, last, error_number, code, copied = matched.groups()
         first_id = int(first)
         last_id = int(last)
+        code_number = int(code)
+        if code_number not in {0, 1}:
+            raise ValueError(f"unknown zero-copy completion code in {path.name}")
+        if (copied == "yes") != (code_number == 1):
+            raise ValueError(f"completion copied marker disagrees with ee_code in {path.name}")
+        copied_observed = copied_observed or code_number == 1
         if int(error_number) != 0 or first_id > last_id or last_id >= 8:
             raise ValueError(f"invalid completion range in {path.name}")
         covered.update(range(first_id, last_id + 1))
     if covered != set(range(8)):
         raise ValueError(f"{path.name} completion ranges cover {sorted(covered)}")
+    if fallback[0] != f"copied_fallback_observed={'yes' if copied_observed else 'no'}":
+        raise ValueError(f"{path.name} fallback report disagrees with completions")
 
 
 def main() -> int:

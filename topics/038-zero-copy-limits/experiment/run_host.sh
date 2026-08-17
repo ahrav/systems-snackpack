@@ -174,7 +174,8 @@ write_source_manifest "$output_dir/source-manifest-before.sha256"
     printf 'schedule_seed=38017\n'
     printf 'blocks_per_pair=8\n'
     printf 'fresh_process_runs=96\n'
-    printf 'transfer_timer_boundary=socket_and_input_setup_excluded_buffered_allocation_and_splice_pipe_included\n'
+    printf '%s\n' \
+        'transfer_timer_boundary=start_after_file_open_and_sender_connect_without_receiver_ready_barrier_end_after_shutdown_report_and_waitpid_buffered_alloc_free_and_splice_pipe_create_close_included_sender_cpu_interval_receiver_cpu_whole_child'
     printf 'msg_zerocopy_boundary=correctness_and_completion_only_no_timing_ranking\n'
     lscpu
 } >"$output_dir/host.txt" 2>&1
@@ -264,6 +265,33 @@ cp "$build_dir/msgzc-control-native" "$artifacts/"
 
 codegen="$output_dir/codegen"
 mkdir "$codegen"
+
+retain_linked_calls() {
+    local disassembly=$1
+    local destination=$2
+    local targets=$3
+
+    # A linked call site has a call instruction (`call`/`callq` on x86-64 or
+    # `bl` on AArch64) and a resolved symbol.  This excludes PLT labels and
+    # relocation/reference-only lines from the retained receipt.
+    rg -n "[[:space:]](callq?|bl)[[:space:]]+[^<]*<(${targets})(@[^>]*)?>" \
+        "$disassembly" >"$destination" || true
+}
+
+require_linked_call_count() {
+    local receipt=$1
+    local symbol=$2
+    local minimum=$3
+    local count
+
+    count=$(rg -c "<${symbol}(@[^>]*)?>" "$receipt" || true)
+    count=${count:-0}
+    if ((count < minimum)); then
+        echo "codegen gate: expected at least $minimum linked call(s) to $symbol in $receipt; found $count" >&2
+        return 1
+    fi
+}
+
 for flavor in generic native; do
     if [[ $flavor == generic ]]; then
         transfer_binary="$build_dir/transfer-probe"
@@ -274,10 +302,19 @@ for flavor in generic native; do
     fi
     objdump -drwC "$transfer_binary" >"$codegen/transfer-${flavor}.txt"
     objdump -drwC "$msgzc_binary" >"$codegen/msgzc-${flavor}.txt"
-    rg -n 'pread@|send@|sendfile@|splice@' "$codegen/transfer-${flavor}.txt" \
-        >"$codegen/transfer-${flavor}-call-sites.txt"
-    rg -n 'setsockopt@|sendmsg@|recvmsg@' "$codegen/msgzc-${flavor}.txt" \
-        >"$codegen/msgzc-${flavor}-call-sites.txt"
+    transfer_calls="$codegen/transfer-${flavor}-call-sites.txt"
+    msgzc_calls="$codegen/msgzc-${flavor}-call-sites.txt"
+    retain_linked_calls "$codegen/transfer-${flavor}.txt" "$transfer_calls" \
+        'pread|send|sendfile|splice'
+    retain_linked_calls "$codegen/msgzc-${flavor}.txt" "$msgzc_calls" \
+        'setsockopt|sendmsg|recvmsg'
+    require_linked_call_count "$transfer_calls" pread 1
+    require_linked_call_count "$transfer_calls" send 1
+    require_linked_call_count "$transfer_calls" sendfile 1
+    require_linked_call_count "$transfer_calls" splice 2
+    require_linked_call_count "$msgzc_calls" setsockopt 1
+    require_linked_call_count "$msgzc_calls" sendmsg 1
+    require_linked_call_count "$msgzc_calls" recvmsg 1
 done
 
 run_gate validate.txt python3 -I -B "$experiment_dir/validate_receipts.py" \

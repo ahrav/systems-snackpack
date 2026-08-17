@@ -163,6 +163,12 @@ static int record_completion(
 
     uint32_t first = extended_error->ee_info;
     uint32_t last = extended_error->ee_data;
+    if (extended_error->ee_code != 0 &&
+        extended_error->ee_code != SO_EE_CODE_ZEROCOPY_COPIED) {
+        fprintf(stderr, "unknown zero-copy completion code: %u\n",
+                extended_error->ee_code);
+        return -1;
+    }
     bool copied = extended_error->ee_code == SO_EE_CODE_ZEROCOPY_COPIED;
 
     printf("completion=%u first=%" PRIu32 " last=%" PRIu32
