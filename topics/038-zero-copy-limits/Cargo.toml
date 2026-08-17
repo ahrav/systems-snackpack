@@ -1,0 +1,17 @@
+[package]
+name = "zero-copy-limits"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "zero_copy_limits"
+path = "src/lib.rs"
+
+[[bin]]
+name = "zero-copy-contract-probe"
+path = "src/bin/zero_copy_contract_probe.rs"
+
+[lints]
+workspace = true
