@@ -264,7 +264,8 @@ enum Owner {
 ///
 /// The token carries the private identity of its originating mapping. It does
 /// not implement [`Clone`] or [`Copy`], and [`DmaMapping::complete`] consumes
-/// it, so safe code cannot replay one completion token.
+/// it on success, so safe code cannot replay one completion token. A rejected
+/// completion returns the token inside [`RejectedCompletion`].
 #[derive(Debug)]
 pub struct CompletionToken {
     mapping_identity: Arc<()>,
@@ -284,6 +285,20 @@ impl CompletionToken {
     pub const fn epoch(&self) -> MappingEpoch {
         self.epoch
     }
+}
+
+/// A refused completion, handing the token back to the caller.
+///
+/// [`DmaMapping::complete`] consumes its token only when ownership actually
+/// returns to the CPU. Every rejection returns the token inside this error,
+/// so a completion routed to the wrong mapping cannot strand the token's
+/// rightful mapping in device ownership.
+#[derive(Debug)]
+pub struct RejectedCompletion {
+    /// The token exactly as submitted, still valid for its own mapping.
+    pub token: CompletionToken,
+    /// Why the mapping refused the completion.
+    pub error: MappingError,
 }
 
 /// Checked address and ownership model for one streaming DMA mapping.
@@ -493,25 +508,43 @@ impl DmaMapping {
     ///
     /// # Errors
     ///
+    /// Every rejection returns [`RejectedCompletion`], which carries the
+    /// unconsumed token alongside the reason:
+    ///
     /// - [`MappingError::InactiveMapping`] if reset or unmap invalidated the map.
     /// - [`MappingError::StaleEpoch`] if the token names another map generation.
     /// - [`MappingError::CpuOwnsBuffer`] if no descriptor is in flight.
     /// - [`MappingError::CompletionMismatch`] if the token belongs to another
     ///   mapping or another descriptor owns the buffer.
-    pub fn complete(&mut self, token: CompletionToken) -> Result<(), MappingError> {
+    pub fn complete(&mut self, token: CompletionToken) -> Result<(), RejectedCompletion> {
         if !self.active {
-            return Err(MappingError::InactiveMapping);
+            return Err(RejectedCompletion {
+                token,
+                error: MappingError::InactiveMapping,
+            });
         }
         if !Arc::ptr_eq(&token.mapping_identity, &self.identity) {
-            return Err(MappingError::CompletionMismatch);
+            return Err(RejectedCompletion {
+                token,
+                error: MappingError::CompletionMismatch,
+            });
         }
         if token.epoch != self.epoch {
-            return Err(MappingError::StaleEpoch);
+            return Err(RejectedCompletion {
+                token,
+                error: MappingError::StaleEpoch,
+            });
         }
         match self.owner {
-            Owner::Cpu => Err(MappingError::CpuOwnsBuffer),
+            Owner::Cpu => Err(RejectedCompletion {
+                token,
+                error: MappingError::CpuOwnsBuffer,
+            }),
             Owner::Device { descriptor } if descriptor != token.descriptor => {
-                Err(MappingError::CompletionMismatch)
+                Err(RejectedCompletion {
+                    token,
+                    error: MappingError::CompletionMismatch,
+                })
             }
             Owner::Device { .. } => {
                 self.owner = Owner::Cpu;
@@ -707,10 +740,9 @@ mod tests {
         );
         let mut unrelated = mapping(DmaDirection::ToDevice);
         let unrelated_token = unrelated.submit(10).unwrap();
-        assert_eq!(
-            map.complete(unrelated_token),
-            Err(MappingError::CompletionMismatch)
-        );
+        let rejected = map.complete(unrelated_token).unwrap_err();
+        assert_eq!(rejected.error, MappingError::CompletionMismatch);
+        unrelated.complete(rejected.token).unwrap();
         map.complete(token).unwrap();
         map.check_cpu_access().unwrap();
     }
@@ -731,7 +763,10 @@ mod tests {
         let mut map = mapping(DmaDirection::FromDevice);
         let token = map.submit(10).unwrap();
         map.invalidate_after_reset();
-        assert_eq!(map.complete(token), Err(MappingError::InactiveMapping));
+        assert_eq!(
+            map.complete(token).unwrap_err().error,
+            MappingError::InactiveMapping
+        );
         assert_eq!(map.epoch(), MappingEpoch::new(8));
     }
 

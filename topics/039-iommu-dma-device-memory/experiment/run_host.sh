@@ -297,23 +297,72 @@ for flavor in generic native; do
         elif [[ $architecture == x86_64 ]]; then
             # Position-independent x86-64 executables can load this locally
             # defined function through a relative relocation and then use an
-            # indirect register call. Bind that relocation to the symbol's
-            # linked address and require an indirect call instruction. The
+            # indirect register call. Bind the whole chain: the relocation
+            # names a slot holding the symbol's linked address, an
+            # instruction loads that exact slot (objdump resolves the
+            # rip-relative target in its comment), and a later call goes
+            # through the loaded register before anything clobbers it, or
+            # calls through the slot memory-indirectly. An unrelated indirect
+            # call elsewhere in the binary cannot satisfy this. The
             # deterministic probe output separately proves that both hook
             # results passed their assertions.
             symbol_address=$(
                 awk -v symbol="$symbol" '$3 == symbol { print $1; exit }' \
                     "$codegen/${flavor}.symbols.txt" | sed 's/^0*//'
             )
-            if [[ -z $symbol_address ]] || \
-                ! rg -q "R_X86_64_RELATIVE[[:space:]]+0*${symbol_address}([[:space:]]|$)" \
-                    "$codegen/${flavor}.relocations.txt" || \
-                ! rg -q '[[:space:]]callq?[[:space:]]+\*%' \
-                    "$codegen/${flavor}.objdump.txt"; then
-                echo "$flavor codegen lacks a linked direct or relocated indirect call to $symbol" >&2
+            slot_addresses=$(
+                awk -v target="$symbol_address" \
+                    '$3 == "R_X86_64_RELATIVE" && $4 == target {
+                        slot = $1; sub(/^0+/, "", slot); print slot
+                    }' "$codegen/${flavor}.relocations.txt" | paste -sd,
+            )
+            if [[ -z $symbol_address || -z $slot_addresses ]] || \
+                ! awk -v slots_str="$slot_addresses" '
+                    BEGIN {
+                        n = split(slots_str, parts, ",")
+                        for (i = 1; i <= n; i++) if (parts[i] != "") slot[parts[i]] = 1
+                    }
+                    # A new function body invalidates every tracked register.
+                    /^[0-9a-f]+ </ { for (r in pending) delete pending[r]; next }
+                    {
+                        line = $0
+                        # Memory-indirect call straight through a hook slot.
+                        if (line ~ /callq?[[:space:]]+\*0x[0-9a-f]+\(%rip\)[[:space:]]+#/) {
+                            cmt = line
+                            sub(/.*#[[:space:]]*/, "", cmt); sub(/[[:space:]<].*/, "", cmt)
+                            if (cmt in slot) { found = 1; exit }
+                            next
+                        }
+                        # Load of a hook slot into a register.
+                        if (line ~ /mov[[:space:]]+0x[0-9a-f]+\(%rip\),%r[0-9a-z]+[[:space:]]+#/) {
+                            reg = line
+                            sub(/.*\(%rip\),/, "", reg); sub(/[[:space:]].*/, "", reg)
+                            cmt = line
+                            sub(/.*#[[:space:]]*/, "", cmt); sub(/[[:space:]<].*/, "", cmt)
+                            if (cmt in slot) { pending[reg] = 1 } else { delete pending[reg] }
+                            next
+                        }
+                        # Register-indirect call through a still-live hook register.
+                        if (line ~ /callq?[[:space:]]+\*%r[0-9a-z]+/) {
+                            reg = line
+                            sub(/.*\*/, "", reg); sub(/[[:space:]].*/, "", reg)
+                            if (reg in pending) { found = 1; exit }
+                            next
+                        }
+                        # Any other write to a tracked register invalidates it.
+                        op = line
+                        sub(/[[:space:]]*#.*$/, "", op)
+                        if (match(op, /,%r[0-9a-z]+$/)) {
+                            reg = substr(op, RSTART + 1, RLENGTH - 1)
+                            delete pending[reg]
+                        }
+                    }
+                    END { exit found ? 0 : 1 }
+                ' "$codegen/${flavor}.objdump.txt"; then
+                echo "$flavor codegen lacks a linked direct or slot-bound indirect call to $symbol" >&2
                 exit 1
             fi
-            printf '%s\t%s\tx86-relative-relocation-and-indirect-call\n' \
+            printf '%s\t%s\tx86-slot-bound-indirect-call\n' \
                 "$flavor" "$symbol" >>"$codegen/linked-hook-modes.tsv"
         else
             echo "$flavor codegen lacks a linked call to $symbol" >&2

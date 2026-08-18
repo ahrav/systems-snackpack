@@ -33,3 +33,9 @@ Both hosts passed the exact-source run. Repository history, not the host
 bundles, must verify that the later evidence-only commit adds only evidence and
 leaves measured source commit
 `3aaece99023cfa33440af7c5f90204c18840953d` unchanged.
+
+Review follow-up commits after `3aaece9` changed the probe's receipt contract,
+so the archived process outputs byte-match that commit's `expected.txt`, not
+the current one. The retained records validate `3aaece9` exactly as recorded.
+Both host runs must be repeated at the final source commit and the archives
+replaced before this evidence covers the published code.

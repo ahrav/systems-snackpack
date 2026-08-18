@@ -137,11 +137,13 @@ fn main() {
     let unrelated_token = unrelated_mapping
         .submit(99)
         .expect("independent mapping can issue an unrelated token");
-    require_error(
-        mapping.complete(unrelated_token),
-        MappingError::CompletionMismatch,
-        "completion from an unrelated descriptor",
-    );
+    let rejected = mapping
+        .complete(unrelated_token)
+        .expect_err("completion from an unrelated descriptor is rejected");
+    assert_eq!(rejected.error, MappingError::CompletionMismatch);
+    unrelated_mapping
+        .complete(rejected.token)
+        .expect("returned token still completes its own mapping");
     mapping
         .complete(token)
         .expect("matching completion returns ownership to the CPU");
@@ -200,7 +202,7 @@ fn main() {
     );
     println!("direction from_device_write=accepted from_device_read=rejected");
     println!(
-        "lifecycle stale_epoch=rejected early_unmap=rejected unrelated_completion=rejected cpu_during_dma=rejected cpu_after_completion=accepted"
+        "lifecycle stale_epoch=rejected early_unmap=rejected unrelated_completion=rejected returned_token_completes_own_mapping=accepted cpu_during_dma=rejected cpu_after_completion=accepted"
     );
     println!(
         "scatter original={} mapped={} unmap_mapped=rejected unmap_original=accepted",
