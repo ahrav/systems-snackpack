@@ -230,6 +230,8 @@ write_source_manifest "$output_dir/source-manifest-before.sha256"
     printf 'cpu_count_online='; getconf _NPROCESSORS_ONLN
     printf 'cpu_count_available='; nproc
     printf 'page_size='; getconf PAGESIZE
+    printf 'toolchain_resolution_directory='; pwd -P
+    printf 'rust_metadata_and_build_resolved_from=invocation_directory_not_extracted_archive\n'
     printf 'build_generic=release default target features\n'
     printf 'build_native=release RUSTFLAGS=-C target-cpu=native\n'
     printf 'measurement_kind=deterministic correctness only\n'
@@ -297,14 +299,19 @@ manifest="$source_root/Cargo.toml"
 package=iommu-dma-device-memory
 
 # Cargo reads config.toml from its canonical working directory, every parent
-# up to the filesystem root, and Cargo home, and --manifest-path does not
-# move that search. Run from the canonical extracted source root so the
-# searched chain is exactly the one probed here; a symlinked invocation
-# directory would otherwise leave Cargo reading physical parents that $PWD
-# never names. Any such file could select a rustc wrapper, linker, or build
-# flags that the recorded toolchain and flags do not capture, so the
-# exact-source contract refuses them all. Cargo home is still needed for the
-# offline registry, so it is checked, not replaced.
+# up to the filesystem root, and Cargo home, and --manifest-path does not move
+# that search. Probe the physical working directory rather than $PWD, which a
+# symlinked invocation directory leaves naming parents Cargo never reads, and
+# probe the extracted source root too. Any such file could select a rustc
+# wrapper, linker, or build flags that the recorded toolchain and flags do not
+# capture, so the exact-source contract refuses them all. Cargo home is still
+# needed for the offline registry, so it is checked, not replaced.
+#
+# The runner deliberately does not cd into the extracted tree: rustup selects a
+# toolchain by working directory, so building from inside the archive would let
+# its rust-toolchain.toml choose the compiler instead of this host's default,
+# changing what the two-host comparison observes. Staying put keeps the build
+# and the recorded Rust metadata resolved from the same directory.
 cargo_config_probe() {
     local directory=$1
     while :; do
@@ -318,7 +325,7 @@ cargo_config_probe() {
         directory=$(dirname "$directory")
     done
 }
-cd -- "$source_root"
+cargo_config_probe "$(pwd -P)"
 cargo_config_probe "$source_root"
 for candidate in "${CARGO_HOME:-$HOME/.cargo}/config.toml" \
     "${CARGO_HOME:-$HOME/.cargo}/config"; do
