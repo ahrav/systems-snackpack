@@ -309,15 +309,7 @@ pub fn splice_pipe_estimate(
         return Err(ModelError::ZeroChunkSize);
     }
     let bytes_per_cycle = pipe_capacity.min(requested_chunk);
-    let cycles = if logical_bytes == 0 {
-        0
-    } else {
-        logical_bytes
-            .checked_sub(1)
-            .and_then(|value| value.checked_div(bytes_per_cycle))
-            .and_then(|value| value.checked_add(1))
-            .ok_or(ModelError::ArithmeticOverflow)?
-    };
+    let cycles = logical_bytes.div_ceil(bytes_per_cycle);
     let minimum_splice_calls = cycles
         .checked_mul(2)
         .ok_or(ModelError::ArithmeticOverflow)?;

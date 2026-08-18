@@ -463,10 +463,14 @@ static int run_transfer(const char *method, const char *path, uint64_t bytes,
     int socket_fd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
     if (socket_fd < 0) {
         perror("socket client");
+        kill(child, SIGTERM);
+        (void)waitpid(child, NULL, 0);
         return 1;
     }
     if (connect(socket_fd, (struct sockaddr *)&address, sizeof(address)) != 0) {
         perror("connect");
+        kill(child, SIGTERM);
+        (void)waitpid(child, NULL, 0);
         return 1;
     }
     int sndbuf = -1;

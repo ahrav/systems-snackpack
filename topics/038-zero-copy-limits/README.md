@@ -317,9 +317,9 @@ objdump -drwC /tmp/topic038-build/transfer-probe-native \
   > /tmp/topic038-results/transfer-native.disassembly
 objdump -drwC /tmp/topic038-build/msgzc-control-native \
   > /tmp/topic038-results/msgzc-native.disassembly
-rg -n '\b(call|bl)\b.*<(pread|send|sendfile|splice)@' \
+rg -n '\b(callq?|bl)\b.*<(pread|send|sendfile|splice)@' \
   /tmp/topic038-results/transfer-native.disassembly
-rg -n '\b(call|bl)\b.*<(setsockopt|sendmsg|recvmsg)@' \
+rg -n '\b(callq?|bl)\b.*<(setsockopt|sendmsg|recvmsg)@' \
   /tmp/topic038-results/msgzc-native.disassembly
 ```
 

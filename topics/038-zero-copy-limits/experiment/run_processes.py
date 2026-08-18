@@ -101,7 +101,13 @@ def run_control(
     outer_ns = time.monotonic_ns() - started
     stdout_path.write_bytes(completed.stdout)
     stderr_path.write_bytes(completed.stderr)
-    parsed = parse_result(completed.stdout) if expected_result else None
+    try:
+        parsed = parse_result(completed.stdout) if expected_result else None
+    except ValueError as error:
+        stderr_text = completed.stderr.decode("utf-8", errors="replace").strip()
+        raise ValueError(
+            f"{error} (exit code {completed.returncode}; stderr: {stderr_text[:500]!r})"
+        ) from error
     return completed.returncode, outer_ns, parsed
 
 
@@ -123,6 +129,10 @@ def main() -> int:
     parser.add_argument("--blocks", type=int, default=8)
     parser.add_argument("--cpu-list")
     arguments = parser.parse_args()
+    # Resolve once so the hashed file, the recorded path, and every executed
+    # command name the same binary; a bare filename would otherwise be hashed
+    # from the working directory but executed through PATH lookup.
+    arguments.binary = arguments.binary.resolve()
 
     if arguments.output.exists():
         parser.error(f"output already exists: {arguments.output}")

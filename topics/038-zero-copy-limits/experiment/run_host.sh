@@ -52,9 +52,26 @@ if [[ -e $output_dir || -e ${output_dir}.work ]]; then
     echo "output or work path already exists: $output_dir" >&2
     exit 2
 fi
+if [[ ! -f $source_archive ]]; then
+    echo "source archive does not exist: $source_archive" >&2
+    exit 2
+fi
 archive_digest=$(sha256sum "$source_archive" | awk '{print $1}')
 if [[ $archive_digest != "$archive_digest_expected" ]]; then
     echo "source archive digest mismatch" >&2
+    exit 2
+fi
+# A digest binds this run to archive bytes but not to SOURCE_COMMIT. A
+# commit-created `git archive` stores the commit ID as the pax global header
+# comment in the first tar data block; require it to match SOURCE_COMMIT so the
+# receipt's source identity is the archive's own claim, not the caller's.
+pax_global_header=$(gzip -dc -- "$source_archive" 2>/dev/null | dd bs=512 skip=1 count=1 status=none | tr -d '\0' || true)
+if [[ ! $pax_global_header =~ comment=([0-9a-f]{40}) ]]; then
+    echo "source archive does not embed a commit ID; create it with git archive --format=tar.gz COMMIT" >&2
+    exit 2
+fi
+if [[ ${BASH_REMATCH[1]} != "$source_commit" ]]; then
+    echo "source archive embeds commit ${BASH_REMATCH[1]}, not SOURCE_COMMIT $source_commit" >&2
     exit 2
 fi
 if tar -tzf "$source_archive" | rg '(^/|(^|/)\.\.(/|$))'; then
@@ -93,6 +110,9 @@ mkdir -p "$output_dir" "$extract_dir"
 filesystem_type=$(findmnt -no FSTYPE -T "$work_dir")
 if [[ $filesystem_type != tmpfs ]]; then
     echo "focused experiment requires warmed tmpfs; $work_dir is $filesystem_type" >&2
+    # Remove the just-created empty directories so a corrected rerun does not
+    # fail the exists-check above; rmdir cannot touch non-empty evidence.
+    rmdir -- "$extract_dir" "$work_dir" "$output_dir"
     exit 1
 fi
 tar -xzf "$source_archive" -C "$extract_dir"
