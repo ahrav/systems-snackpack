@@ -249,6 +249,17 @@ record_required cc-version.txt cc -v
 record_required objdump-version.txt objdump --version
 record_required rust-target-cfg.txt rustc --print cfg
 record_required rust-target-features.txt rustc --print target-features
+# `cc -v` with no input performs no link, so it never names the linker. Do a
+# real link of a trivial program to capture the driver's collect2 and ld
+# invocation, and record the selected linker's own version, since the
+# measurement record promises the linker version used to build the probes.
+link_probe_source="$work_dir/link-probe.c"
+link_probe_binary="$work_dir/link-probe"
+printf 'int main(void) { return 0; }\n' >"$link_probe_source"
+record_required cc-link-verbose.txt cc -v -o "$link_probe_binary" "$link_probe_source"
+record_required cc-linker-path.txt cc -print-prog-name=ld
+cc_linker=$(cc -print-prog-name=ld)
+record_required cc-linker-version.txt "$cc_linker" --version
 # GCC-specific query; another compiler may reject it, so this one is optional.
 record_optional cc-native-target.txt cc -march=native -Q --help=target
 record_optional limits.txt bash -c 'ulimit -a'

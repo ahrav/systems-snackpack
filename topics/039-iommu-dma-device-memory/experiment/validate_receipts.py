@@ -56,6 +56,15 @@ def validate_flavor(root: Path, expected: bytes, flavor: str) -> None:
     binary = flavor_root / config["binary"]
     if digest_path(binary) != config["binary_sha256"]:
         raise ValueError(f"{flavor}: binary changed after the process run")
+    # The bundle must carry the expected output its receipt names, so this
+    # validation can be rerun from a retrieved archive alone.
+    retained_expected = flavor_root / config["expected"]
+    if not retained_expected.is_file():
+        raise ValueError(f"{flavor}: bundle does not retain {config['expected']}")
+    if digest_path(retained_expected) != expected_digest:
+        raise ValueError(f"{flavor}: retained expected output digest mismatch")
+    if retained_expected.read_bytes() != expected:
+        raise ValueError(f"{flavor}: retained expected output differs from the supplied one")
 
     with (flavor_root / "runs.tsv").open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle, delimiter="\t")

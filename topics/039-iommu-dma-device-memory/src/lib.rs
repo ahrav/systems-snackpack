@@ -153,9 +153,17 @@ pub enum MemoryRole {
 }
 
 impl MemoryRole {
-    /// Reports whether the model requires an explicit CPU/device ownership handoff.
+    /// Reports whether the model requires the streaming ownership cycle: map,
+    /// hand the buffer to the device, wait for completion, then unmap, with
+    /// cache maintenance at each boundary.
+    ///
+    /// [`Self::CoherentControl`] answers `false` because it needs no streaming
+    /// cycle, not because it needs no ownership discipline. A coherent
+    /// descriptor ring still hands individual descriptors between producer and
+    /// device, usually through an ownership bit, and ordering still applies.
+    /// Coherence removes cache maintenance, not the handoff.
     #[must_use]
-    pub const fn transfers_ownership(self) -> bool {
+    pub const fn requires_streaming_ownership_cycle(self) -> bool {
         matches!(self, Self::StreamingPayload | Self::BounceBuffer)
     }
 }
@@ -927,11 +935,13 @@ mod tests {
     }
 
     #[test]
-    fn memory_roles_do_not_conflate_visibility_and_ownership() {
-        assert!(!MemoryRole::CoherentControl.transfers_ownership());
-        assert!(MemoryRole::StreamingPayload.transfers_ownership());
-        assert!(MemoryRole::BounceBuffer.transfers_ownership());
-        assert!(!MemoryRole::MmioRegister.transfers_ownership());
-        assert!(!MemoryRole::DeviceLocal.transfers_ownership());
+    fn memory_roles_do_not_conflate_visibility_and_streaming_cycles() {
+        // CoherentControl answers false because it skips the streaming cycle,
+        // not because a coherent ring skips descriptor ownership handoffs.
+        assert!(!MemoryRole::CoherentControl.requires_streaming_ownership_cycle());
+        assert!(MemoryRole::StreamingPayload.requires_streaming_ownership_cycle());
+        assert!(MemoryRole::BounceBuffer.requires_streaming_ownership_cycle());
+        assert!(!MemoryRole::MmioRegister.requires_streaming_ownership_cycle());
+        assert!(!MemoryRole::DeviceLocal.requires_streaming_ownership_cycle());
     }
 }

@@ -57,11 +57,20 @@ def main() -> int:
     # boundary and no in-process check can exclude it.
     retained_binary.chmod(0o500)
     binary_digest = digest_path(retained_binary)
+    # Retain the expected output the receipt names. The runner deletes its
+    # private source copy, so without this a retrieved bundle could not rerun
+    # the exact-output validation or read the contract bytes it claims.
+    retained_expected = output / expected.name
+    shutil.copy2(expected, retained_expected)
+    retained_expected.chmod(0o400)
+    expected_digest = hashlib.sha256(expected_bytes).hexdigest()
+    if digest_path(retained_expected) != expected_digest:
+        raise RuntimeError("retained expected output does not match its source")
     configuration = {
         "binary": retained_binary.name,
         "binary_sha256": binary_digest,
         "expected": expected.name,
-        "expected_sha256": hashlib.sha256(expected_bytes).hexdigest(),
+        "expected_sha256": expected_digest,
         "flavor": arguments.flavor,
         "fresh_process_runs": arguments.runs,
         "measurement_kind": "deterministic correctness only",
