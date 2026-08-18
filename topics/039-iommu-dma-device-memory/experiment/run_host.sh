@@ -71,7 +71,37 @@ extract_dir="$work_dir/archive"
 # precreated between the check above and here cannot be adopted; -p would
 # accept it. Each leaf is created 0700 in the same call, so no window exists
 # where it is group- or world-writable.
-mkdir -p -- "$(dirname -- "$output_dir")"
+# Creating the leaves atomically does not help if a parent is
+# attacker-controlled: whoever can write a parent can rename the private leaf
+# and substitute paths while receipts are written. Require the whole ancestor
+# chain to exist already and be untamperable, and never create it here. A
+# directory writable by group or other is refused unless it is sticky, which
+# is what stops another user renaming or deleting our entry.
+output_parent=$(dirname -- "$output_dir")
+if [[ -L $output_parent || ! -d $output_parent ]]; then
+    echo "output parent must already exist as a real directory: $output_parent" >&2
+    exit 2
+fi
+invoking_uid=$(id -u)
+probe_directory=$output_parent
+while :; do
+    if [[ -L $probe_directory ]]; then
+        echo "output ancestor must not be a symbolic link: $probe_directory" >&2
+        exit 2
+    fi
+    ancestor_owner=$(stat -c %u -- "$probe_directory")
+    ancestor_mode=$(stat -c %a -- "$probe_directory")
+    if [[ $ancestor_owner != "$invoking_uid" && $ancestor_owner != 0 ]]; then
+        echo "output ancestor must be owned by the invoking user or root: $probe_directory" >&2
+        exit 2
+    fi
+    if ((0$ancestor_mode & 022)) && ((!(0$ancestor_mode & 01000))); then
+        echo "output ancestor is writable by others and not sticky: $probe_directory" >&2
+        exit 2
+    fi
+    [[ $probe_directory == / ]] && break
+    probe_directory=$(dirname -- "$probe_directory")
+done
 if ! mkdir -m 0700 -- "$output_dir"; then
     echo "could not exclusively create output directory: $output_dir" >&2
     exit 2
@@ -161,7 +191,7 @@ write_source_manifest() {
     (
         cd "$source_root"
         rg --files --hidden --no-ignore -g '!target/**' -g '!.git/**' -g '!.git' -0 |
-            LC_ALL=C sort -z | xargs -0 sha256sum
+            LC_ALL=C sort -z | xargs -0 sha256sum --
     ) >"$destination"
 }
 
@@ -405,8 +435,8 @@ run_gate gate-cargo-fmt.txt cargo fmt --manifest-path "$manifest" --all -- --che
 run_gate gate-cargo-test.txt env CARGO_TARGET_DIR="$cargo_target" cargo test --manifest-path "$manifest" --locked --offline --package "$package" --all-targets
 run_gate gate-cargo-clippy.txt env CARGO_TARGET_DIR="$cargo_target" cargo clippy --manifest-path "$manifest" --locked --offline --package "$package" --all-targets -- -D warnings
 run_gate gate-cargo-doc.txt env CARGO_TARGET_DIR="$cargo_target" RUSTDOCFLAGS=-Dwarnings cargo doc --manifest-path "$manifest" --locked --offline --package "$package" --no-deps
-run_gate build-generic.txt env CARGO_TARGET_DIR="$cargo_target" RUSTFLAGS= cargo build --manifest-path "$manifest" --locked --offline --release --package "$package" --bin dma-contract-probe
-run_gate build-native.txt env CARGO_TARGET_DIR="$native_cargo_target" RUSTFLAGS='-C target-cpu=native' cargo build --manifest-path "$manifest" --locked --offline --release --package "$package" --bin dma-contract-probe
+run_gate build-generic.txt env CARGO_TARGET_DIR="$cargo_target" RUSTFLAGS= cargo build -vv --manifest-path "$manifest" --locked --offline --release --package "$package" --bin dma-contract-probe
+run_gate build-native.txt env CARGO_TARGET_DIR="$native_cargo_target" RUSTFLAGS='-C target-cpu=native' cargo build -vv --manifest-path "$manifest" --locked --offline --release --package "$package" --bin dma-contract-probe
 
 generic_binary="$cargo_target/release/dma-contract-probe"
 native_binary="$native_cargo_target/release/dma-contract-probe"
@@ -645,7 +675,7 @@ fi
 manifest_tmp="$manifest_tmp_dir/MANIFEST.sha256"
 (
     cd "$output_dir"
-    rg --files --hidden --no-ignore -0 | LC_ALL=C sort -z | xargs -0 sha256sum
+    rg --files --hidden --no-ignore -0 | LC_ALL=C sort -z | xargs -0 sha256sum --
 ) >"$manifest_tmp"
 mv -- "$manifest_tmp" "$output_dir/MANIFEST.sha256"
 rmdir -- "$manifest_tmp_dir"
