@@ -634,13 +634,13 @@ impl DmaMapping {
 
 /// Translates within one contiguous aperture for generated-code inspection.
 ///
-/// Returns [`u64::MAX`] for zero length, a zero-length or overflowing declared
-/// aperture, overflow of the translated range, an out-of-aperture range, or a
-/// translated start of [`u64::MAX`], which the failure sentinel reserves. It
-/// uses `physical_base + offset` only to expose the bounds checks for linked
-/// image inspection; [`DmaMapping::translate`] owns the page-list model. A
-/// wrong but in-aperture `iova` succeeds because bounds checks cannot prove
-/// descriptor intent.
+/// Returns [`u64::MAX`] for zero length, a zero-length declared aperture, a
+/// declared IOVA or physical aperture that runs past the address space, an
+/// out-of-aperture range, or a translated start of [`u64::MAX`], which the
+/// failure sentinel reserves. It uses `physical_base + offset` only to expose
+/// the bounds checks for linked image inspection; [`DmaMapping::translate`]
+/// owns the page-list model. A wrong but in-aperture `iova` succeeds because
+/// bounds checks cannot prove descriptor intent.
 #[unsafe(no_mangle)]
 #[inline(never)]
 pub extern "C" fn topic39_checked_translate(
@@ -653,10 +653,12 @@ pub extern "C" fn topic39_checked_translate(
     if range_len == 0 || aperture_len == 0 {
         return u64::MAX;
     }
-    // Reject a declared aperture that itself runs past the address space,
-    // matching DmaMapping::new. An offset-only check would otherwise accept
-    // subranges of an impossible aperture.
-    if iova_base.checked_add(aperture_len - 1).is_none() {
+    // Both declared apertures must fit the address space, matching
+    // DmaMapping::new. Checking the full aperture also bounds every accepted
+    // subrange, since range_len <= aperture_len - offset.
+    if iova_base.checked_add(aperture_len - 1).is_none()
+        || physical_base.checked_add(aperture_len - 1).is_none()
+    {
         return u64::MAX;
     }
     let Some(offset) = iova.checked_sub(iova_base) else {
@@ -665,13 +667,15 @@ pub extern "C" fn topic39_checked_translate(
     if offset >= aperture_len || range_len > aperture_len - offset {
         return u64::MAX;
     }
+    // The physical aperture check above already bounds this sum. The checked
+    // form stays because this hook exists to make the bounds arithmetic
+    // visible in the linked image.
     let Some(start) = physical_base.checked_add(offset) else {
         return u64::MAX;
     };
     // u64::MAX is this hook's failure sentinel, so it cannot also name a
-    // successful translation. DmaMapping::new already rejects a backing page
-    // whose last byte overflows, so the model never needs that address.
-    if start == u64::MAX || start.checked_add(range_len - 1).is_none() {
+    // successful translation.
+    if start == u64::MAX {
         return u64::MAX;
     }
     start
@@ -857,20 +861,29 @@ mod tests {
             topic39_checked_translate(0x1000, 0x1000, 0x1001, 1, u64::MAX),
             u64::MAX
         );
-        assert_eq!(
-            topic39_checked_translate(0, 16, 0, 3, u64::MAX - 1),
-            u64::MAX
-        );
-        assert_eq!(
-            topic39_checked_translate(0, 16, 0, 2, u64::MAX - 1),
-            u64::MAX - 1
-        );
-        assert_eq!(topic39_checked_translate(0, 16, 0, 1, u64::MAX), u64::MAX);
+        // Declared IOVA aperture runs past the address space.
         assert_eq!(
             topic39_checked_translate(u64::MAX - 1, 4, u64::MAX - 1, 1, 0),
             u64::MAX
         );
+        // Declared physical aperture runs past the address space.
+        assert_eq!(
+            topic39_checked_translate(0, 4, 0, 1, u64::MAX - 1),
+            u64::MAX
+        );
+        assert_eq!(
+            topic39_checked_translate(0, 16, 0, 3, u64::MAX - 1),
+            u64::MAX
+        );
+        // Zero-length declared aperture.
         assert_eq!(topic39_checked_translate(0, 0, 0, 1, 0x1000), u64::MAX);
+        // The failure sentinel cannot name a translation.
+        assert_eq!(topic39_checked_translate(0, 1, 0, 1, u64::MAX), u64::MAX);
+        // Representable boundary apertures still translate.
+        assert_eq!(
+            topic39_checked_translate(0, 2, 0, 2, u64::MAX - 1),
+            u64::MAX - 1
+        );
         assert_eq!(
             topic39_checked_translate(u64::MAX - 3, 4, u64::MAX - 3, 1, 0x1000),
             0x1000

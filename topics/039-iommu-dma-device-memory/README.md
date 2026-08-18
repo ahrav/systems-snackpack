@@ -289,13 +289,20 @@ Independent processes must produce identical expected output. See
 
 ### Retained two-host observation
 
-Both required hosts ran the final reviewed source commit
+This observation is historical. Both required hosts ran source commit
 `2bb0d3e55efda225caeaeafbb285382824692b64` from one Git archive with Secure
 Hash Algorithm 256-bit (SHA-256) digest, a content fingerprint,
 `e5711fbfada35934afb39e4c3492f62a3066b731c05981d35c8dce0d7e31f614`.
-All 16 fresh correctness processes per host matched expected output, and every
-required package check, source-integrity check, retained evidence record, and
-generated-code check passed. No timing was collected.
+All 16 fresh correctness processes per host matched that commit's expected
+output, and every required package check, source-integrity check, retained
+evidence record, and generated-code check passed. No timing was collected.
+
+Later review commits changed the probe's receipt contract and the process
+receipt schema, so this run does not validate the current branch head. Both
+hosts must be rerun from the current head before any two-host observation
+describes the published contract. See
+[`measurements/README.md`](measurements/README.md) for which source commit each
+retained binding covers.
 
 The Arm target was
 `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`, the 64-bit Arm architecture
@@ -311,8 +318,11 @@ cipher (`sm4`), Scalable Vector Extension (`sve`), random-number generation
 16-bit floating-point format used in machine learning. Rust was 1.95.0 and the
 GNU Compiler Collection (GCC) was 11.5.0.
 
-SSH alias `xxl` resolved at run time to
-`dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com`. It reported x86-64, Linux
+The orchestrator supplied
+`dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com` as the resolution of SSH alias
+`xxl`, and that host confirmed the same fully qualified hostname; the alias
+resolution itself is a client-side observation retained outside the host
+bundles. It reported x86-64, Linux
 `6.12.95-124.187.amzn2023.x86_64`, 192 available CPUs, and Intel Xeon Platinum
 8488C under Kernel-based Virtual Machine (KVM). The generic Rust target enabled
 Streaming Single Instruction, Multiple Data Extensions (SSE) versions 1 and
