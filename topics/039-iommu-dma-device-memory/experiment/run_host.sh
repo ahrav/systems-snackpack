@@ -63,6 +63,17 @@ if [[ ! -f $source_archive ]]; then
     exit 2
 fi
 
+work_dir="${output_dir}.work"
+extract_dir="$work_dir/archive"
+mkdir -p "$output_dir" "$extract_dir"
+# Copy the archive once into the private work area. Every verification and
+# the extraction read this immutable snapshot, so replacing the caller's
+# file between the digest check and extraction cannot change what runs.
+private_archive="$work_dir/source-archive.tar.gz"
+cp -- "$source_archive" "$private_archive"
+chmod 0400 "$private_archive"
+source_archive=$private_archive
+
 archive_digest=$(sha256sum "$source_archive" | awk '{print $1}')
 if [[ $archive_digest != "$archive_digest_expected" ]]; then
     echo "source archive digest mismatch" >&2
@@ -111,9 +122,6 @@ dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com)
     ;;
 esac
 
-work_dir="${output_dir}.work"
-extract_dir="$work_dir/archive"
-mkdir -p "$output_dir" "$extract_dir"
 tar -xzf "$source_archive" -C "$extract_dir"
 
 runner_relative=topics/039-iommu-dma-device-memory/experiment/run_host.sh
