@@ -258,11 +258,15 @@ native_cargo_target="$work_dir/cargo-target-native"
 manifest="$source_root/Cargo.toml"
 package=iommu-dma-device-memory
 
-# Cargo reads config.toml from the invocation directory, every parent up to
-# the filesystem root, and Cargo home. Any such file could select a rustc
-# wrapper, linker, or build flags that the recorded toolchain and flags do
-# not capture, so the exact-source contract refuses them all. Cargo home is
-# still needed for the offline registry, so it is checked, not replaced.
+# Cargo reads config.toml from its canonical working directory, every parent
+# up to the filesystem root, and Cargo home, and --manifest-path does not
+# move that search. Run from the canonical extracted source root so the
+# searched chain is exactly the one probed here; a symlinked invocation
+# directory would otherwise leave Cargo reading physical parents that $PWD
+# never names. Any such file could select a rustc wrapper, linker, or build
+# flags that the recorded toolchain and flags do not capture, so the
+# exact-source contract refuses them all. Cargo home is still needed for the
+# offline registry, so it is checked, not replaced.
 cargo_config_probe() {
     local directory=$1
     while :; do
@@ -276,8 +280,8 @@ cargo_config_probe() {
         directory=$(dirname "$directory")
     done
 }
+cd -- "$source_root"
 cargo_config_probe "$source_root"
-cargo_config_probe "$PWD"
 for candidate in "${CARGO_HOME:-$HOME/.cargo}/config.toml" \
     "${CARGO_HOME:-$HOME/.cargo}/config"; do
     if [[ -e $candidate ]]; then

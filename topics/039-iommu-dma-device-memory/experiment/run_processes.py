@@ -50,10 +50,16 @@ def main() -> int:
     raw.mkdir()
     retained_binary = output / "probe"
     shutil.copy2(binary, retained_binary)
-    retained_binary.chmod(0o755)
+    # Owner read and execute only. The per-launch digest below is what
+    # actually binds each replicate to these bytes; dropping the write bit
+    # just removes the accidental path. A same-user process that rewrites
+    # this file, cargo, or python itself is outside the runner's trust
+    # boundary and no in-process check can exclude it.
+    retained_binary.chmod(0o500)
+    binary_digest = digest_path(retained_binary)
     configuration = {
         "binary": retained_binary.name,
-        "binary_sha256": digest_path(retained_binary),
+        "binary_sha256": binary_digest,
         "expected": expected.name,
         "expected_sha256": hashlib.sha256(expected_bytes).hexdigest(),
         "flavor": arguments.flavor,
@@ -70,6 +76,14 @@ def main() -> int:
 
     rows = []
     for sequence in range(1, arguments.runs + 1):
+        # Attest the bytes this replicate is about to execute. Hashing only
+        # before the loop and once after would accept a substituted probe
+        # that was restored before validation.
+        launch_digest = digest_path(retained_binary)
+        if launch_digest != binary_digest:
+            raise RuntimeError(
+                f"{arguments.flavor} probe changed before process {sequence}"
+            )
         completed = subprocess.run(
             [str(retained_binary)],
             check=False,
@@ -86,6 +100,7 @@ def main() -> int:
             {
                 "sequence": str(sequence),
                 "flavor": arguments.flavor,
+                "binary_sha256_at_launch": launch_digest,
                 "return_code": str(completed.returncode),
                 "stdout_matches_expected": "yes" if matches else "no",
                 "stdout_sha256": digest_path(stdout_path),

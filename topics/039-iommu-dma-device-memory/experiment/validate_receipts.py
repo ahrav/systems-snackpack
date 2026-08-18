@@ -62,6 +62,7 @@ def validate_flavor(root: Path, expected: bytes, flavor: str) -> None:
         expected_fields = [
             "sequence",
             "flavor",
+            "binary_sha256_at_launch",
             "return_code",
             "stdout_matches_expected",
             "stdout_sha256",
@@ -83,6 +84,7 @@ def validate_flavor(root: Path, expected: bytes, flavor: str) -> None:
         stderr_path = flavor_root / "raw" / f"run-{sequence:02d}.stderr"
         if (
             row["flavor"] != flavor
+            or row["binary_sha256_at_launch"] != config["binary_sha256"]
             or row["return_code"] != "0"
             or row["stdout_matches_expected"] != "yes"
             or row["stderr_bytes"] != "0"

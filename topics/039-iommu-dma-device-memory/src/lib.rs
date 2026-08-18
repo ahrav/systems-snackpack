@@ -207,6 +207,8 @@ pub enum MappingError {
     AddressMaskExceeded,
     /// Length is not an exact multiple of the model's page size.
     MisalignedLength,
+    /// IOVA base or a backing-page base is not page-size aligned.
+    MisalignedBase,
     /// Backing-page count does not cover the aperture exactly.
     BackingCoverageMismatch,
     /// Mapped scatter/gather count exceeds the original nonzero count.
@@ -237,6 +239,7 @@ impl Display for MappingError {
             Self::AddressOverflow => "address arithmetic overflowed",
             Self::AddressMaskExceeded => "mapping exceeds the device address mask",
             Self::MisalignedLength => "mapping length is not page aligned",
+            Self::MisalignedBase => "mapping base address is not page aligned",
             Self::BackingCoverageMismatch => "backing pages do not cover the mapping",
             Self::InvalidScatterCounts => "mapped scatter count exceeds original count",
             Self::InactiveMapping => "mapping is inactive",
@@ -334,6 +337,8 @@ impl DmaMapping {
     ///
     /// - [`MappingError::MisalignedLength`] if `length` is not an exact multiple
     ///   of `page_size`.
+    /// - [`MappingError::MisalignedBase`] if `iova_base` or any backing page is
+    ///   not a multiple of `page_size`.
     /// - [`MappingError::BackingCoverageMismatch`] if `physical_pages` does not
     ///   contain exactly one entry per model page.
     /// - [`MappingError::AddressOverflow`] if the CPU virtual range, the IOVA
@@ -356,6 +361,17 @@ impl DmaMapping {
         let page_value = page_size.get();
         if !length_value.is_multiple_of(page_value) {
             return Err(MappingError::MisalignedLength);
+        }
+        // The model maps one backing page per aperture page, so an unaligned
+        // IOVA or physical base would silently straddle two real granules
+        // while `translate` still resolved it to one entry.
+        if !iova_base.get().is_multiple_of(page_value) {
+            return Err(MappingError::MisalignedBase);
+        }
+        for page in &physical_pages {
+            if !page.get().is_multiple_of(page_value) {
+                return Err(MappingError::MisalignedBase);
+            }
         }
         let page_count = length_value / page_value;
         if usize::try_from(page_count).ok() != Some(physical_pages.len()) {
@@ -843,6 +859,42 @@ mod tests {
             u64::MAX - 1
         );
         assert_eq!(topic39_checked_translate(0, 16, 0, 1, u64::MAX), u64::MAX);
+        let unaligned_iova = DmaMapping::new(
+            CpuVirtualAddress::new(0x7f20_0000_0000),
+            Iova::new(0x4000_0001),
+            NonZeroU64::new(16 * 1024).unwrap(),
+            NonZeroU64::new(4096).unwrap(),
+            vec![
+                PhysicalAddress::new(0x1_0000_0000),
+                PhysicalAddress::new(0x3_0000_0000),
+                PhysicalAddress::new(0x1_8000_0000),
+                PhysicalAddress::new(0x5_0000_0000),
+            ],
+            u64::MAX,
+            DmaDirection::FromDevice,
+            MappingEpoch::new(7),
+            ScatterCounts::new(NonZeroUsize::new(4).unwrap(), NonZeroUsize::new(2).unwrap())
+                .unwrap(),
+        );
+        assert_eq!(unaligned_iova.err(), Some(MappingError::MisalignedBase));
+        let unaligned_page = DmaMapping::new(
+            CpuVirtualAddress::new(0x7f20_0000_0000),
+            Iova::new(0x4000_0000),
+            NonZeroU64::new(16 * 1024).unwrap(),
+            NonZeroU64::new(4096).unwrap(),
+            vec![
+                PhysicalAddress::new(0x1_0000_0000),
+                PhysicalAddress::new(0x3_0000_0800),
+                PhysicalAddress::new(0x1_8000_0000),
+                PhysicalAddress::new(0x5_0000_0000),
+            ],
+            u64::MAX,
+            DmaDirection::FromDevice,
+            MappingEpoch::new(7),
+            ScatterCounts::new(NonZeroUsize::new(4).unwrap(), NonZeroUsize::new(2).unwrap())
+                .unwrap(),
+        );
+        assert_eq!(unaligned_page.err(), Some(MappingError::MisalignedBase));
     }
 
     #[test]

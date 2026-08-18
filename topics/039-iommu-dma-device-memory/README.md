@@ -82,7 +82,12 @@ dma_addr_t payload_dma =
 if (dma_mapping_error(dev, payload_dma))
     return -ENOMEM;
 
-/* Publish the descriptor, then wait for the device driver's real completion. */
+/* Publish the descriptor, then wait for the device driver's real completion.
+   Both steps are driver specific; the CPU must not synchronize or read the
+   buffer until the driver has observed completed transfer status. */
+publish_descriptor(dev, payload_dma, payload_len);
+wait_for_device_completion(dev);
+
 dma_sync_single_for_cpu(dev, payload_dma, payload_len, DMA_FROM_DEVICE);
 consume_read_only(payload, payload_len);
 
