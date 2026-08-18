@@ -248,6 +248,10 @@ record_required python-version.txt python3 -VV
 record_required cc-version.txt cc -v
 record_required objdump-version.txt objdump --version
 record_required rust-target-cfg.txt rustc --print cfg
+# --print target-features lists what the target supports and does not change
+# under -C target-cpu=native, and the cfg above is collected with generic
+# defaults, so the native build's enabled features need their own record.
+record_required rust-native-target-cfg.txt rustc -C target-cpu=native --print cfg
 record_required rust-target-features.txt rustc --print target-features
 # `cc -v` with no input performs no link, so it never names the linker. Do a
 # real link of a trivial program to capture the driver's collect2 and ld

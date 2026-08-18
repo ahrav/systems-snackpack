@@ -1,9 +1,13 @@
 # Exact-source binding
 
-Both host archives were produced from final-reviewed source commit
+Both host archives were produced from source commit
 `068d082c422efce23700949b01af80f3f2554572` and one `git archive` with Secure
 Hash Algorithm 256-bit (SHA-256) digest, a content fingerprint,
 `f34a828911083552792785c5ebe751f83efc25885489e895be9de3c44a6c9dc7`.
+This binding is historical and scoped to that commit: later review commits
+changed the probe's receipt contract and the process receipt schema, so no
+retained run validates the current branch head.
+
 The runner verified the archive's embedded Git commit and digest before
 extraction. The host bundles do not contain a branch or Git reference (ref)
 receipt, which would record the named reference and the commit it resolved to.
