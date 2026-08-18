@@ -8,8 +8,8 @@ The two named hosts ran one exact source archive. This is a correctness and
 code-generation comparison, not a timing comparison. It does not compare Arm
 and x86-64 device, DMA, IOMMU, cache-maintenance, or translation performance.
 The current comparison binds final-reviewed source commit
-`f43f0fe3766933e9f17ce4d0c7590345238dbbae` and source archive SHA-256
-`84f24c2ff91e38898d353481dd50b0effa66e25790eea433c736787e7a250802`.
+`2bb0d3e55efda225caeaeafbb285382824692b64` and source archive SHA-256
+`e5711fbfada35934afb39e4c3492f62a3066b731c05981d35c8dce0d7e31f614`.
 
 | Observation | Arm target | `xxl` target |
 | --- | --- | --- |
