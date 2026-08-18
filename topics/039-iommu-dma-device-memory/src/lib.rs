@@ -634,12 +634,13 @@ impl DmaMapping {
 
 /// Translates within one contiguous aperture for generated-code inspection.
 ///
-/// Returns [`u64::MAX`] for zero length, overflow of the translated range, an
-/// out-of-aperture range, or a translated start of [`u64::MAX`], which the
-/// failure sentinel reserves. It uses `physical_base + offset` only to expose
-/// the bounds checks for linked image inspection; [`DmaMapping::translate`]
-/// owns the page-list model. A wrong but in-aperture `iova` succeeds because
-/// bounds checks cannot prove descriptor intent.
+/// Returns [`u64::MAX`] for zero length, a zero-length or overflowing declared
+/// aperture, overflow of the translated range, an out-of-aperture range, or a
+/// translated start of [`u64::MAX`], which the failure sentinel reserves. It
+/// uses `physical_base + offset` only to expose the bounds checks for linked
+/// image inspection; [`DmaMapping::translate`] owns the page-list model. A
+/// wrong but in-aperture `iova` succeeds because bounds checks cannot prove
+/// descriptor intent.
 #[unsafe(no_mangle)]
 #[inline(never)]
 pub extern "C" fn topic39_checked_translate(
@@ -649,7 +650,13 @@ pub extern "C" fn topic39_checked_translate(
     range_len: u64,
     physical_base: u64,
 ) -> u64 {
-    if range_len == 0 {
+    if range_len == 0 || aperture_len == 0 {
+        return u64::MAX;
+    }
+    // Reject a declared aperture that itself runs past the address space,
+    // matching DmaMapping::new. An offset-only check would otherwise accept
+    // subranges of an impossible aperture.
+    if iova_base.checked_add(aperture_len - 1).is_none() {
         return u64::MAX;
     }
     let Some(offset) = iova.checked_sub(iova_base) else {
@@ -859,6 +866,15 @@ mod tests {
             u64::MAX - 1
         );
         assert_eq!(topic39_checked_translate(0, 16, 0, 1, u64::MAX), u64::MAX);
+        assert_eq!(
+            topic39_checked_translate(u64::MAX - 1, 4, u64::MAX - 1, 1, 0),
+            u64::MAX
+        );
+        assert_eq!(topic39_checked_translate(0, 0, 0, 1, 0x1000), u64::MAX);
+        assert_eq!(
+            topic39_checked_translate(u64::MAX - 3, 4, u64::MAX - 3, 1, 0x1000),
+            0x1000
+        );
         let unaligned_iova = DmaMapping::new(
             CpuVirtualAddress::new(0x7f20_0000_0000),
             Iova::new(0x4000_0001),
