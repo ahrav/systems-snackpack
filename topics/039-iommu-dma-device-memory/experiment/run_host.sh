@@ -292,27 +292,57 @@ done
     printf 'pci_device_group_listing_end\n'
 } >"$output_dir/iommu-sysfs.txt"
 
-kernel_pattern='^(CONFIG_(IOMMU|IOMMUFD|IOMMU_SVA|SWIOTLB|ARM_SMMU|ARM_SMMU_V3|INTEL_IOMMU|AMD_IOMMU|VFIO|VFIO_IOMMU_TYPE1|PCI_PASID|PCI_ATS|PCI_PRI))='
-kernel_config_source=unavailable
-{
-    if [[ -r /proc/config.gz ]]; then
-        kernel_config_source=/proc/config.gz
-        printf 'kernel_config_source=/proc/config.gz\n'
-        gzip -dc /proc/config.gz | rg "$kernel_pattern" || true
-    elif [[ -r /boot/config-$(uname -r) ]]; then
-        kernel_config_source="/boot/config-$(uname -r)"
-        printf 'kernel_config_source=/boot/config-%s\n' "$(uname -r)"
-        rg "$kernel_pattern" "/boot/config-$(uname -r)" || true
-    else
-        printf 'kernel_config_source=unavailable\n'
+kernel_symbols=(
+    IOMMU IOMMU_SUPPORT IOMMUFD IOMMU_SVA SWIOTLB
+    ARM_SMMU ARM_SMMU_V3 INTEL_IOMMU AMD_IOMMU
+    VFIO VFIO_IOMMU_TYPE1 PCI_PASID PCI_ATS PCI_PRI
+)
+kernel_symbol_alternation=$(
+    IFS='|'
+    printf '%s' "${kernel_symbols[*]}"
+)
+# Decode the configuration before accepting its source. A masked decode
+# failure would otherwise leave a passing receipt with no usable evidence.
+kernel_config_decoded="$work_dir/kernel-config-decoded.txt"
+if [[ -r /proc/config.gz ]]; then
+    if ! gzip -dc /proc/config.gz >"$kernel_config_decoded"; then
+        echo "required kernel configuration could not be decoded from /proc/config.gz" >&2
+        exit 1
     fi
-} >"$output_dir/iommu-kernel-config.txt" 2>&1
-# The acceptance contract requires relevant kernel configuration, so a host
-# that cannot supply it fails rather than passing with the evidence missing.
-if [[ $kernel_config_source == unavailable ]]; then
+    kernel_config_source=/proc/config.gz
+elif [[ -r /boot/config-$(uname -r) ]]; then
+    if ! cp -- "/boot/config-$(uname -r)" "$kernel_config_decoded"; then
+        echo "required kernel configuration could not be read from /boot/config-$(uname -r)" >&2
+        exit 1
+    fi
+    kernel_config_source="/boot/config-$(uname -r)"
+else
     echo "required kernel configuration unavailable: neither /proc/config.gz nor /boot/config-$(uname -r) is readable" >&2
     exit 1
 fi
+if [[ ! -s $kernel_config_decoded ]]; then
+    echo "required kernel configuration decoded empty from $kernel_config_source" >&2
+    exit 1
+fi
+{
+    printf 'kernel_config_source=%s\n' "$kernel_config_source"
+    # One line per required symbol, so an explicitly disabled symbol is
+    # distinguishable from one this kernel does not define at all.
+    printf 'kernel_config_symbol_states_begin\n'
+    for symbol in "${kernel_symbols[@]}"; do
+        if symbol_line=$(rg -N -m 1 "^CONFIG_${symbol}=" "$kernel_config_decoded"); then
+            printf '%s\n' "$symbol_line"
+        elif rg -N -q "^# CONFIG_${symbol} is not set\$" "$kernel_config_decoded"; then
+            printf 'CONFIG_%s=not_set\n' "$symbol"
+        else
+            printf 'CONFIG_%s=absent\n' "$symbol"
+        fi
+    done
+    printf 'kernel_config_symbol_states_end\n'
+    printf 'kernel_config_matching_lines_begin\n'
+    rg -N "^(# )?CONFIG_($kernel_symbol_alternation)" "$kernel_config_decoded" || true
+    printf 'kernel_config_matching_lines_end\n'
+} >"$output_dir/iommu-kernel-config.txt" 2>&1
 
 cargo_target="$work_dir/cargo-target-generic"
 native_cargo_target="$work_dir/cargo-target-native"
