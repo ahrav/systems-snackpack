@@ -48,7 +48,7 @@ static double timeval_seconds(const struct timeval *tv) {
 }
 
 static uint8_t pattern_byte(uint64_t offset) {
-    uint64_t x = offset & ((1ULL << 20) - 1ULL);
+    uint64_t x = offset;
     x += 0x9e3779b97f4a7c15ULL;
     x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
     x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
@@ -79,9 +79,6 @@ static int prepare_file(const char *path, uint64_t bytes) {
         perror("malloc");
         return 1;
     }
-    for (size_t i = 0; i < block_size; i++) {
-        block[i] = pattern_byte((uint64_t)i);
-    }
 
     int fd = open(path, O_CREAT | O_TRUNC | O_WRONLY | O_CLOEXEC, 0600);
     if (fd < 0) {
@@ -90,14 +87,21 @@ static int prepare_file(const char *path, uint64_t bytes) {
         return 1;
     }
     uint64_t remaining = bytes;
+    uint64_t position = 0;
     while (remaining > 0) {
         size_t amount = remaining < block_size ? (size_t)remaining : block_size;
+        // Every byte depends on its absolute file offset, so a transfer that
+        // duplicates, skips, or reorders whole blocks cannot still verify.
+        for (size_t i = 0; i < amount; i++) {
+            block[i] = pattern_byte(position + (uint64_t)i);
+        }
         if (write_all_fd(fd, block, amount) != 0) {
             perror("write prepare");
             close(fd);
             free(block);
             return 1;
         }
+        position += amount;
         remaining -= amount;
     }
     if (fsync(fd) != 0) {

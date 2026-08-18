@@ -107,7 +107,7 @@ __attribute__((noinline)) static int enable_zerocopy(int fd)
 }
 
 __attribute__((noinline)) static int send_zerocopy_chunks(
-    int fd, const unsigned char *buffer, size_t page_size)
+    int fd, const unsigned char *buffer, size_t page_size, uint32_t *submitted_sends)
 {
     for (uint32_t send_id = 0; send_id < SEND_COUNT; ++send_id) {
         const unsigned char *base = buffer + (size_t)send_id * SEND_BYTES;
@@ -138,6 +138,9 @@ __attribute__((noinline)) static int send_zerocopy_chunks(
             fprintf(stderr, "send_id=%" PRIu32 " unexpectedly sent zero bytes\n", send_id);
             return -1;
         }
+        // Any sendmsg that accepted bytes consumed a zero-copy identifier and
+        // holds the buffer until its completion, even if the send was short.
+        ++*submitted_sends;
         if ((size_t)sent != SEND_BYTES) {
             fprintf(stderr,
                     "send_id=%" PRIu32 " short send: got=%zd expected=%d\n",
@@ -154,6 +157,7 @@ __attribute__((noinline)) static int send_zerocopy_chunks(
 static int record_completion(
     const struct sock_extended_err *extended_error,
     bool covered[SEND_COUNT],
+    uint32_t expected_sends,
     unsigned int *notification_count,
     unsigned int *copied_notification_count)
 {
@@ -181,7 +185,7 @@ static int record_completion(
         ++*copied_notification_count;
     }
 
-    if (extended_error->ee_errno != 0 || first > last || last >= SEND_COUNT) {
+    if (extended_error->ee_errno != 0 || first > last || last >= expected_sends) {
         fprintf(stderr, "invalid zero-copy completion range\n");
         return -1;
     }
@@ -192,7 +196,8 @@ static int record_completion(
     return 1;
 }
 
-__attribute__((noinline)) static int drain_zerocopy_completions(int fd)
+__attribute__((noinline)) static int drain_zerocopy_completions(
+    int fd, uint32_t expected_sends)
 {
     bool covered[SEND_COUNT] = { false };
     unsigned int covered_count = 0;
@@ -200,7 +205,10 @@ __attribute__((noinline)) static int drain_zerocopy_completions(int fd)
     unsigned int copied_notification_count = 0;
     int64_t deadline = monotonic_ms() + COMPLETION_TIMEOUT_MS;
 
-    while (covered_count < SEND_COUNT) {
+    if (expected_sends == 0) {
+        return 0;
+    }
+    while (covered_count < expected_sends) {
         unsigned char payload[1];
         unsigned char control[CMSG_SPACE(sizeof(struct sock_extended_err)) +
                               CMSG_SPACE(sizeof(struct sockaddr_in))];
@@ -260,6 +268,7 @@ __attribute__((noinline)) static int drain_zerocopy_completions(int fd)
             const struct sock_extended_err *extended_error =
                 (const struct sock_extended_err *)CMSG_DATA(cmsg);
             int recorded = record_completion(extended_error, covered,
+                                             expected_sends,
                                              &notification_count,
                                              &copied_notification_count);
             if (recorded < 0) {
@@ -276,13 +285,13 @@ __attribute__((noinline)) static int drain_zerocopy_completions(int fd)
         }
 
         covered_count = 0;
-        for (size_t id = 0; id < SEND_COUNT; ++id) {
+        for (size_t id = 0; id < expected_sends; ++id) {
             covered_count += covered[id] ? 1U : 0U;
         }
     }
 
-    printf("completion_coverage=%u/%d notifications=%u copied_notifications=%u\n",
-           covered_count, SEND_COUNT, notification_count,
+    printf("completion_coverage=%u/%" PRIu32 " notifications=%u copied_notifications=%u\n",
+           covered_count, expected_sends, notification_count,
            copied_notification_count);
     printf("copied_fallback_observed=%s\n",
            copied_notification_count > 0 ? "yes" : "no");
@@ -410,7 +419,8 @@ int main(void)
            SEND_COUNT, SEND_BYTES, TOTAL_BYTES);
     printf("measurement=correctness_only timing_reported=no\n");
 
-    int send_result = send_zerocopy_chunks(client_fd, buffer, page_size);
+    uint32_t submitted_sends = 0;
+    int send_result = send_zerocopy_chunks(client_fd, buffer, page_size, &submitted_sends);
     if (shutdown(client_fd, SHUT_WR) != 0) {
         perror("shutdown(SHUT_WR)");
         send_result = -1;
@@ -440,7 +450,12 @@ int main(void)
     int completion_result = -1;
     if (send_result == 0 && receiver.error_number == 0 &&
         receiver.received == TOTAL_BYTES) {
-        completion_result = drain_zerocopy_completions(client_fd);
+        completion_result = drain_zerocopy_completions(client_fd, SEND_COUNT);
+    } else {
+        // Even on failure, every accepted send still holds a buffer-lifetime
+        // identifier; drain those completions before releasing the storage so
+        // cleanup honors the same ownership rule the control demonstrates.
+        (void)drain_zerocopy_completions(client_fd, submitted_sends);
     }
 
     close(server_fd);

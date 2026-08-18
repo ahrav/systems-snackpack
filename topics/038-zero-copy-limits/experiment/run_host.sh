@@ -11,6 +11,13 @@ if [[ -n $(compgen -A function) ]]; then
     echo "exact-source measurement refuses inherited shell functions" >&2
     exit 2
 fi
+# Clearing LD_* below cannot stop the dynamic loader from injecting libraries
+# listed in /etc/ld.so.preload into every probe process, so refuse to measure
+# on a host with system-wide preloads.
+if [[ -s /etc/ld.so.preload ]]; then
+    echo "exact-source measurement refuses system-wide preloads in /etc/ld.so.preload" >&2
+    exit 2
+fi
 
 swept_environment_names=()
 while IFS= read -r variable; do
