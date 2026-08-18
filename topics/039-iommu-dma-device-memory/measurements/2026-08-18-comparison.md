@@ -10,10 +10,13 @@ code-generation comparison, not a timing comparison. It does not compare
 input-output memory management unit (IOMMU), cache maintenance (software
 operations that make central processing unit (CPU) and device cached views
 agree), or translation performance.
-The current comparison binds final-reviewed source commit
+This comparison is historical. It binds source commit
 `2bb0d3e55efda225caeaeafbb285382824692b64` and source archive Secure Hash
 Algorithm 256-bit (SHA-256) digest
 `e5711fbfada35934afb39e4c3492f62a3066b731c05981d35c8dce0d7e31f614`.
+Later review commits changed the probe's receipt contract and the process
+receipt schema, so these archives do not validate the current branch head;
+both hosts must be rerun before a comparison describes the published contract.
 Here, a digest is a content fingerprint. A generic build uses the Rust
 compiler's default target features, meaning the instruction capabilities the
 compiler may assume. A native build adds the build flag
