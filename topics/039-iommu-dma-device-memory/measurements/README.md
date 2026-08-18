@@ -27,15 +27,12 @@ The retained records are:
 - [`2026-08-18-arm.md`](2026-08-18-arm.md)
 - [`2026-08-18-xxl.md`](2026-08-18-xxl.md)
 - [`2026-08-18-comparison.md`](2026-08-18-comparison.md)
-- [`raw/2026-08-18-3aaece9/SOURCE.md`](raw/2026-08-18-3aaece9/SOURCE.md)
+- Retained post-review source binding, superseded for the current branch head:
+  [`raw/2026-08-18-a56a48e/SOURCE.md`](raw/2026-08-18-a56a48e/SOURCE.md)
+- Initial retained source binding, also superseded for the current branch head:
+  [`raw/2026-08-18-3aaece9/SOURCE.md`](raw/2026-08-18-3aaece9/SOURCE.md)
 
-Both hosts passed the exact-source run. Repository history, not the host
-bundles, must verify that the later evidence-only commit adds only evidence and
-leaves measured source commit
-`3aaece99023cfa33440af7c5f90204c18840953d` unchanged.
-
-Review follow-up commits after `3aaece9` changed the probe's receipt contract,
-so the archived process outputs byte-match that commit's `expected.txt`, not
-the current one. The retained records validate `3aaece9` exactly as recorded.
-Both host runs must be repeated at the final source commit and the archives
-replaced before this evidence covers the published code.
+Both hosts passed the `a56a48e` exact-source run, and repository history shows
+that its later evidence-only commit changed only evidence. Source commit
+`068d082` then changed the probe receipt and codegen gate, so both host runs
+must be repeated before the retained current records cover the published code.
