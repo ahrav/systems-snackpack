@@ -5,7 +5,8 @@ Git-created source archive and records SHA-256 digests. Each host archive also
 contains its own manifest. The evidence-only commit must not change the source
 that produced the receipts.
 
-The current post-review run is under
-[`2026-08-18-a56a48e`](2026-08-18-a56a48e/). The initial
-[`2026-08-18-3aaece9`](2026-08-18-3aaece9/) run remains as historical evidence
-but no longer represents the current branch source.
+The current final-reviewed run is under
+[`2026-08-18-068d082`](2026-08-18-068d082/). The intermediate
+[`2026-08-18-a56a48e`](2026-08-18-a56a48e/) and initial
+[`2026-08-18-3aaece9`](2026-08-18-3aaece9/) runs remain as historical evidence
+but do not represent the current branch source.

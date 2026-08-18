@@ -245,9 +245,9 @@ output. See [`rounds/01.md`](rounds/01.md) for the acceptance contract and
 
 ### Retained two-host observation
 
-Both required hosts ran the post-review source commit
-`a56a48e32d78ee942163c66c25a9661e9b75fa52` from one Git archive with SHA-256
-digest `33e08d63e7c439742d7a8acb103f2d1fcc2d19e0b667d809de93a992aec5aa9f`.
+Both required hosts ran the final reviewed source commit
+`068d082c422efce23700949b01af80f3f2554572` from one Git archive with SHA-256
+digest `f34a828911083552792785c5ebe751f83efc25885489e895be9de3c44a6c9dc7`.
 All 16 fresh correctness processes per host matched expected output, and every
 package, source-integrity, receipt, and generated-code gate passed. No timing
 was collected.

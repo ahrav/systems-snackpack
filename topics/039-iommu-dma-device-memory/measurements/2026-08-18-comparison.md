@@ -7,9 +7,9 @@ Date: 2026-08-18
 The two named hosts ran one exact source archive. This is a correctness and
 code-generation comparison, not a timing comparison. It does not compare Arm
 and x86-64 device, DMA, IOMMU, cache-maintenance, or translation performance.
-The current comparison binds post-review source commit
-`a56a48e32d78ee942163c66c25a9661e9b75fa52` and source archive SHA-256
-`33e08d63e7c439742d7a8acb103f2d1fcc2d19e0b667d809de93a992aec5aa9f`.
+The current comparison binds final-reviewed source commit
+`068d082c422efce23700949b01af80f3f2554572` and source archive SHA-256
+`f34a828911083552792785c5ebe751f83efc25885489e895be9de3c44a6c9dc7`.
 
 | Observation | Arm target | `xxl` target |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ The current comparison binds post-review source commit
 | Generic Rust features | Neon | FXSR, SSE, SSE2 |
 | Native build | `-C target-cpu=native` | `-C target-cpu=native` |
 | Visible PCI devices / IOMMU groups | 4 / 0 | 154 / 0 |
-| Generic hook linkage | Direct symbol calls | Relative relocations and indirect calls |
+| Generic hook linkage | Direct symbol calls | Relocation-slot-bound indirect calls |
 | Checked-translator instructions | `sub`, `adds`, `ccmp`, `csinv`, `csel` | `test`, `sub`, comparisons, branches, `cmov` |
 | Fresh process results | 8 generic + 8 native pass | 8 generic + 8 native pass |
 | Timing | Not reported | Not reported |
