@@ -5,44 +5,71 @@ Date: 2026-08-18
 ## Comparison boundary
 
 The two named hosts ran one exact source archive. This is a correctness and
-code-generation comparison, not a timing comparison. It does not compare Arm
-and x86-64 device, DMA, IOMMU, cache-maintenance, or translation performance.
+code-generation comparison, not a timing comparison. It does not compare
+64-bit Arm and 64-bit x86 (x86-64) device, direct memory access (DMA),
+input-output memory management unit (IOMMU), cache maintenance (software
+operations that make central processing unit (CPU) and device cached views
+agree), or translation performance.
 The current comparison binds final-reviewed source commit
-`2bb0d3e55efda225caeaeafbb285382824692b64` and source archive SHA-256
+`2bb0d3e55efda225caeaeafbb285382824692b64` and source archive Secure Hash
+Algorithm 256-bit (SHA-256) digest
 `e5711fbfada35934afb39e4c3492f62a3066b731c05981d35c8dce0d7e31f614`.
+Here, a digest is a content fingerprint. A generic build uses the Rust
+compiler's default target features, meaning the instruction capabilities the
+compiler may assume. A native build adds the build flag
+`-C target-cpu=native`; a build flag is an option passed to the compiler, and
+this one permits features reported by that host.
+
+An IOMMU group is a kernel isolation set of devices that cannot be separated
+by the IOMMU. The table records group visibility, not physical device
+connectivity.
 
 | Observation | Arm target | `xxl` target |
 | --- | --- | --- |
 | Resolved host | `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com` | `dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com` |
-| Architecture | AArch64 | x86-64 |
+| Architecture | 64-bit Arm (AArch64) | 64-bit x86 (x86-64) |
 | Kernel | `6.12.95-124.187.amzn2023.aarch64` | `6.12.95-124.187.amzn2023.x86_64` |
-| CPU evidence | Arm implementer `0x41`, part `0xd40`, variant `0x1`, revision `0x1`; 64 CPUs | Intel Xeon Platinum 8488C under KVM; 192 CPUs |
-| Rust / GCC | 1.95.0 / 11.5.0 | 1.97.1 / 11.5.0 |
-| Generic Rust features | Neon | FXSR, SSE, SSE2 |
+| Central processing unit (CPU) evidence | Arm implementer `0x41`, part `0xd40`, variant `0x1`, revision `0x1`; 64 CPUs | Intel Xeon Platinum 8488C under Kernel-based Virtual Machine (KVM); 192 CPUs |
+| Rust / GNU Compiler Collection (GCC) | 1.95.0 / 11.5.0 | 1.97.1 / 11.5.0 |
+| Generic Rust target-feature names | Arm Advanced Single Instruction, Multiple Data, where one instruction operates on multiple lanes; commonly named Neon | Floating-point and vector register-state save and restore instructions (`FXSAVE` and `FXRSTOR`), plus Streaming Single Instruction, Multiple Data Extensions versions 1 and 2 |
 | Native build | `-C target-cpu=native` | `-C target-cpu=native` |
-| Visible PCI devices / IOMMU groups | 4 / 0 | 154 / 0 |
-| Generic hook linkage | Direct symbol calls | Relocation-slot-bound indirect calls |
-| Checked-translator instructions | `subs`, `cbz`, comparisons, `adds`, `neg`, branches | `mov`, `test`, `sub`, `setcc`, comparisons, `add`, `neg`, branches |
+| Visible Peripheral Component Interconnect (PCI) devices / IOMMU groups | 4 / 0 | 154 / 0 |
+| Generic test-function linkage | Call instruction names the target directly | Loader writes its chosen executable load base plus a stored adjustment into a linker-created slot, producing an absolute target address; program-counter-relative code reaches that slot and loads the target into a register |
+| Checked-translator instructions | Subtract/add and update flags (`subs`, `adds`); compare with zero and branch (`cbz`); negate (`neg`); comparisons and branches | Copy (`mov`); bitwise AND that updates flags without storing its result (`test`); subtract/add (`sub`, `add`); write a condition result (`setcc`); negate (`neg`); comparisons and branches |
 | Fresh process results | 8 generic + 8 native pass | 8 generic + 8 native pass |
 | Timing | Not reported | Not reported |
 
-Both kernels expose config support for PCI ATS, PRI, PASID, VFIO, IOMMU SVA,
-and SWIOTLB. The Arm config also enables Arm SMMUv3; the x86 config enables
-Intel and AMD IOMMUs. Both guest-visible namespaces expose zero IOMMU groups.
-That shared observation cannot establish the physical topology or active DMA
-path.
+Both kernels expose configuration support for PCI Address Translation Services
+(ATS), Page Request Interface (PRI), Process Address Space ID (PASID), Virtual
+Function input/output (VFIO), IOMMU Shared Virtual Addressing (SVA), and the
+software input-output translation lookaside buffer (SWIOTLB). The Arm
+configuration also enables the Arm System Memory Management Unit version 3
+(SMMUv3); the x86 configuration enables Intel and Advanced Micro Devices (AMD)
+IOMMUs. Both guest-visible device directories expose zero IOMMU groups. That
+shared observation cannot establish the physical device connectivity or active
+DMA path.
 
 ## Measured, inferred, and untested
 
-- **Measured:** exact host identity, kernel and toolchains, config and sysfs
-  visibility, build flags, process output and exit status, hashes, source
-  immutability, linked symbols, relocations or direct calls, and disassembly.
+- **Measured:** exact host identity, kernel and toolchains, meaning compiler,
+  linker, and build-tool versions; configuration and Linux system filesystem
+  (`sysfs`) visibility; build flags; process output and exit status; hashes;
+  proof that source files remained unchanged; linked symbols; linker relocation
+  records or direct
+  calls; and decoded executable machine instructions (disassembly).
 - **Derived:** none beyond file counts and cryptographic digests.
 - **Inferred:** the hardware or compiler mechanisms that motivated a particular
-  lowering; no timing was used to attribute a performance cause.
-- **Untested:** real device access, IOMMU activation, map/unmap or invalidation
-  cost, IOTLB and ATS misses, cache synchronization, PRI faults, SWIOTLB copy
-  paths, VFIO containment, MMIO ordering, and device or peer memory.
+  generated instruction sequence; no timing was used to attribute a
+  performance cause.
+- **Untested:** real device access; active IOMMU translation; map creation,
+  removal, or the discarding of stale cached translations; input-output
+  translation lookaside buffer (IOTLB) misses, where a recent device
+  translation is absent; ATS device-cache misses; PRI requests for missing
+  translations; cache synchronization; SWIOTLB bounce copies; VFIO isolation;
+  memory-mapped input/output (MMIO) register ordering; and device or peer
+  memory.
 
-The result supports the portable contract checks and demonstrates different
-linked implementations on these machines. It does not support an ISA ranking.
+The result supports the portable contract checks, meaning checks whose declared
+requirements do not depend on one host's extra instructions, and demonstrates
+different linked implementations on these machines. It does not support an
+instruction-set architecture ranking.

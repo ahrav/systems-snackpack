@@ -1,9 +1,12 @@
 # Raw evidence
 
 The dated source-identity directory binds both retrieved host archives to one
-Git-created source archive and records SHA-256 digests. Each host archive also
-contains its own manifest. The evidence-only commit must not change the source
-that produced the receipts.
+Git-created source archive and records Secure Hash Algorithm 256-bit (SHA-256)
+digests, which are content fingerprints. Each host archive also contains its
+own file-and-digest list
+(manifest). The evidence-only commit must not change the source that produced
+the receipts, meaning the retained, machine-verifiable records from the host
+runs.
 
 The current final-reviewed run is under
 [`2026-08-18-2bb0d3e`](2026-08-18-2bb0d3e/). The hardened
