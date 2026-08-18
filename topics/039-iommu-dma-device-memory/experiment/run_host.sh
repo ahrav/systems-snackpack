@@ -66,7 +66,24 @@ fi
 
 work_dir="${output_dir}.work"
 extract_dir="$work_dir/archive"
-mkdir -p "$output_dir" "$extract_dir"
+# Reserve both leaves atomically. Plain mkdir fails with EEXIST on an
+# existing directory, file, or symlink, so a path another local user
+# precreated between the check above and here cannot be adopted; -p would
+# accept it. Each leaf is created 0700 in the same call, so no window exists
+# where it is group- or world-writable.
+mkdir -p -- "$(dirname -- "$output_dir")"
+if ! mkdir -m 0700 -- "$output_dir"; then
+    echo "could not exclusively create output directory: $output_dir" >&2
+    exit 2
+fi
+if ! mkdir -m 0700 -- "$work_dir"; then
+    echo "could not exclusively create work directory: $work_dir" >&2
+    exit 2
+fi
+if ! mkdir -m 0700 -- "$extract_dir"; then
+    echo "could not exclusively create extract directory: $extract_dir" >&2
+    exit 2
+fi
 # Copy the archive once into the private work area. Every verification and
 # the extraction read this immutable snapshot, so replacing the caller's
 # file between the digest check and extraction cannot change what runs.
@@ -170,6 +187,24 @@ record_optional() {
     } >"$output_dir/$name" 2>&1 || true
 }
 
+# The acceptance contract claims exact toolchain and target-feature records, so
+# a failed probe must fail the run rather than leave a bundle that is missing
+# evidence it advertises. record_optional stays for genuinely optional
+# diagnostics, such as compiler-specific queries that another compiler rejects.
+record_required() {
+    local name=$1
+    shift
+    if ! {
+        printf 'COMMAND='
+        printf '%q ' "$@"
+        printf '\n'
+        "$@"
+    } >"$output_dir/$name" 2>&1; then
+        echo "required host metadata probe failed: $name" >&2
+        exit 1
+    fi
+}
+
 write_source_manifest "$output_dir/source-manifest-before.sha256"
 {
     printf 'source_commit=%s\n' "$source_commit"
@@ -204,14 +239,15 @@ write_source_manifest "$output_dir/source-manifest-before.sha256"
     lscpu
 } >"$output_dir/host.txt" 2>&1
 
-record_optional proc-cpuinfo.txt sed -n '1,260p' /proc/cpuinfo
-record_optional rustc-version.txt rustc -vV
-record_optional cargo-version.txt cargo -Vv
-record_optional python-version.txt python3 -VV
-record_optional cc-version.txt cc -v
-record_optional objdump-version.txt objdump --version
-record_optional rust-target-cfg.txt rustc --print cfg
-record_optional rust-target-features.txt rustc --print target-features
+record_required proc-cpuinfo.txt sed -n '1,260p' /proc/cpuinfo
+record_required rustc-version.txt rustc -vV
+record_required cargo-version.txt cargo -Vv
+record_required python-version.txt python3 -VV
+record_required cc-version.txt cc -v
+record_required objdump-version.txt objdump --version
+record_required rust-target-cfg.txt rustc --print cfg
+record_required rust-target-features.txt rustc --print target-features
+# GCC-specific query; another compiler may reject it, so this one is optional.
 record_optional cc-native-target.txt cc -march=native -Q --help=target
 record_optional limits.txt bash -c 'ulimit -a'
 
