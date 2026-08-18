@@ -75,6 +75,7 @@ def main() -> int:
             check=False,
             capture_output=True,
             env={**os.environ, "LC_ALL": "C", "LANG": "C"},
+            timeout=120,
         )
         stdout_path = raw / f"run-{sequence:02d}.stdout"
         stderr_path = raw / f"run-{sequence:02d}.stderr"

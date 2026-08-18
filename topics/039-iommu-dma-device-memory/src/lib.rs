@@ -293,6 +293,7 @@ impl CompletionToken {
 /// ownership to one descriptor, [`Self::complete`] returns ownership, and
 /// [`Self::unmap`] or [`Self::invalidate_after_reset`] makes the mapping
 /// inactive. None of these transitions operate on hardware or real memory.
+#[derive(Debug)]
 pub struct DmaMapping {
     cpu_base: CpuVirtualAddress,
     iova_base: Iova,
@@ -320,8 +321,8 @@ impl DmaMapping {
     ///   of `page_size`.
     /// - [`MappingError::BackingCoverageMismatch`] if `physical_pages` does not
     ///   contain exactly one entry per model page.
-    /// - [`MappingError::AddressOverflow`] if the IOVA aperture or any physical
-    ///   backing page extends beyond `u64::MAX`.
+    /// - [`MappingError::AddressOverflow`] if the CPU virtual range, the IOVA
+    ///   aperture, or any physical backing page extends beyond `u64::MAX`.
     /// - [`MappingError::AddressMaskExceeded`] if the last IOVA exceeds
     ///   `dma_mask`.
     #[allow(clippy::too_many_arguments)]
@@ -345,6 +346,10 @@ impl DmaMapping {
         if usize::try_from(page_count).ok() != Some(physical_pages.len()) {
             return Err(MappingError::BackingCoverageMismatch);
         }
+        cpu_base
+            .get()
+            .checked_add(length_value - 1)
+            .ok_or(MappingError::AddressOverflow)?;
         let last_iova = iova_base
             .get()
             .checked_add(length_value - 1)
@@ -737,6 +742,28 @@ mod tests {
             Err(MappingError::InvalidScatterCounts)
         );
         assert!(!topic39_mask_allows(0xffff_fff0, 32, u32::MAX as u64));
+        assert!(!topic39_mask_allows(u64::MAX - 10, 32, u64::MAX));
+        assert_eq!(
+            DmaMapping::new(
+                CpuVirtualAddress::new(u64::MAX - 4095),
+                Iova::new(0x4000_0000),
+                NonZeroU64::new(16 * 1024).unwrap(),
+                NonZeroU64::new(4096).unwrap(),
+                vec![
+                    PhysicalAddress::new(0x1_0000_0000),
+                    PhysicalAddress::new(0x3_0000_0000),
+                    PhysicalAddress::new(0x1_8000_0000),
+                    PhysicalAddress::new(0x5_0000_0000),
+                ],
+                u64::MAX,
+                DmaDirection::FromDevice,
+                MappingEpoch::new(7),
+                ScatterCounts::new(NonZeroUsize::new(4).unwrap(), NonZeroUsize::new(2).unwrap())
+                    .unwrap(),
+            )
+            .err(),
+            Some(MappingError::AddressOverflow)
+        );
         assert_eq!(
             topic39_checked_translate(0x1000, 0x1000, 0x1fff, 2, 0x8000),
             u64::MAX

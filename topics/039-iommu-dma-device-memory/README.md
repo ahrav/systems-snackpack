@@ -16,7 +16,9 @@ device may reach the mapped range.
 Use one 64-kibibyte (KiB) receive buffer as the running example. One KiB is
 1,024 bytes. CPU code sees virtual address `0x7f20_0000_0000`. Four physically
 scattered 16 KiB regions back it. The driver gives the device one contiguous
-IOVA range beginning at `0x4000_0000`.
+IOVA range beginning at `0x4000_0000`. The executable probe models this same
+shape at a smaller size: a 16 KiB buffer backed by four scattered 4 KiB pages
+at the same base addresses.
 
 Before the device writes that buffer, establish all five claims:
 

@@ -176,15 +176,18 @@ fn main() {
         black_box(MAPPING_LENGTH),
         black_box(0xffff_ffff),
     );
-    let mask_reject = topic39_mask_allows(
+    let mask_boundary = topic39_mask_allows(
         black_box(IOVA_BASE),
         black_box(MAPPING_LENGTH),
         black_box(IOVA_BASE + MAPPING_LENGTH - 2),
     );
+    let mask_overflow =
+        topic39_mask_allows(black_box(u64::MAX - 10), black_box(32), black_box(u64::MAX));
     assert_eq!(hook_inside, 0x1_0000_0000 + PAGE_SIZE + 64);
     assert_eq!(hook_outside, u64::MAX);
     assert!(mask_ok);
-    assert!(!mask_reject);
+    assert!(!mask_boundary);
+    assert!(!mask_overflow);
 
     println!("contract=cpu_physical_iova_are_distinct result=PASS");
     println!(
@@ -204,6 +207,8 @@ fn main() {
         scatter.original(),
         scatter.mapped()
     );
-    println!("linked_hooks in_aperture=accepted outside=rejected mask_overflow=rejected");
+    println!(
+        "linked_hooks in_aperture=accepted outside=rejected mask_boundary=rejected mask_overflow=rejected"
+    );
     println!("result=PASS timing_reported=no real_dma_exercised=no");
 }

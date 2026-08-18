@@ -13,7 +13,7 @@ and x86-64 device, DMA, IOMMU, cache-maintenance, or translation performance.
 | Resolved host | `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com` | `dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com` |
 | Architecture | AArch64 | x86-64 |
 | Kernel | `6.12.95-124.187.amzn2023.aarch64` | `6.12.95-124.187.amzn2023.x86_64` |
-| CPU evidence | Arm implementer `0x41`, part `0xd40`, variant 1, revision 1; 64 CPUs | Intel Xeon Platinum 8488C under KVM; 192 CPUs |
+| CPU evidence | Arm implementer `0x41`, part `0xd40`, variant `0x1`, revision `0x1`; 64 CPUs | Intel Xeon Platinum 8488C under KVM; 192 CPUs |
 | Rust / GCC | 1.95.0 / 11.5.0 | 1.97.1 / 11.5.0 |
 | Generic Rust features | Neon | FXSR, SSE, SSE2 |
 | Native build | `-C target-cpu=native` | `-C target-cpu=native` |

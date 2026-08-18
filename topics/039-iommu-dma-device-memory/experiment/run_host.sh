@@ -280,8 +280,11 @@ for flavor in generic native; do
     nm -n "$binary" >"$codegen/${flavor}.symbols.txt"
     readelf -h -n -A "$binary" >"$codegen/${flavor}.elf.txt"
     readelf -rW "$binary" >"$codegen/${flavor}.relocations.txt"
+    # `|| true`: a missing symbol must reach the named error below, not die
+    # silently on rg's non-match exit status under `set -e`.
     rg -n '<topic39_(checked_translate|mask_allows)>:' \
-        "$codegen/${flavor}.objdump.txt" >"$codegen/${flavor}.required-symbols.txt"
+        "$codegen/${flavor}.objdump.txt" >"$codegen/${flavor}.required-symbols.txt" \
+        || true
     for symbol in topic39_checked_translate topic39_mask_allows; do
         if ! rg -q "<${symbol}>:" "$codegen/${flavor}.objdump.txt"; then
             echo "$flavor codegen lacks required definition $symbol" >&2
