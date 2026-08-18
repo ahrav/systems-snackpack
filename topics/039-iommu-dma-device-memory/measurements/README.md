@@ -21,3 +21,15 @@ exists or that a device bypasses translation.
 
 Host notes and exact-source archives are added only after both required runs
 pass. [`../rounds/01.md`](../rounds/01.md) defines the acceptance contract.
+
+The retained records are:
+
+- [`2026-08-18-arm.md`](2026-08-18-arm.md)
+- [`2026-08-18-xxl.md`](2026-08-18-xxl.md)
+- [`2026-08-18-comparison.md`](2026-08-18-comparison.md)
+- [`raw/2026-08-18-3aaece9/SOURCE.md`](raw/2026-08-18-3aaece9/SOURCE.md)
+
+Both hosts passed the exact-source run. Repository history, not the host
+bundles, must verify that the later evidence-only commit adds only evidence and
+leaves measured source commit
+`3aaece99023cfa33440af7c5f90204c18840953d` unchanged.

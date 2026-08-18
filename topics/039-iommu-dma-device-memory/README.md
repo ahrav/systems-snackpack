@@ -241,6 +241,44 @@ and native builds in independent processes and requires identical expected
 output. See [`rounds/01.md`](rounds/01.md) for the acceptance contract and
 [`measurements/README.md`](measurements/README.md) for retained evidence.
 
+### Retained two-host observation
+
+Both required hosts ran source commit
+`3aaece99023cfa33440af7c5f90204c18840953d` from one Git archive with SHA-256
+digest `9da821782a8fd37023a05e4ca08e8e942831eabf3410eabe31e81128913765f8`.
+All 16 fresh correctness processes per host matched expected output, and every
+package, source-integrity, receipt, and generated-code gate passed. No timing
+was collected.
+
+The Arm target was
+`dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`, AArch64, Linux
+`6.12.95-124.187.amzn2023.aarch64`, with 64 available CPUs. Its processor
+identification was implementer `0x41`, part `0xd40`, variant `0x1`, revision
+`0x1`. The generic compiler target enabled Neon; the native C query reported
+`armv8.4-a+crypto+sha3+sm4+sve+rng+i8mm+bf16`. Rust was 1.95.0 and GCC was
+11.5.0.
+
+SSH alias `xxl` resolved at run time to
+`dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com`. It reported x86-64, Linux
+`6.12.95-124.187.amzn2023.x86_64`, 192 available CPUs, and Intel Xeon Platinum
+8488C under Kernel-based Virtual Machine (KVM). The generic Rust target enabled
+SSE and SSE2; the native C query reported Sapphire Rapids tuning with AVX2,
+AVX-512F, and SSE4.2 enabled. Rust was 1.97.1 and GCC was 11.5.0.
+
+Both kernels were configured with PCI ATS, PRI, PASID, VFIO, IOMMU SVA, and
+SWIOTLB support. The Arm config also enabled Arm SMMU and SMMUv3; the x86 config
+enabled Intel and AMD IOMMU support. The guest-visible sysfs view showed zero
+IOMMU class entries, zero groups, and zero PCI group links on both hosts. That
+absence does not prove that the physical host lacks an IOMMU or that a real
+device would bypass translation.
+
+Generated code differed without changing the model result. The Arm executable
+contained direct calls to both hooks and used `sub`, `adds`, `ccmp`, `csinv`,
+and `csel` in the generic checked translator. The x86-64 executable used
+relative relocations plus indirect calls and implemented the checks with
+`test`, `sub`, comparisons, branches, and `cmov`. These are observations of the
+two named executables, not instruction-set-family performance claims.
+
 ## Practical selection guide
 
 1. Use coherent allocation for small, long-lived control structures, and keep
