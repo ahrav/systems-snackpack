@@ -279,6 +279,7 @@ for flavor in generic native; do
     objdump -drwC "$binary" >"$codegen/${flavor}.objdump.txt"
     nm -n "$binary" >"$codegen/${flavor}.symbols.txt"
     readelf -h -n -A "$binary" >"$codegen/${flavor}.elf.txt"
+    readelf -rW "$binary" >"$codegen/${flavor}.relocations.txt"
     rg -n '<topic39_(checked_translate|mask_allows)>:' \
         "$codegen/${flavor}.objdump.txt" >"$codegen/${flavor}.required-symbols.txt"
     for symbol in topic39_checked_translate topic39_mask_allows; do
@@ -286,7 +287,32 @@ for flavor in generic native; do
             echo "$flavor codegen lacks required definition $symbol" >&2
             exit 1
         fi
-        if ! rg -q "[[:space:]](callq?|bl)[[:space:]]+[^<]*<${symbol}>" "$codegen/${flavor}.objdump.txt"; then
+        if rg -q "[[:space:]](callq?|bl)[[:space:]]+[^<]*<${symbol}>" \
+            "$codegen/${flavor}.objdump.txt"; then
+            printf '%s\t%s\tdirect-symbol-call\n' "$flavor" "$symbol" \
+                >>"$codegen/linked-hook-modes.tsv"
+        elif [[ $architecture == x86_64 ]]; then
+            # Position-independent x86-64 executables can load this locally
+            # defined function through a relative relocation and then use an
+            # indirect register call. Bind that relocation to the symbol's
+            # linked address and require an indirect call instruction. The
+            # deterministic probe output separately proves that both hook
+            # results passed their assertions.
+            symbol_address=$(
+                awk -v symbol="$symbol" '$3 == symbol { print $1; exit }' \
+                    "$codegen/${flavor}.symbols.txt" | sed 's/^0*//'
+            )
+            if [[ -z $symbol_address ]] || \
+                ! rg -q "R_X86_64_RELATIVE[[:space:]]+0*${symbol_address}([[:space:]]|$)" \
+                    "$codegen/${flavor}.relocations.txt" || \
+                ! rg -q '[[:space:]]callq?[[:space:]]+\*%' \
+                    "$codegen/${flavor}.objdump.txt"; then
+                echo "$flavor codegen lacks a linked direct or relocated indirect call to $symbol" >&2
+                exit 1
+            fi
+            printf '%s\t%s\tx86-relative-relocation-and-indirect-call\n' \
+                "$flavor" "$symbol" >>"$codegen/linked-hook-modes.tsv"
+        else
             echo "$flavor codegen lacks a linked call to $symbol" >&2
             exit 1
         fi
@@ -311,7 +337,7 @@ fi
     printf 'correctness_processes=16\n'
     printf 'generic_processes=8\n'
     printf 'native_processes=8\n'
-    printf 'generated_code=linked_definitions_and_calls_verified\n'
+    printf 'generated_code=hook_definitions_and_direct_or_relocated_indirect_calls_verified\n'
     printf 'measurement_boundary=CPU_only_contract_model_no_real_DMA_or_IOMMU_activity\n'
     printf 'timing_reported=no\n'
     printf 'result=PASS\n'
