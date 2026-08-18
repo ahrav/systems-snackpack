@@ -276,22 +276,43 @@ done
     printf 'iommu_group_listing_begin\n'
     for entry in "${iommu_group_entries[@]}"; do
         printf '%s\n' "$entry"
+        for member in "$entry"/devices/*; do
+            printf '  device %s -> %s\n' "${member##*/}" "$(realpath "$member")"
+        done
     done
     printf 'iommu_group_listing_end\n'
+    printf 'pci_device_group_listing_begin\n'
+    for device in "${pci_devices[@]}"; do
+        if [[ -L $device/iommu_group ]]; then
+            printf '%s -> %s\n' "${device##*/}" "$(realpath "$device/iommu_group")"
+        else
+            printf '%s -> none\n' "${device##*/}"
+        fi
+    done
+    printf 'pci_device_group_listing_end\n'
 } >"$output_dir/iommu-sysfs.txt"
 
 kernel_pattern='^(CONFIG_(IOMMU|IOMMUFD|IOMMU_SVA|SWIOTLB|ARM_SMMU|ARM_SMMU_V3|INTEL_IOMMU|AMD_IOMMU|VFIO|VFIO_IOMMU_TYPE1|PCI_PASID|PCI_ATS|PCI_PRI))='
+kernel_config_source=unavailable
 {
     if [[ -r /proc/config.gz ]]; then
+        kernel_config_source=/proc/config.gz
         printf 'kernel_config_source=/proc/config.gz\n'
         gzip -dc /proc/config.gz | rg "$kernel_pattern" || true
     elif [[ -r /boot/config-$(uname -r) ]]; then
+        kernel_config_source="/boot/config-$(uname -r)"
         printf 'kernel_config_source=/boot/config-%s\n' "$(uname -r)"
         rg "$kernel_pattern" "/boot/config-$(uname -r)" || true
     else
         printf 'kernel_config_source=unavailable\n'
     fi
 } >"$output_dir/iommu-kernel-config.txt" 2>&1
+# The acceptance contract requires relevant kernel configuration, so a host
+# that cannot supply it fails rather than passing with the evidence missing.
+if [[ $kernel_config_source == unavailable ]]; then
+    echo "required kernel configuration unavailable: neither /proc/config.gz nor /boot/config-$(uname -r) is readable" >&2
+    exit 1
+fi
 
 cargo_target="$work_dir/cargo-target-generic"
 native_cargo_target="$work_dir/cargo-target-native"
@@ -547,7 +568,8 @@ if ! cmp "$output_dir/source-manifest-before.sha256" "$output_dir/source-manifes
     exit 1
 fi
 {
-    printf 'source_identity=verified_archive_commit_and_sha256\n'
+    printf 'source_identity=verified_archive_digest_and_embedded_commit_header\n'
+    printf 'archive_tree_binding=orchestrator_observation_outside_this_bundle\n'
     printf 'source_manifest_unchanged=yes\n'
     printf 'host_identity=verified_local_hostname_and_architecture\n'
     printf 'ssh_label_binding=orchestrator_observation_outside_this_bundle\n'
@@ -566,14 +588,20 @@ if [[ $work_dir != "${output_dir}.work" || ! -d $work_dir ]]; then
 fi
 rm -rf -- "$work_dir"
 
-manifest_tmp="${output_dir}.manifest.$$.tmp"
-if [[ -e $manifest_tmp ]]; then
-    echo "temporary manifest path already exists: $manifest_tmp" >&2
+manifest_tmp_dir="${output_dir}.manifest.tmp"
+# Stage the manifest inside a directory created atomically at mode 0700 rather
+# than redirecting into a sibling path. A plain existence test cannot see a
+# dangling symlink another local user precreated, and the redirection would
+# follow it; mkdir refuses any existing path, symlink included.
+if ! mkdir -m 0700 -- "$manifest_tmp_dir"; then
+    echo "could not exclusively create manifest staging directory: $manifest_tmp_dir" >&2
     exit 2
 fi
+manifest_tmp="$manifest_tmp_dir/MANIFEST.sha256"
 (
     cd "$output_dir"
     rg --files --hidden --no-ignore -0 | LC_ALL=C sort -z | xargs -0 sha256sum
 ) >"$manifest_tmp"
 mv -- "$manifest_tmp" "$output_dir/MANIFEST.sha256"
+rmdir -- "$manifest_tmp_dir"
 printf 'HOST_RUN=PASS output=%s\n' "$output_dir"
