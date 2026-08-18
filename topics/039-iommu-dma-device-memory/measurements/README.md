@@ -41,8 +41,12 @@ The retained records are:
 - [`2026-08-18-arm.md`](2026-08-18-arm.md)
 - [`2026-08-18-xxl.md`](2026-08-18-xxl.md)
 - [`2026-08-18-comparison.md`](2026-08-18-comparison.md)
-- Current final-reviewed source binding, the record tying the evidence to one
-  exact source commit and archive content fingerprint:
+- Most recent source binding, the record tying the evidence to one exact source
+  commit and archive content fingerprint. Superseded for the current branch
+  head: review commits after `2bb0d3e` changed the probe receipt contract, so
+  its retained stdout no longer matches `expected.txt` and did not exercise the
+  device-reported-descriptor check. Both hosts must be rerun from the current
+  head before any binding is the final-reviewed evidence:
   [`raw/2026-08-18-2bb0d3e/SOURCE.md`](raw/2026-08-18-2bb0d3e/SOURCE.md)
 - Retained hardened source binding, superseded for the current branch head,
   meaning the latest commit on the topic branch:
@@ -56,7 +60,9 @@ The retained records are:
 - Initial retained source binding, also superseded for the current branch head:
   [`raw/2026-08-18-3aaece9/SOURCE.md`](raw/2026-08-18-3aaece9/SOURCE.md)
 
-Both hosts passed the `2bb0d3e` exact-source run. Repository history, not the
-host bundles, must verify that later evidence-only commits change only evidence
-and leave measured source commit
-`2bb0d3e55efda225caeaeafbb285382824692b64` unchanged.
+Both hosts passed the `2bb0d3e` exact-source run, and that run remains valid
+evidence for commit `2bb0d3e55efda225caeaeafbb285382824692b64` alone. Later
+review commits changed the probe's receipt contract, so the current branch head
+has no host evidence yet. Repository history, not the host bundles, must verify
+that evidence-only commits change only evidence and leave the measured source
+commit they name unchanged.

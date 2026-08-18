@@ -184,7 +184,9 @@ write_source_manifest "$output_dir/source-manifest-before.sha256"
 {
     printf 'date_utc='; date -u +%Y-%m-%dT%H:%M:%SZ
     printf 'ssh_target_label=%s\n' "$SSH_TARGET_LABEL"
+    printf 'ssh_target_label_trust=caller_supplied_not_verifiable_on_this_host\n'
     printf 'ssh_resolved_hostname=%s\n' "$SSH_RESOLVED_HOSTNAME"
+    printf 'ssh_resolved_hostname_trust=caller_supplied_compared_to_local_hostname_fqdn\n'
     printf 'hostname_short='; hostname
     printf 'hostname_fqdn=%s\n' "$resolved_hostname"
     printf 'uname_all='; uname -a
@@ -504,7 +506,8 @@ fi
 {
     printf 'source_identity=verified_archive_commit_and_sha256\n'
     printf 'source_manifest_unchanged=yes\n'
-    printf 'host_identity=verified_label_resolved_hostname_and_architecture\n'
+    printf 'host_identity=verified_local_hostname_and_architecture\n'
+    printf 'ssh_label_binding=orchestrator_observation_outside_this_bundle\n'
     printf 'correctness_processes=16\n'
     printf 'generic_processes=8\n'
     printf 'native_processes=8\n'
