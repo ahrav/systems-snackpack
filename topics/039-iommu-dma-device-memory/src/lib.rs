@@ -506,6 +506,12 @@ impl DmaMapping {
 
     /// Returns ownership to the CPU for the matching completion token.
     ///
+    /// `reported_descriptor` is the descriptor identity the device reported
+    /// with the completion. It is a separate argument because the device
+    /// supplies it, while `token` is the driver's own unforgeable submission
+    /// record: a device or provider can report a descriptor the driver does
+    /// not have in flight, and the model must reject that.
+    ///
     /// # Errors
     ///
     /// Every rejection returns [`RejectedCompletion`], which carries the
@@ -513,10 +519,19 @@ impl DmaMapping {
     ///
     /// - [`MappingError::InactiveMapping`] if reset or unmap invalidated the map.
     /// - [`MappingError::StaleEpoch`] if the token names another map generation.
-    /// - [`MappingError::CpuOwnsBuffer`] if no descriptor is in flight.
+    /// - [`MappingError::CpuOwnsBuffer`] if no descriptor is in flight. Safe
+    ///   code cannot reach this: a token exists only while its submission is
+    ///   in flight, and a successful completion consumes it, so single-use
+    ///   tokens prove the no-double-completion invariant at compile time.
+    ///   The arm remains as a defensive guard on the model's own state.
     /// - [`MappingError::CompletionMismatch`] if the token belongs to another
-    ///   mapping or another descriptor owns the buffer.
-    pub fn complete(&mut self, token: CompletionToken) -> Result<(), RejectedCompletion> {
+    ///   mapping, or `reported_descriptor` does not name the descriptor this
+    ///   mapping has in flight.
+    pub fn complete(
+        &mut self,
+        token: CompletionToken,
+        reported_descriptor: u64,
+    ) -> Result<(), RejectedCompletion> {
         if !self.active {
             return Err(RejectedCompletion {
                 token,
@@ -540,7 +555,7 @@ impl DmaMapping {
                 token,
                 error: MappingError::CpuOwnsBuffer,
             }),
-            Owner::Device { descriptor } if descriptor != token.descriptor => {
+            Owner::Device { descriptor } if descriptor != reported_descriptor => {
                 Err(RejectedCompletion {
                     token,
                     error: MappingError::CompletionMismatch,
@@ -603,11 +618,12 @@ impl DmaMapping {
 
 /// Translates within one contiguous aperture for generated-code inspection.
 ///
-/// Returns [`u64::MAX`] for zero length, overflow, or an out-of-aperture range.
-/// It uses `physical_base + offset` only to expose the bounds checks for linked
-/// image inspection; [`DmaMapping::translate`] owns the page-list model. A wrong
-/// but in-aperture `iova` succeeds because bounds checks cannot prove descriptor
-/// intent.
+/// Returns [`u64::MAX`] for zero length, overflow of the translated range, an
+/// out-of-aperture range, or a translated start of [`u64::MAX`], which the
+/// failure sentinel reserves. It uses `physical_base + offset` only to expose
+/// the bounds checks for linked image inspection; [`DmaMapping::translate`]
+/// owns the page-list model. A wrong but in-aperture `iova` succeeds because
+/// bounds checks cannot prove descriptor intent.
 #[unsafe(no_mangle)]
 #[inline(never)]
 pub extern "C" fn topic39_checked_translate(
@@ -629,7 +645,10 @@ pub extern "C" fn topic39_checked_translate(
     let Some(start) = physical_base.checked_add(offset) else {
         return u64::MAX;
     };
-    if start.checked_add(range_len - 1).is_none() {
+    // u64::MAX is this hook's failure sentinel, so it cannot also name a
+    // successful translation. DmaMapping::new already rejects a backing page
+    // whose last byte overflows, so the model never needs that address.
+    if start == u64::MAX || start.checked_add(range_len - 1).is_none() {
         return u64::MAX;
     }
     start
@@ -746,10 +765,12 @@ mod tests {
         );
         let mut unrelated = mapping(DmaDirection::ToDevice);
         let unrelated_token = unrelated.submit(10).unwrap();
-        let rejected = map.complete(unrelated_token).unwrap_err();
+        let rejected = map.complete(unrelated_token, 10).unwrap_err();
         assert_eq!(rejected.error, MappingError::CompletionMismatch);
-        unrelated.complete(rejected.token).unwrap();
-        map.complete(token).unwrap();
+        unrelated.complete(rejected.token, 10).unwrap();
+        let misreported = map.complete(token, 11).unwrap_err();
+        assert_eq!(misreported.error, MappingError::CompletionMismatch);
+        map.complete(misreported.token, 10).unwrap();
         map.check_cpu_access().unwrap();
     }
 
@@ -758,7 +779,7 @@ mod tests {
         let mut map = mapping(DmaDirection::FromDevice);
         let token = map.submit(10).unwrap();
         assert_eq!(map.unmap(4), Err(MappingError::DeviceOwnsBuffer));
-        map.complete(token).unwrap();
+        map.complete(token, 10).unwrap();
         assert_eq!(map.unmap(2), Err(MappingError::WrongUnmapCount));
         map.unmap(4).unwrap();
         assert_eq!(map.check_cpu_access(), Err(MappingError::InactiveMapping));
@@ -770,7 +791,7 @@ mod tests {
         let token = map.submit(10).unwrap();
         map.invalidate_after_reset();
         assert_eq!(
-            map.complete(token).unwrap_err().error,
+            map.complete(token, 10).unwrap_err().error,
             MappingError::InactiveMapping
         );
         assert_eq!(map.epoch(), MappingEpoch::new(8));
@@ -821,6 +842,7 @@ mod tests {
             topic39_checked_translate(0, 16, 0, 2, u64::MAX - 1),
             u64::MAX - 1
         );
+        assert_eq!(topic39_checked_translate(0, 16, 0, 1, u64::MAX), u64::MAX);
     }
 
     #[test]

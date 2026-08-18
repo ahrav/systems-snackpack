@@ -2,7 +2,7 @@ contract=cpu_physical_iova_are_distinct result=PASS
 address_spaces cpu=0x7f2000000000 iova=0x40000000 translated=0x300000040
 aperture wrong_inside=accepted translated=0x300000c00 outside=rejected
 direction from_device_write=accepted from_device_read=rejected
-lifecycle stale_epoch=rejected early_unmap=rejected unrelated_completion=rejected returned_token_completes_own_mapping=accepted cpu_during_dma=rejected cpu_after_completion=accepted
+lifecycle stale_epoch=rejected early_unmap=rejected unrelated_completion=rejected returned_token_completes_own_mapping=accepted misreported_descriptor=rejected cpu_during_dma=rejected cpu_after_completion=accepted
 scatter original=4 mapped=2 unmap_mapped=rejected unmap_original=accepted
 linked_hooks in_aperture=accepted outside=rejected mask_boundary=rejected mask_overflow=rejected
 result=PASS timing_reported=no real_dma_exercised=no

@@ -25,6 +25,7 @@ while IFS= read -r variable; do
         CC | CFLAGS | CPPFLAGS | LDFLAGS | COMPILER_PATH | GCC_EXEC_PREFIX | \
         LIBRARY_PATH | CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | \
         LD_* | DYLD_* | GLIBC_TUNABLES | MALLOC_* | GIT_* | \
+        TAR_OPTIONS | TAPE | GZIP | \
         PYTHONPATH | PYTHONHOME | RIPGREP_CONFIG_PATH | CDPATH)
         swept_environment_names+=("$variable")
         unset "$variable"
@@ -309,10 +310,10 @@ run_gate validate-process-receipts.txt python3 -I -B "$experiment_dir/validate_r
 codegen="$output_dir/codegen"
 mkdir "$codegen"
 for flavor in generic native; do
-    binary="$generic_binary"
-    if [[ $flavor == native ]]; then
-        binary="$native_binary"
-    fi
+    # Inspect the probe the process run retained and hashed, not the mutable
+    # Cargo output it was copied from, so the exact-output receipts and this
+    # generated-code gate provably cover the same bytes.
+    binary="$process_root/${flavor}/probe"
     objdump -drwC "$binary" >"$codegen/${flavor}.objdump.txt"
     nm -n "$binary" >"$codegen/${flavor}.symbols.txt"
     readelf -h -n -A "$binary" >"$codegen/${flavor}.elf.txt"
@@ -484,6 +485,10 @@ done
 {
     printf 'generic_binary_sha256='; sha256sum "$generic_binary" | awk '{print $1}'
     printf 'native_binary_sha256='; sha256sum "$native_binary" | awk '{print $1}'
+    printf 'generic_retained_probe_sha256='
+    sha256sum "$process_root/generic/probe" | awk '{print $1}'
+    printf 'native_retained_probe_sha256='
+    sha256sum "$process_root/native/probe" | awk '{print $1}'
     printf 'expected_output_sha256='; sha256sum "$expected" | awk '{print $1}'
 } >"$output_dir/artifact-identity.txt"
 

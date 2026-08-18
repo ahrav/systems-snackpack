@@ -138,14 +138,18 @@ fn main() {
         .submit(99)
         .expect("independent mapping can issue an unrelated token");
     let rejected = mapping
-        .complete(unrelated_token)
+        .complete(unrelated_token, 99)
         .expect_err("completion from an unrelated descriptor is rejected");
     assert_eq!(rejected.error, MappingError::CompletionMismatch);
     unrelated_mapping
-        .complete(rejected.token)
+        .complete(rejected.token, 99)
         .expect("returned token still completes its own mapping");
+    let misreported = mapping
+        .complete(token, 42)
+        .expect_err("a device-reported descriptor that is not in flight is rejected");
+    assert_eq!(misreported.error, MappingError::CompletionMismatch);
     mapping
-        .complete(token)
+        .complete(misreported.token, 41)
         .expect("matching completion returns ownership to the CPU");
     mapping
         .check_cpu_access()
@@ -202,7 +206,7 @@ fn main() {
     );
     println!("direction from_device_write=accepted from_device_read=rejected");
     println!(
-        "lifecycle stale_epoch=rejected early_unmap=rejected unrelated_completion=rejected returned_token_completes_own_mapping=accepted cpu_during_dma=rejected cpu_after_completion=accepted"
+        "lifecycle stale_epoch=rejected early_unmap=rejected unrelated_completion=rejected returned_token_completes_own_mapping=accepted misreported_descriptor=rejected cpu_during_dma=rejected cpu_after_completion=accepted"
     );
     println!(
         "scatter original={} mapped={} unmap_mapped=rejected unmap_original=accepted",
