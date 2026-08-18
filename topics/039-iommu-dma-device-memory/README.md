@@ -246,8 +246,8 @@ output. See [`rounds/01.md`](rounds/01.md) for the acceptance contract and
 ### Retained two-host observation
 
 Both required hosts ran the final reviewed source commit
-`ef1b55f3cc2b9924e46de035d1f1b2e02e07bb08` from one Git archive with SHA-256
-digest `6df35758b2d84a192c2a1470bd6e75a198865d4b3d1cefa67ec3635783585403`.
+`f43f0fe3766933e9f17ce4d0c7590345238dbbae` from one Git archive with SHA-256
+digest `84f24c2ff91e38898d353481dd50b0effa66e25790eea433c736787e7a250802`.
 All 16 fresh correctness processes per host matched expected output, and every
 package, source-integrity, receipt, and generated-code gate passed. No timing
 was collected.
@@ -275,11 +275,12 @@ absence does not prove that the physical host lacks an IOMMU or that a real
 device would bypass translation.
 
 Generated code differed without changing the model result. The Arm executable
-contained direct calls to both hooks and used `sub`, `adds`, `ccmp`, `csinv`,
-and `csel` in the generic checked translator. The x86-64 executable used
-relative relocations plus indirect calls and implemented the checks with
-`test`, `sub`, comparisons, branches, and `cmov`. These are observations of the
-two named executables, not instruction-set-family performance claims.
+contained direct calls to both hooks and used `subs`, `cbz`, comparisons,
+`adds`, `neg`, and conditional branches in the generic checked translator. The
+x86-64 executable used relative relocations plus indirect calls and implemented
+the checks with `mov`, `test`, `sub`, `setcc`, comparisons, `add`, `neg`, and
+conditional branches. These are observations of the two named executables, not
+instruction-set-family performance claims.
 
 ## Practical selection guide
 

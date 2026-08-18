@@ -8,8 +8,8 @@ The two named hosts ran one exact source archive. This is a correctness and
 code-generation comparison, not a timing comparison. It does not compare Arm
 and x86-64 device, DMA, IOMMU, cache-maintenance, or translation performance.
 The current comparison binds final-reviewed source commit
-`ef1b55f3cc2b9924e46de035d1f1b2e02e07bb08` and source archive SHA-256
-`6df35758b2d84a192c2a1470bd6e75a198865d4b3d1cefa67ec3635783585403`.
+`f43f0fe3766933e9f17ce4d0c7590345238dbbae` and source archive SHA-256
+`84f24c2ff91e38898d353481dd50b0effa66e25790eea433c736787e7a250802`.
 
 | Observation | Arm target | `xxl` target |
 | --- | --- | --- |
@@ -22,7 +22,7 @@ The current comparison binds final-reviewed source commit
 | Native build | `-C target-cpu=native` | `-C target-cpu=native` |
 | Visible PCI devices / IOMMU groups | 4 / 0 | 154 / 0 |
 | Generic hook linkage | Direct symbol calls | Relocation-slot-bound indirect calls |
-| Checked-translator instructions | `sub`, `adds`, `ccmp`, `csinv`, `csel` | `test`, `sub`, comparisons, branches, `cmov` |
+| Checked-translator instructions | `subs`, `cbz`, comparisons, `adds`, `neg`, branches | `mov`, `test`, `sub`, `setcc`, comparisons, `add`, `neg`, branches |
 | Fresh process results | 8 generic + 8 native pass | 8 generic + 8 native pass |
 | Timing | Not reported | Not reported |
 
