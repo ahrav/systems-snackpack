@@ -301,9 +301,14 @@ for flavor in generic native; do
             # names a slot holding the symbol's linked address, an
             # instruction loads that exact slot (objdump resolves the
             # rip-relative target in its comment), and a later call goes
-            # through the loaded register before anything clobbers it, or
-            # calls through the slot memory-indirectly. An unrelated indirect
-            # call elsewhere in the binary cannot satisfy this. The
+            # through the loaded register while it provably still holds the
+            # slot value, or calls through the slot memory-indirectly. The
+            # tracker canonicalizes register aliases (%eax writes clobber a
+            # tracked %rax), kills every tracked register on instructions
+            # with implicit or multi-register writes (other calls, xchg,
+            # mul/div, cpuid, string ops, pops), and invalidates a tracked
+            # register on any other instruction that mentions its family, so
+            # an unrelated indirect call cannot satisfy the gate. The
             # deterministic probe output separately proves that both hook
             # results passed their assertions.
             symbol_address=$(
@@ -318,43 +323,81 @@ for flavor in generic native; do
             )
             if [[ -z $symbol_address || -z $slot_addresses ]] || \
                 ! awk -v slots_str="$slot_addresses" '
+                    function canon(reg) {
+                        sub(/^%/, "", reg)
+                        if (reg ~ /^r([89]|1[0-5])[dwb]?$/) {
+                            sub(/[dwb]$/, "", reg); return reg
+                        }
+                        if (reg ~ /^[er]?(ax|bx|cx|dx)$/) {
+                            sub(/^[er]/, "", reg); return "r" reg
+                        }
+                        if (reg ~ /^[abcd][lh]$/) return "r" substr(reg, 1, 1) "x"
+                        if (reg ~ /^[er]?(si|di|bp|sp)$/) {
+                            sub(/^[er]/, "", reg); return "r" reg
+                        }
+                        if (reg ~ /^(si|di|bp|sp)l$/) return "r" substr(reg, 1, 2)
+                        return reg
+                    }
+                    function fam(creg,   base) {
+                        if (creg in famre) return famre[creg]
+                        if (creg ~ /^r([89]|1[0-5])$/) {
+                            famre[creg] = "%" creg "[dwb]?"
+                        } else {
+                            base = substr(creg, 2)
+                            if (base ~ /^[abcd]x$/) {
+                                famre[creg] = "%[er]?" base "|%" substr(base, 1, 1) "[lh]"
+                            } else {
+                                famre[creg] = "%[er]?" base "|%" base "l"
+                            }
+                        }
+                        return famre[creg]
+                    }
                     BEGIN {
+                        FS = "\t"
                         n = split(slots_str, parts, ",")
                         for (i = 1; i <= n; i++) if (parts[i] != "") slot[parts[i]] = 1
                     }
                     # A new function body invalidates every tracked register.
                     /^[0-9a-f]+ </ { for (r in pending) delete pending[r]; next }
+                    NF < 3 { next }
                     {
-                        line = $0
-                        # Memory-indirect call straight through a hook slot.
-                        if (line ~ /callq?[[:space:]]+\*0x[0-9a-f]+\(%rip\)[[:space:]]+#/) {
-                            cmt = line
+                        insn = $3
+                        mnem = insn; sub(/[[:space:]].*/, "", mnem)
+                        body = insn; sub(/[[:space:]]*#.*$/, "", body)
+                        cmt = ""
+                        if (insn ~ /#/) {
+                            cmt = insn
                             sub(/.*#[[:space:]]*/, "", cmt); sub(/[[:space:]<].*/, "", cmt)
-                            if (cmt in slot) { found = 1; exit }
-                            next
                         }
-                        # Load of a hook slot into a register.
-                        if (line ~ /mov[[:space:]]+0x[0-9a-f]+\(%rip\),%r[0-9a-z]+[[:space:]]+#/) {
-                            reg = line
-                            sub(/.*\(%rip\),/, "", reg); sub(/[[:space:]].*/, "", reg)
-                            cmt = line
-                            sub(/.*#[[:space:]]*/, "", cmt); sub(/[[:space:]<].*/, "", cmt)
-                            if (cmt in slot) { pending[reg] = 1 } else { delete pending[reg] }
-                            next
+                        # Memory-indirect call straight through a hook slot.
+                        if (mnem ~ /^callq?$/ && body ~ /\*0x[0-9a-f]+\(%rip\)/ && (cmt in slot)) {
+                            found = 1; exit
                         }
                         # Register-indirect call through a still-live hook register.
-                        if (line ~ /callq?[[:space:]]+\*%r[0-9a-z]+/) {
-                            reg = line
-                            sub(/.*\*/, "", reg); sub(/[[:space:]].*/, "", reg)
-                            if (reg in pending) { found = 1; exit }
+                        if (mnem ~ /^callq?$/ && match(body, /\*%[a-z0-9]+/)) {
+                            if (canon(substr(body, RSTART + 1, RLENGTH - 1)) in pending) {
+                                found = 1; exit
+                            }
+                        }
+                        # Load of a hook slot into a register.
+                        if (mnem == "mov" && (cmt in slot) && \
+                            body ~ /0x[0-9a-f]+\(%rip\),%[a-z0-9]+[[:space:]]*$/) {
+                            reg = body
+                            sub(/.*\(%rip\),/, "", reg); sub(/[[:space:]].*$/, "", reg)
+                            pending[canon(reg)] = 1
                             next
                         }
-                        # Any other write to a tracked register invalidates it.
-                        op = line
-                        sub(/[[:space:]]*#.*$/, "", op)
-                        if (match(op, /,%r[0-9a-z]+$/)) {
-                            reg = substr(op, RSTART + 1, RLENGTH - 1)
-                            delete pending[reg]
+                        # Implicit or multi-register writes kill every tracked
+                        # register: other calls, interrupts, xchg/cmpxchg/xadd,
+                        # mul/div families, cpuid/rdtsc, string ops, pops.
+                        if (mnem ~ /^(callq?|syscall|sysenter|int3?|cpuid|rdtscp?|rdpmc|xgetbv|mul|imul|div|idiv|cqo|cdq|cbw|cwde|cdqe|xchg|cmpxchg([81]6b)?|xadd|rep[nz]*|movs[bwdq]?|stos[bwdq]?|lods[bwdq]?|scas[bwdq]?|cmps[bwdq]?|ins[bwd]?|outs[bwd]?|pop[a-z]*|leave|enter|loop[nz]*e?)$/) {
+                            for (r in pending) delete pending[r]
+                            next
+                        }
+                        # Any other mention of a tracked register family, read
+                        # or write, conservatively invalidates it.
+                        for (r in pending) {
+                            if (body ~ fam(r)) delete pending[r]
                         }
                     }
                     END { exit found ? 0 : 1 }
