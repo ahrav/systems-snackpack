@@ -28,13 +28,15 @@ The retained records are:
 - [`2026-08-18-xxl.md`](2026-08-18-xxl.md)
 - [`2026-08-18-comparison.md`](2026-08-18-comparison.md)
 - Current final-reviewed source binding:
+  [`raw/2026-08-18-ef1b55f/SOURCE.md`](raw/2026-08-18-ef1b55f/SOURCE.md)
+- Retained post-review source binding, superseded for the current branch head:
   [`raw/2026-08-18-068d082/SOURCE.md`](raw/2026-08-18-068d082/SOURCE.md)
 - Retained intermediate source binding, superseded for the current branch head:
   [`raw/2026-08-18-a56a48e/SOURCE.md`](raw/2026-08-18-a56a48e/SOURCE.md)
 - Initial retained source binding, also superseded for the current branch head:
   [`raw/2026-08-18-3aaece9/SOURCE.md`](raw/2026-08-18-3aaece9/SOURCE.md)
 
-Both hosts passed the `068d082` exact-source run. Repository history, not the
+Both hosts passed the `ef1b55f` exact-source run. Repository history, not the
 host bundles, must verify that later evidence-only commits change only evidence
 and leave measured source commit
-`068d082c422efce23700949b01af80f3f2554572` unchanged.
+`ef1b55f3cc2b9924e46de035d1f1b2e02e07bb08` unchanged.

@@ -6,7 +6,8 @@ contains its own manifest. The evidence-only commit must not change the source
 that produced the receipts.
 
 The current final-reviewed run is under
-[`2026-08-18-068d082`](2026-08-18-068d082/). The intermediate
-[`2026-08-18-a56a48e`](2026-08-18-a56a48e/) and initial
-[`2026-08-18-3aaece9`](2026-08-18-3aaece9/) runs remain as historical evidence
-but do not represent the current branch source.
+[`2026-08-18-ef1b55f`](2026-08-18-ef1b55f/). The post-review
+[`2026-08-18-068d082`](2026-08-18-068d082/), intermediate
+[`2026-08-18-a56a48e`](2026-08-18-a56a48e/), and initial
+[`2026-08-18-3aaece9`](2026-08-18-3aaece9/) runs remain as historical
+evidence but do not represent the current branch source.
