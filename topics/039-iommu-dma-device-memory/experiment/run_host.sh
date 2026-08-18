@@ -248,6 +248,35 @@ cargo_target="$work_dir/cargo-target-generic"
 native_cargo_target="$work_dir/cargo-target-native"
 manifest="$source_root/Cargo.toml"
 package=iommu-dma-device-memory
+
+# Cargo reads config.toml from the invocation directory, every parent up to
+# the filesystem root, and Cargo home. Any such file could select a rustc
+# wrapper, linker, or build flags that the recorded toolchain and flags do
+# not capture, so the exact-source contract refuses them all. Cargo home is
+# still needed for the offline registry, so it is checked, not replaced.
+cargo_config_probe() {
+    local directory=$1
+    while :; do
+        for candidate in "$directory/.cargo/config.toml" "$directory/.cargo/config"; do
+            if [[ -e $candidate ]]; then
+                echo "exact-source experiment refuses discovered Cargo config $candidate" >&2
+                exit 2
+            fi
+        done
+        [[ $directory == / ]] && break
+        directory=$(dirname "$directory")
+    done
+}
+cargo_config_probe "$source_root"
+cargo_config_probe "$PWD"
+for candidate in "${CARGO_HOME:-$HOME/.cargo}/config.toml" \
+    "${CARGO_HOME:-$HOME/.cargo}/config"; do
+    if [[ -e $candidate ]]; then
+        echo "exact-source experiment refuses discovered Cargo config $candidate" >&2
+        exit 2
+    fi
+done
+
 run_gate gate-cargo-fmt.txt cargo fmt --manifest-path "$manifest" --all -- --check
 run_gate gate-cargo-test.txt env CARGO_TARGET_DIR="$cargo_target" cargo test --manifest-path "$manifest" --locked --offline --package "$package" --all-targets
 run_gate gate-cargo-clippy.txt env CARGO_TARGET_DIR="$cargo_target" cargo clippy --manifest-path "$manifest" --locked --offline --package "$package" --all-targets -- -D warnings
@@ -303,14 +332,18 @@ for flavor in generic native; do
             # rip-relative target in its comment), and a later call goes
             # through the loaded register while it provably still holds the
             # slot value, or calls through the slot memory-indirectly. The
-            # tracker canonicalizes register aliases (%eax writes clobber a
-            # tracked %rax), kills every tracked register on instructions
-            # with implicit or multi-register writes (other calls, xchg,
-            # mul/div, cpuid, string ops, pops), and invalidates a tracked
-            # register on any other instruction that mentions its family, so
-            # an unrelated indirect call cannot satisfy the gate. The
-            # deterministic probe output separately proves that both hook
-            # results passed their assertions.
+            # tracker only trusts straight-line reachability: the first pass
+            # collects every branch-target address, and the second pass
+            # drops all tracked registers at those block leaders, at
+            # function labels, and at unconditional jumps or returns, so an
+            # association never survives into code reachable from another
+            # predecessor. It also canonicalizes register aliases (%eax
+            # writes clobber a tracked %rax), kills every tracked register
+            # on instructions with implicit or multi-register writes (other
+            # calls, xchg, mul/div, cpuid, string ops, pops), and
+            # invalidates a tracked register on any other mention of its
+            # family. The deterministic probe output separately proves that
+            # both hook results passed their assertions.
             symbol_address=$(
                 awk -v symbol="$symbol" '$3 == symbol { print $1; exit }' \
                     "$codegen/${flavor}.symbols.txt" | sed 's/^0*//'
@@ -357,10 +390,30 @@ for flavor in generic native; do
                         n = split(slots_str, parts, ",")
                         for (i = 1; i <= n; i++) if (parts[i] != "") slot[parts[i]] = 1
                     }
+                    # First pass: every explicit branch or call target starts
+                    # a block that another predecessor can reach.
+                    NR == FNR {
+                        if (NF >= 3) {
+                            insn = $3
+                            mnem = insn; sub(/[[:space:]].*/, "", mnem)
+                            if (mnem ~ /^(j[a-z]+|callq?|loop[a-z]*)$/) {
+                                operand = insn
+                                sub(/^[^[:space:]]+[[:space:]]+/, "", operand)
+                                sub(/[[:space:]].*/, "", operand)
+                                if (operand ~ /^[0-9a-f]+$/) leader[operand] = 1
+                            }
+                        }
+                        next
+                    }
                     # A new function body invalidates every tracked register.
                     /^[0-9a-f]+ </ { for (r in pending) delete pending[r]; next }
                     NF < 3 { next }
                     {
+                        addr = $1
+                        gsub(/[[:space:]:]/, "", addr)
+                        # A block leader is reachable from another
+                        # predecessor, so the load no longer dominates.
+                        if (addr in leader) for (r in pending) delete pending[r]
                         insn = $3
                         mnem = insn; sub(/[[:space:]].*/, "", mnem)
                         body = insn; sub(/[[:space:]]*#.*$/, "", body)
@@ -387,6 +440,12 @@ for flavor in generic native; do
                             pending[canon(reg)] = 1
                             next
                         }
+                        # Unconditional control transfers end the
+                        # fall-through run; nothing survives past them.
+                        if (mnem ~ /^(jmpq?|ret[fq]?|ud2|hlt)$/) {
+                            for (r in pending) delete pending[r]
+                            next
+                        }
                         # Implicit or multi-register writes kill every tracked
                         # register: other calls, interrupts, xchg/cmpxchg/xadd,
                         # mul/div families, cpuid/rdtsc, string ops, pops.
@@ -401,7 +460,7 @@ for flavor in generic native; do
                         }
                     }
                     END { exit found ? 0 : 1 }
-                ' "$codegen/${flavor}.objdump.txt"; then
+                ' "$codegen/${flavor}.objdump.txt" "$codegen/${flavor}.objdump.txt"; then
                 echo "$flavor codegen lacks a linked direct or slot-bound indirect call to $symbol" >&2
                 exit 1
             fi

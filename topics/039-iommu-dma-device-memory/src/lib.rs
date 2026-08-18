@@ -626,7 +626,13 @@ pub extern "C" fn topic39_checked_translate(
     if offset >= aperture_len || range_len > aperture_len - offset {
         return u64::MAX;
     }
-    physical_base.saturating_add(offset)
+    let Some(start) = physical_base.checked_add(offset) else {
+        return u64::MAX;
+    };
+    if start.checked_add(range_len - 1).is_none() {
+        return u64::MAX;
+    }
+    start
 }
 
 /// Checks a half-open IOVA range against an inclusive device address mask.
@@ -806,6 +812,14 @@ mod tests {
         assert_eq!(
             topic39_checked_translate(0x1000, 0x1000, 0x1001, 1, u64::MAX),
             u64::MAX
+        );
+        assert_eq!(
+            topic39_checked_translate(0, 16, 0, 3, u64::MAX - 1),
+            u64::MAX
+        );
+        assert_eq!(
+            topic39_checked_translate(0, 16, 0, 2, u64::MAX - 1),
+            u64::MAX - 1
         );
     }
 
