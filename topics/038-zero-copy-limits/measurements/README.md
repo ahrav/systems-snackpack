@@ -50,6 +50,14 @@ byte against the deterministic source pattern. Timing still requires exact
 received length, clean receiver status, clean transfer status, and successful
 process exit, but omits the per-byte comparator.
 
+At measured commit `c6b76b4` the source pattern repeated every 1 MiB and the
+`MSG_ZEROCOPY` payload repeated every 256 bytes, so these retained correctness
+receipts could not have detected a transfer that duplicated, skipped, or
+reordered whole pattern periods; they establish exact received length and
+byte-for-byte equality against that periodic pattern only. Later source
+commits generate every byte from its full absolute offset, and receipts from
+reruns at those commits do not carry this limitation.
+
 The `MSG_ZEROCOPY` control is correctness-only. It enables `SO_ZEROCOPY` on an
 IPv4 loopback TCP socket, sends eight page-aligned 64 KiB regions, retains the
 entire 524,288-byte buffer, verifies receiver bytes, and processes the error
