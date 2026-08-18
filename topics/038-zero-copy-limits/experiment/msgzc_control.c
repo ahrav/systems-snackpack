@@ -50,7 +50,15 @@ struct receiver_ctx {
 
 static unsigned char expected_byte(size_t offset)
 {
-    return (unsigned char)(((offset * 131U) + 17U) & 0xffU);
+    // Every byte depends on its full absolute offset with no short period, so
+    // a send that uses the wrong region, or duplicates or reorders regions,
+    // cannot still verify.
+    uint64_t x = (uint64_t)offset;
+    x += 0x9e3779b97f4a7c15ULL;
+    x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
+    x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
+    x ^= x >> 31;
+    return (unsigned char)(x >> 56);
 }
 
 static int64_t monotonic_ms(void)

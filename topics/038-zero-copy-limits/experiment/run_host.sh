@@ -35,6 +35,11 @@ while IFS= read -r variable; do
     esac
 done < <(compgen -e)
 export GIT_NO_REPLACE_OBJECTS=1
+# The sweep above cannot stop an inherited PATH from substituting wrappers for
+# cc, cargo, python3, taskset, or the hashing and archive tools, so pin the
+# search path to standard locations plus the rustup toolchain directory.
+export PATH="$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
+hash -r
 
 if [[ $# -ne 4 ]]; then
     echo "usage: $0 OUTPUT_DIR SOURCE_COMMIT SOURCE_ARCHIVE_SHA256 SOURCE_ARCHIVE" >&2
