@@ -1,0 +1,17 @@
+[package]
+name = "iommu-dma-device-memory"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "iommu_dma_device_memory"
+path = "src/lib.rs"
+
+[[bin]]
+name = "dma-contract-probe"
+path = "src/bin/dma_contract_probe.rs"
+
+[lints]
+workspace = true

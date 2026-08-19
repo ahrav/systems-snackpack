@@ -1,0 +1,682 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Run the committed Topic 39 correctness model from a digest-bound Git archive.
+# Results and build products stay outside the extracted source tree.
+if [[ -n ${BASH_ENV:-} ]]; then
+    echo "exact-source experiment refuses BASH_ENV" >&2
+    exit 2
+fi
+if [[ -n $(compgen -A function) ]]; then
+    echo "exact-source experiment refuses inherited shell functions" >&2
+    exit 2
+fi
+if [[ -s /etc/ld.so.preload ]]; then
+    echo "exact-source experiment refuses system-wide dynamic-loader preloads" >&2
+    exit 2
+fi
+
+swept_environment_names=()
+while IFS= read -r variable; do
+    case $variable in
+    RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | RUSTFMT | \
+        RUSTFLAGS | RUSTDOCFLAGS | CARGO_ENCODED_RUSTFLAGS | CARGO_INCREMENTAL | \
+        CARGO_BUILD_* | CARGO_TARGET_* | CARGO_PROFILE_* | CARGO_UNSTABLE_* | \
+        CC | CFLAGS | CPPFLAGS | LDFLAGS | COMPILER_PATH | GCC_EXEC_PREFIX | \
+        LIBRARY_PATH | CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | \
+        LD_* | DYLD_* | GLIBC_TUNABLES | MALLOC_* | GIT_* | \
+        TAR_OPTIONS | TAPE | GZIP | \
+        PYTHONPATH | PYTHONHOME | RIPGREP_CONFIG_PATH | CDPATH)
+        swept_environment_names+=("$variable")
+        unset "$variable"
+        ;;
+    esac
+done < <(compgen -e)
+export GIT_NO_REPLACE_OBJECTS=1
+export PATH="$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
+hash -r
+
+if [[ $# -ne 4 ]]; then
+    echo "usage: $0 OUTPUT_DIR SOURCE_COMMIT SOURCE_ARCHIVE_SHA256 SOURCE_ARCHIVE" >&2
+    exit 2
+fi
+: "${SSH_TARGET_LABEL:?set SSH_TARGET_LABEL to xxl or the authorized Arm hostname}"
+: "${SSH_RESOLVED_HOSTNAME:?set SSH_RESOLVED_HOSTNAME to the runtime-resolved hostname}"
+
+output_dir=$(realpath -m -- "$1")
+source_commit=${2,,}
+archive_digest_expected=${3,,}
+source_archive=$(realpath -m -- "$4")
+if [[ ! $source_commit =~ ^[0-9a-f]{40}$ ]]; then
+    echo "SOURCE_COMMIT must be a full 40-hex Git object ID" >&2
+    exit 2
+fi
+if [[ ! $archive_digest_expected =~ ^[0-9a-f]{64}$ ]]; then
+    echo "SOURCE_ARCHIVE_SHA256 must be 64 hexadecimal digits" >&2
+    exit 2
+fi
+if [[ -e $output_dir || -e ${output_dir}.work ]]; then
+    echo "output or work path already exists: $output_dir" >&2
+    exit 2
+fi
+if [[ ! -f $source_archive ]]; then
+    echo "source archive does not exist: $source_archive" >&2
+    exit 2
+fi
+
+work_dir="${output_dir}.work"
+extract_dir="$work_dir/archive"
+# Reserve both leaves atomically. Plain mkdir fails with EEXIST on an
+# existing directory, file, or symlink, so a path another local user
+# precreated between the check above and here cannot be adopted; -p would
+# accept it. Each leaf is created 0700 in the same call, so no window exists
+# where it is group- or world-writable.
+# Creating the leaves atomically does not help if a parent is
+# attacker-controlled: whoever can write a parent can rename the private leaf
+# and substitute paths while receipts are written. Require the whole ancestor
+# chain to exist already and be untamperable, and never create it here. A
+# directory writable by group or other is refused unless it is sticky, which
+# is what stops another user renaming or deleting our entry.
+output_parent=$(dirname -- "$output_dir")
+if [[ -L $output_parent || ! -d $output_parent ]]; then
+    echo "output parent must already exist as a real directory: $output_parent" >&2
+    exit 2
+fi
+invoking_uid=$(id -u)
+probe_directory=$output_parent
+while :; do
+    if [[ -L $probe_directory ]]; then
+        echo "output ancestor must not be a symbolic link: $probe_directory" >&2
+        exit 2
+    fi
+    ancestor_owner=$(stat -c %u -- "$probe_directory")
+    ancestor_mode=$(stat -c %a -- "$probe_directory")
+    if [[ $ancestor_owner != "$invoking_uid" && $ancestor_owner != 0 ]]; then
+        echo "output ancestor must be owned by the invoking user or root: $probe_directory" >&2
+        exit 2
+    fi
+    if ((0$ancestor_mode & 022)) && ((!(0$ancestor_mode & 01000))); then
+        echo "output ancestor is writable by others and not sticky: $probe_directory" >&2
+        exit 2
+    fi
+    [[ $probe_directory == / ]] && break
+    probe_directory=$(dirname -- "$probe_directory")
+done
+if ! mkdir -m 0700 -- "$output_dir"; then
+    echo "could not exclusively create output directory: $output_dir" >&2
+    exit 2
+fi
+if ! mkdir -m 0700 -- "$work_dir"; then
+    echo "could not exclusively create work directory: $work_dir" >&2
+    exit 2
+fi
+if ! mkdir -m 0700 -- "$extract_dir"; then
+    echo "could not exclusively create extract directory: $extract_dir" >&2
+    exit 2
+fi
+# Copy the archive once into the private work area. Every verification and
+# the extraction read this immutable snapshot, so replacing the caller's
+# file between the digest check and extraction cannot change what runs.
+private_archive="$work_dir/source-archive.tar.gz"
+cp -- "$source_archive" "$private_archive"
+chmod 0400 "$private_archive"
+source_archive=$private_archive
+
+archive_digest=$(sha256sum "$source_archive" | awk '{print $1}')
+if [[ $archive_digest != "$archive_digest_expected" ]]; then
+    echo "source archive digest mismatch" >&2
+    exit 2
+fi
+pax_global_header=$(gzip -dc -- "$source_archive" 2>/dev/null | dd bs=512 skip=1 count=1 status=none | tr -d '\0' || true)
+if [[ ! $pax_global_header =~ comment=([0-9a-f]{40}) ]]; then
+    echo "archive lacks the commit identity written by git archive" >&2
+    exit 2
+fi
+if [[ ${BASH_REMATCH[1]} != "$source_commit" ]]; then
+    echo "archive embeds ${BASH_REMATCH[1]}, not $source_commit" >&2
+    exit 2
+fi
+if tar -tzf "$source_archive" | rg '(^/|(^|/)\.\.(/|$))'; then
+    echo "source archive contains an unsafe path" >&2
+    exit 2
+fi
+if tar -tvzf "$source_archive" | awk 'substr($1, 1, 1) == "l" { found=1 } END { exit !found }'; then
+    echo "source archive contains a symbolic link" >&2
+    exit 2
+fi
+
+resolved_hostname=$(hostname -f)
+architecture=$(uname -m)
+if [[ $resolved_hostname != "$SSH_RESOLVED_HOSTNAME" ]]; then
+    echo "resolved host mismatch: expected $SSH_RESOLVED_HOSTNAME, got $resolved_hostname" >&2
+    exit 1
+fi
+case $SSH_TARGET_LABEL in
+xxl)
+    [[ $architecture == x86_64 ]] || {
+        echo "xxl must resolve to x86_64; got $architecture" >&2
+        exit 1
+    }
+    ;;
+dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com)
+    [[ $architecture == aarch64 || $architecture == arm64 ]] || {
+        echo "authorized Arm host must be aarch64/arm64; got $architecture" >&2
+        exit 1
+    }
+    ;;
+*)
+    echo "unexpected SSH target label: $SSH_TARGET_LABEL" >&2
+    exit 2
+    ;;
+esac
+
+tar -xzf "$source_archive" -C "$extract_dir"
+
+runner_relative=topics/039-iommu-dma-device-memory/experiment/run_host.sh
+mapfile -t runner_markers < <(rg --files --hidden --no-ignore "$extract_dir" | rg "/${runner_relative}$" | LC_ALL=C sort)
+if [[ ${#runner_markers[@]} -ne 1 ]]; then
+    echo "archive must contain exactly one Topic 39 host runner" >&2
+    exit 2
+fi
+source_root=${runner_markers[0]%/"$runner_relative"}
+source_root=$(realpath "$source_root")
+experiment_dir="$source_root/topics/039-iommu-dma-device-memory/experiment"
+if ! cmp -- "${BASH_SOURCE[0]}" "$experiment_dir/run_host.sh"; then
+    echo "executed host runner differs from the archive's runner" >&2
+    exit 2
+fi
+
+write_source_manifest() {
+    local destination=$1
+    (
+        cd "$source_root"
+        rg --files --hidden --no-ignore -g '!target/**' -g '!.git/**' -g '!.git' -0 |
+            LC_ALL=C sort -z | xargs -0 sha256sum --
+    ) >"$destination"
+}
+
+run_gate() {
+    local name=$1
+    shift
+    {
+        printf 'COMMAND='
+        printf '%q ' "$@"
+        printf '\n'
+        "$@"
+    } >"$output_dir/$name" 2>&1
+}
+
+record_optional() {
+    local name=$1
+    shift
+    {
+        printf 'COMMAND='
+        printf '%q ' "$@"
+        printf '\n'
+        "$@"
+    } >"$output_dir/$name" 2>&1 || true
+}
+
+# The acceptance contract claims exact toolchain and target-feature records, so
+# a failed probe must fail the run rather than leave a bundle that is missing
+# evidence it advertises. record_optional stays for genuinely optional
+# diagnostics, such as compiler-specific queries that another compiler rejects.
+record_required() {
+    local name=$1
+    shift
+    if ! {
+        printf 'COMMAND='
+        printf '%q ' "$@"
+        printf '\n'
+        "$@"
+    } >"$output_dir/$name" 2>&1; then
+        echo "required host metadata probe failed: $name" >&2
+        exit 1
+    fi
+}
+
+write_source_manifest "$output_dir/source-manifest-before.sha256"
+{
+    printf 'source_commit=%s\n' "$source_commit"
+    printf 'source_archive=%s\n' "$source_archive"
+    printf 'source_archive_sha256=%s\n' "$archive_digest"
+    printf 'source_root=%s\n' "$source_root"
+    printf 'runner_sha256='
+    sha256sum "$experiment_dir/run_host.sh" | awk '{print $1}'
+    printf 'swept_environment_names=%s\n' "${swept_environment_names[*]:-none}"
+} >"$output_dir/source-identity.txt"
+
+{
+    printf 'date_utc='; date -u +%Y-%m-%dT%H:%M:%SZ
+    printf 'ssh_target_label=%s\n' "$SSH_TARGET_LABEL"
+    printf 'ssh_target_label_trust=caller_supplied_not_verifiable_on_this_host\n'
+    printf 'ssh_resolved_hostname=%s\n' "$SSH_RESOLVED_HOSTNAME"
+    printf 'ssh_resolved_hostname_trust=caller_supplied_compared_to_local_hostname_fqdn\n'
+    printf 'hostname_short='; hostname
+    printf 'hostname_fqdn=%s\n' "$resolved_hostname"
+    printf 'uname_all='; uname -a
+    printf 'architecture=%s\n' "$architecture"
+    printf 'kernel='; uname -r
+    printf 'cpu_count_online='; getconf _NPROCESSORS_ONLN
+    printf 'cpu_count_available='; nproc
+    printf 'page_size='; getconf PAGESIZE
+    printf 'toolchain_resolution_directory='; pwd -P
+    printf 'rust_metadata_and_build_resolved_from=invocation_directory_not_extracted_archive\n'
+    printf 'build_generic=release default target features\n'
+    printf 'build_native=release RUSTFLAGS=-C target-cpu=native\n'
+    printf 'measurement_kind=deterministic correctness only\n'
+    printf 'fresh_process_runs=8 generic + 8 native\n'
+    printf 'timing_reported=no\n'
+    printf 'real_dma_exercised=no\n'
+    lscpu
+} >"$output_dir/host.txt" 2>&1
+
+record_required proc-cpuinfo.txt sed -n '1,260p' /proc/cpuinfo
+record_required rustc-version.txt rustc -vV
+record_required cargo-version.txt cargo -Vv
+record_required python-version.txt python3 -VV
+record_required cc-version.txt cc -v
+record_required objdump-version.txt objdump --version
+record_required rust-target-cfg.txt rustc --print cfg
+# --print target-features lists what the target supports and does not change
+# under -C target-cpu=native, and the cfg above is collected with generic
+# defaults, so the native build's enabled features need their own record.
+record_required rust-native-target-cfg.txt rustc -C target-cpu=native --print cfg
+record_required rust-target-features.txt rustc --print target-features
+# `cc -v` with no input performs no link, so it never names the linker. Do a
+# real link of a trivial program to capture the driver's collect2 and ld
+# invocation, and record the selected linker's own version, since the
+# measurement record promises the linker version used to build the probes.
+link_probe_source="$work_dir/link-probe.c"
+link_probe_binary="$work_dir/link-probe"
+printf 'int main(void) { return 0; }\n' >"$link_probe_source"
+record_required cc-link-verbose.txt cc -v -o "$link_probe_binary" "$link_probe_source"
+record_required cc-linker-path.txt cc -print-prog-name=ld
+cc_linker=$(cc -print-prog-name=ld)
+record_required cc-linker-version.txt "$cc_linker" --version
+# GCC-specific query; another compiler may reject it, so this one is optional.
+record_optional cc-native-target.txt cc -march=native -Q --help=target
+record_optional limits.txt bash -c 'ulimit -a'
+
+shopt -s nullglob
+iommu_class_entries=(/sys/class/iommu/*)
+iommu_group_entries=(/sys/kernel/iommu_groups/*)
+pci_devices=(/sys/bus/pci/devices/*)
+pci_iommu_links=0
+for device in "${pci_devices[@]}"; do
+    if [[ -L $device/iommu_group ]]; then
+        ((pci_iommu_links += 1))
+    fi
+done
+{
+    printf 'sys_class_iommu_entries=%d\n' "${#iommu_class_entries[@]}"
+    printf 'sys_kernel_iommu_groups=%d\n' "${#iommu_group_entries[@]}"
+    printf 'sys_bus_pci_devices=%d\n' "${#pci_devices[@]}"
+    printf 'pci_devices_with_iommu_group_link=%d\n' "$pci_iommu_links"
+    printf 'sys_class_iommu_listing_begin\n'
+    for entry in "${iommu_class_entries[@]}"; do
+        printf '%s -> %s\n' "$entry" "$(realpath "$entry")"
+    done
+    printf 'sys_class_iommu_listing_end\n'
+    printf 'iommu_group_listing_begin\n'
+    for entry in "${iommu_group_entries[@]}"; do
+        printf '%s\n' "$entry"
+        for member in "$entry"/devices/*; do
+            printf '  device %s -> %s\n' "${member##*/}" "$(realpath "$member")"
+        done
+    done
+    printf 'iommu_group_listing_end\n'
+    printf 'pci_device_group_listing_begin\n'
+    for device in "${pci_devices[@]}"; do
+        if [[ -L $device/iommu_group ]]; then
+            printf '%s -> %s\n' "${device##*/}" "$(realpath "$device/iommu_group")"
+        else
+            printf '%s -> none\n' "${device##*/}"
+        fi
+    done
+    printf 'pci_device_group_listing_end\n'
+} >"$output_dir/iommu-sysfs.txt"
+
+kernel_symbols=(
+    IOMMU IOMMU_SUPPORT IOMMUFD IOMMU_SVA SWIOTLB
+    ARM_SMMU ARM_SMMU_V3 INTEL_IOMMU AMD_IOMMU
+    VFIO VFIO_IOMMU_TYPE1 PCI_PASID PCI_ATS PCI_PRI
+)
+kernel_symbol_alternation=$(
+    IFS='|'
+    printf '%s' "${kernel_symbols[*]}"
+)
+# Decode the configuration before accepting its source. A masked decode
+# failure would otherwise leave a passing receipt with no usable evidence.
+kernel_config_decoded="$work_dir/kernel-config-decoded.txt"
+if [[ -r /proc/config.gz ]]; then
+    if ! gzip -dc /proc/config.gz >"$kernel_config_decoded"; then
+        echo "required kernel configuration could not be decoded from /proc/config.gz" >&2
+        exit 1
+    fi
+    kernel_config_source=/proc/config.gz
+elif [[ -r /boot/config-$(uname -r) ]]; then
+    if ! cp -- "/boot/config-$(uname -r)" "$kernel_config_decoded"; then
+        echo "required kernel configuration could not be read from /boot/config-$(uname -r)" >&2
+        exit 1
+    fi
+    kernel_config_source="/boot/config-$(uname -r)"
+else
+    echo "required kernel configuration unavailable: neither /proc/config.gz nor /boot/config-$(uname -r) is readable" >&2
+    exit 1
+fi
+if [[ ! -s $kernel_config_decoded ]]; then
+    echo "required kernel configuration decoded empty from $kernel_config_source" >&2
+    exit 1
+fi
+{
+    printf 'kernel_config_source=%s\n' "$kernel_config_source"
+    # One line per required symbol, so an explicitly disabled symbol is
+    # distinguishable from one this kernel does not define at all.
+    printf 'kernel_config_symbol_states_begin\n'
+    for symbol in "${kernel_symbols[@]}"; do
+        if symbol_line=$(rg -N -m 1 "^CONFIG_${symbol}=" "$kernel_config_decoded"); then
+            printf '%s\n' "$symbol_line"
+        elif rg -N -q "^# CONFIG_${symbol} is not set\$" "$kernel_config_decoded"; then
+            printf 'CONFIG_%s=not_set\n' "$symbol"
+        else
+            printf 'CONFIG_%s=absent\n' "$symbol"
+        fi
+    done
+    printf 'kernel_config_symbol_states_end\n'
+    printf 'kernel_config_matching_lines_begin\n'
+    rg -N "^(# )?CONFIG_($kernel_symbol_alternation)" "$kernel_config_decoded" || true
+    printf 'kernel_config_matching_lines_end\n'
+} >"$output_dir/iommu-kernel-config.txt" 2>&1
+
+cargo_target="$work_dir/cargo-target-generic"
+native_cargo_target="$work_dir/cargo-target-native"
+manifest="$source_root/Cargo.toml"
+package=iommu-dma-device-memory
+
+# Cargo reads config.toml from its canonical working directory, every parent
+# up to the filesystem root, and Cargo home, and --manifest-path does not move
+# that search. Probe the physical working directory rather than $PWD, which a
+# symlinked invocation directory leaves naming parents Cargo never reads, and
+# probe the extracted source root too. Any such file could select a rustc
+# wrapper, linker, or build flags that the recorded toolchain and flags do not
+# capture, so the exact-source contract refuses them all. Cargo home is still
+# needed for the offline registry, so it is checked, not replaced.
+#
+# The runner deliberately does not cd into the extracted tree: rustup selects a
+# toolchain by working directory, so building from inside the archive would let
+# its rust-toolchain.toml choose the compiler instead of this host's default,
+# changing what the two-host comparison observes. Staying put keeps the build
+# and the recorded Rust metadata resolved from the same directory.
+cargo_config_probe() {
+    local directory=$1
+    while :; do
+        for candidate in "$directory/.cargo/config.toml" "$directory/.cargo/config"; do
+            if [[ -e $candidate ]]; then
+                echo "exact-source experiment refuses discovered Cargo config $candidate" >&2
+                exit 2
+            fi
+        done
+        [[ $directory == / ]] && break
+        directory=$(dirname "$directory")
+    done
+}
+cargo_config_probe "$(pwd -P)"
+cargo_config_probe "$source_root"
+for candidate in "${CARGO_HOME:-$HOME/.cargo}/config.toml" \
+    "${CARGO_HOME:-$HOME/.cargo}/config"; do
+    if [[ -e $candidate ]]; then
+        echo "exact-source experiment refuses discovered Cargo config $candidate" >&2
+        exit 2
+    fi
+done
+
+run_gate gate-cargo-fmt.txt cargo fmt --manifest-path "$manifest" --all -- --check
+run_gate gate-cargo-test.txt env CARGO_TARGET_DIR="$cargo_target" cargo test --manifest-path "$manifest" --locked --offline --package "$package" --all-targets
+run_gate gate-cargo-clippy.txt env CARGO_TARGET_DIR="$cargo_target" cargo clippy --manifest-path "$manifest" --locked --offline --package "$package" --all-targets -- -D warnings
+run_gate gate-cargo-doc.txt env CARGO_TARGET_DIR="$cargo_target" RUSTDOCFLAGS=-Dwarnings cargo doc --manifest-path "$manifest" --locked --offline --package "$package" --no-deps
+run_gate build-generic.txt env CARGO_TARGET_DIR="$cargo_target" RUSTFLAGS= cargo build -vv --manifest-path "$manifest" --locked --offline --release --package "$package" --bin dma-contract-probe
+run_gate build-native.txt env CARGO_TARGET_DIR="$native_cargo_target" RUSTFLAGS='-C target-cpu=native' cargo build -vv --manifest-path "$manifest" --locked --offline --release --package "$package" --bin dma-contract-probe
+
+generic_binary="$cargo_target/release/dma-contract-probe"
+native_binary="$native_cargo_target/release/dma-contract-probe"
+expected="$experiment_dir/expected.txt"
+process_root="$output_dir/processes"
+mkdir "$process_root"
+run_gate run-generic-processes.txt python3 -I -B "$experiment_dir/run_processes.py" \
+    --binary "$generic_binary" --expected "$expected" \
+    --output "$process_root/generic" --flavor generic --runs 8
+run_gate run-native-processes.txt python3 -I -B "$experiment_dir/run_processes.py" \
+    --binary "$native_binary" --expected "$expected" \
+    --output "$process_root/native" --flavor native --runs 8
+run_gate validate-process-receipts.txt python3 -I -B "$experiment_dir/validate_receipts.py" \
+    --root "$process_root" --expected "$expected"
+
+codegen="$output_dir/codegen"
+mkdir "$codegen"
+for flavor in generic native; do
+    # Inspect the probe the process run retained and hashed, not the mutable
+    # Cargo output it was copied from, so the exact-output receipts and this
+    # generated-code gate provably cover the same bytes.
+    binary="$process_root/${flavor}/probe"
+    objdump -drwC "$binary" >"$codegen/${flavor}.objdump.txt"
+    nm -n "$binary" >"$codegen/${flavor}.symbols.txt"
+    readelf -h -n -A "$binary" >"$codegen/${flavor}.elf.txt"
+    readelf -rW "$binary" >"$codegen/${flavor}.relocations.txt"
+    # `|| true`: a missing symbol must reach the named error below, not die
+    # silently on rg's non-match exit status under `set -e`.
+    rg -n '<topic39_(checked_translate|mask_allows)>:' \
+        "$codegen/${flavor}.objdump.txt" >"$codegen/${flavor}.required-symbols.txt" \
+        || true
+    for symbol in topic39_checked_translate topic39_mask_allows; do
+        if ! rg -q "<${symbol}>:" "$codegen/${flavor}.objdump.txt"; then
+            echo "$flavor codegen lacks required definition $symbol" >&2
+            exit 1
+        fi
+        if rg -q "[[:space:]](callq?|bl)[[:space:]]+[^<]*<${symbol}>" \
+            "$codegen/${flavor}.objdump.txt"; then
+            printf '%s\t%s\tdirect-symbol-call\n' "$flavor" "$symbol" \
+                >>"$codegen/linked-hook-modes.tsv"
+        elif [[ $architecture == x86_64 ]]; then
+            # Position-independent x86-64 executables can load this locally
+            # defined function through a relative relocation and then use an
+            # indirect register call. Bind the whole chain: the relocation
+            # names a slot holding the symbol's linked address, an
+            # instruction loads that exact slot (objdump resolves the
+            # rip-relative target in its comment), and a later call goes
+            # through the loaded register while it provably still holds the
+            # slot value, or calls through the slot memory-indirectly. The
+            # tracker only trusts straight-line reachability: the first pass
+            # collects every branch-target address, and the second pass
+            # drops all tracked registers at those block leaders, at
+            # function labels, and at unconditional jumps or returns, so an
+            # association never survives into code reachable from another
+            # predecessor. It also canonicalizes register aliases (%eax
+            # writes clobber a tracked %rax), kills every tracked register
+            # on instructions with implicit or multi-register writes (other
+            # calls, xchg, mul/div, cpuid, string ops, pops), and
+            # invalidates a tracked register on any other mention of its
+            # family. The deterministic probe output separately proves that
+            # both hook results passed their assertions.
+            symbol_address=$(
+                awk -v symbol="$symbol" '$3 == symbol { print $1; exit }' \
+                    "$codegen/${flavor}.symbols.txt" | sed 's/^0*//'
+            )
+            slot_addresses=$(
+                awk -v target="$symbol_address" \
+                    '$3 == "R_X86_64_RELATIVE" && $4 == target {
+                        slot = $1; sub(/^0+/, "", slot); print slot
+                    }' "$codegen/${flavor}.relocations.txt" | paste -sd,
+            )
+            if [[ -z $symbol_address || -z $slot_addresses ]] || \
+                ! awk -v slots_str="$slot_addresses" '
+                    function canon(reg) {
+                        sub(/^%/, "", reg)
+                        if (reg ~ /^r([89]|1[0-5])[dwb]?$/) {
+                            sub(/[dwb]$/, "", reg); return reg
+                        }
+                        if (reg ~ /^[er]?(ax|bx|cx|dx)$/) {
+                            sub(/^[er]/, "", reg); return "r" reg
+                        }
+                        if (reg ~ /^[abcd][lh]$/) return "r" substr(reg, 1, 1) "x"
+                        if (reg ~ /^[er]?(si|di|bp|sp)$/) {
+                            sub(/^[er]/, "", reg); return "r" reg
+                        }
+                        if (reg ~ /^(si|di|bp|sp)l$/) return "r" substr(reg, 1, 2)
+                        return reg
+                    }
+                    function fam(creg,   base) {
+                        if (creg in famre) return famre[creg]
+                        if (creg ~ /^r([89]|1[0-5])$/) {
+                            famre[creg] = "%" creg "[dwb]?"
+                        } else {
+                            base = substr(creg, 2)
+                            if (base ~ /^[abcd]x$/) {
+                                famre[creg] = "%[er]?" base "|%" substr(base, 1, 1) "[lh]"
+                            } else {
+                                famre[creg] = "%[er]?" base "|%" base "l"
+                            }
+                        }
+                        return famre[creg]
+                    }
+                    BEGIN {
+                        FS = "\t"
+                        n = split(slots_str, parts, ",")
+                        for (i = 1; i <= n; i++) if (parts[i] != "") slot[parts[i]] = 1
+                    }
+                    # First pass: every explicit branch or call target starts
+                    # a block that another predecessor can reach.
+                    NR == FNR {
+                        if (NF >= 3) {
+                            insn = $3
+                            mnem = insn; sub(/[[:space:]].*/, "", mnem)
+                            if (mnem ~ /^(j[a-z]+|callq?|loop[a-z]*)$/) {
+                                operand = insn
+                                sub(/^[^[:space:]]+[[:space:]]+/, "", operand)
+                                sub(/[[:space:]].*/, "", operand)
+                                if (operand ~ /^[0-9a-f]+$/) leader[operand] = 1
+                            }
+                        }
+                        next
+                    }
+                    # A new function body invalidates every tracked register.
+                    /^[0-9a-f]+ </ { for (r in pending) delete pending[r]; next }
+                    NF < 3 { next }
+                    {
+                        addr = $1
+                        gsub(/[[:space:]:]/, "", addr)
+                        # A block leader is reachable from another
+                        # predecessor, so the load no longer dominates.
+                        if (addr in leader) for (r in pending) delete pending[r]
+                        insn = $3
+                        mnem = insn; sub(/[[:space:]].*/, "", mnem)
+                        body = insn; sub(/[[:space:]]*#.*$/, "", body)
+                        cmt = ""
+                        if (insn ~ /#/) {
+                            cmt = insn
+                            sub(/.*#[[:space:]]*/, "", cmt); sub(/[[:space:]<].*/, "", cmt)
+                        }
+                        # Memory-indirect call straight through a hook slot.
+                        if (mnem ~ /^callq?$/ && body ~ /\*0x[0-9a-f]+\(%rip\)/ && (cmt in slot)) {
+                            found = 1; exit
+                        }
+                        # Register-indirect call through a still-live hook register.
+                        if (mnem ~ /^callq?$/ && match(body, /\*%[a-z0-9]+/)) {
+                            if (canon(substr(body, RSTART + 1, RLENGTH - 1)) in pending) {
+                                found = 1; exit
+                            }
+                        }
+                        # Load of a hook slot into a register.
+                        if (mnem == "mov" && (cmt in slot) && \
+                            body ~ /0x[0-9a-f]+\(%rip\),%[a-z0-9]+[[:space:]]*$/) {
+                            reg = body
+                            sub(/.*\(%rip\),/, "", reg); sub(/[[:space:]].*$/, "", reg)
+                            pending[canon(reg)] = 1
+                            next
+                        }
+                        # Unconditional control transfers end the
+                        # fall-through run; nothing survives past them.
+                        if (mnem ~ /^(jmpq?|ret[fq]?|ud2|hlt)$/) {
+                            for (r in pending) delete pending[r]
+                            next
+                        }
+                        # Implicit or multi-register writes kill every tracked
+                        # register: other calls, interrupts, xchg/cmpxchg/xadd,
+                        # mul/div families, cpuid/rdtsc, string ops, pops.
+                        if (mnem ~ /^(callq?|syscall|sysenter|int3?|cpuid|rdtscp?|rdpmc|xgetbv|mul|imul|div|idiv|cqo|cdq|cbw|cwde|cdqe|xchg|cmpxchg([81]6b)?|xadd|rep[nz]*|movs[bwdq]?|stos[bwdq]?|lods[bwdq]?|scas[bwdq]?|cmps[bwdq]?|ins[bwd]?|outs[bwd]?|pop[a-z]*|leave|enter|loop[nz]*e?)$/) {
+                            for (r in pending) delete pending[r]
+                            next
+                        }
+                        # Any other mention of a tracked register family, read
+                        # or write, conservatively invalidates it.
+                        for (r in pending) {
+                            if (body ~ fam(r)) delete pending[r]
+                        }
+                    }
+                    END { exit found ? 0 : 1 }
+                ' "$codegen/${flavor}.objdump.txt" "$codegen/${flavor}.objdump.txt"; then
+                echo "$flavor codegen lacks a linked direct or slot-bound indirect call to $symbol" >&2
+                exit 1
+            fi
+            printf '%s\t%s\tx86-slot-bound-indirect-call\n' \
+                "$flavor" "$symbol" >>"$codegen/linked-hook-modes.tsv"
+        else
+            echo "$flavor codegen lacks a linked call to $symbol" >&2
+            exit 1
+        fi
+    done
+done
+
+{
+    printf 'generic_binary_sha256='; sha256sum "$generic_binary" | awk '{print $1}'
+    printf 'native_binary_sha256='; sha256sum "$native_binary" | awk '{print $1}'
+    printf 'generic_retained_probe_sha256='
+    sha256sum "$process_root/generic/probe" | awk '{print $1}'
+    printf 'native_retained_probe_sha256='
+    sha256sum "$process_root/native/probe" | awk '{print $1}'
+    printf 'expected_output_sha256='; sha256sum "$expected" | awk '{print $1}'
+} >"$output_dir/artifact-identity.txt"
+
+write_source_manifest "$output_dir/source-manifest-after.sha256"
+if ! cmp "$output_dir/source-manifest-before.sha256" "$output_dir/source-manifest-after.sha256"; then
+    echo "source tree changed during the exact-source experiment" >&2
+    exit 1
+fi
+{
+    printf 'source_identity=verified_archive_digest_and_embedded_commit_header\n'
+    printf 'archive_tree_binding=orchestrator_observation_outside_this_bundle\n'
+    printf 'source_manifest_unchanged=yes\n'
+    printf 'host_identity=verified_local_hostname_and_architecture\n'
+    printf 'ssh_label_binding=orchestrator_observation_outside_this_bundle\n'
+    printf 'correctness_processes=16\n'
+    printf 'generic_processes=8\n'
+    printf 'native_processes=8\n'
+    printf 'generated_code=hook_definitions_and_direct_or_relocated_indirect_calls_verified\n'
+    printf 'measurement_boundary=CPU_only_contract_model_no_real_DMA_or_IOMMU_activity\n'
+    printf 'timing_reported=no\n'
+    printf 'result=PASS\n'
+} >"$output_dir/completion.txt"
+
+if [[ $work_dir != "${output_dir}.work" || ! -d $work_dir ]]; then
+    echo "refusing cleanup outside the newly created work directory" >&2
+    exit 2
+fi
+rm -rf -- "$work_dir"
+
+manifest_tmp_dir="${output_dir}.manifest.tmp"
+# Stage the manifest inside a directory created atomically at mode 0700 rather
+# than redirecting into a sibling path. A plain existence test cannot see a
+# dangling symlink another local user precreated, and the redirection would
+# follow it; mkdir refuses any existing path, symlink included.
+if ! mkdir -m 0700 -- "$manifest_tmp_dir"; then
+    echo "could not exclusively create manifest staging directory: $manifest_tmp_dir" >&2
+    exit 2
+fi
+manifest_tmp="$manifest_tmp_dir/MANIFEST.sha256"
+(
+    cd "$output_dir"
+    rg --files --hidden --no-ignore -0 | LC_ALL=C sort -z | xargs -0 sha256sum --
+) >"$manifest_tmp"
+mv -- "$manifest_tmp" "$output_dir/MANIFEST.sha256"
+rmdir -- "$manifest_tmp_dir"
+printf 'HOST_RUN=PASS output=%s\n' "$output_dir"
