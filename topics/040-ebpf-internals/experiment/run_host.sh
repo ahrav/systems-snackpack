@@ -1,8 +1,18 @@
-#!/usr/bin/env bash
+#!/usr/bin/env -S bash -p
 set -euo pipefail
 
 # Run the committed Topic 40 probe from a digest-bound Git archive. The probe
 # exercises correctness and code-generation contracts; it reports no timing.
+#
+# Privileged mode (-p) makes Bash skip the $BASH_ENV and $ENV startup files
+# and refuse to import shell functions from the environment, so a hostile
+# environment cannot execute code before the first command of this script.
+# The $- gate rejects any launch that dropped -p (for example
+# `bash run_host.sh`), so every accepted execution started uncontaminated.
+if [[ $- != *p* ]]; then
+    echo "exact-source experiment requires bash privileged mode: run via ./run_host.sh or bash -p" >&2
+    exit 2
+fi
 if [[ -n ${BASH_ENV:-} ]]; then
     echo "exact-source experiment refuses BASH_ENV" >&2
     exit 2
@@ -144,6 +154,13 @@ xxl)
     jit_objdump_machine=i386:x86-64
     ;;
 dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com)
+    # The Arm label names one specific host, so the label must equal the
+    # locally resolved hostname; architecture alone would certify any
+    # AArch64 machine as the named host.
+    [[ $resolved_hostname == "$SSH_TARGET_LABEL" ]] || {
+        echo "fixed Arm label must match the resolved hostname; got $resolved_hostname" >&2
+        exit 1
+    }
     [[ $architecture == aarch64 || $architecture == arm64 ]] || {
         echo "authorized Arm host must be aarch64/arm64; got $architecture" >&2
         exit 1

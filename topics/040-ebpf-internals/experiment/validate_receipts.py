@@ -13,6 +13,17 @@ from pathlib import Path
 
 EMPTY_SHA256 = hashlib.sha256(b"").hexdigest()
 
+# Digest of the complete expected_patterns.json this validator accepts. The
+# schema checks in validate_contract cannot see a weakened required_regex or
+# forbidden_regex list; pinning the whole contract can.
+EXPECTED_CONTRACT_SHA256 = (
+    "b5f41a472a21a1f80315e3302d93384d363f5aff71c850c875f709de71d4573a"
+)
+
+# The one target label that names a specific host rather than a role; its
+# receipt must record that exact hostname.
+ARM_HOST = "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com"
+
 
 def digest_path(path: Path) -> str:
     """Return a streaming SHA-256 digest for one file."""
@@ -345,14 +356,15 @@ def validate_host_and_source(root: Path, contract: dict[str, object]) -> None:
     host = (root / "host.txt").read_text(encoding="utf-8")
     label = extract(host, r"^ssh_target_label=(.+)$", "host target label").group(1)
     architecture = extract(host, r"^architecture=(.+)$", "host architecture").group(1)
+    hostname_fqdn = extract(host, r"^hostname_fqdn=(.+)$", "host fqdn").group(1)
     if label == "xxl" and architecture != "x86_64":
         raise ValueError("xxl receipt is not x86-64")
-    if label == "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com" and architecture not in {
-        "aarch64",
-        "arm64",
-    }:
-        raise ValueError("authorized Arm receipt is not AArch64")
-    if label not in {"xxl", "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com"}:
+    if label == ARM_HOST:
+        if architecture not in {"aarch64", "arm64"}:
+            raise ValueError("authorized Arm receipt is not AArch64")
+        if hostname_fqdn != label:
+            raise ValueError("authorized Arm receipt did not run on the named host")
+    if label not in {"xxl", ARM_HOST}:
         raise ValueError("receipt names an unauthorized target label")
     for marker in (
         "uname_all=",
@@ -382,7 +394,10 @@ def main() -> int:
     parser.add_argument("--contract", type=Path, required=True)
     arguments = parser.parse_args()
     root = arguments.root.resolve(strict=True)
-    contract = json.loads(arguments.contract.read_text(encoding="utf-8"))
+    contract_bytes = arguments.contract.read_bytes()
+    if hashlib.sha256(contract_bytes).hexdigest() != EXPECTED_CONTRACT_SHA256:
+        raise ValueError("contract digest differs from the pinned receipt contract")
+    contract = json.loads(contract_bytes.decode("utf-8"))
 
     validate_contract(contract)
     for path in root.rglob("*"):
