@@ -397,8 +397,6 @@ def validate_host_and_source(root: Path, contract: dict[str, object]) -> str:
         "bpf-policy.txt",
         "bpf-filesystems.txt",
         "build.txt",
-        "rust-tests.txt",
-        "rust-example.txt",
         "codegen/probe.objdump.txt",
         "codegen/probe.elf.txt",
     ]

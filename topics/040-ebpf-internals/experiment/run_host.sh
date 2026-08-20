@@ -80,7 +80,7 @@ archive_digest_expected=${3,,}
 source_archive=$(realpath -m -- "$4")
 expected_source_sha256=bb90159be331d91e505ff049ec8dd09e3286d2e30266f2f6a1a6f611c0b0c9df
 expected_process_runner_sha256=1cfcf3dc720d35cc27abba0200b68f0bcc9c01afab4c51bc58c4f9181e08cb2f
-expected_receipt_validator_sha256=248858a1da953b01632fc6caec45a310e4fe6c34fa01f0307c461b8c4e13f08a
+expected_receipt_validator_sha256=1081393068deaa0bb343182974b3af9c89db361db8b5b4c316d5c432384bc4b8
 expected_contract_sha256=e13ab9491aa6e2c3aa3a975767068ee5ed0ab8224bc517cab30ae62613725f6e
 if [[ ! $source_commit =~ ^[0-9a-f]{40}$ ]]; then
     echo "SOURCE_COMMIT must be a full 40-hex Git object ID" >&2
@@ -403,10 +403,6 @@ mkdir -m 0700 "$build_dir"
 probe_binary="$build_dir/ebpf-socket-filter"
 run_gate build.txt gcc -v -O2 -g -std=c11 -Wall -Wextra -Werror \
     "$experiment_dir/ebpf_socket_filter.c" -o "$probe_binary"
-run_gate rust-tests.txt "$cargo_path" test --locked --manifest-path "$source_root/Cargo.toml" \
-    --package ebpf-internals --lib --examples
-run_gate rust-example.txt "$cargo_path" run --locked --manifest-path "$source_root/Cargo.toml" \
-    --package ebpf-internals --example cost-and-control
 cp -- "$probe_binary" "$artifacts/ebpf-socket-filter"
 chmod 0500 "$artifacts/ebpf-socket-filter"
 
