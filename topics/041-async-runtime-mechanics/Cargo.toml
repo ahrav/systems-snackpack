@@ -1,0 +1,17 @@
+[package]
+name = "async-runtime-mechanics"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "async_runtime_mechanics"
+path = "src/lib.rs"
+
+[[example]]
+name = "state-and-cancellation"
+path = "examples/state_and_cancellation.rs"
+
+[lints]
+workspace = true
