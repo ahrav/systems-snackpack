@@ -9,9 +9,10 @@ driver before applying a mechanism operationally.
 
 ## Instruction and verifier contracts
 
-- [Request for Comments 9669: eBPF Instruction Set Specification, version 1.0](https://www.rfc-editor.org/rfc/rfc9669.html)
-  defines the eBPF instruction encoding, registers, memory operations, jumps,
-  and calling convention. It does not define Linux program types or helpers.
+- [RFC 9669: BPF Instruction Set Architecture (ISA), version 1.0](https://www.rfc-editor.org/rfc/rfc9669.html)
+  defines the BPF instruction encoding, registers, memory operations, jumps,
+  and calling convention. It does not define Linux program types or the Linux
+  helper catalog and contracts.
 - [Linux 6.12 eBPF verifier documentation](https://docs.kernel.org/6.12/bpf/verifier.html)
   describes register and stack state, pointer types, value ranges, branch
   refinement, and state pruning. Its broad statement that loops are not allowed

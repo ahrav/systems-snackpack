@@ -1,11 +1,13 @@
-# Extended Berkeley Packet Filter internals
+# BPF internals
 
-An Extended Berkeley Packet Filter (eBPF) program can run near a Linux kernel
-event without adding a kernel module. The short program is only one part of the
-system. Permission, verification, attachment, state, output, generated code,
-and lifetime are separate contracts. A program that passes the verifier can
-still count the wrong event, overload a shared map, lose output, or detach when
-its last owning attachment reference disappears.
+BPF is the standardized name for a kernel execution environment; eBPF is the
+common name for its modern form. RFC 9669 treats both as standalone names, not
+acronyms. A BPF program can run near a Linux kernel event without adding a
+kernel module. The short program is only one part of the system. Permission,
+verification, attachment, state, output, generated code, and lifetime are
+separate contracts. A program that passes the verifier can still count the
+wrong event, overload a shared map, lose output, or detach when its last owning
+attachment reference disappears.
 
 This topic uses a parcel-sorting station as a running example. A packet is a
 parcel. A hook is the station where Linux calls a program. The verifier is the

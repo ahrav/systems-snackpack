@@ -1,8 +1,9 @@
-//! Narrow models for reasoning about Extended Berkeley Packet Filter internals.
+//! Narrow models for reasoning about BPF internals.
 //!
-//! An Extended Berkeley Packet Filter (eBPF) program is admitted, attached,
-//! executed, and owned through separate Linux contracts. This crate models two
-//! small parts that are useful without a Linux eBPF runtime:
+//! BPF is the standardized name; eBPF is the common name for its modern form.
+//! A BPF program is admitted, attached, executed, and owned through separate
+//! Linux contracts. This crate models two small parts that are useful without a
+//! Linux BPF runtime:
 //!
 //! - [`ControlFlowProgram`] checks branch targets in a deliberately tiny
 //!   instruction subset. It demonstrates why verifier acceptance is a separate
