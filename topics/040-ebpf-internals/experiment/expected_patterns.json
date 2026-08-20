@@ -1,0 +1,60 @@
+{
+  "schema": "topic40-ebpf-receipt-contract-v1",
+  "boundary": "correctness and generated-code inspection only; no timing claim",
+  "source_sha256": "faab623812e641585f0c4fa56fd74f9801faa4dde84f4d20431a0a3eb72cf8e8",
+  "ordinary": {
+    "return_code": 77,
+    "required_regex": [
+      "^probe_pid=[0-9]+ uid=[0-9]+ euid=[0-9]+$",
+      "^probe_boundary=raw_bpf_syscall_socket_filter_loopback_udp$",
+      "^invalid_load_result=fd:-1 errno:(1:Operation not permitted|13:Permission denied)$",
+      "invalid_verifier_log_begin\\n<empty>\\ninvalid_verifier_log_end",
+      "^accept_load_result=fd:-1 errno:(1:Operation not permitted|13:Permission denied)$",
+      "accept_verifier_log_begin\\n<empty>\\naccept_verifier_log_end",
+      "^outcome=permission_boundary_prevented_verifier_demo$"
+    ],
+    "forbidden_regex": [
+      "jump out of range",
+      "invalid_program_unexpectedly_accepted",
+      "all_correctness_checks_passed"
+    ]
+  },
+  "privileged": {
+    "fresh_process_runs": 8,
+    "return_code": 0,
+    "required_regex": [
+      "^probe_pid=[0-9]+ uid=0 euid=0$",
+      "^probe_boundary=raw_bpf_syscall_socket_filter_loopback_udp$",
+      "^invalid_load_result=fd:-1 errno:22:Invalid argument$",
+      "invalid_verifier_log_begin\\n(?s:.*?)jump out of range from insn 0 to 101(?s:.*?)invalid_verifier_log_end",
+      "^accept_load_result=fd:[0-9]+ errno:0:Success$",
+      "^drop_load_result=fd:[0-9]+ errno:0:Success$",
+      "^accept_info_initial=id:[0-9]+ type:1 xlated_len:16 jited_len:[1-9][0-9]* verified_insns:2 run_cnt:[0-9]+ run_time_ns:[0-9]+$",
+      "^drop_info_initial=id:[0-9]+ type:1 xlated_len:16 jited_len:[1-9][0-9]* verified_insns:2 run_cnt:[0-9]+ run_time_ns:[0-9]+$",
+      "^accept_xlated_hex=b7000000ffffffff9500000000000000$",
+      "^drop_xlated_hex=b7000000000000009500000000000000$",
+      "^accept_jited_hex=[0-9a-f]+$",
+      "^drop_jited_hex=[0-9a-f]+$",
+      "^accept_filter_observation=received_exact_payload bytes=14$",
+      "^drop_filter_observation=send_succeeded_receive_timed_out$",
+      "^outcome=all_correctness_checks_passed$"
+    ],
+    "forbidden_regex": [
+      "invalid_program_unexpectedly_accepted",
+      "unexpected",
+      "correctness_check_failed",
+      "_write_error=",
+      "_info_error=",
+      "_info_bytes_error=",
+      "jited_visibility=zero_length_returned_by_kernel"
+    ],
+    "exact_xlated_hex": {
+      "accept": "b7000000ffffffff9500000000000000",
+      "drop": "b7000000000000009500000000000000"
+    },
+    "required_blob_kinds": [
+      "xlated",
+      "jited"
+    ]
+  }
+}

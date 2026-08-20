@@ -1,0 +1,17 @@
+[package]
+name = "ebpf-internals"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "ebpf_internals"
+path = "src/lib.rs"
+
+[[example]]
+name = "cost-and-control"
+path = "examples/cost_and_control.rs"
+
+[lints]
+workspace = true
