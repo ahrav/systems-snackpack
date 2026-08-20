@@ -1,16 +1,16 @@
-#!/usr/bin/env -S bash -p
+#!/bin/bash -p
 set -euo pipefail
 
 # Run the committed Topic 40 probe from a digest-bound Git archive. The probe
 # exercises correctness and code-generation contracts; it reports no timing.
 #
 # Privileged mode (-p) makes Bash skip the $BASH_ENV and $ENV startup files
-# and refuse to import shell functions from the environment, so a hostile
-# environment cannot execute code before the first command of this script.
+# and refuse to import shell functions from the environment, so shell startup
+# hooks cannot execute code before the first command of this script.
 # The $- gate rejects any launch that dropped -p (for example
 # `bash run_host.sh`), so every accepted execution started uncontaminated.
 if [[ $- != *p* ]]; then
-    echo "exact-source experiment requires bash privileged mode: run via ./run_host.sh or bash -p" >&2
+    echo "exact-source experiment requires bash privileged mode: run via ./run_host.sh or /bin/bash -p" >&2
     exit 2
 fi
 if [[ -n ${BASH_ENV:-} ]]; then
@@ -29,9 +29,10 @@ fi
 swept_environment_names=()
 while IFS= read -r variable; do
     case $variable in
-    BPFTOOL_* | CLANG_* | LLVM_* | \
+    BPFTOOL_* | CLANG_* | LLVM_* | RUSTUP_* | \
         RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | RUSTFMT | \
         RUSTFLAGS | RUSTDOCFLAGS | CARGO_ENCODED_RUSTFLAGS | CARGO_INCREMENTAL | \
+        CARGO_HOME | \
         CARGO_BUILD_* | CARGO_TARGET_* | CARGO_PROFILE_* | CARGO_UNSTABLE_* | \
         CC | CFLAGS | CPPFLAGS | LDFLAGS | COMPILER_PATH | GCC_EXEC_PREFIX | \
         LIBRARY_PATH | CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | \
@@ -47,8 +48,24 @@ done < <(compgen -e)
 export GIT_NO_REPLACE_OBJECTS=1
 export LANG=C
 export LC_ALL=C
-export PATH="$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
+account_entry=$(/usr/bin/getent passwd "$(/usr/bin/id -u)")
+IFS=: read -r _ _ _ _ _ account_home _ <<<"$account_entry"
+if [[ -z $account_home || ! -d $account_home ]]; then
+    echo "cannot resolve the invoking account's home directory" >&2
+    exit 2
+fi
+if [[ ${HOME:-} != "$account_home" ]]; then
+    swept_environment_names+=(HOME)
+fi
+export HOME="$account_home"
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
 hash -r
+cargo_path="$HOME/.cargo/bin/cargo"
+rustc_path="$HOME/.cargo/bin/rustc"
+if [[ ! -x $cargo_path || ! -x $rustc_path ]]; then
+    echo "the invoking account must provide executable cargo and rustc proxies" >&2
+    exit 2
+fi
 
 if [[ $# -ne 4 ]]; then
     echo "usage: $0 OUTPUT_DIR SOURCE_COMMIT SOURCE_ARCHIVE_SHA256 SOURCE_ARCHIVE" >&2
@@ -62,6 +79,9 @@ source_commit=${2,,}
 archive_digest_expected=${3,,}
 source_archive=$(realpath -m -- "$4")
 expected_source_sha256=faab623812e641585f0c4fa56fd74f9801faa4dde84f4d20431a0a3eb72cf8e8
+expected_process_runner_sha256=1cfcf3dc720d35cc27abba0200b68f0bcc9c01afab4c51bc58c4f9181e08cb2f
+expected_receipt_validator_sha256=55d01386ebf61b57fc92371f1d4c7f348d5c13100e6b26706a5e346865310e11
+expected_contract_sha256=b5f41a472a21a1f80315e3302d93384d363f5aff71c850c875f709de71d4573a
 if [[ ! $source_commit =~ ^[0-9a-f]{40}$ ]]; then
     echo "SOURCE_COMMIT must be a full 40-hex Git object ID" >&2
     exit 2
@@ -194,6 +214,18 @@ if [[ $(sha256sum "$experiment_dir/ebpf_socket_filter.c" | awk '{print $1}') != 
     echo "committed C probe differs from the exact tested source" >&2
     exit 2
 fi
+if [[ $(sha256sum "$experiment_dir/run_processes.py" | awk '{print $1}') != "$expected_process_runner_sha256" ]]; then
+    echo "privileged-process runner differs from the pinned harness" >&2
+    exit 2
+fi
+if [[ $(sha256sum "$experiment_dir/validate_receipts.py" | awk '{print $1}') != "$expected_receipt_validator_sha256" ]]; then
+    echo "receipt validator differs from the pinned harness" >&2
+    exit 2
+fi
+if [[ $(sha256sum "$experiment_dir/expected_patterns.json" | awk '{print $1}') != "$expected_contract_sha256" ]]; then
+    echo "receipt contract differs from the pinned harness" >&2
+    exit 2
+fi
 
 write_source_manifest() {
     local destination=$1
@@ -286,8 +318,8 @@ record_required proc-self-status.txt sed -n '1,260p' /proc/self/status
 record_required gcc-version.txt gcc -v
 record_required gcc-target.txt gcc -dumpmachine
 record_required gcc-target-options.txt gcc -Q -O2 --help=target
-record_required rustc-version.txt rustc -vV
-record_required cargo-version.txt cargo -Vv
+record_required rustc-version.txt "$rustc_path" -vV
+record_required cargo-version.txt "$cargo_path" -Vv
 record_required python-version.txt python3 -VV
 record_required objdump-version.txt objdump --version
 record_required readelf-version.txt readelf --version
@@ -371,9 +403,9 @@ mkdir -m 0700 "$build_dir"
 probe_binary="$build_dir/ebpf-socket-filter"
 run_gate build.txt gcc -v -O2 -g -std=c11 -Wall -Wextra -Werror \
     "$experiment_dir/ebpf_socket_filter.c" -o "$probe_binary"
-run_gate rust-tests.txt cargo test --locked --manifest-path "$source_root/Cargo.toml" \
+run_gate rust-tests.txt "$cargo_path" test --locked --manifest-path "$source_root/Cargo.toml" \
     --package ebpf-internals --lib --examples
-run_gate rust-example.txt cargo run --locked --manifest-path "$source_root/Cargo.toml" \
+run_gate rust-example.txt "$cargo_path" run --locked --manifest-path "$source_root/Cargo.toml" \
     --package ebpf-internals --example cost-and-control
 cp -- "$probe_binary" "$artifacts/ebpf-socket-filter"
 chmod 0500 "$artifacts/ebpf-socket-filter"
