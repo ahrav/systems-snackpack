@@ -12,3 +12,6 @@ Each retained directory binds one committed source candidate to:
 Generated binaries are evidence for their named compiler and host. They are not
 stable Rust application binary interfaces or architecture-wide performance
 claims.
+
+The first retained receipt is
+[`2026-08-20-f03eb7c/`](2026-08-20-f03eb7c/).

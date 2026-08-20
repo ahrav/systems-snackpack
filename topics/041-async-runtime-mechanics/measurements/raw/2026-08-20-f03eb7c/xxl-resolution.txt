@@ -1,0 +1,4 @@
+ssh_alias=xxl
+ssh_g_effective_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+remote_hostname_fqdn=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+remote_architecture=x86_64

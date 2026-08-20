@@ -7,5 +7,9 @@ channel, scheduler, or cancellation-latency path.
 The required replication unit is one fresh process. Eight processes per host
 must produce byte-identical output. Inner polls are state transitions.
 
-Host-specific notes and sealed exact-source receipts are added only after both
-required hosts pass the acceptance contract in [`../rounds/01.md`](../rounds/01.md).
+Both required hosts passed the acceptance contract:
+
+- [`2026-08-20-arm.md`](2026-08-20-arm.md)
+- [`2026-08-20-xxl.md`](2026-08-20-xxl.md)
+- [`2026-08-20-comparison.md`](2026-08-20-comparison.md)
+- [`raw/2026-08-20-f03eb7c/`](raw/2026-08-20-f03eb7c/)
