@@ -147,6 +147,14 @@ It does not measure XDP, TC, tracing, LSM, map contention, output throughput,
 startup cost, or production packet rate. No elapsed-time comparison is
 justified.
 
+The retained [cross-host comparison](measurements/2026-08-19-comparison.md)
+binds the result to source commit `f32d0dbfcc146bc0fb2d8739c2da668a95d95bd9`.
+Both hosts passed eight fresh privileged processes. They returned the same two
+16-byte translated BPF programs, but the visible native JIT bodies differed:
+64 bytes for both programs on the measured AArch64 host, and 21 bytes for
+accept versus 16 bytes for drop on the measured x86-64 host. This is generated-
+code evidence for two named kernels, not an architecture-family ranking.
+
 ## Common failures and misleading shortcuts
 
 - **“Verified means correct.”** The verifier admits safe, policy-compliant

@@ -1,0 +1,9 @@
+command=ssh -G xxl
+host=xxl
+user=ahrav
+hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+proxycommand=/usr/local/bin/wssh proxy %h
+
+runtime_command=ssh xxl 'hostname -f; uname -m'
+runtime_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+runtime_architecture=x86_64

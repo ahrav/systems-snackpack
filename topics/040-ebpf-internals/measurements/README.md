@@ -17,6 +17,12 @@ The 250-millisecond receive timeout distinguishes a drop from a received packet.
 It is not a latency measurement. No elapsed-time, throughput, instruction-set,
 or processor-vendor comparison is justified.
 
-[`../rounds/01.md`](../rounds/01.md) defines the acceptance contract. Host notes
-and a cross-host comparison are added after both exact-source runs pass. Raw
-archives belong under [`raw/`](raw/).
+[`../rounds/01.md`](../rounds/01.md) defines the acceptance contract. The first
+retained run passed on both required hosts:
+
+- [`2026-08-19-arm.md`](2026-08-19-arm.md)
+- [`2026-08-19-xxl.md`](2026-08-19-xxl.md)
+- [`2026-08-19-comparison.md`](2026-08-19-comparison.md)
+
+The sealed raw archives and source identity are under
+[`raw/2026-08-19-f32d0db/`](raw/2026-08-19-f32d0db/).
