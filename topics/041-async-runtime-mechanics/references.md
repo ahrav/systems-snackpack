@@ -5,6 +5,14 @@ boundaries for this visit. The measured Arm host used rustc 1.95.0. Compiler
 future layout and Tokio task layout are not stable application binary
 interfaces (ABIs); remeasure them after a toolchain or runtime change.
 
+## Measured host identity
+
+- [Arm Neoverse V1 Core Technical Reference Manual](https://documentation-service.arm.com/static/64be968738511951cb7a087a)
+  defines the Main ID Register (`MIDR_EL1`) reset value `0x411FD401`, including
+  architecture field `0xf` and part number `0xd40`. The measured register value
+  supports the reported Neoverse V1 identification; it is not a performance
+  claim about other Arm systems.
+
 ## Rust future mechanics
 
 - [The `Future` trait](https://doc.rust-lang.org/1.97.1/std/future/trait.Future.html)
