@@ -81,15 +81,17 @@ static void print_submitted_insns(const char *label,
     printf("%s_submitted_insns_end\n", label);
 }
 
-static int write_blob(const char *output_dir, const char *label,
-                      const char *kind, const void *data, size_t length) {
-    char path[512];
-    int n = snprintf(path, sizeof(path), "%s/%s.%s.bin", output_dir, label, kind);
-    if (n < 0 || (size_t)n >= sizeof(path)) {
+static int write_blob(int output_dir_fd, const char *label, const char *kind,
+                      const void *data, size_t length) {
+    char name[64];
+    int n = snprintf(name, sizeof(name), "%s.%s.bin", label, kind);
+    if (n < 0 || (size_t)n >= sizeof(name)) {
         errno = ENAMETOOLONG;
         return -1;
     }
-    int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0600);
+    int fd = openat(output_dir_fd, name,
+                    O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC,
+                    0600);
     if (fd < 0) {
         return -1;
     }
@@ -112,7 +114,7 @@ static int write_blob(const char *output_dir, const char *label,
     if (close(fd) != 0) {
         return -1;
     }
-    printf("%s_%s_file=%s bytes=%zu\n", label, kind, path, length);
+    printf("%s_%s_file=%s bytes=%zu\n", label, kind, name, length);
     return 0;
 }
 
@@ -125,7 +127,7 @@ static void print_hex(const char *label, const char *kind, const uint8_t *bytes,
     putchar('\n');
 }
 
-static int inspect_program(int fd, const char *label, const char *output_dir) {
+static int inspect_program(int fd, const char *label, int output_dir_fd) {
     struct bpf_prog_info initial;
     union bpf_attr attr;
     memset(&initial, 0, sizeof(initial));
@@ -181,14 +183,14 @@ static int inspect_program(int fd, const char *label, const char *output_dir) {
     }
     printf("%s_xlated_insns_end\n", label);
     print_hex(label, "xlated", xlated, info.xlated_prog_len);
-    if (write_blob(output_dir, label, "xlated", xlated,
+    if (write_blob(output_dir_fd, label, "xlated", xlated,
                    info.xlated_prog_len) != 0) {
         printf("%s_xlated_write_error=%d:%s\n", label, errno, strerror(errno));
     }
 
     if (info.jited_prog_len > 0) {
         print_hex(label, "jited", jited, info.jited_prog_len);
-        if (write_blob(output_dir, label, "jited", jited,
+        if (write_blob(output_dir_fd, label, "jited", jited,
                        info.jited_prog_len) != 0) {
             printf("%s_jited_write_error=%d:%s\n", label, errno,
                    strerror(errno));
@@ -295,8 +297,22 @@ int main(int argc, char **argv) {
         fprintf(stderr, "usage: %s OUTPUT_DIRECTORY\n", argv[0]);
         return 2;
     }
-    if (mkdir(argv[1], 0700) != 0 && errno != EEXIST) {
+    if (mkdir(argv[1], 0700) != 0) {
         perror("mkdir output directory");
+        return 2;
+    }
+    int output_dir_fd = open(argv[1], O_RDONLY | O_DIRECTORY | O_NOFOLLOW |
+                                         O_CLOEXEC);
+    if (output_dir_fd < 0) {
+        perror("open output directory");
+        return 2;
+    }
+    struct stat output_stat;
+    if (fstat(output_dir_fd, &output_stat) != 0 ||
+        !S_ISDIR(output_stat.st_mode) || output_stat.st_uid != geteuid() ||
+        (output_stat.st_mode & (S_IWGRP | S_IWOTH)) != 0) {
+        fprintf(stderr, "output directory identity or mode is unsafe\n");
+        close(output_dir_fd);
         return 2;
     }
 
@@ -380,8 +396,8 @@ int main(int argc, char **argv) {
     }
 
     int result = 0;
-    if (inspect_program(accept_fd, "accept", argv[1]) != 0 ||
-        inspect_program(drop_fd, "drop", argv[1]) != 0) {
+    if (inspect_program(accept_fd, "accept", output_dir_fd) != 0 ||
+        inspect_program(drop_fd, "drop", output_dir_fd) != 0) {
         result = 1;
     }
     if (test_udp_filter(accept_fd, true, "topic40-accept") != 0 ||
@@ -393,6 +409,7 @@ int main(int argc, char **argv) {
 
     close(drop_fd);
     close(accept_fd);
+    close(output_dir_fd);
     free(log);
     return result;
 }

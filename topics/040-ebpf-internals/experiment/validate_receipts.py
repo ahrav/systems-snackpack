@@ -13,16 +13,23 @@ from pathlib import Path
 
 EMPTY_SHA256 = hashlib.sha256(b"").hexdigest()
 
-# Digest of the complete expected_patterns.json this validator accepts. The
-# schema checks in validate_contract cannot see a weakened required_regex or
-# forbidden_regex list; pinning the whole contract can.
-EXPECTED_CONTRACT_SHA256 = (
-    "b5f41a472a21a1f80315e3302d93384d363f5aff71c850c875f709de71d4573a"
-)
+# Digests of the complete expected_patterns.json contracts this validator
+# accepts. The schema checks in validate_contract cannot see a weakened
+# required_regex or forbidden_regex list; pinning the whole contract can.
+EXPECTED_CONTRACT_SHA256S = {
+    # Original measured probe retained by the checked-in receipt bundles.
+    "b5f41a472a21a1f80315e3302d93384d363f5aff71c850c875f709de71d4573a",
+    # Probe with directory-relative, no-follow receipt file creation.
+    "e13ab9491aa6e2c3aa3a975767068ee5ed0ab8224bc517cab30ae62613725f6e",
+}
 
 # The one target label that names a specific host rather than a role; its
 # receipt must record that exact hostname.
 ARM_HOST = "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com"
+
+DISASSEMBLY_ROW = re.compile(
+    r"^\s*([0-9a-f]+):\t([0-9a-f][0-9a-f ]*?)\s*\t", re.MULTILINE
+)
 
 
 def digest_path(path: Path) -> str:
@@ -81,6 +88,32 @@ def parse_program(text: str, label: str) -> dict[str, int | str]:
             f"{label} JIT bytes",
         ).group(1),
     }
+
+
+def disassembled_bytes(text: str, architecture: str, label: str) -> bytes:
+    """Rebuild the JIT bytes represented by an objdump transcript."""
+
+    rows = DISASSEMBLY_ROW.findall(text)
+    if not rows:
+        raise ValueError(f"{label}: disassembly has no instruction rows")
+    decoded = bytearray()
+    for offset_text, column in rows:
+        offset = int(offset_text, 16)
+        if offset != len(decoded):
+            raise ValueError(f"{label}: disassembly is not contiguous at 0x{offset:x}")
+        if architecture in {"aarch64", "arm64"}:
+            if re.fullmatch(r"[0-9a-f]{8}", column) is None:
+                raise ValueError(
+                    f"{label}: invalid AArch64 instruction word {column!r}"
+                )
+            decoded.extend(bytes.fromhex(column)[::-1])
+        elif architecture == "x86_64":
+            if re.fullmatch(r"[0-9a-f]{2}( [0-9a-f]{2})*", column) is None:
+                raise ValueError(f"{label}: invalid x86-64 byte column {column!r}")
+            decoded.extend(bytes.fromhex(column))
+        else:
+            raise ValueError(f"{label}: unsupported JIT architecture {architecture!r}")
+    return bytes(decoded)
 
 
 def validate_contract(contract: dict[str, object]) -> None:
@@ -175,7 +208,9 @@ def validate_program_blobs(
     return result
 
 
-def validate_privileged(root: Path, contract: dict[str, object]) -> None:
+def validate_privileged(
+    root: Path, contract: dict[str, object], architecture: str
+) -> None:
     """Require eight fresh successful privileged program lifecycles."""
 
     process_root = root / "processes"
@@ -243,6 +278,16 @@ def validate_privileged(root: Path, contract: dict[str, object]) -> None:
         str(value) for value in range(1, 9)
     ]:
         raise ValueError("expected exactly process sequences 1 through 8")
+    probe_pids = [row["probe_pid"] for row in rows]
+    if len(set(probe_pids)) != len(rows):
+        raise ValueError("privileged receipts repeat a probe PID")
+    program_ids = [
+        row[column]
+        for row in rows
+        for column in ("accept_program_id", "drop_program_id")
+    ]
+    if len(set(program_ids)) != 2 * len(rows):
+        raise ValueError("privileged receipts repeat a BPF program ID")
 
     privileged = contract["privileged"]
     exact_xlated = privileged["exact_xlated_hex"]
@@ -301,21 +346,37 @@ def validate_privileged(root: Path, contract: dict[str, object]) -> None:
             raise ValueError(f"privileged process {sequence}: semantic row mismatch")
 
         for label in ("accept", "drop"):
-            disassembly = (
+            disassembly_path = (
                 root
                 / "codegen"
                 / "jit"
                 / f"run-{sequence:02d}-{label}.objdump.txt"
-            ).read_text(encoding="utf-8")
-            if "file format binary" not in disassembly or re.search(
-                r"\bret[q]?\b", disassembly
-            ) is None:
+            )
+            disassembly = disassembly_path.read_text(encoding="utf-8")
+            evidence_label = (
+                f"privileged process {sequence}: {label} JIT disassembly"
+            )
+            header = re.search(
+                r"^(.+):\s+file format binary$", disassembly, re.MULTILINE
+            )
+            expected_suffix = (
+                f"/run-{sequence:02d}-kernel-bytes/{label}.jited.bin"
+            )
+            if header is None or not header.group(1).endswith(expected_suffix):
+                raise ValueError(f"{evidence_label}: header names the wrong JIT blob")
+            retained_jit = (blob_root / f"{label}.jited.bin").read_bytes()
+            decoded_jit = disassembled_bytes(
+                disassembly, architecture, evidence_label
+            )
+            if decoded_jit != retained_jit:
+                raise ValueError(f"{evidence_label}: bytes differ from the retained JIT blob")
+            if re.search(r"\bret[q]?\b", disassembly) is None:
                 raise ValueError(
-                    f"privileged process {sequence}: {label} JIT disassembly is incomplete"
+                    f"{evidence_label}: return instruction is absent"
                 )
 
 
-def validate_host_and_source(root: Path, contract: dict[str, object]) -> None:
+def validate_host_and_source(root: Path, contract: dict[str, object]) -> str:
     """Require source binding and the advertised Linux host evidence."""
 
     required_files = [
@@ -386,6 +447,7 @@ def validate_host_and_source(root: Path, contract: dict[str, object]) -> None:
         r"^source_archive_sha256=[0-9a-f]{64}$", source_identity, re.MULTILINE
     ) is None:
         raise ValueError("source identity lacks the archive digest")
+    return architecture
 
 
 def main() -> int:
@@ -395,7 +457,7 @@ def main() -> int:
     arguments = parser.parse_args()
     root = arguments.root.resolve(strict=True)
     contract_bytes = arguments.contract.read_bytes()
-    if hashlib.sha256(contract_bytes).hexdigest() != EXPECTED_CONTRACT_SHA256:
+    if hashlib.sha256(contract_bytes).hexdigest() not in EXPECTED_CONTRACT_SHA256S:
         raise ValueError("contract digest differs from the pinned receipt contract")
     contract = json.loads(contract_bytes.decode("utf-8"))
 
@@ -403,9 +465,9 @@ def main() -> int:
     for path in root.rglob("*"):
         if path.is_symlink():
             raise ValueError(f"evidence bundle contains a symlink: {path}")
-    validate_host_and_source(root, contract)
+    architecture = validate_host_and_source(root, contract)
     validate_ordinary(root, contract)
-    validate_privileged(root, contract)
+    validate_privileged(root, contract, architecture)
     print(
         "receipt_validation=PASS ordinary_permission_processes=1 "
         "fresh_privileged_processes=8 jit_disassemblies=16 timing_reported=no"

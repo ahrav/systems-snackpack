@@ -1,7 +1,7 @@
 {
   "schema": "topic40-ebpf-receipt-contract-v1",
   "boundary": "correctness and generated-code inspection only; no timing claim",
-  "source_sha256": "faab623812e641585f0c4fa56fd74f9801faa4dde84f4d20431a0a3eb72cf8e8",
+  "source_sha256": "bb90159be331d91e505ff049ec8dd09e3286d2e30266f2f6a1a6f611c0b0c9df",
   "ordinary": {
     "return_code": 77,
     "required_regex": [

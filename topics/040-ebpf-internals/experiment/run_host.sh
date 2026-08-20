@@ -78,10 +78,10 @@ output_dir=$(realpath -m -- "$1")
 source_commit=${2,,}
 archive_digest_expected=${3,,}
 source_archive=$(realpath -m -- "$4")
-expected_source_sha256=faab623812e641585f0c4fa56fd74f9801faa4dde84f4d20431a0a3eb72cf8e8
+expected_source_sha256=bb90159be331d91e505ff049ec8dd09e3286d2e30266f2f6a1a6f611c0b0c9df
 expected_process_runner_sha256=1cfcf3dc720d35cc27abba0200b68f0bcc9c01afab4c51bc58c4f9181e08cb2f
-expected_receipt_validator_sha256=55d01386ebf61b57fc92371f1d4c7f348d5c13100e6b26706a5e346865310e11
-expected_contract_sha256=b5f41a472a21a1f80315e3302d93384d363f5aff71c850c875f709de71d4573a
+expected_receipt_validator_sha256=248858a1da953b01632fc6caec45a310e4fe6c34fa01f0307c461b8c4e13f08a
+expected_contract_sha256=e13ab9491aa6e2c3aa3a975767068ee5ed0ab8224bc517cab30ae62613725f6e
 if [[ ! $source_commit =~ ^[0-9a-f]{40}$ ]]; then
     echo "SOURCE_COMMIT must be a full 40-hex Git object ID" >&2
     exit 2
