@@ -231,12 +231,14 @@ run_record rust-target-cfg.txt rustc --print cfg
 run_record rust-native-target-cfg.txt rustc -C target-cpu=native --print cfg
 run_record rust-target-features.txt rustc --print target-features
 
-# A private baseline gives the extracted archive a Git work tree. The staged
-# check validates whitespace in the candidate itself; the requested
-# `git diff --check` gate and final clean check then detect later mutations.
+# A private baseline gives the extracted archive a Git work tree. Scope the
+# staged whitespace check to this topic and its lockfile entry: older retained
+# disassembly elsewhere in the workspace contains intentional trailing bytes.
+# The requested `git diff --check` gate and final check detect later mutations.
 git init -q "$source_root"
 git -C "$source_root" -c core.attributesFile=/dev/null add --all
-run_record source-whitespace-baseline.txt git -C "$source_root" diff --cached --check
+run_record source-whitespace-baseline.txt git -C "$source_root" diff --cached --check -- \
+    Cargo.lock topics/042-rust-aliasing-provenance
 run_record source-baseline-commit.txt git -C "$source_root" \
     -c user.name=topic42-receipt \
     -c user.email=topic42-receipt.invalid \
