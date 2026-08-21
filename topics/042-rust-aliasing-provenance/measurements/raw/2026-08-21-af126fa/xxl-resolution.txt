@@ -1,0 +1,9 @@
+recorded_at_utc=2026-08-21T14:43:33Z
+ssh_alias=xxl
+ssh_g_user=ahrav
+ssh_g_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+ssh_g_port=22
+remote_hostname_fqdn=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+remote_architecture=x86_64
+remote_kernel=6.12.95-124.187.amzn2023.x86_64
+remote_online_cpus=192

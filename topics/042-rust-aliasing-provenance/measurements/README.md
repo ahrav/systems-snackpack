@@ -15,6 +15,17 @@ raw-pointer contract that permits exact overlap. Native instruction sequences
 are recorded for the two named hosts but are not generalized to an instruction
 set architecture, processor vendor, or other compiler version.
 
-[`../rounds/01.md`](../rounds/01.md) defines the acceptance contract. Retained
-host and cross-host notes are added only after the exact pushed source passes
-both required Linux runs and local receipt revalidation.
+Each host note maps its numbers and generated-code statements to named records
+inside the sealed archive. The cross-host note compares only fields retained by
+both archives. It labels contract explanations as inferred rather than
+measured.
+
+[`../rounds/01.md`](../rounds/01.md) defines the acceptance contract. The first
+retained run passed on both required hosts:
+
+- [`2026-08-21-arm.md`](2026-08-21-arm.md)
+- [`2026-08-21-xxl.md`](2026-08-21-xxl.md)
+- [`2026-08-21-comparison.md`](2026-08-21-comparison.md)
+
+The sealed bundles and source identity are under
+[`raw/2026-08-21-af126fa/`](raw/2026-08-21-af126fa/).

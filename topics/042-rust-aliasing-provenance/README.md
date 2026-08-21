@@ -1,13 +1,14 @@
 # Rust aliasing and pointer provenance
 
-A Rust pointer is not only a numerical address. It also carries abstract
-permission information that constrains which memory it may access, when, and
-whether it may write. That information is called **provenance**. **Aliasing**
+A Rust pointer is not only a numerical address. Rust's abstract machine also
+associates it with permission information. That information constrains the
+memory it can access, the access time, and permission to write; Rust calls it
+**provenance**. **Aliasing**
 means that two access paths can reach overlapping memory. These rules matter
 because unsafe code must uphold the reference promises and raw-access
-preconditions that the compiler may rely on. Code can print the expected value
-and still have undefined behavior, which means Rust assigns no requirements to
-what the program does.
+preconditions that the compiler is permitted to rely on. Code can print the
+expected value and still have undefined behavior, which means Rust assigns no
+requirements to what the program does.
 
 Use a hotel keycard as the running model. The room number is the address. The
 keycard's authorization is the provenance. Two cards can print the same room
@@ -49,12 +50,12 @@ do not remove the access conditions above.
 | Exposed Provenance operations | Reconstruct a pointer when an address crossed an integer-only boundary | `expose_provenance` records exposure and `with_exposed_provenance` asks the implementation to select a previously exposed provenance | Proof that a dereference is valid | Selection has weaker, deliberately ambiguous semantics and is harder for tools to reason about | An operating-system or foreign interface truly erases the pointer carrier |
 | Raw pointers | Express overlap, optionality, or foreign memory | The programmer performs loads and stores under a written safety contract | Any validity rule | Reviewers and tools must reconstruct every obligation | Safe borrowing cannot express the required layout or protocol |
 | `UnsafeCell<T>` | Permit controlled mutation behind shared access | It opts its contained value out of the usual shared-reference immutability promise | Overlapping `&mut`, invalid lifetimes, or data-race safety | The surrounding abstraction must supply synchronization and invariants | Interior mutability is the intended API contract |
-| `NonNull<T>` | Store a non-null raw pointer efficiently | It wraps a raw pointer and lets `Option<NonNull<T>>` use null as its discriminant | Liveness, alignment, initialization, ownership, or dereference validity | Its covariance can make an abstraction that mutates `T` unsound | Non-nullness is a useful representation invariant |
+| `NonNull<T>` | Store a non-null raw pointer | It wraps a raw pointer and lets `Option<NonNull<T>>` use null as its discriminant | Liveness, alignment, initialization, ownership, or dereference validity | Its covariance can make an abstraction that mutates `T` unsound | Non-nullness is a useful representation invariant |
 | Indices or handles | Survive relocation, serialization, or shared-memory remapping | Store a logical identifier and resolve it through a current owner | Stable address identity by itself | Every use needs validated resolution and generation rules | Data can move or cross process boundaries |
 
 `Pin`, `MaybeUninit`, and atomics solve different problems. `Pin` prevents safe
 code from moving a pinned `!Unpin` value through the pinned handle.
-`MaybeUninit` represents bytes that may not yet hold a valid value. Atomic
+`MaybeUninit` represents bytes that do not yet have to hold a valid value. Atomic
 operations coordinate concurrent accesses. None creates valid provenance or
 repairs an invalid aliasing relationship.
 
@@ -149,6 +150,14 @@ provenance contract. The experiment reports no timing because constant-size
 correctness and generated-code inspection answer the lesson's question; elapsed
 startup noise would not.
 
+The retained [cross-host comparison](measurements/2026-08-21-comparison.md)
+binds the result to source commit `af126fa920f51969667e02b926786cca598212ea`.
+Both hosts passed all seven workspace gates and eight fresh correctness
+processes. Their LLVM bodies carried the same alias attributes and load order.
+The AArch64 build used separate `ldr` instructions for the raw reload; the
+x86-64 build folded that reload into a memory-operand `addq`. These are exact-
+build observations, not architecture-family performance claims.
+
 ## Common failures and misleading shortcuts
 
 - **“A pointer is just an integer.”** Equal address bits do not establish the
@@ -159,7 +168,7 @@ startup noise would not.
   express overlap, but each load and store still needs validity, provenance,
   alignment, initialization, and race safety.
 - **“`NonNull<T>` is a valid object.”** It proves only non-null representation;
-  the pointee may be dangling, misaligned, uninitialized, or inaccessible.
+  the pointee can be dangling, misaligned, uninitialized, or inaccessible.
 - **“Integer round-tripping proves a dereference.”** Address equality is only a
   numerical observation. Prefer a pointer carrier and `with_addr` when one
   exists.
@@ -176,9 +185,9 @@ startup noise would not.
   Mid-level Intermediate Representation (MIR). It checks executed paths under
   an experimental alias model and configuration. Unexecuted paths and other
   models remain outside that result.
-- **“References are always faster.”** Their stronger contract can enable
-  optimization, as this small function demonstrates. Real performance still
-  depends on whether the workload and generated code use that opportunity.
+- **“References are always faster.”** This exact build reused one source load
+  in the reference body. The experiment did not measure performance, and other
+  workloads and compiler builds need not make the same code-generation choice.
 
 ## Practical selection guide
 
