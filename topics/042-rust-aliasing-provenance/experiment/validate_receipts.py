@@ -8,7 +8,8 @@ import csv
 import hashlib
 import json
 import re
-from pathlib import Path
+import shlex
+from pathlib import Path, PurePosixPath
 
 
 EXPECTED_GATE_LOGS = (
@@ -21,89 +22,130 @@ EXPECTED_GATE_LOGS = (
     "gates/07-cargo-doc.txt",
 )
 
-# Each recorded command receipt is bound to the tokens its COMMAND line must
-# contain. Absolute paths vary per run, so only run-independent tokens are
-# required. A bare exit-status line cannot satisfy these.
-EXPECTED_COMMAND_TOKENS = {
-    "gates/01-git-diff-check.txt": ("git", "diff", "--check"),
-    "gates/02-cargo-fmt.txt": ("cargo", "fmt", "--all", "--check"),
-    "gates/03-cargo-test-lib-examples.txt": (
-        "cargo",
-        "test",
-        "--locked",
-        "--offline",
-        "--workspace",
-        "--lib",
-        "--examples",
-    ),
-    "gates/04-cargo-test-doc.txt": (
-        "cargo",
-        "test",
-        "--locked",
-        "--offline",
-        "--workspace",
-        "--doc",
-    ),
-    "gates/05-cargo-clippy.txt": (
-        "cargo",
-        "clippy",
-        "--locked",
-        "--offline",
-        "--workspace",
-        "--all-targets",
-        "-D warnings",
-    ),
-    "gates/06-cargo-bench-no-run.txt": (
-        "cargo",
-        "bench",
-        "--locked",
-        "--offline",
-        "--workspace",
-        "--no-run",
-    ),
-    "gates/07-cargo-doc.txt": (
-        "RUSTDOCFLAGS=-D\\ warnings",
-        "cargo",
-        "doc",
-        "--locked",
-        "--offline",
-        "--workspace",
-        "--no-deps",
-    ),
-    "source-clean-after.txt": ("git", "diff", "--check"),
-    "build-native.txt": (
-        "RUSTFLAGS=-C\\ opt-level=3\\ -C\\ target-cpu=native\\ -C\\ panic=abort",
-        "cargo",
-        "build",
-        "--locked",
-        "--offline",
-        "--release",
-        "--package rust-aliasing-provenance",
-        "--example provenance_demo",
-    ),
-    "codegen-command.txt": (
-        "rustc",
-        "--crate-name rust_aliasing_provenance",
-        "--edition=2024",
-        "--crate-type=lib",
-        "-C opt-level=3",
-        "-C target-cpu=native",
-        "-C panic=abort",
-        "--emit=",
-    ),
-    "run-processes.txt": ("python3", "run_processes.py", "--runs 8"),
+# Each recorded command receipt is bound to the program it must invoke and the
+# arguments that program must carry. Absolute paths vary per run, so they are
+# matched by prefix or suffix rather than in full. Arguments are compared against
+# parsed argv elements, so text that merely appears somewhere in the command line
+# cannot satisfy a requirement.
+EXPECTED_COMMANDS: dict[str, dict[str, object]] = {
+    "gates/01-git-diff-check.txt": {"program": "git", "args": ("diff", "--check")},
+    "gates/02-cargo-fmt.txt": {
+        "program": "cargo",
+        "args": ("fmt", "--all", "--check"),
+    },
+    "gates/03-cargo-test-lib-examples.txt": {
+        "program": "cargo",
+        "args": ("test", "--locked", "--offline", "--workspace", "--lib", "--examples"),
+        "env": {"CARGO_TARGET_DIR": None},
+    },
+    "gates/04-cargo-test-doc.txt": {
+        "program": "cargo",
+        "args": ("test", "--locked", "--offline", "--workspace", "--doc"),
+        "env": {"CARGO_TARGET_DIR": None},
+    },
+    "gates/05-cargo-clippy.txt": {
+        "program": "cargo",
+        "args": (
+            "clippy",
+            "--locked",
+            "--offline",
+            "--workspace",
+            "--all-targets",
+            "--",
+            "-D",
+            "warnings",
+        ),
+        "env": {"CARGO_TARGET_DIR": None},
+    },
+    "gates/06-cargo-bench-no-run.txt": {
+        "program": "cargo",
+        "args": ("bench", "--locked", "--offline", "--workspace", "--no-run"),
+        "env": {"CARGO_TARGET_DIR": None},
+    },
+    "gates/07-cargo-doc.txt": {
+        "program": "cargo",
+        "args": ("doc", "--locked", "--offline", "--workspace", "--no-deps"),
+        "env": {"CARGO_TARGET_DIR": None, "RUSTDOCFLAGS": "-D warnings"},
+    },
+    "source-clean-after.txt": {"program": "git", "args": ("diff", "--check")},
+    "build-native.txt": {
+        "program": "cargo",
+        "args": (
+            "build",
+            "-vv",
+            "--locked",
+            "--offline",
+            "--release",
+            "--package",
+            "rust-aliasing-provenance",
+            "--example",
+            "provenance_demo",
+        ),
+        "env": {
+            "CARGO_TARGET_DIR": None,
+            "RUSTFLAGS": "-C opt-level=3 -C target-cpu=native -C panic=abort",
+        },
+    },
+    "codegen-command.txt": {
+        "program": "rustc",
+        "args": (
+            "--crate-name",
+            "rust_aliasing_provenance",
+            "--edition=2024",
+            "--crate-type=lib",
+            "-C",
+            "opt-level=3",
+            "-C",
+            "target-cpu=native",
+            "-C",
+            "panic=abort",
+        ),
+        "arg_prefixes": ("--emit=",),
+        "arg_suffixes": ("src/lib.rs",),
+    },
+    "run-processes.txt": {
+        "program": "python3",
+        "args": ("-I", "-B", "--runs", "8"),
+        "arg_suffixes": ("run_processes.py",),
+    },
 }
+
+
+def parse_recorded_argv(command_line: str) -> tuple[dict[str, str], list[str]]:
+    """Split a recorded COMMAND line into env assignments and argv.
+
+    `run_record` writes the command with printf %q, so the line is shell-quoted
+    and parsed as such. A leading `env` plus any NAME=VALUE assignments are
+    returned separately from the program and its arguments.
+    """
+
+    if "$'" in command_line:
+        raise ValueError("recorded command uses unsupported ANSI-C quoting")
+    argv = shlex.split(command_line, posix=True)
+    if not argv:
+        raise ValueError("recorded command is empty")
+    if PurePosixPath(argv[0]).name == "env":
+        argv = argv[1:]
+    assignments: dict[str, str] = {}
+    while argv and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=.*", argv[0]):
+        name, value = argv[0].split("=", 1)
+        assignments[name] = value
+        argv = argv[1:]
+    if not argv:
+        raise ValueError("recorded command names no program")
+    return assignments, argv
 
 
 def require_command_receipt(root: Path, relative: str) -> None:
     """Require one recorded command and a single final zero exit status.
 
-    A substring search for a zero status accepts any nonempty file containing
-    that text, so a receipt is required to carry the shape `run_record` writes:
-    its command on the first line, then exactly one exit status as the last
-    line.
+    A substring search accepts any nonempty file containing the expected text, so
+    the receipt must instead carry the shape `run_record` writes -- its command on
+    the first line, then exactly one exit status as the last line -- and its
+    parsed argv must name the expected program and arguments.
     """
 
+    expected = EXPECTED_COMMANDS[relative]
     lines = (root / relative).read_text(encoding="utf-8").splitlines()
     while lines and not lines[-1].strip():
         lines.pop()
@@ -111,13 +153,36 @@ def require_command_receipt(root: Path, relative: str) -> None:
         raise ValueError(f"empty command receipt: {relative}")
     if not lines[0].startswith("COMMAND="):
         raise ValueError(f"receipt does not open with its command: {relative}")
+
+    assignments, argv = parse_recorded_argv(lines[0][len("COMMAND=") :])
+    program = str(expected["program"])
+    if PurePosixPath(argv[0]).name != program:
+        raise ValueError(
+            f"receipt {relative} records program {argv[0]!r}, expected {program!r}"
+        )
+    arguments = argv[1:]
     missing = [
-        token
-        for token in EXPECTED_COMMAND_TOKENS[relative]
-        if token not in lines[0]
+        argument
+        for argument in expected.get("args", ())  # type: ignore[call-overload]
+        if argument not in arguments
     ]
     if missing:
-        raise ValueError(f"receipt {relative} lacks expected command tokens: {missing}")
+        raise ValueError(f"receipt {relative} lacks expected arguments: {missing}")
+    for prefix in expected.get("arg_prefixes", ()):  # type: ignore[call-overload]
+        if not any(argument.startswith(prefix) for argument in arguments):
+            raise ValueError(f"receipt {relative} lacks an argument starting {prefix!r}")
+    for suffix in expected.get("arg_suffixes", ()):  # type: ignore[call-overload]
+        if not any(argument.endswith(suffix) for argument in arguments):
+            raise ValueError(f"receipt {relative} lacks an argument ending {suffix!r}")
+    for name, value in expected.get("env", {}).items():  # type: ignore[union-attr]
+        if name not in assignments:
+            raise ValueError(f"receipt {relative} lacks the {name} assignment")
+        if value is not None and assignments[name] != value:
+            raise ValueError(
+                f"receipt {relative} records {name}={assignments[name]!r}, "
+                f"expected {value!r}"
+            )
+
     statuses = [
         index
         for index, line in enumerate(lines)
@@ -258,6 +323,51 @@ def llvm_definition(text: str, symbol: str) -> tuple[str, str]:
     return match.group(1), match.group(2)
 
 
+def llvm_parameters(header: str, symbol: str) -> dict[str, str]:
+    """Return each parameter declaration in one LLVM definition header by name.
+
+    Attributes elsewhere in the header, including a `section "noalias"` clause,
+    must not be mistaken for a parameter attribute, so the parameter list is
+    isolated by balanced parentheses and split on its own top-level commas.
+    """
+
+    opening = header.index("(", header.index(f"@{symbol}"))
+    depth = 0
+    closing = -1
+    for index in range(opening, len(header)):
+        if header[index] == "(":
+            depth += 1
+        elif header[index] == ")":
+            depth -= 1
+            if depth == 0:
+                closing = index
+                break
+    if closing < 0:
+        raise ValueError(f"unbalanced parameter list for {symbol}")
+
+    declarations: list[str] = []
+    current = ""
+    depth = 0
+    for character in header[opening + 1 : closing]:
+        if character == "(":
+            depth += 1
+        elif character == ")":
+            depth -= 1
+        if character == "," and depth == 0:
+            declarations.append(current)
+            current = ""
+        else:
+            current += character
+    declarations.append(current)
+
+    parameters: dict[str, str] = {}
+    for declaration in declarations:
+        name = re.search(r"%([A-Za-z0-9_.]+)\s*$", declaration.strip())
+        if name is not None:
+            parameters[name.group(1)] = declaration
+    return parameters
+
+
 def validate_llvm_contract(root: Path) -> None:
     """Prove the alias-sensitive load contract in optimized LLVM IR."""
 
@@ -267,10 +377,19 @@ def validate_llvm_contract(root: Path) -> None:
     )
     raw_header, raw_body = llvm_definition(text, "topic42_raw_contract")
 
-    if len(re.findall(r"\bnoalias\b", reference_header)) < 2:
-        raise ValueError("reference parameters do not both carry LLVM noalias")
-    if re.search(r"\bnoalias\b", raw_header):
-        raise ValueError("raw-pointer parameters unexpectedly carry LLVM noalias")
+    # Counting the attribute across the whole header cannot show which parameter
+    # carries it, so require it on each parameter's own declaration.
+    reference_parameters = llvm_parameters(reference_header, "topic42_reference_contract")
+    raw_parameters = llvm_parameters(raw_header, "topic42_raw_contract")
+    for name in ("destination", "source"):
+        if name not in reference_parameters:
+            raise ValueError(f"reference contract lacks a %{name} parameter")
+        if not re.search(r"\bnoalias\b", reference_parameters[name]):
+            raise ValueError(f"reference parameter %{name} does not carry LLVM noalias")
+        if name not in raw_parameters:
+            raise ValueError(f"raw contract lacks a %{name} parameter")
+        if re.search(r"\bnoalias\b", raw_parameters[name]):
+            raise ValueError(f"raw parameter %{name} unexpectedly carries LLVM noalias")
 
     source_load = re.compile(r"^\s*%[^=]+ = load i64, ptr %source(?:,|\s)", re.MULTILINE)
     reference_loads = list(source_load.finditer(reference_body))
@@ -343,7 +462,7 @@ def validate_host_source_and_gates(
         root / "source-manifest-after.sha256"
     ).read_bytes():
         raise ValueError("source manifest changed during the host run")
-    for relative in EXPECTED_COMMAND_TOKENS:
+    for relative in EXPECTED_COMMANDS:
         require_command_receipt(root, relative)
 
     source = parse_key_values(root / "source-identity.txt")
