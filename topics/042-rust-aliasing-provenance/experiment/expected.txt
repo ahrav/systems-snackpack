@@ -1,0 +1,6 @@
+strict_provenance words=[10, 20, 99, 40] dereferenced_within_live_allocation=yes
+exposed_address comparison=equal dereferenced=no
+reference distinct_inputs=yes returned=14 dst=8 src=7
+raw_distinct same_pointer=no returned=14 dst=8 src=7
+raw_alias same_pointer=yes returned=15 value=8
+contract result=PASS timing_reported=no
