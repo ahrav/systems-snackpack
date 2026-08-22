@@ -297,16 +297,20 @@ esac
 # gates and native build.
 cd "$source_root"
 
-# Sweeping RUSTUP_TOOLCHAIN removes the environment override, but a directory
-# override recorded in rustup's settings can still redirect the proxies, and
-# the version receipts only have to be nonempty. Bind the compiler that runs
-# the gates to the archive's own pin so a run under another toolchain cannot
-# report the hard-coded build boundary.
+# Select the archive's pinned toolchain explicitly. Sweeping RUSTUP_TOOLCHAIN
+# removes the caller's environment override, but a directory override recorded in
+# rustup's settings still outranks rust-toolchain.toml for every bare rustc and
+# cargo call, and a custom toolchain reached that way can report the pinned
+# version while being a different compiler. Setting RUSTUP_TOOLCHAIN from the
+# archive's own pin outranks a directory override in turn, and leaves the recorded
+# commands unchanged. Confirm the selection resolves inside this account's rustup
+# toolchain directory for the pinned version.
 toolchain_pin=$(awk -F'"' '/^[[:space:]]*channel[[:space:]]*=/ { print $2; exit }' rust-toolchain.toml)
 if [[ ! $toolchain_pin =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
     echo "archive must pin an exact numeric toolchain; found '${toolchain_pin:-none}'" >&2
     exit 2
 fi
+export RUSTUP_TOOLCHAIN="$toolchain_pin"
 resolved_rustc_version=$(rustc -V | awk '{print $2}')
 resolved_cargo_version=$(cargo -V | awk '{print $2}')
 if [[ $resolved_rustc_version != "$toolchain_pin" ]]; then
@@ -317,6 +321,17 @@ if [[ $resolved_cargo_version != "$toolchain_pin" ]]; then
     echo "cargo $resolved_cargo_version does not match pinned $toolchain_pin" >&2
     exit 2
 fi
+toolchain_prefix="$rustup_home/toolchains/$toolchain_pin-"
+resolved_rustc_binary=$(rustup which rustc)
+resolved_cargo_binary=$(rustup which cargo)
+if [[ $resolved_rustc_binary != "$toolchain_prefix"* ]]; then
+    echo "rustc resolves to $resolved_rustc_binary, outside $toolchain_prefix*" >&2
+    exit 2
+fi
+if [[ $resolved_cargo_binary != "$toolchain_prefix"* ]]; then
+    echo "cargo resolves to $resolved_cargo_binary, outside $toolchain_prefix*" >&2
+    exit 2
+fi
 
 {
     printf 'source_commit=%s\n' "$source_commit"
@@ -324,10 +339,11 @@ fi
     printf 'archive_embedded_commit=%s\n' "$archive_embedded_commit"
     printf 'runner_sha256='; sha256sum "$experiment_dir/run_host.sh" | awk '{print $1}'
     printf 'toolchain_pin=%s\n' "$toolchain_pin"
+    printf 'toolchain_selection=RUSTUP_TOOLCHAIN=%s\n' "$toolchain_pin"
     printf 'resolved_rustc_version=%s\n' "$resolved_rustc_version"
     printf 'resolved_cargo_version=%s\n' "$resolved_cargo_version"
-    printf 'resolved_rustc_path=%s\n' "$(command -v rustc)"
-    printf 'resolved_cargo_path=%s\n' "$(command -v cargo)"
+    printf 'resolved_rustc_binary=%s\n' "$resolved_rustc_binary"
+    printf 'resolved_cargo_binary=%s\n' "$resolved_cargo_binary"
     printf 'account_home=%s\n' "$account_home"
     printf 'rustup_home=%s\n' "$rustup_home"
     printf 'command_path=%s\n' "$PATH"
