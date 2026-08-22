@@ -193,7 +193,10 @@ def validate_llvm_contract(root: Path) -> None:
 
 
 def validate_host_source_and_gates(
-    root: Path, expected_commit: str, expected_archive_sha256: str
+    root: Path,
+    expected_commit: str,
+    expected_archive_sha256: str,
+    expected_hostname: str,
 ) -> None:
     """Require current host metadata, exact source identity, and seven gates."""
 
@@ -268,8 +271,23 @@ def validate_host_source_and_gates(
             raise ValueError("authorized Arm receipt is not AArch64")
     else:
         raise ValueError(f"unauthorized SSH target label: {label!r}")
-    if host.get("hostname_fqdn") != host.get("ssh_resolved_hostname"):
+
+    # Both hostname fields come from the bundle under test, so comparing them to
+    # each other only proves internal consistency: absent fields would compare
+    # equal as None, and a bundle from another host stays self-consistent.
+    # Require both to be present and to equal the hostname the caller expects.
+    recorded_fqdn = host.get("hostname_fqdn", "")
+    recorded_resolved = host.get("ssh_resolved_hostname", "")
+    if not recorded_fqdn or not recorded_resolved:
+        raise ValueError("host receipt lacks a recorded resolved hostname")
+    if recorded_fqdn != recorded_resolved:
         raise ValueError("recorded resolved hostname differs from the executing host")
+    if recorded_fqdn != expected_hostname:
+        raise ValueError(
+            f"bundle records host {recorded_fqdn}, expected {expected_hostname}"
+        )
+    if label != "xxl" and recorded_fqdn != label:
+        raise ValueError("fixed Arm label must equal the recorded hostname")
     if any(
         (
             host.get("measurement_kind")
@@ -315,12 +333,20 @@ def main() -> int:
         type=hex_field(64, "--archive-sha256"),
         help="SHA-256 of the git archive the bundle must have been produced from",
     )
+    parser.add_argument(
+        "--expected-hostname",
+        required=True,
+        help="fully qualified hostname the bundle must have been produced on",
+    )
     arguments = parser.parse_args()
     root = arguments.root.resolve()
     expected = arguments.expected.read_bytes()
 
     validate_host_source_and_gates(
-        root, arguments.source_commit, arguments.archive_sha256
+        root,
+        arguments.source_commit,
+        arguments.archive_sha256,
+        arguments.expected_hostname,
     )
     validate_processes(root, expected)
     validate_llvm_contract(root)
@@ -329,7 +355,8 @@ def main() -> int:
         "reference_noalias=yes reference_source_loads=1 "
         "raw_noalias=no raw_source_loads=2 "
         f"source_commit={arguments.source_commit} "
-        f"source_archive_sha256={arguments.archive_sha256}"
+        f"source_archive_sha256={arguments.archive_sha256} "
+        f"host={arguments.expected_hostname}"
     )
     return 0
 

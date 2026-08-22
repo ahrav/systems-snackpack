@@ -57,7 +57,7 @@ swept_environment_names=()
 while IFS= read -r variable; do
     case $variable in
     RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | RUSTFMT | \
-        RUSTFLAGS | RUSTDOCFLAGS | RUSTUP_TOOLCHAIN | CARGO_* | \
+        RUSTFLAGS | RUSTDOCFLAGS | RUSTUP_HOME | RUSTUP_TOOLCHAIN | CARGO_* | \
         CC | CFLAGS | CPPFLAGS | LDFLAGS | COMPILER_PATH | GCC_EXEC_PREFIX | \
         LIBRARY_PATH | CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | \
         LD_* | DYLD_* | GLIBC_TUNABLES | MALLOC_* | GIT_* | \
@@ -70,23 +70,39 @@ while IFS= read -r variable; do
 done < <(compgen -e)
 export GIT_NO_REPLACE_OBJECTS=1
 
-# PATH must not depend on an inherited HOME. Privileged mode preserves HOME, so
-# a supplied value would place attacker-chosen rustc, cargo, git, tar, sha256sum,
-# or python3 ahead of the system tools, and the version records do not
-# authenticate the executables they describe. Resolve the invoking account's home
-# from the password database using the kernel-reported real user instead of the
-# environment, build the general command path from trusted absolute directories
-# only, and append the rustup proxy directory last so that it supplies the pinned
-# toolchain without being able to shadow a system tool.
+# Establish a trusted system-only search path before running any external
+# command. Every check above uses shell builtins, so this is the first point at
+# which an inherited PATH could matter, and the account resolution below must not
+# depend on one: a substituted id, getent, or awk could otherwise name an
+# attacker-controlled home whose .cargo/bin holds proxies that report the pinned
+# version while producing different artifacts.
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
+hash -r
+
+# The command path and the toolchain stores must not depend on an inherited HOME
+# or RUSTUP_HOME. Privileged mode preserves both, and the rustup proxies compute
+# their settings and toolchain directories from RUSTUP_HOME even when
+# RUSTUP_TOOLCHAIN is cleared, so a linked or custom toolchain in a supplied home
+# could report the pinned version from a different compiler. Resolve the invoking
+# account from the password database using the kernel-reported real user, then
+# bind HOME, RUSTUP_HOME, and the rustup proxy directory to that account. The
+# proxy directory is appended last so it supplies the pinned toolchain without
+# being able to shadow a system tool.
 real_user=$(id -un)
 account_home=$(getent passwd "$real_user" | awk -F: '{print $6}')
 if [[ -z $account_home || ! -d $account_home ]]; then
     echo "cannot resolve a home directory for $real_user from the password database" >&2
     exit 2
 fi
-export HOME="$account_home"
+rustup_home="$account_home/.rustup"
 rustup_bin="$account_home/.cargo/bin"
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$rustup_bin"
+if [[ ! -d $rustup_home ]]; then
+    echo "no rustup home for $real_user at $rustup_home" >&2
+    exit 2
+fi
+export HOME="$account_home"
+export RUSTUP_HOME="$rustup_home"
+export PATH="$PATH:$rustup_bin"
 hash -r
 
 if [[ $# -ne 4 ]]; then
@@ -281,6 +297,7 @@ fi
     printf 'resolved_rustc_path=%s\n' "$(command -v rustc)"
     printf 'resolved_cargo_path=%s\n' "$(command -v cargo)"
     printf 'account_home=%s\n' "$account_home"
+    printf 'rustup_home=%s\n' "$rustup_home"
     printf 'command_path=%s\n' "$PATH"
     printf 'cargo_home_isolated=yes\n'
     printf 'swept_environment_names=%s\n' "${swept_environment_names[*]:-none}"
@@ -397,7 +414,8 @@ run_record validate-receipts.txt python3 -I -B "$experiment_dir/validate_receipt
     --root "$output_dir" \
     --expected "$expected" \
     --source-commit "$source_commit" \
-    --archive-sha256 "$archive_digest"
+    --archive-sha256 "$archive_digest" \
+    --expected-hostname "$resolved_hostname"
 
 # Only retained evidence remains. The deleted path was created by this run and
 # is constrained to OUTPUT_DIR/.work under a direct /tmp child.
