@@ -74,6 +74,15 @@ while IFS= read -r variable; do
     esac
 done < <(compgen -e)
 export GIT_NO_REPLACE_OBJECTS=1
+# Pin the locale before any external tool runs. Localized builds of readelf and
+# lscpu translate the field labels these receipts capture, and both the validator
+# and the CPU-model extraction match English labels, so an inherited LANG or LC_*
+# could turn a valid run into a failure or a silently missing field. LC_ALL
+# outranks every other locale variable, and LANGUAGE is ignored under the C
+# locale.
+export LANG=C
+export LC_ALL=C
+unset LANGUAGE
 # Git reads system and global configuration even with HOME bound to the invoking
 # account, and settings there change what the gates measure: core.whitespace can
 # make `git diff --check` exit zero on trailing whitespace, and core.fsmonitor

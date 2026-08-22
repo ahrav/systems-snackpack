@@ -346,6 +346,28 @@ def validate_processes(root: Path, expected: bytes) -> None:
         raise ValueError("process sequence is not exactly 1..8")
 
     empty_digest = hashlib.sha256(b"").hexdigest()
+
+    # The contract is exactly eight launches with no retry, so an extra stream
+    # would mean an attempt the receipts do not account for. Counting rows cannot
+    # see those, so require the retained streams to be exactly the expected set.
+    raw_root = process_root / "raw"
+    expected_streams = {
+        f"run-{sequence:02d}.{stream}"
+        for sequence in range(1, 9)
+        for stream in ("stdout", "stderr")
+    }
+    retained_streams = {entry.name for entry in raw_root.iterdir()}
+    if retained_streams != expected_streams:
+        unexpected = sorted(retained_streams - expected_streams)
+        missing = sorted(expected_streams - retained_streams)
+        raise ValueError(
+            f"retained process streams are not exactly run-01..run-08: "
+            f"unexpected {unexpected}, missing {missing}"
+        )
+    for name in sorted(expected_streams):
+        if not (raw_root / name).is_file():
+            raise ValueError(f"retained process stream is not a regular file: {name}")
+
     for row in rows:
         sequence = int(row["sequence"])
         stdout = process_root / "raw" / f"run-{sequence:02d}.stdout"
