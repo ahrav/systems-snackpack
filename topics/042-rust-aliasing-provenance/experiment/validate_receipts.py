@@ -738,7 +738,12 @@ def hex_field(length: int, label: str):
 
 
 def main() -> int:
-    """Validate one host's complete Topic 42 receipt bundle."""
+    """Validate one host's complete Topic 42 receipt bundle.
+
+    Every expectation is supplied by the caller rather than read back from the
+    bundle. `run_host.sh` invokes this validator as a required gate, so any
+    argument added here must be passed there in the same change.
+    """
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, required=True)

@@ -538,6 +538,7 @@ run_record codegen/linked.elf.txt readelf -h -n -A "$retained_binary"
 run_record source-clean-after.txt git -C "$source_root" diff --check
 write_source_manifest "$output_dir/source-manifest-after.sha256"
 cmp "$output_dir/source-manifest-before.sha256" "$output_dir/source-manifest-after.sha256"
+source_manifest_digest=$(sha256sum "$output_dir/source-manifest-before.sha256" | awk '{print $1}')
 run_record validate-receipts.txt python3 -I -B "$experiment_dir/validate_receipts.py" \
     --root "$output_dir" \
     --expected "$expected" \
@@ -545,7 +546,8 @@ run_record validate-receipts.txt python3 -I -B "$experiment_dir/validate_receipt
     --archive-sha256 "$archive_digest" \
     --expected-hostname "$resolved_hostname" \
     --expected-rustc-version "$toolchain_pin" \
-    --expected-llvm-version "$resolved_llvm_version"
+    --expected-llvm-version "$resolved_llvm_version" \
+    --expected-source-manifest-sha256 "$source_manifest_digest"
 
 # Only retained evidence remains. The deleted path was created by this run and
 # is constrained to OUTPUT_DIR/.work under a direct /tmp child.
@@ -555,6 +557,7 @@ rm -rf -- "$work_dir"
     printf 'status=PASS\n'
     printf 'source_commit=%s\n' "$source_commit"
     printf 'source_archive_sha256=%s\n' "$archive_digest"
+    printf 'source_manifest_sha256=%s\n' "$source_manifest_digest"
     printf 'ssh_target_label=%s\n' "$SSH_TARGET_LABEL"
     printf 'ssh_resolved_hostname=%s\n' "$SSH_RESOLVED_HOSTNAME"
     printf 'architecture=%s\n' "$architecture"
