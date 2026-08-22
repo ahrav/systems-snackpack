@@ -61,8 +61,8 @@ fi
 swept_environment_names=()
 while IFS= read -r variable; do
     case $variable in
-    RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | RUSTFMT | \
-        RUSTFLAGS | RUSTDOCFLAGS | RUSTUP_HOME | RUSTUP_TOOLCHAIN | CARGO_* | \
+    RUSTC | RUSTC_* | RUSTDOC | RUSTFMT | \
+        RUSTFLAGS | RUSTDOCFLAGS | CLIPPY_* | RUSTUP_HOME | RUSTUP_TOOLCHAIN | CARGO_* | \
         CC | CFLAGS | CPPFLAGS | LDFLAGS | COMPILER_PATH | GCC_EXEC_PREFIX | \
         LIBRARY_PATH | CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | \
         LD_* | DYLD_* | GLIBC_TUNABLES | MALLOC_* | GIT_* | \
@@ -267,6 +267,26 @@ run_record() {
 }
 
 write_source_manifest "$output_dir/source-manifest-before.sha256"
+
+# The digest this run passes to the validator is derived from the manifest it
+# just wrote, so it cannot by itself show the manifest is complete: an equally
+# incomplete pair would agree with its own digest. Establish completeness against
+# an input this run did not generate by comparing the manifest's path set with the
+# digest-checked archive's own file list. The archive carries no target or .git
+# entries, so the two sets must be identical.
+archive_paths="$work_dir/archive-paths.txt"
+manifest_paths="$work_dir/manifest-paths.txt"
+tar -tzf "$private_archive" |
+    sed -n "s|^${source_root##*/}/||p" |
+    grep -v '/$' | grep -v '^$' | LC_ALL=C sort >"$archive_paths"
+awk '{ sub(/^[0-9a-f]+  /, ""); print }' "$output_dir/source-manifest-before.sha256" |
+    LC_ALL=C sort >"$manifest_paths"
+if ! cmp -s "$archive_paths" "$manifest_paths"; then
+    echo "source manifest does not match the archive's file list" >&2
+    diff -- "$archive_paths" "$manifest_paths" >&2 || true
+    exit 2
+fi
+archive_path_count=$(wc -l <"$archive_paths")
 
 resolved_hostname=$(hostname -f)
 architecture=$(uname -m)
@@ -558,6 +578,7 @@ rm -rf -- "$work_dir"
     printf 'source_commit=%s\n' "$source_commit"
     printf 'source_archive_sha256=%s\n' "$archive_digest"
     printf 'source_manifest_sha256=%s\n' "$source_manifest_digest"
+    printf 'source_manifest_paths=%s\n' "$archive_path_count"
     printf 'ssh_target_label=%s\n' "$SSH_TARGET_LABEL"
     printf 'ssh_resolved_hostname=%s\n' "$SSH_RESOLVED_HOSTNAME"
     printf 'architecture=%s\n' "$architecture"
