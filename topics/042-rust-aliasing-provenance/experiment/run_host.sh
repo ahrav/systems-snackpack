@@ -62,7 +62,7 @@ swept_environment_names=()
 while IFS= read -r variable; do
     case $variable in
     RUSTC | RUSTC_* | RUSTDOC | RUSTFMT | \
-        RUSTFLAGS | RUSTDOCFLAGS | CLIPPY_* | RUSTUP_HOME | RUSTUP_TOOLCHAIN | CARGO_* | \
+        RUSTFLAGS | RUSTDOCFLAGS | CLIPPY_* | RUSTUP_* | CARGO_* | \
         CC | CFLAGS | CPPFLAGS | LDFLAGS | COMPILER_PATH | GCC_EXEC_PREFIX | \
         LIBRARY_PATH | CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | \
         LD_* | DYLD_* | GLIBC_TUNABLES | MALLOC_* | GIT_* | \
@@ -367,6 +367,15 @@ if [[ ! $toolchain_pin =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
 fi
 export RUSTUP_TOOLCHAIN="$toolchain_pin"
 toolchain_prefix="$rustup_home/toolchains/$toolchain_pin-"
+# Resolve only an already-installed toolchain. rustup installs a missing one on
+# demand, and its distribution server and update root are caller-supplied
+# variables, so a resolution that reaches the network could fetch a compiler that
+# then self-reports the pinned version. Those variables are swept above; requiring
+# the directory to exist first removes the download path entirely.
+if ! compgen -G "$toolchain_prefix*" >/dev/null; then
+    echo "pinned toolchain $toolchain_pin is not installed under $rustup_home/toolchains" >&2
+    exit 2
+fi
 resolved_rustc_binary=$("$rustup_exe" which rustc)
 resolved_cargo_binary=$("$rustup_exe" which cargo)
 if [[ $resolved_rustc_binary != "$toolchain_prefix"* ]]; then

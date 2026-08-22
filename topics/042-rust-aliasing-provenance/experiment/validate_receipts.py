@@ -14,6 +14,8 @@ from pathlib import Path, PurePosixPath
 
 TOPIC_DIRECTORY = "topics/042-rust-aliasing-provenance"
 RETAINED_BINARY = "provenance-demo"
+# The Cargo example target keeps the crate-style name; the retained copy is renamed.
+EXAMPLE_TARGET = "provenance_demo"
 
 # `uname -m` reports arm64 on some Arm hosts while rustc and readelf use the
 # canonical aarch64 spelling, so normalize before comparing either.
@@ -654,6 +656,77 @@ def require_regular_files(root: Path) -> None:
             raise ValueError(f"bundle retains a non-regular file: {relative}")
 
 
+def require_consistent_paths(root: Path) -> None:
+    """Require every recorded path slot to name the one archived workspace.
+
+    Absolute paths vary per run, so the argv templates match them with a
+    wildcard. A wildcard alone would accept a gate whose --manifest-path selects a
+    different workspace, so derive the run's own directories from two receipts and
+    require every other path slot to agree with them.
+    """
+
+    def argv_of(relative: str) -> list[str]:
+        line = (root / relative).read_text(encoding="utf-8").splitlines()[0]
+        return parse_recorded_argv(line[len("COMMAND=") :])[1]
+
+    retained = argv_of("codegen/linked.objdump.txt")[2]
+    suffix = f"/processes/{RETAINED_BINARY}"
+    if not retained.endswith(suffix):
+        raise ValueError(f"linked receipt does not name the retained binary: {retained}")
+    run_root = retained[: -len(suffix)]
+    work = f"{run_root}/.work"
+
+    source_root = argv_of("gates/01-git-diff-check.txt")[2]
+    archive_root = f"{work}/archive"
+    if source_root != archive_root and not source_root.startswith(f"{archive_root}/"):
+        raise ValueError(
+            f"gate workspace {source_root} is not inside the extracted archive "
+            f"{archive_root}"
+        )
+
+    manifest = f"{source_root}/Cargo.toml"
+    experiment = f"{source_root}/{TOPIC_DIRECTORY}/experiment"
+    expected_slots: dict[str, dict[int, str]] = {
+        "source-clean-after.txt": {2: source_root},
+        "gates/02-cargo-fmt.txt": {3: manifest},
+        "gates/03-cargo-test-lib-examples.txt": {3: manifest},
+        "gates/04-cargo-test-doc.txt": {3: manifest},
+        "gates/05-cargo-clippy.txt": {3: manifest},
+        "gates/06-cargo-bench-no-run.txt": {3: manifest},
+        "gates/07-cargo-doc.txt": {3: manifest},
+        "build-native.txt": {4: manifest},
+        "codegen-command.txt": {12: f"{source_root}/{TOPIC_DIRECTORY}/src/lib.rs"},
+        "run-processes.txt": {
+            3: f"{experiment}/run_processes.py",
+            5: f"{work}/native-target/release/examples/{EXAMPLE_TARGET}",
+            7: f"{experiment}/expected.txt",
+            9: f"{run_root}/processes",
+        },
+        "codegen/linked.symbols.txt": {2: retained},
+        "codegen/linked.elf.txt": {4: retained},
+    }
+    for relative, slots in expected_slots.items():
+        argv = argv_of(relative)
+        for index, wanted in slots.items():
+            if argv[index] != wanted:
+                raise ValueError(
+                    f"receipt {relative} argv[{index}] is {argv[index]!r}, "
+                    f"expected {wanted!r}"
+                )
+
+    for relative, expected in EXPECTED_COMMANDS.items():
+        expected_env: dict[str, str | None] = expected.get("env", {})  # type: ignore[assignment]
+        if "CARGO_TARGET_DIR" not in expected_env:
+            continue
+        line = (root / relative).read_text(encoding="utf-8").splitlines()[0]
+        assignments = parse_recorded_argv(line[len("COMMAND=") :])[0]
+        target_dir = assignments["CARGO_TARGET_DIR"]
+        if not target_dir.startswith(f"{work}/"):
+            raise ValueError(
+                f"receipt {relative} builds into {target_dir}, outside {work}"
+            )
+
+
 def validate_host_source_and_gates(
     root: Path,
     expected_commit: str,
@@ -825,6 +898,7 @@ def main() -> int:
     expected = arguments.expected.read_bytes()
 
     require_regular_files(root)
+    require_consistent_paths(root)
     validate_host_source_and_gates(
         root,
         arguments.source_commit,
