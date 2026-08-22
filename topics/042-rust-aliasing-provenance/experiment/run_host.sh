@@ -334,6 +334,33 @@ if [[ ! $resolved_llvm_version =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
     echo "rustc reports no usable LLVM version: '${resolved_llvm_version:-none}'" >&2
     exit 2
 fi
+
+# Cargo resolves the compiler, rustdoc, and its own subcommands for itself, so
+# invoking a verified Cargo by absolute path does not bind what it launches: it
+# finds rustc and rustdoc through PATH or RUSTC/RUSTDOC, and finds cargo-fmt and
+# cargo-clippy under CARGO_HOME/bin or PATH, both of which this run has
+# deliberately emptied. Name the compiler tools explicitly and append the verified
+# toolchain's own directory, which holds only Rust tools and so cannot shadow a
+# system command, so every subprocess is the pinned one.
+toolchain_bin=${resolved_rustc_binary%/*}
+if [[ ${resolved_cargo_binary%/*} != "$toolchain_bin" ]]; then
+    echo "verified cargo and rustc are not in one toolchain directory" >&2
+    exit 2
+fi
+resolved_rustdoc_binary="$toolchain_bin/rustdoc"
+resolved_rustfmt_binary="$toolchain_bin/rustfmt"
+for required_tool in "$resolved_rustdoc_binary" "$resolved_rustfmt_binary" \
+    "$toolchain_bin/cargo-fmt" "$toolchain_bin/cargo-clippy" "$toolchain_bin/clippy-driver"; do
+    if [[ ! -x $required_tool ]]; then
+        echo "pinned toolchain lacks $required_tool" >&2
+        exit 2
+    fi
+done
+export RUSTC="$resolved_rustc_binary"
+export RUSTDOC="$resolved_rustdoc_binary"
+export RUSTFMT="$resolved_rustfmt_binary"
+export PATH="$PATH:$toolchain_bin"
+hash -r
 if [[ $resolved_rustc_version != "$toolchain_pin" ]]; then
     echo "rustc $resolved_rustc_version does not match pinned $toolchain_pin" >&2
     exit 2
@@ -353,6 +380,9 @@ fi
     printf 'resolved_rustc_version=%s\n' "$resolved_rustc_version"
     printf 'resolved_cargo_version=%s\n' "$resolved_cargo_version"
     printf 'resolved_llvm_version=%s\n' "$resolved_llvm_version"
+    printf 'resolved_rustdoc_binary=%s\n' "$resolved_rustdoc_binary"
+    printf 'resolved_rustfmt_binary=%s\n' "$resolved_rustfmt_binary"
+    printf 'toolchain_bin=%s\n' "$toolchain_bin"
     printf 'resolved_rustc_binary=%s\n' "$resolved_rustc_binary"
     printf 'resolved_cargo_binary=%s\n' "$resolved_cargo_binary"
     printf 'account_home=%s\n' "$account_home"
