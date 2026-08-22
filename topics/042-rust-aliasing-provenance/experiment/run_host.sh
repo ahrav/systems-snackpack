@@ -18,18 +18,23 @@ if [[ $- != *p* ]]; then
     exit 2
 fi
 # Privileged mode is not the dynamic loader's secure-execution mode: for an
-# ordinary same-UID invocation the loader still honours LD_PRELOAD and LD_AUDIT
-# for this interpreter, so an injected library's initialisation code has already
-# run before this line and unsetting the variable later cannot unload it. A
-# compromised interpreter cannot sanitise itself, so refuse to certify the run
-# instead of continuing. Removing these variables before the interpreter starts
-# belongs to the launcher; see the trusted-launcher boundary below.
-for loader_variable in LD_PRELOAD LD_AUDIT; do
-    if [[ -n ${!loader_variable:-} ]]; then
-        echo "exact-source experiment refuses $loader_variable" >&2
+# ordinary same-UID invocation the loader still honours the LD_* family for this
+# interpreter. LD_PRELOAD and LD_AUDIT load a library directly, and
+# LD_LIBRARY_PATH can satisfy one of Bash's own dependencies from an
+# attacker-chosen directory; in every case the library's initialisation code has
+# already run before this line and unsetting the variable afterwards cannot
+# unload it. A compromised interpreter cannot sanitise itself, so refuse to
+# certify the run instead of continuing. Removing these variables before the
+# interpreter starts belongs to the launcher; see the trusted-launcher boundary
+# below.
+while IFS= read -r variable; do
+    case $variable in
+    LD_* | DYLD_*)
+        echo "exact-source experiment refuses $variable" >&2
         exit 2
-    fi
-done
+        ;;
+    esac
+done < <(compgen -e)
 if [[ -n ${BASH_ENV:-} ]]; then
     echo "exact-source experiment refuses BASH_ENV" >&2
     exit 2
@@ -69,6 +74,13 @@ while IFS= read -r variable; do
     esac
 done < <(compgen -e)
 export GIT_NO_REPLACE_OBJECTS=1
+# Git reads system and global configuration even with HOME bound to the invoking
+# account, and settings there change what the gates measure: core.whitespace can
+# make `git diff --check` exit zero on trailing whitespace, and core.fsmonitor
+# names a command Git runs while inspecting the work tree. Point both scopes at
+# /dev/null so only the explicit -c settings below apply.
+export GIT_CONFIG_GLOBAL=/dev/null
+export GIT_CONFIG_SYSTEM=/dev/null
 
 # Establish a trusted system-only search path before running any external
 # command. Every check above uses shell builtins, so this is the first point at
@@ -198,6 +210,26 @@ if ! cmp -- "${BASH_SOURCE[0]}" "$experiment_dir/run_host.sh"; then
     echo "executed host runner differs from the archive's runner" >&2
     exit 2
 fi
+
+# Cargo, rustfmt, and Clippy each search the working directory and every ancestor
+# for configuration, and CARGO_HOME isolation does not affect that search. The
+# extracted tree sits below /tmp, so a file above it still reaches these builds:
+# a /tmp/.cargo/config.toml can add build.rustflags or select a wrapper or linker,
+# and a /tmp/rustfmt.toml setting disable_all_formatting turns the formatting gate
+# into a pass. Every directory below OUTPUT_DIR is created by this run, so refuse
+# any such configuration outside the digest-bound source tree.
+ancestor=$(dirname -- "$source_root")
+while :; do
+    for ambient_config in .cargo/config.toml .cargo/config rustfmt.toml .rustfmt.toml \
+        clippy.toml .clippy.toml; do
+        if [[ -e $ancestor/$ambient_config ]]; then
+            echo "refusing build configuration outside the source tree: $ancestor/$ambient_config" >&2
+            exit 2
+        fi
+    done
+    [[ $ancestor == / ]] && break
+    ancestor=$(dirname -- "$ancestor")
+done
 
 write_source_manifest() {
     local destination=$1

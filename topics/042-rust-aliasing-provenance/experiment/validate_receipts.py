@@ -22,64 +22,63 @@ EXPECTED_GATE_LOGS = (
     "gates/07-cargo-doc.txt",
 )
 
-# Each recorded command receipt is bound to the program it must invoke and the
-# arguments that program must carry. Absolute paths vary per run, so they are
-# matched by prefix or suffix rather than in full. Arguments are compared against
-# parsed argv elements, so text that merely appears somewhere in the command line
-# cannot satisfy a requirement.
+# The complete argv each recorded command must have, after its leading `env` and
+# assignments are removed. "*" matches exactly one run-varying token, such as an
+# absolute path. Matching the whole shape rather than testing for required
+# members is what rejects an extra behaviour-changing flag: adding --no-run to the
+# test gate leaves every expected argument present but stops the tests running.
 EXPECTED_COMMANDS: dict[str, dict[str, object]] = {
-    "gates/01-git-diff-check.txt": {"program": "git", "args": ("diff", "--check")},
+    "gates/01-git-diff-check.txt": {
+        "argv": ("git", "-C", "*", "diff", "--check"),
+    },
     "gates/02-cargo-fmt.txt": {
-        "program": "cargo",
-        "args": ("fmt", "--all", "--check"),
+        "argv": ("cargo", "fmt", "--manifest-path", "*", "--all", "--", "--check"),
     },
     "gates/03-cargo-test-lib-examples.txt": {
-        "program": "cargo",
-        "args": ("test", "--locked", "--offline", "--workspace", "--lib", "--examples"),
+        "argv": (
+            "cargo", "test", "--manifest-path", "*",
+            "--locked", "--offline", "--workspace", "--lib", "--examples",
+        ),
         "env": {"CARGO_TARGET_DIR": None},
     },
     "gates/04-cargo-test-doc.txt": {
-        "program": "cargo",
-        "args": ("test", "--locked", "--offline", "--workspace", "--doc"),
+        "argv": (
+            "cargo", "test", "--manifest-path", "*",
+            "--locked", "--offline", "--workspace", "--doc",
+        ),
         "env": {"CARGO_TARGET_DIR": None},
     },
     "gates/05-cargo-clippy.txt": {
-        "program": "cargo",
-        "args": (
-            "clippy",
-            "--locked",
-            "--offline",
-            "--workspace",
-            "--all-targets",
-            "--",
-            "-D",
-            "warnings",
+        "argv": (
+            "cargo", "clippy", "--manifest-path", "*",
+            "--locked", "--offline", "--workspace", "--all-targets",
+            "--", "-D", "warnings",
         ),
         "env": {"CARGO_TARGET_DIR": None},
     },
     "gates/06-cargo-bench-no-run.txt": {
-        "program": "cargo",
-        "args": ("bench", "--locked", "--offline", "--workspace", "--no-run"),
+        "argv": (
+            "cargo", "bench", "--manifest-path", "*",
+            "--locked", "--offline", "--workspace", "--no-run",
+        ),
         "env": {"CARGO_TARGET_DIR": None},
     },
     "gates/07-cargo-doc.txt": {
-        "program": "cargo",
-        "args": ("doc", "--locked", "--offline", "--workspace", "--no-deps"),
+        "argv": (
+            "cargo", "doc", "--manifest-path", "*",
+            "--locked", "--offline", "--workspace", "--no-deps",
+        ),
         "env": {"CARGO_TARGET_DIR": None, "RUSTDOCFLAGS": "-D warnings"},
     },
-    "source-clean-after.txt": {"program": "git", "args": ("diff", "--check")},
+    "source-clean-after.txt": {
+        "argv": ("git", "-C", "*", "diff", "--check"),
+    },
     "build-native.txt": {
-        "program": "cargo",
-        "args": (
-            "build",
-            "-vv",
-            "--locked",
-            "--offline",
-            "--release",
-            "--package",
-            "rust-aliasing-provenance",
-            "--example",
-            "provenance_demo",
+        "argv": (
+            "cargo", "build", "-vv", "--manifest-path", "*",
+            "--locked", "--offline", "--release",
+            "--package", "rust-aliasing-provenance",
+            "--example", "provenance_demo",
         ),
         "env": {
             "CARGO_TARGET_DIR": None,
@@ -87,26 +86,20 @@ EXPECTED_COMMANDS: dict[str, dict[str, object]] = {
         },
     },
     "codegen-command.txt": {
-        "program": "rustc",
-        "args": (
-            "--crate-name",
-            "rust_aliasing_provenance",
-            "--edition=2024",
-            "--crate-type=lib",
-            "-C",
-            "opt-level=3",
-            "-C",
-            "target-cpu=native",
-            "-C",
-            "panic=abort",
+        "argv": (
+            "rustc", "--crate-name", "rust_aliasing_provenance",
+            "--edition=2024", "--crate-type=lib",
+            "-C", "opt-level=3", "-C", "target-cpu=native", "-C", "panic=abort",
+            "--emit=*", "*",
         ),
-        "arg_prefixes": ("--emit=",),
-        "arg_suffixes": ("src/lib.rs",),
+        "arg_suffixes": {12: "src/lib.rs"},
     },
     "run-processes.txt": {
-        "program": "python3",
-        "args": ("-I", "-B", "--runs", "8"),
-        "arg_suffixes": ("run_processes.py",),
+        "argv": (
+            "python3", "-I", "-B", "*",
+            "--binary", "*", "--expected", "*", "--output", "*", "--runs", "8",
+        ),
+        "arg_suffixes": {3: "run_processes.py"},
     },
 }
 
@@ -139,10 +132,11 @@ def parse_recorded_argv(command_line: str) -> tuple[dict[str, str], list[str]]:
 def require_command_receipt(root: Path, relative: str) -> None:
     """Require one recorded command and a single final zero exit status.
 
-    A substring search accepts any nonempty file containing the expected text, so
-    the receipt must instead carry the shape `run_record` writes -- its command on
-    the first line, then exactly one exit status as the last line -- and its
-    parsed argv must name the expected program and arguments.
+    A substring search accepts any nonempty file containing the expected text, and
+    testing only for required members accepts extra arguments that change what
+    ran. The receipt must therefore carry the shape `run_record` writes -- its
+    command on the first line, then exactly one exit status as the last line --
+    and its parsed argv must match the expected shape element for element.
     """
 
     expected = EXPECTED_COMMANDS[relative]
@@ -155,28 +149,45 @@ def require_command_receipt(root: Path, relative: str) -> None:
         raise ValueError(f"receipt does not open with its command: {relative}")
 
     assignments, argv = parse_recorded_argv(lines[0][len("COMMAND=") :])
-    program = str(expected["program"])
-    if PurePosixPath(argv[0]).name != program:
+    template: tuple[str, ...] = expected["argv"]  # type: ignore[assignment]
+    if len(argv) != len(template):
         raise ValueError(
-            f"receipt {relative} records program {argv[0]!r}, expected {program!r}"
+            f"receipt {relative} records {len(argv)} argv elements, "
+            f"expected {len(template)}: {argv}"
         )
-    arguments = argv[1:]
-    missing = [
-        argument
-        for argument in expected.get("args", ())  # type: ignore[call-overload]
-        if argument not in arguments
-    ]
-    if missing:
-        raise ValueError(f"receipt {relative} lacks expected arguments: {missing}")
-    for prefix in expected.get("arg_prefixes", ()):  # type: ignore[call-overload]
-        if not any(argument.startswith(prefix) for argument in arguments):
-            raise ValueError(f"receipt {relative} lacks an argument starting {prefix!r}")
-    for suffix in expected.get("arg_suffixes", ()):  # type: ignore[call-overload]
-        if not any(argument.endswith(suffix) for argument in arguments):
-            raise ValueError(f"receipt {relative} lacks an argument ending {suffix!r}")
-    for name, value in expected.get("env", {}).items():  # type: ignore[union-attr]
-        if name not in assignments:
-            raise ValueError(f"receipt {relative} lacks the {name} assignment")
+    for index, (actual, wanted) in enumerate(zip(argv, template)):
+        if wanted == "*":
+            continue
+        if wanted.endswith("*"):
+            if not actual.startswith(wanted[:-1]):
+                raise ValueError(
+                    f"receipt {relative} argv[{index}] {actual!r} does not start "
+                    f"{wanted[:-1]!r}"
+                )
+            continue
+        if index == 0:
+            if PurePosixPath(actual).name != wanted:
+                raise ValueError(
+                    f"receipt {relative} records program {actual!r}, expected {wanted!r}"
+                )
+            continue
+        if actual != wanted:
+            raise ValueError(
+                f"receipt {relative} argv[{index}] is {actual!r}, expected {wanted!r}"
+            )
+    for index, suffix in expected.get("arg_suffixes", {}).items():  # type: ignore[union-attr]
+        if not argv[index].endswith(suffix):
+            raise ValueError(
+                f"receipt {relative} argv[{index}] does not end {suffix!r}"
+            )
+
+    wanted_env: dict[str, str | None] = expected.get("env", {})  # type: ignore[assignment]
+    if set(assignments) != set(wanted_env):
+        raise ValueError(
+            f"receipt {relative} records environment {sorted(assignments)}, "
+            f"expected {sorted(wanted_env)}"
+        )
+    for name, value in wanted_env.items():
         if value is not None and assignments[name] != value:
             raise ValueError(
                 f"receipt {relative} records {name}={assignments[name]!r}, "
