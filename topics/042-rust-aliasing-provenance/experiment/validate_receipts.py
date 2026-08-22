@@ -12,6 +12,8 @@ import shlex
 from pathlib import Path, PurePosixPath
 
 
+TOPIC_DIRECTORY = "topics/042-rust-aliasing-provenance"
+
 EXPECTED_GATE_LOGS = (
     "gates/01-git-diff-check.txt",
     "gates/02-cargo-fmt.txt",
@@ -73,6 +75,21 @@ EXPECTED_COMMANDS: dict[str, dict[str, object]] = {
     "source-clean-after.txt": {
         "argv": ("git", "-C", "*", "diff", "--check"),
     },
+    "proc-cpuinfo.txt": {"argv": ("sed", "-n", "1,320p", "/proc/cpuinfo")},
+    "rustc-version.txt": {"argv": ("rustc", "-vV")},
+    "cargo-version.txt": {"argv": ("cargo", "-Vv")},
+    "python-version.txt": {"argv": ("python3", "-VV")},
+    "git-version.txt": {"argv": ("git", "--version")},
+    "objdump-version.txt": {"argv": ("objdump", "--version")},
+    "readelf-version.txt": {"argv": ("readelf", "--version")},
+    "rust-target-cfg.txt": {"argv": ("rustc", "--print", "cfg")},
+    "rust-native-target-cfg.txt": {
+        "argv": ("rustc", "-C", "target-cpu=native", "--print", "cfg"),
+    },
+    "rust-target-features.txt": {"argv": ("rustc", "--print", "target-features")},
+    "codegen/linked.objdump.txt": {"argv": ("objdump", "-drwC", "*")},
+    "codegen/linked.symbols.txt": {"argv": ("nm", "-n", "*")},
+    "codegen/linked.elf.txt": {"argv": ("readelf", "-h", "-n", "-A", "*")},
     "build-native.txt": {
         "argv": (
             "cargo", "build", "-vv", "--manifest-path", "*",
@@ -239,6 +256,18 @@ def parse_key_values(path: Path) -> dict[str, str]:
         key, value = line.split("=", 1)
         if re.fullmatch(r"[a-z][a-z0-9_]*", key):
             values[key] = value
+    return values
+
+
+def parse_key_values_from(lines: list[str]) -> dict[str, str]:
+    """Parse `field: value` lines, as `rustc -vV` and `cargo -Vv` emit them."""
+
+    values: dict[str, str] = {}
+    for line in lines:
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        values[key.strip().lower()] = value.strip()
     return values
 
 
@@ -434,11 +463,118 @@ def validate_llvm_contract(root: Path) -> None:
             raise ValueError(f"linked symbol table lacks {symbol}")
 
 
+def receipt_body(root: Path, relative: str) -> list[str]:
+    """Return one command receipt's output lines, without command or status."""
+
+    lines = (root / relative).read_text(encoding="utf-8").splitlines()
+    while lines and not lines[-1].strip():
+        lines.pop()
+    return lines[1:-1]
+
+
+def require_tool_identities(
+    root: Path, expected_rustc: str, expected_llvm: str
+) -> None:
+    """Require the recorded compiler and Cargo identities to be the expected ones.
+
+    Requiring only that these receipts be nonempty lets arbitrary text stand in
+    for compiler evidence, so parse the fields `rustc -vV` and `cargo -Vv` emit
+    and compare them with the versions the caller expects.
+    """
+
+    rustc = parse_key_values_from(receipt_body(root, "rustc-version.txt"))
+    cargo = parse_key_values_from(receipt_body(root, "cargo-version.txt"))
+    if rustc.get("release") != expected_rustc:
+        raise ValueError(
+            f"rustc receipt records release {rustc.get('release')!r}, "
+            f"expected {expected_rustc!r}"
+        )
+    if cargo.get("release") != expected_rustc:
+        raise ValueError(
+            f"cargo receipt records release {cargo.get('release')!r}, "
+            f"expected {expected_rustc!r}"
+        )
+    if rustc.get("llvm version") != expected_llvm:
+        raise ValueError(
+            f"rustc receipt records LLVM {rustc.get('llvm version')!r}, "
+            f"expected {expected_llvm!r}"
+        )
+    if re.fullmatch(r"[0-9a-f]{40}", rustc.get("commit-hash", "")) is None:
+        raise ValueError("rustc receipt lacks a full commit hash")
+    if re.fullmatch(r"[0-9a-f]{40}", cargo.get("commit-hash", "")) is None:
+        raise ValueError("cargo receipt lacks a full commit hash")
+
+    architecture = parse_key_values(root / "host.txt").get("architecture", "")
+    host_triple = rustc.get("host", "")
+    if not host_triple.startswith(f"{architecture}-"):
+        raise ValueError(
+            f"rustc host triple {host_triple!r} does not match recorded "
+            f"architecture {architecture!r}"
+        )
+
+
+def parse_source_manifest(root: Path, relative: str) -> dict[str, str]:
+    """Parse one `sha256sum` source manifest into digests by relative path.
+
+    Comparing the two manifests for equality accepts any two identical files, so
+    each is required to be a complete manifest of safe relative paths with no
+    duplicates.
+    """
+
+    entries: dict[str, str] = {}
+    for number, line in enumerate(
+        (root / relative).read_text(encoding="utf-8").splitlines(), start=1
+    ):
+        if not line.strip():
+            continue
+        match = re.fullmatch(r"([0-9a-f]{64})  (\S.*)", line)
+        if match is None:
+            raise ValueError(f"{relative} line {number} is not a sha256sum entry")
+        digest, path = match.groups()
+        parts = PurePosixPath(path).parts
+        if path.startswith("/") or ".." in parts:
+            raise ValueError(f"{relative} line {number} names an unsafe path: {path}")
+        if path in entries:
+            raise ValueError(f"{relative} repeats {path}")
+        entries[path] = digest
+    if not entries:
+        raise ValueError(f"{relative} records no source files")
+    return entries
+
+
+def require_source_manifests(root: Path, runner_sha256: str) -> None:
+    """Require both manifests to be complete, equal, and to bind the runner."""
+
+    before = parse_source_manifest(root, "source-manifest-before.sha256")
+    after = parse_source_manifest(root, "source-manifest-after.sha256")
+    if before != after:
+        raise ValueError("source manifest changed during the host run")
+    for anchor in (
+        "Cargo.toml",
+        "rust-toolchain.toml",
+        f"{TOPIC_DIRECTORY}/src/lib.rs",
+        f"{TOPIC_DIRECTORY}/experiment/run_host.sh",
+        f"{TOPIC_DIRECTORY}/experiment/validate_receipts.py",
+        f"{TOPIC_DIRECTORY}/experiment/run_processes.py",
+        f"{TOPIC_DIRECTORY}/experiment/expected.txt",
+    ):
+        if anchor not in before:
+            raise ValueError(f"source manifest lacks {anchor}")
+    recorded_runner = before[f"{TOPIC_DIRECTORY}/experiment/run_host.sh"]
+    if recorded_runner != runner_sha256:
+        raise ValueError(
+            f"source manifest records runner {recorded_runner}, "
+            f"identity records {runner_sha256}"
+        )
+
+
 def validate_host_source_and_gates(
     root: Path,
     expected_commit: str,
     expected_archive_sha256: str,
     expected_hostname: str,
+    expected_rustc: str,
+    expected_llvm: str,
 ) -> None:
     """Require current host metadata, exact source identity, and seven gates."""
 
@@ -469,10 +605,6 @@ def validate_host_source_and_gates(
         "run-processes.txt",
     ) + EXPECTED_GATE_LOGS
     require_nonempty(root, required)
-    if (root / "source-manifest-before.sha256").read_bytes() != (
-        root / "source-manifest-after.sha256"
-    ).read_bytes():
-        raise ValueError("source manifest changed during the host run")
     for relative in EXPECTED_COMMANDS:
         require_command_receipt(root, relative)
 
@@ -496,6 +628,11 @@ def validate_host_source_and_gates(
         raise ValueError(
             "archive-embedded commit differs from the expected source commit"
         )
+    recorded_runner = source.get("runner_sha256", "")
+    if re.fullmatch(r"[0-9a-f]{64}", recorded_runner) is None:
+        raise ValueError("source identity lacks a SHA-256 runner digest")
+    require_source_manifests(root, recorded_runner)
+    require_tool_identities(root, expected_rustc, expected_llvm)
 
     host = parse_key_values(root / "host.txt")
     label = host.get("ssh_target_label")
@@ -575,6 +712,16 @@ def main() -> int:
         required=True,
         help="fully qualified hostname the bundle must have been produced on",
     )
+    parser.add_argument(
+        "--expected-rustc-version",
+        required=True,
+        help="rustc and cargo release the bundle must have been built with",
+    )
+    parser.add_argument(
+        "--expected-llvm-version",
+        required=True,
+        help="LLVM version the recorded rustc must report",
+    )
     arguments = parser.parse_args()
     root = arguments.root.resolve()
     expected = arguments.expected.read_bytes()
@@ -584,6 +731,8 @@ def main() -> int:
         arguments.source_commit,
         arguments.archive_sha256,
         arguments.expected_hostname,
+        arguments.expected_rustc_version,
+        arguments.expected_llvm_version,
     )
     validate_processes(root, expected)
     validate_llvm_contract(root)
@@ -593,7 +742,9 @@ def main() -> int:
         "raw_noalias=no raw_source_loads=2 "
         f"source_commit={arguments.source_commit} "
         f"source_archive_sha256={arguments.archive_sha256} "
-        f"host={arguments.expected_hostname}"
+        f"host={arguments.expected_hostname} "
+        f"rustc={arguments.expected_rustc_version} "
+        f"llvm={arguments.expected_llvm_version}"
     )
     return 0
 

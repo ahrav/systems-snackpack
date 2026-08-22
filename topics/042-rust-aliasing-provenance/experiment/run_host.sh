@@ -97,9 +97,10 @@ hash -r
 # RUSTUP_TOOLCHAIN is cleared, so a linked or custom toolchain in a supplied home
 # could report the pinned version from a different compiler. Resolve the invoking
 # account from the password database using the kernel-reported real user, then
-# bind HOME, RUSTUP_HOME, and the rustup proxy directory to that account. The
-# proxy directory is appended last so it supplies the pinned toolchain without
-# being able to shadow a system tool.
+# bind HOME and RUSTUP_HOME to that account. The proxy directory is deliberately
+# kept off PATH: the Rust tools are invoked by the absolute paths verified below,
+# so neither a system rustc or cargo earlier in the path nor a poisoned
+# .cargo/bin entry can be selected.
 real_user=$(id -un)
 account_home=$(getent passwd "$real_user" | awk -F: '{print $6}')
 if [[ -z $account_home || ! -d $account_home ]]; then
@@ -108,13 +109,17 @@ if [[ -z $account_home || ! -d $account_home ]]; then
 fi
 rustup_home="$account_home/.rustup"
 rustup_bin="$account_home/.cargo/bin"
+rustup_exe="$rustup_bin/rustup"
 if [[ ! -d $rustup_home ]]; then
     echo "no rustup home for $real_user at $rustup_home" >&2
     exit 2
 fi
+if [[ ! -x $rustup_exe ]]; then
+    echo "no rustup executable for $real_user at $rustup_exe" >&2
+    exit 2
+fi
 export HOME="$account_home"
 export RUSTUP_HOME="$rustup_home"
-export PATH="$PATH:$rustup_bin"
 hash -r
 
 if [[ $# -ne 4 ]]; then
@@ -311,25 +316,30 @@ if [[ ! $toolchain_pin =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
     exit 2
 fi
 export RUSTUP_TOOLCHAIN="$toolchain_pin"
-resolved_rustc_version=$(rustc -V | awk '{print $2}')
-resolved_cargo_version=$(cargo -V | awk '{print $2}')
-if [[ $resolved_rustc_version != "$toolchain_pin" ]]; then
-    echo "rustc $resolved_rustc_version does not match pinned $toolchain_pin" >&2
-    exit 2
-fi
-if [[ $resolved_cargo_version != "$toolchain_pin" ]]; then
-    echo "cargo $resolved_cargo_version does not match pinned $toolchain_pin" >&2
-    exit 2
-fi
 toolchain_prefix="$rustup_home/toolchains/$toolchain_pin-"
-resolved_rustc_binary=$(rustup which rustc)
-resolved_cargo_binary=$(rustup which cargo)
+resolved_rustc_binary=$("$rustup_exe" which rustc)
+resolved_cargo_binary=$("$rustup_exe" which cargo)
 if [[ $resolved_rustc_binary != "$toolchain_prefix"* ]]; then
     echo "rustc resolves to $resolved_rustc_binary, outside $toolchain_prefix*" >&2
     exit 2
 fi
 if [[ $resolved_cargo_binary != "$toolchain_prefix"* ]]; then
     echo "cargo resolves to $resolved_cargo_binary, outside $toolchain_prefix*" >&2
+    exit 2
+fi
+resolved_rustc_version=$("$resolved_rustc_binary" -V | awk '{print $2}')
+resolved_cargo_version=$("$resolved_cargo_binary" -V | awk '{print $2}')
+resolved_llvm_version=$("$resolved_rustc_binary" -vV | awk -F': ' '/^LLVM version:/ { print $2; exit }')
+if [[ ! $resolved_llvm_version =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
+    echo "rustc reports no usable LLVM version: '${resolved_llvm_version:-none}'" >&2
+    exit 2
+fi
+if [[ $resolved_rustc_version != "$toolchain_pin" ]]; then
+    echo "rustc $resolved_rustc_version does not match pinned $toolchain_pin" >&2
+    exit 2
+fi
+if [[ $resolved_cargo_version != "$toolchain_pin" ]]; then
+    echo "cargo $resolved_cargo_version does not match pinned $toolchain_pin" >&2
     exit 2
 fi
 
@@ -342,6 +352,7 @@ fi
     printf 'toolchain_selection=RUSTUP_TOOLCHAIN=%s\n' "$toolchain_pin"
     printf 'resolved_rustc_version=%s\n' "$resolved_rustc_version"
     printf 'resolved_cargo_version=%s\n' "$resolved_cargo_version"
+    printf 'resolved_llvm_version=%s\n' "$resolved_llvm_version"
     printf 'resolved_rustc_binary=%s\n' "$resolved_rustc_binary"
     printf 'resolved_cargo_binary=%s\n' "$resolved_cargo_binary"
     printf 'account_home=%s\n' "$account_home"
@@ -377,15 +388,15 @@ fi
 } >"$output_dir/host.txt" 2>&1
 
 run_record proc-cpuinfo.txt sed -n '1,320p' /proc/cpuinfo
-run_record rustc-version.txt rustc -vV
-run_record cargo-version.txt cargo -Vv
+run_record rustc-version.txt "$resolved_rustc_binary" -vV
+run_record cargo-version.txt "$resolved_cargo_binary" -Vv
 run_record python-version.txt python3 -VV
 run_record git-version.txt git --version
 run_record objdump-version.txt objdump --version
 run_record readelf-version.txt readelf --version
-run_record rust-target-cfg.txt rustc --print cfg
-run_record rust-native-target-cfg.txt rustc -C target-cpu=native --print cfg
-run_record rust-target-features.txt rustc --print target-features
+run_record rust-target-cfg.txt "$resolved_rustc_binary" --print cfg
+run_record rust-native-target-cfg.txt "$resolved_rustc_binary" -C target-cpu=native --print cfg
+run_record rust-target-features.txt "$resolved_rustc_binary" --print target-features
 
 # A private baseline gives the extracted archive a Git work tree. Scope the
 # staged whitespace check to this topic and its lockfile entry: older retained
@@ -410,26 +421,26 @@ manifest="$source_root/Cargo.toml"
 package=rust-aliasing-provenance
 
 run_record gates/01-git-diff-check.txt git -C "$source_root" diff --check
-run_record gates/02-cargo-fmt.txt cargo fmt --manifest-path "$manifest" --all -- --check
+run_record gates/02-cargo-fmt.txt "$resolved_cargo_binary" fmt --manifest-path "$manifest" --all -- --check
 run_record gates/03-cargo-test-lib-examples.txt env CARGO_TARGET_DIR="$cargo_target" \
-    cargo test --manifest-path "$manifest" --locked --offline --workspace --lib --examples
+    "$resolved_cargo_binary" test --manifest-path "$manifest" --locked --offline --workspace --lib --examples
 run_record gates/04-cargo-test-doc.txt env CARGO_TARGET_DIR="$cargo_target" \
-    cargo test --manifest-path "$manifest" --locked --offline --workspace --doc
+    "$resolved_cargo_binary" test --manifest-path "$manifest" --locked --offline --workspace --doc
 run_record gates/05-cargo-clippy.txt env CARGO_TARGET_DIR="$cargo_target" \
-    cargo clippy --manifest-path "$manifest" --locked --offline --workspace --all-targets -- -D warnings
+    "$resolved_cargo_binary" clippy --manifest-path "$manifest" --locked --offline --workspace --all-targets -- -D warnings
 run_record gates/06-cargo-bench-no-run.txt env CARGO_TARGET_DIR="$cargo_target" \
-    cargo bench --manifest-path "$manifest" --locked --offline --workspace --no-run
+    "$resolved_cargo_binary" bench --manifest-path "$manifest" --locked --offline --workspace --no-run
 run_record gates/07-cargo-doc.txt env CARGO_TARGET_DIR="$cargo_target" RUSTDOCFLAGS='-D warnings' \
-    cargo doc --manifest-path "$manifest" --locked --offline --workspace --no-deps
+    "$resolved_cargo_binary" doc --manifest-path "$manifest" --locked --offline --workspace --no-deps
 
 native_flags='-C opt-level=3 -C target-cpu=native -C panic=abort'
 run_record build-native.txt env CARGO_TARGET_DIR="$native_target" RUSTFLAGS="$native_flags" \
-    cargo build -vv --manifest-path "$manifest" --locked --offline --release \
+    "$resolved_cargo_binary" build -vv --manifest-path "$manifest" --locked --offline --release \
     --package "$package" --example provenance_demo
 
 codegen="$output_dir/codegen"
 mkdir -m 0700 -- "$codegen"
-run_record codegen-command.txt rustc \
+run_record codegen-command.txt "$resolved_rustc_binary" \
     --crate-name rust_aliasing_provenance \
     --edition=2024 \
     --crate-type=lib \
@@ -463,7 +474,9 @@ run_record validate-receipts.txt python3 -I -B "$experiment_dir/validate_receipt
     --expected "$expected" \
     --source-commit "$source_commit" \
     --archive-sha256 "$archive_digest" \
-    --expected-hostname "$resolved_hostname"
+    --expected-hostname "$resolved_hostname" \
+    --expected-rustc-version "$toolchain_pin" \
+    --expected-llvm-version "$resolved_llvm_version"
 
 # Only retained evidence remains. The deleted path was created by this run and
 # is constrained to OUTPUT_DIR/.work under a direct /tmp child.
