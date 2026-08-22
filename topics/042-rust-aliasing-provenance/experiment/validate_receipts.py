@@ -16,6 +16,9 @@ TOPIC_DIRECTORY = "topics/042-rust-aliasing-provenance"
 RETAINED_BINARY = "provenance-demo"
 # The Cargo example target keeps the crate-style name; the retained copy is renamed.
 EXAMPLE_TARGET = "provenance_demo"
+RUST_TOOLS = frozenset({"rustc", "cargo", "rustdoc", "rustfmt"})
+# An absolute Rust tool must live in <rustup home>/toolchains/<toolchain>/bin.
+RUSTUP_TOOLCHAIN_BINARY = r"/.+/toolchains/[^/]+/bin/[A-Za-z0-9_.-]+"
 
 # `uname -m` reports arm64 on some Arm hosts while rustc and readelf use the
 # canonical aarch64 spelling, so normalize before comparing either.
@@ -207,6 +210,18 @@ def require_command_receipt(root: Path, relative: str) -> None:
                 raise ValueError(
                     f"receipt {relative} records program {actual!r}, expected {wanted!r}"
                 )
+            # A basename match alone would accept a forged absolute path such as
+            # /tmp/forged/rustc. An absolute Rust tool must therefore sit inside a
+            # rustup toolchain directory. A bare name records only that the tool was
+            # resolved from the run's command path, which is all a pre-hardening
+            # bundle carries; binding it further requires a bundle from a runner
+            # that names the tools absolutely.
+            if wanted in RUST_TOOLS and actual.startswith("/"):
+                if re.fullmatch(RUSTUP_TOOLCHAIN_BINARY, actual) is None:
+                    raise ValueError(
+                        f"receipt {relative} records {wanted} at {actual}, which is "
+                        f"not inside a rustup toolchain directory"
+                    )
             continue
         if actual != wanted:
             raise ValueError(
@@ -450,6 +465,18 @@ def llvm_parameters(header: str, symbol: str) -> dict[str, str]:
     return parameters
 
 
+def has_parameter_attribute(declaration: str, attribute: str) -> bool:
+    """Report whether one parameter declaration carries a bare LLVM attribute.
+
+    A word-boundary search also matches text inside a quoted attribute such as
+    `"fake-noalias"`, so quoted strings are removed and the remainder is compared
+    token by token.
+    """
+
+    unquoted = re.sub(r'"[^"]*"', " ", declaration)
+    return attribute in unquoted.split()
+
+
 def validate_llvm_contract(root: Path) -> None:
     """Prove the alias-sensitive load contract in optimized LLVM IR."""
 
@@ -466,11 +493,11 @@ def validate_llvm_contract(root: Path) -> None:
     for name in ("destination", "source"):
         if name not in reference_parameters:
             raise ValueError(f"reference contract lacks a %{name} parameter")
-        if not re.search(r"\bnoalias\b", reference_parameters[name]):
+        if not has_parameter_attribute(reference_parameters[name], "noalias"):
             raise ValueError(f"reference parameter %{name} does not carry LLVM noalias")
         if name not in raw_parameters:
             raise ValueError(f"raw contract lacks a %{name} parameter")
-        if re.search(r"\bnoalias\b", raw_parameters[name]):
+        if has_parameter_attribute(raw_parameters[name], "noalias"):
             raise ValueError(f"raw parameter %{name} unexpectedly carries LLVM noalias")
 
     source_load = re.compile(r"^\s*%[^=]+ = load i64, ptr %source(?:,|\s)", re.MULTILINE)
@@ -669,14 +696,26 @@ def require_consistent_paths(root: Path) -> None:
         line = (root / relative).read_text(encoding="utf-8").splitlines()[0]
         return parse_recorded_argv(line[len("COMMAND=") :])[1]
 
-    retained = argv_of("codegen/linked.objdump.txt")[2]
+    def checked(relative: str, index: int, argv: list[str]) -> str:
+        """Return one recorded path, refusing lexical traversal."""
+
+        value = argv[index]
+        if ".." in PurePosixPath(value).parts:
+            raise ValueError(
+                f"receipt {relative} argv[{index}] uses path traversal: {value}"
+            )
+        return value
+
+    retained = checked("codegen/linked.objdump.txt", 2, argv_of("codegen/linked.objdump.txt"))
     suffix = f"/processes/{RETAINED_BINARY}"
     if not retained.endswith(suffix):
         raise ValueError(f"linked receipt does not name the retained binary: {retained}")
     run_root = retained[: -len(suffix)]
     work = f"{run_root}/.work"
 
-    source_root = argv_of("gates/01-git-diff-check.txt")[2]
+    source_root = checked(
+        "gates/01-git-diff-check.txt", 2, argv_of("gates/01-git-diff-check.txt")
+    )
     archive_root = f"{work}/archive"
     if source_root != archive_root and not source_root.startswith(f"{archive_root}/"):
         raise ValueError(
@@ -695,7 +734,14 @@ def require_consistent_paths(root: Path) -> None:
         "gates/06-cargo-bench-no-run.txt": {3: manifest},
         "gates/07-cargo-doc.txt": {3: manifest},
         "build-native.txt": {4: manifest},
-        "codegen-command.txt": {12: f"{source_root}/{TOPIC_DIRECTORY}/src/lib.rs"},
+        "codegen-command.txt": {
+            11: (
+                f"--emit=llvm-ir={run_root}/codegen/topic42.ll,"
+                f"asm={run_root}/codegen/topic42.s,"
+                f"obj={run_root}/codegen/topic42.o"
+            ),
+            12: f"{source_root}/{TOPIC_DIRECTORY}/src/lib.rs",
+        },
         "run-processes.txt": {
             3: f"{experiment}/run_processes.py",
             5: f"{work}/native-target/release/examples/{EXAMPLE_TARGET}",
@@ -708,12 +754,16 @@ def require_consistent_paths(root: Path) -> None:
     for relative, slots in expected_slots.items():
         argv = argv_of(relative)
         for index, wanted in slots.items():
+            checked(relative, index, argv)
             if argv[index] != wanted:
                 raise ValueError(
                     f"receipt {relative} argv[{index}] is {argv[index]!r}, "
                     f"expected {wanted!r}"
                 )
 
+    # The native build must write the tree the process runner launches from, and the
+    # gates must share the other one, so each target directory is bound exactly
+    # rather than merely required to sit inside the work tree.
     for relative, expected in EXPECTED_COMMANDS.items():
         expected_env: dict[str, str | None] = expected.get("env", {})  # type: ignore[assignment]
         if "CARGO_TARGET_DIR" not in expected_env:
@@ -721,9 +771,14 @@ def require_consistent_paths(root: Path) -> None:
         line = (root / relative).read_text(encoding="utf-8").splitlines()[0]
         assignments = parse_recorded_argv(line[len("COMMAND=") :])[0]
         target_dir = assignments["CARGO_TARGET_DIR"]
-        if not target_dir.startswith(f"{work}/"):
+        wanted_target = (
+            f"{work}/native-target"
+            if relative == "build-native.txt"
+            else f"{work}/cargo-target"
+        )
+        if target_dir != wanted_target:
             raise ValueError(
-                f"receipt {relative} builds into {target_dir}, outside {work}"
+                f"receipt {relative} builds into {target_dir}, expected {wanted_target}"
             )
 
 
