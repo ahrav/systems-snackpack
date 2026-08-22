@@ -9,7 +9,9 @@ use std::hint::black_box;
 use std::process::ExitCode;
 use std::time::Instant;
 
-use spectre_era_performance_tradeoffs::{LookupMode, lookup, mode_name};
+use spectre_era_performance_tradeoffs::{
+    LookupMode, lookup, mode_name, topic43_speculation_barrier,
+};
 
 const WORDS: usize = 4096;
 const DEFAULT_ITERATIONS: u64 = 2_000_000;
@@ -81,6 +83,11 @@ fn main() -> ExitCode {
             return ExitCode::from(2);
         }
     };
+
+    // Keep the exact standalone barrier symbol in the release binary for the
+    // generated-code receipt. This one setup call is outside both the warmup
+    // and timed intervals.
+    topic43_speculation_barrier();
 
     let mut state = seed ^ 0xa409_3822_299f_31d0;
     let words: Vec<u64> = (0..WORDS).map(|_| next_state(&mut state)).collect();

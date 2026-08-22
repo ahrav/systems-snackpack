@@ -67,7 +67,7 @@ case $architecture in
         ;;
     aarch64 | arm64)
         grep -Eq '[[:space:]]cmp[[:space:]]' "$output_dir/topic43_mask_lookup.asm"
-        grep -Eq '[[:space:]]sbc[[:space:]]' "$output_dir/topic43_mask_lookup.asm"
+        grep -Eq '[[:space:]](sbc|ngc)[[:space:]]' "$output_dir/topic43_mask_lookup.asm"
         grep -Eq '[[:space:]](csdb|hint[[:space:]]+#0x14)([[:space:]]|$)' \
             "$output_dir/topic43_mask_lookup.asm"
         compare_line=$(first_line '[[:space:]]cmp[[:space:]]' "$barrier_asm")
