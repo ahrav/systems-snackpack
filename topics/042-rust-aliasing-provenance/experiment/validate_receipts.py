@@ -637,6 +637,23 @@ def require_source_manifests(
         )
 
 
+def require_regular_files(root: Path) -> None:
+    """Require the bundle to be directories and regular files only.
+
+    `is_file` and every read follow symbolic links, so a linked entry would let a
+    bundle satisfy a check using content from outside its own tree, or stand in
+    for evidence it does not retain. The runner already refuses an archive that
+    contains a link, so the bundle it writes contains none either.
+    """
+
+    for path in sorted(root.rglob("*")):
+        relative = path.relative_to(root)
+        if path.is_symlink():
+            raise ValueError(f"bundle retains a symbolic link: {relative}")
+        if not path.is_dir() and not path.is_file():
+            raise ValueError(f"bundle retains a non-regular file: {relative}")
+
+
 def validate_host_source_and_gates(
     root: Path,
     expected_commit: str,
@@ -807,6 +824,7 @@ def main() -> int:
     root = arguments.root.resolve()
     expected = arguments.expected.read_bytes()
 
+    require_regular_files(root)
     validate_host_source_and_gates(
         root,
         arguments.source_commit,
