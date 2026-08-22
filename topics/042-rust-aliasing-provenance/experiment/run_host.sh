@@ -361,6 +361,39 @@ export RUSTDOC="$resolved_rustdoc_binary"
 export RUSTFMT="$resolved_rustfmt_binary"
 export PATH="$PATH:$toolchain_bin"
 hash -r
+
+# rustc links through a C compiler driver it finds as `cc`, so the retained
+# executable depends on an input the receipts otherwise never name: sweeping CC
+# does not bind or record the driver, and a wrapper installed in one of the
+# trusted directories could alter the linked binary or run commands during the
+# link. Resolve the driver once, require it to be a regular executable inside a
+# trusted system directory, bind Cargo's linker for this target to that absolute
+# path, and record its identity with the rest of the tools.
+linker_binary=$(command -v cc || true)
+if [[ -z $linker_binary ]]; then
+    echo "no C compiler driver named cc on the trusted command path" >&2
+    exit 2
+fi
+linker_binary=$(realpath -- "$linker_binary")
+case $linker_binary in
+/usr/local/bin/* | /usr/bin/* | /bin/* | /usr/local/sbin/* | /usr/sbin/* | /sbin/*) ;;
+*)
+    echo "linker driver $linker_binary is outside the trusted directories" >&2
+    exit 2
+    ;;
+esac
+if [[ ! -f $linker_binary || ! -x $linker_binary ]]; then
+    echo "linker driver $linker_binary is not a regular executable" >&2
+    exit 2
+fi
+linker_sha256=$(sha256sum "$linker_binary" | awk '{print $1}')
+host_triple=$("$resolved_rustc_binary" -vV | awk -F': ' '/^host:/ { print $2; exit }')
+if [[ -z $host_triple ]]; then
+    echo "rustc reports no host triple" >&2
+    exit 2
+fi
+linker_variable="CARGO_TARGET_$(printf '%s' "$host_triple" | tr 'a-z-' 'A-Z_')_LINKER"
+export "$linker_variable=$linker_binary"
 if [[ $resolved_rustc_version != "$toolchain_pin" ]]; then
     echo "rustc $resolved_rustc_version does not match pinned $toolchain_pin" >&2
     exit 2
@@ -383,6 +416,10 @@ fi
     printf 'resolved_rustdoc_binary=%s\n' "$resolved_rustdoc_binary"
     printf 'resolved_rustfmt_binary=%s\n' "$resolved_rustfmt_binary"
     printf 'toolchain_bin=%s\n' "$toolchain_bin"
+    printf 'host_triple=%s\n' "$host_triple"
+    printf 'linker_binary=%s\n' "$linker_binary"
+    printf 'linker_sha256=%s\n' "$linker_sha256"
+    printf 'linker_variable=%s\n' "$linker_variable"
     printf 'resolved_rustc_binary=%s\n' "$resolved_rustc_binary"
     printf 'resolved_cargo_binary=%s\n' "$resolved_cargo_binary"
     printf 'account_home=%s\n' "$account_home"
@@ -409,6 +446,8 @@ fi
     printf 'cpu_count_online='; getconf _NPROCESSORS_ONLN
     printf 'cpu_count_available='; nproc
     printf 'build_flags=--release -C opt-level=3 -C target-cpu=native -C panic=abort\n'
+    printf 'linker_binary=%s\n' "$linker_binary"
+    printf 'linker_version='; "$linker_binary" --version | head -1
     printf 'measurement_kind=deterministic correctness and codegen only\n'
     printf 'fresh_process_runs=8\n'
     printf 'timing_reported=no\n'

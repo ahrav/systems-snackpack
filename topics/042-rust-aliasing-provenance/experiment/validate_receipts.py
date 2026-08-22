@@ -13,6 +13,15 @@ from pathlib import Path, PurePosixPath
 
 
 TOPIC_DIRECTORY = "topics/042-rust-aliasing-provenance"
+RETAINED_BINARY = "provenance-demo"
+
+# `uname -m` reports arm64 on some Arm hosts while rustc and readelf use the
+# canonical aarch64 spelling, so normalize before comparing either.
+CANONICAL_ARCHITECTURES = {"x86_64": "x86_64", "aarch64": "aarch64", "arm64": "aarch64"}
+ELF_MACHINES = {
+    "x86_64": "Advanced Micro Devices X86-64",
+    "aarch64": "AArch64",
+}
 
 EXPECTED_GATE_LOGS = (
     "gates/01-git-diff-check.txt",
@@ -87,9 +96,18 @@ EXPECTED_COMMANDS: dict[str, dict[str, object]] = {
         "argv": ("rustc", "-C", "target-cpu=native", "--print", "cfg"),
     },
     "rust-target-features.txt": {"argv": ("rustc", "--print", "target-features")},
-    "codegen/linked.objdump.txt": {"argv": ("objdump", "-drwC", "*")},
-    "codegen/linked.symbols.txt": {"argv": ("nm", "-n", "*")},
-    "codegen/linked.elf.txt": {"argv": ("readelf", "-h", "-n", "-A", "*")},
+    "codegen/linked.objdump.txt": {
+        "argv": ("objdump", "-drwC", "*"),
+        "arg_suffixes": {2: f"processes/{RETAINED_BINARY}"},
+    },
+    "codegen/linked.symbols.txt": {
+        "argv": ("nm", "-n", "*"),
+        "arg_suffixes": {2: f"processes/{RETAINED_BINARY}"},
+    },
+    "codegen/linked.elf.txt": {
+        "argv": ("readelf", "-h", "-n", "-A", "*"),
+        "arg_suffixes": {4: f"processes/{RETAINED_BINARY}"},
+    },
     "build-native.txt": {
         "argv": (
             "cargo", "build", "-vv", "--manifest-path", "*",
@@ -452,6 +470,18 @@ def validate_llvm_contract(root: Path) -> None:
     if not (raw_loads[0].start() < raw_stores[0].start() < raw_loads[1].start()):
         raise ValueError("raw source loads do not surround the destination store")
 
+    architecture = parse_key_values(root / "host.txt").get("architecture", "")
+    canonical = CANONICAL_ARCHITECTURES.get(architecture)
+    if canonical is None:
+        raise ValueError(f"unsupported recorded architecture: {architecture!r}")
+    elf_header = parse_key_values_from(receipt_body(root, "codegen/linked.elf.txt"))
+    recorded_machine = elf_header.get("machine", "")
+    if recorded_machine != ELF_MACHINES[canonical]:
+        raise ValueError(
+            f"retained executable reports machine {recorded_machine!r}, "
+            f"expected {ELF_MACHINES[canonical]!r} for {architecture}"
+        )
+
     disassembly = (root / "codegen" / "linked.objdump.txt").read_text(
         encoding="utf-8"
     )
@@ -505,8 +535,11 @@ def require_tool_identities(
         raise ValueError("cargo receipt lacks a full commit hash")
 
     architecture = parse_key_values(root / "host.txt").get("architecture", "")
+    canonical = CANONICAL_ARCHITECTURES.get(architecture)
+    if canonical is None:
+        raise ValueError(f"unsupported recorded architecture: {architecture!r}")
     host_triple = rustc.get("host", "")
-    if not host_triple.startswith(f"{architecture}-"):
+    if not host_triple.startswith(f"{canonical}-"):
         raise ValueError(
             f"rustc host triple {host_triple!r} does not match recorded "
             f"architecture {architecture!r}"
@@ -542,9 +575,23 @@ def parse_source_manifest(root: Path, relative: str) -> dict[str, str]:
     return entries
 
 
-def require_source_manifests(root: Path, runner_sha256: str) -> None:
-    """Require both manifests to be complete, equal, and to bind the runner."""
+def require_source_manifests(
+    root: Path, runner_sha256: str, expected_manifest_sha256: str
+) -> None:
+    """Require both manifests to be the expected complete manifest.
 
+    An anchor list cannot establish completeness -- a manifest holding only the
+    anchors satisfies it -- so bind each manifest file to a digest the caller
+    supplies, then still parse and cross-check the contents.
+    """
+
+    for relative in ("source-manifest-before.sha256", "source-manifest-after.sha256"):
+        actual = digest_path(root / relative)
+        if actual != expected_manifest_sha256:
+            raise ValueError(
+                f"{relative} digest {actual} does not match expected "
+                f"{expected_manifest_sha256}"
+            )
     before = parse_source_manifest(root, "source-manifest-before.sha256")
     after = parse_source_manifest(root, "source-manifest-after.sha256")
     if before != after:
@@ -575,6 +622,7 @@ def validate_host_source_and_gates(
     expected_hostname: str,
     expected_rustc: str,
     expected_llvm: str,
+    expected_manifest_sha256: str,
 ) -> None:
     """Require current host metadata, exact source identity, and seven gates."""
 
@@ -631,7 +679,7 @@ def validate_host_source_and_gates(
     recorded_runner = source.get("runner_sha256", "")
     if re.fullmatch(r"[0-9a-f]{64}", recorded_runner) is None:
         raise ValueError("source identity lacks a SHA-256 runner digest")
-    require_source_manifests(root, recorded_runner)
+    require_source_manifests(root, recorded_runner, expected_manifest_sha256)
     require_tool_identities(root, expected_rustc, expected_llvm)
 
     host = parse_key_values(root / "host.txt")
@@ -722,6 +770,12 @@ def main() -> int:
         required=True,
         help="LLVM version the recorded rustc must report",
     )
+    parser.add_argument(
+        "--expected-source-manifest-sha256",
+        required=True,
+        type=hex_field(64, "--expected-source-manifest-sha256"),
+        help="SHA-256 of the complete source manifest the bundle must record",
+    )
     arguments = parser.parse_args()
     root = arguments.root.resolve()
     expected = arguments.expected.read_bytes()
@@ -733,6 +787,7 @@ def main() -> int:
         arguments.expected_hostname,
         arguments.expected_rustc_version,
         arguments.expected_llvm_version,
+        arguments.expected_source_manifest_sha256,
     )
     validate_processes(root, expected)
     validate_llvm_contract(root)

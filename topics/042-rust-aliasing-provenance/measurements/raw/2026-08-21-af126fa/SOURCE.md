@@ -7,6 +7,8 @@
   `af126fa920f51969667e02b926786cca598212ea`
 - Host runner SHA-256:
   `550bd4035464c4e9d326b8451d1469f97eb5efc9d195d6970d682450aa19c408`
+- Source manifest SHA-256 (identical in both host bundles):
+  `b6ba0132715ce3e3ea81f373664c50bc34c7babe2ec4c616601137654af659d1`
 - Arm archive: `arm-results.tar.gz`
 - `xxl` archive: `xxl-results.tar.gz`
 - Final local gate archive: `local-validation.tar.gz`

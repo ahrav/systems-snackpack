@@ -16,8 +16,8 @@ cargo test --workspace --lib --bins --examples
 
 After retrieval, both sealed result archives passed their internal
 `bundle-manifest.sha256` files on 2026-08-21. Both also passed the validator,
-which requires the expected source commit, archive digest, hostname, and
-toolchain identity:
+which requires the expected source commit, archive digest, hostname, toolchain
+identity, and source-manifest digest:
 
 ```text
 python3 -I -B experiment/validate_receipts.py --root XXL_ROOT \
@@ -26,7 +26,8 @@ python3 -I -B experiment/validate_receipts.py --root XXL_ROOT \
   --archive-sha256 f83290e6f41ec6c704cd61f2033bae1f90e749dbd2799137172a7ab322e99b7d \
   --expected-hostname dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com \
   --expected-rustc-version 1.93.1 \
-  --expected-llvm-version 21.1.8
+  --expected-llvm-version 21.1.8 \
+  --expected-source-manifest-sha256 b6ba0132715ce3e3ea81f373664c50bc34c7babe2ec4c616601137654af659d1
 
 python3 -I -B experiment/validate_receipts.py --root ARM_ROOT \
   --expected experiment/expected.txt \
@@ -34,12 +35,15 @@ python3 -I -B experiment/validate_receipts.py --root ARM_ROOT \
   --archive-sha256 f83290e6f41ec6c704cd61f2033bae1f90e749dbd2799137172a7ab322e99b7d \
   --expected-hostname dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com \
   --expected-rustc-version 1.93.1 \
-  --expected-llvm-version 21.1.8
+  --expected-llvm-version 21.1.8 \
+  --expected-source-manifest-sha256 b6ba0132715ce3e3ea81f373664c50bc34c7babe2ec4c616601137654af659d1
 ```
 
 Every expected value is supplied by the verifier rather than read back from the
 bundle, so the validator cannot report a pass for a bundle built from different
-source, produced on another host, or built with another compiler. The `xxl`
+source, produced on another host, built with another compiler, or recording an
+incomplete source manifest. Both bundles record the same manifest digest, so one
+expected value serves both. The `xxl`
 hostname above is the runtime resolution recorded in `xxl-resolution.txt`; the
 Arm hostname is the fixed authorized label.
 
