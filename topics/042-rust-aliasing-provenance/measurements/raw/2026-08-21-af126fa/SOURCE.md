@@ -16,6 +16,18 @@
 - Measurement boundary: deterministic correctness and generated-code
   inspection only; no timing claim.
 
+## Harness boundary for this evidence
+
+These bundles were produced by host runner `550bd403…`, before the harness was
+hardened to require privileged Bash, refuse `LD_PRELOAD` and `LD_AUDIT`, sweep
+`RUSTUP_TOOLCHAIN`, assert the archive's toolchain pin against the resolved
+`rustc` and `cargo`, isolate `CARGO_HOME`, and resolve `HOME` from the password
+database. Those protections constrain later runs and cannot be applied
+retroactively: re-validating these bundles checks their recorded identity and
+internal consistency, not the ambient inputs present when they were produced.
+Raising this evidence to the hardened boundary requires a fresh run of the
+current runner on both named hosts.
+
 The Git archive is not retained because it contains the full workspace,
 including earlier topics' raw evidence. Each host bundle retains the archive
 digest, embedded commit identity, full extracted-source manifest, runner

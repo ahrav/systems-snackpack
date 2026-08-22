@@ -17,6 +17,19 @@ if [[ $- != *p* ]]; then
     echo "exact-source experiment requires privileged bash: run $0 directly" >&2
     exit 2
 fi
+# Privileged mode is not the dynamic loader's secure-execution mode: for an
+# ordinary same-UID invocation the loader still honours LD_PRELOAD and LD_AUDIT
+# for this interpreter, so an injected library's initialisation code has already
+# run before this line and unsetting the variable later cannot unload it. A
+# compromised interpreter cannot sanitise itself, so refuse to certify the run
+# instead of continuing. Removing these variables before the interpreter starts
+# belongs to the launcher; see the trusted-launcher boundary below.
+for loader_variable in LD_PRELOAD LD_AUDIT; do
+    if [[ -n ${!loader_variable:-} ]]; then
+        echo "exact-source experiment refuses $loader_variable" >&2
+        exit 2
+    fi
+done
 if [[ -n ${BASH_ENV:-} ]]; then
     echo "exact-source experiment refuses BASH_ENV" >&2
     exit 2
@@ -29,6 +42,16 @@ if [[ -s /etc/ld.so.preload ]]; then
     echo "exact-source experiment refuses system-wide dynamic-loader preloads" >&2
     exit 2
 fi
+
+# Trusted-launcher boundary. The checks above refuse a run whose interpreter may
+# already be instrumented, but they cannot prove it is clean: LD_PRELOAD,
+# LD_AUDIT, and $BASH_ENV all act before the first line of this file, and a
+# library already mapped into this process could equally suppress the refusals.
+# What the caller supplies is therefore part of the evidence boundary. The
+# launcher must start this script from a clean environment on a host whose
+# /bin/bash, coreutils, binutils, git, python3, and rustup toolchain the reader
+# already trusts. The receipts record the resolved command path, tool paths, and
+# tool versions so that boundary is auditable; they do not extend it.
 
 swept_environment_names=()
 while IFS= read -r variable; do
@@ -46,7 +69,24 @@ while IFS= read -r variable; do
     esac
 done < <(compgen -e)
 export GIT_NO_REPLACE_OBJECTS=1
-export PATH="$HOME/.cargo/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
+
+# PATH must not depend on an inherited HOME. Privileged mode preserves HOME, so
+# a supplied value would place attacker-chosen rustc, cargo, git, tar, sha256sum,
+# or python3 ahead of the system tools, and the version records do not
+# authenticate the executables they describe. Resolve the invoking account's home
+# from the password database using the kernel-reported real user instead of the
+# environment, build the general command path from trusted absolute directories
+# only, and append the rustup proxy directory last so that it supplies the pinned
+# toolchain without being able to shadow a system tool.
+real_user=$(id -un)
+account_home=$(getent passwd "$real_user" | awk -F: '{print $6}')
+if [[ -z $account_home || ! -d $account_home ]]; then
+    echo "cannot resolve a home directory for $real_user from the password database" >&2
+    exit 2
+fi
+export HOME="$account_home"
+rustup_bin="$account_home/.cargo/bin"
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$rustup_bin"
 hash -r
 
 if [[ $# -ne 4 ]]; then
@@ -238,6 +278,10 @@ fi
     printf 'toolchain_pin=%s\n' "$toolchain_pin"
     printf 'resolved_rustc_version=%s\n' "$resolved_rustc_version"
     printf 'resolved_cargo_version=%s\n' "$resolved_cargo_version"
+    printf 'resolved_rustc_path=%s\n' "$(command -v rustc)"
+    printf 'resolved_cargo_path=%s\n' "$(command -v cargo)"
+    printf 'account_home=%s\n' "$account_home"
+    printf 'command_path=%s\n' "$PATH"
     printf 'cargo_home_isolated=yes\n'
     printf 'swept_environment_names=%s\n' "${swept_environment_names[*]:-none}"
 } >"$output_dir/source-identity.txt"
