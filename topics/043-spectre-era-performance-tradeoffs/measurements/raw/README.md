@@ -1,11 +1,13 @@
 # Raw receipt layout
 
-Each run directory contains the unchanged output from `experiment/run_host.sh`.
-The retained `source-archive.tar.gz`, its embedded commit, and matching source
-manifests bind the executing source to the archive SHA-256 digest. `host.txt`
-records that identity with the requested target label, resolved hostname,
-runtime hostname, architecture, kernel, affinity, toolchain, native build
-flags, and available vulnerability strings.
+Each host result archive contains the unchanged output from
+`experiment/run_host.sh`. `host.txt` records the full source commit and archive
+SHA-256 digest. Matching executing-tree and archive-tree manifests bind the
+executing source to that retained archive. `host.txt` also records the requested
+target label, resolved and runtime hostnames, architecture, kernel, selected
+CPU, capture-process affinity, toolchain, native build flags, and available
+vulnerability strings. The A/A and timing process records retain each
+`taskset` command used to pin a measurement process.
 
 The remaining required records are:
 

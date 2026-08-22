@@ -1,0 +1,4 @@
+alias=xxl
+ssh_g_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+runtime_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+runtime_architecture=x86_64
