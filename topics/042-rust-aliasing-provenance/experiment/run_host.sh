@@ -232,18 +232,31 @@ fi
 # and a /tmp/rustfmt.toml setting disable_all_formatting turns the formatting gate
 # into a pass. Every directory below OUTPUT_DIR is created by this run, so refuse
 # any such configuration outside the digest-bound source tree.
-ancestor=$(dirname -- "$source_root")
-while :; do
-    for ambient_config in .cargo/config.toml .cargo/config rustfmt.toml .rustfmt.toml \
-        clippy.toml .clippy.toml; do
-        if [[ -e $ancestor/$ambient_config ]]; then
-            echo "refusing build configuration outside the source tree: $ancestor/$ambient_config" >&2
-            exit 2
-        fi
+# OUTPUT_DIR is a direct child of /tmp by contract, so a writable ancestor always
+# exists and a preflight scan alone cannot exclude a configuration file created
+# after it. Scan before the gates and again afterwards, so a file appearing during
+# the run fails the run instead of silently changing what the gates measured.
+scan_ambient_configuration() {
+    local when=$1 ancestor found=""
+    ancestor=$(dirname -- "$source_root")
+    while :; do
+        for ambient_config in .cargo/config.toml .cargo/config rustfmt.toml .rustfmt.toml \
+            clippy.toml .clippy.toml; do
+            if [[ -e $ancestor/$ambient_config ]]; then
+                echo "build configuration outside the source tree ($when): $ancestor/$ambient_config" >&2
+                found=yes
+            fi
+        done
+        [[ $ancestor == / ]] && break
+        ancestor=$(dirname -- "$ancestor")
     done
-    [[ $ancestor == / ]] && break
-    ancestor=$(dirname -- "$ancestor")
-done
+    if [[ -n $found ]]; then
+        return 1
+    fi
+}
+if ! scan_ambient_configuration before; then
+    exit 2
+fi
 
 write_source_manifest() {
     local destination=$1
@@ -366,26 +379,37 @@ if [[ ! $toolchain_pin =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
     exit 2
 fi
 export RUSTUP_TOOLCHAIN="$toolchain_pin"
-toolchain_prefix="$rustup_home/toolchains/$toolchain_pin-"
-# Resolve only an already-installed toolchain. rustup installs a missing one on
-# demand, and its distribution server and update root are caller-supplied
-# variables, so a resolution that reaches the network could fetch a compiler that
-# then self-reports the pinned version. Those variables are swept above; requiring
-# the directory to exist first removes the download path entirely.
-if ! compgen -G "$toolchain_prefix*" >/dev/null; then
-    echo "pinned toolchain $toolchain_pin is not installed under $rustup_home/toolchains" >&2
+# Address the pinned toolchain directory for this host's own triple directly
+# rather than asking rustup to resolve it. A prefix match accepts a directory
+# built for another triple, after which rustup would install the real one from a
+# caller-influenced server, so naming the exact directory removes both the wrong
+# match and the download path.
+case $architecture in
+x86_64) expected_triple=x86_64-unknown-linux-gnu ;;
+aarch64 | arm64) expected_triple=aarch64-unknown-linux-gnu ;;
+*)
+    echo "unsupported architecture for toolchain selection: $architecture" >&2
+    exit 2
+    ;;
+esac
+toolchain_dir="$rustup_home/toolchains/$toolchain_pin-$expected_triple"
+toolchain_bin="$toolchain_dir/bin"
+if [[ ! -d $toolchain_dir ]]; then
+    echo "pinned toolchain is not installed at $toolchain_dir" >&2
     exit 2
 fi
-resolved_rustc_binary=$("$rustup_exe" which rustc)
-resolved_cargo_binary=$("$rustup_exe" which cargo)
-if [[ $resolved_rustc_binary != "$toolchain_prefix"* ]]; then
-    echo "rustc resolves to $resolved_rustc_binary, outside $toolchain_prefix*" >&2
-    exit 2
-fi
-if [[ $resolved_cargo_binary != "$toolchain_prefix"* ]]; then
-    echo "cargo resolves to $resolved_cargo_binary, outside $toolchain_prefix*" >&2
-    exit 2
-fi
+resolved_rustc_binary="$toolchain_bin/rustc"
+resolved_cargo_binary="$toolchain_bin/cargo"
+resolved_rustdoc_binary="$toolchain_bin/rustdoc"
+resolved_rustfmt_binary="$toolchain_bin/rustfmt"
+for required_tool in "$resolved_rustc_binary" "$resolved_cargo_binary" \
+    "$resolved_rustdoc_binary" "$resolved_rustfmt_binary" \
+    "$toolchain_bin/cargo-fmt" "$toolchain_bin/cargo-clippy" "$toolchain_bin/clippy-driver"; do
+    if [[ ! -f $required_tool || ! -x $required_tool ]]; then
+        echo "pinned toolchain lacks $required_tool" >&2
+        exit 2
+    fi
+done
 resolved_rustc_version=$("$resolved_rustc_binary" -V | awk '{print $2}')
 resolved_cargo_version=$("$resolved_cargo_binary" -V | awk '{print $2}')
 resolved_llvm_version=$("$resolved_rustc_binary" -vV | awk -F': ' '/^LLVM version:/ { print $2; exit }')
@@ -393,32 +417,30 @@ if [[ ! $resolved_llvm_version =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
     echo "rustc reports no usable LLVM version: '${resolved_llvm_version:-none}'" >&2
     exit 2
 fi
-
-# Cargo resolves the compiler, rustdoc, and its own subcommands for itself, so
-# invoking a verified Cargo by absolute path does not bind what it launches: it
-# finds rustc and rustdoc through PATH or RUSTC/RUSTDOC, and finds cargo-fmt and
-# cargo-clippy under CARGO_HOME/bin or PATH, both of which this run has
-# deliberately emptied. Name the compiler tools explicitly and append the verified
-# toolchain's own directory, which holds only Rust tools and so cannot shadow a
-# system command, so every subprocess is the pinned one.
-toolchain_bin=${resolved_rustc_binary%/*}
-if [[ ${resolved_cargo_binary%/*} != "$toolchain_bin" ]]; then
-    echo "verified cargo and rustc are not in one toolchain directory" >&2
+if [[ $resolved_rustc_version != "$toolchain_pin" ]]; then
+    echo "rustc $resolved_rustc_version does not match pinned $toolchain_pin" >&2
     exit 2
 fi
-resolved_rustdoc_binary="$toolchain_bin/rustdoc"
-resolved_rustfmt_binary="$toolchain_bin/rustfmt"
-for required_tool in "$resolved_rustdoc_binary" "$resolved_rustfmt_binary" \
-    "$toolchain_bin/cargo-fmt" "$toolchain_bin/cargo-clippy" "$toolchain_bin/clippy-driver"; do
-    if [[ ! -x $required_tool ]]; then
-        echo "pinned toolchain lacks $required_tool" >&2
-        exit 2
-    fi
-done
+if [[ $resolved_cargo_version != "$toolchain_pin" ]]; then
+    echo "cargo $resolved_cargo_version does not match pinned $toolchain_pin" >&2
+    exit 2
+fi
+host_triple=$("$resolved_rustc_binary" -vV | awk -F': ' '/^host:/ { print $2; exit }')
+if [[ $host_triple != "$expected_triple" ]]; then
+    echo "rustc host triple $host_triple does not match $expected_triple" >&2
+    exit 2
+fi
+
+# Cargo resolves rustc, rustdoc, and its own subcommands for itself, so invoking a
+# verified Cargo by absolute path does not bind what it launches. Name the
+# compiler tools explicitly, and put the verified toolchain directory ahead of the
+# system directories so cargo-fmt, cargo-clippy, and clippy-driver come from the
+# pinned toolchain rather than an earlier directory. That directory holds only Rust
+# tools, so giving it precedence cannot shadow a system command.
 export RUSTC="$resolved_rustc_binary"
 export RUSTDOC="$resolved_rustdoc_binary"
 export RUSTFMT="$resolved_rustfmt_binary"
-export PATH="$PATH:$toolchain_bin"
+export PATH="$toolchain_bin:$PATH"
 hash -r
 
 # rustc links through a C compiler driver it finds as `cc`, so the retained
@@ -446,6 +468,34 @@ if [[ ! -f $linker_binary || ! -x $linker_binary ]]; then
     exit 2
 fi
 linker_sha256=$(sha256sum "$linker_binary" | awk '{print $1}')
+
+# The driver launches its own linker, which it finds by name, so hashing the
+# driver does not bind what actually writes the executable. Resolve that linker,
+# require it to be a regular executable in a trusted directory, record it, and
+# point the driver's subprogram search at its directory so the recorded one is the
+# one used.
+delegated_linker=$("$linker_binary" -print-prog-name=ld)
+if [[ $delegated_linker != /* ]]; then
+    delegated_linker=$(command -v "$delegated_linker" || true)
+fi
+if [[ -z $delegated_linker ]]; then
+    echo "cannot resolve the linker delegated to by $linker_binary" >&2
+    exit 2
+fi
+delegated_linker=$(realpath -- "$delegated_linker")
+case $delegated_linker in
+/usr/local/bin/* | /usr/bin/* | /bin/* | /usr/local/sbin/* | /usr/sbin/* | /sbin/*) ;;
+*)
+    echo "delegated linker $delegated_linker is outside the trusted directories" >&2
+    exit 2
+    ;;
+esac
+if [[ ! -f $delegated_linker || ! -x $delegated_linker ]]; then
+    echo "delegated linker $delegated_linker is not a regular executable" >&2
+    exit 2
+fi
+delegated_linker_sha256=$(sha256sum "$delegated_linker" | awk '{print $1}')
+export COMPILER_PATH="${delegated_linker%/*}"
 host_triple=$("$resolved_rustc_binary" -vV | awk -F': ' '/^host:/ { print $2; exit }')
 if [[ -z $host_triple ]]; then
     echo "rustc reports no host triple" >&2
@@ -478,6 +528,9 @@ fi
     printf 'host_triple=%s\n' "$host_triple"
     printf 'linker_binary=%s\n' "$linker_binary"
     printf 'linker_sha256=%s\n' "$linker_sha256"
+    printf 'delegated_linker=%s\n' "$delegated_linker"
+    printf 'delegated_linker_sha256=%s\n' "$delegated_linker_sha256"
+    printf 'compiler_path=%s\n' "$COMPILER_PATH"
     printf 'linker_variable=%s\n' "$linker_variable"
     printf 'resolved_rustc_binary=%s\n' "$resolved_rustc_binary"
     printf 'resolved_cargo_binary=%s\n' "$resolved_cargo_binary"
@@ -507,6 +560,8 @@ fi
     printf 'build_flags=--release -C opt-level=3 -C target-cpu=native -C panic=abort\n'
     printf 'linker_binary=%s\n' "$linker_binary"
     printf 'linker_version='; "$linker_binary" --version | head -1
+    printf 'delegated_linker=%s\n' "$delegated_linker"
+    printf 'delegated_linker_version='; "$delegated_linker" --version | head -1
     printf 'measurement_kind=deterministic correctness and codegen only\n'
     printf 'fresh_process_runs=8\n'
     printf 'timing_reported=no\n'
@@ -594,6 +649,10 @@ run_record codegen/linked.objdump.txt objdump -drwC "$retained_binary"
 run_record codegen/linked.symbols.txt nm -n "$retained_binary"
 run_record codegen/linked.elf.txt readelf -h -n -A "$retained_binary"
 
+if ! scan_ambient_configuration after; then
+    echo "ambient build configuration appeared during the run" >&2
+    exit 2
+fi
 run_record source-clean-after.txt git -C "$source_root" diff --check
 write_source_manifest "$output_dir/source-manifest-after.sha256"
 cmp "$output_dir/source-manifest-before.sha256" "$output_dir/source-manifest-after.sha256"
