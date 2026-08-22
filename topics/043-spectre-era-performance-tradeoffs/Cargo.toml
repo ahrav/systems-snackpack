@@ -1,0 +1,13 @@
+[package]
+name = "spectre-era-performance-tradeoffs"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "spectre-tradeoff-probe"
+path = "src/bin/spectre_tradeoff_probe.rs"
