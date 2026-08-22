@@ -21,6 +21,118 @@ EXPECTED_GATE_LOGS = (
     "gates/07-cargo-doc.txt",
 )
 
+# Each recorded command receipt is bound to the tokens its COMMAND line must
+# contain. Absolute paths vary per run, so only run-independent tokens are
+# required. A bare exit-status line cannot satisfy these.
+EXPECTED_COMMAND_TOKENS = {
+    "gates/01-git-diff-check.txt": ("git", "diff", "--check"),
+    "gates/02-cargo-fmt.txt": ("cargo", "fmt", "--all", "--check"),
+    "gates/03-cargo-test-lib-examples.txt": (
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--workspace",
+        "--lib",
+        "--examples",
+    ),
+    "gates/04-cargo-test-doc.txt": (
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--workspace",
+        "--doc",
+    ),
+    "gates/05-cargo-clippy.txt": (
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--workspace",
+        "--all-targets",
+        "-D warnings",
+    ),
+    "gates/06-cargo-bench-no-run.txt": (
+        "cargo",
+        "bench",
+        "--locked",
+        "--offline",
+        "--workspace",
+        "--no-run",
+    ),
+    "gates/07-cargo-doc.txt": (
+        "RUSTDOCFLAGS=-D\\ warnings",
+        "cargo",
+        "doc",
+        "--locked",
+        "--offline",
+        "--workspace",
+        "--no-deps",
+    ),
+    "source-clean-after.txt": ("git", "diff", "--check"),
+    "build-native.txt": (
+        "RUSTFLAGS=-C\\ opt-level=3\\ -C\\ target-cpu=native\\ -C\\ panic=abort",
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--release",
+        "--package rust-aliasing-provenance",
+        "--example provenance_demo",
+    ),
+    "codegen-command.txt": (
+        "rustc",
+        "--crate-name rust_aliasing_provenance",
+        "--edition=2024",
+        "--crate-type=lib",
+        "-C opt-level=3",
+        "-C target-cpu=native",
+        "-C panic=abort",
+        "--emit=",
+    ),
+    "run-processes.txt": ("python3", "run_processes.py", "--runs 8"),
+}
+
+
+def require_command_receipt(root: Path, relative: str) -> None:
+    """Require one recorded command and a single final zero exit status.
+
+    A substring search for a zero status accepts any nonempty file containing
+    that text, so a receipt is required to carry the shape `run_record` writes:
+    its command on the first line, then exactly one exit status as the last
+    line.
+    """
+
+    lines = (root / relative).read_text(encoding="utf-8").splitlines()
+    while lines and not lines[-1].strip():
+        lines.pop()
+    if not lines:
+        raise ValueError(f"empty command receipt: {relative}")
+    if not lines[0].startswith("COMMAND="):
+        raise ValueError(f"receipt does not open with its command: {relative}")
+    missing = [
+        token
+        for token in EXPECTED_COMMAND_TOKENS[relative]
+        if token not in lines[0]
+    ]
+    if missing:
+        raise ValueError(f"receipt {relative} lacks expected command tokens: {missing}")
+    statuses = [
+        index
+        for index, line in enumerate(lines)
+        if re.fullmatch(r"EXIT_STATUS=\d+", line)
+    ]
+    if len(statuses) != 1:
+        raise ValueError(
+            f"receipt {relative} must record exactly one exit status, "
+            f"found {len(statuses)}"
+        )
+    if statuses[0] != len(lines) - 1:
+        raise ValueError(f"receipt {relative} does not end with its exit status")
+    if lines[-1] != "EXIT_STATUS=0":
+        raise ValueError(f"receipt {relative} records {lines[-1]}")
+
 
 def digest_path(path: Path) -> str:
     """Return a streaming SHA-256 digest for one file."""
@@ -231,13 +343,8 @@ def validate_host_source_and_gates(
         root / "source-manifest-after.sha256"
     ).read_bytes():
         raise ValueError("source manifest changed during the host run")
-    if "EXIT_STATUS=0" not in (root / "source-clean-after.txt").read_text(
-        encoding="utf-8"
-    ):
-        raise ValueError("final source-clean check lacks a zero exit status")
-    for relative in EXPECTED_GATE_LOGS:
-        if "EXIT_STATUS=0" not in (root / relative).read_text(encoding="utf-8"):
-            raise ValueError(f"gate lacks a zero exit status: {relative}")
+    for relative in EXPECTED_COMMAND_TOKENS:
+        require_command_receipt(root, relative)
 
     source = parse_key_values(root / "source-identity.txt")
     recorded_commit = source.get("source_commit", "")
