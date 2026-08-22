@@ -19,8 +19,14 @@ After retrieval, both sealed result archives passed their internal
 
 ```text
 python3 -I -B experiment/validate_receipts.py --root HOST_ROOT \
-  --expected experiment/expected.txt
+  --expected experiment/expected.txt \
+  --source-commit af126fa920f51969667e02b926786cca598212ea \
+  --archive-sha256 f83290e6f41ec6c704cd61f2033bae1f90e749dbd2799137172a7ab322e99b7d
 ```
+
+The validator requires the expected source commit and archive digest and
+compares both against the bundle's recorded identity, so it cannot report a
+pass for a bundle built from different source.
 
 Each validator reported eight fresh processes, no timing, reference `noalias`,
 one reference source load, no raw `noalias`, and two raw source loads.

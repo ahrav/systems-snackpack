@@ -1,9 +1,22 @@
-#!/usr/bin/env bash
+#!/bin/bash -p
 set -euo pipefail
 
 # Run the exact archived Topic 42 source. All build products and receipts stay
 # below the caller-supplied /tmp result directory. The experiment reports no
 # timing because its claim concerns language and compiler contracts, not speed.
+#
+# The fixed interpreter path and -p above are load-bearing. Bash sources
+# $BASH_ENV before the first line of this file, so an in-script check cannot
+# see a startup file that ran commands and then unset the variable; privileged
+# mode suppresses that sourcing, and also discards environment-supplied shell
+# functions and ignores SHELLOPTS, BASHOPTS, CDPATH, and GLOBIGNORE. Because
+# an explicit `bash script` invocation bypasses this shebang, refuse to run
+# when privileged mode is not already active rather than emitting receipts a
+# startup hook could have influenced.
+if [[ $- != *p* ]]; then
+    echo "exact-source experiment requires privileged bash: run $0 directly" >&2
+    exit 2
+fi
 if [[ -n ${BASH_ENV:-} ]]; then
     echo "exact-source experiment refuses BASH_ENV" >&2
     exit 2
@@ -21,8 +34,7 @@ swept_environment_names=()
 while IFS= read -r variable; do
     case $variable in
     RUSTC | RUSTC_WRAPPER | RUSTC_WORKSPACE_WRAPPER | RUSTDOC | RUSTFMT | \
-        RUSTFLAGS | RUSTDOCFLAGS | CARGO_ENCODED_RUSTFLAGS | CARGO_INCREMENTAL | \
-        CARGO_BUILD_* | CARGO_TARGET_* | CARGO_PROFILE_* | CARGO_UNSTABLE_* | \
+        RUSTFLAGS | RUSTDOCFLAGS | RUSTUP_TOOLCHAIN | CARGO_* | \
         CC | CFLAGS | CPPFLAGS | LDFLAGS | COMPILER_PATH | GCC_EXEC_PREFIX | \
         LIBRARY_PATH | CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | \
         LD_* | DYLD_* | GLIBC_TUNABLES | MALLOC_* | GIT_* | \
@@ -73,6 +85,16 @@ mkdir -m 0700 -- "$output_dir"
 work_dir="$output_dir/.work"
 extract_dir="$work_dir/archive"
 mkdir -m 0700 -- "$work_dir" "$extract_dir"
+
+# Cargo reads $CARGO_HOME/config.toml regardless of --locked and --offline, so
+# an ambient home could add build.rustflags or select a wrapper or linker that
+# host.txt never records. Redirect Cargo at an empty private home for the whole
+# run. Every workspace dependency is another workspace member, so an empty
+# registry cache still satisfies the offline gates.
+cargo_home="$work_dir/cargo-home"
+mkdir -m 0700 -- "$cargo_home"
+export CARGO_HOME="$cargo_home"
+
 private_archive="$work_dir/source-archive.tar.gz"
 cp -- "$source_archive" "$private_archive"
 chmod 0400 "$private_archive"
@@ -187,11 +209,36 @@ esac
 # gates and native build.
 cd "$source_root"
 
+# Sweeping RUSTUP_TOOLCHAIN removes the environment override, but a directory
+# override recorded in rustup's settings can still redirect the proxies, and
+# the version receipts only have to be nonempty. Bind the compiler that runs
+# the gates to the archive's own pin so a run under another toolchain cannot
+# report the hard-coded build boundary.
+toolchain_pin=$(awk -F'"' '/^[[:space:]]*channel[[:space:]]*=/ { print $2; exit }' rust-toolchain.toml)
+if [[ ! $toolchain_pin =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "archive must pin an exact numeric toolchain; found '${toolchain_pin:-none}'" >&2
+    exit 2
+fi
+resolved_rustc_version=$(rustc -V | awk '{print $2}')
+resolved_cargo_version=$(cargo -V | awk '{print $2}')
+if [[ $resolved_rustc_version != "$toolchain_pin" ]]; then
+    echo "rustc $resolved_rustc_version does not match pinned $toolchain_pin" >&2
+    exit 2
+fi
+if [[ $resolved_cargo_version != "$toolchain_pin" ]]; then
+    echo "cargo $resolved_cargo_version does not match pinned $toolchain_pin" >&2
+    exit 2
+fi
+
 {
     printf 'source_commit=%s\n' "$source_commit"
     printf 'source_archive_sha256=%s\n' "$archive_digest"
     printf 'archive_embedded_commit=%s\n' "$archive_embedded_commit"
     printf 'runner_sha256='; sha256sum "$experiment_dir/run_host.sh" | awk '{print $1}'
+    printf 'toolchain_pin=%s\n' "$toolchain_pin"
+    printf 'resolved_rustc_version=%s\n' "$resolved_rustc_version"
+    printf 'resolved_cargo_version=%s\n' "$resolved_cargo_version"
+    printf 'cargo_home_isolated=yes\n'
     printf 'swept_environment_names=%s\n' "${swept_environment_names[*]:-none}"
 } >"$output_dir/source-identity.txt"
 
@@ -304,7 +351,9 @@ write_source_manifest "$output_dir/source-manifest-after.sha256"
 cmp "$output_dir/source-manifest-before.sha256" "$output_dir/source-manifest-after.sha256"
 run_record validate-receipts.txt python3 -I -B "$experiment_dir/validate_receipts.py" \
     --root "$output_dir" \
-    --expected "$expected"
+    --expected "$expected" \
+    --source-commit "$source_commit" \
+    --archive-sha256 "$archive_digest"
 
 # Only retained evidence remains. The deleted path was created by this run and
 # is constrained to OUTPUT_DIR/.work under a direct /tmp child.

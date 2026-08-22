@@ -192,7 +192,9 @@ def validate_llvm_contract(root: Path) -> None:
             raise ValueError(f"linked symbol table lacks {symbol}")
 
 
-def validate_host_source_and_gates(root: Path) -> None:
+def validate_host_source_and_gates(
+    root: Path, expected_commit: str, expected_archive_sha256: str
+) -> None:
     """Require current host metadata, exact source identity, and seven gates."""
 
     required = (
@@ -235,10 +237,25 @@ def validate_host_source_and_gates(root: Path) -> None:
             raise ValueError(f"gate lacks a zero exit status: {relative}")
 
     source = parse_key_values(root / "source-identity.txt")
-    if re.fullmatch(r"[0-9a-f]{40}", source.get("source_commit", "")) is None:
+    recorded_commit = source.get("source_commit", "")
+    recorded_archive_sha256 = source.get("source_archive_sha256", "")
+    if re.fullmatch(r"[0-9a-f]{40}", recorded_commit) is None:
         raise ValueError("source commit is not a full Git object ID")
-    if re.fullmatch(r"[0-9a-f]{64}", source.get("source_archive_sha256", "")) is None:
+    if re.fullmatch(r"[0-9a-f]{64}", recorded_archive_sha256) is None:
         raise ValueError("source archive digest is not SHA-256")
+    if recorded_commit != expected_commit:
+        raise ValueError(
+            f"bundle records source commit {recorded_commit}, expected {expected_commit}"
+        )
+    if recorded_archive_sha256 != expected_archive_sha256:
+        raise ValueError(
+            f"bundle records archive SHA-256 {recorded_archive_sha256}, "
+            f"expected {expected_archive_sha256}"
+        )
+    if source.get("archive_embedded_commit") != expected_commit:
+        raise ValueError(
+            "archive-embedded commit differs from the expected source commit"
+        )
 
     host = parse_key_values(root / "host.txt")
     label = host.get("ssh_target_label")
@@ -266,23 +283,53 @@ def validate_host_source_and_gates(root: Path) -> None:
         raise ValueError("host measurement boundary or build flags changed")
 
 
+def hex_field(length: int, label: str):
+    """Return an argparse type that accepts one fixed-length lowercase hex field."""
+
+    def parse(value: str) -> str:
+        normalized = value.strip().lower()
+        if re.fullmatch(rf"[0-9a-f]{{{length}}}", normalized) is None:
+            raise argparse.ArgumentTypeError(
+                f"{label} must be {length} hexadecimal digits"
+            )
+        return normalized
+
+    return parse
+
+
 def main() -> int:
     """Validate one host's complete Topic 42 receipt bundle."""
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--expected", type=Path, required=True)
+    parser.add_argument(
+        "--source-commit",
+        required=True,
+        type=hex_field(40, "--source-commit"),
+        help="full Git object ID the bundle must have been produced from",
+    )
+    parser.add_argument(
+        "--archive-sha256",
+        required=True,
+        type=hex_field(64, "--archive-sha256"),
+        help="SHA-256 of the git archive the bundle must have been produced from",
+    )
     arguments = parser.parse_args()
     root = arguments.root.resolve()
     expected = arguments.expected.read_bytes()
 
-    validate_host_source_and_gates(root)
+    validate_host_source_and_gates(
+        root, arguments.source_commit, arguments.archive_sha256
+    )
     validate_processes(root, expected)
     validate_llvm_contract(root)
     print(
         "receipt_validation=PASS fresh_processes=8 timing_reported=no "
         "reference_noalias=yes reference_source_loads=1 "
-        "raw_noalias=no raw_source_loads=2"
+        "raw_noalias=no raw_source_loads=2 "
+        f"source_commit={arguments.source_commit} "
+        f"source_archive_sha256={arguments.archive_sha256}"
     )
     return 0
 
