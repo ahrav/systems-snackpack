@@ -240,7 +240,7 @@ fi
 # into a pass. Every directory below OUTPUT_DIR is created by this run, so refuse
 # any such configuration outside the digest-bound source tree.
 # Cargo's and Clippy's lookups are bound elsewhere: the gates run from the root
-# directory, and CLIPPY_CONF_DIR names a directory this run owns. rustfmt still
+# directory, and CLIPPY_CONF_DIR starts Clippy's search there too. rustfmt still
 # resolves rustfmt.toml from the formatted file's directory upward, which no
 # environment variable overrides, so a writable ancestor remains reachable for
 # that gate alone. Scan before and after so a file present for either scan fails
