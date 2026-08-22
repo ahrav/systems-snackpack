@@ -276,9 +276,30 @@ write_source_manifest "$output_dir/source-manifest-before.sha256"
 # entries, so the two sets must be identical.
 archive_paths="$work_dir/archive-paths.txt"
 manifest_paths="$work_dir/manifest-paths.txt"
-tar -tzf "$private_archive" |
-    sed -n "s|^${source_root##*/}/||p" |
-    grep -v '/$' | grep -v '^$' | LC_ALL=C sort >"$archive_paths"
+# The source root is located by searching the extracted tree, so the archive may
+# or may not carry a leading prefix directory. Derive the prefix from where the
+# root actually landed rather than assuming one, and strip it literally.
+if [[ $source_root == "$extract_dir" ]]; then
+    archive_prefix=""
+else
+    archive_prefix="${source_root#"$extract_dir"/}/"
+fi
+if ! tar -tzf "$private_archive" |
+    awk -v prefix="$archive_prefix" '
+        prefix != "" {
+            if (index($0, prefix) != 1) {
+                printf "archive entry outside %s: %s\n", prefix, $0 >"/dev/stderr"
+                bad = 1
+                next
+            }
+            $0 = substr($0, length(prefix) + 1)
+        }
+        $0 != "" && $0 !~ /\/$/ { print }
+        END { exit bad ? 1 : 0 }
+    ' | LC_ALL=C sort >"$archive_paths"; then
+    echo "source archive contains entries outside the source root" >&2
+    exit 2
+fi
 awk '{ sub(/^[0-9a-f]+  /, ""); print }' "$output_dir/source-manifest-before.sha256" |
     LC_ALL=C sort >"$manifest_paths"
 if ! cmp -s "$archive_paths" "$manifest_paths"; then
