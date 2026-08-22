@@ -177,6 +177,13 @@ cargo_home="$work_dir/cargo-home"
 mkdir -m 0700 -- "$cargo_home"
 export CARGO_HOME="$cargo_home"
 
+# Clippy resolves clippy.toml from CLIPPY_CONF_DIR, or the crate directory, and
+# then upward, and the working directory does not affect it. Relocating that start
+# into the work tree would not help, because the walk would still ascend into the
+# shared /tmp above it. Start it at the root directory instead, which is root-owned
+# and holds no clippy.toml, so the whole lookup is closed to other local users.
+export CLIPPY_CONF_DIR=/
+
 private_archive="$work_dir/source-archive.tar.gz"
 cp -- "$source_archive" "$private_archive"
 chmod 0400 "$private_archive"
@@ -232,10 +239,13 @@ fi
 # and a /tmp/rustfmt.toml setting disable_all_formatting turns the formatting gate
 # into a pass. Every directory below OUTPUT_DIR is created by this run, so refuse
 # any such configuration outside the digest-bound source tree.
-# OUTPUT_DIR is a direct child of /tmp by contract, so a writable ancestor always
-# exists and a preflight scan alone cannot exclude a configuration file created
-# after it. Scan before the gates and again afterwards, so a file appearing during
-# the run fails the run instead of silently changing what the gates measured.
+# Cargo's and Clippy's lookups are bound elsewhere: the gates run from the root
+# directory, and CLIPPY_CONF_DIR names a directory this run owns. rustfmt still
+# resolves rustfmt.toml from the formatted file's directory upward, which no
+# environment variable overrides, so a writable ancestor remains reachable for
+# that gate alone. Scan before and after so a file present for either scan fails
+# the run; a file created and removed entirely between them cannot be seen, which
+# is why the other two lookups are bound rather than scanned.
 scan_ambient_configuration() {
     local when=$1 ancestor found=""
     ancestor=$(dirname -- "$source_root")
@@ -360,10 +370,15 @@ dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com)
     ;;
 esac
 
-# Resolve rustup's pinned toolchain and all Cargo metadata from the archived
-# workspace itself. The records below therefore describe the tools used by the
-# gates and native build.
-cd "$source_root"
+# Cargo and Clippy search the working directory and its ancestors for
+# configuration, so the directory the gates run from decides which ancestors are
+# reachable. Running from the extracted tree put the shared, writable /tmp on that
+# path, where a file created between a preflight scan and a gate could not be
+# detected at all. Run from the root directory instead: it is root-owned, holds no
+# .cargo directory, and has no ancestor above it, so no other local user can place
+# configuration on the search path for any part of the run. Every path the gates
+# use is absolute, so nothing depends on the working directory.
+cd /
 
 # Select the archive's pinned toolchain explicitly. Sweeping RUSTUP_TOOLCHAIN
 # removes the caller's environment override, but a directory override recorded in
@@ -373,7 +388,7 @@ cd "$source_root"
 # archive's own pin outranks a directory override in turn, and leaves the recorded
 # commands unchanged. Confirm the selection resolves inside this account's rustup
 # toolchain directory for the pinned version.
-toolchain_pin=$(awk -F'"' '/^[[:space:]]*channel[[:space:]]*=/ { print $2; exit }' rust-toolchain.toml)
+toolchain_pin=$(awk -F'"' '/^[[:space:]]*channel[[:space:]]*=/ { print $2; exit }' "$source_root/rust-toolchain.toml")
 if [[ ! $toolchain_pin =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
     echo "archive must pin an exact numeric toolchain; found '${toolchain_pin:-none}'" >&2
     exit 2
@@ -538,6 +553,8 @@ fi
     printf 'rustup_home=%s\n' "$rustup_home"
     printf 'command_path=%s\n' "$PATH"
     printf 'cargo_home_isolated=yes\n'
+    printf 'clippy_conf_dir=%s\n' "$CLIPPY_CONF_DIR"
+    printf 'gate_working_directory=/\n'
     printf 'swept_environment_names=%s\n' "${swept_environment_names[*]:-none}"
 } >"$output_dir/source-identity.txt"
 
