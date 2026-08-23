@@ -82,9 +82,11 @@ def summaries_match(expected: object, actual: object) -> bool:
 def host_field(host: str, name: str, pattern: str = r"[^\n]+") -> str:
     """Return the unique ``name=value`` line's value from the host receipt."""
 
-    values = re.findall(rf"^{name}=({pattern})$", host, flags=re.MULTILINE)
+    values = re.findall(rf"^{re.escape(name)}=(.*)$", host, flags=re.MULTILINE)
     if len(values) != 1:
         raise SystemExit(f"host receipt must record exactly one {name}")
+    if not re.fullmatch(pattern, values[0]):
+        raise SystemExit(f"host receipt records an invalid {name}")
     return values[0]
 
 
@@ -157,8 +159,9 @@ def main() -> None:
     if architecture not in AUTHORIZED_TARGETS.get(target_label, ()):
         raise SystemExit("host receipt names an unauthorized target or architecture")
     archive_digest = hashlib.sha256((root / "source-archive.tar.gz").read_bytes()).hexdigest()
-    if f"source_archive_verified_sha256={archive_digest}" not in host:
-        raise SystemExit("retained source archive differs from the verified digest")
+    for field in ("source_archive_sha256", "source_archive_verified_sha256"):
+        if host_field(host, field, r"[0-9a-f]{64}") != archive_digest:
+            raise SystemExit(f"retained source archive differs from {field}")
     # Bind the retained archive to the recorded commit exactly as the runner
     # does: git archive embeds the commit in the pax comment header.
     source_commit = host_field(host, "source_commit", r"[0-9a-f]{40}")

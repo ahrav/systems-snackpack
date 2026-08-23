@@ -172,17 +172,17 @@ fi
 
 (
     cd -- "$repo_root"
-    RUSTFLAGS='-C target-cpu=native' cargo build --locked --release \
+    env -u CARGO_ENCODED_RUSTFLAGS \
+        CARGO_TARGET_DIR="$run_private/target" \
+        RUSTFLAGS='-C target-cpu=native' \
+        cargo build --locked --release \
         --package spectre-era-performance-tradeoffs --bin spectre-tradeoff-probe
     printf 'build_status=pass\n'
 ) >"$output_dir/build.txt" 2>&1
-# The workspace target directory is mutable: any concurrent cargo invocation
-# can replace the probe between codegen capture and the timing schedule.
-# Measure a read-only run-private copy and hold its digest for a post-schedule
-# recheck so every process is bound to the same bytes.
-install -m 0500 -- "$repo_root/target/release/spectre-tradeoff-probe" \
-    "$run_private/spectre-tradeoff-probe"
-binary="$run_private/spectre-tradeoff-probe"
+# A private Cargo target prevents another workspace build from replacing the
+# probe. Clearing encoded flags makes RUSTFLAGS the authoritative native target.
+binary="$run_private/target/release/spectre-tradeoff-probe"
+chmod 0500 -- "$binary"
 probe_sha256=$(sha256sum -- "$binary" | awk '{print $1}')
 printf 'probe_sha256=%s\n' "$probe_sha256" >"$output_dir/probe.sha256"
 
@@ -211,3 +211,14 @@ if ! diff -u "$output_dir/source-manifest-archive.sha256" \
     exit 2
 fi
 python3 "$script_dir/validate_receipts.py" "$output_dir"
+
+# Validation imports code from the executing tree, so prove that tree still
+# matches the archive after the validator exits. A drifted run has no valid
+# certification artifact.
+if ! write_source_manifest "$repo_root" "$run_private/source-manifest-final.sha256" || \
+    ! cmp -s "$output_dir/source-manifest-archive.sha256" \
+        "$run_private/source-manifest-final.sha256"; then
+    rm -f -- "$output_dir/receipt-validation.json"
+    printf 'executing source changed during receipt validation\n' >&2
+    exit 2
+fi

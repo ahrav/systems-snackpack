@@ -25,122 +25,207 @@ class CodegenError(ValueError):
     """A retained disassembly fails the fixed instruction checks."""
 
 
-def first_match(
-    pattern: str, lines: list[str], minimum: int, file: str
-) -> tuple[int, re.Match[str]]:
-    """Return the first matching line and match strictly after ``minimum``."""
+Instruction = tuple[int, str, str]
 
-    for number, line in enumerate(lines, 1):
-        match = re.search(pattern, line)
-        if number > minimum and match:
-            return number, match
-    raise CodegenError(
-        f"missing ordered instruction pattern {pattern!r} after line {minimum} in {file}"
+
+def instruction_stream(asm: Path, symbol: str) -> list[Instruction]:
+    """Parse GNU objdump instruction addresses, mnemonics, and operands."""
+
+    text = asm.read_text(encoding="utf-8")
+    if f"<{symbol}>" not in text:
+        raise CodegenError(f"{asm.name} does not disassemble {symbol}")
+    code = []
+    for line in text.splitlines():
+        match = re.match(r"^\s*([0-9a-f]+):\s+([a-z][a-z0-9.]*)\s*(.*?)\s*$", line)
+        if match:
+            code.append((int(match.group(1), 16), match.group(2), match.group(3)))
+    if not code:
+        raise CodegenError(f"{asm.name} contains no instructions")
+    return code
+
+
+def operand_match(
+    code: list[Instruction], index: int, mnemonics: tuple[str, ...], pattern: str, file: str
+) -> re.Match[str]:
+    """Match one exact instruction position and return its operand captures."""
+
+    if index >= len(code) or code[index][1] not in mnemonics:
+        expected = "/".join(mnemonics)
+        raise CodegenError(f"expected adjacent {expected} instruction in {file}")
+    match = re.fullmatch(pattern, code[index][2])
+    if not match:
+        raise CodegenError(f"unexpected {code[index][1]} operands in {file}: {code[index][2]}")
+    return match
+
+
+def first_mnemonic(code: list[Instruction], mnemonics: tuple[str, ...], file: str) -> int:
+    for index, (_, mnemonic, _) in enumerate(code):
+        if mnemonic in mnemonics:
+            return index
+    raise CodegenError(f"missing {'/'.join(mnemonics)} instruction in {file}")
+
+
+def require_branch_target(
+    code: list[Instruction], branch: int, target_index: int, file: str
+) -> None:
+    """Require a branch to target one exact instruction in its symbol."""
+
+    match = re.match(r"([0-9a-f]+)\b", code[branch][2])
+    if not match:
+        raise CodegenError(f"cannot parse branch target in {file}: {code[branch][2]}")
+    target = int(match.group(1), 16)
+    if target != code[target_index][0]:
+        raise CodegenError(f"unexpected out-of-bounds branch target in {file}")
+
+
+def check_x86(mask: list[Instruction], barrier: list[Instruction]) -> str:
+    mask_file = "topic43_mask_lookup.asm"
+    compare = first_mnemonic(mask, ("cmp", "cmpq", "cmpl", "cmpw"), mask_file)
+    compare_match = operand_match(
+        mask, compare, (mask[compare][1],), r"%[a-z0-9]+,\s*(%[a-z0-9]+)", mask_file
+    )
+    index = re.escape(compare_match.group(1))
+    mask_match = operand_match(
+        mask,
+        compare + 1,
+        ("sbb", "sbbq", "sbbl", "sbbw"),
+        r"(%[a-z0-9]+),\s*\1",
+        mask_file,
+    )
+    mask_register = re.escape(mask_match.group(1))
+    operand_match(
+        mask,
+        compare + 2,
+        ("and", "andq", "andl", "andw"),
+        rf"{mask_register},\s*{index}",
+        mask_file,
+    )
+    load = compare + 3
+    while load < len(mask) and not re.fullmatch(
+        rf"\([^,]+,\s*{index},[^)]*\),\s*{mask_register}", mask[load][2]
+    ):
+        load += 1
+    operand_match(
+        mask,
+        load,
+        ("and", "andq", "andl", "andw"),
+        rf"\([^,]+,\s*{index},[^)]*\),\s*{mask_register}",
+        mask_file,
     )
 
+    barrier_file = "topic43_barrier_lookup.asm"
+    compare = first_mnemonic(barrier, ("cmp", "cmpq", "cmpl", "cmpw"), barrier_file)
+    if compare != 0 or len(barrier) != 7:
+        raise CodegenError(f"unexpected instruction graph in {barrier_file}")
+    compare_match = operand_match(
+        barrier,
+        compare,
+        (barrier[compare][1],),
+        r"%[a-z0-9]+,\s*(%[a-z0-9]+)",
+        barrier_file,
+    )
+    index = re.escape(compare_match.group(1))
+    operand_match(barrier, compare + 1, ("jae", "jnb", "jnc"), r"[0-9a-f]+.*", barrier_file)
+    operand_match(barrier, compare + 2, ("lfence",), r"", barrier_file)
+    operand_match(
+        barrier,
+        compare + 3,
+        ("mov", "movq", "movl", "movw"),
+        rf"\([^,]+,\s*{index},[^)]*\),\s*%[a-z0-9]+",
+        barrier_file,
+    )
+    operand_match(barrier, compare + 4, ("ret", "retq"), r"", barrier_file)
+    operand_match(
+        barrier,
+        compare + 5,
+        ("xor", "xorl", "xorq"),
+        r"(%[a-z0-9]+),\s*\1",
+        barrier_file,
+    )
+    operand_match(barrier, compare + 6, ("ret", "retq"), r"", barrier_file)
+    require_branch_target(barrier, compare + 1, compare + 5, barrier_file)
+    return "cmp<conditional-branch<lfence<load"
 
-def first_line(pattern: str, lines: list[str], minimum: int, file: str) -> int:
-    """Return the 1-based number of the first match strictly after ``minimum``."""
 
-    return first_match(pattern, lines, minimum, file)[0]
+def check_arm(mask: list[Instruction], barrier: list[Instruction]) -> str:
+    mask_file = "topic43_mask_lookup.asm"
+    compare = first_mnemonic(mask, ("cmp",), mask_file)
+    compare_match = operand_match(mask, compare, ("cmp",), r"(x[0-9]+),\s*x[0-9]+", mask_file)
+    index = re.escape(compare_match.group(1))
+    if compare + 1 >= len(mask) or mask[compare + 1][1] not in ("ngc", "sbc"):
+        raise CodegenError(f"expected adjacent ngc/sbc instruction in {mask_file}")
+    if mask[compare + 1][1] == "ngc":
+        mask_match = operand_match(mask, compare + 1, ("ngc",), r"(x[0-9]+),\s*xzr", mask_file)
+    else:
+        mask_match = operand_match(
+            mask, compare + 1, ("sbc",), r"(x[0-9]+),\s*xzr,\s*xzr", mask_file
+        )
+    mask_register = re.escape(mask_match.group(1))
+    barrier_mnemonic = mask[compare + 2][1] if compare + 2 < len(mask) else ""
+    barrier_operands = r"" if barrier_mnemonic == "csdb" else r"#0x14"
+    operand_match(
+        mask, compare + 2, ("csdb", "hint"), barrier_operands, mask_file
+    )
+    safe_match = operand_match(
+        mask,
+        compare + 3,
+        ("and",),
+        rf"(x[0-9]+),\s*(?:{mask_register},\s*{index}|{index},\s*{mask_register})",
+        mask_file,
+    )
+    safe_index = re.escape(safe_match.group(1))
+    load = first_mnemonic(mask[compare + 4 :], ("ldr",), mask_file) + compare + 4
+    load_match = operand_match(
+        mask,
+        load,
+        ("ldr",),
+        rf"(x[0-9]+),\s*\[[^],]+,\s*{safe_index}(?:,[^]]*)?\]",
+        mask_file,
+    )
+    loaded_word = re.escape(load_match.group(1))
+    operand_match(
+        mask,
+        load + 1,
+        ("and",),
+        rf"x[0-9]+,\s*(?:{loaded_word},\s*{mask_register}|{mask_register},\s*{loaded_word})",
+        mask_file,
+    )
+
+    barrier_file = "topic43_barrier_lookup.asm"
+    compare = first_mnemonic(barrier, ("cmp",), barrier_file)
+    if compare != 0 or len(barrier) != 8:
+        raise CodegenError(f"unexpected instruction graph in {barrier_file}")
+    compare_match = operand_match(
+        barrier, compare, ("cmp",), r"(x[0-9]+),\s*x[0-9]+", barrier_file
+    )
+    index = re.escape(compare_match.group(1))
+    operand_match(barrier, compare + 1, ("b.cs", "b.hs"), r"[0-9a-f]+.*", barrier_file)
+    operand_match(barrier, compare + 2, ("dsb",), r"nsh", barrier_file)
+    operand_match(barrier, compare + 3, ("isb",), r"", barrier_file)
+    operand_match(
+        barrier,
+        compare + 4,
+        ("ldr",),
+        rf"x[0-9]+,\s*\[[^],]+,\s*{index}(?:,[^]]*)?\]",
+        barrier_file,
+    )
+    operand_match(barrier, compare + 5, ("ret",), r"", barrier_file)
+    operand_match(barrier, compare + 6, ("mov",), r"x0,\s*xzr", barrier_file)
+    operand_match(barrier, compare + 7, ("ret",), r"", barrier_file)
+    require_branch_target(barrier, compare + 1, compare + 6, barrier_file)
+    return "cmp<conditional-branch<dsb-nsh<isb<load"
 
 
 def check_codegen_dir(codegen_dir: Path, architecture: str) -> str:
     """Validate the retained assembly for ``architecture``; return the barrier order."""
 
-    for symbol in SYMBOLS:
-        asm = codegen_dir / f"{symbol}.asm"
-        if f"<{symbol}>" not in asm.read_text(encoding="utf-8"):
-            raise CodegenError(f"{asm.name} does not disassemble {symbol}")
-    mask_file = "topic43_mask_lookup.asm"
-    mask_lines = (codegen_dir / mask_file).read_text(encoding="utf-8").splitlines()
-    barrier_file = "topic43_barrier_lookup.asm"
-    barrier_lines = (codegen_dir / barrier_file).read_text(encoding="utf-8").splitlines()
+    streams = {
+        symbol: instruction_stream(codegen_dir / f"{symbol}.asm", symbol) for symbol in SYMBOLS
+    }
     if architecture == "x86_64":
-        compare, compare_match = first_match(
-            r"[ \t]cmp[qwl]?[ \t]+%[a-z0-9]+,[ \t]*(%[a-z0-9]+)(?:[ \t]|$)",
-            mask_lines,
-            0,
-            mask_file,
-        )
-        index = re.escape(compare_match.group(1))
-        mask, mask_match = first_match(
-            r"[ \t]sbb[qwl]?[ \t]+(%[a-z0-9]+),[ \t]*\1(?:[ \t]|$)",
-            mask_lines,
-            compare,
-            mask_file,
-        )
-        mask_register = re.escape(mask_match.group(1))
-        masked_index = first_line(
-            rf"[ \t]and[qwl]?[ \t]+{mask_register},[ \t]*{index}(?:[ \t]|$)",
-            mask_lines,
-            mask,
-            mask_file,
-        )
-        first_line(
-            rf"[ \t]and[qwl]?[ \t]+\([^,]+,[ \t]*{index},[^)]*\),"
-            rf"[ \t]*{mask_register}(?:[ \t]|$)",
-            mask_lines,
-            masked_index,
-            mask_file,
-        )
-        compare = first_line(r"[ \t]cmp[qwl]?[ \t]", barrier_lines, 0, barrier_file)
-        branch = first_line(
-            r"[ \t]j(a|ae|b|be|e|ne|z|nz)[ \t]", barrier_lines, compare, barrier_file
-        )
-        barrier = first_line(r"[ \t]lfence([ \t]|$)", barrier_lines, branch, barrier_file)
-        first_line(
-            r"[ \t]mov[qwl]?[ \t]+[^ \t]*\([^)]*\),", barrier_lines, barrier, barrier_file
-        )
-        return "cmp<conditional-branch<lfence<load"
+        return check_x86(streams["topic43_mask_lookup"], streams["topic43_barrier_lookup"])
     if architecture in ("aarch64", "arm64"):
-        compare, compare_match = first_match(
-            r"[ \t]cmp[ \t]+(x[0-9]+),[ \t]*x[0-9]+(?:[ \t]|$)",
-            mask_lines,
-            0,
-            mask_file,
-        )
-        index = re.escape(compare_match.group(1))
-        mask, mask_match = first_match(
-            r"[ \t](?:ngc[ \t]+(x[0-9]+),[ \t]*xzr|"
-            r"sbc[ \t]+(x[0-9]+),[ \t]*xzr,[ \t]*xzr)(?:[ \t]|$)",
-            mask_lines,
-            compare,
-            mask_file,
-        )
-        mask_register = re.escape(mask_match.group(1) or mask_match.group(2))
-        csdb = first_line(
-            r"[ \t](csdb|hint[ \t]+#0x14)([ \t]|$)", mask_lines, mask, mask_file
-        )
-        masked_index, masked_index_match = first_match(
-            rf"[ \t]and[ \t]+(x[0-9]+),[ \t]*(?:{mask_register},[ \t]*{index}|"
-            rf"{index},[ \t]*{mask_register})(?:[ \t]|$)",
-            mask_lines,
-            csdb,
-            mask_file,
-        )
-        safe_index = re.escape(masked_index_match.group(1))
-        load, load_match = first_match(
-            rf"[ \t]ldr[ \t]+(x[0-9]+),[ \t]*\[[^],]+,[ \t]*{safe_index}"
-            rf"(?:,[^]]*)?\]",
-            mask_lines,
-            masked_index,
-            mask_file,
-        )
-        loaded_word = re.escape(load_match.group(1))
-        first_line(
-            rf"[ \t]and[ \t]+x[0-9]+,[ \t]*(?:{loaded_word},[ \t]*{mask_register}|"
-            rf"{mask_register},[ \t]*{loaded_word})(?:[ \t]|$)",
-            mask_lines,
-            load,
-            mask_file,
-        )
-        compare = first_line(r"[ \t]cmp[ \t]", barrier_lines, 0, barrier_file)
-        branch = first_line(r"[ \t]b\.[a-z]+[ \t]", barrier_lines, compare, barrier_file)
-        dsb = first_line(r"[ \t]dsb[ \t]+nsh", barrier_lines, branch, barrier_file)
-        isb = first_line(r"[ \t]isb([ \t]|$)", barrier_lines, dsb, barrier_file)
-        first_line(r"[ \t]ldr[ \t]", barrier_lines, isb, barrier_file)
-        return "cmp<conditional-branch<dsb-nsh<isb<load"
+        return check_arm(streams["topic43_mask_lookup"], streams["topic43_barrier_lookup"])
     raise CodegenError(f"unsupported Linux architecture for Topic 43: {architecture}")
 
 
