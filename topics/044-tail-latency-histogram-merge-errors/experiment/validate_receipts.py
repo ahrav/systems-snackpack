@@ -52,6 +52,13 @@ MERGE_SYMBOL = "topic44_checked_merge_four"
 # the validation claim. Tokens are matched exactly; ("suffix", value) entries
 # match host-dependent absolute paths by their invariant tail.
 COMMAND_TEMPLATES = (
+    ("kernel.txt", ("uname", "-a")),
+    ("cpuinfo.txt", ("lscpu",)),
+    ("rustc-version.txt", ("rustc", "-vV")),
+    ("cargo-version.txt", ("cargo", "-Vv")),
+    ("gcc-version.txt", ("gcc", "--version")),
+    ("rust-target-features.txt", ("rustc", "--print", "target-features")),
+    ("native-target-cfg.txt", ("rustc", "-C", "target-cpu=native", "--print", "cfg")),
     (
         "test.txt",
         (
@@ -81,6 +88,23 @@ COMMAND_TEMPLATES = (
             "tail-latency-histogram-merge-errors",
             "--example",
             "histogram_merge_probe",
+        ),
+    ),
+    (
+        "run-processes.txt",
+        (
+            "python3",
+            "-I",
+            "-B",
+            ("suffix", "/experiment/run_processes.py"),
+            "--binary",
+            ("suffix", "/release/examples/histogram_merge_probe"),
+            "--expected",
+            ("suffix", "/experiment/expected.txt"),
+            "--output",
+            ("suffix", "/processes"),
+            "--runs",
+            "8",
         ),
     ),
     (
@@ -212,6 +236,11 @@ def main() -> int:
     parser.add_argument("root", type=Path)
     parser.add_argument("--expected-label", required=True)
     parser.add_argument("--expected-resolved-host", required=True)
+    parser.add_argument(
+        "--host-run",
+        action="store_true",
+        help="invoked by run_host.sh before validation.txt and status.txt exist",
+    )
     arguments = parser.parse_args()
     root = arguments.root.resolve()
 
@@ -281,6 +310,41 @@ def main() -> int:
 
     for receipt, template in COMMAND_TEMPLATES:
         check_sealed_command(root, receipt, template)
+    # The runner seals `clang --version` when Clang exists and otherwise
+    # writes this exact marker, so any other content is a forged receipt.
+    if (root / "clang-version.txt").read_text(encoding="utf-8") != "clang=unavailable\n":
+        check_sealed_command(root, "clang-version.txt", ("clang", "--version"))
+    if not arguments.host_run:
+        # These two receipts are written only after the host's own in-progress
+        # validation completes, so the host run cannot require them without
+        # recursing on an unfinished receipt; every later validation must.
+        for receipt in ("validation.txt", "status.txt"):
+            if not (root / receipt).is_file():
+                raise SystemExit(f"missing receipts: {receipt}")
+        if (root / "status.txt").read_text(encoding="utf-8") != "status=PASS\n":
+            raise SystemExit("host status receipt does not record PASS")
+        lines = (root / "validation.txt").read_text(encoding="utf-8").splitlines()
+        if not lines or not lines[0].startswith("COMMAND="):
+            raise SystemExit("validation.txt does not record a sealed command")
+        tokens = shlex.split(lines[0][len("COMMAND=") :])
+        if tokens[-1:] == ["--host-run"]:
+            tokens = tokens[:-1]
+        if (
+            len(tokens) != 9
+            or tokens[0:3] != ["python3", "-I", "-B"]
+            or not tokens[3].endswith("/experiment/validate_receipts.py")
+            or tokens[5:] != [
+                "--expected-label",
+                arguments.expected_label,
+                "--expected-resolved-host",
+                arguments.expected_resolved_host,
+            ]
+        ):
+            raise SystemExit("validation.txt does not record the expected command")
+        if lines[-1] != "EXIT_STATUS=0":
+            raise SystemExit("validation.txt does not record a successful exit")
+        if "status=PASS" not in lines[1:]:
+            raise SystemExit("host-side validation did not report PASS")
     for textual in (
         "codegen/library.asm",
         "codegen/library.ll",

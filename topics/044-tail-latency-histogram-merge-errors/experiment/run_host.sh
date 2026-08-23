@@ -166,6 +166,6 @@ write_manifest "$output_dir/source-manifest-after.sha256"
 cmp "$output_dir/source-manifest-before.sha256" "$output_dir/source-manifest-after.sha256"
 run_record validation.txt python3 -I -B "$topic_dir/experiment/validate_receipts.py" \
     "$output_dir" --expected-label "$SSH_TARGET_LABEL" \
-    --expected-resolved-host "$SSH_RESOLVED_HOSTNAME"
+    --expected-resolved-host "$SSH_RESOLVED_HOSTNAME" --host-run
 rm -rf -- "$work_dir"
 printf 'status=PASS\n' >"$output_dir/status.txt"

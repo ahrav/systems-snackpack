@@ -341,6 +341,8 @@ impl CumulativeHistogram {
     ///   bucket schemas.
     /// - [`HistogramError::CounterReset`] if any current counter is lower than
     ///   its older value.
+    /// - [`HistogramError::ArithmeticOverflow`] if the total interval delta
+    ///   cannot fit in `u64`.
     pub fn delta_since(&self, older: &Self) -> Result<IntervalHistogram, HistogramError> {
         if self.schema != older.schema {
             return Err(HistogramError::SchemaMismatch);
@@ -535,6 +537,17 @@ mod tests {
         assert_eq!(
             current.delta_since(&older),
             Err(HistogramError::CounterReset)
+        );
+    }
+
+    #[test]
+    fn delta_rejects_aggregate_interval_overflow() {
+        let older = CumulativeHistogram::new(schema(), vec![0, 0, 0, 0]).expect("valid snapshot");
+        let current = CumulativeHistogram::new(schema(), vec![u64::MAX, u64::MAX, 0, 0])
+            .expect("valid snapshot");
+        assert_eq!(
+            current.delta_since(&older),
+            Err(HistogramError::ArithmeticOverflow)
         );
     }
 
