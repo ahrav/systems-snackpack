@@ -13,6 +13,15 @@ from pathlib import Path
 
 from analyze import analyze_aa, analyze_timing, load_rows
 from codegen_checks import CodegenError, check_codegen_dir
+from self_test import ITERATIONS as SELF_TEST_ITERATIONS
+from self_test import MODES as SELF_TEST_MODES
+from self_test import SEED as SELF_TEST_SEED
+
+RUNNER_RELATIVE = "topics/043-spectre-era-performance-tradeoffs/experiment/run_host.sh"
+AUTHORIZED_TARGETS = {
+    "xxl": ("x86_64",),
+    "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com": ("aarch64", "arm64"),
+}
 
 REQUIRED = (
     "source-archive.tar.gz",
@@ -22,6 +31,7 @@ REQUIRED = (
     "host.txt",
     "correctness.txt",
     "build.txt",
+    "probe.sha256",
     "self-test.json",
     "aa-processes.jsonl",
     "aa-summary.json",
@@ -67,20 +77,41 @@ def summaries_match(expected: object, actual: object) -> bool:
     return type(expected) is type(actual) and expected == actual
 
 
+def host_field(host: str, name: str, pattern: str = r"[^\n]+") -> str:
+    """Return the unique ``name=value`` line's value from the host receipt."""
+
+    values = re.findall(rf"^{name}=({pattern})$", host, flags=re.MULTILINE)
+    if len(values) != 1:
+        raise SystemExit(f"host receipt must record exactly one {name}")
+    return values[0]
+
+
 def archive_manifest(archive: Path) -> bytes:
     """Re-derive the source manifest from the retained archive itself.
 
     Mirrors the runner's ``write_source_manifest``: per-file sha256sum lines
-    over byte-sorted paths relative to the archive's top-level prefix, with
-    the same ``target/`` and ``.git`` exclusions.
+    over byte-sorted paths relative to the archive repository root, with the
+    same ``target/`` and ``.git`` exclusions. The root is anchored on the
+    unique Topic 43 runner path exactly as the runner locates it, so archives
+    both with and without a ``git archive --prefix`` directory re-derive
+    correctly.
     """
 
     entries = []
     with tarfile.open(archive, "r:gz") as tar:
-        for member in tar:
-            if not member.isfile():
+        files = [member for member in tar.getmembers() if member.isfile()]
+        anchors = [
+            member.name
+            for member in files
+            if member.name == RUNNER_RELATIVE or member.name.endswith("/" + RUNNER_RELATIVE)
+        ]
+        if len(anchors) != 1:
+            raise ValueError("source archive must contain exactly one Topic 43 host runner")
+        prefix = anchors[0][: -len(RUNNER_RELATIVE)]
+        for member in files:
+            if not member.name.startswith(prefix):
                 continue
-            name = member.name.split("/", 1)[1] if "/" in member.name else member.name
+            name = member.name[len(prefix):]
             if name.startswith(("target/", ".git/")) or name == ".git":
                 continue
             handle = tar.extractfile(member)
@@ -107,15 +138,32 @@ def main() -> None:
     if any(
         marker not in host
         for marker in (
-            "architecture=",
             "build_flags=-C target-cpu=native",
             "source_manifest_match=pass",
         )
     ):
-        raise SystemExit("host receipt lacks architecture, build flags, or source binding")
+        raise SystemExit("host receipt lacks build flags or source binding")
+    # Re-apply the runner's target authorization offline: the label must be
+    # an authorized target, the resolved and runtime hostnames must agree,
+    # and the architecture must match the label.
+    architecture = host_field(host, "architecture", r"\S+")
+    target_label = host_field(host, "ssh_target_label")
+    resolved_hostname = host_field(host, "ssh_resolved_hostname")
+    runtime_hostname = host_field(host, "runtime_hostname")
+    if runtime_hostname != resolved_hostname:
+        raise SystemExit("runtime hostname differs from the resolved target")
+    if architecture not in AUTHORIZED_TARGETS.get(target_label, ()):
+        raise SystemExit("host receipt names an unauthorized target or architecture")
     archive_digest = hashlib.sha256((root / "source-archive.tar.gz").read_bytes()).hexdigest()
     if f"source_archive_verified_sha256={archive_digest}" not in host:
         raise SystemExit("retained source archive differs from the verified digest")
+    # Bind the retained archive to the recorded commit exactly as the runner
+    # does: git archive embeds the commit in the pax comment header.
+    source_commit = host_field(host, "source_commit", r"[0-9a-f]{40}")
+    with tarfile.open(root / "source-archive.tar.gz", "r:gz") as tar:
+        embedded_commit = tar.pax_headers.get("comment", "")
+    if embedded_commit != source_commit:
+        raise SystemExit("retained archive does not embed the recorded source commit")
     if (root / "source-manifest.diff").read_bytes():
         raise SystemExit("source manifest comparison is not empty")
     # Neither retained manifest is trusted: the archive side re-derives from
@@ -131,21 +179,47 @@ def main() -> None:
     codegen_text = (root / "codegen/codegen-check.txt").read_text(encoding="utf-8")
     if "status=pass" not in codegen_text:
         raise SystemExit("codegen inspection did not pass")
-    host_architectures = re.findall(r"^architecture=(\S+)$", host, flags=re.MULTILINE)
     codegen_architectures = re.findall(r"^architecture=(\S+)$", codegen_text, flags=re.MULTILINE)
-    if len(host_architectures) != 1 or host_architectures != codegen_architectures:
+    if codegen_architectures != [architecture]:
         raise SystemExit("codegen receipt architecture differs from the host receipt")
     # The pass marker is itself a receipt; re-run the instruction checks over
     # the retained assembly so the marker cannot certify evidence the checks
     # would reject.
     try:
-        barrier_order = check_codegen_dir(root / "codegen", host_architectures[0])
+        barrier_order = check_codegen_dir(root / "codegen", architecture)
     except CodegenError as error:
         raise SystemExit(f"retained codegen evidence fails inspection: {error}") from error
     if f"barrier_order={barrier_order}" not in codegen_text:
         raise SystemExit("codegen receipt barrier order differs from the retained assembly")
-    if read_json(root / "self-test.json").get("status") != "pass":
+    # The self-test status string is not evidence; re-check the retained
+    # records for the fixed seed, iteration count, mode coverage, and
+    # cross-mode checksum equivalence.
+    self_test = read_json(root / "self-test.json")
+    if self_test.get("status") != "pass" or self_test.get("schema") != "topic43-self-test-v1":
         raise SystemExit("self-test did not pass")
+    if (
+        self_test.get("iterations") != SELF_TEST_ITERATIONS
+        or self_test.get("seed") != SELF_TEST_SEED
+    ):
+        raise SystemExit("self-test inputs differ from the fixed protocol")
+    records = self_test.get("records")
+    if not isinstance(records, list) or len(records) != len(SELF_TEST_MODES):
+        raise SystemExit("self-test must retain one record per mode")
+    for mode, record in zip(SELF_TEST_MODES, records):
+        if not isinstance(record, dict) or record.get("mode") != mode:
+            raise SystemExit("self-test records do not cover the three modes in order")
+        if (
+            record.get("iterations") != SELF_TEST_ITERATIONS
+            or record.get("seed") != SELF_TEST_SEED
+        ):
+            raise SystemExit(f"self-test {mode} record differs from the fixed inputs")
+    for key in ("checksum", "warmup_checksum"):
+        values = {record.get(key) for record in records}
+        if len(values) != 1 or not all(
+            isinstance(value, int) and not isinstance(value, bool) and value >= 0
+            for value in values
+        ):
+            raise SystemExit(f"self-test {key} values are not equivalent across modes")
 
     aa_rows = load_rows(root / "aa-processes.jsonl")
     timing_rows = load_rows(root / "timing-processes.jsonl")
@@ -163,8 +237,7 @@ def main() -> None:
     cpus = {row.get("cpu") for row in aa_rows + timing_rows}
     if len(cpus) != 1:
         raise SystemExit("process records span more than one CPU")
-    host_cpus = re.findall(r"^cpu=([0-9]+)$", host, flags=re.MULTILINE)
-    if len(host_cpus) != 1 or int(host_cpus[0]) != cpus.pop():
+    if int(host_field(host, "cpu", r"[0-9]+")) != cpus.pop():
         raise SystemExit("host receipt CPU differs from the process records")
 
     digests = {}

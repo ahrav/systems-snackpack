@@ -273,8 +273,18 @@ def analyze_timing(rows: list[dict[str, Any]]) -> dict[str, Any]:
                 fail(f"timing block {block} is incomplete")
             ratios.append(math.log(by_block[block][numerator] / by_block[block]["plain"]))
         comparisons[f"{numerator}/plain"] = interval(ratios)
+    # Reported per-mode central statistics derive from the same retained rows
+    # as the paired ratios, so published tables are recomputable and validated.
+    per_mode: dict[str, Any] = {}
+    for mode in MODES:
+        logs = [math.log(by_block[block][mode]) for block in range(1, TIMING_BLOCKS + 1)]
+        per_mode[mode] = {
+            "processes": len(logs),
+            "geometric_mean_ns": math.exp(statistics.fmean(logs)),
+            "sample_sd_log_ns": statistics.stdev(logs),
+        }
     return {
-        "schema": "topic43-timing-v1",
+        "schema": "topic43-timing-v2",
         "status": "pass",
         "blocks": TIMING_BLOCKS,
         "processes": len(rows),
@@ -282,6 +292,7 @@ def analyze_timing(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "permutation_replications": 4,
         "ordinal_count_per_mode": 8,
         "comparisons": comparisons,
+        "per_mode": per_mode,
         "security_claim": "none",
     }
 
