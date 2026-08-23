@@ -1,0 +1,714 @@
+#!/bin/bash -p
+set -euo pipefail
+
+# Run the exact archived Topic 42 source. All build products and receipts stay
+# below the caller-supplied /tmp result directory. The experiment reports no
+# timing because its claim concerns language and compiler contracts, not speed.
+#
+# The fixed interpreter path and -p above are load-bearing. Bash sources
+# $BASH_ENV before the first line of this file, so an in-script check cannot
+# see a startup file that ran commands and then unset the variable; privileged
+# mode suppresses that sourcing, and also discards environment-supplied shell
+# functions and ignores SHELLOPTS, BASHOPTS, CDPATH, and GLOBIGNORE. Because
+# an explicit `bash script` invocation bypasses this shebang, refuse to run
+# when privileged mode is not already active rather than emitting receipts a
+# startup hook could have influenced.
+if [[ $- != *p* ]]; then
+    echo "exact-source experiment requires privileged bash: run $0 directly" >&2
+    exit 2
+fi
+# Privileged mode is not the dynamic loader's secure-execution mode: for an
+# ordinary same-UID invocation the loader still honours the LD_* family for this
+# interpreter. LD_PRELOAD and LD_AUDIT load a library directly, and
+# LD_LIBRARY_PATH can satisfy one of Bash's own dependencies from an
+# attacker-chosen directory; in every case the library's initialisation code has
+# already run before this line and unsetting the variable afterwards cannot
+# unload it. A compromised interpreter cannot sanitise itself, so refuse to
+# certify the run instead of continuing. Removing these variables before the
+# interpreter starts belongs to the launcher; see the trusted-launcher boundary
+# below.
+while IFS= read -r variable; do
+    case $variable in
+    LD_* | DYLD_*)
+        echo "exact-source experiment refuses $variable" >&2
+        exit 2
+        ;;
+    esac
+done < <(compgen -e)
+if [[ -n ${BASH_ENV:-} ]]; then
+    echo "exact-source experiment refuses BASH_ENV" >&2
+    exit 2
+fi
+if [[ -n $(compgen -A function) ]]; then
+    echo "exact-source experiment refuses inherited shell functions" >&2
+    exit 2
+fi
+if [[ -s /etc/ld.so.preload ]]; then
+    echo "exact-source experiment refuses system-wide dynamic-loader preloads" >&2
+    exit 2
+fi
+
+# Trusted-launcher boundary. The checks above refuse a run whose interpreter may
+# already be instrumented, but they cannot prove it is clean: LD_PRELOAD,
+# LD_AUDIT, and $BASH_ENV all act before the first line of this file, and a
+# library already mapped into this process could equally suppress the refusals.
+# What the caller supplies is therefore part of the evidence boundary. The
+# launcher must start this script from a clean environment on a host whose
+# /bin/bash, coreutils, binutils, git, python3, and rustup toolchain the reader
+# already trusts. The receipts record the resolved command path, tool paths, and
+# tool versions so that boundary is auditable; they do not extend it.
+
+swept_environment_names=()
+while IFS= read -r variable; do
+    case $variable in
+    RUSTC | RUSTC_* | RUSTDOC | RUSTFMT | \
+        RUSTFLAGS | RUSTDOCFLAGS | CLIPPY_* | RUSTUP_* | CARGO_* | \
+        CC | CFLAGS | CPPFLAGS | LDFLAGS | COMPILER_PATH | GCC_EXEC_PREFIX | \
+        LIBRARY_PATH | CPATH | C_INCLUDE_PATH | CPLUS_INCLUDE_PATH | \
+        LD_* | DYLD_* | GLIBC_TUNABLES | MALLOC_* | GIT_* | \
+        TAR_OPTIONS | TAPE | GZIP | PYTHONPATH | PYTHONHOME | \
+        RIPGREP_CONFIG_PATH | CDPATH)
+        swept_environment_names+=("$variable")
+        unset "$variable"
+        ;;
+    esac
+done < <(compgen -e)
+export GIT_NO_REPLACE_OBJECTS=1
+# Pin the locale before any external tool runs. Localized builds of readelf and
+# lscpu translate the field labels these receipts capture, and both the validator
+# and the CPU-model extraction match English labels, so an inherited LANG or LC_*
+# could turn a valid run into a failure or a silently missing field. LC_ALL
+# outranks every other locale variable, and LANGUAGE is ignored under the C
+# locale.
+export LANG=C
+export LC_ALL=C
+unset LANGUAGE
+# Git reads system and global configuration even with HOME bound to the invoking
+# account, and settings there change what the gates measure: core.whitespace can
+# make `git diff --check` exit zero on trailing whitespace, and core.fsmonitor
+# names a command Git runs while inspecting the work tree. Point both scopes at
+# /dev/null so only the explicit -c settings below apply.
+export GIT_CONFIG_GLOBAL=/dev/null
+export GIT_CONFIG_SYSTEM=/dev/null
+
+# Establish a trusted system-only search path before running any external
+# command. Every check above uses shell builtins, so this is the first point at
+# which an inherited PATH could matter, and the account resolution below must not
+# depend on one: a substituted id, getent, or awk could otherwise name an
+# attacker-controlled home whose .cargo/bin holds proxies that report the pinned
+# version while producing different artifacts.
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
+hash -r
+
+# The command path and the toolchain stores must not depend on an inherited HOME
+# or RUSTUP_HOME. Privileged mode preserves both, and the rustup proxies compute
+# their settings and toolchain directories from RUSTUP_HOME even when
+# RUSTUP_TOOLCHAIN is cleared, so a linked or custom toolchain in a supplied home
+# could report the pinned version from a different compiler. Resolve the invoking
+# account from the password database using the kernel-reported real user, then
+# bind HOME and RUSTUP_HOME to that account. The proxy directory is deliberately
+# kept off PATH: the Rust tools are invoked by the absolute paths verified below,
+# so neither a system rustc or cargo earlier in the path nor a poisoned
+# .cargo/bin entry can be selected.
+real_user=$(id -un)
+account_home=$(getent passwd "$real_user" | awk -F: '{print $6}')
+if [[ -z $account_home || ! -d $account_home ]]; then
+    echo "cannot resolve a home directory for $real_user from the password database" >&2
+    exit 2
+fi
+rustup_home="$account_home/.rustup"
+rustup_bin="$account_home/.cargo/bin"
+rustup_exe="$rustup_bin/rustup"
+if [[ ! -d $rustup_home ]]; then
+    echo "no rustup home for $real_user at $rustup_home" >&2
+    exit 2
+fi
+if [[ ! -x $rustup_exe ]]; then
+    echo "no rustup executable for $real_user at $rustup_exe" >&2
+    exit 2
+fi
+export HOME="$account_home"
+export RUSTUP_HOME="$rustup_home"
+hash -r
+
+if [[ $# -ne 4 ]]; then
+    echo "usage: $0 OUTPUT_DIR SOURCE_COMMIT SOURCE_ARCHIVE_SHA256 SOURCE_ARCHIVE" >&2
+    exit 2
+fi
+: "${SSH_TARGET_LABEL:?set SSH_TARGET_LABEL to xxl or the authorized Arm hostname}"
+: "${SSH_RESOLVED_HOSTNAME:?set SSH_RESOLVED_HOSTNAME to the runtime-resolved hostname}"
+
+output_dir=$(realpath -m -- "$1")
+source_commit=${2,,}
+archive_digest_expected=${3,,}
+source_archive=$(realpath -m -- "$4")
+if [[ $(dirname -- "$output_dir") != /tmp ]]; then
+    echo "OUTPUT_DIR must be a direct child of /tmp" >&2
+    exit 2
+fi
+if [[ ! $source_commit =~ ^[0-9a-f]{40}$ ]]; then
+    echo "SOURCE_COMMIT must be a full 40-hex Git object ID" >&2
+    exit 2
+fi
+if [[ ! $archive_digest_expected =~ ^[0-9a-f]{64}$ ]]; then
+    echo "SOURCE_ARCHIVE_SHA256 must be 64 hexadecimal digits" >&2
+    exit 2
+fi
+if [[ -e $output_dir ]]; then
+    echo "output already exists: $output_dir" >&2
+    exit 2
+fi
+if [[ ! -f $source_archive ]]; then
+    echo "source archive does not exist: $source_archive" >&2
+    exit 2
+fi
+
+mkdir -m 0700 -- "$output_dir"
+work_dir="$output_dir/.work"
+extract_dir="$work_dir/archive"
+mkdir -m 0700 -- "$work_dir" "$extract_dir"
+
+# Cargo reads $CARGO_HOME/config.toml regardless of --locked and --offline, so
+# an ambient home could add build.rustflags or select a wrapper or linker that
+# host.txt never records. Redirect Cargo at an empty private home for the whole
+# run. Every workspace dependency is another workspace member, so an empty
+# registry cache still satisfies the offline gates.
+cargo_home="$work_dir/cargo-home"
+mkdir -m 0700 -- "$cargo_home"
+export CARGO_HOME="$cargo_home"
+
+# Clippy resolves clippy.toml from CLIPPY_CONF_DIR, or the crate directory, and
+# then upward, and the working directory does not affect it. Relocating that start
+# into the work tree would not help, because the walk would still ascend into the
+# shared /tmp above it. Start it at the root directory instead, which is root-owned
+# and holds no clippy.toml, so the whole lookup is closed to other local users.
+export CLIPPY_CONF_DIR=/
+
+private_archive="$work_dir/source-archive.tar.gz"
+cp -- "$source_archive" "$private_archive"
+chmod 0400 "$private_archive"
+
+archive_digest=$(sha256sum "$private_archive" | awk '{print $1}')
+if [[ $archive_digest != "$archive_digest_expected" ]]; then
+    echo "source archive digest mismatch" >&2
+    exit 2
+fi
+pax_global_header=$(gzip -dc -- "$private_archive" 2>/dev/null | dd bs=512 skip=1 count=1 status=none | tr -d '\0' || true)
+if [[ ! $pax_global_header =~ comment=([0-9a-f]{40}) ]]; then
+    echo "archive lacks the commit identity written by git archive" >&2
+    exit 2
+fi
+archive_embedded_commit=${BASH_REMATCH[1]}
+if [[ $archive_embedded_commit != "$source_commit" ]]; then
+    echo "archive embeds $archive_embedded_commit, not $source_commit" >&2
+    exit 2
+fi
+if tar -tzf "$private_archive" | rg '(^/|(^|/)\.\.(/|$))'; then
+    echo "source archive contains an unsafe path" >&2
+    exit 2
+fi
+if tar -tvzf "$private_archive" | awk 'substr($1, 1, 1) == "l" { found=1 } END { exit !found }'; then
+    echo "source archive contains a symbolic link" >&2
+    exit 2
+fi
+tar -xzf "$private_archive" -C "$extract_dir"
+
+runner_relative=topics/042-rust-aliasing-provenance/experiment/run_host.sh
+mapfile -t runner_markers < <(
+    rg --files --hidden --no-ignore "$extract_dir" |
+        rg "/${runner_relative}$" |
+        LC_ALL=C sort
+)
+if [[ ${#runner_markers[@]} -ne 1 ]]; then
+    echo "archive must contain exactly one Topic 42 host runner" >&2
+    exit 2
+fi
+source_root=${runner_markers[0]%/"$runner_relative"}
+source_root=$(realpath -- "$source_root")
+topic_dir="$source_root/topics/042-rust-aliasing-provenance"
+experiment_dir="$topic_dir/experiment"
+if ! cmp -- "${BASH_SOURCE[0]}" "$experiment_dir/run_host.sh"; then
+    echo "executed host runner differs from the archive's runner" >&2
+    exit 2
+fi
+
+# Cargo, rustfmt, and Clippy each search the working directory and every ancestor
+# for configuration, and CARGO_HOME isolation does not affect that search. The
+# extracted tree sits below /tmp, so a file above it still reaches these builds:
+# a /tmp/.cargo/config.toml can add build.rustflags or select a wrapper or linker,
+# and a /tmp/rustfmt.toml setting disable_all_formatting turns the formatting gate
+# into a pass. Every directory below OUTPUT_DIR is created by this run, so refuse
+# any such configuration outside the digest-bound source tree.
+# Cargo's and Clippy's lookups are bound elsewhere: the gates run from the root
+# directory, and CLIPPY_CONF_DIR starts Clippy's search there too. rustfmt still
+# resolves rustfmt.toml from the formatted file's directory upward, which no
+# environment variable overrides, so a writable ancestor remains reachable for
+# that gate alone. Scan before and after so a file present for either scan fails
+# the run; a file created and removed entirely between them cannot be seen, which
+# is why the other two lookups are bound rather than scanned.
+scan_ambient_configuration() {
+    local when=$1 ancestor found=""
+    ancestor=$(dirname -- "$source_root")
+    while :; do
+        for ambient_config in .cargo/config.toml .cargo/config rustfmt.toml .rustfmt.toml \
+            clippy.toml .clippy.toml; do
+            if [[ -e $ancestor/$ambient_config ]]; then
+                echo "build configuration outside the source tree ($when): $ancestor/$ambient_config" >&2
+                found=yes
+            fi
+        done
+        [[ $ancestor == / ]] && break
+        ancestor=$(dirname -- "$ancestor")
+    done
+    if [[ -n $found ]]; then
+        return 1
+    fi
+}
+if ! scan_ambient_configuration before; then
+    exit 2
+fi
+
+write_source_manifest() {
+    local destination=$1
+    (
+        cd "$source_root"
+        rg --files --hidden --no-ignore -g '!target/**' -g '!.git/**' -g '!.git' -0 |
+            LC_ALL=C sort -z |
+            xargs -0 sha256sum --
+    ) >"$destination"
+}
+
+run_record() {
+    local destination=$1
+    local command_status
+    shift
+    if {
+        printf 'COMMAND='
+        printf '%q ' "$@"
+        printf '\n'
+        "$@"
+        command_status=$?
+        printf 'EXIT_STATUS=%d\n' "$command_status"
+        ((command_status == 0))
+    } >"$output_dir/$destination" 2>&1; then
+        return 0
+    else
+        echo "required command failed; see $output_dir/$destination" >&2
+        exit 1
+    fi
+}
+
+write_source_manifest "$output_dir/source-manifest-before.sha256"
+
+# The digest this run passes to the validator is derived from the manifest it
+# just wrote, so it cannot by itself show the manifest is complete: an equally
+# incomplete pair would agree with its own digest. Establish completeness against
+# an input this run did not generate by comparing the manifest's path set with the
+# digest-checked archive's own file list. The archive carries no target or .git
+# entries, so the two sets must be identical.
+archive_paths="$work_dir/archive-paths.txt"
+manifest_paths="$work_dir/manifest-paths.txt"
+# The source root is located by searching the extracted tree, so the archive may
+# or may not carry a leading prefix directory. Derive the prefix from where the
+# root actually landed rather than assuming one, and strip it literally.
+if [[ $source_root == "$extract_dir" ]]; then
+    archive_prefix=""
+else
+    archive_prefix="${source_root#"$extract_dir"/}/"
+fi
+if ! tar -tzf "$private_archive" |
+    awk -v prefix="$archive_prefix" '
+        prefix != "" {
+            if (index($0, prefix) != 1) {
+                printf "archive entry outside %s: %s\n", prefix, $0 >"/dev/stderr"
+                bad = 1
+                next
+            }
+            $0 = substr($0, length(prefix) + 1)
+        }
+        $0 != "" && $0 !~ /\/$/ { print }
+        END { exit bad ? 1 : 0 }
+    ' | LC_ALL=C sort >"$archive_paths"; then
+    echo "source archive contains entries outside the source root" >&2
+    exit 2
+fi
+awk '{ sub(/^[0-9a-f]+  /, ""); print }' "$output_dir/source-manifest-before.sha256" |
+    LC_ALL=C sort >"$manifest_paths"
+if ! cmp -s "$archive_paths" "$manifest_paths"; then
+    echo "source manifest does not match the archive's file list" >&2
+    diff -- "$archive_paths" "$manifest_paths" >&2 || true
+    exit 2
+fi
+archive_path_count=$(wc -l <"$archive_paths")
+
+resolved_hostname=$(hostname -f)
+architecture=$(uname -m)
+if [[ $resolved_hostname != "$SSH_RESOLVED_HOSTNAME" ]]; then
+    echo "resolved host mismatch: expected $SSH_RESOLVED_HOSTNAME, got $resolved_hostname" >&2
+    exit 1
+fi
+case $SSH_TARGET_LABEL in
+xxl)
+    [[ $architecture == x86_64 ]] || {
+        echo "xxl must resolve to x86_64; got $architecture" >&2
+        exit 1
+    }
+    ;;
+dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com)
+    [[ $resolved_hostname == "$SSH_TARGET_LABEL" ]] || {
+        echo "fixed Arm label must equal the executing hostname" >&2
+        exit 1
+    }
+    [[ $architecture == aarch64 || $architecture == arm64 ]] || {
+        echo "authorized Arm host must be aarch64/arm64; got $architecture" >&2
+        exit 1
+    }
+    ;;
+*)
+    echo "unexpected SSH target label: $SSH_TARGET_LABEL" >&2
+    exit 2
+    ;;
+esac
+
+# Cargo and Clippy search the working directory and its ancestors for
+# configuration, so the directory the gates run from decides which ancestors are
+# reachable. Running from the extracted tree put the shared, writable /tmp on that
+# path, where a file created between a preflight scan and a gate could not be
+# detected at all. Run from the root directory instead: it is root-owned, holds no
+# .cargo directory, and has no ancestor above it, so no other local user can place
+# configuration on the search path for any part of the run. Every path the gates
+# use is absolute, so nothing depends on the working directory.
+cd /
+
+# Select the archive's pinned toolchain explicitly. Sweeping RUSTUP_TOOLCHAIN
+# removes the caller's environment override, but a directory override recorded in
+# rustup's settings still outranks rust-toolchain.toml for every bare rustc and
+# cargo call, and a custom toolchain reached that way can report the pinned
+# version while being a different compiler. Setting RUSTUP_TOOLCHAIN from the
+# archive's own pin outranks a directory override in turn, and leaves the recorded
+# commands unchanged. Confirm the selection resolves inside this account's rustup
+# toolchain directory for the pinned version.
+toolchain_pin=$(awk -F'"' '/^[[:space:]]*channel[[:space:]]*=/ { print $2; exit }' "$source_root/rust-toolchain.toml")
+if [[ ! $toolchain_pin =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+    echo "archive must pin an exact numeric toolchain; found '${toolchain_pin:-none}'" >&2
+    exit 2
+fi
+export RUSTUP_TOOLCHAIN="$toolchain_pin"
+# Address the pinned toolchain directory for this host's own triple directly
+# rather than asking rustup to resolve it. A prefix match accepts a directory
+# built for another triple, after which rustup would install the real one from a
+# caller-influenced server, so naming the exact directory removes both the wrong
+# match and the download path.
+case $architecture in
+x86_64) expected_triple=x86_64-unknown-linux-gnu ;;
+aarch64 | arm64) expected_triple=aarch64-unknown-linux-gnu ;;
+*)
+    echo "unsupported architecture for toolchain selection: $architecture" >&2
+    exit 2
+    ;;
+esac
+toolchain_dir="$rustup_home/toolchains/$toolchain_pin-$expected_triple"
+toolchain_bin="$toolchain_dir/bin"
+if [[ ! -d $toolchain_dir ]]; then
+    echo "pinned toolchain is not installed at $toolchain_dir" >&2
+    exit 2
+fi
+resolved_rustc_binary="$toolchain_bin/rustc"
+resolved_cargo_binary="$toolchain_bin/cargo"
+resolved_rustdoc_binary="$toolchain_bin/rustdoc"
+resolved_rustfmt_binary="$toolchain_bin/rustfmt"
+for required_tool in "$resolved_rustc_binary" "$resolved_cargo_binary" \
+    "$resolved_rustdoc_binary" "$resolved_rustfmt_binary" \
+    "$toolchain_bin/cargo-fmt" "$toolchain_bin/cargo-clippy" "$toolchain_bin/clippy-driver"; do
+    if [[ ! -f $required_tool || ! -x $required_tool ]]; then
+        echo "pinned toolchain lacks $required_tool" >&2
+        exit 2
+    fi
+done
+resolved_rustc_version=$("$resolved_rustc_binary" -V | awk '{print $2}')
+resolved_cargo_version=$("$resolved_cargo_binary" -V | awk '{print $2}')
+resolved_llvm_version=$("$resolved_rustc_binary" -vV | awk -F': ' '/^LLVM version:/ { print $2; exit }')
+if [[ ! $resolved_llvm_version =~ ^[0-9]+(\.[0-9]+)*$ ]]; then
+    echo "rustc reports no usable LLVM version: '${resolved_llvm_version:-none}'" >&2
+    exit 2
+fi
+if [[ $resolved_rustc_version != "$toolchain_pin" ]]; then
+    echo "rustc $resolved_rustc_version does not match pinned $toolchain_pin" >&2
+    exit 2
+fi
+if [[ $resolved_cargo_version != "$toolchain_pin" ]]; then
+    echo "cargo $resolved_cargo_version does not match pinned $toolchain_pin" >&2
+    exit 2
+fi
+host_triple=$("$resolved_rustc_binary" -vV | awk -F': ' '/^host:/ { print $2; exit }')
+if [[ $host_triple != "$expected_triple" ]]; then
+    echo "rustc host triple $host_triple does not match $expected_triple" >&2
+    exit 2
+fi
+
+# Cargo resolves rustc, rustdoc, and its own subcommands for itself, so invoking a
+# verified Cargo by absolute path does not bind what it launches. Name the
+# compiler tools explicitly, and put the verified toolchain directory ahead of the
+# system directories so cargo-fmt, cargo-clippy, and clippy-driver come from the
+# pinned toolchain rather than an earlier directory. That directory holds only Rust
+# tools, so giving it precedence cannot shadow a system command.
+export RUSTC="$resolved_rustc_binary"
+export RUSTDOC="$resolved_rustdoc_binary"
+export RUSTFMT="$resolved_rustfmt_binary"
+export PATH="$toolchain_bin:$PATH"
+hash -r
+
+# rustc links through a C compiler driver it finds as `cc`, so the retained
+# executable depends on an input the receipts otherwise never name: sweeping CC
+# does not bind or record the driver, and a wrapper installed in one of the
+# trusted directories could alter the linked binary or run commands during the
+# link. Resolve the driver once, require it to be a regular executable inside a
+# trusted system directory, bind Cargo's linker for this target to that absolute
+# path, and record its identity with the rest of the tools.
+linker_binary=$(command -v cc || true)
+if [[ -z $linker_binary ]]; then
+    echo "no C compiler driver named cc on the trusted command path" >&2
+    exit 2
+fi
+linker_binary=$(realpath -- "$linker_binary")
+case $linker_binary in
+/usr/local/bin/* | /usr/bin/* | /bin/* | /usr/local/sbin/* | /usr/sbin/* | /sbin/*) ;;
+*)
+    echo "linker driver $linker_binary is outside the trusted directories" >&2
+    exit 2
+    ;;
+esac
+if [[ ! -f $linker_binary || ! -x $linker_binary ]]; then
+    echo "linker driver $linker_binary is not a regular executable" >&2
+    exit 2
+fi
+linker_sha256=$(sha256sum "$linker_binary" | awk '{print $1}')
+
+# The driver launches its own linker, which it finds by name, so hashing the
+# driver does not bind what actually writes the executable. Resolve that linker,
+# require it to be a regular executable in a trusted directory, record it, and
+# point the driver's subprogram search at its directory so the recorded one is the
+# one used.
+delegated_linker=$("$linker_binary" -print-prog-name=ld)
+if [[ $delegated_linker != /* ]]; then
+    delegated_linker=$(command -v "$delegated_linker" || true)
+fi
+if [[ -z $delegated_linker ]]; then
+    echo "cannot resolve the linker delegated to by $linker_binary" >&2
+    exit 2
+fi
+delegated_linker=$(realpath -- "$delegated_linker")
+case $delegated_linker in
+/usr/local/bin/* | /usr/bin/* | /bin/* | /usr/local/sbin/* | /usr/sbin/* | /sbin/*) ;;
+*)
+    echo "delegated linker $delegated_linker is outside the trusted directories" >&2
+    exit 2
+    ;;
+esac
+if [[ ! -f $delegated_linker || ! -x $delegated_linker ]]; then
+    echo "delegated linker $delegated_linker is not a regular executable" >&2
+    exit 2
+fi
+delegated_linker_sha256=$(sha256sum "$delegated_linker" | awk '{print $1}')
+export COMPILER_PATH="${delegated_linker%/*}"
+host_triple=$("$resolved_rustc_binary" -vV | awk -F': ' '/^host:/ { print $2; exit }')
+if [[ -z $host_triple ]]; then
+    echo "rustc reports no host triple" >&2
+    exit 2
+fi
+linker_variable="CARGO_TARGET_$(printf '%s' "$host_triple" | tr 'a-z-' 'A-Z_')_LINKER"
+export "$linker_variable=$linker_binary"
+if [[ $resolved_rustc_version != "$toolchain_pin" ]]; then
+    echo "rustc $resolved_rustc_version does not match pinned $toolchain_pin" >&2
+    exit 2
+fi
+if [[ $resolved_cargo_version != "$toolchain_pin" ]]; then
+    echo "cargo $resolved_cargo_version does not match pinned $toolchain_pin" >&2
+    exit 2
+fi
+
+{
+    printf 'source_commit=%s\n' "$source_commit"
+    printf 'source_archive_sha256=%s\n' "$archive_digest"
+    printf 'archive_embedded_commit=%s\n' "$archive_embedded_commit"
+    printf 'runner_sha256='; sha256sum "$experiment_dir/run_host.sh" | awk '{print $1}'
+    printf 'toolchain_pin=%s\n' "$toolchain_pin"
+    printf 'toolchain_selection=RUSTUP_TOOLCHAIN=%s\n' "$toolchain_pin"
+    printf 'resolved_rustc_version=%s\n' "$resolved_rustc_version"
+    printf 'resolved_cargo_version=%s\n' "$resolved_cargo_version"
+    printf 'resolved_llvm_version=%s\n' "$resolved_llvm_version"
+    printf 'resolved_rustdoc_binary=%s\n' "$resolved_rustdoc_binary"
+    printf 'resolved_rustfmt_binary=%s\n' "$resolved_rustfmt_binary"
+    printf 'toolchain_bin=%s\n' "$toolchain_bin"
+    printf 'host_triple=%s\n' "$host_triple"
+    printf 'linker_binary=%s\n' "$linker_binary"
+    printf 'linker_sha256=%s\n' "$linker_sha256"
+    printf 'delegated_linker=%s\n' "$delegated_linker"
+    printf 'delegated_linker_sha256=%s\n' "$delegated_linker_sha256"
+    printf 'compiler_path=%s\n' "$COMPILER_PATH"
+    printf 'linker_variable=%s\n' "$linker_variable"
+    printf 'resolved_rustc_binary=%s\n' "$resolved_rustc_binary"
+    printf 'resolved_cargo_binary=%s\n' "$resolved_cargo_binary"
+    printf 'account_home=%s\n' "$account_home"
+    printf 'rustup_home=%s\n' "$rustup_home"
+    printf 'command_path=%s\n' "$PATH"
+    printf 'cargo_home_isolated=yes\n'
+    printf 'clippy_conf_dir=%s\n' "$CLIPPY_CONF_DIR"
+    printf 'gate_working_directory=/\n'
+    printf 'swept_environment_names=%s\n' "${swept_environment_names[*]:-none}"
+} >"$output_dir/source-identity.txt"
+
+cpu_model=$(lscpu | awk -F: '/^Model name:/ { sub(/^[[:space:]]+/, "", $2); print $2; exit }')
+if [[ -z $cpu_model ]]; then
+    cpu_model=$(lscpu | awk -F: '/^Model:/ { sub(/^[[:space:]]+/, "", $2); print $2; exit }')
+fi
+{
+    printf 'date_utc='; date -u +%Y-%m-%dT%H:%M:%SZ
+    printf 'ssh_target_label=%s\n' "$SSH_TARGET_LABEL"
+    printf 'ssh_resolved_hostname=%s\n' "$SSH_RESOLVED_HOSTNAME"
+    printf 'hostname_short='; hostname
+    printf 'hostname_fqdn=%s\n' "$resolved_hostname"
+    printf 'uname_all='; uname -a
+    printf 'architecture=%s\n' "$architecture"
+    printf 'kernel='; uname -r
+    printf 'cpu_model=%s\n' "${cpu_model:-unavailable}"
+    printf 'cpu_count_online='; getconf _NPROCESSORS_ONLN
+    printf 'cpu_count_available='; nproc
+    printf 'build_flags=--release -C opt-level=3 -C target-cpu=native -C panic=abort\n'
+    printf 'linker_binary=%s\n' "$linker_binary"
+    printf 'linker_version='; "$linker_binary" --version | head -1
+    printf 'delegated_linker=%s\n' "$delegated_linker"
+    printf 'delegated_linker_version='; "$delegated_linker" --version | head -1
+    printf 'measurement_kind=deterministic correctness and codegen only\n'
+    printf 'fresh_process_runs=8\n'
+    printf 'timing_reported=no\n'
+    printf 'lscpu_begin\n'
+    lscpu
+    printf 'lscpu_end\n'
+} >"$output_dir/host.txt" 2>&1
+
+run_record proc-cpuinfo.txt sed -n '1,320p' /proc/cpuinfo
+run_record rustc-version.txt "$resolved_rustc_binary" -vV
+run_record cargo-version.txt "$resolved_cargo_binary" -Vv
+run_record python-version.txt python3 -VV
+run_record git-version.txt git --version
+run_record objdump-version.txt objdump --version
+run_record readelf-version.txt readelf --version
+run_record rust-target-cfg.txt "$resolved_rustc_binary" --print cfg
+run_record rust-native-target-cfg.txt "$resolved_rustc_binary" -C target-cpu=native --print cfg
+run_record rust-target-features.txt "$resolved_rustc_binary" --print target-features
+
+# A private baseline gives the extracted archive a Git work tree. Scope the
+# staged whitespace check to this topic and its lockfile entry: older retained
+# disassembly elsewhere in the workspace contains intentional trailing bytes.
+# The requested `git diff --check` gate and final check detect later mutations.
+git init -q "$source_root"
+git -C "$source_root" -c core.attributesFile=/dev/null add --all
+run_record source-whitespace-baseline.txt git -C "$source_root" diff --cached --check -- \
+    Cargo.lock topics/042-rust-aliasing-provenance
+run_record source-baseline-commit.txt git -C "$source_root" \
+    -c user.name=topic42-receipt \
+    -c user.email=topic42-receipt.invalid \
+    -c commit.gpgSign=false \
+    -c core.hooksPath=/dev/null \
+    commit -q -m exact-source-baseline
+
+gates="$output_dir/gates"
+mkdir -m 0700 -- "$gates"
+cargo_target="$work_dir/cargo-target"
+native_target="$work_dir/native-target"
+manifest="$source_root/Cargo.toml"
+package=rust-aliasing-provenance
+
+run_record gates/01-git-diff-check.txt git -C "$source_root" diff --check
+run_record gates/02-cargo-fmt.txt "$resolved_cargo_binary" fmt --manifest-path "$manifest" --all -- --check
+run_record gates/03-cargo-test-lib-examples.txt env CARGO_TARGET_DIR="$cargo_target" \
+    "$resolved_cargo_binary" test --manifest-path "$manifest" --locked --offline --workspace --lib --examples
+run_record gates/04-cargo-test-doc.txt env CARGO_TARGET_DIR="$cargo_target" \
+    "$resolved_cargo_binary" test --manifest-path "$manifest" --locked --offline --workspace --doc
+run_record gates/05-cargo-clippy.txt env CARGO_TARGET_DIR="$cargo_target" \
+    "$resolved_cargo_binary" clippy --manifest-path "$manifest" --locked --offline --workspace --all-targets -- -D warnings
+run_record gates/06-cargo-bench-no-run.txt env CARGO_TARGET_DIR="$cargo_target" \
+    "$resolved_cargo_binary" bench --manifest-path "$manifest" --locked --offline --workspace --no-run
+run_record gates/07-cargo-doc.txt env CARGO_TARGET_DIR="$cargo_target" RUSTDOCFLAGS='-D warnings' \
+    "$resolved_cargo_binary" doc --manifest-path "$manifest" --locked --offline --workspace --no-deps
+
+native_flags='-C opt-level=3 -C target-cpu=native -C panic=abort'
+run_record build-native.txt env CARGO_TARGET_DIR="$native_target" RUSTFLAGS="$native_flags" \
+    "$resolved_cargo_binary" build -vv --manifest-path "$manifest" --locked --offline --release \
+    --package "$package" --example provenance_demo
+
+codegen="$output_dir/codegen"
+mkdir -m 0700 -- "$codegen"
+run_record codegen-command.txt "$resolved_rustc_binary" \
+    --crate-name rust_aliasing_provenance \
+    --edition=2024 \
+    --crate-type=lib \
+    -C opt-level=3 \
+    -C target-cpu=native \
+    -C panic=abort \
+    --emit="llvm-ir=$codegen/topic42.ll,asm=$codegen/topic42.s,obj=$codegen/topic42.o" \
+    "$topic_dir/src/lib.rs"
+
+native_binary="$native_target/release/examples/provenance_demo"
+expected="$experiment_dir/expected.txt"
+run_record run-processes.txt python3 -I -B "$experiment_dir/run_processes.py" \
+    --binary "$native_binary" \
+    --expected "$expected" \
+    --output "$output_dir/processes" \
+    --runs 8
+
+# Inspect the digest-bound executable retained by the process runner. LLVM IR
+# carries the target-independent alias proof. These native files are retained
+# as observations and are not validated by architecture-specific mnemonics.
+retained_binary="$output_dir/processes/provenance-demo"
+run_record codegen/linked.objdump.txt objdump -drwC "$retained_binary"
+run_record codegen/linked.symbols.txt nm -n "$retained_binary"
+run_record codegen/linked.elf.txt readelf -h -n -A "$retained_binary"
+
+if ! scan_ambient_configuration after; then
+    echo "ambient build configuration appeared during the run" >&2
+    exit 2
+fi
+run_record source-clean-after.txt git -C "$source_root" diff --check
+write_source_manifest "$output_dir/source-manifest-after.sha256"
+cmp "$output_dir/source-manifest-before.sha256" "$output_dir/source-manifest-after.sha256"
+source_manifest_digest=$(sha256sum "$output_dir/source-manifest-before.sha256" | awk '{print $1}')
+run_record validate-receipts.txt python3 -I -B "$experiment_dir/validate_receipts.py" \
+    --root "$output_dir" \
+    --expected "$expected" \
+    --source-commit "$source_commit" \
+    --archive-sha256 "$archive_digest" \
+    --expected-hostname "$resolved_hostname" \
+    --expected-rustc-version "$toolchain_pin" \
+    --expected-llvm-version "$resolved_llvm_version" \
+    --expected-source-manifest-sha256 "$source_manifest_digest"
+
+# Only retained evidence remains. The deleted path was created by this run and
+# is constrained to OUTPUT_DIR/.work under a direct /tmp child.
+cd "$output_dir"
+rm -rf -- "$work_dir"
+{
+    printf 'status=PASS\n'
+    printf 'source_commit=%s\n' "$source_commit"
+    printf 'source_archive_sha256=%s\n' "$archive_digest"
+    printf 'source_manifest_sha256=%s\n' "$source_manifest_digest"
+    printf 'source_manifest_paths=%s\n' "$archive_path_count"
+    printf 'ssh_target_label=%s\n' "$SSH_TARGET_LABEL"
+    printf 'ssh_resolved_hostname=%s\n' "$SSH_RESOLVED_HOSTNAME"
+    printf 'architecture=%s\n' "$architecture"
+    printf 'fresh_processes=8\n'
+    printf 'timing_reported=no\n'
+    printf 'llvm_reference_noalias=yes\n'
+    printf 'llvm_reference_source_loads=1\n'
+    printf 'llvm_raw_noalias=no\n'
+    printf 'llvm_raw_source_loads=2\n'
+} >"$output_dir/status.txt"
+(
+    cd "$output_dir"
+    rg --files -g '!bundle-manifest.sha256' -0 |
+        LC_ALL=C sort -z |
+        xargs -0 sha256sum --
+) >"$output_dir/bundle-manifest.sha256"
+
+printf 'experiment_status=PASS output=%s\n' "$output_dir"
