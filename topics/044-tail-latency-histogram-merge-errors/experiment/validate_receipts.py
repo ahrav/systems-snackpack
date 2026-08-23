@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import re
+import shlex
 import tarfile
 from pathlib import Path, PurePosixPath
 
@@ -44,6 +45,73 @@ REQUIRED_FILES = (
 RUNNER_RELATIVE = "topics/044-tail-latency-histogram-merge-errors/experiment/run_host.sh"
 
 EXPECTED_RELATIVE = "topics/044-tail-latency-histogram-merge-errors/experiment/expected.txt"
+
+MERGE_SYMBOL = "topic44_checked_merge_four"
+
+# Sealed-command templates for every run_record receipt whose contents carry
+# the validation claim. Tokens are matched exactly; ("suffix", value) entries
+# match host-dependent absolute paths by their invariant tail.
+COMMAND_TEMPLATES = (
+    (
+        "test.txt",
+        (
+            "cargo",
+            "test",
+            "--manifest-path",
+            ("suffix", "/Cargo.toml"),
+            "--locked",
+            "--offline",
+            "--package",
+            "tail-latency-histogram-merge-errors",
+        ),
+    ),
+    (
+        "build.txt",
+        (
+            "env",
+            "RUSTFLAGS=-C opt-level=3 -C target-cpu=native -C panic=abort",
+            "cargo",
+            "build",
+            "--manifest-path",
+            ("suffix", "/Cargo.toml"),
+            "--locked",
+            "--offline",
+            "--release",
+            "--package",
+            "tail-latency-histogram-merge-errors",
+            "--example",
+            "histogram_merge_probe",
+        ),
+    ),
+    (
+        "codegen/rustc-command.txt",
+        (
+            "rustc",
+            "--crate-name",
+            "histogram_merge_errors",
+            "--edition=2024",
+            "--crate-type=lib",
+            "-C",
+            "opt-level=3",
+            "-C",
+            "target-cpu=native",
+            "-C",
+            "panic=abort",
+            "--emit=asm,llvm-ir,obj",
+            "--out-dir",
+            ("suffix", "/codegen"),
+            ("suffix", "/topics/044-tail-latency-histogram-merge-errors/src/lib.rs"),
+        ),
+    ),
+    (
+        "codegen/library.objdump.txt",
+        ("objdump", "-drwC", ("suffix", "/codegen/library.o")),
+    ),
+    (
+        "codegen/linked.objdump.txt",
+        ("objdump", "-drwC", ("suffix", "/processes/histogram_merge_probe")),
+    ),
+)
 
 
 def digest(path: Path) -> str:
@@ -101,6 +169,28 @@ def manifest_from_archive(path: Path) -> tuple[str, dict[str, str]]:
                 raise ValueError(f"cannot read archived file: {relative!r}")
             entries[relative] = hashlib.sha256(extracted.read()).hexdigest()
     return commit, entries
+
+
+def check_sealed_command(root: Path, receipt: str, template: tuple) -> None:
+    """Require a receipt to seal the exact expected command and a clean exit."""
+
+    lines = (root / receipt).read_text(encoding="utf-8").splitlines()
+    if not lines or not lines[0].startswith("COMMAND="):
+        raise SystemExit(f"{receipt} does not record a sealed command")
+    try:
+        tokens = shlex.split(lines[0][len("COMMAND=") :])
+    except ValueError:
+        raise SystemExit(f"{receipt} records an unparseable command") from None
+    if len(tokens) != len(template):
+        raise SystemExit(f"{receipt} does not record the expected command")
+    for token, spec in zip(tokens, template):
+        if isinstance(spec, tuple):
+            if not token.endswith(spec[1]):
+                raise SystemExit(f"{receipt} does not record the expected command")
+        elif token != spec:
+            raise SystemExit(f"{receipt} does not record the expected command")
+    if lines[-1] != "EXIT_STATUS=0":
+        raise SystemExit(f"{receipt} does not record a successful exit")
 
 
 def parse_identity(path: Path) -> dict[str, str]:
@@ -189,12 +279,16 @@ def main() -> int:
     if "status=PASS" not in (root / "run-processes.txt").read_text(encoding="utf-8"):
         raise SystemExit("process runner did not report PASS")
 
-    for receipt, command_fragment in (("test.txt", "cargo test"), ("build.txt", "cargo build")):
-        lines = (root / receipt).read_text(encoding="utf-8").splitlines()
-        if not lines or not lines[0].startswith("COMMAND=") or command_fragment not in lines[0]:
-            raise SystemExit(f"{receipt} does not record the expected command")
-        if lines[-1] != "EXIT_STATUS=0":
-            raise SystemExit(f"{receipt} does not record a successful exit")
+    for receipt, template in COMMAND_TEMPLATES:
+        check_sealed_command(root, receipt, template)
+    for textual in (
+        "codegen/library.asm",
+        "codegen/library.ll",
+        "codegen/library.objdump.txt",
+        "codegen/linked.objdump.txt",
+    ):
+        if MERGE_SYMBOL not in (root / textual).read_text(encoding="utf-8"):
+            raise SystemExit(f"generated-code receipt lacks the retained merge symbol: {textual}")
 
     codegen_digests = parse_digest_manifest(root / "codegen/sha256sums.txt")
     expected_codegen_paths = {
@@ -206,9 +300,7 @@ def main() -> int:
     for relative, recorded_digest in codegen_digests.items():
         if digest(root / relative) != recorded_digest:
             raise SystemExit(f"generated file differs from its digest: {relative}")
-    if "topic44_checked_merge_four" not in (
-        root / "codegen/linked.symbols.txt"
-    ).read_text(encoding="utf-8"):
+    if MERGE_SYMBOL not in (root / "codegen/linked.symbols.txt").read_text(encoding="utf-8"):
         raise SystemExit("linked binary lacks the retained merge symbol")
 
     print(f"validated_target={arguments.expected_label}")
