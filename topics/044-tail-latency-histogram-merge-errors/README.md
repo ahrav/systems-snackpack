@@ -75,15 +75,22 @@ omission in the data collection path.
 
 [`rounds/01.md`](rounds/01.md) defines the checked-source experiment. It runs
 eight fresh correctness processes on each required Linux host and retains host,
-toolchain, source, output, and generated-code receipts. There is no elapsed-time
-claim: startup would dominate this constant-size example, while the lesson's
-question is whether aggregation preserves meaning.
+toolchain, source, output, and generated-code receipts. The experiment does not
+measure elapsed time; its fixed-size semantic check asks whether aggregation
+preserves meaning.
 
 The retained assembly for `topic44_checked_merge_four` shows how each exact
 compiler and host lowered four checked additions. That output proves neither a
 general instruction-set rule nor a latency advantage. The host notes under
 [`measurements/`](measurements/) separate executed observations, source-backed
 contracts, and inferred explanations.
+
+The first retained run used source commit
+`b8d0c8b06bd29dab090d40f18aa6aa086b5fdf76`. Each required host passed all eight
+fresh processes and the checked-in receipt validator; both retrieved bundles
+passed the validator again. See the
+[cross-host comparison](measurements/2026-08-23-comparison.md) for the exact
+host, toolchain, output, and generated-code boundaries.
 
 ## Selection guide
 

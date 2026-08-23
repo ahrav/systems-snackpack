@@ -1,0 +1,5 @@
+alias=xxl
+resolved_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+resolution_command=ssh -G xxl | rg '^hostname '
+executing_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+observed_architecture=x86_64
