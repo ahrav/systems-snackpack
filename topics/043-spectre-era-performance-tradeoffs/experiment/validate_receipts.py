@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
+import re
 from pathlib import Path
 
 from analyze import analyze_aa, analyze_timing, load_rows
@@ -36,6 +38,31 @@ def read_json(path: Path) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"{path} must contain one JSON object")
     return value
+
+
+def summaries_match(expected: object, actual: object) -> bool:
+    """Structural equality with a float tolerance.
+
+    Last-bit floating-point results of ``fmean``/``stdev`` differ across
+    Python versions, so a retained summary must not be rejected for a 1-ulp
+    disagreement with the recomputation. Everything except non-bool numerics
+    still compares exactly, including dict key sets and list lengths.
+    """
+
+    numeric = (int, float)
+    if isinstance(expected, bool) or isinstance(actual, bool):
+        return expected is actual
+    if isinstance(expected, numeric) and isinstance(actual, numeric):
+        return math.isclose(expected, actual, rel_tol=1e-9, abs_tol=1e-12)
+    if isinstance(expected, dict) and isinstance(actual, dict):
+        return expected.keys() == actual.keys() and all(
+            summaries_match(expected[key], actual[key]) for key in expected
+        )
+    if isinstance(expected, list) and isinstance(actual, list):
+        return len(expected) == len(actual) and all(
+            summaries_match(one, other) for one, other in zip(expected, actual)
+        )
+    return type(expected) is type(actual) and expected == actual
 
 
 def main() -> None:
@@ -70,14 +97,25 @@ def main() -> None:
     if read_json(root / "self-test.json").get("status") != "pass":
         raise SystemExit("self-test did not pass")
 
-    aa_recomputed = analyze_aa(load_rows(root / "aa-processes.jsonl"))
-    timing_recomputed = analyze_timing(load_rows(root / "timing-processes.jsonl"))
-    if read_json(root / "aa-summary.json") != aa_recomputed:
+    aa_rows = load_rows(root / "aa-processes.jsonl")
+    timing_rows = load_rows(root / "timing-processes.jsonl")
+    aa_recomputed = analyze_aa(aa_rows)
+    timing_recomputed = analyze_timing(timing_rows)
+    if not summaries_match(read_json(root / "aa-summary.json"), aa_recomputed):
         raise SystemExit("A/A summary differs from retained process records")
-    if read_json(root / "timing-summary.json") != timing_recomputed:
+    if not summaries_match(read_json(root / "timing-summary.json"), timing_recomputed):
         raise SystemExit("timing summary differs from retained process records")
     if aa_recomputed["status"] != "pass" or timing_recomputed["status"] != "pass":
         raise SystemExit("a fixed experiment gate failed")
+
+    # Each analysis enforces one CPU within its own records; the receipt-level
+    # boundary is one pinned CPU across the whole schedule, matching host.txt.
+    cpus = {row.get("cpu") for row in aa_rows + timing_rows}
+    if len(cpus) != 1:
+        raise SystemExit("process records span more than one CPU")
+    host_cpus = re.findall(r"^cpu=([0-9]+)$", host, flags=re.MULTILINE)
+    if len(host_cpus) != 1 or int(host_cpus[0]) != cpus.pop():
+        raise SystemExit("host receipt CPU differs from the process records")
 
     digests = {}
     for relative in REQUIRED:

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Bytecode caches would land inside the executing tree and make the pre- and
+# post-run source manifests disagree; suppress them for every python child.
+export PYTHONDONTWRITEBYTECODE=1
+
 if [[ $# -lt 1 || $# -gt 3 ]]; then
     printf 'usage: %s OUTPUT_DIR [CPU] [ITERATIONS]\n' "$0" >&2
     exit 2
@@ -95,7 +99,8 @@ cp -- "$source_archive" "$output_dir/source-archive.tar.gz"
 chmod 0400 "$output_dir/source-archive.tar.gz"
 
 source_check=$(mktemp -d)
-trap 'rm -rf -- "$source_check"' EXIT
+run_private=$(mktemp -d)
+trap 'rm -rf -- "$source_check" "$run_private"' EXIT
 tar -xzf "$output_dir/source-archive.tar.gz" -C "$source_check"
 runner_relative=topics/043-spectre-era-performance-tradeoffs/experiment/run_host.sh
 mapfile -t archived_runners < <(rg --files --hidden --no-ignore "$source_check" | \
@@ -166,7 +171,15 @@ fi
     RUSTFLAGS='-C target-cpu=native' cargo build --locked --release \
         --package spectre-era-performance-tradeoffs --bin spectre-tradeoff-probe
 ) >"$output_dir/build.txt" 2>&1
-binary="$repo_root/target/release/spectre-tradeoff-probe"
+# The workspace target directory is mutable: any concurrent cargo invocation
+# can replace the probe between codegen capture and the timing schedule.
+# Measure a read-only run-private copy and hold its digest for a post-schedule
+# recheck so every process is bound to the same bytes.
+install -m 0500 -- "$repo_root/target/release/spectre-tradeoff-probe" \
+    "$run_private/spectre-tradeoff-probe"
+binary="$run_private/spectre-tradeoff-probe"
+probe_sha256=$(sha256sum -- "$binary" | awk '{print $1}')
+printf 'probe_sha256=%s\n' "$probe_sha256" >"$output_dir/probe.sha256"
 
 python3 "$script_dir/self_test.py" --binary "$binary" --cpu "$cpu" \
     --output "$output_dir/self-test.json"
@@ -177,4 +190,20 @@ python3 "$script_dir/run_aa_screen.py" --binary "$binary" --cpu "$cpu" \
 python3 "$script_dir/run_processes.py" --binary "$binary" --cpu "$cpu" \
     --iterations "$iterations" --output "$output_dir/timing-processes.jsonl" \
     --summary "$output_dir/timing-summary.json"
+probe_sha256_final=$(sha256sum -- "$binary" | awk '{print $1}')
+if [[ $probe_sha256_final != "$probe_sha256" ]]; then
+    printf 'probe binary changed during the measurement schedule\n' >&2
+    exit 2
+fi
 python3 "$script_dir/validate_receipts.py" "$output_dir"
+
+# The pre-run manifest comparison only proves the tree matched the archive
+# before measurement began. Re-derive it after every experiment and validation
+# step so receipts cannot silently bind to source modified mid-run.
+write_source_manifest "$repo_root" "$output_dir/source-manifest-post-run.sha256"
+if ! diff -u "$output_dir/source-manifest-archive.sha256" \
+    "$output_dir/source-manifest-post-run.sha256" \
+    >"$output_dir/source-manifest-post-run.diff"; then
+    printf 'executing source changed during the run\n' >&2
+    exit 2
+fi

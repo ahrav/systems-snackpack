@@ -10,7 +10,7 @@ import random
 import statistics
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 
 AA_BLOCKS = 8
 TIMING_BLOCKS = 24
@@ -38,7 +38,7 @@ def fixed_schedule() -> list[tuple[str, str, str]]:
     return schedule
 
 
-def fail(message: str) -> None:
+def fail(message: str) -> NoReturn:
     raise ValueError(message)
 
 
@@ -76,6 +76,8 @@ def result(row: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(value.get(key), int) or value[key] <= 0:
             fail(f"result field {key} must be a positive integer")
     seed = row.get("seed", row.get("workload_seed"))
+    if not isinstance(seed, int) or isinstance(seed, bool):
+        fail("process record lacks an integer workload seed")
     if value.get("mode") != row.get("mode"):
         fail("result mode differs from its process record")
     if value.get("iterations") != row.get("iterations"):
@@ -87,7 +89,10 @@ def result(row: dict[str, Any]) -> dict[str, Any]:
     command = row.get("command")
     if not isinstance(command, list) or len(command) != 10:
         fail("process command changed shape")
-    if command[:2] != ["taskset", "--cpu-list"] or command[2] != str(row.get("cpu")):
+    cpu = row.get("cpu")
+    if not isinstance(cpu, int) or isinstance(cpu, bool) or cpu < 0:
+        fail("process record must pin a nonnegative integer CPU")
+    if command[:2] != ["taskset", "--cpu-list"] or command[2] != str(cpu):
         fail("process command does not pin the recorded CPU")
     expected_flags = [
         "--mode",
@@ -129,6 +134,7 @@ def analyze_aa(rows: list[dict[str, Any]]) -> dict[str, Any]:
     checksums: set[int] = set()
     warmup_checksums: set[int] = set()
     iteration_counts: set[int] = set()
+    cpus: set[int] = set()
     for row in rows:
         block = row.get("block")
         label = row.get("label")
@@ -151,12 +157,15 @@ def analyze_aa(rows: list[dict[str, Any]]) -> dict[str, Any]:
         checksums.add(value["checksum"])
         warmup_checksums.add(value["warmup_checksum"])
         iteration_counts.add(value["iterations"])
+        cpus.add(row["cpu"])
     if len(checksums) != 1:
         fail("A/A checksums differ")
     if len(warmup_checksums) != 1:
         fail("A/A warmup checksums differ")
     if len(iteration_counts) != 1:
         fail("A/A iteration counts differ")
+    if len(cpus) != 1:
+        fail("A/A processes must pin exactly one CPU")
     ratios = []
     for block in range(1, AA_BLOCKS + 1):
         if set(by_block[block]) != {"a", "b"}:
@@ -183,6 +192,7 @@ def analyze_timing(rows: list[dict[str, Any]]) -> dict[str, Any]:
     checksums: set[int] = set()
     warmup_checksums: set[int] = set()
     iteration_counts: set[int] = set()
+    cpus: set[int] = set()
     schedule = fixed_schedule()
     for row in rows:
         block = row.get("block")
@@ -214,6 +224,7 @@ def analyze_timing(rows: list[dict[str, Any]]) -> dict[str, Any]:
         checksums.add(value["checksum"])
         warmup_checksums.add(value["warmup_checksum"])
         iteration_counts.add(value["iterations"])
+        cpus.add(row["cpu"])
         if ordinal == 1:
             seen_permutations[permutation] += 1
     if len(checksums) != 1:
@@ -222,6 +233,8 @@ def analyze_timing(rows: list[dict[str, Any]]) -> dict[str, Any]:
         fail("mode warmup checksums differ")
     if len(iteration_counts) != 1:
         fail("mode iteration counts differ")
+    if len(cpus) != 1:
+        fail("timing processes must pin exactly one CPU")
     if set(seen_permutations) != PERMUTATION_SET or set(seen_permutations.values()) != {4}:
         fail("each of the six permutations must occur four times")
     for mode in MODES:
