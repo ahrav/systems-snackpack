@@ -13,6 +13,7 @@ from pathlib import Path
 
 from analyze import analyze_aa, analyze_timing, load_rows
 from codegen_checks import CodegenError, check_codegen_dir
+from probe_environment import PROBE_ENVIRONMENT
 from self_test import ITERATIONS as SELF_TEST_ITERATIONS
 from self_test import MODES as SELF_TEST_MODES
 from self_test import SEED as SELF_TEST_SEED
@@ -129,9 +130,10 @@ def archive_manifest(archive: Path) -> bytes:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("receipt_dir", type=Path)
+    parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     root = args.receipt_dir.resolve()
-    output = root / "receipt-validation.json"
+    output = args.output.resolve() if args.output else root / "receipt-validation.json"
     if output.exists():
         raise SystemExit("receipt validation output already exists")
     missing = [relative for relative in REQUIRED if not (root / relative).is_file()]
@@ -213,6 +215,7 @@ def main() -> None:
     if (
         self_test.get("iterations") != SELF_TEST_ITERATIONS
         or self_test.get("seed") != SELF_TEST_SEED
+        or self_test.get("environment") != PROBE_ENVIRONMENT
     ):
         raise SystemExit("self-test inputs differ from the fixed protocol")
     records = self_test.get("records")

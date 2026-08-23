@@ -12,6 +12,8 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, NoReturn
 
+from probe_environment import PROBE_ENVIRONMENT
+
 AA_BLOCKS = 8
 TIMING_BLOCKS = 24
 MODES = ("plain", "mask", "barrier")
@@ -118,6 +120,8 @@ def result(row: dict[str, Any], seed_field: str) -> dict[str, Any]:
         fail("process record must pin a nonnegative integer CPU")
     if command[:2] != ["taskset", "--cpu-list"] or command[2] != str(cpu):
         fail("process command does not pin the recorded CPU")
+    if row.get("environment") != PROBE_ENVIRONMENT:
+        fail("process environment differs from the fixed protocol")
     expected_flags = [
         "--mode",
         str(row.get("mode")),

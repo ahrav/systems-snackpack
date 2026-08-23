@@ -100,7 +100,8 @@ chmod 0400 "$output_dir/source-archive.tar.gz"
 
 source_check=$(mktemp -d)
 run_private=$(mktemp -d)
-trap 'rm -rf -- "$source_check" "$run_private"' EXIT
+validation_tmp="$output_dir/.receipt-validation.json.tmp"
+trap 'rm -rf -- "$source_check" "$run_private"; rm -f -- "$validation_tmp"' EXIT
 tar -xzf "$output_dir/source-archive.tar.gz" -C "$source_check"
 runner_relative=topics/043-spectre-era-performance-tradeoffs/experiment/run_host.sh
 mapfile -t archived_runners < <(rg --files --hidden --no-ignore "$source_check" | \
@@ -210,7 +211,7 @@ if ! diff -u "$output_dir/source-manifest-archive.sha256" \
     printf 'executing source changed during the run\n' >&2
     exit 2
 fi
-python3 "$script_dir/validate_receipts.py" "$output_dir"
+python3 "$script_dir/validate_receipts.py" "$output_dir" --output "$validation_tmp"
 
 # Validation imports code from the executing tree, so prove that tree still
 # matches the archive after the validator exits. A drifted run has no valid
@@ -218,7 +219,7 @@ python3 "$script_dir/validate_receipts.py" "$output_dir"
 if ! write_source_manifest "$repo_root" "$run_private/source-manifest-final.sha256" || \
     ! cmp -s "$output_dir/source-manifest-archive.sha256" \
         "$run_private/source-manifest-final.sha256"; then
-    rm -f -- "$output_dir/receipt-validation.json"
     printf 'executing source changed during receipt validation\n' >&2
     exit 2
 fi
+mv -- "$validation_tmp" "$output_dir/receipt-validation.json"

@@ -11,6 +11,8 @@ import sys
 import time
 from pathlib import Path
 
+from probe_environment import PROBE_ENVIRONMENT
+
 BLOCKS = 8
 DEFAULT_ITERATIONS = 20_000_000
 SEED = 0x243F_6A88_85A3_08D3
@@ -42,7 +44,14 @@ def run_one(binary: Path, cpu: int, iterations: int, block: int, ordinal: int, l
     ]
     started_ns = time.time_ns()
     try:
-        completed = subprocess.run(command, capture_output=True, text=True, timeout=120, check=False)
+        completed = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=120,
+            check=False,
+            env=PROBE_ENVIRONMENT,
+        )
         exit_code = completed.returncode
         stdout = completed.stdout
         stderr = completed.stderr
@@ -69,6 +78,7 @@ def run_one(binary: Path, cpu: int, iterations: int, block: int, ordinal: int, l
         "iterations": iterations,
         "cpu": cpu,
         "command": command,
+        "environment": PROBE_ENVIRONMENT,
         "started_unix_ns": started_ns,
         "wall_ns": time.time_ns() - started_ns,
         "exit_code": exit_code,

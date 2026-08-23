@@ -8,6 +8,8 @@ import json
 import subprocess
 from pathlib import Path
 
+from probe_environment import PROBE_ENVIRONMENT
+
 MODES = ("plain", "mask", "barrier")
 ITERATIONS = 200_000
 SEED = 0x243F_6A88_85A3_08D3
@@ -35,7 +37,14 @@ def main() -> None:
             "--seed",
             hex(SEED),
         ]
-        completed = subprocess.run(command, capture_output=True, text=True, timeout=30, check=False)
+        completed = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+            env=PROBE_ENVIRONMENT,
+        )
         if completed.returncode != 0:
             raise SystemExit(f"{mode} self-test failed: {completed.stderr}")
         lines = [line for line in completed.stdout.splitlines() if line.strip()]
@@ -54,6 +63,7 @@ def main() -> None:
         "status": "pass",
         "iterations": ITERATIONS,
         "seed": SEED,
+        "environment": PROBE_ENVIRONMENT,
         "records": records,
         "security_claim": "none",
     }

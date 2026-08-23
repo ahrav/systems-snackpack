@@ -39,6 +39,10 @@ JSON Lines record, one JSON object per line, before starting the next process.
 Invalid output, nonzero exits, and timeouts remain in the raw log and fail
 analysis after the fixed schedule ends.
 
+Every probe receives only `LANG=C`, `LC_ALL=C`, `PATH=os.defpath`, and `TZ=UTC`.
+The self-test and process rows record this allowlist, and offline validation
+rejects different environments.
+
 ```bash
 SOURCE_COMMIT=<40-hex-commit> \
 SOURCE_ARCHIVE_SHA256=<64-hex-archive-digest> \

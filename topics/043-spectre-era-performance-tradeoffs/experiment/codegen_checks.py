@@ -81,18 +81,16 @@ def require_branch_target(
 def check_x86(mask: list[Instruction], barrier: list[Instruction]) -> str:
     mask_file = "topic43_mask_lookup.asm"
     compare = first_mnemonic(mask, ("cmp", "cmpq", "cmpl", "cmpw"), mask_file)
-    compare_match = operand_match(
-        mask, compare, (mask[compare][1],), r"%[a-z0-9]+,\s*(%[a-z0-9]+)", mask_file
-    )
-    index = re.escape(compare_match.group(1))
-    mask_match = operand_match(
+    operand_match(mask, compare, (mask[compare][1],), r"%rsi,\s*%rdx", mask_file)
+    index = re.escape("%rdx")
+    operand_match(
         mask,
         compare + 1,
         ("sbb", "sbbq", "sbbl", "sbbw"),
-        r"(%[a-z0-9]+),\s*\1",
+        r"%rax,\s*%rax",
         mask_file,
     )
-    mask_register = re.escape(mask_match.group(1))
+    mask_register = re.escape("%rax")
     operand_match(
         mask,
         compare + 2,
@@ -100,11 +98,9 @@ def check_x86(mask: list[Instruction], barrier: list[Instruction]) -> str:
         rf"{mask_register},\s*{index}",
         mask_file,
     )
-    load = compare + 3
-    while load < len(mask) and not re.fullmatch(
-        rf"\([^,]+,\s*{index},[^)]*\),\s*{mask_register}", mask[load][2]
-    ):
-        load += 1
+    operand_match(mask, compare + 3, ("cmp", "cmpq"), rf"%rsi,\s*{index}", mask_file)
+    operand_match(mask, compare + 4, ("jae", "jnb", "jnc"), r"[0-9a-f]+.*", mask_file)
+    load = compare + 5
     operand_match(
         mask,
         load,
@@ -117,14 +113,8 @@ def check_x86(mask: list[Instruction], barrier: list[Instruction]) -> str:
     compare = first_mnemonic(barrier, ("cmp", "cmpq", "cmpl", "cmpw"), barrier_file)
     if compare != 0 or len(barrier) != 7:
         raise CodegenError(f"unexpected instruction graph in {barrier_file}")
-    compare_match = operand_match(
-        barrier,
-        compare,
-        (barrier[compare][1],),
-        r"%[a-z0-9]+,\s*(%[a-z0-9]+)",
-        barrier_file,
-    )
-    index = re.escape(compare_match.group(1))
+    operand_match(barrier, compare, (barrier[compare][1],), r"%rsi,\s*%rdx", barrier_file)
+    index = re.escape("%rdx")
     operand_match(barrier, compare + 1, ("jae", "jnb", "jnc"), r"[0-9a-f]+.*", barrier_file)
     operand_match(barrier, compare + 2, ("lfence",), r"", barrier_file)
     operand_match(
@@ -150,44 +140,43 @@ def check_x86(mask: list[Instruction], barrier: list[Instruction]) -> str:
 def check_arm(mask: list[Instruction], barrier: list[Instruction]) -> str:
     mask_file = "topic43_mask_lookup.asm"
     compare = first_mnemonic(mask, ("cmp",), mask_file)
-    compare_match = operand_match(mask, compare, ("cmp",), r"(x[0-9]+),\s*x[0-9]+", mask_file)
-    index = re.escape(compare_match.group(1))
+    operand_match(mask, compare, ("cmp",), r"x2,\s*x1", mask_file)
+    index = re.escape("x2")
     if compare + 1 >= len(mask) or mask[compare + 1][1] not in ("ngc", "sbc"):
         raise CodegenError(f"expected adjacent ngc/sbc instruction in {mask_file}")
     if mask[compare + 1][1] == "ngc":
-        mask_match = operand_match(mask, compare + 1, ("ngc",), r"(x[0-9]+),\s*xzr", mask_file)
+        operand_match(mask, compare + 1, ("ngc",), r"x9,\s*xzr", mask_file)
     else:
-        mask_match = operand_match(
-            mask, compare + 1, ("sbc",), r"(x[0-9]+),\s*xzr,\s*xzr", mask_file
-        )
-    mask_register = re.escape(mask_match.group(1))
+        operand_match(mask, compare + 1, ("sbc",), r"x9,\s*xzr,\s*xzr", mask_file)
+    mask_register = re.escape("x9")
     barrier_mnemonic = mask[compare + 2][1] if compare + 2 < len(mask) else ""
     barrier_operands = r"" if barrier_mnemonic == "csdb" else r"#0x14"
     operand_match(
         mask, compare + 2, ("csdb", "hint"), barrier_operands, mask_file
     )
-    safe_match = operand_match(
+    operand_match(
         mask,
         compare + 3,
         ("and",),
-        rf"(x[0-9]+),\s*(?:{mask_register},\s*{index}|{index},\s*{mask_register})",
+        rf"x8,\s*(?:{mask_register},\s*{index}|{index},\s*{mask_register})",
         mask_file,
     )
-    safe_index = re.escape(safe_match.group(1))
-    load = first_mnemonic(mask[compare + 4 :], ("ldr",), mask_file) + compare + 4
-    load_match = operand_match(
+    safe_index = re.escape("x8")
+    operand_match(mask, compare + 4, ("cmp",), rf"{safe_index},\s*x1", mask_file)
+    operand_match(mask, compare + 5, ("b.cs", "b.hs"), r"[0-9a-f]+.*", mask_file)
+    load = compare + 6
+    operand_match(
         mask,
         load,
         ("ldr",),
-        rf"(x[0-9]+),\s*\[[^],]+,\s*{safe_index}(?:,[^]]*)?\]",
+        rf"x8,\s*\[x0,\s*{safe_index}(?:,[^]]*)?\]",
         mask_file,
     )
-    loaded_word = re.escape(load_match.group(1))
     operand_match(
         mask,
         load + 1,
         ("and",),
-        rf"x[0-9]+,\s*(?:{loaded_word},\s*{mask_register}|{mask_register},\s*{loaded_word})",
+        rf"x0,\s*x8,\s*{mask_register}",
         mask_file,
     )
 
@@ -195,10 +184,8 @@ def check_arm(mask: list[Instruction], barrier: list[Instruction]) -> str:
     compare = first_mnemonic(barrier, ("cmp",), barrier_file)
     if compare != 0 or len(barrier) != 8:
         raise CodegenError(f"unexpected instruction graph in {barrier_file}")
-    compare_match = operand_match(
-        barrier, compare, ("cmp",), r"(x[0-9]+),\s*x[0-9]+", barrier_file
-    )
-    index = re.escape(compare_match.group(1))
+    operand_match(barrier, compare, ("cmp",), r"x2,\s*x1", barrier_file)
+    index = re.escape("x2")
     operand_match(barrier, compare + 1, ("b.cs", "b.hs"), r"[0-9a-f]+.*", barrier_file)
     operand_match(barrier, compare + 2, ("dsb",), r"nsh", barrier_file)
     operand_match(barrier, compare + 3, ("isb",), r"", barrier_file)
