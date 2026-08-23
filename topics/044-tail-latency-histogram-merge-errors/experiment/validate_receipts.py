@@ -189,6 +189,13 @@ def main() -> int:
     if "status=PASS" not in (root / "run-processes.txt").read_text(encoding="utf-8"):
         raise SystemExit("process runner did not report PASS")
 
+    for receipt, command_fragment in (("test.txt", "cargo test"), ("build.txt", "cargo build")):
+        lines = (root / receipt).read_text(encoding="utf-8").splitlines()
+        if not lines or not lines[0].startswith("COMMAND=") or command_fragment not in lines[0]:
+            raise SystemExit(f"{receipt} does not record the expected command")
+        if lines[-1] != "EXIT_STATUS=0":
+            raise SystemExit(f"{receipt} does not record a successful exit")
+
     codegen_digests = parse_digest_manifest(root / "codegen/sha256sums.txt")
     expected_codegen_paths = {
         "processes/histogram_merge_probe",

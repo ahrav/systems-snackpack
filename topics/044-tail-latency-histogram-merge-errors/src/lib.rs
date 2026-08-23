@@ -126,10 +126,16 @@ impl IntervalHistogram {
     ///
     /// - [`HistogramError::ObservationOutOfRange`] if `value_us` exceeds the
     ///   schema's final inclusive bound.
-    /// - [`HistogramError::ArithmeticOverflow`] if the selected bucket already
-    ///   contains `u64::MAX` observations.
+    /// - [`HistogramError::ArithmeticOverflow`] if the histogram already holds
+    ///   `u64::MAX` total observations.
     pub fn record(&mut self, value_us: u64) -> Result<(), HistogramError> {
         let index = self.schema.bucket_index(value_us)?;
+        // Construction guarantees the counts sum to a valid `u64`; checking
+        // the total before mutating preserves that invariant across records,
+        // so a bucket below `u64::MAX` cannot push the total past it.
+        if self.total_count()? == u64::MAX {
+            return Err(HistogramError::ArithmeticOverflow);
+        }
         self.counts[index] = self.counts[index]
             .checked_add(1)
             .ok_or(HistogramError::ArithmeticOverflow)?;
@@ -169,7 +175,7 @@ impl IntervalHistogram {
     ///
     /// - [`HistogramError::SchemaMismatch`] if the bucket schemas differ.
     /// - [`HistogramError::ArithmeticOverflow`] if any corresponding count sum
-    ///   cannot fit in `u64`.
+    ///   or the merged total count cannot fit in `u64`.
     pub fn merge_compatible(&mut self, other: &Self) -> Result<(), HistogramError> {
         if self.schema != other.schema {
             return Err(HistogramError::SchemaMismatch);
@@ -183,6 +189,12 @@ impl IntervalHistogram {
                     .ok_or(HistogramError::ArithmeticOverflow)
             })
             .collect::<Result<Vec<_>, _>>()?;
+        // Per-bucket sums can each fit while their aggregate does not; the
+        // total must stay a valid `u64` before the merge becomes observable.
+        merged.iter().try_fold(0_u64, |sum, count| {
+            sum.checked_add(*count)
+                .ok_or(HistogramError::ArithmeticOverflow)
+        })?;
         self.counts = merged;
         Ok(())
     }
@@ -315,6 +327,13 @@ impl CumulativeHistogram {
     }
 
     /// Subtracts an older snapshot, rejecting reset or schema-change windows.
+    ///
+    /// Reset detection is limited to observed decreases: a producer that
+    /// resets and then re-accumulates every bucket to at least its previous
+    /// value before the next collection is indistinguishable from ordinary
+    /// growth and yields a silently short window. Producers that can reset
+    /// must expose a restart identity (an epoch or start timestamp) alongside
+    /// their counters if such windows have to be rejected.
     ///
     /// # Errors
     ///
@@ -454,6 +473,28 @@ mod tests {
         assert_eq!(
             left.merge_compatible(&right),
             Err(HistogramError::SchemaMismatch)
+        );
+        assert_eq!(left, original);
+    }
+
+    #[test]
+    fn record_rejects_observations_that_overflow_the_total_count() {
+        let mut histogram = IntervalHistogram::from_counts(schema(), vec![u64::MAX - 1, 1, 0, 0])
+            .expect("valid counts");
+        assert_eq!(histogram.record(2), Err(HistogramError::ArithmeticOverflow));
+        assert_eq!(histogram.counts(), &[u64::MAX - 1, 1, 0, 0]);
+    }
+
+    #[test]
+    fn merge_rejects_aggregate_total_overflow_without_mutation() {
+        let mut left = IntervalHistogram::from_counts(schema(), vec![u64::MAX, 0, 0, 0])
+            .expect("valid counts");
+        let original = left.clone();
+        let right =
+            IntervalHistogram::from_counts(schema(), vec![0, 1, 0, 0]).expect("valid counts");
+        assert_eq!(
+            left.merge_compatible(&right),
+            Err(HistogramError::ArithmeticOverflow)
         );
         assert_eq!(left, original);
     }

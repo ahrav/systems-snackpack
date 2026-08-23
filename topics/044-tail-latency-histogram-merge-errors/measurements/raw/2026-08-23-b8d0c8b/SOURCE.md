@@ -19,6 +19,11 @@ the full source commit in the archive's global header. On each host, the
 validator recomputed every archived file digest and matched it to the source
 manifests recorded before and after execution.
 
-The evidence-only change that adds these measurement notes and sealed bundles
-does not change the Rust source, expected output, runner, or validator that this
-archive contains.
+The checked-in tree has since diverged from this sealed archive: review fixes
+changed `src/lib.rs` (large-count quantile arithmetic, cumulative-counter
+validation, and total-count enforcement on record and merge),
+`experiment/run_processes.py`, and `experiment/validate_receipts.py`.
+`experiment/expected.txt` and the runner are unchanged, and the current
+release probe still prints byte-identical output. These receipts remain
+evidence for the archived `b8d0c8b` revision only; the newer code paths are
+covered by the package's unit tests, not by these bundles.
