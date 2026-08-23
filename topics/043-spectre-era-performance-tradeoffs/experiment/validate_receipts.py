@@ -92,8 +92,19 @@ def main() -> None:
         raise SystemExit("retained source archive differs from the verified digest")
     if (root / "source-manifest.diff").read_bytes():
         raise SystemExit("source manifest comparison is not empty")
-    if "status=pass" not in (root / "codegen/codegen-check.txt").read_text(encoding="utf-8"):
+    # The retained diff is itself a receipt that can be replaced; the identity
+    # claim must re-derive from the two manifests it summarizes.
+    if (root / "source-manifest-archive.sha256").read_bytes() != (
+        root / "source-manifest-executing.sha256"
+    ).read_bytes():
+        raise SystemExit("retained source manifests disagree")
+    codegen_text = (root / "codegen/codegen-check.txt").read_text(encoding="utf-8")
+    if "status=pass" not in codegen_text:
         raise SystemExit("codegen inspection did not pass")
+    host_architectures = re.findall(r"^architecture=(\S+)$", host, flags=re.MULTILINE)
+    codegen_architectures = re.findall(r"^architecture=(\S+)$", codegen_text, flags=re.MULTILINE)
+    if len(host_architectures) != 1 or host_architectures != codegen_architectures:
+        raise SystemExit("codegen receipt architecture differs from the host receipt")
     if read_json(root / "self-test.json").get("status") != "pass":
         raise SystemExit("self-test did not pass")
 

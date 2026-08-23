@@ -65,6 +65,21 @@ def result(row: dict[str, Any]) -> dict[str, Any]:
     value = row.get("result")
     if not isinstance(value, dict):
         fail("valid record lacks a result object")
+    # The retained stdout is the process's original output; the parsed result
+    # must re-derive from it so an edited result field cannot contradict the
+    # raw evidence the record carries.
+    stdout = row.get("stdout")
+    if not isinstance(stdout, str):
+        fail("process record lacks retained stdout")
+    stdout_lines = [line for line in stdout.splitlines() if line.strip()]
+    if len(stdout_lines) != 1:
+        fail("retained stdout must contain exactly one result line")
+    try:
+        reparsed = json.loads(stdout_lines[0])
+    except json.JSONDecodeError:
+        fail("retained stdout is not valid JSON")
+    if reparsed != value:
+        fail("result differs from the retained process stdout")
     for key in (
         "iterations",
         "warmup_iterations",
