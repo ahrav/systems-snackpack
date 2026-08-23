@@ -19,6 +19,7 @@ SYMBOLS = (
     "topic43_barrier_lookup",
     "topic43_speculation_barrier",
 )
+ARM_SCRATCH_REGISTERS = {f"x{register}" for register in range(8, 18)}
 
 
 class CodegenError(ValueError):
@@ -36,9 +37,13 @@ def instruction_stream(asm: Path, symbol: str) -> list[Instruction]:
         raise CodegenError(f"{asm.name} does not disassemble {symbol}")
     code = []
     for line in text.splitlines():
-        match = re.match(r"^\s*([0-9a-f]+):\s+([a-z][a-z0-9.]*)\s*(.*?)\s*$", line)
+        match = re.match(
+            r"^\s*([0-9a-f]+):\s+([.]?[a-z][a-z0-9.]*)\s*(.*?)\s*$", line
+        )
         if match:
             code.append((int(match.group(1), 16), match.group(2), match.group(3)))
+        elif re.match(r"^\s*[0-9a-f]+:", line):
+            raise CodegenError(f"unparsed instruction in {asm.name}: {line.strip()}")
     if not code:
         raise CodegenError(f"{asm.name} contains no instructions")
     return code
@@ -70,7 +75,7 @@ def require_branch_target(
 ) -> None:
     """Require a branch to target one exact instruction in its symbol."""
 
-    match = re.match(r"([0-9a-f]+)\b", code[branch][2])
+    match = re.search(r"(?:^|,\s*)([0-9a-f]+)\b", code[branch][2])
     if not match:
         raise CodegenError(f"cannot parse branch target in {file}: {code[branch][2]}")
     target = int(match.group(1), 16)
@@ -78,9 +83,32 @@ def require_branch_target(
         raise CodegenError(f"unexpected out-of-bounds branch target in {file}")
 
 
-def check_x86(mask: list[Instruction], barrier: list[Instruction]) -> str:
+def check_x86(
+    plain: list[Instruction], mask: list[Instruction], barrier: list[Instruction]
+) -> str:
+    plain_file = "topic43_plain_lookup.asm"
+    if len(plain) != 6:
+        raise CodegenError(f"unexpected instruction graph in {plain_file}")
+    operand_match(plain, 0, ("cmp", "cmpq"), r"%rsi,\s*%rdx", plain_file)
+    operand_match(plain, 1, ("jae", "jnb", "jnc"), r"[0-9a-f]+.*", plain_file)
+    operand_match(
+        plain,
+        2,
+        ("mov", "movq"),
+        r"\(%rdi,\s*%rdx,\s*8\),\s*%rax",
+        plain_file,
+    )
+    operand_match(plain, 3, ("ret", "retq"), r"", plain_file)
+    operand_match(plain, 4, ("xor", "xorl"), r"%eax,\s*%eax", plain_file)
+    operand_match(plain, 5, ("ret", "retq"), r"", plain_file)
+    require_branch_target(plain, 1, 4, plain_file)
+
     mask_file = "topic43_mask_lookup.asm"
     compare = first_mnemonic(mask, ("cmp", "cmpq", "cmpl", "cmpw"), mask_file)
+    if compare != 2 or len(mask) != 9:
+        raise CodegenError(f"unexpected instruction graph in {mask_file}")
+    operand_match(mask, 0, ("test", "testq"), r"%rsi,\s*%rsi", mask_file)
+    operand_match(mask, 1, ("je", "jz"), r"[0-9a-f]+.*", mask_file)
     operand_match(mask, compare, (mask[compare][1],), r"%rsi,\s*%rdx", mask_file)
     index = re.escape("%rdx")
     operand_match(
@@ -98,9 +126,7 @@ def check_x86(mask: list[Instruction], barrier: list[Instruction]) -> str:
         rf"{mask_register},\s*{index}",
         mask_file,
     )
-    operand_match(mask, compare + 3, ("cmp", "cmpq"), rf"%rsi,\s*{index}", mask_file)
-    operand_match(mask, compare + 4, ("jae", "jnb", "jnc"), r"[0-9a-f]+.*", mask_file)
-    load = compare + 5
+    load = compare + 3
     operand_match(
         mask,
         load,
@@ -108,6 +134,10 @@ def check_x86(mask: list[Instruction], barrier: list[Instruction]) -> str:
         rf"\([^,]+,\s*{index},[^)]*\),\s*{mask_register}",
         mask_file,
     )
+    operand_match(mask, load + 1, ("ret", "retq"), r"", mask_file)
+    operand_match(mask, load + 2, ("xor", "xorl"), r"%eax,\s*%eax", mask_file)
+    operand_match(mask, load + 3, ("ret", "retq"), r"", mask_file)
+    require_branch_target(mask, 1, load + 2, mask_file)
 
     barrier_file = "topic43_barrier_lookup.asm"
     compare = first_mnemonic(barrier, ("cmp", "cmpq", "cmpl", "cmpw"), barrier_file)
@@ -137,48 +167,80 @@ def check_x86(mask: list[Instruction], barrier: list[Instruction]) -> str:
     return "cmp<conditional-branch<lfence<load"
 
 
-def check_arm(mask: list[Instruction], barrier: list[Instruction]) -> str:
+def check_arm(
+    plain: list[Instruction], mask: list[Instruction], barrier: list[Instruction]
+) -> str:
+    plain_file = "topic43_plain_lookup.asm"
+    if len(plain) != 6:
+        raise CodegenError(f"unexpected instruction graph in {plain_file}")
+    operand_match(plain, 0, ("cmp",), r"x2,\s*x1", plain_file)
+    operand_match(plain, 1, ("b.cs", "b.hs"), r"[0-9a-f]+.*", plain_file)
+    operand_match(plain, 2, ("ldr",), r"x0,\s*\[x0,\s*x2,\s*lsl #3\]", plain_file)
+    operand_match(plain, 3, ("ret",), r"", plain_file)
+    operand_match(plain, 4, ("mov",), r"x0,\s*xzr", plain_file)
+    operand_match(plain, 5, ("ret",), r"", plain_file)
+    require_branch_target(plain, 1, 4, plain_file)
+
     mask_file = "topic43_mask_lookup.asm"
     compare = first_mnemonic(mask, ("cmp",), mask_file)
+    if compare != 1 or len(mask) != 10:
+        raise CodegenError(f"unexpected instruction graph in {mask_file}")
+    operand_match(mask, 0, ("cbz",), r"x1,\s*[0-9a-f]+.*", mask_file)
     operand_match(mask, compare, ("cmp",), r"x2,\s*x1", mask_file)
     index = re.escape("x2")
     if compare + 1 >= len(mask) or mask[compare + 1][1] not in ("ngc", "sbc"):
         raise CodegenError(f"expected adjacent ngc/sbc instruction in {mask_file}")
     if mask[compare + 1][1] == "ngc":
-        operand_match(mask, compare + 1, ("ngc",), r"x9,\s*xzr", mask_file)
+        mask_match = operand_match(
+            mask, compare + 1, ("ngc",), r"(x[0-9]+),\s*xzr", mask_file
+        )
     else:
-        operand_match(mask, compare + 1, ("sbc",), r"x9,\s*xzr,\s*xzr", mask_file)
-    mask_register = re.escape("x9")
+        mask_match = operand_match(
+            mask, compare + 1, ("sbc",), r"(x[0-9]+),\s*xzr,\s*xzr", mask_file
+        )
+    mask_name = mask_match.group(1)
+    if mask_name not in ARM_SCRATCH_REGISTERS:
+        raise CodegenError(f"mask register is not caller-saved scratch state in {mask_file}")
+    mask_register = re.escape(mask_name)
     barrier_mnemonic = mask[compare + 2][1] if compare + 2 < len(mask) else ""
     barrier_operands = r"" if barrier_mnemonic == "csdb" else r"#0x14"
     operand_match(
         mask, compare + 2, ("csdb", "hint"), barrier_operands, mask_file
     )
-    operand_match(
+    safe_match = operand_match(
         mask,
         compare + 3,
         ("and",),
-        rf"x8,\s*(?:{mask_register},\s*{index}|{index},\s*{mask_register})",
+        rf"(x[0-9]+),\s*(?:{mask_register},\s*{index}|{index},\s*{mask_register})",
         mask_file,
     )
-    safe_index = re.escape("x8")
-    operand_match(mask, compare + 4, ("cmp",), rf"{safe_index},\s*x1", mask_file)
-    operand_match(mask, compare + 5, ("b.cs", "b.hs"), r"[0-9a-f]+.*", mask_file)
-    load = compare + 6
-    operand_match(
+    safe_name = safe_match.group(1)
+    if safe_name not in ARM_SCRATCH_REGISTERS or safe_name == mask_name:
+        raise CodegenError(f"safe-index register aliases live state in {mask_file}")
+    safe_index = re.escape(safe_name)
+    load = compare + 4
+    load_match = operand_match(
         mask,
         load,
         ("ldr",),
-        rf"x8,\s*\[x0,\s*{safe_index}(?:,[^]]*)?\]",
+        rf"(x[0-9]+),\s*\[x0,\s*{safe_index}(?:,[^]]*)?\]",
         mask_file,
     )
+    loaded_name = load_match.group(1)
+    if loaded_name not in ARM_SCRATCH_REGISTERS or loaded_name == mask_name:
+        raise CodegenError(f"load destination clobbers the mask in {mask_file}")
+    loaded_word = re.escape(loaded_name)
     operand_match(
         mask,
         load + 1,
         ("and",),
-        rf"x0,\s*x8,\s*{mask_register}",
+        rf"x0,\s*{loaded_word},\s*{mask_register}",
         mask_file,
     )
+    operand_match(mask, load + 2, ("ret",), r"", mask_file)
+    operand_match(mask, load + 3, ("mov",), r"x0,\s*xzr", mask_file)
+    operand_match(mask, load + 4, ("ret",), r"", mask_file)
+    require_branch_target(mask, 0, load + 3, mask_file)
 
     barrier_file = "topic43_barrier_lookup.asm"
     compare = first_mnemonic(barrier, ("cmp",), barrier_file)
@@ -210,9 +272,17 @@ def check_codegen_dir(codegen_dir: Path, architecture: str) -> str:
         symbol: instruction_stream(codegen_dir / f"{symbol}.asm", symbol) for symbol in SYMBOLS
     }
     if architecture == "x86_64":
-        return check_x86(streams["topic43_mask_lookup"], streams["topic43_barrier_lookup"])
+        return check_x86(
+            streams["topic43_plain_lookup"],
+            streams["topic43_mask_lookup"],
+            streams["topic43_barrier_lookup"],
+        )
     if architecture in ("aarch64", "arm64"):
-        return check_arm(streams["topic43_mask_lookup"], streams["topic43_barrier_lookup"])
+        return check_arm(
+            streams["topic43_plain_lookup"],
+            streams["topic43_mask_lookup"],
+            streams["topic43_barrier_lookup"],
+        )
     raise CodegenError(f"unsupported Linux architecture for Topic 43: {architecture}")
 
 

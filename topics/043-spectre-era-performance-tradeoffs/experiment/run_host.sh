@@ -112,6 +112,7 @@ if [[ ${#archived_runners[@]} -ne 1 ]]; then
 fi
 archive_repo_root=${archived_runners[0]%/"$runner_relative"}
 archive_repo_root=$(realpath -- "$archive_repo_root")
+archive_script_dir=$(dirname -- "$archive_repo_root/$runner_relative")
 
 write_source_manifest() {
     local root=$1
@@ -165,14 +166,16 @@ fi
 # succeeded, so offline validation can distinguish passing evidence from
 # truncated or failing output.
 (
-    cd -- "$repo_root"
-    cargo test --locked --package spectre-era-performance-tradeoffs --lib --bins
-    cargo test --locked --package spectre-era-performance-tradeoffs --doc
+    cd -- "$archive_repo_root"
+    CARGO_TARGET_DIR="$run_private/test-target" \
+        cargo test --locked --package spectre-era-performance-tradeoffs --lib --bins
+    CARGO_TARGET_DIR="$run_private/test-target" \
+        cargo test --locked --package spectre-era-performance-tradeoffs --doc
     printf 'correctness_status=pass\n'
 ) >"$output_dir/correctness.txt" 2>&1
 
 (
-    cd -- "$repo_root"
+    cd -- "$archive_repo_root"
     env -u CARGO_ENCODED_RUSTFLAGS \
         CARGO_TARGET_DIR="$run_private/target" \
         RUSTFLAGS='-C target-cpu=native' \
@@ -187,13 +190,13 @@ chmod 0500 -- "$binary"
 probe_sha256=$(sha256sum -- "$binary" | awk '{print $1}')
 printf 'probe_sha256=%s\n' "$probe_sha256" >"$output_dir/probe.sha256"
 
-python3 "$script_dir/self_test.py" --binary "$binary" --cpu "$cpu" \
+python3 "$archive_script_dir/self_test.py" --binary "$binary" --cpu "$cpu" \
     --output "$output_dir/self-test.json"
-"$script_dir/capture_codegen.sh" "$binary" "$output_dir/codegen"
-python3 "$script_dir/run_aa_screen.py" --binary "$binary" --cpu "$cpu" \
+"$archive_script_dir/capture_codegen.sh" "$binary" "$output_dir/codegen"
+python3 "$archive_script_dir/run_aa_screen.py" --binary "$binary" --cpu "$cpu" \
     --iterations "$iterations" --output "$output_dir/aa-processes.jsonl" \
     --summary "$output_dir/aa-summary.json"
-python3 "$script_dir/run_processes.py" --binary "$binary" --cpu "$cpu" \
+python3 "$archive_script_dir/run_processes.py" --binary "$binary" --cpu "$cpu" \
     --iterations "$iterations" --output "$output_dir/timing-processes.jsonl" \
     --summary "$output_dir/timing-summary.json"
 probe_sha256_final=$(sha256sum -- "$binary" | awk '{print $1}')
@@ -202,21 +205,20 @@ if [[ $probe_sha256_final != "$probe_sha256" ]]; then
     exit 2
 fi
 
-# The executing tree must still match the archive after measurement. Produce
-# this terminal snapshot before validation so the receipt certifies it too.
-write_source_manifest "$repo_root" "$output_dir/source-manifest-post-run.sha256"
+# The extracted tree supplies every build and experiment input. Re-derive its
+# manifest after measurement so the receipt certifies that executed source.
+write_source_manifest "$archive_repo_root" "$output_dir/source-manifest-post-run.sha256"
 if ! diff -u "$output_dir/source-manifest-archive.sha256" \
     "$output_dir/source-manifest-post-run.sha256" \
     >"$output_dir/source-manifest-post-run.diff"; then
     printf 'executing source changed during the run\n' >&2
     exit 2
 fi
-python3 "$script_dir/validate_receipts.py" "$output_dir" --output "$validation_tmp"
+python3 "$archive_script_dir/validate_receipts.py" "$output_dir" --output "$validation_tmp"
 
-# Validation imports code from the executing tree, so prove that tree still
-# matches the archive after the validator exits. A drifted run has no valid
-# certification artifact.
-if ! write_source_manifest "$repo_root" "$run_private/source-manifest-final.sha256" || \
+# Prove the extracted tree remains identical after its validator exits. A
+# drifted run never publishes the temporary certification artifact.
+if ! write_source_manifest "$archive_repo_root" "$run_private/source-manifest-final.sha256" || \
     ! cmp -s "$output_dir/source-manifest-archive.sha256" \
         "$run_private/source-manifest-final.sha256"; then
     printf 'executing source changed during receipt validation\n' >&2

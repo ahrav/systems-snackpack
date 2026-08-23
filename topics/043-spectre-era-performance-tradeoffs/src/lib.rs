@@ -140,7 +140,12 @@ pub fn topic43_mask_lookup(words: &[u64], index: usize) -> u64 {
         all(target_os = "linux", target_arch = "aarch64")
     )))]
     let word_mask = 0_u64.wrapping_sub(u64::from(index < len));
-    words[safe_index] & word_mask
+    debug_assert!(safe_index < len);
+    // SAFETY: `words` is nonempty. The architecture masks are either zero or
+    // all ones, so `safe_index` is zero when `index >= len` and remains
+    // `index` otherwise. Both cases are strictly below `len`.
+    let word = unsafe { *words.get_unchecked(safe_index) };
+    word & word_mask
 }
 
 #[inline(always)]

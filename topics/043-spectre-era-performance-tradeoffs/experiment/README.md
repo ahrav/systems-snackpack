@@ -16,8 +16,9 @@ attack, test whether a mitigation covers every exploitable instruction sequence
 2. Record the kernel, CPU model, logical CPU count, affinity, Rust toolchain,
    native target features, `-C target-cpu=native` build flag, compiler version,
    and available kernel vulnerability strings.
-3. Run locked deterministic tests and a cross-mode checksum self-test, then
-   build the release probe with native CPU features.
+3. Run locked deterministic tests from the extracted archive, build its release
+   probe in a private target with native CPU features, and run the cross-mode
+   checksum self-test with that probe.
 4. Capture the four stable symbols. Linux x86-64 must contain `cmp`/`sbb` and
    `lfence`. Linux AArch64 must contain `cmp`/`sbc`/`CSDB` and `DSB NSH` plus
    `ISB`.

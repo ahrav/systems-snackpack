@@ -164,6 +164,11 @@ def main() -> None:
     for field in ("source_archive_sha256", "source_archive_verified_sha256"):
         if host_field(host, field, r"[0-9a-f]{64}") != archive_digest:
             raise SystemExit(f"retained source archive differs from {field}")
+    probe_digest_record = (root / "probe.sha256").read_text(encoding="utf-8").splitlines()
+    if len(probe_digest_record) != 1 or not re.fullmatch(
+        r"probe_sha256=[0-9a-f]{64}", probe_digest_record[0]
+    ):
+        raise SystemExit("probe digest receipt is malformed")
     # Bind the retained archive to the recorded commit exactly as the runner
     # does: git archive embeds the commit in the pax comment header.
     source_commit = host_field(host, "source_commit", r"[0-9a-f]{40}")
