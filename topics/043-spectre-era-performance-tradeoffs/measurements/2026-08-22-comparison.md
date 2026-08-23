@@ -1,9 +1,11 @@
 # Cross-host comparison: 2026-08-22
 
-Both required targets passed exact-source validation, unit and documentation
-tests, checksum equivalence, generated-code ordering, the same-treatment A/A
-screen, the fixed
-24-block schedule, summary recomputation, and receipt hashing.
+Under the embedded `977f78c` protocol, both required targets passed source
+validation, tests, checksum equivalence, generated-code ordering, the
+same-treatment A/A screen, the fixed 24-block schedule, summary recomputation,
+and receipt hashing. These historical bundles predate the current receipt
+contract and require regeneration before their results can be published under
+that contract.
 
 The A/A screen ran the plain implementation under labels `a` and `b` in eight
 alternating paired blocks. It checks label and position bias before comparing

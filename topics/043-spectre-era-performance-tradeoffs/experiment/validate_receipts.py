@@ -11,7 +11,7 @@ import re
 import tarfile
 from pathlib import Path
 
-from analyze import analyze_aa, analyze_timing, load_rows
+from analyze import INDEX_SPACE, WORD_COUNT, analyze_aa, analyze_timing, load_rows
 from codegen_checks import CodegenError, check_codegen_dir
 from probe_environment import PROBE_ENVIRONMENT
 from self_test import ITERATIONS as SELF_TEST_ITERATIONS
@@ -232,6 +232,9 @@ def main() -> None:
         if (
             record.get("iterations") != SELF_TEST_ITERATIONS
             or record.get("seed") != SELF_TEST_SEED
+            or record.get("word_count") != WORD_COUNT
+            or record.get("index_space") != INDEX_SPACE
+            or record.get("barrier_executes_for") != "in_bounds_indices"
         ):
             raise SystemExit(f"self-test {mode} record differs from the fixed inputs")
     for key in ("checksum", "warmup_checksum"):

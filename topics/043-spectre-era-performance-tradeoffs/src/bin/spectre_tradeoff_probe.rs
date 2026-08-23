@@ -54,6 +54,9 @@ fn parse_args() -> Result<(LookupMode, u64, u64), String> {
     if iterations == 0 {
         return Err("--iterations must be positive".into());
     }
+    if seed == 0 {
+        return Err("--seed must be non-zero: zero is an xorshift fixed point".into());
+    }
     Ok((mode.ok_or("--mode is required")?, iterations, seed))
 }
 
@@ -102,10 +105,12 @@ fn main() -> ExitCode {
     let timed_ns = timed_start.elapsed().as_nanos();
 
     println!(
-        "{{\"mode\":\"{}\",\"iterations\":{},\"seed\":{},\"setup_ns\":{},\"warmup_iterations\":{},\"warmup_ns\":{},\"timed_ns\":{},\"warmup_checksum\":{},\"checksum\":{}}}",
+        "{{\"mode\":\"{}\",\"iterations\":{},\"seed\":{},\"word_count\":{},\"index_space\":{},\"barrier_executes_for\":\"in_bounds_indices\",\"setup_ns\":{},\"warmup_iterations\":{},\"warmup_ns\":{},\"timed_ns\":{},\"warmup_checksum\":{},\"checksum\":{}}}",
         mode_name(mode),
         iterations,
         seed,
+        WORDS,
+        WORDS * 2,
         setup_ns,
         WARMUP_ITERATIONS,
         warmup_ns,

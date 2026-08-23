@@ -12,7 +12,7 @@ import sys
 import time
 from pathlib import Path
 
-from probe_environment import PROBE_ENVIRONMENT
+from probe_environment import PROBE_ENVIRONMENT, probe_timeout_seconds
 
 BLOCKS = 24
 DEFAULT_ITERATIONS = 20_000_000
@@ -66,13 +66,14 @@ def run_one(
         "--seed",
         hex(WORKLOAD_SEED),
     ]
+    timeout_seconds = probe_timeout_seconds(iterations)
     started_ns = time.time_ns()
     try:
         completed = subprocess.run(
             command,
             capture_output=True,
             text=True,
-            timeout=120,
+            timeout=timeout_seconds,
             check=False,
             env=PROBE_ENVIRONMENT,
         )
@@ -104,6 +105,7 @@ def run_one(
         "cpu": cpu,
         "command": command,
         "environment": PROBE_ENVIRONMENT,
+        "timeout_seconds": timeout_seconds,
         "started_unix_ns": started_ns,
         "wall_ns": time.time_ns() - started_ns,
         "exit_code": exit_code,

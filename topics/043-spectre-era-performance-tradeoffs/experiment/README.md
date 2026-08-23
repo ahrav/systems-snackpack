@@ -44,6 +44,10 @@ Every probe receives only `LANG=C`, `LC_ALL=C`, `PATH=os.defpath`, and `TZ=UTC`.
 The self-test and process rows record this allowlist, and offline validation
 rejects different environments.
 
+Each probe record also states that 4,096 words are addressed through an 8,192
+index space. About half the generated indices are therefore out of bounds, and
+the barrier mode executes its barrier only for in-bounds indices.
+
 ```bash
 SOURCE_COMMIT=<40-hex-commit> \
 SOURCE_ARCHIVE_SHA256=<64-hex-archive-digest> \

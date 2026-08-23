@@ -12,7 +12,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, NoReturn
 
-from probe_environment import PROBE_ENVIRONMENT
+from probe_environment import PROBE_ENVIRONMENT, probe_timeout_seconds
 
 AA_BLOCKS = 8
 TIMING_BLOCKS = 24
@@ -30,6 +30,8 @@ T_975 = {7: 2.364624251, 23: 2.06865761}
 WARMUP_ITERATIONS = 200_000
 WORKLOAD_SEED = 0x243F_6A88_85A3_08D3
 SCHEDULE_SEED = 0x43_2026_08_22
+WORD_COUNT = 4096
+INDEX_SPACE = 8192
 
 
 def fixed_schedule() -> list[tuple[str, str, str]]:
@@ -122,6 +124,14 @@ def result(row: dict[str, Any], seed_field: str) -> dict[str, Any]:
         fail("process command does not pin the recorded CPU")
     if row.get("environment") != PROBE_ENVIRONMENT:
         fail("process environment differs from the fixed protocol")
+    if row.get("timeout_seconds") != probe_timeout_seconds(value["iterations"]):
+        fail("process timeout differs from the fixed protocol")
+    if (
+        value.get("word_count") != WORD_COUNT
+        or value.get("index_space") != INDEX_SPACE
+        or value.get("barrier_executes_for") != "in_bounds_indices"
+    ):
+        fail("probe index distribution differs from the fixed protocol")
     expected_flags = [
         "--mode",
         str(row.get("mode")),
