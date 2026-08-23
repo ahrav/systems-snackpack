@@ -199,7 +199,7 @@ impl IntervalHistogram {
     /// - [`HistogramError::InvalidQuantile`] if the denominator or numerator
     ///   is zero, or if the numerator exceeds the denominator.
     /// - [`HistogramError::EmptyHistogram`] if every bucket count is zero.
-    /// - [`HistogramError::ArithmeticOverflow`] if total-count, rank, or
+    /// - [`HistogramError::ArithmeticOverflow`] if total-count or
     ///   cumulative-count arithmetic cannot fit in `u64`.
     /// - [`HistogramError::CountInvariantBroken`] if the stored counts do not
     ///   cover the computed rank.
@@ -215,13 +215,12 @@ impl IntervalHistogram {
         if total_count == 0 {
             return Err(HistogramError::EmptyHistogram);
         }
-        let product = total_count
-            .checked_mul(numerator)
-            .ok_or(HistogramError::ArithmeticOverflow)?;
-        let rank = product
-            .checked_add(denominator - 1)
-            .ok_or(HistogramError::ArithmeticOverflow)?
-            / denominator;
+        // Widen to `u128` so `total_count * numerator` cannot overflow for any
+        // valid `u64` inputs. Because `numerator <= denominator`, the ceiling
+        // never exceeds `total_count`, so the narrowing back to `u64` is exact.
+        let rank_wide =
+            (u128::from(total_count) * u128::from(numerator)).div_ceil(u128::from(denominator));
+        let rank = u64::try_from(rank_wide).map_err(|_| HistogramError::ArithmeticOverflow)?;
 
         let mut cumulative = 0_u64;
         for (index, count) in self.counts.iter().enumerate() {
@@ -293,14 +292,22 @@ pub struct CumulativeHistogram {
 impl CumulativeHistogram {
     /// Creates a cumulative snapshot from per-bucket counters.
     ///
+    /// Unlike [`IntervalHistogram::from_counts`], no cross-bucket sum bound is
+    /// imposed: each counter is an independent monotone total, and long-lived
+    /// producers can hold counters whose sum exceeds `u64::MAX` while every
+    /// per-window delta remains representable.
+    ///
     /// # Errors
     ///
     /// - [`HistogramError::BucketCountMismatch`] if the number of counters does
     ///   not equal the number of schema bounds.
-    /// - [`HistogramError::ArithmeticOverflow`] if the counter sum cannot fit
-    ///   in `u64`.
     pub fn new(schema: BucketSchema, interval_totals: Vec<u64>) -> Result<Self, HistogramError> {
-        IntervalHistogram::from_counts(schema.clone(), interval_totals.clone())?;
+        if interval_totals.len() != schema.upper_bounds_us.len() {
+            return Err(HistogramError::BucketCountMismatch {
+                bounds: schema.upper_bounds_us.len(),
+                counts: interval_totals.len(),
+            });
+        }
         Ok(Self {
             schema,
             interval_totals,
@@ -449,6 +456,33 @@ mod tests {
             Err(HistogramError::SchemaMismatch)
         );
         assert_eq!(left, original);
+    }
+
+    #[test]
+    fn nearest_rank_avoids_intermediate_overflow_at_large_total_counts() {
+        let counts = vec![u64::MAX / 2, u64::MAX / 2, 0, 1];
+        let histogram = IntervalHistogram::from_counts(schema(), counts).expect("valid counts");
+        let bracket = histogram
+            .nearest_rank_bracket(99, 100)
+            .expect("rank fits in u64 even when total_count * numerator does not");
+        assert_eq!(bracket.upper_inclusive_us, 10);
+    }
+
+    #[test]
+    fn cumulative_snapshots_accept_counters_whose_sum_exceeds_u64() {
+        let snapshot = CumulativeHistogram::new(schema(), vec![u64::MAX, u64::MAX, 0, 0]);
+        assert!(snapshot.is_ok());
+    }
+
+    #[test]
+    fn cumulative_snapshots_reject_counter_length_mismatch() {
+        assert_eq!(
+            CumulativeHistogram::new(schema(), vec![1, 2, 3]),
+            Err(HistogramError::BucketCountMismatch {
+                bounds: 4,
+                counts: 3,
+            })
+        );
     }
 
     #[test]

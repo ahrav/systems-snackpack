@@ -22,6 +22,7 @@ REQUIRED_FILES = (
     "codegen/library.objdump.txt",
     "codegen/linked.objdump.txt",
     "codegen/linked.symbols.txt",
+    "codegen/rustc-command.txt",
     "codegen/sha256sums.txt",
     "cpuinfo.txt",
     "expected.txt",
@@ -41,6 +42,8 @@ REQUIRED_FILES = (
 )
 
 RUNNER_RELATIVE = "topics/044-tail-latency-histogram-merge-errors/experiment/run_host.sh"
+
+EXPECTED_RELATIVE = "topics/044-tail-latency-histogram-merge-errors/experiment/expected.txt"
 
 
 def digest(path: Path) -> str:
@@ -166,6 +169,8 @@ def main() -> int:
         raise SystemExit("at least one correctness process failed")
     executable_digest = digest(root / "processes/histogram_merge_probe")
     expected = (root / "expected.txt").read_bytes()
+    if hashlib.sha256(expected).hexdigest() != archived_manifest.get(EXPECTED_RELATIVE):
+        raise SystemExit("retained oracle differs from the archived expected output")
     empty_digest = hashlib.sha256(b"").hexdigest()
     for record in records:
         run = record["run"]

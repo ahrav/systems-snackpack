@@ -31,13 +31,16 @@ def main() -> int:
     arguments.output.mkdir(parents=True, exist_ok=False)
     expected = arguments.expected.read_bytes()
     executable_digest = digest(arguments.binary)
+    # The child environment below drops PATH, so a bare relative name would be
+    # unresolvable; the absolute path keeps execution independent of lookup.
+    probe = str(arguments.binary.resolve())
 
     records = []
     for run in range(1, arguments.runs + 1):
         if digest(arguments.binary) != executable_digest:
             raise SystemExit("executable changed between processes")
         completed = subprocess.run(
-            [str(arguments.binary)],
+            [probe],
             check=False,
             capture_output=True,
             env={"LANG": "C", "LC_ALL": "C"},
