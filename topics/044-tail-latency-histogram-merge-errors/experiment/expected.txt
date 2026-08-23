@@ -1,0 +1,11 @@
+definition=nearest-rank p99 rank=ceil(0.99*N)
+shard_a count=1000 p99_us=1
+shard_b count=10 p99_us=1000
+union count=1010 exact_p99_us=100
+wrong_unweighted_mean_of_local_p99_us=500.500000
+wrong_count_weighted_mean_of_local_p99_us=10.891089
+valid_equal_schema_merge_count=1010
+merged_histogram_p99_bracket_us=(10, 100]
+mismatched_schema_merge=REJECTED
+cumulative_counter_reset=REJECTED
+status=PASS

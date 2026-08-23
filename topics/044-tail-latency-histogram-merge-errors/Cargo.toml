@@ -1,0 +1,17 @@
+[package]
+name = "tail-latency-histogram-merge-errors"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "histogram_merge_errors"
+path = "src/lib.rs"
+
+[[example]]
+name = "histogram_merge_probe"
+path = "examples/histogram_merge_probe.rs"
+
+[lints]
+workspace = true
