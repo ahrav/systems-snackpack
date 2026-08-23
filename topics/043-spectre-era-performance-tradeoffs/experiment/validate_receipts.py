@@ -8,9 +8,11 @@ import hashlib
 import json
 import math
 import re
+import tarfile
 from pathlib import Path
 
 from analyze import analyze_aa, analyze_timing, load_rows
+from codegen_checks import CodegenError, check_codegen_dir
 
 REQUIRED = (
     "source-archive.tar.gz",
@@ -65,6 +67,30 @@ def summaries_match(expected: object, actual: object) -> bool:
     return type(expected) is type(actual) and expected == actual
 
 
+def archive_manifest(archive: Path) -> bytes:
+    """Re-derive the source manifest from the retained archive itself.
+
+    Mirrors the runner's ``write_source_manifest``: per-file sha256sum lines
+    over byte-sorted paths relative to the archive's top-level prefix, with
+    the same ``target/`` and ``.git`` exclusions.
+    """
+
+    entries = []
+    with tarfile.open(archive, "r:gz") as tar:
+        for member in tar:
+            if not member.isfile():
+                continue
+            name = member.name.split("/", 1)[1] if "/" in member.name else member.name
+            if name.startswith(("target/", ".git/")) or name == ".git":
+                continue
+            handle = tar.extractfile(member)
+            if handle is None:
+                raise ValueError(f"unreadable archive member: {member.name}")
+            entries.append((name, hashlib.sha256(handle.read()).hexdigest()))
+    entries.sort(key=lambda entry: entry[0].encode("utf-8"))
+    return "".join(f"{digest}  {name}\n" for name, digest in entries).encode("utf-8")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("receipt_dir", type=Path)
@@ -92,8 +118,12 @@ def main() -> None:
         raise SystemExit("retained source archive differs from the verified digest")
     if (root / "source-manifest.diff").read_bytes():
         raise SystemExit("source manifest comparison is not empty")
-    # The retained diff is itself a receipt that can be replaced; the identity
-    # claim must re-derive from the two manifests it summarizes.
+    # Neither retained manifest is trusted: the archive side re-derives from
+    # the retained archive bytes, and the executing side must equal it.
+    if (root / "source-manifest-archive.sha256").read_bytes() != archive_manifest(
+        root / "source-archive.tar.gz"
+    ):
+        raise SystemExit("archive manifest does not re-derive from the retained archive")
     if (root / "source-manifest-archive.sha256").read_bytes() != (
         root / "source-manifest-executing.sha256"
     ).read_bytes():
@@ -105,6 +135,15 @@ def main() -> None:
     codegen_architectures = re.findall(r"^architecture=(\S+)$", codegen_text, flags=re.MULTILINE)
     if len(host_architectures) != 1 or host_architectures != codegen_architectures:
         raise SystemExit("codegen receipt architecture differs from the host receipt")
+    # The pass marker is itself a receipt; re-run the instruction checks over
+    # the retained assembly so the marker cannot certify evidence the checks
+    # would reject.
+    try:
+        barrier_order = check_codegen_dir(root / "codegen", host_architectures[0])
+    except CodegenError as error:
+        raise SystemExit(f"retained codegen evidence fails inspection: {error}") from error
+    if f"barrier_order={barrier_order}" not in codegen_text:
+        raise SystemExit("codegen receipt barrier order differs from the retained assembly")
     if read_json(root / "self-test.json").get("status") != "pass":
         raise SystemExit("self-test did not pass")
 

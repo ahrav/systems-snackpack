@@ -56,7 +56,7 @@ def load_rows(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def result(row: dict[str, Any]) -> dict[str, Any]:
+def result(row: dict[str, Any], seed_field: str) -> dict[str, Any]:
     if row.get("exit_code") != 0 or row.get("valid") is not True:
         fail(
             f"block {row.get('block')} ordinal {row.get('ordinal')} retained "
@@ -80,17 +80,26 @@ def result(row: dict[str, Any]) -> dict[str, Any]:
         fail("retained stdout is not valid JSON")
     if reparsed != value:
         fail("result differs from the retained process stdout")
+    # Checksums are XOR/sum accumulators, so zero is a legitimate value;
+    # counts and durations must stay strictly positive. Booleans are excluded
+    # everywhere because bool is an int subclass and true would pass as 1.
     for key in (
         "iterations",
         "warmup_iterations",
         "timed_ns",
         "warmup_ns",
-        "warmup_checksum",
-        "checksum",
     ):
-        if not isinstance(value.get(key), int) or value[key] <= 0:
+        if not isinstance(value.get(key), int) or isinstance(value.get(key), bool) or value[key] <= 0:
             fail(f"result field {key} must be a positive integer")
-    seed = row.get("seed", row.get("workload_seed"))
+    for key in ("warmup_checksum", "checksum"):
+        if not isinstance(value.get(key), int) or isinstance(value.get(key), bool) or value[key] < 0:
+            fail(f"result field {key} must be a nonnegative integer")
+    # Each phase names its seed field; a stray second seed field would let
+    # the validated field and the field the checks read disagree.
+    other_seed_field = "workload_seed" if seed_field == "seed" else "seed"
+    if other_seed_field in row:
+        fail(f"record carries a contradictory {other_seed_field} field")
+    seed = row.get(seed_field)
     if not isinstance(seed, int) or isinstance(seed, bool):
         fail("process record lacks an integer workload seed")
     if value.get("mode") != row.get("mode"):
@@ -165,7 +174,7 @@ def analyze_aa(rows: list[dict[str, Any]]) -> dict[str, Any]:
             fail("A/A workload seed changed")
         if label in by_block[block]:
             fail(f"A/A block {block} repeats label {label}")
-        value = result(row)
+        value = result(row, "seed")
         if value.get("mode") != "plain":
             fail("A/A labels must both execute plain mode")
         by_block[block][label] = float(value["timed_ns"])
@@ -231,7 +240,7 @@ def analyze_timing(rows: list[dict[str, Any]]) -> dict[str, Any]:
             fail(f"timing block {block} differs from the fixed schedule")
         if mode in by_block[block]:
             fail(f"timing block {block} repeats mode {mode}")
-        value = result(row)
+        value = result(row, "workload_seed")
         if value.get("mode") != mode:
             fail("record mode and probe mode differ")
         by_block[block][mode] = float(value["timed_ns"])
