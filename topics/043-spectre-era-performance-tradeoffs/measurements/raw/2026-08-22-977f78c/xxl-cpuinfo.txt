@@ -1,0 +1,12 @@
+REPRODUCE_COMMAND=printf 'captured_utc=%s\nhostname=%s\narchitecture=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(hostname -f)" "$(uname -m)"; awk -F '[[:space:]]*:[[:space:]]*' 'BEGIN { OFS="=" } { key=$1; gsub(/^[[:space:]]+|[[:space:]]+$/, "", key) } key ~ /^(processor|vendor_id|cpu family|model|model name|stepping|microcode)$/ { gsub(/ /, "_", key); print key, $2; if (key == "microcode") exit }' /proc/cpuinfo
+capture_command_provenance=original_command_not_retained
+captured_utc=2026-08-22T17:53:54Z
+hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+architecture=x86_64
+processor=0
+vendor_id=GenuineIntel
+cpu_family=6
+model=143
+model_name=Intel(R) Xeon(R) Platinum 8488C
+stepping=8
+microcode=0x2b000670

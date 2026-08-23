@@ -1,0 +1,12 @@
+REPRODUCE_COMMAND=printf 'captured_utc=%s\nhostname=%s\narchitecture=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(hostname -f)" "$(uname -m)"; awk -F '[[:space:]]*:[[:space:]]*' 'BEGIN { OFS="=" } { key=$1; gsub(/^[[:space:]]+|[[:space:]]+$/, "", key) } key ~ /^(processor|Features|CPU implementer|CPU architecture|CPU variant|CPU part|CPU revision)$/ { gsub(/ /, "_", key); print key, $2; if (key == "CPU_revision") exit }' /proc/cpuinfo
+capture_command_provenance=original_command_not_retained
+captured_utc=2026-08-22T17:53:59Z
+hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+architecture=aarch64
+processor=0
+Features=fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng
+CPU_implementer=0x41
+CPU_architecture=8
+CPU_variant=0x1
+CPU_part=0xd40
+CPU_revision=1
