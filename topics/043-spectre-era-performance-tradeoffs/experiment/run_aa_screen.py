@@ -16,6 +16,17 @@ DEFAULT_ITERATIONS = 20_000_000
 SEED = 0x243F_6A88_85A3_08D3
 
 
+def partial_text(output: bytes | str | None) -> str:
+    """TimeoutExpired retains captured output as raw bytes even when the
+    process ran in text mode; normalize so the record stays JSON-serializable."""
+
+    if output is None:
+        return ""
+    if isinstance(output, bytes):
+        return output.decode("utf-8", errors="replace")
+    return output
+
+
 def run_one(binary: Path, cpu: int, iterations: int, block: int, ordinal: int, label: str) -> dict:
     command = [
         "taskset",
@@ -37,8 +48,8 @@ def run_one(binary: Path, cpu: int, iterations: int, block: int, ordinal: int, l
         stderr = completed.stderr
     except subprocess.TimeoutExpired as error:
         exit_code = 124
-        stdout = error.stdout or ""
-        stderr = error.stderr or ""
+        stdout = partial_text(error.stdout)
+        stderr = partial_text(error.stderr)
     result = None
     valid = False
     try:

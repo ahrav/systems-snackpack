@@ -32,6 +32,17 @@ def fixed_schedule() -> list[tuple[str, str, str]]:
     return schedule
 
 
+def partial_text(output: bytes | str | None) -> str:
+    """TimeoutExpired retains captured output as raw bytes even when the
+    process ran in text mode; normalize so the record stays JSON-serializable."""
+
+    if output is None:
+        return ""
+    if isinstance(output, bytes):
+        return output.decode("utf-8", errors="replace")
+    return output
+
+
 def run_one(
     binary: Path,
     cpu: int,
@@ -61,8 +72,8 @@ def run_one(
         stderr = completed.stderr
     except subprocess.TimeoutExpired as error:
         exit_code = 124
-        stdout = error.stdout or ""
-        stderr = error.stderr or ""
+        stdout = partial_text(error.stdout)
+        stderr = partial_text(error.stderr)
     result = None
     valid = False
     try:
