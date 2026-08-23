@@ -29,7 +29,7 @@ of the data contract and must not be mixed silently.
 - [HdrHistogram implementation and documentation](https://github.com/HdrHistogram/HdrHistogram)
   defines its configurable value range, significant-digit precision, constant
   relative precision, and coordinated-omission correction boundary.
-- [HdrHistogram Java 2.2.2 merge implementation](https://github.com/HdrHistogram/HdrHistogram/blob/HdrHistogram-2.2.2/src/main/java/org/HdrHistogram/AbstractHistogram.java#L1698-L1745)
+- [HdrHistogram Java 2.2.2 merge implementation](https://github.com/HdrHistogram/HdrHistogram/blob/HdrHistogram-2.2.2/src/main/java/org/HdrHistogram/AbstractHistogram.java#L725-L771)
   directly adds compatible layouts and otherwise re-records representative
   values. Auto-resize and representable-range behavior are implementation
   configuration, not universal histogram properties.
