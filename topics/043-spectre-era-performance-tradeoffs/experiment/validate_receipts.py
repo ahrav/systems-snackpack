@@ -28,6 +28,8 @@ REQUIRED = (
     "source-manifest-executing.sha256",
     "source-manifest-archive.sha256",
     "source-manifest.diff",
+    "source-manifest-post-run.sha256",
+    "source-manifest-post-run.diff",
     "host.txt",
     "correctness.txt",
     "build.txt",
@@ -173,18 +175,17 @@ def main() -> None:
         lines = (root / name).read_text(encoding="utf-8").splitlines()
         if not lines or lines[-1] != marker:
             raise SystemExit(f"{name} lacks its terminal success marker")
-    if (root / "source-manifest.diff").read_bytes():
-        raise SystemExit("source manifest comparison is not empty")
-    # Neither retained manifest is trusted: the archive side re-derives from
-    # the retained archive bytes, and the executing side must equal it.
-    if (root / "source-manifest-archive.sha256").read_bytes() != archive_manifest(
-        root / "source-archive.tar.gz"
-    ):
+    for name in ("source-manifest.diff", "source-manifest-post-run.diff"):
+        if (root / name).read_bytes():
+            raise SystemExit(f"{name} is not empty")
+    # None of the retained manifests is trusted: the archive side re-derives
+    # from archive bytes, and both executing-tree snapshots must equal it.
+    retained_archive_manifest = (root / "source-manifest-archive.sha256").read_bytes()
+    if retained_archive_manifest != archive_manifest(root / "source-archive.tar.gz"):
         raise SystemExit("archive manifest does not re-derive from the retained archive")
-    if (root / "source-manifest-archive.sha256").read_bytes() != (
-        root / "source-manifest-executing.sha256"
-    ).read_bytes():
-        raise SystemExit("retained source manifests disagree")
+    for name in ("source-manifest-executing.sha256", "source-manifest-post-run.sha256"):
+        if retained_archive_manifest != (root / name).read_bytes():
+            raise SystemExit(f"{name} differs from the retained archive manifest")
     codegen_text = (root / "codegen/codegen-check.txt").read_text(encoding="utf-8")
     if "status=pass" not in codegen_text:
         raise SystemExit("codegen inspection did not pass")
@@ -240,6 +241,13 @@ def main() -> None:
         raise SystemExit("timing summary differs from retained process records")
     if aa_recomputed["status"] != "pass" or timing_recomputed["status"] != "pass":
         raise SystemExit("a fixed experiment gate failed")
+
+    # A/A controls and timing comparisons must exercise one workload. Each
+    # phase validates these fields internally; this check binds the phases.
+    combined_results = [row["result"] for row in aa_rows + timing_rows]
+    for field in ("iterations", "checksum", "warmup_checksum"):
+        if len({result[field] for result in combined_results}) != 1:
+            raise SystemExit(f"process records disagree across phases on {field}")
 
     # Each analysis enforces one CPU within its own records; the receipt-level
     # boundary is one pinned CPU across the whole schedule, matching host.txt.

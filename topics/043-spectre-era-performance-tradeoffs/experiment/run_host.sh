@@ -200,11 +200,9 @@ if [[ $probe_sha256_final != "$probe_sha256" ]]; then
     printf 'probe binary changed during the measurement schedule\n' >&2
     exit 2
 fi
-python3 "$script_dir/validate_receipts.py" "$output_dir"
 
-# The pre-run manifest comparison only proves the tree matched the archive
-# before measurement began. Re-derive it after every experiment and validation
-# step so receipts cannot silently bind to source modified mid-run.
+# The executing tree must still match the archive after measurement. Produce
+# this terminal snapshot before validation so the receipt certifies it too.
 write_source_manifest "$repo_root" "$output_dir/source-manifest-post-run.sha256"
 if ! diff -u "$output_dir/source-manifest-archive.sha256" \
     "$output_dir/source-manifest-post-run.sha256" \
@@ -212,3 +210,4 @@ if ! diff -u "$output_dir/source-manifest-archive.sha256" \
     printf 'executing source changed during the run\n' >&2
     exit 2
 fi
+python3 "$script_dir/validate_receipts.py" "$output_dir"

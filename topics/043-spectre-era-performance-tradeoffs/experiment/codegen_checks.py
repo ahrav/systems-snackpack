@@ -25,20 +25,24 @@ class CodegenError(ValueError):
     """A retained disassembly fails the fixed instruction checks."""
 
 
-def first_line(pattern: str, lines: list[str], minimum: int, file: str) -> int:
-    """Return the 1-based number of the first match strictly after ``minimum``."""
+def first_match(
+    pattern: str, lines: list[str], minimum: int, file: str
+) -> tuple[int, re.Match[str]]:
+    """Return the first matching line and match strictly after ``minimum``."""
 
     for number, line in enumerate(lines, 1):
-        if number > minimum and re.search(pattern, line):
-            return number
+        match = re.search(pattern, line)
+        if number > minimum and match:
+            return number, match
     raise CodegenError(
         f"missing ordered instruction pattern {pattern!r} after line {minimum} in {file}"
     )
 
 
-def require(pattern: str, lines: list[str], file: str) -> None:
-    if not any(re.search(pattern, line) for line in lines):
-        raise CodegenError(f"missing instruction pattern {pattern!r} in {file}")
+def first_line(pattern: str, lines: list[str], minimum: int, file: str) -> int:
+    """Return the 1-based number of the first match strictly after ``minimum``."""
+
+    return first_match(pattern, lines, minimum, file)[0]
 
 
 def check_codegen_dir(codegen_dir: Path, architecture: str) -> str:
@@ -53,8 +57,33 @@ def check_codegen_dir(codegen_dir: Path, architecture: str) -> str:
     barrier_file = "topic43_barrier_lookup.asm"
     barrier_lines = (codegen_dir / barrier_file).read_text(encoding="utf-8").splitlines()
     if architecture == "x86_64":
-        require(r"[ \t]cmp[qwl]?[ \t]", mask_lines, mask_file)
-        require(r"[ \t]sbb[qwl]?[ \t]", mask_lines, mask_file)
+        compare, compare_match = first_match(
+            r"[ \t]cmp[qwl]?[ \t]+%[a-z0-9]+,[ \t]*(%[a-z0-9]+)(?:[ \t]|$)",
+            mask_lines,
+            0,
+            mask_file,
+        )
+        index = re.escape(compare_match.group(1))
+        mask, mask_match = first_match(
+            r"[ \t]sbb[qwl]?[ \t]+(%[a-z0-9]+),[ \t]*\1(?:[ \t]|$)",
+            mask_lines,
+            compare,
+            mask_file,
+        )
+        mask_register = re.escape(mask_match.group(1))
+        masked_index = first_line(
+            rf"[ \t]and[qwl]?[ \t]+{mask_register},[ \t]*{index}(?:[ \t]|$)",
+            mask_lines,
+            mask,
+            mask_file,
+        )
+        first_line(
+            rf"[ \t]and[qwl]?[ \t]+\([^,]+,[ \t]*{index},[^)]*\),"
+            rf"[ \t]*{mask_register}(?:[ \t]|$)",
+            mask_lines,
+            masked_index,
+            mask_file,
+        )
         compare = first_line(r"[ \t]cmp[qwl]?[ \t]", barrier_lines, 0, barrier_file)
         branch = first_line(
             r"[ \t]j(a|ae|b|be|e|ne|z|nz)[ \t]", barrier_lines, compare, barrier_file
@@ -65,9 +94,47 @@ def check_codegen_dir(codegen_dir: Path, architecture: str) -> str:
         )
         return "cmp<conditional-branch<lfence<load"
     if architecture in ("aarch64", "arm64"):
-        require(r"[ \t]cmp[ \t]", mask_lines, mask_file)
-        require(r"[ \t](sbc|ngc)[ \t]", mask_lines, mask_file)
-        require(r"[ \t](csdb|hint[ \t]+#0x14)([ \t]|$)", mask_lines, mask_file)
+        compare, compare_match = first_match(
+            r"[ \t]cmp[ \t]+(x[0-9]+),[ \t]*x[0-9]+(?:[ \t]|$)",
+            mask_lines,
+            0,
+            mask_file,
+        )
+        index = re.escape(compare_match.group(1))
+        mask, mask_match = first_match(
+            r"[ \t](?:ngc[ \t]+(x[0-9]+),[ \t]*xzr|"
+            r"sbc[ \t]+(x[0-9]+),[ \t]*xzr,[ \t]*xzr)(?:[ \t]|$)",
+            mask_lines,
+            compare,
+            mask_file,
+        )
+        mask_register = re.escape(mask_match.group(1) or mask_match.group(2))
+        csdb = first_line(
+            r"[ \t](csdb|hint[ \t]+#0x14)([ \t]|$)", mask_lines, mask, mask_file
+        )
+        masked_index, masked_index_match = first_match(
+            rf"[ \t]and[ \t]+(x[0-9]+),[ \t]*(?:{mask_register},[ \t]*{index}|"
+            rf"{index},[ \t]*{mask_register})(?:[ \t]|$)",
+            mask_lines,
+            csdb,
+            mask_file,
+        )
+        safe_index = re.escape(masked_index_match.group(1))
+        load, load_match = first_match(
+            rf"[ \t]ldr[ \t]+(x[0-9]+),[ \t]*\[[^],]+,[ \t]*{safe_index}"
+            rf"(?:,[^]]*)?\]",
+            mask_lines,
+            masked_index,
+            mask_file,
+        )
+        loaded_word = re.escape(load_match.group(1))
+        first_line(
+            rf"[ \t]and[ \t]+x[0-9]+,[ \t]*(?:{loaded_word},[ \t]*{mask_register}|"
+            rf"{mask_register},[ \t]*{loaded_word})(?:[ \t]|$)",
+            mask_lines,
+            load,
+            mask_file,
+        )
         compare = first_line(r"[ \t]cmp[ \t]", barrier_lines, 0, barrier_file)
         branch = first_line(r"[ \t]b\.[a-z]+[ \t]", barrier_lines, compare, barrier_file)
         dsb = first_line(r"[ \t]dsb[ \t]+nsh", barrier_lines, branch, barrier_file)
