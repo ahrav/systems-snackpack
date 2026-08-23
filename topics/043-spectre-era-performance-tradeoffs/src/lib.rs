@@ -126,7 +126,21 @@ pub fn topic43_mask_lookup(words: &[u64], index: usize) -> u64 {
     let mask = 0_usize.wrapping_sub(usize::from(index < len));
 
     let safe_index = index & mask;
-    words[safe_index] & mask as u64
+    // On the measured 64-bit targets the index mask already spans the word, so
+    // the cast preserves the assembly's data dependency unchanged.
+    #[cfg(any(
+        all(target_os = "linux", target_arch = "x86_64"),
+        all(target_os = "linux", target_arch = "aarch64")
+    ))]
+    let word_mask = mask as u64;
+    // The correctness-only fallback re-derives an all-ones u64: widening a
+    // 32-bit usize mask would clear the upper half of every valid word.
+    #[cfg(not(any(
+        all(target_os = "linux", target_arch = "x86_64"),
+        all(target_os = "linux", target_arch = "aarch64")
+    )))]
+    let word_mask = 0_u64.wrapping_sub(u64::from(index < len));
+    words[safe_index] & word_mask
 }
 
 #[inline(always)]
@@ -227,6 +241,17 @@ mod tests {
         let words = [3, 5, 8, 13];
         let indices = [0, 1, 3, 4, usize::MAX];
         for index in indices {
+            let expected = topic43_plain_lookup(&words, index);
+            assert_eq!(topic43_mask_lookup(&words, index), expected);
+            assert_eq!(topic43_barrier_lookup(&words, index), expected);
+        }
+    }
+
+    #[test]
+    fn modes_preserve_words_wider_than_u32() {
+        // A 32-bit index mask widened to u64 would clear the upper word half.
+        let words = [0x1_0000_0000, u64::MAX, 0xdead_beef_0000_0001];
+        for index in [0, 1, 2, 3, usize::MAX] {
             let expected = topic43_plain_lookup(&words, index);
             assert_eq!(topic43_mask_lookup(&words, index), expected);
             assert_eq!(topic43_barrier_lookup(&words, index), expected);

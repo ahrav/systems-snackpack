@@ -164,6 +164,15 @@ def main() -> None:
         embedded_commit = tar.pax_headers.get("comment", "")
     if embedded_commit != source_commit:
         raise SystemExit("retained archive does not embed the recorded source commit")
+    # The runner appends each marker only after every command in the captured
+    # log succeeds, so a truncated or failing log cannot be recertified.
+    for name, marker in (
+        ("correctness.txt", "correctness_status=pass"),
+        ("build.txt", "build_status=pass"),
+    ):
+        lines = (root / name).read_text(encoding="utf-8").splitlines()
+        if not lines or lines[-1] != marker:
+            raise SystemExit(f"{name} lacks its terminal success marker")
     if (root / "source-manifest.diff").read_bytes():
         raise SystemExit("source manifest comparison is not empty")
     # Neither retained manifest is trusted: the archive side re-derives from

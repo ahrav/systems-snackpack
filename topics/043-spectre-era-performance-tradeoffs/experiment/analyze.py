@@ -275,13 +275,18 @@ def analyze_timing(rows: list[dict[str, Any]]) -> dict[str, Any]:
         comparisons[f"{numerator}/plain"] = interval(ratios)
     # Reported per-mode central statistics derive from the same retained rows
     # as the paired ratios, so published tables are recomputable and validated.
+    # Durations normalize to nanoseconds per lookup, matching the reports.
+    iterations = next(iter(iteration_counts))
     per_mode: dict[str, Any] = {}
     for mode in MODES:
-        logs = [math.log(by_block[block][mode]) for block in range(1, TIMING_BLOCKS + 1)]
+        logs = [
+            math.log(by_block[block][mode] / iterations)
+            for block in range(1, TIMING_BLOCKS + 1)
+        ]
         per_mode[mode] = {
             "processes": len(logs),
-            "geometric_mean_ns": math.exp(statistics.fmean(logs)),
-            "sample_sd_log_ns": statistics.stdev(logs),
+            "geometric_mean_ns_per_iteration": math.exp(statistics.fmean(logs)),
+            "sample_sd_log_ns_per_iteration": statistics.stdev(logs),
         }
     return {
         "schema": "topic43-timing-v2",

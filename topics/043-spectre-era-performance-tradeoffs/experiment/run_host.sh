@@ -160,16 +160,21 @@ fi
     done
 } >"$output_dir/host.txt"
 
+# Each captured log ends with a success marker only when every command in it
+# succeeded, so offline validation can distinguish passing evidence from
+# truncated or failing output.
 (
     cd -- "$repo_root"
     cargo test --locked --package spectre-era-performance-tradeoffs --lib --bins
     cargo test --locked --package spectre-era-performance-tradeoffs --doc
+    printf 'correctness_status=pass\n'
 ) >"$output_dir/correctness.txt" 2>&1
 
 (
     cd -- "$repo_root"
     RUSTFLAGS='-C target-cpu=native' cargo build --locked --release \
         --package spectre-era-performance-tradeoffs --bin spectre-tradeoff-probe
+    printf 'build_status=pass\n'
 ) >"$output_dir/build.txt" 2>&1
 # The workspace target directory is mutable: any concurrent cargo invocation
 # can replace the probe between codegen capture and the timing schedule.
