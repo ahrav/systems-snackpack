@@ -1,0 +1,17 @@
+[package]
+name = "rust-aliasing-provenance"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "rust_aliasing_provenance"
+path = "src/lib.rs"
+
+[[example]]
+name = "provenance_demo"
+path = "examples/provenance_demo.rs"
+
+[lints]
+workspace = true

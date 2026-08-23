@@ -95,6 +95,10 @@ name = "roaring-bitmaps-compressed-sets"
 version = "0.1.0"
 
 [[package]]
+name = "rust-aliasing-provenance"
+version = "0.1.0"
+
+[[package]]
 name = "string-matching-selection"
 version = "0.1.0"
 
