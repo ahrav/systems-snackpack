@@ -9,9 +9,12 @@ import re
 from pathlib import Path
 
 
+# capture_codegen.sh always passes --no-show-raw-insn, so the mnemonic follows
+# the address directly. A raw-byte skip group here would swallow mnemonics made
+# entirely of hexadecimal characters (Arm "fadd" parses as bytes, leaving "d0"
+# as the mnemonic).
 INSTRUCTION = re.compile(
-    r"^\s*([0-9a-f]+):\s+(?:(?:[0-9a-f]{2}(?:[0-9a-f]{2}){0,3})\s+)*"
-    r"([.a-z0-9]+)\s*(.*?)\s*$",
+    r"^\s*([0-9a-f]+):\s+([.a-z0-9]+)\s*(.*?)\s*$",
     re.IGNORECASE,
 )
 VECTOR_REGISTER = re.compile(r"\b[xyz]mm([0-9]+)\b|\bv([0-9]+)(?:\.[0-9a-z]+)?\b", re.IGNORECASE)
@@ -81,7 +84,7 @@ def x86_hot_loop(rows: list[tuple[int, str, str]], suffix: str) -> list[tuple[in
 def arm_hot_loop(
     rows: list[tuple[int, str, str]], fma_mnemonic: str
 ) -> list[tuple[int, str, str]]:
-    """Select the backward-branch region containing the most requested FMA work."""
+    """Select the smallest backward-branch region with the most requested FMA work."""
 
     candidates = []
     for branch_index, (address, mnemonic, operands) in enumerate(rows):
@@ -97,10 +100,10 @@ def arm_hot_loop(
         region = [row for row in rows[: branch_index + 1] if target <= row[0] <= address]
         fma_count = sum(mnemonic == fma_mnemonic for _, mnemonic, _ in region)
         if fma_count:
-            candidates.append((fma_count, region))
+            candidates.append((fma_count, -len(region), region))
     if not candidates:
         raise ValueError(f"no backward Arm branch contains {fma_mnemonic}")
-    return max(candidates, key=lambda candidate: candidate[0])[1]
+    return max(candidates, key=lambda candidate: (candidate[0], candidate[1]))[2]
 
 
 def check_x86(codegen_dir: Path) -> dict[str, object]:

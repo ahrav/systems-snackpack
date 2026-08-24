@@ -23,8 +23,9 @@ keeps 96 double-precision lanes of useful work fixed while comparing scalar,
 
 Scalar code minimizes dispatch and tail costs. A 128-bit path gives two
 double-precision lanes and exists on both measured architectures. Advanced
-Vector Extensions 2 (AVX2) gives four lanes on x86-64. Advanced Vector Extensions
-512 (AVX-512) gives eight lanes where the required feature subset exists. Arm
+Vector Extensions (AVX) with FMA gives four double lanes on x86-64. Advanced
+Vector Extensions 512 (AVX-512) gives eight lanes where the required feature
+subset exists. Arm
 Scalable Vector Extension (SVE) uses an implementation-selected vector length;
 this first visit records SVE availability but does not execute an SVE path.
 
@@ -78,7 +79,7 @@ processor-family folklore constant.
 |---|---|---|---|---|
 | Scalar | Tiny inputs, tails, and a production baseline fallback | Lane parallelism | More instructions for independent work; this experiment's x86 scalar probe requires fused multiply-add (FMA) | Inputs are short or no vector path passes its gate |
 | 128 bit | Portable fixed-width parallelism across these two architectures | Memory limits or dispatch overhead | Limited to two double lanes | It wins on the target mix or provides the simplest common path |
-| 256 bit | Four double lanes with AVX2 on x86-64 | AVX-512-only operations | On affected Intel generations, clock policy depends on instruction class, width, and active-core count | It wins request-level measurements and controls code size |
+| 256 bit | Four double lanes with AVX and FMA on x86-64 | AVX-512-only operations | On affected Intel generations, clock policy depends on instruction class, width, and active-core count | It wins request-level measurements and controls code size |
 | 512 bit | Eight double lanes and AVX-512 operations | Bandwidth, tails, or service-wide side effects | Benefit depends on processor model, instruction mix, and active cores | Model-specific measurements include the follow-on workload |
 | SVE | One vector-length-agnostic Arm loop | A universal physical width or speedup | Correct code must tolerate the runtime vector length | An SVE implementation beats the fixed-width path on supported Arm targets |
 

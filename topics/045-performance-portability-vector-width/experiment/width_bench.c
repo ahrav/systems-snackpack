@@ -141,7 +141,7 @@ static double kernel_v128(uint64_t steps) {
     return total / (double)LOGICAL_CHAINS;
 }
 
-__attribute__((noinline, target("avx2,fma")))
+__attribute__((noinline, target("avx,fma")))
 static double kernel_v256(uint64_t steps) {
     enum { LANES = 4 };
     const __m256d multiplier = _mm256_set1_pd(0.99999999999);
@@ -187,7 +187,7 @@ static int mode_supported(const char *mode) {
     __builtin_cpu_init();
     if (strcmp(mode, "scalar") == 0) return __builtin_cpu_supports("fma");
     if (strcmp(mode, "v128") == 0) return __builtin_cpu_supports("avx") && __builtin_cpu_supports("fma");
-    if (strcmp(mode, "v256") == 0) return __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+    if (strcmp(mode, "v256") == 0) return __builtin_cpu_supports("avx") && __builtin_cpu_supports("fma");
     if (strcmp(mode, "v512") == 0) return __builtin_cpu_supports("avx512f") && __builtin_cpu_supports("fma");
     return 0;
 }
@@ -272,7 +272,9 @@ static uint64_t parse_u64(const char *text, const char *name) {
     char *end = NULL;
     errno = 0;
     unsigned long long value = strtoull(text, &end, 10);
-    if (errno != 0 || end == text || *end != '\0') {
+    /* strtoull accepts leading whitespace and signs; "-1" wraps to ULLONG_MAX
+     * without setting errno. Require the text to start with a digit. */
+    if (text[0] < '0' || text[0] > '9' || errno != 0 || end == text || *end != '\0') {
         fprintf(stderr, "invalid %s: %s\n", name, text);
         exit(2);
     }

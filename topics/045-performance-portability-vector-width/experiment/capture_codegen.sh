@@ -6,7 +6,7 @@ if [[ $# -ne 2 ]]; then
     exit 2
 fi
 
-binary=$(realpath -- "$1")
+binary=$(realpath -m -- "$1")
 output_dir=$(realpath -m -- "$2")
 if [[ ! -x $binary || -e $output_dir ]]; then
     printf 'binary must exist and output directory must not exist\n' >&2
