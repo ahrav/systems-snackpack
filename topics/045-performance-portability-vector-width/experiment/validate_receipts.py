@@ -390,7 +390,7 @@ def recompute(raw_path: Path, summary: dict, manifest: dict, architecture: str) 
         retained_contrasts = list(csv.DictReader(handle))
     if len(retained_contrasts) != len(contrast_rows):
         raise ValueError(f"{raw_path.name}: contrast CSV has the wrong row count")
-    for retained_row, expected_row in zip(retained_contrasts, contrast_rows, strict=True):
+    for retained_row, expected_row in zip(retained_contrasts, contrast_rows):
         for key in ("comparison", "template"):
             if retained_row[key] != str(expected_row[key]):
                 raise ValueError(f"{raw_path.name}: contrast CSV {key} differs")
@@ -584,7 +584,9 @@ def main() -> None:
             ("v128", "v128", True, manifest["seed"] + 100),
         ]
     )
-    for summary, (baseline, candidate, aa, seed) in zip(summaries, expected_identities, strict=True):
+    if len(summaries) != len(expected_identities):
+        raise ValueError("comparison identities have the wrong row count")
+    for summary, (baseline, candidate, aa, seed) in zip(summaries, expected_identities):
         expected_blocks = manifest["aa_blocks"] if aa else manifest["blocks"]
         if (
             summary["baseline_mode"], summary["candidate_mode"],
