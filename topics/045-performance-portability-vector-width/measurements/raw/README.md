@@ -20,10 +20,11 @@ counter failures. A failed bundle records an attempted run but cannot support a
 published measurement claim.
 
 Before extraction, reject absolute paths, `..` components, duplicate members,
-unsupported member types, and unexpected archive roots. Then run the validator
-from the retained `source.tar.gz` with the recorded source commit, archive
-digest, target label, and resolved hostname. Its output must be byte-identical
-to the corresponding host-side `receipt-validation.json`.
+unsupported member types, and unexpected archive roots. Then run the
+`validate_receipts.py` script extracted from the retained `source.tar.gz`
+against each host bundle, passing the recorded source commit, archive digest,
+target label, and resolved hostname. Its output must be byte-identical to the
+corresponding host-side `receipt-validation.json`.
 
 The retained 2026-08-24 run is in
 [`2026-08-24-edc75b26/`](2026-08-24-edc75b26/). Its `SHA256SUMS` checksum
