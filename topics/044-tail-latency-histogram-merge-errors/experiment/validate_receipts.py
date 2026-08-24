@@ -137,6 +137,10 @@ COMMAND_TEMPLATES = (
         "codegen/linked.objdump.txt",
         ("objdump", "-drwC", ("suffix", "/processes/histogram_merge_probe")),
     ),
+    (
+        "codegen/linked.symbols.txt",
+        ("nm", "-n", ("suffix", "/processes/histogram_merge_probe")),
+    ),
 )
 
 
@@ -331,6 +335,11 @@ def main() -> int:
         (
             "codegen/linked.objdump.txt",
             sealed["codegen/linked.objdump.txt"][2],
+            f"{outroot}/processes/histogram_merge_probe",
+        ),
+        (
+            "codegen/linked.symbols.txt",
+            sealed["codegen/linked.symbols.txt"][2],
             f"{outroot}/processes/histogram_merge_probe",
         ),
         ("test.txt", sealed["test.txt"][3], f"{source_root}/Cargo.toml"),
