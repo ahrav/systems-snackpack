@@ -97,10 +97,32 @@ trap 'rm -rf -- "$source_tree" "$private"; rm -f -- "$validation_tmp"' EXIT
 python3 -I -B -c '
 import pathlib, sys, tarfile
 with tarfile.open(sys.argv[1], "r:gz") as archive:
-    for member in archive.getmembers():
+    members = archive.getmembers()
+    names = set()
+    roots = set()
+    for member in members:
         path = pathlib.PurePosixPath(member.name)
-        if path.is_absolute() or ".." in path.parts or not (member.isdir() or member.isfile()):
+        if member.name in names:
+            raise SystemExit(f"duplicate archive member: {member.name}")
+        names.add(member.name)
+        if (
+            not path.parts
+            or path.parts[0] in ("", ".")
+            or path.is_absolute()
+            or ".." in path.parts
+            or not (member.isdir() or member.isfile())
+        ):
             raise SystemExit(f"unsafe or unsupported archive member: {member.name}")
+        roots.add(path.parts[0])
+    if len(roots) != 1:
+        raise SystemExit("source archive must contain exactly one top-level root")
+    root = next(iter(roots))
+    root_entries = [
+        member for member in members
+        if pathlib.PurePosixPath(member.name).parts == (root,)
+    ]
+    if len(root_entries) != 1 or not root_entries[0].isdir():
+        raise SystemExit("source archive must contain one directory entry for its root")
 ' "$output_dir/source-archive.tar.gz"
 tar -xzf "$output_dir/source-archive.tar.gz" -C "$source_tree"
 runner_relative=topics/045-performance-portability-vector-width/experiment/run_host.sh

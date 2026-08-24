@@ -10,8 +10,10 @@ bandwidth, a complete service, or a processor family's frequency policy.
 Each logical chain performs the same number of
 `x = fused_multiply_add(multiplier, addend, x)` steps. Twelve independent
 accumulators keep dependency latency from serializing the loop. The scalar path
-disables compiler vectorization. Intrinsics select 128-bit, 256-bit, and 512-bit
-paths where the architecture and runtime feature check allow them.
+disables compiler vectorization. Compiler intrinsics are C functions that
+request specific processor operations while leaving register allocation to the
+compiler. They select 128-bit, 256-bit, and 512-bit paths where the architecture
+and runtime feature check allow them.
 
 GNU Compiler Collection (GCC) must use these flags:
 

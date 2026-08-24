@@ -10,7 +10,8 @@ from pathlib import Path
 
 
 INSTRUCTION = re.compile(
-    r"^\s*([0-9a-f]+):\s+(?:(?:[0-9a-f]{2,8})\s+)*([.a-z0-9]+)\s*(.*?)\s*$",
+    r"^\s*([0-9a-f]+):\s+(?:(?:[0-9a-f]{2}(?:[0-9a-f]{2}){0,3})\s+)*"
+    r"([.a-z0-9]+)\s*(.*?)\s*$",
     re.IGNORECASE,
 )
 VECTOR_REGISTER = re.compile(r"\b[xyz]mm([0-9]+)\b|\bv([0-9]+)(?:\.[0-9a-z]+)?\b", re.IGNORECASE)
@@ -138,8 +139,18 @@ def check_x86(codegen_dir: Path) -> dict[str, object]:
     return result
 
 
+def require_only(
+    hot_loop: list[tuple[int, str, str]], allowed: set[str], symbol: str
+) -> None:
+    """Reject any instruction outside the FMA and integer loop-control allowlist."""
+
+    unexpected = sorted({mnemonic for _, mnemonic, _ in hot_loop if mnemonic not in allowed})
+    if unexpected:
+        raise ValueError(f"{symbol} hot loop contains unexpected instructions: {unexpected}")
+
+
 def check_arm(codegen_dir: Path) -> dict[str, object]:
-    """Require scalar FMADD and a copy-free 12-destination Advanced SIMD loop."""
+    """Require 12-destination Arm FMA loops with only explicit loop-control work."""
 
     scalar_rows = instructions(codegen_dir / "kernel_scalar.asm")
     scalar_hot_loop = arm_hot_loop(scalar_rows, "fmadd")
@@ -154,13 +165,7 @@ def check_arm(codegen_dir: Path) -> dict[str, object]:
             f"kernel_scalar hot loop has {scalar_fma_count} fmadd operations and "
             f"{len(scalar_destinations)} destinations; expected exactly 12 of each"
         )
-    if any(mnemonic in {"fmov", "mov", "orr"} for _, mnemonic, _ in scalar_hot_loop):
-        raise ValueError("kernel_scalar hot loop contains a register copy")
-    if any(
-        mnemonic in {"ldr", "str", "ldp", "stp", "ld1", "st1"}
-        for _, mnemonic, _ in scalar_hot_loop
-    ):
-        raise ValueError("kernel_scalar hot loop contains a load or store")
+    require_only(scalar_hot_loop, {"add", "fmadd", "cmp", "b.ne"}, "kernel_scalar")
 
     vector_rows = instructions(codegen_dir / "kernel_v128.asm")
     hot_loop = arm_hot_loop(vector_rows, "fmla")
@@ -175,12 +180,7 @@ def check_arm(codegen_dir: Path) -> dict[str, object]:
             f"kernel_v128 hot loop has {fmla_count} fmla operations and "
             f"{len(vector_destinations)} destinations; expected exactly 12 of each"
         )
-    if any(mnemonic in {"mov", "orr"} and len(register_numbers(operands)) >= 2
-           for _, mnemonic, operands in hot_loop):
-        raise ValueError("kernel_v128 hot loop contains a vector-register copy")
-    if any(mnemonic in {"ldr", "str", "ldp", "stp", "ld1", "st1"}
-           for _, mnemonic, _ in hot_loop):
-        raise ValueError("kernel_v128 hot loop contains a load or store")
+    require_only(hot_loop, {"add", "fmla", "cmp", "b.ne"}, "kernel_v128")
 
     return {
         "kernel_scalar": {

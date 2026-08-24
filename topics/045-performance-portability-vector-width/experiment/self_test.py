@@ -48,8 +48,19 @@ def main() -> None:
         raise SystemExit("forced timeout did not produce a failed retained row")
     if row["stdout"] != "partial stdout" or row["stderr"] != "partial stderr":
         raise SystemExit("timeout byte output was not decoded")
+    malformed = "RESULT\tscalar\tnot-an-integer\t0\t1\t1.0\t0\n"
+    if runner.parse_result(malformed) is not None:
+        raise SystemExit("malformed numeric output was accepted")
     args.output.write_text(
-        json.dumps({"status": "pass", "serialized_bytes": len(encoded)}, indent=2, sort_keys=True) + "\n",
+        json.dumps(
+            {
+                "malformed_numeric_output_rejected": True,
+                "serialized_bytes": len(encoded),
+                "status": "pass",
+            },
+            indent=2,
+            sort_keys=True,
+        ) + "\n",
         encoding="utf-8",
     )
 

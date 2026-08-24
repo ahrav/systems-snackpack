@@ -123,10 +123,31 @@ def verify_source_archive(root: Path, host: dict[str, str]) -> None:
         members = archive.getmembers()
         if embedded_commit != expected_commit:
             raise ValueError("Git archive commit does not match host receipt")
+        names = set()
+        roots = set()
         for member in members:
             path = PurePosixPath(member.name)
-            if path.is_absolute() or ".." in path.parts:
-                raise ValueError("source archive contains an unsafe path")
+            if member.name in names:
+                raise ValueError(f"source archive repeats member {member.name}")
+            names.add(member.name)
+            if (
+                not path.parts
+                or path.parts[0] in ("", ".")
+                or path.is_absolute()
+                or ".." in path.parts
+                or not (member.isdir() or member.isfile())
+            ):
+                raise ValueError(f"source archive has unsafe member {member.name}")
+            roots.add(path.parts[0])
+        if len(roots) != 1:
+            raise ValueError("source archive must contain exactly one top-level root")
+        archive_root = next(iter(roots))
+        root_entries = [
+            member for member in members
+            if PurePosixPath(member.name).parts == (archive_root,)
+        ]
+        if len(root_entries) != 1 or not root_entries[0].isdir():
+            raise ValueError("source archive lacks one directory entry for its root")
         anchors = [
             member.name for member in members
             if member.name.endswith("/topics/045-performance-portability-vector-width/experiment/run_host.sh")

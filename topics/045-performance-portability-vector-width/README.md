@@ -91,7 +91,9 @@ latency imposed on later request phases or a sibling hardware thread.
 
 [`experiment/width_bench.c`](experiment/width_bench.c) runs the same recurrence
 over 96 logical double-precision chains. Twelve independent accumulators expose
-instruction-level parallelism without changing useful work. Every mode computes
+instruction-level parallelism: the processor can overlap operations whose
+results do not depend on one another. This does not change useful work. Every
+mode computes
 `x = fused_multiply_add(multiplier, addend, x)`. The scalar check limits the
 absolute checksum difference to
 `64 × 2^-52 × max(1, |scalar checksum|)`.

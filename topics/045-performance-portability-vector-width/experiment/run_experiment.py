@@ -101,11 +101,14 @@ def parse_result(stdout):
     fields = result_lines[0].split("\t")
     if len(fields) != 7:
         return None
-    return {
-        "mode": fields[1], "steps": int(fields[2]),
-        "warmup_ns": int(fields[3]), "main_ns": int(fields[4]),
-        "checksum": float(fields[5]), "observed_cpu": int(fields[6]),
-    }
+    try:
+        return {
+            "mode": fields[1], "steps": int(fields[2]),
+            "warmup_ns": int(fields[3]), "main_ns": int(fields[4]),
+            "checksum": float(fields[5]), "observed_cpu": int(fields[6]),
+        }
+    except ValueError:
+        return None
 
 
 def invoke(binary, mode, steps, warmup_steps, cpu, label):
