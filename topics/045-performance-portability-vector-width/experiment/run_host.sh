@@ -83,6 +83,12 @@ if [[ ! $cpu =~ ^[0-9]+$ || ! $steps =~ ^[1-9][0-9]*$ ]]; then
     printf 'CPU and steps must be integers\n' >&2
     exit 2
 fi
+# validate_receipts.py seals the publication contract to exactly this count;
+# any other value would fail only after the full multi-process run.
+if [[ $steps != 20000000 ]]; then
+    printf 'publication receipts require exactly 20000000 steps\n' >&2
+    exit 2
+fi
 if ! python3 -I -B -c 'import os,sys; sys.exit(int(sys.argv[1]) not in os.sched_getaffinity(0))' "$cpu"; then
     printf 'CPU %s is outside the process affinity set\n' "$cpu" >&2
     exit 2

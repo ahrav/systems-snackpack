@@ -468,6 +468,9 @@ def main() -> None:
         raise ValueError("before and after source manifests differ")
 
     host = key_values(root / "host.txt")
+    missing_fields = sorted(CRITICAL_HOST_KEYS - host.keys())
+    if missing_fields:
+        raise ValueError(f"host receipt lacks critical fields: {', '.join(missing_fields)}")
     architecture = host.get("architecture")
     target = host.get("ssh_target_label")
     if target == "xxl" and architecture != "x86_64":
