@@ -76,7 +76,7 @@ processor-family folklore constant.
 
 | Path | Solves | Does not solve | Main catch | Choose it when |
 |---|---|---|---|---|
-| Scalar | Tiny inputs, tails, and a production baseline fallback | Lane parallelism | More instructions for independent work; this experiment's x86 scalar probe requires FMA | Inputs are short or no vector path passes its gate |
+| Scalar | Tiny inputs, tails, and a production baseline fallback | Lane parallelism | More instructions for independent work; this experiment's x86 scalar probe requires fused multiply-add (FMA) | Inputs are short or no vector path passes its gate |
 | 128 bit | Portable fixed-width parallelism across these two architectures | Memory limits or dispatch overhead | Limited to two double lanes | It wins on the target mix or provides the simplest common path |
 | 256 bit | Four double lanes with AVX2 on x86-64 | AVX-512-only operations | On affected Intel generations, clock policy depends on instruction class, width, and active-core count | It wins request-level measurements and controls code size |
 | 512 bit | Eight double lanes and AVX-512 operations | Bandwidth, tails, or service-wide side effects | Benefit depends on processor model, instruction mix, and active cores | Model-specific measurements include the follow-on workload |
