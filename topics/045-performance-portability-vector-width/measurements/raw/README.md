@@ -24,3 +24,9 @@ unsupported member types, and unexpected archive roots. Then run the validator
 from the retained `source.tar.gz` with the recorded source commit, archive
 digest, target label, and resolved hostname. Its output must be byte-identical
 to the corresponding host-side `receipt-validation.json`.
+
+The retained 2026-08-24 run is in
+[`2026-08-24-edc75b26/`](2026-08-24-edc75b26/). Its `SHA256SUMS` checksum
+manifest binds the source archive, both untouched host bundles, fresh
+target-resolution records, the Arm model supplement, and both independent
+validation reports.
