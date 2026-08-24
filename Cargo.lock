@@ -163,6 +163,10 @@ name = "systems-snackpack-topic-014"
 version = "0.1.0"
 
 [[package]]
+name = "tail-latency-histogram-merge-errors"
+version = "0.1.0"
+
+[[package]]
 name = "topic-021-store-write-path"
 version = "0.1.0"
 
