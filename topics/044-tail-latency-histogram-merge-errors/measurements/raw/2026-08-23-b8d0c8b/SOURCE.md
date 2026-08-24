@@ -22,8 +22,9 @@ manifests recorded before and after execution.
 The checked-in tree has since diverged from this sealed archive: review fixes
 changed `src/lib.rs` (large-count quantile arithmetic, cumulative-counter
 validation, and total-count enforcement on record and merge),
-`experiment/run_processes.py`, and `experiment/validate_receipts.py`.
-`experiment/expected.txt` and the runner are unchanged, and the current
-release probe still prints byte-identical output. These receipts remain
-evidence for the archived `b8d0c8b` revision only; the newer code paths are
-covered by the package's unit tests, not by these bundles.
+`experiment/run_processes.py`, `experiment/validate_receipts.py`, and
+`experiment/run_host.sh` (its self-validation now passes `--host-run`).
+`experiment/expected.txt` is unchanged and the current release probe still
+prints byte-identical output. These receipts remain evidence for the archived
+`b8d0c8b` revision only; the newer code paths are covered by the package's
+unit tests, not by these bundles.

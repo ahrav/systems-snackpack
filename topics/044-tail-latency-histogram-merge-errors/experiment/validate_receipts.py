@@ -46,6 +46,8 @@ RUNNER_RELATIVE = "topics/044-tail-latency-histogram-merge-errors/experiment/run
 
 EXPECTED_RELATIVE = "topics/044-tail-latency-histogram-merge-errors/experiment/expected.txt"
 
+TOPIC_RELATIVE = "topics/044-tail-latency-histogram-merge-errors"
+
 MERGE_SYMBOL = "topic44_checked_merge_four"
 
 # Sealed-command templates for every run_record receipt whose contents carry
@@ -166,7 +168,7 @@ def parse_digest_manifest(path: Path) -> dict[str, str]:
     return entries
 
 
-def manifest_from_archive(path: Path) -> tuple[str, dict[str, str]]:
+def manifest_from_archive(path: Path) -> tuple[str, str, dict[str, str]]:
     """Hash every regular archived source file under its repository path."""
 
     with tarfile.open(path, mode="r:gz") as archive:
@@ -192,10 +194,10 @@ def manifest_from_archive(path: Path) -> tuple[str, dict[str, str]]:
             if extracted is None:
                 raise ValueError(f"cannot read archived file: {relative!r}")
             entries[relative] = hashlib.sha256(extracted.read()).hexdigest()
-    return commit, entries
+    return commit, prefix.strip("/"), entries
 
 
-def check_sealed_command(root: Path, receipt: str, template: tuple) -> None:
+def check_sealed_command(root: Path, receipt: str, template: tuple) -> list[str]:
     """Require a receipt to seal the exact expected command and a clean exit."""
 
     lines = (root / receipt).read_text(encoding="utf-8").splitlines()
@@ -215,6 +217,7 @@ def check_sealed_command(root: Path, receipt: str, template: tuple) -> None:
             raise SystemExit(f"{receipt} does not record the expected command")
     if lines[-1] != "EXIT_STATUS=0":
         raise SystemExit(f"{receipt} does not record a successful exit")
+    return tokens
 
 
 def parse_identity(path: Path) -> dict[str, str]:
@@ -270,7 +273,7 @@ def main() -> int:
     if identity.get("archive_sha256") != archive_digest:
         raise SystemExit("host identity records a different source archive digest")
 
-    archived_commit, archived_manifest = manifest_from_archive(root / "source.tar.gz")
+    archived_commit, source_dir, archived_manifest = manifest_from_archive(root / "source.tar.gz")
     if archived_commit != identity.get("source_commit"):
         raise SystemExit("retained source archive embeds a different commit")
     before_manifest = parse_digest_manifest(root / "source-manifest-before.sha256")
@@ -308,12 +311,60 @@ def main() -> int:
     if "status=PASS" not in (root / "run-processes.txt").read_text(encoding="utf-8"):
         raise SystemExit("process runner did not report PASS")
 
-    for receipt, template in COMMAND_TEMPLATES:
-        check_sealed_command(root, receipt, template)
+    sealed = {
+        receipt: check_sealed_command(root, receipt, template)
+        for receipt, template in COMMAND_TEMPLATES
+    }
     # The runner seals `clang --version` when Clang exists and otherwise
     # writes this exact marker, so any other content is a forged receipt.
     if (root / "clang-version.txt").read_text(encoding="utf-8") != "clang=unavailable\n":
         check_sealed_command(root, "clang-version.txt", ("clang", "--version"))
+
+    # Every sealed path is a fixed function of the run's output root and the
+    # extracted archive directory, so a receipt naming any other workspace or
+    # bundle is forged even when its path suffix looks right. The output root
+    # is anchored on the objdump'd library.o, whose digest is separately bound
+    # to the retained object file.
+    outroot = sealed["codegen/library.objdump.txt"][2].removesuffix("/codegen/library.o")
+    source_root = f"{outroot}/.work/source/{source_dir}"
+    correlations = (
+        (
+            "codegen/linked.objdump.txt",
+            sealed["codegen/linked.objdump.txt"][2],
+            f"{outroot}/processes/histogram_merge_probe",
+        ),
+        ("test.txt", sealed["test.txt"][3], f"{source_root}/Cargo.toml"),
+        ("build.txt", sealed["build.txt"][5], f"{source_root}/Cargo.toml"),
+        (
+            "codegen/rustc-command.txt",
+            sealed["codegen/rustc-command.txt"][13],
+            f"{outroot}/codegen",
+        ),
+        (
+            "codegen/rustc-command.txt",
+            sealed["codegen/rustc-command.txt"][14],
+            f"{source_root}/{TOPIC_RELATIVE}/src/lib.rs",
+        ),
+        (
+            "run-processes.txt",
+            sealed["run-processes.txt"][3],
+            f"{source_root}/{TOPIC_RELATIVE}/experiment/run_processes.py",
+        ),
+        (
+            "run-processes.txt",
+            sealed["run-processes.txt"][5],
+            f"{outroot}/.work/target/release/examples/histogram_merge_probe",
+        ),
+        (
+            "run-processes.txt",
+            sealed["run-processes.txt"][7],
+            f"{source_root}/{TOPIC_RELATIVE}/experiment/expected.txt",
+        ),
+        ("run-processes.txt", sealed["run-processes.txt"][9], f"{outroot}/processes"),
+    )
+    for receipt, actual, expected_path in correlations:
+        if actual != expected_path:
+            raise SystemExit(f"{receipt} references a path outside this run: {actual}")
     if not arguments.host_run:
         # These two receipts are written only after the host's own in-progress
         # validation completes, so the host run cannot require them without
@@ -332,7 +383,8 @@ def main() -> int:
         if (
             len(tokens) != 9
             or tokens[0:3] != ["python3", "-I", "-B"]
-            or not tokens[3].endswith("/experiment/validate_receipts.py")
+            or tokens[3] != f"{source_root}/{TOPIC_RELATIVE}/experiment/validate_receipts.py"
+            or tokens[4] != outroot
             or tokens[5:] != [
                 "--expected-label",
                 arguments.expected_label,
