@@ -375,14 +375,25 @@ def recompute(raw_path: Path, summary: dict, manifest: dict, architecture: str) 
         "ci95_ratio_high": math.exp(mean_log + half_width),
         "ci_method": "two-sided paired-t interval over complete-block log contrasts",
     }
+    if summary["aa_identical_mode"] and not 0.90 <= recomputed["geomean_ratio"] <= 1.10:
+        raise ValueError(f"{raw_path.name}: A/A point estimate is outside [0.90, 1.10]")
     retained = summary["contrast"]
     if set(retained) != set(recomputed):
         raise ValueError(f"{raw_path.name}: contrast summary fields differ")
     for key, value in recomputed.items():
         if isinstance(value, str):
-            if retained[key] != value:
+            if not isinstance(retained[key], str) or retained[key] != value:
                 raise ValueError(f"{raw_path.name}:{key}: method label differs")
+        elif isinstance(value, int):
+            if isinstance(retained[key], bool) or not isinstance(retained[key], int):
+                raise ValueError(f"{raw_path.name}:{key}: integer field has the wrong type")
+            if retained[key] != value:
+                raise ValueError(f"{raw_path.name}:{key}: integer field differs")
         else:
+            if isinstance(retained[key], bool) or not isinstance(retained[key], (int, float)):
+                raise ValueError(f"{raw_path.name}:{key}: numeric field has the wrong type")
+            if not math.isfinite(float(retained[key])):
+                raise ValueError(f"{raw_path.name}:{key}: numeric field is not finite")
             close(float(retained[key]), float(value), f"{raw_path.name}:{key}")
     with raw_path.with_name(raw_path.name.replace("-raw.jsonl", "-contrasts.csv")).open(
         newline="", encoding="utf-8"
@@ -406,7 +417,10 @@ def recompute(raw_path: Path, summary: dict, manifest: dict, architecture: str) 
         raise ValueError(f"{raw_path.name}: candidate metrics differ from raw rows")
     if summary["failed_processes"] != 0:
         raise ValueError(f"{raw_path.name}: summary records failed processes")
-    return recomputed
+    # The independent arithmetic above can differ by one binary64 unit across
+    # libm implementations. Return the retained values only after validating
+    # them so the digest-bound report is byte-stable across architectures.
+    return dict(retained)
 
 
 def main() -> None:
@@ -594,15 +608,15 @@ def main() -> None:
         ) != (baseline, candidate, aa, seed, expected_blocks):
             raise ValueError(f"{summary['name']}: mode, A/A, seed, or block identity differs")
 
-    recomputed = {}
+    validated_contrasts = {}
     for summary in summaries:
         name = summary["name"]
         retained = json.loads((root / f"experiment/{name}-summary.json").read_text(encoding="utf-8"))
         if retained != summary:
             raise ValueError(f"{name}: individual and aggregate summaries differ")
-        recomputed[name] = recompute(root / f"experiment/{name}-raw.jsonl", summary, manifest, architecture)
-        if summary["aa_identical_mode"] and not 0.90 <= recomputed[name]["geomean_ratio"] <= 1.10:
-            raise ValueError(f"{name}: A/A point estimate is outside [0.90, 1.10]")
+        validated_contrasts[name] = recompute(
+            root / f"experiment/{name}-raw.jsonl", summary, manifest, architecture
+        )
 
     digest_paths = [root / relative for relative in REQUIRED]
     if architecture == "x86_64":
@@ -618,7 +632,7 @@ def main() -> None:
         "architecture": architecture,
         "ssh_target_label": target,
         "binary_sha256": actual_binary_digest,
-        "recomputed": recomputed,
+        "validated_contrasts": validated_contrasts,
         "input_sha256": {
             str(path.relative_to(root)): sha256(path) for path in sorted(digest_paths)
         },
