@@ -1,8 +1,11 @@
 # Performance portability: choose vector width from evidence
 
-Wider vectors perform more useful updates per instruction. They can also change
-the available execution ports, clock rate, tail handling, and fixed dispatch
-cost. Instruction-set support establishes legality, not the fastest width.
+Wider vectors perform more useful updates per instruction. They can also use a
+different set of arithmetic pipelines, change clock rate, require special work
+for leftover elements, and add one-time path-selection or setup cost. The
+specialist terms for these effects are execution ports, tail handling, and
+dispatch cost. Instruction-set support establishes legality, not the fastest
+width.
 
 Single Instruction, Multiple Data (SIMD) applies one instruction to two or more
 independent values. A lane is one value inside that instruction. The experiment
@@ -27,17 +30,21 @@ this first visit records SVE availability but does not execute an SVE path.
 
 ## Bound throughput before timing
 
-The useful rate cannot exceed either memory delivery or compute execution:
+The useful rate cannot exceed either memory delivery or compute execution. In
+this model, `bytes_per_element` includes every required read and write, and each
+counted vector operation must complete one useful update in every lane:
 
 ```text
 rate = min(memory_bytes_per_second / bytes_per_element,
            cycles_per_second * vector_operations_per_cycle * lanes_per_vector)
 ```
 
-For 32 GB/s and eight bytes per element, memory caps the rate at four billion
-elements per second. A four-lane path at 3 GHz and two vector operations per
-cycle has a 24-billion-element compute bound, so extra lanes cannot help until
-memory traffic changes. [`roofline_elements_per_second`] evaluates this bound.
+For an illustrative, non-measured case with 32 gigabytes per second (GB/s) and
+eight bytes per element, memory caps the rate at four billion elements per
+second. A four-lane path at an illustrative 3 gigahertz and two vector
+operations per cycle has a 24-billion-elements-per-second compute bound, so
+extra lanes cannot help until memory traffic changes.
+[`roofline_elements_per_second`] evaluates this bound.
 
 When fixed useful work halves the dynamic instruction count, a measured clock
 ratio changes the elapsed-time expectation:
@@ -69,9 +76,9 @@ processor-family folklore constant.
 
 | Path | Solves | Does not solve | Main catch | Choose it when |
 |---|---|---|---|---|
-| Scalar | Tiny inputs, tails, universal fallback | Lane parallelism | More instructions for independent work | Inputs are short or no vector path passes its gate |
+| Scalar | Tiny inputs, tails, and a production baseline fallback | Lane parallelism | More instructions for independent work; this experiment's x86 scalar probe requires FMA | Inputs are short or no vector path passes its gate |
 | 128 bit | Portable fixed-width parallelism across these two architectures | Memory limits or dispatch overhead | Limited to two double lanes | It wins on the target mix or provides the simplest common path |
-| 256 bit | Four double lanes with AVX2 on x86-64 | AVX-512-only operations | Documented Intel clock policies classify instruction mix as well as width | It wins request-level measurements and controls code size |
+| 256 bit | Four double lanes with AVX2 on x86-64 | AVX-512-only operations | On affected Intel generations, clock policy depends on instruction class, width, and active-core count | It wins request-level measurements and controls code size |
 | 512 bit | Eight double lanes and AVX-512 operations | Bandwidth, tails, or service-wide side effects | Benefit depends on processor model, instruction mix, and active cores | Model-specific measurements include the follow-on workload |
 | SVE | One vector-length-agnostic Arm loop | A universal physical width or speedup | Correct code must tolerate the runtime vector length | An SVE implementation beats the fixed-width path on supported Arm targets |
 
@@ -85,14 +92,20 @@ latency imposed on later request phases or a sibling hardware thread.
 [`experiment/width_bench.c`](experiment/width_bench.c) runs the same recurrence
 over 96 logical double-precision chains. Twelve independent accumulators expose
 instruction-level parallelism without changing useful work. Every mode computes
-`x = fused_multiply_add(multiplier, addend, x)`. The scalar check permits only a
-small floating-point reduction-order difference.
+`x = fused_multiply_add(multiplier, addend, x)`. The scalar check limits the
+absolute checksum difference to
+`64 × 2^-52 × max(1, |scalar checksum|)`.
 
-[`experiment/run_experiment.py`](experiment/run_experiment.py) launches fresh
-processes in seed-shuffled ABBA and BAAB blocks. One complete four-process block
-is one replication. It reports a geometric candidate-to-baseline time ratio and
-a two-sided 95% paired Student-t interval over block log contrasts. An identical
-treatment A/A comparison screens label and position imbalance.
+[`experiment/run_experiment.py`](experiment/run_experiment.py) calls the
+baseline mode A and the candidate mode B. It launches fresh processes in
+four-process ABBA and BAAB blocks, so both modes occupy early and late positions.
+For each block, the log contrast is the average logarithm of the two candidate
+times minus the average logarithm of the two baseline times. One complete block
+is one replication. A paired Student-t interval describes uncertainty across
+the eight block contrasts. Exponentiating their mean gives the geometric
+candidate-to-baseline ratio; exponentiating their standard deviation gives the
+multiplicative standard-deviation factor. An A/A control assigns both labels to
+the same mode and screens label and position imbalance.
 
 [`experiment/run_host.sh`](experiment/run_host.sh) binds a Git archive to one
 authorized Linux target, records the host and toolchain, runs Rust and C
@@ -104,20 +117,29 @@ the acceptance contract. Final host records belong under [`measurements/`](measu
 
 The timing interval covers between-block variation during one run window. The
 primary timer covers only the fixed-work kernel after same-mode warmup. Linux
-`perf stat` counters cover process startup, warmup, and the main kernel because
-they surround the child process. The x86-64 run groups core cycles with reference
-cycles when the model exposes both events. The Arm run records core cycles only.
+`perf stat` user-mode counters cover process startup, warmup, and the main kernel
+because they surround the child process. The x86-64 run groups user-mode core
+cycles with reference cycles when the model exposes both events. Reference
+cycles are intended not to scale with clock frequency. The Arm run records
+user-mode core cycles only.
 
-Cycle-to-reference-cycle ratios can support a clock-rate explanation on the
-tested x86 processor. They cannot prove a frequency-license transition. Virtual
-machine scheduling, thermal drift, shared-machine work, and shorter steal
-intervals can remain. A result names one host, compiler, binary, input, CPU
-placement, active-core state, and run window. It is not an instruction-set-wide
-claim.
+Cycle-to-reference-cycle ratios can be consistent with an effective-clock
+change on the tested x86 processor. Because the counter scope differs from the
+main timer, the ratio is a diagnostic consistency check, not an independent
+prediction. A frequency license is an internal processor classification used to
+select an allowed power and clock range; this experiment cannot observe or
+prove a license transition. Virtual-machine scheduling, thermal drift, and
+shared-machine work can remain. Linux steal time counts intervals when a virtual
+processor wanted to run but the hypervisor did not schedule it; intervals
+shorter than that counter's resolution can remain invisible. A result names one
+host, compiler, binary, input, logical-processor placement, recorded
+simultaneous-multithreading topology, and run window. It is not an
+instruction-set-wide claim.
 
 ## Selection guide
 
-1. Keep scalar as the oracle and fallback.
+1. Keep a production-baseline scalar path as the oracle and fallback; the x86
+   scalar path in this focused probe is narrower but still requires FMA.
 2. Dispatch only after exact feature detection.
 3. Inspect the generated loop for every deployed target.
 4. Measure fixed request sizes with process-level, order-balanced replication.
@@ -128,7 +150,7 @@ claim.
 Primary sources and their version boundaries are in
 [`references.md`](references.md).
 
-[`roofline_elements_per_second`]: crate::roofline_elements_per_second
-[`PathCost`]: crate::PathCost
-[`fixed_work_time_ns`]: crate::fixed_work_time_ns
-[`break_even_elements`]: crate::break_even_elements
+[`roofline_elements_per_second`]: src/lib.rs
+[`PathCost`]: src/lib.rs
+[`fixed_work_time_ns`]: src/lib.rs
+[`break_even_elements`]: src/lib.rs

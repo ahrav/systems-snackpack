@@ -1,8 +1,8 @@
 # Focused vector-width experiment
 
 This experiment asks how vector width changes one compute-bound recurrence on
-one pinned logical CPU. It does not measure memory bandwidth, a complete service,
-or a processor family's frequency policy.
+one pinned logical central processing unit (CPU). It does not measure memory
+bandwidth, a complete service, or a processor family's frequency policy.
 
 ## Workload
 
@@ -20,16 +20,21 @@ GNU Compiler Collection (GCC) must use these flags:
 -ffp-contract=fast -fno-omit-frame-pointer
 ```
 
-The correctness check compares every supported path with the scalar result. A
-small tolerance permits a different final reduction order. The generated-code
-gate is separate: on AArch64 it requires exactly 12 independent `fmla`
-destinations and no vector copy or memory instruction in the detected hot loop.
-That gate catches a destination-operand mistake whose algebraic result still
-passes the checksum.
+The correctness check compares every supported path with the scalar result. It
+limits the absolute checksum difference to
+`64 × 2^-52 × max(1, |scalar checksum|)`, allowing only bounded floating-point
+reduction-order variation. The generated-code gate is separate: on AArch64 it
+requires exactly 12 independent `fmla` destinations and no vector copy or
+memory instruction in the detected hot loop. That gate rejects a
+destination-operand mistake even when the final checksum remains within the
+bound.
 
 ## Process schedule
 
-[`run_experiment.py`](run_experiment.py) applies this fixed schedule:
+[`run_experiment.py`](run_experiment.py) calls the baseline mode A and the
+candidate mode B. ABBA and BAAB are order-balanced four-process blocks: each
+mode occupies both early and late positions. An A/A control assigns both labels
+to the same mode. The script applies this fixed schedule:
 
 1. Reject an existing output directory and record the binary digest.
 2. Run every supported mode for the exact 20,000,000-step workload. Use that
@@ -44,26 +49,35 @@ passes the checksum.
 7. Recheck the binary digest after the fixed schedule.
 
 The child environment contains only `LANG=C`, `LC_ALL=C`, `PATH` set to the
-platform default executable path, and `TZ=UTC`. Each process has a 120-second
-deadline.
+platform default executable path, and `TZ=UTC`, where UTC means Coordinated
+Universal Time. Each process has a 120-second deadline.
 
-One complete four-process block log contrast is one replication. The geometric
-candidate-to-baseline ratio and two-sided paired Student-t interval use eight
-block contrasts and seven degrees of freedom. Each interval is a marginal,
-unadjusted description of its named comparison. The family of intervals does
-not provide joint 95% coverage.
+For one block, the log contrast is the average logarithm of the two candidate
+times minus the average logarithm of the two baseline times. One complete block
+is one replication. Exponentiating the mean of eight block contrasts gives the
+geometric candidate-to-baseline ratio. The paired Student-t interval describes
+uncertainty across those eight fresh-process blocks and uses seven degrees of
+freedom. Exponentiating the log-contrast standard deviation gives the
+multiplicative standard-deviation factor. Each interval describes only its
+named comparison; the set of intervals does not jointly provide 95% coverage.
 
-The primary timer is `CLOCK_MONOTONIC_RAW` around the main fixed-work kernel. It
-excludes process startup and same-mode warmup. Linux `perf stat` surrounds the
-whole child, so its counters include startup, warmup, and the main kernel. On
-x86-64, core and reference cycles form one simultaneous group. AArch64 records
-core cycles because the required Arm host does not expose reference cycles.
+The primary timer uses Linux `CLOCK_MONOTONIC_RAW`, a monotonic clock not
+adjusted by wall-clock corrections, around the main fixed-work kernel. It
+excludes process startup and same-mode warmup. Linux `perf stat`, the hardware
+counter command, surrounds the whole child, so its user-mode counters include
+startup, warmup, and the main kernel. On x86-64, user-mode core and reference
+cycles form one simultaneous group. Reference cycles advance independently of
+frequency scaling when the platform exposes the event. AArch64 records
+user-mode core cycles because the required Arm host does not expose reference
+cycles.
 
 ## Checked-source host run
 
-Create a Git archive from the exact publication candidate, upload it beside an
-extracted copy, and invoke the archived runner. The output directory must not
-exist and must remain outside the repository.
+Create a Git archive from the exact publication candidate, transfer it through
+the authorized Secure Shell (SSH) target, and invoke the archived runner. The
+target label and resolved hostname bind the receipt to the SSH route and the
+machine that executed it. The output directory must not exist and must remain
+outside the repository.
 
 ```bash
 SOURCE_COMMIT=<40-hex-commit> \
@@ -91,6 +105,7 @@ python3 -I -B experiment/validate_receipts.py /path/to/host-receipts \
   --output /tmp/topic45-independent-validation.json
 ```
 
-Review raw order, the A/A result, counter running time, per-CPU steal ticks,
-generated loops, and host state before attributing a timing ratio to vector
-width or clock behavior.
+Review raw order, the A/A result, counter running time, and per-CPU steal ticks,
+which count scheduler-accounting intervals when a virtual CPU wanted to run but
+the hypervisor did not schedule it. Also inspect generated loops and host state
+before attributing a timing ratio to vector width or clock behavior.
