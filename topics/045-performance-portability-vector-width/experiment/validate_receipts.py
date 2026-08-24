@@ -72,6 +72,24 @@ CRITICAL_HOST_KEYS = {
     "build_flags",
 }
 
+# One stable marker per tool section that run_host.sh appends after the
+# key/value block. A receipt truncated after the keys would otherwise pass
+# even though the CPU identity, toolchain versions, target features, and
+# perf event sections are part of the acceptance contract.
+CRITICAL_HOST_SECTIONS = (
+    "Architecture:",  # lscpu CPU identity and topology
+    "gcc (",  # gcc --version banner
+    "Python 3.",  # python3 --version
+    "GNU objdump",  # objdump --version
+    "GNU nm",  # nm --version
+    "rustc 1.",  # rustc -Vv
+    "cargo 1.",  # cargo -Vv
+    "perf version",  # perf version
+    "Features supported by",  # rustc --print target-features
+    "The following options",  # gcc -march=native -Q --help=target
+    "cpu-cycles",  # perf list hw
+)
+
 
 def sha256(path: Path) -> str:
     """Return one file's SHA-256 digest."""
@@ -471,6 +489,10 @@ def main() -> None:
     missing_fields = sorted(CRITICAL_HOST_KEYS - host.keys())
     if missing_fields:
         raise ValueError(f"host receipt lacks critical fields: {', '.join(missing_fields)}")
+    host_text = (root / "host.txt").read_text(encoding="utf-8")
+    missing_sections = [marker for marker in CRITICAL_HOST_SECTIONS if marker not in host_text]
+    if missing_sections:
+        raise ValueError(f"host receipt lacks tool sections: {', '.join(missing_sections)}")
     architecture = host.get("architecture")
     target = host.get("ssh_target_label")
     if target == "xxl" and architecture != "x86_64":

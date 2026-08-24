@@ -282,6 +282,12 @@ static uint64_t parse_u64(const char *text, const char *name) {
 }
 
 static int correctness_check(uint64_t steps) {
+    /* The scalar oracle is compiled with target("fma") on x86-64; calling it
+     * on a host without FMA raises SIGILL instead of a diagnostic. */
+    if (!mode_supported("scalar")) {
+        fprintf(stderr, "scalar reference kernel is unsupported on this host\n");
+        return 1;
+    }
     const double reference = kernel_scalar(steps);
     const char *modes[] = {"scalar", "v128", "v256", "v512"};
     const size_t count = sizeof(modes) / sizeof(modes[0]);
