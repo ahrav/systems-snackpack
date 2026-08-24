@@ -1,0 +1,8 @@
+recorded_utc=2026-08-24T15:44:44Z
+ssh_alias=xxl
+resolved_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+runtime_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+architecture=x86_64
+python=Python 3.9.25
+available_cpus=192
+probe_affinity=0-191

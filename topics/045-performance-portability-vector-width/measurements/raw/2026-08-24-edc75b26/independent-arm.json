@@ -1,0 +1,56 @@
+{
+  "architecture": "aarch64",
+  "binary_sha256": "ae4ca16e399cc45bee0d950c771559cd504ac8a240f02f38d22880e14565c4a8",
+  "input_sha256": {
+    "binary.sha256": "6d5dd509039e74f07aea318755f412e595965aabd7f0808788feddb999759cc1",
+    "binary/width_bench": "ae4ca16e399cc45bee0d950c771559cd504ac8a240f02f38d22880e14565c4a8",
+    "build.txt": "5d3f596c2c8592db62f6f00ffd09eb59541e9e6bf5d65063bca61bea7bedff05",
+    "codegen/all.asm": "2efa06ff200d783727304f2980573708f81c04032c35a69edb3a48bdb01c4ba9",
+    "codegen/codegen-check.json": "0528ecd91180245f4c79325b41bbf77024bccd85669ba816fac959a905b51034",
+    "codegen/kernel_scalar.asm": "2ea409f4724ece8bd1daf927c6d6fc8cb288d11de294c0d7850803f6f43727de",
+    "codegen/kernel_v128.asm": "b7f8fe9090d4fd9a9f80b1c99edd99aec28b624baaba96da2ecf4637b6a920b0",
+    "codegen/sha256sums.txt": "0ee4cf40b48bdb2d3baa655bbf0a8ffaf3b0b52db8ad2f73de98ff63daae54ff",
+    "codegen/symbols.txt": "3cb6b9b24d007124b9e980d2210a80ecd06d7ba326061f01a41f4639a737dc22",
+    "correctness.txt": "b8617be1edf0c46f6db52695e758bd9b59978919957d1113dc1daecdf0acd5ec",
+    "experiment/aa-v128-contrasts.csv": "de4112af69949e04ede81bce93a596e8732ac3734fb5cf31587392a2c94dd9c8",
+    "experiment/aa-v128-raw.jsonl": "23f5aa52b8218f3b81854e794f5a905a2c1797afcda7083567f6dd771497dd95",
+    "experiment/aa-v128-summary.json": "1a3bfcffc3dd571c7420cc7e0cc96353253a5859a076b092813b87851f353cf9",
+    "experiment/all-summaries.json": "f7772e439db776dc9df3e4ef0e9c463ad18473b078e2fa382f3e65dca90f4c99",
+    "experiment/binary-final.sha256": "84f1bc82f2602d4ac7df5af2da4d80307ff905459aef97cad1042fce9db1b648",
+    "experiment/manifest.json": "86f4e598628c9b38c312c1606ea805aa8b588231a0de2767dc93f5d884559013",
+    "experiment/scalar-vs-v128-contrasts.csv": "db6bb8211bde062f854ac2ea57c85e7064f7c69a63b2d539cae90448c89af2b6",
+    "experiment/scalar-vs-v128-raw.jsonl": "2e8e8f748b406b39eb81b3edc93654a35d5bf9ff2eec31d88391fb3301f82b95",
+    "experiment/scalar-vs-v128-summary.json": "dba719e8fc9afcce589787074c22f2221d6c129012847348bf949da11b43f71b",
+    "host.txt": "22a98ba5613a17cadff8e1eb1adceb9576e220b5f0521ff117401bc64d72ecae",
+    "modes.txt": "97393c9de5b2eecb65964c22ac49e45665956df51fc850fe132569c36497e95d",
+    "protocol-self-test.json": "bb32ed2b154c3b3e7c3856bd9602362a5e799784b91cf05e9a5687532ef06828",
+    "source-archive.tar.gz": "1c1f7c89a513ec6409367b3b5605def6748ba95d2a9f1a55fcfe67c111031852",
+    "source-manifest-after.sha256": "2e746416f789dac3a01e324203a0b121ca36b0b0098caadaa29e3fa420a75fd9",
+    "source-manifest-before.sha256": "2e746416f789dac3a01e324203a0b121ca36b0b0098caadaa29e3fa420a75fd9",
+    "source-manifest.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "ssh_target_label": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+  "status": "pass",
+  "validated_contrasts": {
+    "aa-v128": {
+      "ci95_ratio_high": 1.028307558607472,
+      "ci95_ratio_low": 0.9836657964277908,
+      "ci_method": "two-sided paired-t interval over complete-block log contrasts",
+      "complete_blocks": 8,
+      "geomean_ratio": 1.0057390186377062,
+      "log_contrast_mean": 0.005722613207696181,
+      "log_contrast_sd": 0.026540202811356994,
+      "multiplicative_sd": 1.0268955305191219
+    },
+    "scalar-vs-v128": {
+      "ci95_ratio_high": 0.5034191774344082,
+      "ci95_ratio_low": 0.4866904377462368,
+      "ci_method": "two-sided paired-t interval over complete-block log contrasts",
+      "complete_blocks": 8,
+      "geomean_ratio": 0.49498414099383287,
+      "log_contrast_mean": -0.7032295553229844,
+      "log_contrast_sd": 0.020208548672683627,
+      "multiplicative_sd": 1.020414123849209
+    }
+  }
+}
