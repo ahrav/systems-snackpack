@@ -104,6 +104,26 @@ the whole block on any invalid record, and captures the stable
 [`experiment/README.md`](experiment/README.md) for runnable commands and
 [`rounds/01.md`](rounds/01.md) for the acceptance contract.
 
+## Checked-source result on 2026-08-25
+
+The sealed source was commit `e4fb542f6640566f8f7fbcd220eb1f52c388df04`.
+Each host ran eight primary blocks and four padded A/A blocks, or 48 fresh
+processes and 960 million checked increments. The primary interval covers
+variation across eight complete blocks in that one run window.
+
+| Exact host | Packed/padded geometric mean | Descriptive 95% block bootstrap | Padded A/A | Atomic lowering |
+|---|---:|---:|---:|---|
+| Arm `c7g.16xlarge`, part `0xd40`, CPUs 0 and 1 | 2.9770 | [2.8985, 3.0598] | 1.00036 | unrolled `ldadd` |
+| `xxl`, Intel Xeon Platinum 8488C, CPUs 0 and 1 | 5.4294 | [5.1962, 5.6523] | 1.00720 | unrolled `lock incq` |
+
+On these placements, moving the counters to separate measured lines reduced
+fixed-work time. The ratios differ by host, but this run cannot assign the
+difference to the instruction set, processor vendor, or one coherence path.
+The compilers, processor models, virtual-machine environments, and atomic
+lowerings also differ. The [Arm note](measurements/2026-08-25-arm.md), [`xxl`
+note](measurements/2026-08-25-xxl.md), and [comparison
+note](measurements/2026-08-25-comparison.md) retain the full boundaries.
+
 ## Keep the evidence boundary explicit
 
 Elapsed time can show that changing only layout changed this fixed workload on
