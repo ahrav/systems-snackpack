@@ -1,0 +1,17 @@
+[package]
+name = "cache-coherence-false-sharing"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "cache_coherence_false_sharing"
+path = "src/lib.rs"
+
+[[example]]
+name = "cache_coherence_probe"
+path = "examples/cache_coherence_probe.rs"
+
+[lints]
+workspace = true
