@@ -1,0 +1,15 @@
+[arm]
+captured_utc=2026-08-26T14:46:34Z
+hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+architecture=aarch64
+midr_el1=0x00000000411fd401
+vendor_id=ARM
+lscpu_model=1
+
+[xxl]
+captured_utc=2026-08-26T14:46:33Z
+hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+architecture=x86_64
+vendor_id=GenuineIntel
+model_name=Intel(R) Xeon(R) Platinum 8488C
+lscpu_model=143

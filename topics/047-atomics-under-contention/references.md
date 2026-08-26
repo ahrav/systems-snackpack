@@ -32,6 +32,9 @@ the cited machines or the checked-source measurements in this topic.
   note](https://developer.arm.com/community/arm-community-blogs/b/tools-software-ides-blog/posts/making-the-most-of-the-arm-architecture-in-gcc-10)
   contrasts direct LSE code with load-exclusive/store-exclusive loops and
   runtime-selected out-of-line atomics.
+- [Linux AArch64 processor identifiers](https://github.com/torvalds/linux/blob/master/arch/arm64/include/asm/cputype.h)
+  map Arm implementer `0x41` and part `0xd40` to Neoverse V1. This identifies
+  the observed model register; it does not generalize a timing result.
 - [Intel 64 and IA-32 Software Developer's Manuals, revision
   092](https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html)
   define locked-operation ordering and distinguish cache locking from external
