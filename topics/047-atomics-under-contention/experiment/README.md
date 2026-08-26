@@ -85,8 +85,11 @@ objdump -d -C --no-show-raw-insn \
 The x86-64 binary should retain locked read-modify-write instructions, including
 `cmpxchg` in the CAS kernel. AArch64 can contain Large System Extensions (LSE)
 instructions, an exclusive-load/store loop, or linked helper calls, depending
-on the exact target features. Record the linked image. Do not infer timing,
-fairness, or cache-line handoffs from an instruction name.
+on the exact target features. Both shared and striped stable symbol names must
+remain in the symbol table. The optimizer may bind them to one address because
+their machine-code bodies are identical; `symbol-addresses.json` records that
+alias explicitly. Record the linked image. Do not infer timing, fairness, or
+cache-line handoffs from an instruction name.
 
 ## Create a source-bound host receipt
 

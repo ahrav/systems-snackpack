@@ -62,6 +62,7 @@ REQUIRED = (
     *(f"smoke/{mode}.{suffix}" for mode in MODES for suffix in ("json", "stderr", "status")),
     "codegen/all.asm",
     "codegen/symbols.txt",
+    "codegen/symbol-addresses.json",
     "codegen/topic47_shared_fetch_add.asm",
     "codegen/topic47_cas_increment.asm",
     "codegen/topic47_striped_fetch_add.asm",
@@ -390,17 +391,31 @@ def close_tree(actual: object, expected: object, path: str = "summary") -> None:
         )
 
 
-def function_body(disassembly: str, symbol: str) -> str | None:
+def linked_symbol_addresses(symbol_table: str) -> dict[str, int]:
+    addresses = {}
+    for line in symbol_table.splitlines():
+        match = re.match(r"^([0-9a-f]+)\s+\S\s+(.+)$", line.strip())
+        if match and match.group(2) in SYMBOLS:
+            addresses[match.group(2)] = int(match.group(1), 16)
+    return addresses
+
+
+def function_body_at_address(disassembly: str, address: int) -> tuple[str, str] | None:
     lines = disassembly.splitlines()
-    start = next((index for index, line in enumerate(lines) if line.strip().endswith(f"<{symbol}>:")), None)
-    if start is None:
+    headers = []
+    for index, line in enumerate(lines):
+        match = re.match(r"^([0-9a-f]+) <(.+)>:$", line.strip())
+        if match:
+            headers.append((index, int(match.group(1), 16), match.group(2)))
+    header_index = next(
+        (position for position, (_, candidate, _) in enumerate(headers) if candidate == address),
+        None,
+    )
+    if header_index is None:
         return None
-    end = len(lines)
-    for index in range(start + 1, len(lines)):
-        if re.match(r"^[0-9a-f]+ <.*>:$", lines[index].strip()):
-            end = index
-            break
-    return "\n".join(lines[start:end]) + "\n"
+    start, _, label = headers[header_index]
+    end = headers[header_index + 1][0] if header_index + 1 < len(headers) else len(lines)
+    return "\n".join(lines[start:end]) + "\n", label
 
 
 def validate_codegen(root: Path, architecture: str) -> None:
@@ -418,12 +433,27 @@ def validate_codegen(root: Path, architecture: str) -> None:
         raise SystemExit(f"cannot inspect retained linked binary: {error!r}")
     require((root / "codegen/all.asm").read_text() == disassembly, "retained full disassembly differs from binary")
     require((root / "codegen/symbols.txt").read_text() == symbols, "retained symbol table differs from binary")
+    addresses = linked_symbol_addresses(symbols)
+    require(set(addresses) == set(SYMBOLS), "linked image lacks a stable kernel symbol")
     bodies = {}
+    expected_mapping = {}
     for symbol in SYMBOLS:
-        body = function_body(disassembly, symbol)
-        require(body is not None, f"linked image lacks {symbol}")
+        body_and_label = function_body_at_address(disassembly, addresses[symbol])
+        require(body_and_label is not None, f"linked image lacks a body for {symbol}")
+        body, label = body_and_label
         require((root / f"codegen/{symbol}.asm").read_text() == body, f"retained {symbol} body differs")
         bodies[symbol] = body
+        expected_mapping[symbol] = {
+            "address": f"0x{addresses[symbol]:x}",
+            "disassembly_label": label,
+        }
+    require(
+        exact_equal(
+            strict_json((root / "codegen/symbol-addresses.json").read_text()),
+            expected_mapping,
+        ),
+        "stable symbol-address mapping differs from linked image",
+    )
     if architecture == "x86_64":
         add_pattern = r"\block\b.*\b(inc|add|xadd)"
         cas_pattern = r"\block\b.*\bcmpxchg"
@@ -460,7 +490,12 @@ def validate_codegen(root: Path, architecture: str) -> None:
         "codegen check receipt mismatch",
     )
     manifest = recorded_manifest(root / "codegen/sha256sums.txt")
-    expected_paths = {"codegen/all.asm", "codegen/symbols.txt", *(f"codegen/{symbol}.asm" for symbol in SYMBOLS)}
+    expected_paths = {
+        "codegen/all.asm",
+        "codegen/symbols.txt",
+        "codegen/symbol-addresses.json",
+        *(f"codegen/{symbol}.asm" for symbol in SYMBOLS),
+    }
     require(set(manifest) == expected_paths, "codegen digest manifest has the wrong paths")
     for relative, digest in manifest.items():
         require(sha256(root / relative) == digest, f"codegen digest mismatch: {relative}")

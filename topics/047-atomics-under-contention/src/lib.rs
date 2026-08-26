@@ -427,8 +427,9 @@ pub extern "C" fn topic47_cas_increment(counter: &AtomicU64, iterations: u64) ->
 ///
 /// This separate symbol has the same local operation as
 /// [`topic47_shared_fetch_add`]. Its runtime distinction comes from each worker
-/// receiving a different 128-byte allocation slot. The counter wraps modulo
-/// 2^64.
+/// receiving a different 128-byte allocation slot. An optimizer may retain the
+/// two stable symbol names at one shared code address because their bodies are
+/// identical. The counter wraps modulo 2^64.
 #[unsafe(no_mangle)]
 #[inline(never)]
 pub extern "C" fn topic47_striped_fetch_add(counter: &AtomicU64, iterations: u64) {

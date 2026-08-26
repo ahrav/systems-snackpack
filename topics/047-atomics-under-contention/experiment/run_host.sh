@@ -324,13 +324,16 @@ done
 mkdir -- "$output_dir/codegen"
 objdump -d -C --no-show-raw-insn "$binary" >"$output_dir/codegen/all.asm"
 nm -n -C --defined-only "$binary" >"$output_dir/codegen/symbols.txt"
-python3 -I -B - "$output_dir/codegen/all.asm" "$output_dir/codegen" <<'PY'
+python3 -I -B - "$output_dir/codegen/all.asm" "$output_dir/codegen/symbols.txt" \
+    "$output_dir/codegen" <<'PY'
+import json
 import pathlib
 import re
 import sys
 
 source = pathlib.Path(sys.argv[1]).read_text()
-destination = pathlib.Path(sys.argv[2])
+symbol_table = pathlib.Path(sys.argv[2]).read_text()
+destination = pathlib.Path(sys.argv[3])
 symbols = (
     "topic47_shared_fetch_add",
     "topic47_cas_increment",
@@ -338,19 +341,43 @@ symbols = (
     "topic47_batched_fetch_add",
 )
 lines = source.splitlines()
+addresses = {}
+for line in symbol_table.splitlines():
+    match = re.match(r"^([0-9a-f]+)\s+\S\s+(.+)$", line.strip())
+    if match and match.group(2) in symbols:
+        addresses[match.group(2)] = int(match.group(1), 16)
+if set(addresses) != set(symbols):
+    missing = sorted(set(symbols) - set(addresses))
+    raise SystemExit(f"linked image lacks stable symbols: {missing}")
+
+headers = []
+for index, line in enumerate(lines):
+    match = re.match(r"^([0-9a-f]+) <(.+)>:$", line.strip())
+    if match:
+        headers.append((index, int(match.group(1), 16), match.group(2)))
+
+mapping = {}
 for symbol in symbols:
-    start = next((index for index, line in enumerate(lines) if line.strip().endswith(f"<{symbol}>:")), None)
-    if start is None:
-        raise SystemExit(f"linked image lacks {symbol}")
-    end = len(lines)
-    for index in range(start + 1, len(lines)):
-        if re.match(r"^[0-9a-f]+ <.*>:$", lines[index].strip()):
-            end = index
-            break
+    address = addresses[symbol]
+    header_index = next(
+        (position for position, (_, candidate, _) in enumerate(headers) if candidate == address),
+        None,
+    )
+    if header_index is None:
+        raise SystemExit(f"linked image has no disassembly body at {address:#x} for {symbol}")
+    start, _, disassembly_label = headers[header_index]
+    end = headers[header_index + 1][0] if header_index + 1 < len(headers) else len(lines)
     body = "\n".join(lines[start:end]) + "\n"
     if len(body.splitlines()) < 2:
         raise SystemExit(f"linked image has no body for {symbol}")
     (destination / f"{symbol}.asm").write_text(body)
+    mapping[symbol] = {
+        "address": f"0x{address:x}",
+        "disassembly_label": disassembly_label,
+    }
+(destination / "symbol-addresses.json").write_text(
+    json.dumps(mapping, indent=2, sort_keys=True) + "\n"
+)
 PY
 
 aarch64_has_add_lowering() {
@@ -389,7 +416,7 @@ printf '{"status":"PASS","architecture":"%s","symbols_checked":4}\n' "$architect
     >"$output_dir/codegen/codegen-check.json"
 (
     cd -- "$output_dir"
-    sha256sum -- codegen/all.asm codegen/symbols.txt \
+    sha256sum -- codegen/all.asm codegen/symbols.txt codegen/symbol-addresses.json \
         codegen/topic47_shared_fetch_add.asm codegen/topic47_cas_increment.asm \
         codegen/topic47_striped_fetch_add.asm codegen/topic47_batched_fetch_add.asm \
         >codegen/sha256sums.txt
