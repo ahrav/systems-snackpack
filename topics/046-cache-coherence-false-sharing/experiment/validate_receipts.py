@@ -46,6 +46,56 @@ def require(condition, message):
         raise SystemExit(message)
 
 
+def templates(count, rng):
+    result = ["ABBA"] * (count // 2) + ["BAAB"] * (count // 2)
+    rng.shuffle(result)
+    return result
+
+
+def make_schedule(blocks, aa_blocks, seed):
+    rng = random.Random(seed)
+    schedule = []
+    for index, template in enumerate(templates(blocks, rng), 1):
+        schedule.append(
+            {
+                "pair": "packed_over_padded",
+                "block": f"primary-{index:02d}",
+                "template": template,
+                "A": "packed",
+                "B": "padded",
+            }
+        )
+    for index, template in enumerate(templates(aa_blocks, rng), 1):
+        schedule.append(
+            {
+                "pair": "padded_A_over_padded_B",
+                "block": f"aa-{index:02d}",
+                "template": template,
+                "A": "padded",
+                "B": "padded",
+            }
+        )
+    rng.shuffle(schedule)
+    return schedule
+
+
+def expected_attempt_fields(schedule):
+    fields = []
+    for entry in schedule:
+        for position, label in enumerate(entry["template"], 1):
+            fields.append(
+                {
+                    "block": entry["block"],
+                    "pair": entry["pair"],
+                    "template": entry["template"],
+                    "position": position,
+                    "label": label,
+                    "mode": entry[label],
+                }
+            )
+    return fields
+
+
 def strict_result(result, mode, iterations, cpu0, cpu1):
     expected = {
         "mode": mode,
@@ -162,6 +212,7 @@ def main():
         "correctness.txt",
         "build.txt",
         "binary.sha256",
+        "binary/cache_coherence_probe",
         "codegen-increment.txt",
         "codegen-check.txt",
         "smoke-packed.json",
@@ -185,7 +236,14 @@ def main():
         "aa_blocks": str(args.expected_aa_blocks),
     }
     require(all(host.get(key) == value for key, value in expected_host.items()), "host identity mismatch")
-    require("/coherency_line_size:64" in host.get("coherence_line_sizes", ""), "missing 64-byte line evidence")
+    line_entries = (host.get("coherence_line_sizes") or "").split()
+    observed_sizes = set()
+    for entry in line_entries:
+        path, separator, value = entry.rpartition(":")
+        if not separator or not path.endswith("coherency_line_size"):
+            raise SystemExit(f"malformed coherence line entry: {entry}")
+        observed_sizes.add(int(value))
+    require(observed_sizes == {64}, f"coherence lines are not exactly 64 bytes: {sorted(observed_sizes)}")
     require(sha256(root / "source-archive.tar.gz") == args.expected_archive_sha256, "archive digest mismatch")
     require((root / "source-manifest-before.sha256").read_bytes() == (root / "source-manifest-after.sha256").read_bytes(), "source changed during run")
     require((root / "source-manifest.diff").read_bytes() == b"", "source manifest diff is not empty")
@@ -224,6 +282,16 @@ def main():
     iterations = metadata.get("iterations_per_thread")
     cpu0 = metadata.get("cpu0")
     cpu1 = metadata.get("cpu1")
+    schedule = make_schedule(
+        metadata.get("blocks"), metadata.get("aa_blocks"), metadata.get("seed")
+    )
+    expected_fields = expected_attempt_fields(schedule)
+    require(len(attempts) == len(expected_fields), "attempt count differs from regenerated schedule")
+    for record, expected in zip(attempts, expected_fields):
+        require(
+            all(record.get(key) == value for key, value in expected.items()),
+            f"attempt {record.get('attempt')} deviates from the regenerated fixed schedule",
+        )
     for record in attempts:
         record["valid"] = recomputed_validity(record, iterations, cpu0, cpu1)
     require(all(record["valid"] for record in attempts), "recomputed attempt validity failed")
@@ -276,6 +344,10 @@ def main():
 
     binary_digest = (root / "binary.sha256").read_text().split()[0]
     require(binary_digest == metadata.get("binary_sha256"), "binary digest mismatch")
+    require(
+        sha256(root / "binary/cache_coherence_probe") == binary_digest,
+        "retained binary does not match its recorded digest",
+    )
     result = {
         "status": "PASS",
         "source_commit": args.expected_source_commit,
