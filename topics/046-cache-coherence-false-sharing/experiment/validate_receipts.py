@@ -6,7 +6,9 @@ import hashlib
 import json
 import math
 import random
+import re
 import statistics
+import tarfile
 from pathlib import Path
 
 
@@ -41,6 +43,40 @@ def key_values(path):
     return values
 
 
+def archive_file_digests(archive_path):
+    digests = {}
+    with tarfile.open(archive_path, "r:gz") as archive:
+        for member in archive.getmembers():
+            if not member.isfile():
+                continue
+            parts = Path(member.name).parts
+            if len(parts) < 2:
+                continue
+            source = archive.extractfile(member)
+            if source is None:
+                raise SystemExit(f"unreadable archive member: {member.name}")
+            reader = source
+            digest = hashlib.sha256()
+            for chunk in iter(lambda: reader.read(1024 * 1024), b""):
+                digest.update(chunk)
+            # Manifest paths are relative to the repository root; strip the
+            # single top-level archive directory prefix.
+            digests["/".join(parts[1:])] = digest.hexdigest()
+    return digests
+
+
+def recorded_manifest(path):
+    values = {}
+    for line in path.read_text().splitlines():
+        if line.startswith("\\"):
+            raise SystemExit(f"manifest uses escaped names: {path}")
+        digest, separator, name = line.partition("  ")
+        if not separator or name.endswith("/") or len(digest) != 64:
+            raise SystemExit(f"malformed manifest line: {line}")
+        values[name] = digest
+    return values
+
+
 def require(condition, message):
     if not condition:
         raise SystemExit(message)
@@ -63,6 +99,7 @@ def make_schedule(blocks, aa_blocks, seed):
                 "template": template,
                 "A": "packed",
                 "B": "padded",
+                "aa": False,
             }
         )
     for index, template in enumerate(templates(aa_blocks, rng), 1):
@@ -73,6 +110,7 @@ def make_schedule(blocks, aa_blocks, seed):
                 "template": template,
                 "A": "padded",
                 "B": "padded",
+                "aa": True,
             }
         )
     rng.shuffle(schedule)
@@ -118,12 +156,27 @@ def strict_result(result, mode, iterations, cpu0, cpu1):
         and result.get("packed_size") == 128
         and result.get("padded_size") == 256
         and isinstance(result.get("elapsed_ns"), int)
+        and not isinstance(result.get("elapsed_ns"), bool)
         and result["elapsed_ns"] > 0
         and result.get("start_cpu0") == cpu0
         and result.get("start_cpu1") == cpu1
         and result.get("end_cpu0") == cpu0
         and result.get("end_cpu1") == cpu1
     )
+
+
+def reparsed_stdout_result(record):
+    stdout = record.get("stdout")
+    if not isinstance(stdout, str):
+        return None
+    lines = stdout.splitlines()
+    if len(lines) != 1:
+        return None
+    try:
+        value = json.loads(lines[0])
+    except json.JSONDecodeError:
+        return None
+    return value if isinstance(value, dict) else None
 
 
 def recomputed_validity(record, iterations, cpu0, cpu1):
@@ -133,6 +186,7 @@ def recomputed_validity(record, iterations, cpu0, cpu1):
         and record.get("timed_out") is False
         and "parse_error" not in record
         and isinstance(result, dict)
+        and reparsed_stdout_result(record) == result
         and strict_result(result, record.get("mode"), iterations, cpu0, cpu1)
     )
 
@@ -247,9 +301,23 @@ def main():
     require(sha256(root / "source-archive.tar.gz") == args.expected_archive_sha256, "archive digest mismatch")
     require((root / "source-manifest-before.sha256").read_bytes() == (root / "source-manifest-after.sha256").read_bytes(), "source changed during run")
     require((root / "source-manifest.diff").read_bytes() == b"", "source manifest diff is not empty")
+    require(
+        recorded_manifest(root / "source-manifest-before.sha256") == archive_file_digests(root / "source-archive.tar.gz"),
+        "source manifest does not describe the authenticated archive",
+    )
     require("CORRECTNESS_STATUS=pass" in (root / "correctness.txt").read_text(), "correctness gate failed")
     require("BUILD_STATUS=pass" in (root / "build.txt").read_text(), "build gate failed")
     require("status=PASS" in (root / "codegen-check.txt").read_text(), "codegen check failed")
+    increment_text = (root / "codegen-increment.txt").read_text()
+    require("<topic46_increment>" in (root / "codegen.txt").read_text(), "missing increment symbol in retained disassembly")
+    require("<topic46_increment>" in increment_text, "increment extract lacks the increment symbol")
+    if args.expected_architecture == "x86_64":
+        locked_rmw = re.search(r"\block\b.*\b(inc|add|xadd)", increment_text)
+    elif args.expected_architecture in ("aarch64", "arm64"):
+        locked_rmw = re.search(r"\b(ldadd|ldxr|ldaxr|stxr|stlxr|__aarch64_ldadd)", increment_text)
+    else:
+        raise SystemExit(f"unsupported architecture: {args.expected_architecture}")
+    require(locked_rmw is not None, "retained disassembly lacks the architecture-specific atomic increment")
 
     smoke_packed = json.loads((root / "smoke-packed.json").read_text())
     smoke_padded = json.loads((root / "smoke-padded.json").read_text())
@@ -285,6 +353,10 @@ def main():
     schedule = make_schedule(
         metadata.get("blocks"), metadata.get("aa_blocks"), metadata.get("seed")
     )
+    require(
+        metadata.get("schedule") == schedule,
+        "metadata schedule does not match the regenerated fixed schedule",
+    )
     expected_fields = expected_attempt_fields(schedule)
     require(len(attempts) == len(expected_fields), "attempt count differs from regenerated schedule")
     for record, expected in zip(attempts, expected_fields):
@@ -299,10 +371,11 @@ def main():
     by_block = {}
     for record in attempts:
         by_block.setdefault(record.get("block"), []).append(record)
-    # Contrast order must mirror run_processes.py (schedule order, not sorted
-    # names): the bootstrap consumes one shared RNG stream over this sequence.
+    # Contrast order must mirror run_processes.py (regenerated schedule order,
+    # not sorted names): the bootstrap consumes one shared RNG stream over this
+    # sequence. The regenerated schedule is used, never the serialized copy.
     contrasts = {pair: [] for pair in ("packed_over_padded", "padded_A_over_padded_B")}
-    for entry in metadata.get("schedule", []):
+    for entry in schedule:
         records = by_block.get(entry.get("block"), [])
         pair_name = entry.get("pair")
         if pair_name not in contrasts:

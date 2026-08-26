@@ -113,6 +113,7 @@ def strict_result(result, mode, args):
         and result.get("packed_size") == 128
         and result.get("padded_size") == 256
         and isinstance(result.get("elapsed_ns"), int)
+        and not isinstance(result.get("elapsed_ns"), bool)
         and result["elapsed_ns"] > 0
         and result.get("start_cpu0") == args.cpu0
         and result.get("start_cpu1") == args.cpu1
