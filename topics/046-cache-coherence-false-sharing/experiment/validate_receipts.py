@@ -286,6 +286,7 @@ def main():
         "build.txt",
         "binary.sha256",
         "binary/cache_coherence_probe",
+        "codegen.txt",
         "codegen-increment.txt",
         "codegen-check.txt",
         "smoke-packed.json",
