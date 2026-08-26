@@ -1,0 +1,7 @@
+source_commit=85da97ca0070461daf74a72586888903ea170e16
+source_branch=curriculum/topic-047-atomics-under-contention
+source_archive_sha256=6af2754b232eaed3c6296762f794882ea6cc7271aa8c561feef12af810245d3d
+source_archive_policy=exact commit with unrelated Topics 1-46 raw measurement directories excluded
+failed_preflight_commit=a8f69118405d7bb416f8eb13023a51190aa49e83
+failed_preflight_boundary=codegen parser rejected a same-address shared/striped optimizer alias before timing collection
+failed_preflight_disposition=no benchmark attempts accepted; parser fixed without changing kernels

@@ -1,0 +1,7 @@
+captured_utc=2026-08-26T14:43:09Z
+ssh_alias=xxl
+resolved_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+probe_architecture=x86_64
+probe_kernel=6.12.95-124.187.amzn2023.x86_64
+probe_available_cpu_count=192
+command=ssh -G xxl | rg '^hostname '
