@@ -400,16 +400,28 @@ aarch64_has_cas_lowering() {
 
 case $architecture in
     x86_64)
-        rg -q '\block\b.*\b(inc|add|xadd)' "$output_dir/codegen/topic47_shared_fetch_add.asm"
-        rg -q '\block\b.*\bcmpxchg' "$output_dir/codegen/topic47_cas_increment.asm"
-        rg -q '\block\b.*\b(inc|add|xadd)' "$output_dir/codegen/topic47_striped_fetch_add.asm"
-        rg -q '\block\b.*\b(inc|add|xadd)' "$output_dir/codegen/topic47_batched_fetch_add.asm"
+        for symbol in topic47_shared_fetch_add topic47_striped_fetch_add topic47_batched_fetch_add; do
+            rg -q '\block\b.*\b(inc|add|xadd)' "$output_dir/codegen/${symbol}.asm" || {
+                printf '%s lacks a locked atomic add\n' "$symbol" >&2
+                exit 2
+            }
+        done
+        rg -q '\block\b.*\bcmpxchg' "$output_dir/codegen/topic47_cas_increment.asm" || {
+            printf 'topic47_cas_increment lacks a locked cmpxchg\n' >&2
+            exit 2
+        }
         ;;
     aarch64 | arm64)
-        aarch64_has_add_lowering "$output_dir/codegen/topic47_shared_fetch_add.asm"
-        aarch64_has_cas_lowering "$output_dir/codegen/topic47_cas_increment.asm"
-        aarch64_has_add_lowering "$output_dir/codegen/topic47_striped_fetch_add.asm"
-        aarch64_has_add_lowering "$output_dir/codegen/topic47_batched_fetch_add.asm"
+        for symbol in topic47_shared_fetch_add topic47_striped_fetch_add topic47_batched_fetch_add; do
+            aarch64_has_add_lowering "$output_dir/codegen/${symbol}.asm" || {
+                printf '%s lacks a complete atomic-add lowering\n' "$symbol" >&2
+                exit 2
+            }
+        done
+        aarch64_has_cas_lowering "$output_dir/codegen/topic47_cas_increment.asm" || {
+            printf 'topic47_cas_increment lacks a complete CAS lowering\n' >&2
+            exit 2
+        }
         ;;
 esac
 printf '{"status":"PASS","architecture":"%s","symbols_checked":4}\n' "$architecture" \
@@ -442,7 +454,10 @@ python3 -I -B "$archive_script_dir/validate_receipts.py" "$output_dir" \
     --expected-architecture "$architecture" --output "$validation_tmp"
 
 write_source_manifest "$private/source-manifest-final.sha256"
-cmp -s "$output_dir/source-manifest-before.sha256" "$private/source-manifest-final.sha256"
+if ! cmp -s "$output_dir/source-manifest-before.sha256" "$private/source-manifest-final.sha256"; then
+    printf 'source tree changed during host gates\n' >&2
+    exit 2
+fi
 final_binary_sha256=$(sha256sum -- "$binary" | awk '{print $1}')
 initial_binary_sha256=$(awk '{print $1}' "$output_dir/binary.sha256")
 if [[ $final_binary_sha256 != "$initial_binary_sha256" ]]; then

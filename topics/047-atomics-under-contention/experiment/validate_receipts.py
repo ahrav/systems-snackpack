@@ -418,6 +418,24 @@ def function_body_at_address(disassembly: str, address: int) -> tuple[str, str] 
     return "\n".join(lines[start:end]) + "\n", label
 
 
+def normalized_disassembly(text: str) -> str:
+    """Replace the input path in objdump's file-format header with a fixed name.
+
+    objdump prints the path it was invoked with on the first header line, so a
+    receipt archive extracted at a different root would fail an exact
+    comparison against a fresh disassembly of an unchanged binary. Normalizing
+    the header on both sides keeps every instruction byte in the comparison
+    while letting a relocated archive revalidate.
+    """
+    return re.sub(
+        r"^\S+:(\s+file format\s+\S+)$",
+        r"atomic_contention:\1",
+        text,
+        count=1,
+        flags=re.MULTILINE,
+    )
+
+
 def validate_codegen(root: Path, architecture: str) -> None:
     binary = root / "binary/atomic_contention"
     try:
@@ -430,8 +448,12 @@ def validate_codegen(root: Path, architecture: str) -> None:
             check=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=120,
         ).stdout
     except (OSError, subprocess.SubprocessError) as error:
-        raise SystemExit(f"cannot inspect retained linked binary: {error!r}")
-    require((root / "codegen/all.asm").read_text() == disassembly, "retained full disassembly differs from binary")
+        raise SystemExit(f"cannot inspect retained linked binary: {error!r}") from error
+    require(
+        normalized_disassembly((root / "codegen/all.asm").read_text())
+        == normalized_disassembly(disassembly),
+        "retained full disassembly differs from binary",
+    )
     require((root / "codegen/symbols.txt").read_text() == symbols, "retained symbol table differs from binary")
     addresses = linked_symbol_addresses(symbols)
     require(set(addresses) == set(SYMBOLS), "linked image lacks a stable kernel symbol")

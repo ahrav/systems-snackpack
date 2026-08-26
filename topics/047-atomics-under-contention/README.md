@@ -1,9 +1,10 @@
 # Atomics under contention
 
-An atomic update prevents lost writes. It does not let several cores modify one
-location in parallel. A shared read-modify-write operation still needs one
-serialized modification point. Under contention, throughput depends on how
-frequently writers meet at that point and how much failed work they create.
+A correctly used atomic read-modify-write prevents lost updates for that
+operation. It does not let several cores modify one location in parallel. A
+shared read-modify-write operation still needs one serialized modification
+point. Under contention, throughput depends on how frequently writers meet at
+that point and how much failed work they create.
 
 ## Separate correctness from scalability
 

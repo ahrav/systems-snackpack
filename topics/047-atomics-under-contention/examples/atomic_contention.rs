@@ -134,7 +134,16 @@ fn result_json(label: &str, result: &BenchmarkResult) -> String {
 }
 
 fn main() {
-    let arguments: Vec<String> = env::args().collect();
+    let arguments: Vec<String> = env::args_os()
+        .map(|argument| {
+            argument.into_string().unwrap_or_else(|raw| {
+                fail(format_args!(
+                    "argument is not valid UTF-8: {}",
+                    raw.to_string_lossy()
+                ))
+            })
+        })
+        .collect();
     if arguments.len() != 8 {
         fail(format_args!(
             "usage: {} <shared|cas|striped|batched> <threads> \

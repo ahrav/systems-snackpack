@@ -190,17 +190,18 @@ def strict_result(result: object, mode: str, bench_label: str, args: argparse.Na
     if mode == "cas":
         if result["rmw_attempts"] != logical_ops + result["cas_retries"]:
             return False
-    elif result["cas_retries"] != 0:
-        return False
-    elif mode in ("shared", "striped"):
-        if result["rmw_attempts"] != logical_ops:
-            return False
-    elif mode == "batched":
-        expected_flushes = args.threads * math.ceil(args.iterations / args.batch_size)
-        if result["rmw_attempts"] != expected_flushes:
-            return False
     else:
-        return False
+        if result["cas_retries"] != 0:
+            return False
+        if mode in ("shared", "striped"):
+            if result["rmw_attempts"] != logical_ops:
+                return False
+        elif mode == "batched":
+            expected_flushes = args.threads * math.ceil(args.iterations / args.batch_size)
+            if result["rmw_attempts"] != expected_flushes:
+                return False
+        else:
+            return False
     return True
 
 

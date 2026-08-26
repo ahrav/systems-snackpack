@@ -661,12 +661,17 @@ mod platform {
 
             workers.push(thread::spawn(move || {
                 let mut placement_error = pin_current_thread(requested_cpu).err();
-                let start_cpu = current_cpu().ok();
+                let start_query = current_cpu();
+                let start_cpu = start_query.as_ref().ok().copied();
                 if placement_error.is_none() && start_cpu != Some(requested_cpu) {
-                    placement_error = Some(format!(
-                        "observed CPU {:?} after requesting CPU {requested_cpu}",
-                        start_cpu
-                    ));
+                    placement_error = Some(match &start_query {
+                        Ok(observed) => {
+                            format!("observed CPU {observed} after requesting CPU {requested_cpu}")
+                        }
+                        Err(detail) => format!(
+                            "could not read the CPU after requesting CPU {requested_cpu}: {detail}"
+                        ),
+                    });
                 }
                 let placement_valid = placement_error.is_none();
 
@@ -701,12 +706,17 @@ mod platform {
                 };
                 barrier.wait();
 
-                let end_cpu = current_cpu().ok();
+                let end_query = current_cpu();
+                let end_cpu = end_query.as_ref().ok().copied();
                 if placement_error.is_none() && end_cpu != Some(requested_cpu) {
-                    placement_error = Some(format!(
-                        "observed CPU {:?} after requesting CPU {requested_cpu}",
-                        end_cpu
-                    ));
+                    placement_error = Some(match &end_query {
+                        Ok(observed) => {
+                            format!("observed CPU {observed} after requesting CPU {requested_cpu}")
+                        }
+                        Err(detail) => format!(
+                            "could not read the CPU after requesting CPU {requested_cpu}: {detail}"
+                        ),
+                    });
                 }
                 WorkerResult {
                     placement_error,

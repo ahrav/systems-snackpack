@@ -139,6 +139,11 @@ is never silently replaced.
 
 - Compare only `steady_ns` per logical update for the primary ratios. Report
   startup, warmup, and teardown separately.
+- Every kernel pays one fixed `black_box(index)` cost per logical increment,
+  and that cost is inside `steady_ns`. The shared overhead pulls the
+  striped/shared and batched/shared ratios toward 1, with a proportionally
+  larger effect on the cheaper striped and batched modes, so those ratios
+  understate the isolated-counter advantage.
 - Keep all 12 complete primary blocks. Do not stop after a favorable result.
 - Treat the A/A result as a mechanical path check, not a universal noise floor.
 - Report CAS retries as software failed attempts per successful logical update,
