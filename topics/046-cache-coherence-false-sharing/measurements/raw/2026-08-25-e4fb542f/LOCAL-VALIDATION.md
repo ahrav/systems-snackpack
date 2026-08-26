@@ -50,3 +50,15 @@ independent pass expanded each bundle and checked every file in its internal
 evidence manifest except the deliberately omitted duplicate source archive.
 Both receipt-validation documents and both process summaries reported `PASS`
 with no invalid attempts.
+
+## Validator versioning
+
+The receipt validator was strengthened after collection: it now requires
+coherence-line evidence for both selected CPUs, derives code-generation
+evidence by disassembling the retained binary, and needs a disassembler
+capable of the measured architecture. The retained bundles predate dual-CPU
+capture, so running the current validator against them reports missing CPU 1
+line-size entries, and the Arm bundle additionally requires an AArch64-capable
+`objdump`. These stricter rules bind future collections. The published
+statistics do not depend on the added checks: they are recomputed directly
+from each bundle's raw `attempts.jsonl`, which both bundles support.

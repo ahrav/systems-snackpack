@@ -211,6 +211,19 @@ def recomputed_validity(record, iterations, cpu0, cpu1):
     )
 
 
+def function_body(disassembly, symbol):
+    lines = disassembly.splitlines()
+    start = next((i for i, line in enumerate(lines) if line.endswith(f"<{symbol}>:")), None)
+    if start is None:
+        return None
+    end = len(lines)
+    for index in range(start + 1, len(lines)):
+        if re.match(r"^[0-9a-f]+ <.*>:", lines[index]):
+            end = index
+            break
+    return "\n".join(lines[start:end])
+
+
 def percentile(values, probability):
     ordered = sorted(values)
     location = probability * (len(ordered) - 1)
@@ -347,16 +360,22 @@ def main():
     except (OSError, subprocess.SubprocessError) as error:
         raise SystemExit(f"cannot disassemble the retained binary: {error!r}")
     require("<topic46_increment>" in regenerated, "retained binary lacks the increment symbol")
+    binary_body = function_body(regenerated, "topic46_increment")
+    if binary_body is None:
+        raise SystemExit("retained binary's disassembly lacks a topic46_increment body")
     if args.expected_architecture == "x86_64":
         locked_rmw = re.search(r"\block\b.*\b(inc|add|xadd)", increment_text)
-        binary_rmw = re.search(r"\block\b.*\b(inc|add|xadd)", regenerated)
+        binary_rmw = re.search(r"\block\b.*\b(inc|add|xadd)", binary_body)
     elif args.expected_architecture in ("aarch64", "arm64"):
         locked_rmw = re.search(r"\b(ldadd|ldxr|ldaxr|stxr|stlxr|__aarch64_ldadd)", increment_text)
-        binary_rmw = re.search(r"\b(ldadd|ldxr|ldaxr|stxr|stlxr|__aarch64_ldadd)", regenerated)
+        binary_rmw = re.search(r"\b(ldadd|ldxr|ldaxr|stxr|stlxr|__aarch64_ldadd)", binary_body)
     else:
         raise SystemExit(f"unsupported architecture: {args.expected_architecture}")
     require(locked_rmw is not None, "retained disassembly lacks the architecture-specific atomic increment")
-    require(binary_rmw is not None, "retained binary's disassembly lacks the architecture-specific atomic increment")
+    require(
+        binary_rmw is not None,
+        "topic46_increment in the retained binary lacks the architecture-specific atomic increment",
+    )
 
     smoke_packed = json.loads((root / "smoke-packed.json").read_text())
     smoke_padded = json.loads((root / "smoke-padded.json").read_text())

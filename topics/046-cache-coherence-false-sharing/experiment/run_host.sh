@@ -93,6 +93,12 @@ case $SSH_TARGET_LABEL in
             printf 'authorized Arm target is not AArch64\n' >&2
             exit 2
         }
+        # The Arm label is a fixed hostname, so the runtime must match it
+        # directly rather than trusting the caller-supplied resolved name.
+        [[ $runtime_hostname == "$SSH_TARGET_LABEL" ]] || {
+            printf 'runtime host is not the authorized Arm target\n' >&2
+            exit 2
+        }
         ;;
     *)
         printf 'unauthorized Topic 46 target: %s\n' "$SSH_TARGET_LABEL" >&2
