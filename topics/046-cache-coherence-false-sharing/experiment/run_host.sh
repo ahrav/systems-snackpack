@@ -60,6 +60,10 @@ if (( blocks < 2 || blocks % 2 != 0 || aa_blocks < 2 || aa_blocks % 2 != 0 )); t
     printf 'publication block counts must be even and at least two\n' >&2
     exit 2
 fi
+if [[ $iterations -ne 10000000 || $blocks -ne 8 || $aa_blocks -ne 4 || $seed -ne 20260825 || $cpu0 -ne 0 || $cpu1 -ne 1 ]]; then
+    printf 'invocation violates the fixed Topic 46 publication contract (rounds/01.md): CPUs 0 and 1, 10000000 iterations per worker, eight primary and four A/A blocks, seed 20260825\n' >&2
+    exit 2
+fi
 
 runtime_hostname=$(hostname -f)
 architecture=$(uname -m)

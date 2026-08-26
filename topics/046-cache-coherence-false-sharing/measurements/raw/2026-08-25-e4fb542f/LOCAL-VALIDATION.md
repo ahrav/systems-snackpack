@@ -17,7 +17,7 @@ cargo bench --workspace --no-run
 RUSTDOCFLAGS='-D warnings' cargo doc --workspace --no-deps
 bash -n topics/046-cache-coherence-false-sharing/experiment/run_host.sh
 shellcheck topics/046-cache-coherence-false-sharing/experiment/run_host.sh
-python3 -I -B -c '<compile both Topic 46 Python scripts>'
+python3 -I -B -m py_compile topics/046-cache-coherence-false-sharing/experiment/run_processes.py topics/046-cache-coherence-false-sharing/experiment/validate_receipts.py
 sha256sum -c topics/046-cache-coherence-false-sharing/measurements/raw/2026-08-25-e4fb542f/SHA256SUMS
 ```
 

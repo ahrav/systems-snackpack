@@ -4,6 +4,9 @@
 import argparse
 import hashlib
 import json
+import math
+import random
+import statistics
 from pathlib import Path
 
 
@@ -41,6 +44,109 @@ def key_values(path):
 def require(condition, message):
     if not condition:
         raise SystemExit(message)
+
+
+def strict_result(result, mode, iterations, cpu0, cpu1):
+    expected = {
+        "mode": mode,
+        "iterations_per_thread": iterations,
+        "cpu0": cpu0,
+        "cpu1": cpu1,
+        "first": iterations,
+        "second": iterations,
+        "address0_mod_128": 0,
+        "slot_bytes": 128,
+        "layout_ok": True,
+        "affinity_ok": True,
+        "correct": True,
+    }
+    if any(result.get(key) != value for key, value in expected.items()):
+        return False
+    expected_delta = 8 if mode == "packed" else 128
+    return (
+        result.get("address_delta") == expected_delta
+        and result.get("packed_size") == 128
+        and result.get("padded_size") == 256
+        and isinstance(result.get("elapsed_ns"), int)
+        and result["elapsed_ns"] > 0
+        and result.get("start_cpu0") == cpu0
+        and result.get("start_cpu1") == cpu1
+        and result.get("end_cpu0") == cpu0
+        and result.get("end_cpu1") == cpu1
+    )
+
+
+def recomputed_validity(record, iterations, cpu0, cpu1):
+    result = record.get("result")
+    return (
+        record.get("returncode") == 0
+        and record.get("timed_out") is False
+        and "parse_error" not in record
+        and isinstance(result, dict)
+        and strict_result(result, record.get("mode"), iterations, cpu0, cpu1)
+    )
+
+
+def percentile(values, probability):
+    ordered = sorted(values)
+    location = probability * (len(ordered) - 1)
+    lower = math.floor(location)
+    upper = math.ceil(location)
+    if lower == upper:
+        return ordered[lower]
+    weight = location - lower
+    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
+
+
+def summarize(contrasts, seed, draws):
+    if len(contrasts) < 2:
+        return {"complete_blocks": len(contrasts), "estimable": False}
+    mean_log = statistics.fmean(contrasts)
+    rng = random.Random(seed)
+    bootstrap = [
+        math.exp(statistics.fmean(rng.choice(contrasts) for _ in contrasts))
+        for _ in range(draws)
+    ]
+    return {
+        "complete_blocks": len(contrasts),
+        "estimable": True,
+        "geometric_mean_ratio": math.exp(mean_log),
+        "median_block_ratio": math.exp(statistics.median(contrasts)),
+        "log_contrast_sd": statistics.stdev(contrasts),
+        "min_block_ratio": math.exp(min(contrasts)),
+        "max_block_ratio": math.exp(max(contrasts)),
+        "bootstrap_95pct_ratio": [
+            percentile(bootstrap, 0.025),
+            percentile(bootstrap, 0.975),
+        ],
+        "bootstrap_draws": draws,
+    }
+
+
+def close_enough(recomputed, published):
+    if set(recomputed) != set(published):
+        return False
+    for key, value in recomputed.items():
+        other = published[key]
+        if isinstance(value, float):
+            if not (
+                isinstance(other, (int, float))
+                and math.isclose(value, other, rel_tol=1e-9, abs_tol=1e-12)
+            ):
+                return False
+        elif isinstance(value, list):
+            if not (
+                isinstance(other, list)
+                and len(value) == len(other)
+                and all(
+                    math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-12)
+                    for a, b in zip(value, other)
+                )
+            ):
+                return False
+        elif value != other:
+            return False
+    return True
 
 
 def main():
@@ -104,10 +210,69 @@ def main():
     require(summary.get("identity_unchanged") is True, "runner or binary changed")
     require(metadata.get("blocks") == args.expected_blocks and metadata.get("aa_blocks") == args.expected_aa_blocks, "metadata block count mismatch")
 
+    require(
+        host.get("cpu0") == str(metadata.get("cpu0"))
+        and host.get("cpu1") == str(metadata.get("cpu1")),
+        "host and metadata CPU placement disagree",
+    )
+
     primary = summary.get("pairs", {}).get("packed_over_padded", {})
     aa = summary.get("pairs", {}).get("padded_A_over_padded_B", {})
     require(primary.get("complete_blocks") == args.expected_blocks and primary.get("estimable") is True, "primary estimate incomplete")
     require(aa.get("complete_blocks") == args.expected_aa_blocks and aa.get("estimable") is True, "A/A estimate incomplete")
+
+    iterations = metadata.get("iterations_per_thread")
+    cpu0 = metadata.get("cpu0")
+    cpu1 = metadata.get("cpu1")
+    for record in attempts:
+        record["valid"] = recomputed_validity(record, iterations, cpu0, cpu1)
+    require(all(record["valid"] for record in attempts), "recomputed attempt validity failed")
+
+    by_block = {}
+    for record in attempts:
+        by_block.setdefault(record.get("block"), []).append(record)
+    # Contrast order must mirror run_processes.py (schedule order, not sorted
+    # names): the bootstrap consumes one shared RNG stream over this sequence.
+    contrasts = {pair: [] for pair in ("packed_over_padded", "padded_A_over_padded_B")}
+    for entry in metadata.get("schedule", []):
+        records = by_block.get(entry.get("block"), [])
+        pair_name = entry.get("pair")
+        if pair_name not in contrasts:
+            continue
+        if len(records) != 4 or not all(record["valid"] for record in records):
+            continue
+        if any(record.get("pair") != pair_name for record in records):
+            continue
+        by_label = {"A": [], "B": []}
+        for record in records:
+            by_label[record["label"]].append(math.log(record["result"]["elapsed_ns"]))
+        if len(by_label["A"]) != 2 or len(by_label["B"]) != 2:
+            continue
+        contrasts[pair_name].append(
+            statistics.fmean(by_label["A"]) - statistics.fmean(by_label["B"])
+        )
+
+    published_pairs = summary.get("pairs", {})
+    require(set(published_pairs) == set(contrasts), "published pairs do not match the attempt stream")
+    ordered_pairs = sorted(published_pairs)
+    for index, pair_name in enumerate(ordered_pairs):
+        values = contrasts[pair_name]
+        bootstrap_draws = published_pairs[pair_name].get("bootstrap_draws")
+        require(
+            isinstance(bootstrap_draws, int) and bootstrap_draws > 0,
+            f"missing bootstrap draws for {pair_name}",
+        )
+        metadata_seed = metadata.get("seed")
+        require(isinstance(metadata_seed, int), "metadata seed missing")
+        recomputed = summarize(values, metadata_seed + index + 1, bootstrap_draws)
+        recomputed["interval_scope"] = (
+            "descriptive percentile bootstrap over complete four-process blocks "
+            "from this host, binary, CPU placement, and run window"
+        )
+        require(
+            close_enough(recomputed, published_pairs[pair_name]),
+            f"published {pair_name} statistics are not supported by attempts.jsonl",
+        )
 
     binary_digest = (root / "binary.sha256").read_text().split()[0]
     require(binary_digest == metadata.get("binary_sha256"), "binary digest mismatch")

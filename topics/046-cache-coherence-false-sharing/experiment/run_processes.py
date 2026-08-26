@@ -156,6 +156,8 @@ def run_attempt(binary, block, position, label, args, attempt_number):
             if len(lines) != 1:
                 raise ValueError("probe must emit exactly one output record")
             result = json.loads(lines[0])
+            if not isinstance(result, dict):
+                raise ValueError("probe output record must be a JSON object")
             record["result"] = result
             record["valid"] = completed.returncode == 0 and strict_result(result, mode, args)
         except (json.JSONDecodeError, TypeError, KeyError, ValueError) as error:
