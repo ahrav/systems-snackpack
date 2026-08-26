@@ -15,6 +15,10 @@ name = "async-runtime-mechanics"
 version = "0.1.0"
 
 [[package]]
+name = "atomics-under-contention"
+version = "0.1.0"
+
+[[package]]
 name = "backpressure-overload"
 version = "0.1.0"
 
