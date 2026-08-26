@@ -428,7 +428,7 @@ def normalized_disassembly(text: str) -> str:
     while letting a relocated archive revalidate.
     """
     return re.sub(
-        r"^\S+:(\s+file format\s+\S+)$",
+        r"^.+:(\s+file format\s+\S+)$",
         r"atomic_contention:\1",
         text,
         count=1,
