@@ -1,0 +1,5 @@
+ssh_alias=xxl
+resolved_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+runtime_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+architecture=x86_64
+resolved_utc_date=2026-08-25
