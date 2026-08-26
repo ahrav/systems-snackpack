@@ -8,6 +8,7 @@ import math
 import random
 import re
 import statistics
+import subprocess
 import tarfile
 from pathlib import Path
 
@@ -311,13 +312,15 @@ def main():
     }
     require(all(host.get(key) == value for key, value in expected_host.items()), "host identity mismatch")
     line_entries = (host.get("coherence_line_sizes") or "").split()
-    observed_sizes = set()
+    observed_by_cpu = {}
     for entry in line_entries:
         path, separator, value = entry.rpartition(":")
         if not separator or not path.endswith("coherency_line_size"):
             raise SystemExit(f"malformed coherence line entry: {entry}")
-        observed_sizes.add(int(value))
-    require(observed_sizes == {64}, f"coherence lines are not exactly 64 bytes: {sorted(observed_sizes)}")
+        match = re.search(r"/cpu(\d+)/cache/", path)
+        if match is None:
+            raise SystemExit(f"coherence line entry lacks a CPU number: {entry}")
+        observed_by_cpu.setdefault(int(match.group(1)), set()).add(int(value))
     require(sha256(root / "source-archive.tar.gz") == args.expected_archive_sha256, "archive digest mismatch")
     require((root / "source-manifest-before.sha256").read_bytes() == (root / "source-manifest-after.sha256").read_bytes(), "source changed during run")
     require((root / "source-manifest.diff").read_bytes() == b"", "source manifest diff is not empty")
@@ -328,16 +331,32 @@ def main():
     require("CORRECTNESS_STATUS=pass" in (root / "correctness.txt").read_text(), "correctness gate failed")
     require("BUILD_STATUS=pass" in (root / "build.txt").read_text(), "build gate failed")
     require("status=PASS" in (root / "codegen-check.txt").read_text(), "codegen check failed")
+    retained_binary = root / "binary/cache_coherence_probe"
     increment_text = (root / "codegen-increment.txt").read_text()
-    require("<topic46_increment>" in (root / "codegen.txt").read_text(), "missing increment symbol in retained disassembly")
+    codegen_text = (root / "codegen.txt").read_text()
+    require("<topic46_increment>" in codegen_text, "missing increment symbol in retained disassembly")
     require("<topic46_increment>" in increment_text, "increment extract lacks the increment symbol")
+    # The serialized disassembly is not trusted on its own: regenerate it from
+    # the retained binary and require the atomic lowering there too.
+    try:
+        regenerated = subprocess.run(
+            ["objdump", "-d", "-C", "--no-show-raw-insn", str(retained_binary)],
+            check=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            timeout=120,
+        ).stdout
+    except (OSError, subprocess.SubprocessError) as error:
+        raise SystemExit(f"cannot disassemble the retained binary: {error!r}")
+    require("<topic46_increment>" in regenerated, "retained binary lacks the increment symbol")
     if args.expected_architecture == "x86_64":
         locked_rmw = re.search(r"\block\b.*\b(inc|add|xadd)", increment_text)
+        binary_rmw = re.search(r"\block\b.*\b(inc|add|xadd)", regenerated)
     elif args.expected_architecture in ("aarch64", "arm64"):
         locked_rmw = re.search(r"\b(ldadd|ldxr|ldaxr|stxr|stlxr|__aarch64_ldadd)", increment_text)
+        binary_rmw = re.search(r"\b(ldadd|ldxr|ldaxr|stxr|stlxr|__aarch64_ldadd)", regenerated)
     else:
         raise SystemExit(f"unsupported architecture: {args.expected_architecture}")
     require(locked_rmw is not None, "retained disassembly lacks the architecture-specific atomic increment")
+    require(binary_rmw is not None, "retained binary's disassembly lacks the architecture-specific atomic increment")
 
     smoke_packed = json.loads((root / "smoke-packed.json").read_text())
     smoke_padded = json.loads((root / "smoke-padded.json").read_text())
@@ -385,6 +404,11 @@ def main():
         and int(metadata.get("cpu0")) not in siblings1,
         "recorded CPUs are simultaneous threads",
     )
+    for cpu in (metadata.get("cpu0"), metadata.get("cpu1")):
+        require(
+            observed_by_cpu.get(cpu) == {64},
+            f"cpu{cpu} coherence lines are not exactly 64 bytes: {sorted(observed_by_cpu.get(cpu, ()))}",
+        )
 
     require(
         host.get("cpu0") == str(metadata.get("cpu0"))
@@ -468,9 +492,15 @@ def main():
     binary_digest = (root / "binary.sha256").read_text().split()[0]
     require(binary_digest == metadata.get("binary_sha256"), "binary digest mismatch")
     require(
-        sha256(root / "binary/cache_coherence_probe") == binary_digest,
-        "retained binary does not match its recorded digest",
+        summary.get("binary_sha256_before") == summary.get("binary_sha256_after"),
+        "recorded binary digest changed during the run",
     )
+    require(
+        binary_digest == summary.get("binary_sha256_before"),
+        "retained binary does not match the digests recorded for the run",
+    )
+    retained_binary_path = root / "binary/cache_coherence_probe"
+    require(sha256(retained_binary_path) == binary_digest, "retained binary does not match its recorded digest")
     result = {
         "status": "PASS",
         "source_commit": args.expected_source_commit,

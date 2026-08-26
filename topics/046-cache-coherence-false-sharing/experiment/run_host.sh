@@ -3,6 +3,9 @@ set -euo pipefail
 
 export PYTHONDONTWRITEBYTECODE=1
 unset BASH_ENV CDPATH ENV GLOBIGNORE LD_PRELOAD PYTHONHOME PYTHONPATH
+# Cargo gives encoded rustflags precedence over RUSTFLAGS; clearing it keeps
+# the inline -C target-cpu=native authoritative.
+unset CARGO_ENCODED_RUSTFLAGS
 
 if [[ $# -ne 7 ]]; then
     printf 'usage: %s OUTPUT_DIR CPU0 CPU1 ITERATIONS BLOCKS AA_BLOCKS SEED\n' "$0" >&2
@@ -123,6 +126,13 @@ if any(cpu not in allowed for cpu in cpus):
 def read(cpu, name):
     return pathlib.Path(f"/sys/devices/system/cpu/cpu{cpu}/topology/{name}").read_text().strip()
 
+def line_sizes(cpu):
+    files = list(pathlib.Path(f"/sys/devices/system/cpu/cpu{cpu}/cache").glob("index*/coherency_line_size"))
+    sizes = {int(path.read_text()) for path in files}
+    if not files:
+        raise SystemExit(f"cpu{cpu} reports no cache coherency line sizes")
+    return sizes
+
 core_ids = [read(cpu, "core_id") for cpu in cpus]
 packages = [read(cpu, "physical_package_id") for cpu in cpus]
 siblings = set()
@@ -137,10 +147,10 @@ if core_ids[0] == core_ids[1] or cpus[1] in siblings:
 if packages[0] != packages[1]:
     raise SystemExit("publication pair must remain within one physical package")
 
-line_files = list(pathlib.Path(f"/sys/devices/system/cpu/cpu{cpus[0]}/cache").glob("index*/coherency_line_size"))
-line_sizes = {int(path.read_text()) for path in line_files}
-if not line_files or line_sizes != {64}:
-    raise SystemExit(f"publication requires observed 64-byte sysfs coherence lines, got {sorted(line_sizes)}")
+for cpu in cpus:
+    sizes = line_sizes(cpu)
+    if sizes != {64}:
+        raise SystemExit(f"publication requires observed 64-byte sysfs coherence lines on cpu{cpu}, got {sorted(sizes)}")
 PY
 
 mkdir -p -- "$output_dir"
@@ -223,8 +233,10 @@ write_source_manifest "$output_dir/source-manifest-before.sha256"
     printf 'perf_event_paranoid=%s\n' "$(</proc/sys/kernel/perf_event_paranoid)"
     printf 'build_flags=RUSTFLAGS=-C target-cpu=native cargo build --locked --offline --release --example cache_coherence_probe\n'
     printf 'coherence_line_sizes='
-    for line_file in /sys/devices/system/cpu/cpu"${cpu0}"/cache/index*/coherency_line_size; do
-        printf '%s:%s ' "$line_file" "$(<"$line_file")"
+    for cpu_n in "$cpu0" "$cpu1"; do
+        for line_file in /sys/devices/system/cpu/cpu"${cpu_n}"/cache/index*/coherency_line_size; do
+            printf '%s:%s ' "$line_file" "$(<"$line_file")"
+        done
     done
     printf '\n'
     uname -a
