@@ -42,12 +42,22 @@ if [[ $actual_archive_sha256 != "$SOURCE_ARCHIVE_SHA256" ]]; then
     printf 'source archive digest mismatch\n' >&2
     exit 2
 fi
-pax_header=$(gzip -dc -- "$source_archive" 2>/dev/null | \
-    dd bs=512 skip=1 count=1 status=none | tr -d '\0' || true)
-if [[ ! $pax_header =~ comment=([0-9a-f]{40}) || ${BASH_REMATCH[1]} != "$SOURCE_COMMIT" ]]; then
-    printf 'source archive does not embed commit %s\n' "$SOURCE_COMMIT" >&2
-    exit 2
-fi
+python3 -I -B - "$source_archive" "$SOURCE_COMMIT" <<'PY'
+import sys
+import tarfile
+
+with tarfile.open(sys.argv[1], "r:gz") as archive:
+    for member in archive.getmembers():
+        # git archive publishes the commit as a global PAX header; tarfile
+        # surfaces it only when a real length-delimited PAX record declared it.
+        declared = member.pax_headers.get("comment")
+        if declared is not None:
+            break
+    else:
+        raise SystemExit("source archive declares no PAX comment header")
+if declared != sys.argv[2]:
+    raise SystemExit(f"source archive does not embed commit {sys.argv[2]}")
+PY
 if [[ ! $cpu0 =~ ^[0-9]+$ || ! $cpu1 =~ ^[0-9]+$ || $cpu0 == "$cpu1" ]]; then
     printf 'CPU identifiers must be distinct nonnegative integers\n' >&2
     exit 2

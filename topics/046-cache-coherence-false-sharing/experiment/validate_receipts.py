@@ -11,6 +11,11 @@ import statistics
 import tarfile
 from pathlib import Path
 
+# run_processes.py's fixed publication default; the publication runner never
+# overrides it, so a receipt claiming any other draw count is not publishable.
+PUBLICATION_BOOTSTRAP_DRAWS = 20_000
+PUBLICATION_RUNNER_PATH = "topics/046-cache-coherence-false-sharing/experiment/run_processes.py"
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -63,6 +68,20 @@ def archive_file_digests(archive_path):
             # single top-level archive directory prefix.
             digests["/".join(parts[1:])] = digest.hexdigest()
     return digests
+
+
+def parse_cpu_list(value):
+    cpus = set()
+    for part in value.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            first, last = part.split("-", 1)
+            cpus.update(range(int(first), int(last) + 1))
+        else:
+            cpus.add(int(part))
+    return cpus
 
 
 def recorded_manifest(path):
@@ -334,7 +353,37 @@ def main():
     require(summary.get("attempts") == expected_attempts, "summary attempt count mismatch")
     require(summary.get("all_attempts_valid") is True and summary.get("invalid_blocks") == [], "summary reports invalid blocks")
     require(summary.get("identity_unchanged") is True, "runner or binary changed")
+    require(
+        summary.get("runner_sha256_before") == summary.get("runner_sha256_after"),
+        "recorded runner digest changed during the run",
+    )
+    require(
+        metadata.get("runner_sha256") == summary.get("runner_sha256_before"),
+        "metadata and summary runner digests disagree",
+    )
+    require(
+        archive_file_digests(root / "source-archive.tar.gz").get(PUBLICATION_RUNNER_PATH)
+        == metadata.get("runner_sha256"),
+        "archived runner does not match the recorded runner digest",
+    )
     require(metadata.get("blocks") == args.expected_blocks and metadata.get("aa_blocks") == args.expected_aa_blocks, "metadata block count mismatch")
+
+    core_values = (
+        host.get("cpu0_core_id"),
+        host.get("cpu1_core_id"),
+        host.get("cpu0_package_id"),
+        host.get("cpu1_package_id"),
+    )
+    require(all(value is not None and value.isdigit() for value in core_values), "missing or malformed recorded CPU topology")
+    require(core_values[0] != core_values[1], "recorded CPUs share a physical core")
+    require(core_values[2] == core_values[3], "recorded CPUs are in different packages")
+    siblings0 = parse_cpu_list(host.get("cpu0_thread_siblings", ""))
+    siblings1 = parse_cpu_list(host.get("cpu1_thread_siblings", ""))
+    require(
+        int(metadata.get("cpu1")) not in siblings0
+        and int(metadata.get("cpu0")) not in siblings1,
+        "recorded CPUs are simultaneous threads",
+    )
 
     require(
         host.get("cpu0") == str(metadata.get("cpu0"))
@@ -400,8 +449,8 @@ def main():
         values = contrasts[pair_name]
         bootstrap_draws = published_pairs[pair_name].get("bootstrap_draws")
         require(
-            isinstance(bootstrap_draws, int) and bootstrap_draws > 0,
-            f"missing bootstrap draws for {pair_name}",
+            bootstrap_draws == PUBLICATION_BOOTSTRAP_DRAWS,
+            f"{pair_name} does not use the fixed publication draw count",
         )
         metadata_seed = metadata.get("seed")
         require(isinstance(metadata_seed, int), "metadata seed missing")
