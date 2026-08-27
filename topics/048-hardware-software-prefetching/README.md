@@ -88,10 +88,13 @@ They are arithmetic screens, not elapsed-time predictors.
 
 [`experiment/prefetch_bench.c`](experiment/prefetch_bench.c) compares a scalar
 demand-only gather with the same gather plus one low-locality read hint. Each
-record occupies one 64-byte cache line. A deterministic permutation visits
-every record exactly once per pass. The program checks the sum, reports page
-faults and processor migration around the timed kernel, and keeps allocation,
-initialization, and warmup outside steady-state time.
+record has a 64-byte stride. The program's 4,096-byte-aligned allocation plus
+the 64-byte cache lines reported by both measured hosts puts each record on a
+separate line; the structure-size assertion alone would prove only the stride.
+A deterministic permutation visits every record exactly once per pass. The
+program checks the sum, reports page faults and processor migration around the
+timed kernel, and keeps allocation, initialization, and warmup outside
+steady-state time.
 
 [`experiment/run_campaign.py`](experiment/run_campaign.py) uses fresh processes
 and complete ABBA/BAAB blocks. A is demand-only and B is one fixed prefetch
