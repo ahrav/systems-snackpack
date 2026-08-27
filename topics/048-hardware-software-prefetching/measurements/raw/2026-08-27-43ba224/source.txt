@@ -1,0 +1,13 @@
+branch=curriculum/topic-048-hardware-software-prefetching
+source_commit=43ba2249e862193a6b68fc5e4e72f06a377d40ef
+source_archive_sha256=07f941a479b51e2af8d57fc23d80b5ddec78ce2d9cd4af0d73474c84d6cd3f9b
+prefetch_bench_c_sha256=903c84eaf5234fa5c72c8d805c2d704503fb0dc7cbd46cb346a9562ecf9ebd88
+run_campaign_py_sha256=4a3c53a31faff3f55d3d796e8a922758f60156f093560ca8e30d061c270a9b2e
+analyze_py_sha256=fcbb84211b9f5db5cdbecb0da04406522e5141d1ae36f9e9229fc8ae59f79918
+validate_receipts_py_sha256=741b508da019be6a483946baa35ddd90684fd24762ad0a8242ba48f0a7a7967a
+
+The platform blocked outbound transfer of the private-repository archive. Before
+fresh execution, each authorized host's existing prefetch_bench.c and
+run_campaign.py was SHA-256 checked against the source commit and matched the
+digests above. The exact committed analyzer and validator then ran locally over
+the retrieved raw outputs, with the sealed archive embedded in each receipt.
