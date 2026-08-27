@@ -59,6 +59,10 @@ name = "finite-state-transducers-compact-dictionaries"
 version = "0.1.0"
 
 [[package]]
+name = "hardware-software-prefetching"
+version = "0.1.0"
+
+[[package]]
 name = "idempotency-concurrency"
 version = "0.1.0"
 
