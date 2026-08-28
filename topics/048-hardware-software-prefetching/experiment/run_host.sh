@@ -120,6 +120,7 @@ python3 "$experiment_directory/analyze.py" "$output_directory/sequential.tsv" \
 
 python3 "$experiment_directory/validate_receipts.py" "$output_directory" \
     --expected-source-commit "$source_commit" \
+    --expected-source-archive-sha256 "$(sha256sum "$output_directory/source-archive.tar.gz" | cut -d' ' -f1)" \
     --expected-hostname "$(hostname -f 2>/dev/null || hostname)" \
     --expected-uname-machine "$(uname -m)" \
     --objdump objdump \

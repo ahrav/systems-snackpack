@@ -10,6 +10,7 @@ import json
 import math
 import random
 import re
+import shlex
 import statistics
 import subprocess
 import tarfile
@@ -346,6 +347,15 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("receipt", type=Path)
     parser.add_argument("--expected-source-commit", required=True)
+    parser.add_argument(
+        "--expected-source-archive-sha256",
+        required=True,
+        help=(
+            "trusted digest of source-archive.tar.gz obtained out of band, "
+            "for example from the published measurement page; archive PAX "
+            "metadata alone does not authenticate the commit"
+        ),
+    )
     parser.add_argument("--expected-hostname", required=True)
     parser.add_argument("--expected-uname-machine", required=True)
     parser.add_argument(
@@ -382,6 +392,12 @@ def main() -> None:
         host_field_present(host_text, "uname_machine", args.expected_uname_machine),
         "host identity differs: uname machine",
     )
+    # Every distance-to-bytes translation in the experiment assumes 64-byte
+    # records on 64-byte cache lines.
+    require(
+        host_field_present(host_text, "line_size", str(LINE_BYTES)),
+        "host cache line size is not the frozen 64 bytes",
+    )
     gcc_versions = GCC_VERSION_LINE.findall(host_text)
     require(
         bool(gcc_versions) and all(v == FROZEN_GCC_VERSION for v in gcc_versions),
@@ -392,7 +408,11 @@ def main() -> None:
     # Token-exact comparison: a substring test would accept extra
     # outcome-changing options appended to the frozen flags. The source
     # content itself is bound separately through the executed-source digests.
-    build_tokens = build_lines[0].split()
+    # shlex handles the printf %q escaping run_host.sh applies to paths.
+    try:
+        build_tokens = shlex.split(build_lines[0])
+    except ValueError:
+        build_tokens = []
     frozen_flags = FROZEN_BUILD_FLAGS.split()
     require(
         len(build_tokens) == len(frozen_flags) + 4
@@ -411,6 +431,13 @@ def main() -> None:
     require(
         source_hashes == {"source-archive.tar.gz": sha256(receipt / "source-archive.tar.gz")},
         "source archive digest record differs",
+    )
+    # The archive's PAX comment is writable by whoever packed the archive, so
+    # commit authentication rests on this externally supplied trusted digest;
+    # the PAX and prefix checks below remain as consistency checks only.
+    require(
+        source_hashes["source-archive.tar.gz"] == args.expected_source_archive_sha256,
+        "source archive differs from the trusted digest",
     )
     binary_hashes = recorded_hashes(receipt / "binary.sha256")
     require(

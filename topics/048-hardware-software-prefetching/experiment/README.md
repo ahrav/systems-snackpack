@@ -55,14 +55,18 @@ manifest, and independently recomputed summaries.
 ```bash
 python3 topics/048-hardware-software-prefetching/experiment/validate_receipts.py \
   /tmp/topic48-SOURCE-receipt --expected-source-commit SOURCE \
+  --expected-source-archive-sha256 ARCHIVE_SHA256 \
   --expected-hostname HOST --expected-uname-machine ARCH \
   --objdump objdump
 jq '.summary' /tmp/topic48-SOURCE-receipt/random-analysis.json
 rg -n 'prefetch|prfm' /tmp/topic48-SOURCE-receipt/codegen/kernel_prefetch.asm
 ```
 
-The hostname and machine values come from the target you claim the receipt
-represents; the validator compares them with the recorded host evidence.
+The archive digest, hostname, and machine values come from a source you trust
+independently of the receipt — for this topic, the published measurement
+pages. Archive PAX metadata alone does not authenticate the commit, so the
+validator requires the trusted archive digest and compares the recorded host
+evidence against the stated identity.
 `--objdump` regenerates the kernel disassembly from the retained binary and
 checks the hint evidence against those bytes; omit it when no disassembler for
 the receipt's architecture is available, which limits the codegen check to the

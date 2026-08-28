@@ -162,6 +162,10 @@ def main():
         parser.error("--blocks must be a positive even number")
     if args.aa_blocks <= 0 or args.aa_blocks % 2 != 0:
         parser.error("--aa-blocks must be a positive even number")
+    # analyze.py's Student-t table covers 30 degrees of freedom, so a larger
+    # campaign would complete collection and then fail summarization.
+    if args.blocks > 30 or args.aa_blocks > 30:
+        parser.error("block counts above 30 exceed the analyzer's Student-t table")
     if args.process_timeout <= 0:
         parser.error("--process-timeout must be positive seconds")
 

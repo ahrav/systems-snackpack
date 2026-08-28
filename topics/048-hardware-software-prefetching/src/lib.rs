@@ -218,8 +218,9 @@ pub fn throughput_ceiling(inputs: ThroughputInputs) -> Result<ThroughputBound, M
 /// # Errors
 ///
 /// Returns [`ModelError::Negative`] when the extra cost is negative or
-/// non-finite and [`ModelError::Invalid`] when the avoided stall is not
-/// finite and positive.
+/// non-finite, [`ModelError::Invalid`] when the avoided stall is not finite
+/// and positive, or when a positive extra cost yields a ratio that is not
+/// representable as a finite positive number.
 pub fn useful_fraction_break_even(
     extra_cycles_per_iteration: f64,
     avoided_stall_cycles_when_useful: f64,
@@ -231,7 +232,14 @@ pub fn useful_fraction_break_even(
         avoided_stall_cycles_when_useful,
         "avoided_stall_cycles_when_useful",
     )?;
-    Ok(extra_cycles_per_iteration / avoided_stall_cycles_when_useful)
+    let ratio = extra_cycles_per_iteration / avoided_stall_cycles_when_useful;
+    // A positive cost with a ratio that underflowed to zero would claim no
+    // useful prefetches are needed; an overflow to infinity is equally
+    // meaningless. Zero cost legitimately yields a zero ratio.
+    if extra_cycles_per_iteration > 0.0 {
+        validate_positive(ratio, "break-even fraction")?;
+    }
+    Ok(ratio)
 }
 
 fn validate_positive(value: f64, name: &'static str) -> Result<(), ModelError> {
@@ -370,9 +378,22 @@ mod tests {
     fn useful_fraction_exposes_impossible_break_even() {
         assert_eq!(useful_fraction_break_even(0.5, 20.0), Ok(0.025));
         assert_eq!(useful_fraction_break_even(30.0, 20.0), Ok(1.5));
+        assert_eq!(useful_fraction_break_even(0.0, 20.0), Ok(0.0));
         assert_eq!(
             useful_fraction_break_even(-1.0, 20.0),
             Err(ModelError::Negative("extra_cycles_per_iteration"))
+        );
+    }
+
+    #[test]
+    fn useful_fraction_rejects_unrepresentable_ratios() {
+        assert_eq!(
+            useful_fraction_break_even(f64::MIN_POSITIVE, f64::MAX),
+            Err(ModelError::Invalid("break-even fraction"))
+        );
+        assert_eq!(
+            useful_fraction_break_even(f64::MAX, f64::MIN_POSITIVE),
+            Err(ModelError::Invalid("break-even fraction"))
         );
     }
 }
