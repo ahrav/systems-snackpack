@@ -94,8 +94,9 @@ pub fn required_lead_iterations(
 ///
 /// # Errors
 ///
-/// Returns [`ModelError::Zero`] for a zero line count or line size and
-/// [`ModelError::Overflow`] when the product exceeds `u64`.
+/// - Returns [`ModelError::Zero`] when `lines_per_iteration` is zero.
+/// - Returns [`ModelError::Zero`] when `line_bytes` is zero.
+/// - Returns [`ModelError::Overflow`] when the product exceeds `u64`.
 pub fn in_flight_bytes(
     distance_iterations: u64,
     lines_per_iteration: u64,
@@ -130,7 +131,10 @@ pub struct ThroughputInputs {
     pub bytes_per_iteration: f64,
 }
 
-/// Component that sets the smallest throughput ceiling.
+/// Component selected for the smallest throughput ceiling.
+///
+/// Equal ceilings select CPU before concurrency, and concurrency before
+/// bandwidth.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LimitingFactor {
     /// Instruction execution is the smallest modeled ceiling.
@@ -219,10 +223,12 @@ pub fn throughput_ceiling(inputs: ThroughputInputs) -> Result<ThroughputBound, M
 ///
 /// # Errors
 ///
-/// Returns [`ModelError::Negative`] when the extra cost is negative or
-/// non-finite, [`ModelError::Invalid`] when the avoided stall is not finite
-/// and positive, or when a positive extra cost yields a ratio that is not
-/// representable as a finite positive number.
+/// - Returns [`ModelError::Negative`] when `extra_cycles_per_iteration` is
+///   negative or non-finite.
+/// - Returns [`ModelError::Invalid`] when
+///   `avoided_stall_cycles_when_useful` is not finite and positive.
+/// - Returns [`ModelError::Invalid`] when a positive extra cost produces a
+///   fraction that is not representable as a finite positive number.
 pub fn useful_fraction_break_even(
     extra_cycles_per_iteration: f64,
     avoided_stall_cycles_when_useful: f64,
