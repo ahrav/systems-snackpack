@@ -186,6 +186,7 @@ def validate_metadata(metadata: dict[str, Any]) -> tuple[list[dict[str, Any]], d
     if not isinstance(config, dict) or set(config) != {
         "probe_cpu",
         "worker_cpus",
+        "numa_node",
         "large_mib",
         "worker_mib",
         "warmup_ms",
@@ -193,9 +194,12 @@ def validate_metadata(metadata: dict[str, Any]) -> tuple[list[dict[str, Any]], d
     }:
         fail("campaign config key set changed")
     probe_cpu = config.get("probe_cpu")
+    numa_node = config.get("numa_node")
     workers = config.get("worker_cpus")
     if not is_int(probe_cpu) or probe_cpu < 0:
         fail("probe CPU is invalid")
+    if not is_int(numa_node) or numa_node < 0:
+        fail("NUMA node is invalid")
     if (
         not isinstance(workers, list)
         or len(workers) != 8
@@ -229,6 +233,8 @@ def expected_command(
         str(config["probe_cpu"]),
         "--worker-cpus",
         ",".join(map(str, config["worker_cpus"])),
+        "--numa-node",
+        str(config["numa_node"]),
         "--large-mib",
         str(config["large_mib"]),
         "--worker-mib",
@@ -381,6 +387,7 @@ def validate_attempts(
                 treatment=spec["treatment"],
                 probe_cpu=config["probe_cpu"],
                 worker_cpus=tuple(config["worker_cpus"]),
+                numa_node=config["numa_node"],
                 large_mib=config["large_mib"],
                 worker_mib=config["worker_mib"],
                 warmup_ms=config["warmup_ms"],
