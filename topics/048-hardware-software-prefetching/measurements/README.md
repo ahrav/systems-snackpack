@@ -9,3 +9,8 @@ and measured-versus-inferred boundaries.
 
 The sealed raw receipt archives and their SHA-256 manifest are under
 [`raw/2026-08-27-43ba224/`](raw/2026-08-27-43ba224/).
+
+Review hardening changed the checked-host source and receipt contract. The
+[2026-08-28 exact-source verification](2026-08-28-exact-source-rerun.md)
+records the final two-host result and links its sealed receipts under
+[`raw/2026-08-28-f367af8/`](raw/2026-08-28-f367af8/).

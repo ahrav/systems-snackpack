@@ -45,7 +45,8 @@ use std::fmt;
 pub enum ModelError {
     /// An integer input that appears in a divisor or size was zero.
     Zero(&'static str),
-    /// A floating-point input was negative, zero where forbidden, or non-finite.
+    /// A floating-point input or derived result was negative, zero where
+    /// forbidden, or non-finite.
     Invalid(&'static str),
     /// A floating-point input was negative or non-finite where zero is allowed.
     Negative(&'static str),

@@ -1,0 +1,10 @@
+resolution_recorded_utc=2026-08-28T08:25:44Z
+ssh_alias=xxl
+ssh_config_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+xxl_remote_probe_utc=2026-08-28T08:25:46Z
+xxl_reported_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+xxl_uname_machine=x86_64
+arm_remote_probe_utc=2026-08-28T08:25:47Z
+arm_expected_hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+arm_reported_hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+arm_uname_machine=aarch64
