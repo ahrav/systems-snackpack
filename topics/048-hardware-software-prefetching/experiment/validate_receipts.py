@@ -20,6 +20,10 @@ from pathlib import Path
 
 T95 = {1: 12.706, 3: 3.182}
 HINT_INSTRUCTION = re.compile(r"\b(?:prefetch(?:nta|t[012]|w|wt1)|prfm)\b")
+EXPECTED_HINT_INSTRUCTION = {
+    "aarch64": re.compile(r"\bprfm\s+pldl1strm\b"),
+    "x86_64": re.compile(r"\bprefetchnta\b"),
+}
 # The frozen round-01 toolchain: rounds/01.md declares GCC 11.5 with exactly
 # these flags, so a receipt built any other way measures different kernels.
 FROZEN_GCC_VERSION = "11.5"
@@ -28,6 +32,18 @@ FROZEN_BUILD_FLAGS = (
     "-fno-tree-vectorize -fno-tree-slp-vectorize"
 )
 GCC_VERSION_LINE = re.compile(r"^gcc \([^)]*\) (\d+\.\d+)", re.MULTILINE)
+PYTHON_VERSION_LINE = re.compile(r"^Python \d+\.\d+\.\d+", re.MULTILINE)
+OBJDUMP_VERSION_LINE = re.compile(r"^GNU objdump .+", re.MULTILINE)
+RECORDED_UTC_LINE = re.compile(
+    r"^recorded_utc=\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$", re.MULTILINE
+)
+AVAILABLE_CPUS_LINE = re.compile(r"^available_cpus=(\d+)$", re.MULTILINE)
+LSCPU_CPUS_LINE = re.compile(r"^CPU\(s\):\s+(\d+)$", re.MULTILINE)
+CPU0_TOPOLOGY_LINE = re.compile(r"^0,[^,]*,[^,]*,[^,]*,(?:Y|yes)$", re.MULTILINE)
+NATIVE_MARCH_LINE = re.compile(r"^\s+-march=\s+\S+", re.MULTILINE)
+NATIVE_MTUNE_LINE = re.compile(r"^\s+-mtune=\s+\S+", re.MULTILINE)
+MIDR_LINE = re.compile(r"^midr_el1=0x[0-9a-fA-F]+$", re.MULTILINE)
+MICROCODE_LINE = re.compile(r"^microcode_version=\S+$", re.MULTILINE)
 LINE_BYTES = 64
 REQUIRED = (
     "source-archive.tar.gz",
@@ -385,6 +401,10 @@ def main() -> None:
         require(sha256(receipt / name) == digest, f"digest mismatch: {name}")
     host_text = (receipt / "host.txt").read_text()
     require(
+        args.expected_uname_machine in EXPECTED_HINT_INSTRUCTION,
+        "unsupported expected architecture",
+    )
+    require(
         host_field_present(host_text, "hostname", args.expected_hostname),
         "host identity differs: hostname",
     )
@@ -398,6 +418,44 @@ def main() -> None:
         host_field_present(host_text, "line_size", str(LINE_BYTES)),
         "host cache line size is not the frozen 64 bytes",
     )
+    require(RECORDED_UTC_LINE.search(host_text) is not None, "host timestamp missing")
+    require(
+        re.search(rf"^Linux {re.escape(args.expected_hostname)} \S+", host_text, re.MULTILINE)
+        is not None,
+        "kernel identity missing",
+    )
+    available_cpus = AVAILABLE_CPUS_LINE.findall(host_text)
+    lscpu_cpus = LSCPU_CPUS_LINE.findall(host_text)
+    require(
+        len(available_cpus) == 1
+        and len(lscpu_cpus) == 1
+        and int(available_cpus[0]) > 0
+        and available_cpus[0] == lscpu_cpus[0],
+        "available CPU count missing or inconsistent",
+    )
+    require(CPU0_TOPOLOGY_LINE.search(host_text) is not None, "CPU 0 topology missing")
+    require(NATIVE_MARCH_LINE.search(host_text) is not None, "native march missing")
+    require(NATIVE_MTUNE_LINE.search(host_text) is not None, "native mtune missing")
+    require(PYTHON_VERSION_LINE.search(host_text) is not None, "Python version missing")
+    require(OBJDUMP_VERSION_LINE.search(host_text) is not None, "objdump version missing")
+    if args.expected_uname_machine == "aarch64":
+        require(
+            re.search(r"^Vendor ID:\s+ARM$", host_text, re.MULTILINE) is not None,
+            "Arm vendor missing",
+        )
+        require(MIDR_LINE.search(host_text) is not None, "Arm MIDR missing")
+    else:
+        require(
+            re.search(r"^Model name:\s+\S", host_text, re.MULTILINE) is not None,
+            "x86 model name missing",
+        )
+        require(
+            re.search(r"^CPU family:\s+\d+", host_text, re.MULTILINE) is not None
+            and re.search(r"^Model:\s+\d+", host_text, re.MULTILINE) is not None
+            and re.search(r"^Stepping:\s+\S+", host_text, re.MULTILINE) is not None,
+            "x86 family, model, or stepping missing",
+        )
+        require(MICROCODE_LINE.search(host_text) is not None, "x86 microcode missing")
     gcc_versions = GCC_VERSION_LINE.findall(host_text)
     require(
         bool(gcc_versions) and all(v == FROZEN_GCC_VERSION for v in gcc_versions),
@@ -446,6 +504,7 @@ def main() -> None:
     )
     expected_source_names = {
         "prefetch_bench.c",
+        "run_host.sh",
         "run_campaign.py",
         "analyze.py",
         "validate_receipts.py",
@@ -480,8 +539,7 @@ def main() -> None:
         require(archived_digests[name] == digest, f"source digest differs: {name}")
     executed_hashes = executed_source_hashes(receipt / "execution-sources.sha256")
     require(
-        {"prefetch_bench.c", "run_campaign.py"} <= set(executed_hashes)
-        and set(executed_hashes) <= expected_source_names,
+        set(executed_hashes) == expected_source_names,
         "executed source set differs",
     )
     for name, digest in executed_hashes.items():
@@ -495,7 +553,8 @@ def main() -> None:
     require("kernel_demand" in symbols and "kernel_prefetch" in symbols, "kernel symbols missing")
     demand_asm = (receipt / "codegen/kernel_demand.asm").read_text().lower()
     prefetch_asm = (receipt / "codegen/kernel_prefetch.asm").read_text().lower()
-    require(HINT_INSTRUCTION.search(prefetch_asm) is not None, "linked prefetch hint missing")
+    expected_hint = EXPECTED_HINT_INSTRUCTION[args.expected_uname_machine]
+    require(expected_hint.search(prefetch_asm) is not None, "linked prefetch hint differs")
     require(HINT_INSTRUCTION.search(demand_asm) is None, "demand kernel contains prefetch hint")
     # The recorded .asm text is only manifest-covered; regenerating from the
     # retained binary binds the hint evidence to the bytes that actually ran.
@@ -518,10 +577,16 @@ def main() -> None:
             )
             regenerated = disassembly.stdout.lower()
             require(f"<{kernel}>" in regenerated, f"regenerated disassembly missing {kernel}")
-            require(
-                (HINT_INSTRUCTION.search(regenerated) is not None) == expect_hint,
-                f"binary hint evidence differs from recorded text: {kernel}",
-            )
+            if expect_hint:
+                require(
+                    expected_hint.search(regenerated) is not None,
+                    f"binary hint evidence differs from recorded text: {kernel}",
+                )
+            else:
+                require(
+                    HINT_INSTRUCTION.search(regenerated) is None,
+                    f"binary hint evidence differs from recorded text: {kernel}",
+                )
         codegen_binding = "regenerated-from-binary"
 
     random_result = validate_campaign(

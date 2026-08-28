@@ -29,17 +29,25 @@ before transfer; do not substitute a remembered hostname.
 ```bash
 archive="/tmp/topic48-${source_commit}.tar.gz"
 archive_root="systems-snackpack-${source_commit}"
+expected_hostname=HOST_RECORDED_BY_THE_CONTROLLER
+expected_uname_machine=ARCH_RECORDED_BY_THE_CONTROLLER
+if ! printf '%s  %s\n' "$archive_sha256" "$archive" |
+  sha256sum --check --strict -; then
+  exit 1
+fi
 tar -xOf "$archive" \
   "$archive_root/topics/048-hardware-software-prefetching/experiment/run_host.sh" |
   bash -s -- "$archive" "$source_commit" "$archive_sha256" \
+    "$expected_hostname" "$expected_uname_machine" \
     "/tmp/topic48-${source_commit}-receipt"
 ```
 
 Set `archive_sha256` to the digest recorded before transfer; do not recompute
-it from the target's received archive. This extracts the host runner from the
-sealed archive itself, checks that received archive against the externally
-recorded digest before extraction, and avoids dependence on a separate target
-checkout.
+it from the target's received archive. Set the expected host and machine from
+the controller's pre-transfer target probe. The `sha256sum` command must pass
+before anything is extracted or executed from the received archive. The runner
+checks the same controller-supplied digest and host identity again, then avoids
+dependence on a separate target checkout.
 
 The script records host identity, raw model-identification fields when the
 kernel exposes them, compiler and Python versions, and native target flags. It
@@ -67,11 +75,11 @@ jq '.summary' /tmp/topic48-SOURCE-receipt/random-analysis.json
 rg -n 'prefetch|prfm' /tmp/topic48-SOURCE-receipt/codegen/kernel_prefetch.asm
 ```
 
-The archive digest, hostname, and machine values come from a source you trust
-independently of the receipt — for this topic, the published measurement
-pages. Archive PAX metadata alone does not authenticate the commit, so the
-validator requires the trusted archive digest and compares the recorded host
-evidence against the stated identity.
+The archive digest, hostname, and machine values come from controller evidence
+recorded before transfer, independently of the receipt. The published raw
+directory retains that evidence. Archive PAX metadata alone does not
+authenticate the commit, so the validator requires the trusted archive digest
+and compares the recorded host evidence against the controller's identity.
 `--objdump` regenerates the kernel disassembly from the retained binary and
 checks the hint evidence against those bytes; omit it when no disassembler for
 the receipt's architecture is available, which limits the codegen check to the
