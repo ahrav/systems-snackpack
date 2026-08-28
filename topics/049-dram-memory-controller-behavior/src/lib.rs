@@ -252,13 +252,7 @@ pub fn expected_device_component_ns(
     let expected = mix.probability(BankState::Hit) * timing.device_component_ns(BankState::Hit)
         + mix.probability(BankState::Closed) * timing.device_component_ns(BankState::Closed)
         + mix.probability(BankState::Conflict) * timing.device_component_ns(BankState::Conflict);
-    if expected.is_finite() {
-        Ok(expected)
-    } else {
-        Err(ModelError::DerivedValueNotFinite(
-            "expected device component",
-        ))
-    }
+    finite_result(expected, "expected device component")
 }
 
 /// Applies Little's law to a byte-throughput target.
@@ -581,8 +575,10 @@ fn validate_non_negative_finite(value: f64, name: &'static str) -> Result<(), Mo
 }
 
 fn validate_positive_finite(value: f64, name: &'static str) -> Result<(), ModelError> {
-    validate_non_negative_finite(value, name)?;
-    if value == 0.0 {
+    if !value.is_finite() {
+        return Err(ModelError::NotFinite(name));
+    }
+    if value <= 0.0 {
         return Err(ModelError::NotPositive(name));
     }
     Ok(())
@@ -728,6 +724,10 @@ mod tests {
         assert_eq!(
             required_inflight(20e9, 100e-9, 0.0),
             Err(ModelError::NotPositive("useful bytes per request"))
+        );
+        assert_eq!(
+            required_inflight(20e9, -1.0, 64.0),
+            Err(ModelError::NotPositive("average latency seconds"))
         );
         assert_eq!(
             inflight_payload_ceiling(-1.0, 100e-9, 64.0),

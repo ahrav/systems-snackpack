@@ -2,7 +2,8 @@
 
 The 2026-08-28 first visit passed on both required Linux targets:
 
-- [AArch64 host result](2026-08-28-arm.md)
+- [AArch64 host result](2026-08-28-arm.md) — accepted from a complete retry;
+  the first fixed-horizon Arm campaign was rejected as a whole
 - [`xxl` host result](2026-08-28-xxl.md)
 - [cross-host comparison](2026-08-28-comparison.md)
 
