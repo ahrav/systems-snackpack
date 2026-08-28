@@ -1,0 +1,12 @@
+{
+  "binary_sha256": "0e481c797b2b7c107d6ed71e55d7220e395ac28f9978ef4d6f695fe2cecc20e1",
+  "codegen_binding": "recorded-text-only",
+  "hostname": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+  "random_rows": 88,
+  "schema": 1,
+  "sequential_rows": 16,
+  "source_archive_sha256": "58834c58bb98d296a1d10d7dc3990a7fca5a0387962f4159b036e209444ac3c2",
+  "source_commit": "f367af8954de2626c8d0ef0b26f77eebf4dd6e99",
+  "uname_machine": "aarch64",
+  "valid": true
+}

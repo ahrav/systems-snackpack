@@ -1,0 +1,7 @@
+recorded_utc=2026-08-27T15:12:08Z
+alias=xxl
+user=ahrav
+hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+port=22
+reported_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+reported_architecture=x86_64

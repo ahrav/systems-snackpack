@@ -1,0 +1,31 @@
+Arm target: dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+Campaign recorded UTC: 2026-08-28T08:26:23Z
+Architecture: aarch64
+Kernel: Linux 6.12.100-125.179.amzn2023.aarch64
+Available CPUs: 64
+CPU: Arm Neoverse V1, stepping r1p1, MIDR 0x411fd401
+CPU 0 topology: node 0, socket 0, core 0, online
+Line size reported by getconf: 64 bytes
+GCC: 11.5.0 20240719 (Red Hat 11.5.0-5)
+Python: 3.9.25
+GNU objdump: 2.41-50.amzn2023.0.5
+Rust: 1.95.0
+Native march: armv8.4-a+crypto+sha3+sm4+sve+rng+i8mm+bf16
+Native mtune: neoverse-n1
+
+x86 target: SSH alias xxl
+Pre-transfer resolved and reported hostname: dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+Campaign recorded UTC: 2026-08-28T08:26:23Z
+Architecture: x86_64
+Kernel: Linux 6.12.95-124.187.amzn2023.x86_64
+Available CPUs: 192
+CPU: Intel Xeon Platinum 8488C, family 6 model 143 stepping 8
+Microcode: 0x2b000670
+CPU 0 topology: node 0, socket 0, core 0, online
+Line size reported by getconf: 64 bytes
+GCC: 11.5.0 20240719 (Red Hat 11.5.0-5)
+Python: 3.9.25
+GNU objdump: 2.41-50.amzn2023.0.5
+Rust: 1.98.0
+Native march: sapphirerapids
+Native mtune: sapphirerapids
