@@ -47,8 +47,11 @@ analysis and sealing.
   target.
 - `host-model-probes.txt` records the fresh Arm model-register and x86
   microcode probes after collection.
-- `xxl-resolution.txt` records the Secure Shell alias resolution used for this
-  run.
+- `xxl-resolution.txt` records the Secure Shell alias resolution for this run,
+  captured at `2026-08-27T15:12:08Z`, after the campaign window. It attests
+  where `xxl` pointed at capture time; the measured host's identity is
+  attested by the receipt's own `host.txt`, and linking the two assumes the
+  alias was not remapped between the campaign and the capture.
 - `SHA256SUMS` records outer digests for every file in this directory.
 
 Each host archive includes host and compiler data, build flags, execution-source

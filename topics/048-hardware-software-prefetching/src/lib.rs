@@ -163,7 +163,9 @@ pub struct ThroughputBound {
 ///
 /// # Errors
 ///
-/// Returns [`ModelError::Invalid`] when any input is non-finite or not positive.
+/// Returns [`ModelError::Invalid`] when any input is non-finite or not
+/// positive, or when a derived ceiling is not representable as a finite
+/// positive number.
 pub fn throughput_ceiling(inputs: ThroughputInputs) -> Result<ThroughputBound, ModelError> {
     validate_positive(inputs.cpu_iterations_per_cycle, "cpu_iterations_per_cycle")?;
     validate_positive(
@@ -175,9 +177,15 @@ pub fn throughput_ceiling(inputs: ThroughputInputs) -> Result<ThroughputBound, M
     validate_positive(inputs.memory_bytes_per_cycle, "memory_bytes_per_cycle")?;
     validate_positive(inputs.bytes_per_iteration, "bytes_per_iteration")?;
 
-    let concurrency = inputs.maximum_concurrent_misses
-        / (inputs.miss_latency_cycles * inputs.misses_per_iteration);
+    // Sequential division avoids the intermediate product
+    // `miss_latency_cycles * misses_per_iteration`, which can overflow to
+    // infinity for finite inputs and silently zero the ceiling; validation
+    // then rejects any remaining unrepresentable result instead of ranking it.
+    let concurrency =
+        inputs.maximum_concurrent_misses / inputs.miss_latency_cycles / inputs.misses_per_iteration;
     let bandwidth = inputs.memory_bytes_per_cycle / inputs.bytes_per_iteration;
+    validate_positive(concurrency, "concurrency ceiling")?;
+    validate_positive(bandwidth, "bandwidth ceiling")?;
     let (iterations_per_cycle, limiting_factor) = if inputs.cpu_iterations_per_cycle <= concurrency
         && inputs.cpu_iterations_per_cycle <= bandwidth
     {
@@ -309,6 +317,49 @@ mod tests {
             throughput_ceiling(invalid),
             Err(ModelError::Invalid("cpu_iterations_per_cycle"))
         );
+    }
+
+    #[test]
+    fn throughput_survives_huge_denominator_product() {
+        // `miss_latency_cycles * misses_per_iteration` overflows f64, yet the
+        // true ceiling is a representable positive subnormal; the product form
+        // returned a silent zero bound here.
+        let bound = throughput_ceiling(ThroughputInputs {
+            cpu_iterations_per_cycle: 4.0,
+            maximum_concurrent_misses: 1.0,
+            miss_latency_cycles: f64::MAX,
+            misses_per_iteration: 2.0,
+            memory_bytes_per_cycle: 16.0,
+            bytes_per_iteration: 64.0,
+        })
+        .unwrap();
+        assert!(bound.concurrency_iterations_per_cycle > 0.0);
+        assert_eq!(bound.limiting_factor, LimitingFactor::Concurrency);
+    }
+
+    #[test]
+    fn throughput_rejects_unrepresentable_ceilings() {
+        let common = ThroughputInputs {
+            cpu_iterations_per_cycle: 0.5,
+            maximum_concurrent_misses: 12.0,
+            miss_latency_cycles: 240.0,
+            misses_per_iteration: 1.0,
+            memory_bytes_per_cycle: 16.0,
+            bytes_per_iteration: 64.0,
+        };
+        let underflow = throughput_ceiling(ThroughputInputs {
+            maximum_concurrent_misses: f64::MIN_POSITIVE,
+            miss_latency_cycles: f64::MAX,
+            misses_per_iteration: f64::MAX,
+            ..common
+        });
+        assert_eq!(underflow, Err(ModelError::Invalid("concurrency ceiling")));
+        let overflow = throughput_ceiling(ThroughputInputs {
+            memory_bytes_per_cycle: f64::MAX,
+            bytes_per_iteration: f64::MIN_POSITIVE,
+            ..common
+        });
+        assert_eq!(overflow, Err(ModelError::Invalid("bandwidth ceiling")));
     }
 
     #[test]

@@ -244,7 +244,11 @@ def validate_campaign(
             actual_schedule.append((case, distance, block, template, position, label))
 
     expected_rows = len(primary_distances) * primary_blocks * 4 + aa_blocks * 4
-    require(rows == expected_rows and len(pids) == rows, "process count or PID reuse mismatch")
+    # PID uniqueness is not required: the kernel may legally reuse a PID after
+    # an earlier fresh process exits, and each row's TSV PID is already bound
+    # to its process result above. The analysis comparison still reports the
+    # recomputed unique-PID count.
+    require(rows == expected_rows, "process count mismatch")
     require(len(binary_hashes) == 1, "campaign used multiple binary hashes")
     expected_rng = random.Random(campaign_seed)
     expected_distance_order = sorted(primary_distances)

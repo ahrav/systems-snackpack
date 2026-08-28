@@ -43,6 +43,8 @@ def parse_distances(text: str):
     values = [int(item) for item in text.split(",") if item]
     if not values or any(value <= 0 for value in values):
         raise argparse.ArgumentTypeError("distances must be positive comma-separated integers")
+    if len(set(values)) != len(values):
+        raise argparse.ArgumentTypeError("distances must be unique")
     return values
 
 
@@ -170,7 +172,13 @@ def main():
     distance_order = sorted(args.distances)
     rng.shuffle(distance_order)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    with args.output.open("w", newline="") as output:
+    try:
+        # Exclusive create: overwriting an existing log would erase retained
+        # failed attempts from an earlier run of the same command.
+        output_stream = args.output.open("x", newline="")
+    except FileExistsError:
+        parser.error("output already exists; choose a new path to retain prior attempts")
+    with output_stream as output:
         writer = csv.DictWriter(output, fieldnames=FIELDNAMES, delimiter="\t")
         writer.writeheader()
 
