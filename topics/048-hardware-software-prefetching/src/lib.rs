@@ -163,10 +163,10 @@ pub struct ThroughputBound {
 
 /// Computes the minimum of CPU, concurrent-miss, and bandwidth ceilings.
 ///
-/// The concurrency term is evaluated as `(maximum_concurrent_misses /
-/// miss_latency_cycles) / misses_per_iteration`. Sequential division avoids
-/// overflow in a multiplied denominator; its floating-point rounding and
-/// underflow can differ from the algebraically equivalent product form.
+/// The concurrency term is `maximum_concurrent_misses /
+/// (miss_latency_cycles * misses_per_iteration)`, evaluated through
+/// mantissa/exponent scaling so an intermediate overflow or underflow cannot
+/// misreport a representable ceiling.
 /// The bandwidth term is `memory_bytes_per_cycle / bytes_per_iteration`.
 /// The function is a capacity screen. It does not include address-generation,
 /// translation, cache-conflict, or queuing effects.
