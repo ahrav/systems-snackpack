@@ -179,21 +179,15 @@ pub fn throughput_ceiling(inputs: ThroughputInputs) -> Result<ThroughputBound, M
     validate_positive(inputs.misses_per_iteration, "misses_per_iteration")?;
     validate_positive(inputs.memory_bytes_per_cycle, "memory_bytes_per_cycle")?;
     validate_positive(inputs.bytes_per_iteration, "bytes_per_iteration")?;
-
-    // Sequential division avoids the intermediate product
-    // `miss_latency_cycles * misses_per_iteration`, which can overflow to
-    // infinity for finite inputs and silently zero the ceiling. Dividing by
-    // the larger factor first keeps the intermediate in range whenever the
-    // true ceiling exceeds it: if that first division overflows, dividing by
-    // the smaller-or-equal remaining factor could only grow the value, so the
-    // true ceiling itself is beyond f64 and the validation below rejects it.
-    let (larger_factor, smaller_factor) =
-        if inputs.miss_latency_cycles >= inputs.misses_per_iteration {
-            (inputs.miss_latency_cycles, inputs.misses_per_iteration)
-        } else {
-            (inputs.misses_per_iteration, inputs.miss_latency_cycles)
-        };
-    let concurrency = inputs.maximum_concurrent_misses / larger_factor / smaller_factor;
+    // The three-factor ratio is evaluated through mantissa/exponent scaling:
+    // a plain division order can overflow or underflow an intermediate for
+    // inputs whose true ceiling is representable. Validation below still
+    // rejects a ceiling that is genuinely outside f64's range.
+    let concurrency = scaled_ratio(
+        inputs.maximum_concurrent_misses,
+        inputs.miss_latency_cycles,
+        inputs.misses_per_iteration,
+    );
     let bandwidth = inputs.memory_bytes_per_cycle / inputs.bytes_per_iteration;
     validate_positive(concurrency, "concurrency ceiling")?;
     validate_positive(bandwidth, "bandwidth ceiling")?;
@@ -255,6 +249,47 @@ fn validate_positive(value: f64, name: &'static str) -> Result<(), ModelError> {
         Ok(())
     } else {
         Err(ModelError::Invalid(name))
+    }
+}
+
+/// Splits a finite positive `f64` into a mantissa in `[1, 2)` and a
+/// power-of-two exponent, normalizing subnormal inputs first.
+fn split_mantissa_exponent(value: f64) -> (f64, i32) {
+    const EXPONENT_MASK: u64 = 0x7ff << 52;
+    const EXPONENT_ONE: u64 = 1023 << 52;
+    let (value, adjustment) = if value < f64::MIN_POSITIVE {
+        // Multiplying a subnormal by an exact power of two is exact and moves
+        // it into the range where the exponent bits are meaningful.
+        (value * 2f64.powi(64), -64)
+    } else {
+        (value, 0)
+    };
+    let bits = value.to_bits();
+    let exponent = ((bits >> 52) & 0x7ff) as i32 - 1023 + adjustment;
+    let mantissa = f64::from_bits((bits & !EXPONENT_MASK) | EXPONENT_ONE);
+    (mantissa, exponent)
+}
+
+/// Computes `numerator / (factor_a * factor_b)` for finite positive inputs
+/// without intermediate overflow or underflow. The mantissa ratio stays in
+/// `(1/4, 2)`, so only the final power-of-two scaling can leave `f64`'s
+/// range, and then only when the true value itself does. The result is exact
+/// to within a few units in the last place.
+fn scaled_ratio(numerator: f64, factor_a: f64, factor_b: f64) -> f64 {
+    let (numerator_mantissa, numerator_exponent) = split_mantissa_exponent(numerator);
+    let (a_mantissa, a_exponent) = split_mantissa_exponent(factor_a);
+    let (b_mantissa, b_exponent) = split_mantissa_exponent(factor_b);
+    let mantissa_ratio = numerator_mantissa / a_mantissa / b_mantissa;
+    let exponent = numerator_exponent - a_exponent - b_exponent;
+    if exponent > 1100 {
+        f64::INFINITY
+    } else if exponent < -1200 {
+        0.0
+    } else {
+        // Two-step scaling keeps each power-of-two factor representable even
+        // when the combined exponent reaches the subnormal boundary.
+        let half = exponent / 2;
+        mantissa_ratio * 2f64.powi(half) * 2f64.powi(exponent - half)
     }
 }
 
@@ -373,6 +408,25 @@ mod tests {
         .unwrap();
         assert!(bound.concurrency_iterations_per_cycle.is_finite());
         assert!(bound.concurrency_iterations_per_cycle > 4.0e307);
+        assert_eq!(bound.limiting_factor, LimitingFactor::Bandwidth);
+    }
+
+    #[test]
+    fn throughput_preserves_subnormal_operand_ratios() {
+        // Smallest subnormal in both the numerator and one factor: the true
+        // ceiling is exactly 0.5, but any plain division order loses it to
+        // intermediate underflow or overflow.
+        let smallest = f64::from_bits(1);
+        let bound = throughput_ceiling(ThroughputInputs {
+            cpu_iterations_per_cycle: 4.0,
+            maximum_concurrent_misses: smallest,
+            miss_latency_cycles: 2.0,
+            misses_per_iteration: smallest,
+            memory_bytes_per_cycle: 16.0,
+            bytes_per_iteration: 64.0,
+        })
+        .unwrap();
+        assert_eq!(bound.concurrency_iterations_per_cycle, 0.5);
         assert_eq!(bound.limiting_factor, LimitingFactor::Bandwidth);
     }
 

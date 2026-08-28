@@ -177,6 +177,13 @@ int main(int argc, char **argv) {
         fprintf(stderr, "line count must be in [1, UINT32_MAX]\n");
         return 2;
     }
+    /* A distance at or beyond the line count leaves kernel_prefetch with an
+     * empty prefetch loop, silently reporting a demand-only run as mode
+     * "prefetch". */
+    if (is_prefetch && distance >= count) {
+        fprintf(stderr, "prefetch distance must be smaller than the line count\n");
+        return 2;
+    }
 
     struct timespec process_start;
     struct timespec init_end;
