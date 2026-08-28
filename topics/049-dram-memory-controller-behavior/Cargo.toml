@@ -1,0 +1,17 @@
+[package]
+name = "dram-memory-controller-behavior"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "dram_memory_controller_behavior"
+path = "src/lib.rs"
+
+[[example]]
+name = "dram_cost_model"
+path = "examples/dram_cost_model.rs"
+
+[lints]
+workspace = true
