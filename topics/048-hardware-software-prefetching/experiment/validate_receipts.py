@@ -556,6 +556,7 @@ def main() -> None:
                 "schema": 1,
                 "valid": True,
                 "source_commit": args.expected_source_commit,
+                "source_archive_sha256": args.expected_source_archive_sha256,
                 "hostname": args.expected_hostname,
                 "uname_machine": args.expected_uname_machine,
                 "codegen_binding": codegen_binding,

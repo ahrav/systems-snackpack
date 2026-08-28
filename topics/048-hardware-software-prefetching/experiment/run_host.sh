@@ -1,16 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -ne 3 ]]; then
-    echo "usage: $0 SOURCE-ARCHIVE SOURCE-COMMIT OUTPUT-DIRECTORY" >&2
+if [[ $# -ne 4 ]]; then
+    echo "usage: $0 SOURCE-ARCHIVE SOURCE-COMMIT EXPECTED-ARCHIVE-SHA256 OUTPUT-DIRECTORY" >&2
     exit 2
 fi
 
 source_archive=$(realpath "$1")
 source_commit=$2
-output_directory=$(realpath -m "$3")
+expected_source_archive_sha256=$3
+output_directory=$(realpath -m "$4")
 scratch_directory=$(mktemp -d)
 trap 'rm -rf -- "$scratch_directory"' EXIT
+
+if [[ ! "$expected_source_archive_sha256" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "expected archive SHA-256 must be 64 lowercase hexadecimal characters" >&2
+    exit 2
+fi
+
+actual_source_archive_sha256=$(sha256sum "$source_archive" | cut -d' ' -f1)
+if [[ "$actual_source_archive_sha256" != "$expected_source_archive_sha256" ]]; then
+    echo "source archive SHA-256 differs from the trusted digest" >&2
+    exit 1
+fi
 
 if [[ -e "$output_directory" ]]; then
     echo "output already exists; choose a new directory to retain prior attempts: $output_directory" >&2
@@ -38,7 +50,14 @@ binary="$output_directory/prefetch_bench"
     printf 'line_size=%s\n' "$(getconf LEVEL1_DCACHE_LINESIZE 2>/dev/null || true)"
     uname -a
     lscpu
+    if [[ -r /sys/devices/system/cpu/cpu0/regs/identification/midr_el1 ]]; then
+        printf 'midr_el1=%s\n' "$(< /sys/devices/system/cpu/cpu0/regs/identification/midr_el1)"
+    fi
+    if [[ -r /sys/devices/system/cpu/cpu0/microcode/version ]]; then
+        printf 'microcode_version=%s\n' "$(< /sys/devices/system/cpu/cpu0/microcode/version)"
+    fi
     gcc --version
+    python3 --version
     # rustc is provenance only; the benchmark builds with gcc, so a host
     # without Rust must not abort the probe under set -e.
     if command -v rustc >/dev/null 2>&1; then rustc -vV; else echo 'rustc: not installed'; fi
@@ -120,7 +139,7 @@ python3 "$experiment_directory/analyze.py" "$output_directory/sequential.tsv" \
 
 python3 "$experiment_directory/validate_receipts.py" "$output_directory" \
     --expected-source-commit "$source_commit" \
-    --expected-source-archive-sha256 "$(sha256sum "$output_directory/source-archive.tar.gz" | cut -d' ' -f1)" \
+    --expected-source-archive-sha256 "$expected_source_archive_sha256" \
     --expected-hostname "$(hostname -f 2>/dev/null || hostname)" \
     --expected-uname-machine "$(uname -m)" \
     --objdump objdump \

@@ -14,7 +14,8 @@ source_commit=$(git rev-parse HEAD)
 git archive --format=tar.gz --prefix="systems-snackpack-${source_commit}/" \
   --output="/tmp/topic48-${source_commit}.tar.gz" "$source_commit" -- \
   topics/048-hardware-software-prefetching
-sha256sum "/tmp/topic48-${source_commit}.tar.gz"
+archive_sha256=$(shasum -a 256 "/tmp/topic48-${source_commit}.tar.gz" | cut -d' ' -f1)
+printf '%s\n' "$archive_sha256"
 ```
 
 The path-limited archive contains the complete Topic 48 artifact without
@@ -30,16 +31,20 @@ archive="/tmp/topic48-${source_commit}.tar.gz"
 archive_root="systems-snackpack-${source_commit}"
 tar -xOf "$archive" \
   "$archive_root/topics/048-hardware-software-prefetching/experiment/run_host.sh" |
-  bash -s -- "$archive" "$source_commit" \
+  bash -s -- "$archive" "$source_commit" "$archive_sha256" \
     "/tmp/topic48-${source_commit}-receipt"
 ```
 
-This extracts the host runner from the sealed archive itself. It does not
-depend on a separate repository checkout on the target.
+Set `archive_sha256` to the digest recorded before transfer; do not recompute
+it from the target's received archive. This extracts the host runner from the
+sealed archive itself, checks that received archive against the externally
+recorded digest before extraction, and avoids dependence on a separate target
+checkout.
 
-The script records host identity and native target flags, builds the exact C
-source, checks small demand and prefetch runs, inspects both linked kernels, and
-runs these campaigns:
+The script records host identity, raw model-identification fields when the
+kernel exposes them, compiler and Python versions, and native target flags. It
+then builds the exact C source, checks small demand and prefetch runs, inspects
+both linked kernels, and runs these campaigns:
 
 - randomized gather: five distances, four primary blocks each, and two A/A
   blocks, for 88 fresh processes;
