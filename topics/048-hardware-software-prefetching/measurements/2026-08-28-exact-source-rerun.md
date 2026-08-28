@@ -120,10 +120,10 @@ All processes reported an accepted `MADV_NOHUGEPAGE` request. This Linux memory
 advice asks the kernel not to use transparent huge pages for the mapping;
 acceptance does not prove the mapping's eventual page size.
 
-Before runner extraction, each received archive passed a controller-side
-SHA-256 check. Both in-host validators then reported `valid: true` against the
-same controller-supplied digest and identity, with code generation regenerated
-from the retained binary. Independent publication validation again supplied
+Before runner extraction, each received archive passed a target-side SHA-256
+check against a controller-supplied digest. Both in-host validators then
+reported `valid: true` against the same controller-supplied digest and
+identity, with code generation regenerated from the retained binary. Independent publication validation again supplied
 the published digest, hostname, and architecture and reported `valid: true`;
 the publication host lacked cross-architecture disassemblers, so that second
 code-generation check was limited to the manifest-bound recorded text.
