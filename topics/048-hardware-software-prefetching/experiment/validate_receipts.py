@@ -389,10 +389,18 @@ def main() -> None:
     )
     build_lines = (receipt / "build.txt").read_text().splitlines()
     require(bool(build_lines), "build record is empty")
+    # Token-exact comparison: a substring test would accept extra
+    # outcome-changing options appended to the frozen flags. The source
+    # content itself is bound separately through the executed-source digests.
+    build_tokens = build_lines[0].split()
+    frozen_flags = FROZEN_BUILD_FLAGS.split()
     require(
-        build_lines[0].startswith("gcc ")
-        and FROZEN_BUILD_FLAGS in build_lines[0]
-        and "prefetch_bench.c" in build_lines[0],
+        len(build_tokens) == len(frozen_flags) + 4
+        and build_tokens[0] == "gcc"
+        and build_tokens[1 : 1 + len(frozen_flags)] == frozen_flags
+        and Path(build_tokens[-3]).name == "prefetch_bench.c"
+        and build_tokens[-2] == "-o"
+        and Path(build_tokens[-1]).name == "prefetch_bench",
         "build command differs from the frozen flags",
     )
     require(

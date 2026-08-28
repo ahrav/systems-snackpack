@@ -51,7 +51,11 @@ def summarize(log_contrasts):
     ratio = math.exp(mean_log)
     if n > 1:
         sd_log = statistics.stdev(log_contrasts)
-        critical = T95.get(n - 1, 1.96)
+        critical = T95.get(n - 1)
+        if critical is None:
+            # 1.96 is the normal critical value; substituting it for an
+            # untabulated Student-t value would narrow the reported interval.
+            raise SystemExit(f"unsupported block count for the Student-t table: {n}")
         half = critical * sd_log / math.sqrt(n)
         low = math.exp(mean_log - half)
         high = math.exp(mean_log + half)

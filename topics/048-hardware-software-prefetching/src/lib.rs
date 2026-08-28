@@ -47,6 +47,8 @@ pub enum ModelError {
     Zero(&'static str),
     /// A floating-point input was negative, zero where forbidden, or non-finite.
     Invalid(&'static str),
+    /// A floating-point input was negative or non-finite where zero is allowed.
+    Negative(&'static str),
     /// A derived byte count exceeded `u64`.
     Overflow(&'static str),
 }
@@ -56,6 +58,7 @@ impl fmt::Display for ModelError {
         match self {
             Self::Zero(name) => write!(formatter, "{name} must be nonzero"),
             Self::Invalid(name) => write!(formatter, "{name} must be finite and positive"),
+            Self::Negative(name) => write!(formatter, "{name} must be finite and nonnegative"),
             Self::Overflow(name) => write!(formatter, "{name} overflows u64"),
         }
     }
@@ -214,14 +217,15 @@ pub fn throughput_ceiling(inputs: ThroughputInputs) -> Result<ThroughputBound, M
 ///
 /// # Errors
 ///
-/// Returns [`ModelError::Invalid`] when either input is non-finite, the extra
-/// cost is negative, or the avoided stall is not positive.
+/// Returns [`ModelError::Negative`] when the extra cost is negative or
+/// non-finite and [`ModelError::Invalid`] when the avoided stall is not
+/// finite and positive.
 pub fn useful_fraction_break_even(
     extra_cycles_per_iteration: f64,
     avoided_stall_cycles_when_useful: f64,
 ) -> Result<f64, ModelError> {
     if !extra_cycles_per_iteration.is_finite() || extra_cycles_per_iteration < 0.0 {
-        return Err(ModelError::Invalid("extra_cycles_per_iteration"));
+        return Err(ModelError::Negative("extra_cycles_per_iteration"));
     }
     validate_positive(
         avoided_stall_cycles_when_useful,
@@ -368,7 +372,7 @@ mod tests {
         assert_eq!(useful_fraction_break_even(30.0, 20.0), Ok(1.5));
         assert_eq!(
             useful_fraction_break_even(-1.0, 20.0),
-            Err(ModelError::Invalid("extra_cycles_per_iteration"))
+            Err(ModelError::Negative("extra_cycles_per_iteration"))
         );
     }
 }
