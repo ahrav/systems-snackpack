@@ -56,9 +56,11 @@ def summarize(log_contrasts):
         low = math.exp(mean_log - half)
         high = math.exp(mean_log + half)
     else:
-        sd_log = float("nan")
-        low = float("nan")
-        high = float("nan")
+        # None serializes to JSON null; float("nan") would emit a bare NaN
+        # token that strict RFC 8259 parsers such as jq reject.
+        sd_log = None
+        low = None
+        high = None
     return {
         "blocks": n,
         "prefetch_over_demand_geomean": ratio,

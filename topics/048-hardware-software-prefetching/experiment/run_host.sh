@@ -39,7 +39,9 @@ binary="$output_directory/prefetch_bench"
     uname -a
     lscpu
     gcc --version
-    rustc -vV
+    # rustc is provenance only; the benchmark builds with gcc, so a host
+    # without Rust must not abort the probe under set -e.
+    if command -v rustc >/dev/null 2>&1; then rustc -vV; else echo 'rustc: not installed'; fi
     gcc -Q -O3 -march=native --help=target
 } > "$output_directory/host.txt" 2>&1
 

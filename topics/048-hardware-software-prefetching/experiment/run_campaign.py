@@ -143,7 +143,9 @@ def main():
 
     binary_hash = sha256(args.binary)
     rng = random.Random(args.campaign_seed)
-    distance_order = list(args.distances)
+    # Shuffle from sorted order so the schedule depends only on the distance
+    # set and seed; validate_receipts.py recomputes it the same way.
+    distance_order = sorted(args.distances)
     rng.shuffle(distance_order)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", newline="") as output:
