@@ -949,13 +949,22 @@ def validate_host(
                 fail(f"lscpu topology repeats cpu{cpu}")
             topology_rows[cpu] = (node, package, core)
     for cpu, expected_location in locations.items():
-        if topology_rows.get(cpu) != expected_location:
-            fail(f"lscpu topology differs from sysfs-derived fields for cpu{cpu}")
-        node, package, core = expected_location
+        lscpu_location = topology_rows.get(cpu)
+        if lscpu_location is None or lscpu_location[0] != expected_location[0]:
+            fail(f"lscpu NUMA node differs from sysfs-derived fields for cpu{cpu}")
         for sibling in sibling_sets[cpu]:
             sibling_location = topology_rows.get(sibling)
-            if sibling_location is not None and sibling_location[1:] != (package, core):
+            if sibling_location is not None and sibling_location[1:] != lscpu_location[1:]:
                 fail(f"cpu{cpu} sibling set conflicts with lscpu package/core topology")
+    for index, cpu in enumerate(selected_cpus):
+        for other in selected_cpus[index + 1:]:
+            sysfs_same_core = locations[cpu][1:] == locations[other][1:]
+            lscpu_same_core = topology_rows[cpu][1:] == topology_rows[other][1:]
+            if sysfs_same_core != lscpu_same_core:
+                fail(
+                    f"sysfs package/core equivalence differs from lscpu socket/core "
+                    f"equivalence for cpu{cpu} and cpu{other}"
+                )
 
     online_cpus = parse_cpu_list(bodies["cpu-online"])
     online_nodes = parse_cpu_list(bodies["numa-online"])
@@ -985,9 +994,20 @@ def validate_host(
     sysfs_pmus = bodies["sysfs-pmus"].splitlines()
     if not sysfs_pmus or any(not re.fullmatch(r"[A-Za-z0-9_.-]+", name) for name in sysfs_pmus):
         fail("sysfs PMU evidence contains an invalid device name")
-    perf_pmus = set(re.findall(r"\b([A-Za-z0-9_.-]+)/[^/\n]+/", bodies["perf-pmus"]))
+    perf_pmus: set[str] = set()
+    kernel_row = re.compile(
+        r"^\s*(?:\S+\s+OR\s+)?([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)/"
+        r"\s+\[Kernel PMU event\]\s*$"
+    )
+    for line in bodies["perf-pmus"].splitlines():
+        if "[Kernel PMU event]" not in line:
+            continue
+        match = kernel_row.fullmatch(line)
+        if not match:
+            fail("perf contains a malformed line marked as a Kernel PMU event")
+        perf_pmus.add(match.group(1))
     if not perf_pmus or not perf_pmus.issubset(set(sysfs_pmus)):
-        fail("perf PMU rows are malformed or name devices absent from sysfs")
+        fail("kernel PMU rows are absent or name devices absent from sysfs")
     if "-march=" not in bodies["gcc-native-target"]:
         fail("native compiler target evidence lacks -march")
     if not re.fullmatch(r"/[^\n]*gcc", bodies["command-v-gcc"]):
