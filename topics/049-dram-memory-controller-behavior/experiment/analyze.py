@@ -416,7 +416,9 @@ def descriptive(values: list[float]) -> dict[str, Any]:
     }
 
 
-def contrast_summary(contrasts: list[float], *, interval: bool) -> dict[str, Any]:
+def contrast_summary(
+    contrasts: list[float], *, interval_scope: str | None
+) -> dict[str, Any]:
     if len(contrasts) < 2:
         fail("contrast summary needs at least two complete blocks")
     mean = statistics.fmean(contrasts)
@@ -431,7 +433,7 @@ def contrast_summary(contrasts: list[float], *, interval: bool) -> dict[str, Any
         "block_ratio_minimum": min(ratios),
         "block_ratio_maximum": max(ratios),
     }
-    if interval:
+    if interval_scope is not None:
         degrees = len(contrasts) - 1
         critical = T_975.get(degrees)
         if critical is None:
@@ -445,10 +447,7 @@ def contrast_summary(contrasts: list[float], *, interval: bool) -> dict[str, Any
                 "t_critical_975": critical,
                 "ci95_ratio_low": math.exp(mean - half_width),
                 "ci95_ratio_high": math.exp(mean + half_width),
-                "interval_scope": (
-                    "between-block variation in paired fresh-process log large-chain "
-                    "nanoseconds-per-load ratios on this exact host, binary, and run window"
-                ),
+                "interval_scope": interval_scope,
             }
         )
     return summary
@@ -490,21 +489,35 @@ def block_rows(
     return blocks
 
 
-def phase_summary(blocks: list[dict[str, Any]], *, interval: bool) -> dict[str, Any]:
+def phase_summary(blocks: list[dict[str, Any]]) -> dict[str, Any]:
     probes = [block["probe_log_contrast"] for block in blocks]
     small = [block["small_log_contrast"] for block in blocks]
     by_template: dict[str, Any] = {}
     for template in ("ABBA", "BAAB"):
         selected = [block for block in blocks if block["template"] == template]
         by_template[template] = {
-            "probe": contrast_summary([block["probe_log_contrast"] for block in selected], interval=False),
+            "probe": contrast_summary(
+                [block["probe_log_contrast"] for block in selected], interval_scope=None
+            ),
             "small_control": contrast_summary(
-                [block["small_log_contrast"] for block in selected], interval=False
+                [block["small_log_contrast"] for block in selected], interval_scope=None
             ),
         }
     return {
-        "probe": contrast_summary(probes, interval=interval),
-        "small_control": contrast_summary(small, interval=interval),
+        "probe": contrast_summary(
+            probes,
+            interval_scope=(
+                "between-block variation in paired fresh-process log large-chain "
+                "nanoseconds-per-load ratios on this exact host, binary, and run window"
+            ),
+        ),
+        "small_control": contrast_summary(
+            small,
+            interval_scope=(
+                "between-block variation in paired fresh-process log small-control-chain "
+                "nanoseconds-per-load ratios on this exact host, binary, and run window"
+            ),
+        ),
         "by_template": by_template,
     }
 
@@ -545,8 +558,8 @@ def analyze_campaign(metadata_path: Path, attempts_path: Path) -> dict[str, Any]
         "uncounted_tail_bytes_at_most": len(config["worker_cpus"]) * 256 * 1024,
         "boundary": "application useful source bytes, not cache-line, fabric, or DRAM traffic",
     }
-    primary = phase_summary(primary_blocks, interval=True)
-    aa = phase_summary(aa_blocks, interval=True)
+    primary = phase_summary(primary_blocks)
+    aa = phase_summary(aa_blocks)
     return {
         "schema": "topic49-analysis.v1",
         "status": "pass",

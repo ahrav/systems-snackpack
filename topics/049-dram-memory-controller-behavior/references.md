@@ -41,6 +41,18 @@ windows.
   policy](https://docs.kernel.org/admin-guide/mm/numa_memory_policy.html)
   defines process and virtual-memory-area placement policy. A NUMA node is not
   a DRAM bank or row.
+- [Linux `set_mempolicy(2)`](https://man7.org/linux/man-pages/man2/set_mempolicy.2.html)
+  defines `MPOL_BIND` as restricting allocations to a node mask. The harness
+  treats a failed policy call as a failed process.
+- [Linux `kernel.numa_balancing`
+  documentation](https://docs.kernel.org/admin-guide/sysctl/kernel.html#numa-balancing)
+  explains that automatic NUMA balancing samples placement by unmapping pages
+  and trapping faults. The experiment records this host setting but uses a
+  process-local bind policy rather than changing it globally.
+- [Linux `getrusage(2)`](https://man7.org/linux/man-pages/man2/getrusage.2.html)
+  distinguishes process-wide `RUSAGE_SELF` from Linux-specific per-thread
+  `RUSAGE_THREAD` counters. A minor-fault count does not identify its kernel
+  cause by itself.
 - [Linux `pagemap`
   documentation](https://docs.kernel.org/admin-guide/mm/pagemap.html) explains
   the capability restriction on physical frame numbers and its RowHammer

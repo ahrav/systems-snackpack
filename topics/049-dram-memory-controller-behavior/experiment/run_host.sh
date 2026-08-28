@@ -154,6 +154,12 @@ print("single_numa_node=true")
 print("allowed_affinity=" + ",".join(map(str, sorted(allowed))))
 PY
 
+selected_numa_node=$(sed -n 's/^selected_numa_node=//p' -- "$topology_tmp")
+if [[ ! $selected_numa_node =~ ^[0-9]+$ ]]; then
+    printf 'topology probe did not produce one selected NUMA node\n' >&2
+    exit 2
+fi
+
 actual_archive_sha256=$(sha256sum -- "$source_archive_input" | awk '{print $1}')
 if [[ $actual_archive_sha256 != "$source_archive_sha256" ]]; then
     printf 'uploaded source archive digest mismatch\n' >&2
@@ -315,6 +321,16 @@ else
     cpu_model=$(sed -n '1p' -- "$midr_path")
     cpu_model_source=sysfs-midr-el1
 fi
+numa_balancing_path=/proc/sys/kernel/numa_balancing
+if [[ ! -r $numa_balancing_path ]]; then
+    printf 'host lacks readable automatic NUMA balancing state\n' >&2
+    exit 2
+fi
+numa_balancing=$(sed -n '1p' -- "$numa_balancing_path")
+if [[ ! $numa_balancing =~ ^[0-3]$ ]]; then
+    printf 'automatic NUMA balancing state is not a valid bitmask: %s\n' "$numa_balancing" >&2
+    exit 2
+fi
 
 {
     printf 'captured_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -329,6 +345,7 @@ fi
     printf 'cpu_selection=%s\n' "$cpu_selection"
     printf 'probe_cpu=%s\n' "$probe_cpu"
     printf 'worker_cpus=%s\n' "$worker_cpu_csv"
+    printf 'numa_node=%s\n' "$selected_numa_node"
     printf 'large_mib=512\n'
     printf 'worker_mib=128\n'
     printf 'warmup_ms=750\n'
@@ -339,6 +356,7 @@ fi
     printf 'available_cpu_count=%s\n' "$(nproc)"
     printf 'cpu_model_source=%s\n' "$cpu_model_source"
     printf 'cpu_model=%s\n' "$cpu_model"
+    printf 'numa_balancing=%s\n' "$numa_balancing"
     printf 'build_flags=-O3 -g -std=gnu11 -Wall -Wextra -Werror -march=native -pthread\n'
     sed -n '1,200p' -- "$topology_tmp"
     capture_command uname uname -a
@@ -348,6 +366,7 @@ fi
     capture_command lscpu-caches lscpu -C
     capture_command numactl numactl --hardware
     capture_file numa-online /sys/devices/system/node/online
+    capture_file numa-balancing "$numa_balancing_path"
     capture_file cpu-online /sys/devices/system/cpu/online
     capture_file thp-enabled /sys/kernel/mm/transparent_hugepage/enabled
     capture_file thp-defrag /sys/kernel/mm/transparent_hugepage/defrag
@@ -431,7 +450,8 @@ run_smoke() {
     if timeout --signal=TERM --kill-after=5s 60s \
         env BENCH_LABEL="$label" "$binary_path" \
             --treatment "$treatment" --probe-cpu "$probe_cpu" \
-            --worker-cpus "$worker_cpu_csv" --large-mib 8 --worker-mib 4 \
+            --worker-cpus "$worker_cpu_csv" --numa-node "$selected_numa_node" \
+            --large-mib 8 --worker-mib 4 \
             --warmup-ms 50 >"$output_dir/smoke/$name.stdout" \
             2>"$output_dir/smoke/$name.stderr"; then
         returncode=0
@@ -452,7 +472,8 @@ run_smoke() {
 run_smoke idle-path-a idle smoke:idle:path-a "$output_dir/binary/path-a/dram_bench"
 run_smoke loaded-path-b loaded smoke:loaded:path-b "$output_dir/binary/path-b/dram_bench"
 run_smoke loaded-path-a loaded smoke:loaded:path-a "$output_dir/binary/path-a/dram_bench"
-python3 -I -B - "$archive_script_dir" "$output_dir/smoke" "$probe_cpu" "$worker_cpu_csv" <<'PY'
+python3 -I -B - "$archive_script_dir" "$output_dir/smoke" "$probe_cpu" \
+    "$worker_cpu_csv" "$selected_numa_node" <<'PY'
 import pathlib
 import sys
 
@@ -463,13 +484,16 @@ from run_processes import ExpectedResult, strict_json_line, validate_result
 root = pathlib.Path(sys.argv[2])
 probe = int(sys.argv[3])
 workers = tuple(int(value) for value in sys.argv[4].split(","))
+numa_node = int(sys.argv[5])
 for name, treatment, label in (
     ("idle-path-a", "idle", "smoke:idle:path-a"),
     ("loaded-path-b", "loaded", "smoke:loaded:path-b"),
     ("loaded-path-a", "loaded", "smoke:loaded:path-a"),
 ):
     value = strict_json_line((root / f"{name}.stdout").read_text())
-    validate_result(value, ExpectedResult(label, treatment, probe, workers, 8, 4, 50))
+    validate_result(
+        value, ExpectedResult(label, treatment, probe, workers, numa_node, 8, 4, 50)
+    )
 PY
 
 mkdir -- "$output_dir/codegen"
@@ -574,13 +598,14 @@ else:
 PY
 
 {
-    printf 'COMMAND=python3 -I -B run_processes.py --binary-a path-a --binary-b path-b --out experiment --probe-cpu %s --worker-cpus %s --large-mib 512 --worker-mib 128 --warmup-ms 750 --seed 20260828 --timeout-seconds 300\n' \
-        "$probe_cpu" "$worker_cpu_csv"
+    printf 'COMMAND=python3 -I -B run_processes.py --binary-a path-a --binary-b path-b --out experiment --probe-cpu %s --worker-cpus %s --numa-node %s --large-mib 512 --worker-mib 128 --warmup-ms 750 --seed 20260828 --timeout-seconds 300\n' \
+        "$probe_cpu" "$worker_cpu_csv" "$selected_numa_node"
     python3 -I -B "$archive_script_dir/run_processes.py" \
         --binary-a "$output_dir/binary/path-a/dram_bench" \
         --binary-b "$output_dir/binary/path-b/dram_bench" \
         --out "$output_dir/experiment" \
         --probe-cpu "$probe_cpu" --worker-cpus "$worker_cpu_csv" \
+        --numa-node "$selected_numa_node" \
         --large-mib 512 --worker-mib 128 --warmup-ms 750 \
         --seed 20260828 --timeout-seconds 300
     printf 'CAMPAIGN_STATUS=pass\n'

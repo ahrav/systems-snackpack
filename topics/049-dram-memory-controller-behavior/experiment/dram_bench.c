@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <linux/mempolicy.h>
 #include <pthread.h>
 #include <sched.h>
 #include <stdarg.h>
@@ -14,6 +15,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/resource.h>
+#include <sys/syscall.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -78,6 +80,7 @@ struct config {
     int probe_cpu;
     int *worker_cpus;
     size_t worker_count;
+    int numa_node;
     uint64_t large_mib;
     uint64_t worker_mib;
     uint64_t warmup_ms;
@@ -117,6 +120,7 @@ struct shared_state {
 struct worker_state {
     struct shared_state *shared;
     int requested_cpu;
+    int numa_node;
     int start_cpu;
     int end_cpu;
     bool affinity_ok;
@@ -137,7 +141,8 @@ struct worker_state {
 static void usage(const char *program) {
     fprintf(stderr,
             "usage: %s --treatment idle|loaded --probe-cpu N "
-            "--worker-cpus N[,N...] [--large-mib N] [--worker-mib N] "
+            "--worker-cpus N[,N...] --numa-node N [--large-mib N] "
+            "[--worker-mib N] "
             "[--warmup-ms N]\n",
             program);
 }
@@ -160,9 +165,9 @@ static uint64_t now_ns(void) {
            (uint64_t)timestamp.tv_nsec;
 }
 
-static void read_usage(struct rusage *result) {
-    if (getrusage(RUSAGE_SELF, result) != 0) {
-        failf("getrusage: %s", strerror(errno));
+static void read_usage(int who, const char *scope, struct rusage *result) {
+    if (getrusage(who, result) != 0) {
+        failf("getrusage(%s): %s", scope, strerror(errno));
     }
 }
 
@@ -181,6 +186,14 @@ static int parse_cpu(const char *text, const char *name) {
     uint64_t value = parse_u64(text, name);
     if (value >= CPU_SETSIZE || value > INT_MAX) {
         failf("%s is outside the supported CPU set: %s", name, text);
+    }
+    return (int)value;
+}
+
+static int parse_numa_node(const char *text) {
+    uint64_t value = parse_u64(text, "NUMA node");
+    if (value > INT_MAX) {
+        failf("NUMA node is too large: %s", text);
     }
     return (int)value;
 }
@@ -248,6 +261,7 @@ static struct config parse_args(int argc, char **argv) {
         .probe_cpu = -1,
         .worker_cpus = NULL,
         .worker_count = 0,
+        .numa_node = -1,
         .large_mib = DEFAULT_LARGE_MIB,
         .worker_mib = DEFAULT_WORKER_MIB,
         .warmup_ms = DEFAULT_WARMUP_MS,
@@ -278,6 +292,8 @@ static struct config parse_args(int argc, char **argv) {
                 failf("--worker-cpus may be specified only once");
             }
             parse_worker_cpus(&config, value);
+        } else if (strcmp(argv[i - 1], "--numa-node") == 0) {
+            config.numa_node = parse_numa_node(value);
         } else if (strcmp(argv[i - 1], "--large-mib") == 0) {
             config.large_mib = parse_u64(value, "large MiB");
         } else if (strcmp(argv[i - 1], "--worker-mib") == 0) {
@@ -291,9 +307,9 @@ static struct config parse_args(int argc, char **argv) {
     }
 
     if (config.treatment == TREATMENT_UNSET || config.probe_cpu < 0 ||
-        config.worker_cpus == NULL) {
+        config.worker_cpus == NULL || config.numa_node < 0) {
         usage(argv[0]);
-        failf("--treatment, --probe-cpu, and --worker-cpus are required");
+        failf("--treatment, --probe-cpu, --worker-cpus, and --numa-node are required");
     }
     if (config.large_mib == 0 || config.worker_mib == 0) {
         failf("large and worker mappings must be non-empty");
@@ -482,6 +498,31 @@ static bool pin_current_thread(int cpu, int *error_number) {
     return current_affinity_is_single_cpu(cpu, error_number);
 }
 
+static bool bind_current_thread_memory_to_node(int node, int *error_number) {
+    const size_t bits_per_word = sizeof(unsigned long) * CHAR_BIT;
+    const size_t word_index = (size_t)node / bits_per_word;
+    if (word_index == SIZE_MAX ||
+        word_index + 1 > SIZE_MAX / sizeof(unsigned long)) {
+        *error_number = EOVERFLOW;
+        return false;
+    }
+    const size_t word_count = word_index + 1;
+    unsigned long *mask = calloc(word_count, sizeof(*mask));
+    if (mask == NULL) {
+        *error_number = errno == 0 ? ENOMEM : errno;
+        return false;
+    }
+    mask[word_index] = 1UL << ((size_t)node % bits_per_word);
+    const unsigned long maxnode = (unsigned long)(word_count * bits_per_word);
+    if (syscall(SYS_set_mempolicy, MPOL_BIND, mask, maxnode) != 0) {
+        *error_number = errno;
+        free(mask);
+        return false;
+    }
+    free(mask);
+    return true;
+}
+
 static struct map_evidence read_map_evidence(const void *address) {
     struct map_evidence result = {
         .found = false,
@@ -638,6 +679,13 @@ static void *worker_main(void *argument) {
     worker->start_cpu = sched_getcpu();
     if (worker->start_cpu != worker->requested_cpu) {
         set_worker_error(worker, 2, 0);
+    }
+
+    int memory_policy_errno = 0;
+    if (worker->error_code == 0 &&
+        !bind_current_thread_memory_to_node(worker->numa_node,
+                                            &memory_policy_errno)) {
+        set_worker_error(worker, 38, memory_policy_errno);
     }
 
     if (worker->error_code == 0) {
@@ -915,7 +963,7 @@ static long usage_delta(long after, long before) {
 int main(int argc, char **argv) {
     const uint64_t process_start_ns = now_ns();
     struct rusage process_usage_start;
-    read_usage(&process_usage_start);
+    read_usage(RUSAGE_SELF, "RUSAGE_SELF", &process_usage_start);
     struct config config = parse_args(argc, argv);
     const long page_size_bytes = sysconf(_SC_PAGESIZE);
     if (page_size_bytes <= 0) {
@@ -929,6 +977,12 @@ int main(int argc, char **argv) {
     }
     if (sched_getcpu() != config.probe_cpu) {
         failf("probe did not begin on requested CPU %d", config.probe_cpu);
+    }
+    int memory_policy_errno = 0;
+    if (!bind_current_thread_memory_to_node(config.numa_node,
+                                            &memory_policy_errno)) {
+        failf("cannot bind probe memory policy to NUMA node %d: %s",
+              config.numa_node, strerror(memory_policy_errno));
     }
 
     const size_t large_bytes =
@@ -977,6 +1031,7 @@ int main(int argc, char **argv) {
     for (size_t i = 0; i < config.worker_count; ++i) {
         workers[i].shared = &shared;
         workers[i].requested_cpu = config.worker_cpus[i];
+        workers[i].numa_node = config.numa_node;
         workers[i].start_cpu = -1;
         workers[i].end_cpu = -1;
         workers[i].buffer_bytes = worker_bytes_each;
@@ -1113,7 +1168,12 @@ int main(int argc, char **argv) {
     const int probe_start_cpu = sched_getcpu();
     struct rusage process_large_window_usage_before;
     struct rusage process_large_window_usage_after;
-    read_usage(&process_large_window_usage_before);
+    struct rusage probe_thread_large_window_usage_before;
+    struct rusage probe_thread_large_window_usage_after;
+    read_usage(RUSAGE_THREAD, "RUSAGE_THREAD",
+               &probe_thread_large_window_usage_before);
+    read_usage(RUSAGE_SELF, "RUSAGE_SELF",
+               &process_large_window_usage_before);
     if (large.node_count > UINT64_MAX / UINT64_C(4)) {
         failf("large traversal load count overflows uint64_t");
     }
@@ -1123,7 +1183,9 @@ int main(int argc, char **argv) {
     uint64_t probe_checksum =
         topic49_run_timed(large.nodes, large.start, probe_loads,
                           &probe_elapsed_ns, &probe_final_index);
-    read_usage(&process_large_window_usage_after);
+    read_usage(RUSAGE_SELF, "RUSAGE_SELF", &process_large_window_usage_after);
+    read_usage(RUSAGE_THREAD, "RUSAGE_THREAD",
+               &probe_thread_large_window_usage_after);
     const int probe_end_cpu = sched_getcpu();
 
     atomic_store_explicit(&shared.stop, true, memory_order_seq_cst);
@@ -1167,6 +1229,18 @@ int main(int argc, char **argv) {
     const long process_large_window_involuntary_context_switches = usage_delta(
         process_large_window_usage_after.ru_nivcsw,
         process_large_window_usage_before.ru_nivcsw);
+    const long probe_thread_large_window_minor_faults = usage_delta(
+        probe_thread_large_window_usage_after.ru_minflt,
+        probe_thread_large_window_usage_before.ru_minflt);
+    const long probe_thread_large_window_major_faults = usage_delta(
+        probe_thread_large_window_usage_after.ru_majflt,
+        probe_thread_large_window_usage_before.ru_majflt);
+    const long probe_thread_large_window_voluntary_context_switches =
+        usage_delta(probe_thread_large_window_usage_after.ru_nvcsw,
+                    probe_thread_large_window_usage_before.ru_nvcsw);
+    const long probe_thread_large_window_involuntary_context_switches =
+        usage_delta(probe_thread_large_window_usage_after.ru_nivcsw,
+                    probe_thread_large_window_usage_before.ru_nivcsw);
     if (process_large_window_major_faults != 0) {
         failf("process-wide large window incurred %ld major page faults",
               process_large_window_major_faults);
@@ -1260,7 +1334,7 @@ int main(int argc, char **argv) {
     const uint64_t probe_bytes = probe_loads * CACHE_LINE_BYTES;
 
     struct rusage process_usage_end;
-    read_usage(&process_usage_end);
+    read_usage(RUSAGE_SELF, "RUSAGE_SELF", &process_usage_end);
     const long total_major_faults = usage_delta(process_usage_end.ru_majflt,
                                                 process_usage_start.ru_majflt);
     if (total_major_faults != 0) {
@@ -1323,9 +1397,11 @@ int main(int argc, char **argv) {
     print_json_string(treatment);
     printf(",\"probe_cpu\":%d,\"worker_cpus\":", config.probe_cpu);
     print_cpu_array(config.worker_cpus, config.worker_count);
-    printf(",\"probe_start_cpu\":%d,\"probe_end_cpu\":%d,"
+    printf(",\"numa_node\":%d,\"memory_policy\":\"MPOL_BIND\","
+           "\"memory_policy_bound\":true,"
+           "\"probe_start_cpu\":%d,\"probe_end_cpu\":%d,"
            "\"worker_start_cpus\":",
-           probe_start_cpu, probe_end_cpu);
+           config.numa_node, probe_start_cpu, probe_end_cpu);
     print_cpu_array(worker_start_cpus, config.worker_count);
     fputs(",\"worker_end_cpus\":", stdout);
     print_cpu_array(worker_end_cpus, config.worker_count);
@@ -1375,6 +1451,10 @@ int main(int argc, char **argv) {
            "\"process_large_window_major_faults\":%ld,"
            "\"process_large_window_voluntary_context_switches\":%ld,"
            "\"process_large_window_involuntary_context_switches\":%ld,"
+           "\"probe_thread_large_window_minor_faults\":%ld,"
+           "\"probe_thread_large_window_major_faults\":%ld,"
+           "\"probe_thread_large_window_voluntary_context_switches\":%ld,"
+           "\"probe_thread_large_window_involuntary_context_switches\":%ld,"
            "\"total_major_faults\":%ld}\n",
            worker_bytes_lower, worker_bytes_lower,
            worker_bytes_upper_inclusive, worker_gib_per_s_lower,
@@ -1383,6 +1463,10 @@ int main(int argc, char **argv) {
            process_large_window_major_faults,
            process_large_window_voluntary_context_switches,
            process_large_window_involuntary_context_switches,
+           probe_thread_large_window_minor_faults,
+           probe_thread_large_window_major_faults,
+           probe_thread_large_window_voluntary_context_switches,
+           probe_thread_large_window_involuntary_context_switches,
            total_major_faults);
 
     free(worker_start_cpus);

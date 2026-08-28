@@ -77,7 +77,8 @@ HEX64 = re.compile(r"[0-9a-f]{64}")
 UTC = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
 
 RESULT_KEYS = {
-    "schema", "label", "treatment", "probe_cpu", "worker_cpus",
+    "schema", "label", "treatment", "probe_cpu", "worker_cpus", "numa_node",
+    "memory_policy", "memory_policy_bound",
     "probe_start_cpu", "probe_end_cpu", "worker_start_cpus", "worker_end_cpus",
     "large_mib", "worker_mib", "warmup_ms", "chunk_bytes", "correct", "affinity_ok",
     "prefetch_state", "madv_nohugepage", "page_size_bytes", "smaps_available",
@@ -93,7 +94,11 @@ RESULT_KEYS = {
     "worker_gib_per_s_upper_inclusive", "worker_checksum",
     "process_large_window_minor_faults", "process_large_window_major_faults",
     "process_large_window_voluntary_context_switches",
-    "process_large_window_involuntary_context_switches", "total_major_faults",
+    "process_large_window_involuntary_context_switches",
+    "probe_thread_large_window_minor_faults",
+    "probe_thread_large_window_major_faults",
+    "probe_thread_large_window_voluntary_context_switches",
+    "probe_thread_large_window_involuntary_context_switches", "total_major_faults",
 }
 ATTEMPT_KEYS = {
     "schema", "sequence", "phase", "block", "template", "position", "label",
@@ -304,13 +309,16 @@ def validate_tree(root: Path, *, sealed: bool) -> None:
 
 def validate_result(
     result: dict[str, Any], *, label: str, treatment: str, probe_cpu: int,
-    workers: tuple[int, ...], large_mib: int, worker_mib: int, warmup_ms: int,
+    workers: tuple[int, ...], numa_node: int, large_mib: int, worker_mib: int,
+    warmup_ms: int,
 ) -> dict[str, Any]:
     if set(result) != RESULT_KEYS:
         fail("result key set differs from the frozen v1 schema")
     exact: dict[str, object] = {
         "schema": RESULT_SCHEMA, "label": label, "treatment": treatment,
         "probe_cpu": probe_cpu, "worker_cpus": list(workers), "probe_start_cpu": probe_cpu,
+        "numa_node": numa_node, "memory_policy": "MPOL_BIND",
+        "memory_policy_bound": True,
         "probe_end_cpu": probe_cpu, "worker_start_cpus": list(workers),
         "worker_end_cpus": list(workers), "large_mib": large_mib,
         "worker_mib": worker_mib, "warmup_ms": warmup_ms, "chunk_bytes": CHUNK_BYTES,
@@ -334,7 +342,11 @@ def validate_result(
         "worker_bytes", "worker_bytes_lower", "worker_bytes_upper_inclusive",
         "worker_checksum", "process_large_window_minor_faults",
         "process_large_window_major_faults", "process_large_window_voluntary_context_switches",
-        "process_large_window_involuntary_context_switches", "total_major_faults",
+        "process_large_window_involuntary_context_switches",
+        "probe_thread_large_window_minor_faults",
+        "probe_thread_large_window_major_faults",
+        "probe_thread_large_window_voluntary_context_switches",
+        "probe_thread_large_window_involuntary_context_switches", "total_major_faults",
     )
     for key in integer_fields:
         if not is_int(result[key]) or result[key] < 0:
@@ -393,8 +405,14 @@ def validate_result(
         fail("worker inclusive upper rate does not rederive")
     if treatment == "idle" and (lower != 0.0 or upper != 0.0):
         fail("idle rate bounds must be exact zero")
-    if result["process_large_window_major_faults"] != 0 or result["total_major_faults"] != 0:
-        fail("process incurred a major fault")
+    if (
+        result["process_large_window_minor_faults"] != 0
+        or result["probe_thread_large_window_minor_faults"] != 0
+        or result["process_large_window_major_faults"] != 0
+        or result["probe_thread_large_window_major_faults"] != 0
+        or result["total_major_faults"] != 0
+    ):
+        fail("large-walk window incurred a page fault or process incurred a major fault")
     if result["smaps_available"]:
         if result["large_kernel_page_kib"] <= 0 or result["large_mmu_page_kib"] <= 0 or result["small_kernel_page_kib"] <= 0:
             fail("smaps lacks mapping page-size evidence")
@@ -445,13 +463,17 @@ def validate_metadata(metadata: dict[str, Any]) -> tuple[dict[str, Any], tuple[i
         fail("A/A requires two distinct paths containing identical bytes")
     config = metadata.get("config")
     if not isinstance(config, dict) or set(config) != {
-        "probe_cpu", "worker_cpus", "large_mib", "worker_mib", "warmup_ms", "timeout_seconds"
+        "probe_cpu", "worker_cpus", "numa_node", "large_mib", "worker_mib",
+        "warmup_ms", "timeout_seconds"
     }:
         fail("campaign config key set changed")
     probe = config.get("probe_cpu")
+    numa_node = config.get("numa_node")
     workers_value = config.get("worker_cpus")
     if not is_int(probe) or probe < 0:
         fail("probe CPU is invalid")
+    if not is_int(numa_node) or numa_node < 0:
+        fail("NUMA node is invalid")
     if (
         not isinstance(workers_value, list) or len(workers_value) != 8
         or any(not is_int(cpu) or cpu < 0 for cpu in workers_value)
@@ -479,6 +501,7 @@ def expected_command(binary: str, treatment: str, config: dict[str, Any]) -> lis
     return [
         binary, "--treatment", treatment, "--probe-cpu", str(config["probe_cpu"]),
         "--worker-cpus", ",".join(map(str, config["worker_cpus"])),
+        "--numa-node", str(config["numa_node"]),
         "--large-mib", "512", "--worker-mib", "128", "--warmup-ms", "750",
     ]
 
@@ -576,7 +599,8 @@ def validate_attempts(
             fail(f"attempt {spec['sequence']} parsed result differs from raw stdout")
         results.append(validate_result(
             parsed, label=spec["bench_label"], treatment=spec["treatment"],
-            probe_cpu=config["probe_cpu"], workers=workers, large_mib=512,
+            probe_cpu=config["probe_cpu"], workers=workers,
+            numa_node=config["numa_node"], large_mib=512,
             worker_mib=128, warmup_ms=750,
         ))
     for key in ("probe_loads", "probe_bytes", "probe_checksum", "small_loads", "small_checksum", "prefetch_state"):
@@ -637,7 +661,9 @@ def contrast(template: str, values: list[float]) -> float:
     return sum(sign * math.log(value) for sign, value in zip(TREATMENT_SIGNS[template], values))
 
 
-def contrast_summary(values: list[float], *, interval: bool) -> dict[str, Any]:
+def contrast_summary(
+    values: list[float], *, required_interval_scope: str | None
+) -> dict[str, Any]:
     if len(values) < 2:
         fail("contrast summary requires at least two blocks")
     mean = statistics.fmean(values)
@@ -648,7 +674,7 @@ def contrast_summary(values: list[float], *, interval: bool) -> dict[str, Any]:
         "sample_sd_log_contrast": sample_sd, "block_ratio_median": statistics.median(ratios),
         "block_ratio_minimum": min(ratios), "block_ratio_maximum": max(ratios),
     }
-    if interval:
+    if required_interval_scope is not None:
         df = len(values) - 1
         if df not in T_975:
             fail(f"no frozen t critical for {df} degrees of freedom")
@@ -658,10 +684,7 @@ def contrast_summary(values: list[float], *, interval: bool) -> dict[str, Any]:
             "degrees_of_freedom": df, "standard_error_log_contrast": standard_error,
             "t_critical_975": T_975[df], "ci95_ratio_low": math.exp(mean - half),
             "ci95_ratio_high": math.exp(mean + half),
-            "interval_scope": (
-                "between-block variation in paired fresh-process log large-chain "
-                "nanoseconds-per-load ratios on this exact host, binary, and run window"
-            ),
+            "interval_scope": required_interval_scope,
         })
     return result
 
@@ -671,12 +694,30 @@ def phase_summary(blocks: list[dict[str, Any]]) -> dict[str, Any]:
     for template in ("ABBA", "BAAB"):
         selected = [block for block in blocks if block["template"] == template]
         by_template[template] = {
-            "probe": contrast_summary([block["probe_log_contrast"] for block in selected], interval=False),
-            "small_control": contrast_summary([block["small_log_contrast"] for block in selected], interval=False),
+            "probe": contrast_summary(
+                [block["probe_log_contrast"] for block in selected],
+                required_interval_scope=None,
+            ),
+            "small_control": contrast_summary(
+                [block["small_log_contrast"] for block in selected],
+                required_interval_scope=None,
+            ),
         }
     return {
-        "probe": contrast_summary([block["probe_log_contrast"] for block in blocks], interval=True),
-        "small_control": contrast_summary([block["small_log_contrast"] for block in blocks], interval=True),
+        "probe": contrast_summary(
+            [block["probe_log_contrast"] for block in blocks],
+            required_interval_scope=(
+                "between-block variation in paired fresh-process log large-chain "
+                "nanoseconds-per-load ratios on this exact host, binary, and run window"
+            ),
+        ),
+        "small_control": contrast_summary(
+            [block["small_log_contrast"] for block in blocks],
+            required_interval_scope=(
+                "between-block variation in paired fresh-process log small-control-chain "
+                "nanoseconds-per-load ratios on this exact host, binary, and run window"
+            ),
+        ),
         "by_template": by_template,
     }
 
@@ -854,7 +895,7 @@ def parse_cpu_list(value: str) -> set[int]:
 def validate_host(
     root: Path, *, target_label: str, hostname: str, architecture: str,
     expected_commit: str, expected_archive_sha256: str,
-) -> tuple[str, int, tuple[int, ...]]:
+) -> tuple[str, int, tuple[int, ...], int]:
     host = (root / "host.txt").read_text(encoding="utf-8")
     exact = {
         "source_commit": expected_commit, "source_archive_sha256": expected_archive_sha256,
@@ -887,6 +928,8 @@ def validate_host(
     cpu_model = host_field(host, "cpu_model")
     probe = int(host_field(host, "probe_cpu", r"[0-9]+"))
     workers = tuple(int(value) for value in host_field(host, "worker_cpus", r"[0-9]+(?:,[0-9]+){7}").split(","))
+    numa_node = int(host_field(host, "numa_node", r"[0-9]+"))
+    numa_balancing = host_field(host, "numa_balancing", r"[0-3]")
     if len(set((probe, *workers))) != 9:
         fail("host evidence does not name nine distinct logical CPUs")
     locations: dict[int, tuple[int, int, int]] = {}
@@ -901,6 +944,8 @@ def validate_host(
         locations[cpu] = (node, package, core)
         sibling_sets[cpu] = siblings
     selected_node = int(host_field(host, "selected_numa_node", r"[0-9]+"))
+    if numa_node != selected_node:
+        fail("configured NUMA node differs from the topology-selected node")
     if len({(package, core) for _, package, core in locations.values()}) != 9:
         fail("selected CPUs do not recompute to distinct physical cores")
     if {node for node, _, _ in locations.values()} != {selected_node}:
@@ -916,7 +961,8 @@ def validate_host(
 
     sections = host_sections(host)
     mandatory = (
-        "uname", "lscpu", "cpu-model-raw", "lscpu-topology", "lscpu-caches", "numa-online", "cpu-online",
+        "uname", "lscpu", "cpu-model-raw", "lscpu-topology", "lscpu-caches", "numa-online",
+        "numa-balancing", "cpu-online",
         "thp-enabled", "process-cgroup", "command-v-gcc", "gcc-version", "gcc-verbose",
         "python-version", "gcc-native-target", "objdump", "readelf", "perf-version",
         "perf-pmus", "sysfs-pmus", "loadavg", "uptime", "selected-cache-topology",
@@ -972,6 +1018,8 @@ def validate_host(
         fail("a selected CPU is absent from the online CPU range")
     if selected_node not in online_nodes:
         fail("the selected NUMA node is absent from the online node range")
+    if bodies["numa-balancing"] != numa_balancing:
+        fail("flat automatic NUMA-balancing state differs from its raw section")
 
     cache_cpus: set[int] = set()
     for line in bodies["selected-cache-topology"].splitlines():
@@ -1018,7 +1066,7 @@ def validate_host(
         fail("host evidence lacks full GCC 11.5.0 verbose output")
     if not re.match(r"Python 3\.[0-9]+\.[0-9]+", bodies["python-version"]):
         fail("host evidence lacks the full Python version")
-    return host, probe, workers
+    return host, probe, workers, selected_node
 
 
 def validate_source(root: Path, expected_commit: str, expected_archive_sha256: str) -> dict[str, str]:
@@ -1151,13 +1199,15 @@ def validate_codegen(root: Path, architecture: str) -> None:
         fail(f"unsupported code-generation architecture: {architecture}")
 
 
-def validate_smokes(root: Path, probe: int, workers: tuple[int, ...]) -> None:
+def validate_smokes(
+    root: Path, probe: int, workers: tuple[int, ...], numa_node: int
+) -> None:
     for name, treatment, label in SMOKES:
         stdout = (root / f"smoke/{name}.stdout").read_text(encoding="utf-8")
         result = strict_json_line(stdout)
         validate_result(
             result, label=label, treatment=treatment, probe_cpu=probe, workers=workers,
-            large_mib=8, worker_mib=4, warmup_ms=50,
+            numa_node=numa_node, large_mib=8, worker_mib=4, warmup_ms=50,
         )
         status = read_json(root / f"smoke/{name}.status.json")
         expected = {"returncode": 0, "timed_out": False, "timeout_seconds": 60}
@@ -1165,10 +1215,13 @@ def validate_smokes(root: Path, probe: int, workers: tuple[int, ...]) -> None:
             fail(f"smoke process failed or status schema changed: {name}")
 
 
-def validate_campaign_command(root: Path, probe: int, workers: tuple[int, ...]) -> None:
+def validate_campaign_command(
+    root: Path, probe: int, workers: tuple[int, ...], numa_node: int
+) -> None:
     command = (
         "COMMAND=python3 -I -B run_processes.py --binary-a path-a --binary-b path-b "
         f"--out experiment --probe-cpu {probe} --worker-cpus {','.join(map(str, workers))} "
+        f"--numa-node {numa_node} "
         "--large-mib 512 --worker-mib 128 --warmup-ms 750 --seed 20260828 "
         "--timeout-seconds 300"
     )
@@ -1206,7 +1259,7 @@ def validate_receipts(
     if not HEX64.fullmatch(expected_source_archive_sha256):
         fail("external expected archive digest is malformed")
     validate_tree(root, sealed=not allow_unsealed)
-    _, probe, workers = validate_host(
+    _, probe, workers, numa_node = validate_host(
         root, target_label=expected_target_label, hostname=expected_hostname,
         architecture=expected_architecture, expected_commit=expected_source_commit,
         expected_archive_sha256=expected_source_archive_sha256,
@@ -1214,13 +1267,17 @@ def validate_receipts(
     validate_source(root, expected_source_commit, expected_source_archive_sha256)
     binary_digest = validate_build_and_binary(root)
     validate_codegen(root, expected_architecture)
-    validate_smokes(root, probe, workers)
-    validate_campaign_command(root, probe, workers)
+    validate_smokes(root, probe, workers, numa_node)
+    validate_campaign_command(root, probe, workers, numa_node)
     metadata = read_json(root / "experiment/metadata.json")
     config, metadata_workers = validate_metadata(metadata)
     validate_campaign_binary_identity(metadata, binary_digest)
-    if config["probe_cpu"] != probe or metadata_workers != workers:
-        fail("campaign CPU selection differs from concrete host evidence")
+    if (
+        config["probe_cpu"] != probe
+        or metadata_workers != workers
+        or config["numa_node"] != numa_node
+    ):
+        fail("campaign CPU or NUMA-node selection differs from concrete host evidence")
     rows, results = validate_attempts(root, metadata, config, workers)
     validate_journal(root, rows)
     recomputed = recompute_summary(metadata, config, rows, results)

@@ -4,7 +4,7 @@ This harness measures a dependent chain with idle workers and with the same
 workers consuming private read-only buffers. It uses fresh processes, complete
 order-balanced blocks, fixed stopping, and an independent A/A path check.
 
-The result is a black-box loaded-memory observation. It does not decode DRAM
+The result is a black-box loaded-treatment observation. It does not decode DRAM
 rows, banks, channels, refresh, queue state, or controller scheduling.
 
 ## Freeze the source
@@ -98,7 +98,9 @@ The runner:
    runner or analyzer, then seals the receipt manifest;
 10. removes write permission and revalidates the sealed receipt.
 
-Every fresh period builds a 512 MiB large cycle, an 8 KiB small control, and
+Every process binds its allocation policy to the selected NUMA node with
+`MPOL_BIND` before creating its mappings. Every fresh period then builds a 512
+MiB large cycle, an 8 KiB small control, and
 eight 128 MiB worker buffers. The runner uses a 750 ms treatment warmup and a
 one-second quiet interval between periods. A process timeout, malformed result,
 fault, migration, checksum failure, or identity change remains in the receipt
@@ -134,8 +136,12 @@ publishing the archive and digest under `measurements/raw/`.
 - Do not replace a failed period or extend collection after inspecting data.
 - `MADV_NOHUGEPAGE` records an accepted Linux request. Mapping-specific
   `/proc/self/smaps` fields provide the page-state evidence.
-- First touch on pinned CPUs is placement intent. `/proc/self/numa_maps` or a
-  page-location query is required before calling a page local to a NUMA node.
+- `MPOL_BIND` restricts new anonymous allocations to the selected NUMA node.
+  The successful system call is part of each result. The receipt does not query
+  every page's final physical location.
+- The receipt records `/proc/sys/kernel/numa_balancing` as the host's automatic
+  NUMA-balancing setting. CPU pinning and first touch do not imply that the
+  kernel will leave pages in their initial placement.
 - Source-byte bounds do not equal cache, interconnect, or controller traffic.
 - Worker source-byte rates cover the full run epoch: worker release, the
   all-worker first-chunk acknowledgement, the small control, the large probe,
@@ -147,9 +153,13 @@ publishing the archive and digest under `measurements/raw/`.
   chunk per worker, so actual source bytes are less than or equal to that
   bound. Idle byte and rate bounds are exactly zero.
 - Minor faults, major faults, and voluntary and involuntary context switches
-  are process-wide `getrusage(RUSAGE_SELF)` deltas around the large dependent
-  walk. They are not probe-thread-only counters.
-- A stable small control narrows broad interference explanations but does not
-  isolate a DRAM mechanism.
+  are reported twice around the large dependent walk: process-wide
+  `getrusage(RUSAGE_SELF)` deltas and probe-thread-only
+  `getrusage(RUSAGE_THREAD)` deltas. Any process-wide minor or major fault in
+  that window fails the period. The full-process `total_major_faults` check
+  still covers the entire invocation.
+- A stable small control only weakens explanations that would affect both its
+  short window and the later large-walk window uniformly. It does not exclude
+  scheduler activity or other work specific to the large-walk window.
 - CPU pinning does not isolate interrupts, co-runners, thermal state, or
   persistent host effects.

@@ -38,6 +38,9 @@ RESULT_KEYS = {
     "treatment",
     "probe_cpu",
     "worker_cpus",
+    "numa_node",
+    "memory_policy",
+    "memory_policy_bound",
     "probe_start_cpu",
     "probe_end_cpu",
     "worker_start_cpus",
@@ -89,6 +92,10 @@ RESULT_KEYS = {
     "process_large_window_major_faults",
     "process_large_window_voluntary_context_switches",
     "process_large_window_involuntary_context_switches",
+    "probe_thread_large_window_minor_faults",
+    "probe_thread_large_window_major_faults",
+    "probe_thread_large_window_voluntary_context_switches",
+    "probe_thread_large_window_involuntary_context_switches",
     "total_major_faults",
 }
 BASE_ENVIRONMENT = {
@@ -105,6 +112,7 @@ class ExpectedResult:
     treatment: str
     probe_cpu: int
     worker_cpus: tuple[int, ...]
+    numa_node: int
     large_mib: int
     worker_mib: int
     warmup_ms: int
@@ -175,6 +183,9 @@ def validate_result(result: object, expected: ExpectedResult) -> dict[str, Any]:
         "treatment": expected.treatment,
         "probe_cpu": expected.probe_cpu,
         "worker_cpus": list(expected.worker_cpus),
+        "numa_node": expected.numa_node,
+        "memory_policy": "MPOL_BIND",
+        "memory_policy_bound": True,
         "probe_start_cpu": expected.probe_cpu,
         "probe_end_cpu": expected.probe_cpu,
         "worker_start_cpus": list(expected.worker_cpus),
@@ -230,6 +241,10 @@ def validate_result(result: object, expected: ExpectedResult) -> dict[str, Any]:
         "process_large_window_major_faults",
         "process_large_window_voluntary_context_switches",
         "process_large_window_involuntary_context_switches",
+        "probe_thread_large_window_minor_faults",
+        "probe_thread_large_window_major_faults",
+        "probe_thread_large_window_voluntary_context_switches",
+        "probe_thread_large_window_involuntary_context_switches",
         "total_major_faults",
     )
     for key in nonnegative:
@@ -339,6 +354,18 @@ def validate_result(result: object, expected: ExpectedResult) -> dict[str, Any]:
     require_result(
         result["process_large_window_major_faults"] == 0,
         "process-wide large dependent-walk window incurred a major fault",
+    )
+    require_result(
+        result["process_large_window_minor_faults"] == 0,
+        "process-wide large dependent-walk window incurred a minor fault",
+    )
+    require_result(
+        result["probe_thread_large_window_major_faults"] == 0,
+        "probe thread large dependent-walk window incurred a major fault",
+    )
+    require_result(
+        result["probe_thread_large_window_minor_faults"] == 0,
+        "probe thread large dependent-walk window incurred a minor fault",
     )
     require_result(result["total_major_faults"] == 0, "process incurred a major fault")
 
@@ -453,6 +480,8 @@ def run_attempt(
         str(args.probe_cpu),
         "--worker-cpus",
         ",".join(map(str, args.worker_cpus)),
+        "--numa-node",
+        str(args.numa_node),
         "--large-mib",
         str(args.large_mib),
         "--worker-mib",
@@ -589,6 +618,7 @@ def run_attempt(
                 treatment=treatment,
                 probe_cpu=args.probe_cpu,
                 worker_cpus=args.worker_cpus,
+                numa_node=args.numa_node,
                 large_mib=args.large_mib,
                 worker_mib=args.worker_mib,
                 warmup_ms=args.warmup_ms,
@@ -618,6 +648,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--out", required=True, type=Path, help="new campaign directory")
     parser.add_argument("--probe-cpu", required=True, type=int)
     parser.add_argument("--worker-cpus", required=True, type=parse_cpu_csv)
+    parser.add_argument("--numa-node", required=True, type=int)
     parser.add_argument("--large-mib", default=512, type=int)
     parser.add_argument("--worker-mib", default=128, type=int)
     parser.add_argument("--warmup-ms", default=750, type=int)
@@ -626,6 +657,7 @@ def parse_args() -> argparse.Namespace:
     args = parser.parse_args()
     if (
         args.probe_cpu < 0
+        or args.numa_node < 0
         or args.probe_cpu in args.worker_cpus
         or args.large_mib <= 0
         or args.worker_mib <= 0
@@ -691,6 +723,7 @@ def main() -> None:
         "config": {
             "probe_cpu": args.probe_cpu,
             "worker_cpus": list(args.worker_cpus),
+            "numa_node": args.numa_node,
             "large_mib": args.large_mib,
             "worker_mib": args.worker_mib,
             "warmup_ms": args.warmup_ms,
