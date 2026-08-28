@@ -1,19 +1,24 @@
 # Topic 49 measurement records
 
-Final records are added only after the exact checked-source candidate passes on
-the literal Arm target and the runtime-resolved `xxl` x86-64 target.
+The 2026-08-28 first visit passed on both required Linux targets:
 
-Each host note must record source and archive identity, host and alias identity,
-toolchain and flags, topology and placement, process count, block contrasts,
-interval scope, useful-byte bounds, code generation, validation outcome, and
-measured-versus-inferred claims. The comparison note must keep host results
-separate and must not turn them into an instruction-set or vendor comparison.
+- [AArch64 host result](2026-08-28-arm.md)
+- [`xxl` host result](2026-08-28-xxl.md)
+- [cross-host comparison](2026-08-28-comparison.md)
 
-Worker rates use the full run epoch, including release, acknowledgement, small
-control, large probe, stop publication, and worker drain through termination.
-The end timestamp follows all worker joins. Record the lower and inclusive
-upper useful-source-byte rates, require every loaded worker to contribute, and
-keep idle bounds at exact zero. Record process-wide large-walk resource
-counters separately from probe-thread timing.
+Both accepted campaigns use source commit
+`8ad95023e53c516499c1c85631582c52ebd63921` and one path-limited source
+archive. Each contains 12 primary four-process blocks and four A/A blocks: 64
+fresh process identifiers, no replacement attempts, and process-level rather
+than inner-loop replication.
 
-Sealed raw receipts and an outer SHA-256 manifest belong under [`raw/`](raw/).
+Worker rates cover the full run epoch from release through worker join. They
+bound application useful source bytes, not cache, fabric, integrated memory
+controller (IMC), or dynamic random-access memory (DRAM) traffic. Resource
+counters around the large walk are reported both process-wide and for the
+probe thread. Every accepted process recorded zero minor and major faults in
+both scopes.
+
+The immutable receipts, the rejected first Arm campaign, controller-side
+validations, and outer checksums are under
+[`raw/2026-08-28-8ad9502/`](raw/2026-08-28-8ad9502/).
