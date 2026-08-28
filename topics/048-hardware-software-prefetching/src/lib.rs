@@ -182,10 +182,18 @@ pub fn throughput_ceiling(inputs: ThroughputInputs) -> Result<ThroughputBound, M
 
     // Sequential division avoids the intermediate product
     // `miss_latency_cycles * misses_per_iteration`, which can overflow to
-    // infinity for finite inputs and silently zero the ceiling; validation
-    // then rejects any remaining unrepresentable result instead of ranking it.
-    let concurrency =
-        inputs.maximum_concurrent_misses / inputs.miss_latency_cycles / inputs.misses_per_iteration;
+    // infinity for finite inputs and silently zero the ceiling. Dividing by
+    // the larger factor first keeps the intermediate in range whenever the
+    // true ceiling exceeds it: if that first division overflows, dividing by
+    // the smaller-or-equal remaining factor could only grow the value, so the
+    // true ceiling itself is beyond f64 and the validation below rejects it.
+    let (larger_factor, smaller_factor) =
+        if inputs.miss_latency_cycles >= inputs.misses_per_iteration {
+            (inputs.miss_latency_cycles, inputs.misses_per_iteration)
+        } else {
+            (inputs.misses_per_iteration, inputs.miss_latency_cycles)
+        };
+    let concurrency = inputs.maximum_concurrent_misses / larger_factor / smaller_factor;
     let bandwidth = inputs.memory_bytes_per_cycle / inputs.bytes_per_iteration;
     validate_positive(concurrency, "concurrency ceiling")?;
     validate_positive(bandwidth, "bandwidth ceiling")?;
@@ -347,6 +355,25 @@ mod tests {
         .unwrap();
         assert!(bound.concurrency_iterations_per_cycle > 0.0);
         assert_eq!(bound.limiting_factor, LimitingFactor::Concurrency);
+    }
+
+    #[test]
+    fn throughput_survives_huge_numerator_and_mixed_factors() {
+        // Dividing by the smaller factor first would overflow the
+        // intermediate to infinity even though the true ceiling is a
+        // representable ~4.49e307.
+        let bound = throughput_ceiling(ThroughputInputs {
+            cpu_iterations_per_cycle: 4.0,
+            maximum_concurrent_misses: f64::MAX,
+            miss_latency_cycles: f64::MIN_POSITIVE,
+            misses_per_iteration: f64::MAX,
+            memory_bytes_per_cycle: 16.0,
+            bytes_per_iteration: 64.0,
+        })
+        .unwrap();
+        assert!(bound.concurrency_iterations_per_cycle.is_finite());
+        assert!(bound.concurrency_iterations_per_cycle > 4.0e307);
+        assert_eq!(bound.limiting_factor, LimitingFactor::Bandwidth);
     }
 
     #[test]
