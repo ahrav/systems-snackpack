@@ -11,6 +11,7 @@ import math
 import random
 import re
 import statistics
+import subprocess
 import tarfile
 from collections import defaultdict
 from pathlib import Path
@@ -18,6 +19,15 @@ from pathlib import Path
 
 T95 = {1: 12.706, 3: 3.182}
 HINT_INSTRUCTION = re.compile(r"\b(?:prefetch(?:nta|t[012]|w|wt1)|prfm)\b")
+# The frozen round-01 toolchain: rounds/01.md declares GCC 11.5 with exactly
+# these flags, so a receipt built any other way measures different kernels.
+FROZEN_GCC_VERSION = "11.5"
+FROZEN_BUILD_FLAGS = (
+    "-O3 -g -std=c11 -Wall -Wextra -Werror -march=native "
+    "-fno-tree-vectorize -fno-tree-slp-vectorize"
+)
+GCC_VERSION_LINE = re.compile(r"^gcc \([^)]*\) (\d+\.\d+)", re.MULTILINE)
+LINE_BYTES = 64
 REQUIRED = (
     "source-archive.tar.gz",
     "source-commit.txt",
@@ -68,11 +78,43 @@ def recorded_hashes(path: Path) -> dict[str, str]:
     return values
 
 
+def executed_source_hashes(path: Path) -> dict[str, str]:
+    """Parse a sha256sum record whose names are the absolute paths that ran
+    remotely; the basename identifies each source file."""
+    values: dict[str, str] = {}
+    for line in path.read_text().splitlines():
+        digest, separator, name = line.partition("  ")
+        require(separator == "  " and len(digest) == 64, f"malformed hash line: {line}")
+        base = Path(name).name
+        require(base != "" and base not in values, f"duplicate executed source: {name}")
+        values[base] = digest
+    return values
+
+
+def host_field_present(host_text: str, key: str, expected: str) -> bool:
+    """host.txt lines are either bare values or key=value pairs."""
+    lines = {line.strip() for line in host_text.splitlines()}
+    return expected in lines or f"{key}={expected}" in lines
+
+
+def require_recomputed_timing(result: dict) -> None:
+    """Bind the derived per-access figure to the retained raw evidence instead
+    of trusting the recorded field."""
+    require(result["lines"] == result["mib"] * 1024 * 1024 // LINE_BYTES, "line count mismatch")
+    require(result["accesses"] == result["lines"] * result["passes"], "access count mismatch")
+    recomputed = result["elapsed_seconds"] * 1.0e9 / result["accesses"]
+    require(
+        math.isclose(result["ns_per_access"], recomputed, rel_tol=1e-4, abs_tol=1e-9),
+        "ns_per_access differs from elapsed-time recomputation",
+    )
+
+
 def validate_smoke(path: Path, expected_mode: str) -> None:
     result = json.loads(path.read_text())
     require(result["schema"] == 1 and result["mode"] == expected_mode, "smoke mode mismatch")
     require(result["correct"] and result["checksum"] == result["expected"], "smoke checksum failed")
     require(result["cpu_start"] == 0 and result["cpu_end"] == 0, "smoke placement failed")
+    require_recomputed_timing(result)
 
 
 def summarize(values: list[float]) -> dict[str, float | int]:
@@ -170,6 +212,7 @@ def validate_campaign(
             require(result["timed_major_faults"] == 0, "timed major fault retained")
             require(result["madv_nohuge_data_rc"] == 0, "data page advice failed")
             require(result["madv_nohuge_order_rc"] == 0, "order page advice failed")
+            require_recomputed_timing(result)
             if case == "primary":
                 require(not saw_aa, "primary row appears after A/A controls")
                 require(distance in primary_distances, "unexpected distance")
@@ -299,15 +342,55 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("receipt", type=Path)
     parser.add_argument("--expected-source-commit", required=True)
+    parser.add_argument("--expected-hostname", required=True)
+    parser.add_argument("--expected-uname-machine", required=True)
+    parser.add_argument(
+        "--objdump",
+        help=(
+            "disassembler used to regenerate kernel disassembly from the "
+            "retained binary; omit when no tool for the receipt's "
+            "architecture is available, which limits the codegen check to "
+            "the recorded text"
+        ),
+    )
     args = parser.parse_args()
     receipt = args.receipt.resolve()
 
     for name in REQUIRED:
         require((receipt / name).is_file(), f"missing receipt file: {name}")
+    # The executed-source record stays outside the manifest: its integrity
+    # comes from matching the sealed archive digests below, and the manifest
+    # membership check must keep equating SHA256SUMS with REQUIRED.
+    require(
+        (receipt / "execution-sources.sha256").is_file(),
+        "missing receipt file: execution-sources.sha256",
+    )
     hashes = recorded_hashes(receipt / "SHA256SUMS")
     require(set(hashes) == set(REQUIRED) - {"SHA256SUMS"}, "manifest membership differs")
     for name, digest in hashes.items():
         require(sha256(receipt / name) == digest, f"digest mismatch: {name}")
+    host_text = (receipt / "host.txt").read_text()
+    require(
+        host_field_present(host_text, "hostname", args.expected_hostname),
+        "host identity differs: hostname",
+    )
+    require(
+        host_field_present(host_text, "uname_machine", args.expected_uname_machine),
+        "host identity differs: uname machine",
+    )
+    gcc_versions = GCC_VERSION_LINE.findall(host_text)
+    require(
+        bool(gcc_versions) and all(v == FROZEN_GCC_VERSION for v in gcc_versions),
+        "compiler version differs from the frozen toolchain",
+    )
+    build_lines = (receipt / "build.txt").read_text().splitlines()
+    require(bool(build_lines), "build record is empty")
+    require(
+        build_lines[0].startswith("gcc ")
+        and FROZEN_BUILD_FLAGS in build_lines[0]
+        and "prefetch_bench.c" in build_lines[0],
+        "build command differs from the frozen flags",
+    )
     require(
         (receipt / "source-commit.txt").read_text().strip() == args.expected_source_commit,
         "source commit differs",
@@ -339,10 +422,11 @@ def main() -> None:
         )
         members = {member.name: member for member in archive.getmembers() if member.isfile()}
         require(
-            members and all(name.startswith(archive_prefix) for name in members),
+            bool(members) and all(name.startswith(archive_prefix) for name in members),
             "source archive prefix differs from commit",
         )
-        for name, digest in source_hashes.items():
+        archived_digests: dict[str, str] = {}
+        for name in sorted(expected_source_names):
             member_name = (
                 archive_prefix
                 + "topics/048-hardware-software-prefetching/experiment/"
@@ -351,7 +435,21 @@ def main() -> None:
             require(member_name in members, f"source archive missing {name}")
             stream = archive.extractfile(members[member_name])
             require(stream is not None, f"cannot read archived source: {name}")
-            require(hashlib.sha256(stream.read()).hexdigest() == digest, f"source digest differs: {name}")
+            assert stream is not None
+            archived_digests[name] = hashlib.sha256(stream.read()).hexdigest()
+    for name, digest in source_hashes.items():
+        require(archived_digests[name] == digest, f"source digest differs: {name}")
+    executed_hashes = executed_source_hashes(receipt / "execution-sources.sha256")
+    require(
+        {"prefetch_bench.c", "run_campaign.py"} <= set(executed_hashes)
+        and set(executed_hashes) <= expected_source_names,
+        "executed source set differs",
+    )
+    for name, digest in executed_hashes.items():
+        require(
+            archived_digests[name] == digest,
+            f"executed source differs from sealed archive: {name}",
+        )
     validate_smoke(receipt / "smoke/demand.json", "demand")
     validate_smoke(receipt / "smoke/prefetch.json", "prefetch")
     symbols = (receipt / "codegen/symbols.txt").read_text()
@@ -360,6 +458,32 @@ def main() -> None:
     prefetch_asm = (receipt / "codegen/kernel_prefetch.asm").read_text().lower()
     require(HINT_INSTRUCTION.search(prefetch_asm) is not None, "linked prefetch hint missing")
     require(HINT_INSTRUCTION.search(demand_asm) is None, "demand kernel contains prefetch hint")
+    # The recorded .asm text is only manifest-covered; regenerating from the
+    # retained binary binds the hint evidence to the bytes that actually ran.
+    codegen_binding = "recorded-text-only"
+    if args.objdump:
+        for kernel, expect_hint in (("kernel_demand", False), ("kernel_prefetch", True)):
+            disassembly = subprocess.run(
+                [
+                    args.objdump,
+                    "-drwC",
+                    f"--disassemble={kernel}",
+                    str(receipt / "prefetch_bench"),
+                ],
+                capture_output=True,
+                text=True,
+            )
+            require(
+                disassembly.returncode == 0,
+                f"objdump failed for {kernel}: {disassembly.stderr.strip()}",
+            )
+            regenerated = disassembly.stdout.lower()
+            require(f"<{kernel}>" in regenerated, f"regenerated disassembly missing {kernel}")
+            require(
+                (HINT_INSTRUCTION.search(regenerated) is not None) == expect_hint,
+                f"binary hint evidence differs from recorded text: {kernel}",
+            )
+        codegen_binding = "regenerated-from-binary"
 
     random_result = validate_campaign(
         receipt / "random.tsv",
@@ -393,6 +517,9 @@ def main() -> None:
                 "schema": 1,
                 "valid": True,
                 "source_commit": args.expected_source_commit,
+                "hostname": args.expected_hostname,
+                "uname_machine": args.expected_uname_machine,
+                "codegen_binding": codegen_binding,
                 "random_rows": random_result["rows"],
                 "sequential_rows": sequential_result["rows"],
                 "binary_sha256": random_result["binary_sha256"],

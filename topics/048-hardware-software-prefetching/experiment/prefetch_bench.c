@@ -83,6 +83,12 @@ static void usage(const char *program) {
 
 static int parse_size(const char *text, size_t *out) {
     char *end = NULL;
+    /* strtoull accepts leading whitespace and a sign and wraps negatives
+     * modulo 2^64, so "-1" would otherwise pass as SIZE_MAX; require the
+     * argument to start with a digit. */
+    if (text[0] < '0' || text[0] > '9') {
+        return -1;
+    }
     errno = 0;
     unsigned long long value = strtoull(text, &end, 0);
     if (errno != 0 || end == text || *end != '\0' || value > SIZE_MAX) {
@@ -94,6 +100,9 @@ static int parse_size(const char *text, size_t *out) {
 
 static int parse_u64(const char *text, uint64_t *out) {
     char *end = NULL;
+    if (text[0] < '0' || text[0] > '9') {
+        return -1;
+    }
     errno = 0;
     unsigned long long value = strtoull(text, &end, 0);
     if (errno != 0 || end == text || *end != '\0') {

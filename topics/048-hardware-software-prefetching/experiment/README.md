@@ -54,10 +54,19 @@ manifest, and independently recomputed summaries.
 
 ```bash
 python3 topics/048-hardware-software-prefetching/experiment/validate_receipts.py \
-  /tmp/topic48-SOURCE-receipt --expected-source-commit SOURCE
+  /tmp/topic48-SOURCE-receipt --expected-source-commit SOURCE \
+  --expected-hostname HOST --expected-uname-machine ARCH \
+  --objdump objdump
 jq '.summary' /tmp/topic48-SOURCE-receipt/random-analysis.json
 rg -n 'prefetch|prfm' /tmp/topic48-SOURCE-receipt/codegen/kernel_prefetch.asm
 ```
+
+The hostname and machine values come from the target you claim the receipt
+represents; the validator compares them with the recorded host evidence.
+`--objdump` regenerates the kernel disassembly from the retained binary and
+checks the hint evidence against those bytes; omit it when no disassembler for
+the receipt's architecture is available, which limits the codegen check to the
+recorded text and reports `codegen_binding: recorded-text-only`.
 
 The ratio is B/A: values below one favor the explicit hint. The Student-t
 interval covers complete-block variation in this exact run window. It is not an

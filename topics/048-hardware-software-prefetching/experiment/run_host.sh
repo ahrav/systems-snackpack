@@ -66,6 +66,11 @@ build_flags=(
         prefetch_bench.c run_campaign.py analyze.py validate_receipts.py \
         > "$output_directory/experiment-sources.sha256"
 )
+# Record the executed paths separately from the archive-relative manifest so
+# the validator can bind what ran to the sealed archive contents.
+sha256sum "$experiment_directory/prefetch_bench.c" \
+    "$experiment_directory/run_campaign.py" \
+    > "$output_directory/execution-sources.sha256"
 
 mkdir -p "$output_directory/smoke" "$output_directory/codegen"
 taskset -c 0 "$binary" --mode demand --pattern random --distance 0 \

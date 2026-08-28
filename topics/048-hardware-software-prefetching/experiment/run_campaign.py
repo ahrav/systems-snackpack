@@ -79,8 +79,27 @@ def run_one(args, *, case, distance, block, template, position, label, mode,
         ]
     )
     started = time.time_ns()
-    completed = subprocess.run(command, text=True, capture_output=True)
-    result_text = completed.stdout.strip()
+    try:
+        completed = subprocess.run(
+            command, text=True, capture_output=True, timeout=args.process_timeout
+        )
+        returncode = completed.returncode
+        result_text = completed.stdout.strip()
+        stderr_text = completed.stderr.strip()
+    except subprocess.TimeoutExpired as timeout_error:
+        # The acceptance contract retains every timeout, so the attempt is
+        # written before the campaign terminates.
+        def captured_text(data: object) -> str:
+            if isinstance(data, bytes):
+                return data.decode(errors="replace").strip()
+            return str(data).strip() if data else ""
+
+        returncode = 124
+        result_text = captured_text(timeout_error.stdout)
+        stderr_text = (
+            captured_text(timeout_error.stderr)
+            + f" process timed out after {args.process_timeout} seconds"
+        ).strip()
     parsed = None
     if result_text:
         try:
@@ -100,18 +119,18 @@ def run_one(args, *, case, distance, block, template, position, label, mode,
             "pid": "" if parsed is None else parsed.get("pid", ""),
             "started_unix_ns": started,
             "binary_sha256": binary_hash,
-            "returncode": completed.returncode,
+            "returncode": returncode,
             "result_json": result_text,
-            "stderr": completed.stderr.strip().replace("\n", "\\n"),
+            "stderr": stderr_text.replace("\n", "\\n"),
         }
     )
     sys.stdout.write(
         f"case={case} distance={distance} block={block} template={template} "
-        f"position={position} label={label} mode={mode} rc={completed.returncode} "
+        f"position={position} label={label} mode={mode} rc={returncode} "
         f"result={result_text}\n"
     )
     sys.stdout.flush()
-    if completed.returncode != 0 or parsed is None or not parsed.get("correct", False):
+    if returncode != 0 or parsed is None or not parsed.get("correct", False):
         raise RuntimeError(f"invalid attempt retained in output; command={command!r}")
 
 
@@ -131,6 +150,7 @@ def main():
     parser.add_argument("--cpu", type=int)
     parser.add_argument("--campaign-seed", type=int, default=480048)
     parser.add_argument("--workload-seed", type=int, default=48000048)
+    parser.add_argument("--process-timeout", type=float, default=600.0)
     args = parser.parse_args()
 
     if not args.binary.is_file():
@@ -140,6 +160,8 @@ def main():
         parser.error("--blocks must be a positive even number")
     if args.aa_blocks <= 0 or args.aa_blocks % 2 != 0:
         parser.error("--aa-blocks must be a positive even number")
+    if args.process_timeout <= 0:
+        parser.error("--process-timeout must be positive seconds")
 
     binary_hash = sha256(args.binary)
     rng = random.Random(args.campaign_seed)
