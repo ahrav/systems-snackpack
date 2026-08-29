@@ -383,7 +383,10 @@ def validate_metadata(
             fail(f"campaign metadata field changed: {key}")
     uname = metadata.get("uname")
     hostname = metadata.get("hostname_f")
-    if not isinstance(uname, dict) or uname.get("machine") != expected_architecture or uname.get("node") != expected_hostname:
+    # The kernel nodename is commonly the short host name while `hostname -f`
+    # resolves the fully qualified name, so only the architecture binds here;
+    # hostname identity is enforced through the hostname_f probe below.
+    if not isinstance(uname, dict) or uname.get("machine") != expected_architecture:
         fail("campaign uname identity changed")
     if not isinstance(hostname, dict) or hostname.get("returncode") != 0 or hostname.get("output") != expected_hostname:
         fail("campaign hostname probe changed")
@@ -462,8 +465,19 @@ def validate_metadata(
         probe = toolchain.get(name)
         if not isinstance(probe, dict) or probe.get("returncode") != 0 or not probe.get("output"):
             fail(f"required toolchain probe failed: {name}")
+    # GCC identity: Debian/Ubuntu GCC banners omit "gcc", so a receipt whose
+    # banner lacks it may still prove GCC through the recorded predefined
+    # macros — __GNUC__ present without __clang__ (Clang defines both).
+    # Receipts recorded before the macro probe existed carry a "gcc" banner.
     if "gcc" not in toolchain["cc"]["output"].lower():
-        fail("exact burn-loop codegen contract requires GCC")
+        macros = toolchain.get("cc_macros")
+        macro_text = (
+            str(macros.get("output", ""))
+            if isinstance(macros, dict) and macros.get("returncode") == 0
+            else ""
+        )
+        if "__GNUC__" not in macro_text or "__clang__" in macro_text:
+            fail("exact burn-loop codegen contract requires GCC")
     binary_digest = metadata.get("binary_sha256")
     if not isinstance(binary_digest, str) or not HEX64.fullmatch(binary_digest):
         fail("campaign binary digest is malformed")

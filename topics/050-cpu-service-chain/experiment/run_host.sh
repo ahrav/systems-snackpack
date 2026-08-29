@@ -194,7 +194,15 @@ write_source_manifest "$output_dir/source-manifest-before.sha256"
 install -m 0400 -- "$output_dir/source-manifest-before.sha256" \
     "$output_dir/source-files.sha256"
 
-if ! cc --version | head -n 1 | rg -qi 'gcc'; then
+# Identify the compiler through its predefined macros rather than the
+# version banner: Debian/Ubuntu GCC banners such as
+# "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0" contain no "gcc", and Clang
+# also defines __GNUC__, so GCC identity is __GNUC__ without __clang__.
+# The probe runs with the campaign's sanitized PATH so it inspects the same
+# cc the build resolves.
+compiler_macros=$(env -i PATH=/bin:/usr/bin LC_ALL=C \
+    cc -E -dM -x c /dev/null 2>/dev/null) || compiler_macros=""
+if ! rg -q '__GNUC__' <<<"$compiler_macros" || rg -q '__clang__' <<<"$compiler_macros"; then
     printf 'Topic 50 exact codegen contract requires GCC on the authorized hosts\n' >&2
     exit 2
 fi

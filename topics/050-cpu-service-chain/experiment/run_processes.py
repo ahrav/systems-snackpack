@@ -103,7 +103,7 @@ def read_text(path: Path) -> str | None:
         return None
 
 
-def command_output(argv: list[str]) -> dict[str, object]:
+def command_output(argv: list[str], env: dict[str, str] | None = None) -> dict[str, object]:
     try:
         completed = subprocess.run(
             argv,
@@ -112,6 +112,7 @@ def command_output(argv: list[str]) -> dict[str, object]:
             stderr=subprocess.STDOUT,
             timeout=15,
             check=False,
+            env=env,
         )
         return {"argv": argv, "returncode": completed.returncode, "output": completed.stdout.strip()}
     except (FileNotFoundError, subprocess.TimeoutExpired) as error:
@@ -295,7 +296,15 @@ def metadata(topology: dict[str, object], selected: dict[str, int], build_argv: 
         "sysfs": sysfs_snapshot(selected),
         "scheduler_exposure": {path: read_text(Path(path)) for path in sched_paths},
         "toolchain": {
-            "cc": command_output(["cc", "--version"]),
+            # The cc probes run under BASE_ENVIRONMENT so they inspect the
+            # same compiler the sanitized build resolves; an inherited-PATH
+            # probe could record a different cc than the one that produced
+            # the retained binary. The macro dump identifies GCC without
+            # depending on distribution banner text.
+            "cc": command_output(["cc", "--version"], env=BASE_ENVIRONMENT),
+            "cc_macros": command_output(
+                ["cc", "-E", "-dM", "-x", "c", "/dev/null"], env=BASE_ENVIRONMENT
+            ),
             "clang": command_output(["clang", "--version"]),
             "rustc": command_output(["rustc", "-Vv"]),
             "python": command_output([sys.executable, "--version"]),
