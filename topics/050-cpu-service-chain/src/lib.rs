@@ -693,6 +693,10 @@ mod tests {
             .expect("finite result must not error on intermediate underflow");
         assert!(small.execution_seconds() > 0.0);
         assert_eq!(small.execution_seconds(), 1.0 / f64::MAX);
+        // Mixed-scale rates whose product overflows but whose quotient is an
+        // ordinary normal value.
+        let mixed = WakeService::new(0.0, 0.0, 1e-300, 1e-300, 1e300).expect("valid");
+        assert_close(mixed.execution_seconds(), 1e-300);
     }
 
     #[test]

@@ -187,6 +187,15 @@ static void *waiter_main(void *opaque) {
     r->voluntary_cs = ru_end.ru_nvcsw - ru_start.ru_nvcsw;
     r->involuntary_cs = ru_end.ru_nivcsw - ru_start.ru_nivcsw;
     pthread_mutex_unlock(&lock);
+    /* The waiter_ready store precedes the lock call, so the holder can still
+     * observe it, burn, and unlock while a descheduled waiter has not yet
+     * blocked. A blocking futex acquisition deschedules the thread
+     * voluntarily and increments ru_nvcsw; an uncontended acquisition does
+     * not, so such an attempt is rejected rather than recorded. */
+    if (r->voluntary_cs < 1) {
+        fprintf(stderr, "waiter acquired the lock without blocking\n");
+        exit(3);
+    }
     return NULL;
 }
 

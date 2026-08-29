@@ -341,6 +341,8 @@ def row_acceptance_error(
             return f"{role} did not run under SCHED_OTHER priority 0"
     if not 4_900_000 <= int(result["holder_cpu_ns"]) <= 6_000_000:
         return "holder CPU-time control escaped 4.9-6.0 ms"
+    if int(result["waiter_voluntary_context_switches"]) < 1:
+        return "waiter acquired the lock without blocking"
     if result["holder_start_cpu"] != selected["holder"] or result["holder_end_cpu"] != selected["holder"]:
         return "holder ran on unexpected CPU"
     if result["waiter_start_cpu"] != selected["waiter"] or result["waiter_end_cpu"] != selected["waiter"]:

@@ -194,6 +194,8 @@ def validate(rows: list[dict[str, object]], metadata: dict[str, object], failure
                 errors.append(f"row {index}: {role} did not run under SCHED_OTHER priority 0")
         if not 4_900_000 <= int(row["holder_cpu_ns"]) <= 6_000_000:
             errors.append(f"row {index}: holder CPU-time control escaped 4.9-6.0 ms")
+        if int(row["waiter_voluntary_context_switches"]) < 1:
+            errors.append(f"row {index}: waiter acquired the lock without blocking")
         if int(row["holder_start_cpu"]) != int(selected["holder"]) or int(row["holder_end_cpu"]) != int(
             selected["holder"]
         ):
@@ -209,6 +211,28 @@ def validate(rows: list[dict[str, object]], metadata: dict[str, object], failure
             errors.append(f"row {index}: wrong hog assignment")
         if int(row["hog_start_cpu"]) != expected_hog or int(row["hog_end_cpu"]) != expected_hog:
             errors.append(f"row {index}: hog ran on unexpected CPU")
+    # block_interval preconditions: every experiment holds blocks 1-8, each
+    # with exactly two rows per label and positive metrics, so a passing
+    # validation guarantees the interval computation cannot raise.
+    experiment_labels = {"treatment": ("A", "B"), "aa": ("X", "Y")}
+    for index, row in enumerate(rows, start=2):
+        if row["experiment"] not in experiment_labels:
+            errors.append(f"row {index}: unknown experiment {row['experiment']!r}")
+        for metric in ("holder_wall_ns", "waiter_wait_ns"):
+            if int(row[metric]) <= 0:
+                errors.append(f"row {index}: non-positive {metric}")
+    for experiment, (first, second) in experiment_labels.items():
+        blocks: dict[int, list[str]] = defaultdict(list)
+        for row in rows:
+            if row["experiment"] == experiment:
+                blocks[int(row["block"])].append(str(row["label"]))
+        if sorted(blocks) != list(range(1, 9)):
+            errors.append(f"{experiment}: expected blocks 1-8, got {sorted(blocks)}")
+        for block, labels in sorted(blocks.items()):
+            if len(labels) != 4 or labels.count(first) != 2 or labels.count(second) != 2:
+                errors.append(
+                    f"{experiment} block {block}: expected two {first} and two {second} rows"
+                )
     failure_text = failures_path.read_text(encoding="utf-8") if failures_path.exists() else ""
     expected_rows = 2 * 8 * 4
     pids = [int(row["pid"]) for row in rows]

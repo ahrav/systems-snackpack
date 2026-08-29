@@ -558,6 +558,11 @@ def validate_result(result: dict[str, object], spec: dict[str, object], selected
     for field in HEADER:
         if field.endswith("context_switches") and (type(result[field]) is not int or result[field] < 0):
             fail(f"attempt {spec['sequence']} has invalid context-switch count")
+    # A blocking futex acquisition deschedules the waiter voluntarily; an
+    # attempt whose waiter never descheduled acquired the lock uncontended
+    # and does not measure blocking.
+    if result["waiter_voluntary_context_switches"] < 1:
+        fail(f"attempt {spec['sequence']} waiter acquired the lock without blocking")
 
 
 def validate_attempts(
