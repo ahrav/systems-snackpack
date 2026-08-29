@@ -16,6 +16,17 @@ processor families, or workloads.
 Raw archives, controller validation, source identity, and the runtime `xxl`
 resolution belong under [`raw/`](raw/).
 
+The sealed receipts bind source commit `97572e9`, whose archived program has
+no waiter-to-holder handshake: the holder begins its timed burn immediately
+after the start barrier, so a sufficiently delayed waiter could in principle
+miss the contention window and record a near-zero wait. The retained rows
+show that no attempt hit that window: across all 128 rows in both sealed
+receipts, every `waiter_wait_ns` is at least 0.95 of the same row's
+`holder_wall_ns` (minimum 4.787 ms against a 5.008 ms holder wall), so each
+retained waiter blocked for essentially the entire holder burn. Later source
+revisions add an explicit handshake that closes the window for future
+campaigns.
+
 The first-visit records are:
 
 - [`2026-08-29-arm.md`](2026-08-29-arm.md), for the required AArch64 host;

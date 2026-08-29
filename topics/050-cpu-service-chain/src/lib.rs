@@ -336,16 +336,25 @@ impl WakeService {
 
         // Dividing by the larger rate first keeps the intermediate quotient at
         // or below `max(instructions, result)`, so the chain reaches infinity
-        // only when the final execution time itself is unrepresentable.
-        let (first_divisor, second_divisor) = if instructions_per_cycle >= frequency_hz {
+        // only when the final execution time itself is unrepresentable. That
+        // order can round a representable subnormal result to zero, so a zero
+        // quotient from nonzero instructions retries with the smaller rate
+        // first, whose intermediate is at least the final result and therefore
+        // cannot underflow one that is representable. The two orders cannot
+        // both fail: joint failure needs `result * smaller` below the
+        // subnormal floor and `result * larger` above `f64::MAX`, which forces
+        // `larger / smaller` past `f64::MAX` divided by the smallest
+        // subnormal, beyond any finite operand pair.
+        let (larger_rate, smaller_rate) = if instructions_per_cycle >= frequency_hz {
             (instructions_per_cycle, frequency_hz)
         } else {
             (frequency_hz, instructions_per_cycle)
         };
-        let execution_seconds = finite_result(
-            instructions / first_divisor / second_divisor,
-            "wake execution seconds",
-        )?;
+        let mut execution_quotient = instructions / larger_rate / smaller_rate;
+        if execution_quotient == 0.0 && instructions != 0.0 {
+            execution_quotient = instructions / smaller_rate / larger_rate;
+        }
+        let execution_seconds = finite_result(execution_quotient, "wake execution seconds")?;
         let total_seconds = finite_sum(
             &[idle_exit_seconds, runnable_queue_seconds, execution_seconds],
             "wake-service total seconds",
@@ -668,6 +677,22 @@ mod tests {
         let wake = WakeService::new(0.0, 0.0, 0.0, 1.0, 1.0).expect("valid");
         assert_eq!(wake.execution_seconds(), 0.0);
         assert_eq!(wake.total_seconds(), 0.0);
+    }
+
+    #[test]
+    fn wake_service_represents_extreme_but_finite_execution_times() {
+        // Naive left-to-right division overflows the intermediate quotient
+        // even though the final execution time is `1.0 / f64::MIN_POSITIVE`.
+        let large = WakeService::new(0.0, 0.0, f64::MAX, f64::MIN_POSITIVE, f64::MAX)
+            .expect("finite result must not error on intermediate overflow");
+        assert_close(large.execution_seconds(), 1.0 / f64::MIN_POSITIVE);
+        // Dividing by the larger rate first underflows the intermediate
+        // quotient even though the final execution time is the representable
+        // subnormal `1.0 / f64::MAX`.
+        let small = WakeService::new(0.0, 0.0, f64::MIN_POSITIVE, f64::MIN_POSITIVE, f64::MAX)
+            .expect("finite result must not error on intermediate underflow");
+        assert!(small.execution_seconds() > 0.0);
+        assert_eq!(small.execution_seconds(), 1.0 / f64::MAX);
     }
 
     #[test]
