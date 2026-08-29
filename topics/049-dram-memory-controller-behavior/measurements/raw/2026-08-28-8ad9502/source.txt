@@ -1,0 +1,7 @@
+source_commit=8ad95023e53c516499c1c85631582c52ebd63921
+source_archive_sha256=1c8669600b7c28645ee50242c0934d2d5ec1110afd98e360d757bc636dd095ef
+accepted_processes_per_host=64
+primary_blocks=12
+aa_blocks=4
+replacement_attempts=0
+analysis_unit=complete_four_process_block
