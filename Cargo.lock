@@ -43,6 +43,10 @@ name = "cpu-memory-model-atomic-lowering"
 version = "0.1.0"
 
 [[package]]
+name = "cpu-service-chain"
+version = "0.1.0"
+
+[[package]]
 name = "database-index-internals"
 version = "0.1.0"
 

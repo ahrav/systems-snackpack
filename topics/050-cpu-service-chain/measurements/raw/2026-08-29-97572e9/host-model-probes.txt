@@ -1,0 +1,18 @@
+probe_boundary=read-only controller probes collected after the sealed campaigns
+
+[arm]
+observed_utc=2026-08-29T17:04:06Z
+hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+architecture=aarch64
+/sys/kernel/sched_ext/state=disabled
+/sys/kernel/sched_ext/root/ops=unavailable
+/proc/sys/kernel/sched_schedstats=0
+
+[xxl]
+observed_utc=2026-08-29T17:04:05Z
+ssh_alias=xxl
+hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+architecture=x86_64
+/sys/kernel/sched_ext/state=disabled
+/sys/kernel/sched_ext/root/ops=unavailable
+/proc/sys/kernel/sched_schedstats=0
