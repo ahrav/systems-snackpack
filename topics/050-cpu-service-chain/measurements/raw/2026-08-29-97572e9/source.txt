@@ -1,0 +1,4 @@
+source_commit=97572e93a6ee98e14bece7501068d5cedd962571
+source_archive_sha256=546dd1fa3cd205fd19bc937198281e0b7b6ca929a85d657c18f68d8312c4d035
+source_path=topics/050-cpu-service-chain
+archive_prefix=systems-snackpack-97572e93a6ee98e14bece7501068d5cedd962571/

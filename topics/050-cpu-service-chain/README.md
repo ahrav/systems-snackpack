@@ -8,9 +8,9 @@ idle state. CPU utilization alone does not separate those delays.
 
 Use one running example: a request thread needs a mutex held by a low-priority
 refresh thread while a normal-priority compression thread remains runnable.
-The refresh thread has only 5 milliseconds of CPU work left. If compression
-shares its logical CPU, those 5 milliseconds can occupy far more wall time and
-the request waits with it.
+The refresh thread has only 60 microseconds of CPU work left. If compression
+shares its logical CPU, that small amount of work can occupy far more wall
+time and the request waits with it.
 
 ## Model the complete service chain
 
@@ -37,10 +37,10 @@ For one request, separate blocked, runnable, and executing time:
 response = dependency_blocking + runnable_queueing + own_execution
 ```
 
-If the request waits 2 milliseconds for the refresh lock owner, then waits
-0.4 milliseconds after becoming runnable, then executes for 60 microseconds,
-its response time is `2 + 0.4 + 0.06 = 2.46` milliseconds. Optimizing only its
-60 microseconds cannot recover the other 2.4 milliseconds.
+For one observed request, suppose the lock wait is 2 milliseconds. The request
+then waits 0.4 milliseconds after becoming runnable and executes for 60
+microseconds. Its response time is `2 + 0.4 + 0.06 = 2.46` milliseconds.
+Optimizing only its 60 microseconds cannot recover the other 2.4 milliseconds.
 
 The lock wait itself is approximately:
 
@@ -49,17 +49,18 @@ lock_wait = owner_work_remaining + owner_runnable_queueing
             + owner_dependency_chain + handoff
 ```
 
-With 60 microseconds of owner work, 2 milliseconds of owner queueing, no
-further dependency, and 15 microseconds of handoff, the wait is about 2.075
-milliseconds. Lowering the owner's priority can make the dependent request
-slower.
+For a separate lock acquisition in the same service, use 60 microseconds of
+owner work, 2 milliseconds of owner queueing, no further dependency, and 15
+microseconds of handoff. The wait is about 2.075 milliseconds. These are new
+teaching inputs, not a decomposition of the observed 2-millisecond wait above.
+Lowering the owner's priority can make the dependent request slower.
 
 Linux ordinary fair scheduling uses a numeric `nice` value as a relative
 weight. Nice 19 reduces a thread's fair-class share when it competes with
 normal-priority work; it does not set an absolute CPU percentage. A futex,
-short for fast user-space mutex, lets an uncontended lock stay in user space
-and lets the kernel park a contended waiter. An ordinary mutex does not donate
-a waiter's priority to its owner.
+short for fast user-space locking, is a Linux wait-and-wake primitive that lets
+an uncontended lock stay in user space and the kernel park a contended waiter.
+An ordinary mutex does not donate a waiter's priority to its owner.
 
 The [`service_chain_cost_model`](examples/service_chain_cost_model.rs) example
 exposes checked helpers for response time, lock blocking, configured fair
@@ -89,6 +90,10 @@ scheduler simulations or latency predictions.
 [`lock_holder_preemption.c`](experiment/lock_holder_preemption.c) creates the
 request, refresh, and compression roles with three threads:
 
+The experiment scales the running example's owner work to a 5-millisecond
+thread CPU target so that fresh-process measurements remain stable enough to
+audit on both required hosts.
+
 - The refresh thread locks a mutex, lowers only its own nice value to 19, pins
   to one logical CPU, and targets 5 milliseconds on
   `CLOCK_THREAD_CPUTIME_ID`, the per-thread CPU clock. Accepted runs measure
@@ -111,11 +116,21 @@ not isolate an instruction-set architecture (ISA), a Linux scheduler
 implementation detail, or SMT behavior. The accepted 4.9-to-6.0-millisecond
 thread CPU range checks whether added wall time is consistent with descheduling
 rather than extra owner work. It cannot identify the exact scheduler path. No
-exact-source host result is claimed here.
+single-host result is generalized to an architecture or processor family.
+
+The exact-source campaigns used commit
+`97572e93a6ee98e14bece7501068d5cedd962571`. On the required AArch64 host,
+the holder-wall A/B ratio was `39.092720`, with a 95% between-block interval
+of `[38.567194, 39.625406]`. On the runtime-resolved `xxl` x86-64 host, it
+was `38.855392`, with interval `[38.233483, 39.487418]`. All four holder and
+waiter A/A intervals included one. These values describe two exact hosts,
+native binaries, placements, workloads, and run windows. They do not estimate
+a production population or compare Arm with x86.
 
 See [`experiment/README.md`](experiment/README.md) for exact-source commands,
 [`rounds/01.md`](rounds/01.md) for the frozen claim and acceptance contract,
-and [`measurements/README.md`](measurements/README.md) for evidence boundaries.
+and [`measurements/README.md`](measurements/README.md) for host records, raw
+receipts, and evidence boundaries.
 
 ## Selection guide
 

@@ -1,0 +1,18 @@
+{
+  "aa_blocks": 8,
+  "analysis_unit": "one complete four-period block log contrast",
+  "architecture": "aarch64",
+  "attempt_count": 64,
+  "binary_sha256": "6707b32cd472bc1ac87e5937490635bd922a1b470843237ff558ec951e63e713",
+  "failed_attempts": 0,
+  "fresh_pid_count": 64,
+  "hostname": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+  "periods_per_block": 4,
+  "primary_blocks": 8,
+  "schema": "topic50-receipt-validation.v1",
+  "source_archive_sha256": "546dd1fa3cd205fd19bc937198281e0b7b6ca929a85d657c18f68d8312c4d035",
+  "source_commit": "97572e93a6ee98e14bece7501068d5cedd962571",
+  "source_mutation": false,
+  "status": "pass",
+  "target_label": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com"
+}

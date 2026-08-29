@@ -15,3 +15,11 @@ processor families, or workloads.
 
 Raw archives, controller validation, source identity, and the runtime `xxl`
 resolution belong under [`raw/`](raw/).
+
+The first-visit records are:
+
+- [`2026-08-29-arm.md`](2026-08-29-arm.md), for the required AArch64 host;
+- [`2026-08-29-xxl.md`](2026-08-29-xxl.md), for the runtime-resolved x86-64
+  host; and
+- [`2026-08-29-comparison.md`](2026-08-29-comparison.md), for the boundary
+  between the two independent observations.
