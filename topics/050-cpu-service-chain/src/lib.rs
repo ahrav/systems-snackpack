@@ -334,8 +334,16 @@ impl WakeService {
         validate_positive_finite(instructions_per_cycle, "instructions per cycle")?;
         validate_positive_finite(frequency_hz, "frequency hertz")?;
 
+        // Dividing by the larger rate first keeps the intermediate quotient at
+        // or below `max(instructions, result)`, so the chain reaches infinity
+        // only when the final execution time itself is unrepresentable.
+        let (first_divisor, second_divisor) = if instructions_per_cycle >= frequency_hz {
+            (instructions_per_cycle, frequency_hz)
+        } else {
+            (frequency_hz, instructions_per_cycle)
+        };
         let execution_seconds = finite_result(
-            instructions / instructions_per_cycle / frequency_hz,
+            instructions / first_divisor / second_divisor,
             "wake execution seconds",
         )?;
         let total_seconds = finite_sum(

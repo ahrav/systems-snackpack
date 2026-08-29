@@ -181,6 +181,11 @@ write_source_manifest() {
         mapfile -t paths < <(
             rg --files topics/050-cpu-service-chain/experiment | LC_ALL=C sort
         )
+        if ((${#paths[@]} == 0)); then
+            # An empty expansion would leave sha256sum reading stdin forever.
+            printf 'source manifest found no experiment files\n' >&2
+            exit 2
+        fi
         sha256sum -- "${paths[@]}"
     ) >"$destination"
 }

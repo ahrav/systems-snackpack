@@ -150,6 +150,8 @@ def sha256(path: Path) -> str:
 def same(left: object, right: object) -> bool:
     if isinstance(left, bool) or isinstance(right, bool):
         return left is right
+    if type(left) is int and type(right) is int:
+        return left == right
     if type(left) in (int, float) and type(right) in (int, float):
         return math.isclose(float(left), float(right), rel_tol=1e-10, abs_tol=1e-12)
     if isinstance(left, list) and isinstance(right, list):

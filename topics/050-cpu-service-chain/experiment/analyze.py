@@ -230,14 +230,29 @@ def main() -> int:
     run_dir = Path(sys.argv[1] if len(sys.argv) > 1 else "run")
     rows = load_rows(run_dir / "raw.csv")
     metadata = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
+    validation = validate(rows, metadata, run_dir / "failures.jsonl")
+    # block_interval raises on incomplete or non-positive blocks; a run that
+    # already failed validation must still emit the structured payload with
+    # its error list instead of dying with a traceback.
+    if validation["pass"]:
+        intervals = {
+            "treatment_holder_wall": block_interval(rows, "treatment", "A", "B", "holder_wall_ns"),
+            "treatment_waiter_wait": block_interval(rows, "treatment", "A", "B", "waiter_wait_ns"),
+            "aa_holder_wall": block_interval(rows, "aa", "X", "Y", "holder_wall_ns"),
+            "aa_waiter_wait": block_interval(rows, "aa", "X", "Y", "waiter_wait_ns"),
+        }
+    else:
+        intervals = {
+            "treatment_holder_wall": None,
+            "treatment_waiter_wait": None,
+            "aa_holder_wall": None,
+            "aa_waiter_wait": None,
+        }
     result = {
         "schema": "topic50-analysis.v1",
-        "validation": validate(rows, metadata, run_dir / "failures.jsonl"),
+        "validation": validation,
         "process_descriptives": label_summaries(rows),
-        "treatment_holder_wall": block_interval(rows, "treatment", "A", "B", "holder_wall_ns"),
-        "treatment_waiter_wait": block_interval(rows, "treatment", "A", "B", "waiter_wait_ns"),
-        "aa_holder_wall": block_interval(rows, "aa", "X", "Y", "holder_wall_ns"),
-        "aa_waiter_wait": block_interval(rows, "aa", "X", "Y", "waiter_wait_ns"),
+        **intervals,
         "interpretation_fence": {
             "measured": "wall time, per-thread CPU time, requested/observed affinity, nice result, and getrusage context-switch counts for each fresh PID",
             "observed_codegen": "the summary does not infer mechanisms from code generation; the sealed receipt records linked disassembly from the exact campaign binary separately",

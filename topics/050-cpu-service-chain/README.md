@@ -94,8 +94,9 @@ The experiment scales the running example's owner work to a 5-millisecond
 thread CPU target so that fresh-process measurements remain stable enough to
 audit on both required hosts.
 
-- The refresh thread locks a mutex, lowers only its own nice value to 19, pins
-  to one logical CPU, and targets 5 milliseconds on
+- The refresh thread locks a mutex, raises only its own nice value to 19
+  (lowering only its own priority), pins to one logical CPU, and targets 5
+  milliseconds on
   `CLOCK_THREAD_CPUTIME_ID`, the per-thread CPU clock. Accepted runs measure
   from 4.9 through 6.0 milliseconds.
 - The request thread pins to a different physical core and waits for the mutex.

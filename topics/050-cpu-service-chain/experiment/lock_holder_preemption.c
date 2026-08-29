@@ -16,6 +16,7 @@
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_barrier_t start_barrier;
 static atomic_int holder_done;
+static atomic_int waiter_ready;
 
 #if defined(__GNUC__) && !defined(__clang__)
 #define TOPIC50_NOINLINE __attribute__((noinline, noclone, noipa))
@@ -138,6 +139,11 @@ static void *holder_main(void *opaque) {
         abort();
     }
     barrier_wait_checked();
+    /* Wait until the waiter has published its acquisition attempt so the
+     * timed burn cannot complete before the waiter contends for the mutex;
+     * an uncontended unlock would record a spuriously small waiter wait. */
+    while (!atomic_load_explicit(&waiter_ready, memory_order_acquire)) {
+    }
     r->start_cpu = sched_getcpu();
     clock_gettime(CLOCK_MONOTONIC_RAW, &wall_start);
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &cpu_start);
@@ -170,7 +176,10 @@ static void *waiter_main(void *opaque) {
     r->start_cpu = sched_getcpu();
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
     getrusage(RUSAGE_THREAD, &ru_start);
-    pthread_mutex_lock(&lock);
+    atomic_store_explicit(&waiter_ready, 1, memory_order_release);
+    if (pthread_mutex_lock(&lock) != 0) {
+        abort();
+    }
     getrusage(RUSAGE_THREAD, &ru_end);
     clock_gettime(CLOCK_MONOTONIC_RAW, &end);
     r->end_cpu = sched_getcpu();
@@ -269,6 +278,7 @@ int main(int argc, char **argv) {
     pthread_t hog_thread;
 
     atomic_init(&holder_done, 0);
+    atomic_init(&waiter_ready, 0);
     if (pthread_barrier_init(&start_barrier, NULL, 3) != 0) {
         abort();
     }

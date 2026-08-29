@@ -135,7 +135,7 @@ The host runner performs these gates:
 1. validates the authorized target identity and architecture;
 2. validates and retains the exact source archive;
 3. hashes every experiment source before execution;
-4. builds the native program with `-O2 -g -Wall -Wextra -Werror -pthread`;
+4. builds the native program with `-O2 -g -std=c11 -Wall -Wextra -Werror -pthread`;
 5. records architecture, hostname, kernel, compiler, CPU model/features,
    configured and allowed CPU counts, topology, effective affinity, nice and
    scheduler state, simultaneous-multithreading exposure, CPU-frequency

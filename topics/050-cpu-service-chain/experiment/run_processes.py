@@ -311,6 +311,48 @@ def make_schedule(a: str, b: str, seed: int) -> list[str]:
     return templates
 
 
+# Frozen images of make_schedule(SEED) and make_schedule(SEED + 1). The
+# campaign refuses to start if the interpreter's shuffle diverges from these,
+# so a Python-version change fails closed here instead of at receipt
+# validation, which compares schedule.json against the same frozen values.
+FROZEN_TREATMENT_SCHEDULE = ["BAAB", "ABBA", "ABBA", "BAAB", "BAAB", "ABBA", "BAAB", "ABBA"]
+FROZEN_AA_SCHEDULE = ["YXXY", "YXXY", "XYYX", "YXXY", "XYYX", "XYYX", "XYYX", "YXXY"]
+
+
+def row_acceptance_error(
+    result: dict[str, object], selected: dict[str, int], experiment: str, label: str
+) -> str | None:
+    """Mirrors the analyzer's per-row acceptance rules so a semantically
+    invalid attempt fails the campaign immediately and lands in the failure
+    ledger instead of surfacing only at post-campaign analysis."""
+    for role in ("holder", "waiter", "hog"):
+        if result[f"{role}_pin_rc"] != 0 or result[f"{role}_affinity_exact"] != 1:
+            return f"{role} affinity failure"
+    if result["holder_nice_set_rc"] != 0 or result["holder_nice_observed"] != HOLDER_NICE:
+        return "holder nice failure"
+    if result["waiter_nice_observed"] != 0 or result["hog_nice_observed"] != 0:
+        return "waiter or hog did not run at nice 0"
+    for role in ("holder", "waiter", "hog"):
+        if (
+            result[f"{role}_sched_get_rc"] != 0
+            or result[f"{role}_sched_policy"] != 0
+            or result[f"{role}_sched_priority"] != 0
+        ):
+            return f"{role} did not run under SCHED_OTHER priority 0"
+    if not 4_900_000 <= int(result["holder_cpu_ns"]) <= 6_000_000:
+        return "holder CPU-time control escaped 4.9-6.0 ms"
+    if result["holder_start_cpu"] != selected["holder"] or result["holder_end_cpu"] != selected["holder"]:
+        return "holder ran on unexpected CPU"
+    if result["waiter_start_cpu"] != selected["waiter"] or result["waiter_end_cpu"] != selected["waiter"]:
+        return "waiter ran on unexpected CPU"
+    expected_hog = selected["holder"] if experiment == "treatment" and label == "A" else selected["control"]
+    if result["hog_cpu_requested"] != expected_hog:
+        return "wrong hog assignment"
+    if result["hog_start_cpu"] != expected_hog or result["hog_end_cpu"] != expected_hog:
+        return "hog ran on unexpected CPU"
+    return None
+
+
 def run_one(
     writer: csv.writer,
     attempts_file,
@@ -397,7 +439,16 @@ def run_one(
     else:
         validation_error = "process failed, timed out, changed binary, or emitted non-single-line stdout"
 
-    valid = process.returncode == 0 and not timed_out and artifact_error is None and result is not None
+    if result is not None and validation_error is None:
+        validation_error = row_acceptance_error(result, selected, experiment, label)
+
+    valid = (
+        process.returncode == 0
+        and not timed_out
+        and artifact_error is None
+        and result is not None
+        and validation_error is None
+    )
     status = {
         "schema": "topic50-attempt.v1",
         "sequence": sequence,
@@ -525,6 +576,8 @@ def main() -> int:
 
     treatment_schedule = make_schedule("A", "B", SEED)
     aa_schedule = make_schedule("X", "Y", SEED + 1)
+    if treatment_schedule != FROZEN_TREATMENT_SCHEDULE or aa_schedule != FROZEN_AA_SCHEDULE:
+        raise RuntimeError("interpreter-derived schedule diverged from the frozen assignment")
     (OUT_DIR / "schedule.json").write_text(
         json.dumps({"seed": SEED, "treatment": treatment_schedule, "aa": aa_schedule}, indent=2) + "\n",
         encoding="utf-8",
