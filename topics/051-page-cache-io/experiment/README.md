@@ -53,7 +53,8 @@ The semantic controls also:
 
 - compare one sequential-advice read with one random-advice read after verified zero residency;
 - confirm that a buffered write populates the page cache;
-- time `write` separately from `fdatasync`;
+- record the fill-and-write loop separately from a later interval that includes
+  sampling and ends when `fdatasync` returns;
 - confirm that `fdatasync` does not imply page-cache eviction;
 - record page residency after each direct read without treating zero residency
   as an application binary interface guarantee.
@@ -125,12 +126,18 @@ python3 -I -B experiment/validate_receipts.py /path/to/receipt \
   documents `O_DIRECT` as trying to minimize cache effects, so zero resident
   pages is an observation rather than an application binary interface
   guarantee.
-- The primary hypothesis is that the randomized buffered scan takes longer
-  than the sequential buffered scan because it prevents sequential read-ahead
-  and request locality. Treat the observed ratio as a host-specific
-  measurement, not a filesystem or instruction-set constant.
-- The write control times `fdatasync` separately and requires the pages to
-  remain resident after completion. Global dirty and writeback counters remain
-  contextual because other processes can change them.
+- The primary treatment changes access order and advice together. A slower
+  randomized scan is consistent with losing sequential read-ahead and request
+  locality, but this experiment does not isolate those effects. Treat the
+  observed ratio as a host-specific measurement, not a filesystem or
+  instruction-set constant.
+- The write control records the fill-and-write-loop interval and a later
+  interval that ends when `fdatasync` returns. The later interval also includes
+  intervening process and kernel sampling, so it is not isolated `fdatasync`
+  latency. The control requires the pages to remain resident after completion.
+  Global dirty and writeback counters remain contextual because other
+  processes can change them.
 
-If direct I/O is unsupported, the fixed direct campaign fails instead of silently switching methods. That host then lacks a complete publication receipt for this experiment.
+If direct I/O is unsupported, the fixed direct campaign fails instead of
+silently switching methods. That host then lacks a complete publication
+receipt for this experiment.

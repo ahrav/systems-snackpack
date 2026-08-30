@@ -1,0 +1,4 @@
+archive_path=/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-051/2026-08-30-fa2dbea/arm-results.tar.gz
+archive_sha256=3f9cd8fca945d0ac82f31aaffcb32f6ac5ac2ebfff2ec1fd88e65de3da139f1e
+receipt_manifest_sha256=8bda60aba9d24fe3178f903df0cd9aa22862f57cb81e2799c30540cb34b7dc77
+mode=0444
