@@ -39,6 +39,16 @@ data_parent=${TOPIC51_DATA_PARENT:-/var/tmp}
 arm_target=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
 build_flags=(-O3 -g -std=c11 -Wall -Wextra -Werror -march=native)
 
+rustc_path=$(command -v rustc) || {
+    printf 'Topic 51 publication receipts require rustc in the host environment\n' >&2
+    exit 2
+}
+rustc_path=$(realpath -- "$rustc_path")
+rustc_version=$("$rustc_path" -Vv) || {
+    printf 'failed to record the Rust toolchain through %s\n' "$rustc_path" >&2
+    exit 2
+}
+
 if [[ ! $source_commit =~ ^[0-9a-f]{40}$ || ! $source_archive_sha256 =~ ^[0-9a-f]{64}$ ]]; then
     printf 'source commit or archive digest has the wrong shape\n' >&2
     exit 2
@@ -229,7 +239,7 @@ install -m 0400 -- "$output_dir/source-manifest-before.sha256" \
 
 python3 -I -B - "$output_dir/host.json" "$target_label" "$expected_hostname" \
     "$expected_architecture" "$source_commit" "$source_archive_sha256" \
-    "$data_parent" "$data_dir" <<'PY'
+    "$data_parent" "$data_dir" "$rustc_path" "$rustc_version" <<'PY'
 import glob
 import json
 import os
@@ -247,6 +257,8 @@ import sys
     archive_sha,
     data_parent,
     data_dir,
+    rustc_path,
+    rustc_version,
 ) = sys.argv[1:]
 
 def command(argv):
@@ -317,7 +329,11 @@ value = {
     "compiler": command(["cc", "--version"]),
     "compiler_target": command(["cc", "-march=native", "-Q", "--help=target"]),
     "python": command(["python3", "--version"]),
-    "rust": command(["rustc", "-Vv"]),
+    "rust": {
+        "argv": [rustc_path, "-Vv"],
+        "returncode": 0,
+        "output": rustc_version,
+    },
     "sysctl": command([
         "sysctl",
         "vm.dirty_ratio",
