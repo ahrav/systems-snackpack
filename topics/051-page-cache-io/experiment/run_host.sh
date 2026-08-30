@@ -52,6 +52,15 @@ rustc_version=$("$rustc_path" -Vv) || {
     exit 2
 }
 
+sysctl_path=$(command -v sysctl) || {
+    printf 'Topic 51 publication receipts require sysctl in the host environment\n' >&2
+    exit 2
+}
+if [[ $sysctl_path != /* || ! -x $sysctl_path ]]; then
+    printf 'sysctl must resolve to an executable absolute path, got %s\n' "$sysctl_path" >&2
+    exit 2
+fi
+
 if [[ ! $source_commit =~ ^[0-9a-f]{40}$ || ! $source_archive_sha256 =~ ^[0-9a-f]{64}$ ]]; then
     printf 'source commit or archive digest has the wrong shape\n' >&2
     exit 2
@@ -242,7 +251,8 @@ install -m 0400 -- "$output_dir/source-manifest-before.sha256" \
 
 python3 -I -B - "$output_dir/host.json" "$target_label" "$expected_hostname" \
     "$expected_architecture" "$source_commit" "$source_archive_sha256" \
-    "$data_parent" "$data_dir" "$rustc_path" "$rustc_version" <<'PY'
+    "$data_parent" "$data_dir" "$rustc_path" "$rustc_version" \
+    "$sysctl_path" <<'PY'
 import glob
 import json
 import os
@@ -262,17 +272,21 @@ import sys
     data_dir,
     rustc_path,
     rustc_version,
+    sysctl_path,
 ) = sys.argv[1:]
 
 def command(argv):
-    process = subprocess.run(
-        argv,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        check=False,
-        env={"LANG": "C", "LC_ALL": "C", "PATH": "/bin:/usr/bin", "TZ": "UTC"},
-    )
+    try:
+        process = subprocess.run(
+            argv,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+            env={"LANG": "C", "LC_ALL": "C", "PATH": "/bin:/usr/bin", "TZ": "UTC"},
+        )
+    except FileNotFoundError as error:
+        return {"argv": argv, "returncode": 127, "output": str(error)}
     return {"argv": argv, "returncode": process.returncode, "output": process.stdout.strip()}
 
 def selected(path, names):
@@ -338,7 +352,7 @@ value = {
         "output": rustc_version,
     },
     "sysctl": command([
-        "sysctl",
+        sysctl_path,
         "vm.dirty_ratio",
         "vm.dirty_background_ratio",
         "vm.dirty_bytes",
