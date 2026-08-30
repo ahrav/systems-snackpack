@@ -1,4 +1,4 @@
-# Linux page-cache I/O
+# Linux page-cache input/output (I/O)
 
 Linux can turn file memory into a hidden performance and durability contract.
 Buffered reads can reuse memory and fetch ahead. Buffered writes can return
@@ -11,8 +11,8 @@ not store the full lesson transcript.
 
 ## One file, four stages
 
-Use an archive service as the running example. The service keeps a 4 GiB index
-hot, scans an 8 GiB archive once, and accepts uploads.
+Use an archive service as the running example. The service keeps a 4-gibibyte
+(GiB) index hot, scans an 8 GiB archive once, and accepts uploads.
 
 1. A buffered `read` copies cached bytes into the process. A cache miss asks the
    filesystem to fill the page cache first.
@@ -20,14 +20,20 @@ hot, scans an 8 GiB archive once, and accepts uploads.
    process asks for them.
 3. A buffered `write` dirties cached data. Writeback later sends dirty data to
    storage.
-4. `O_DIRECT` requests direct input/output (I/O). It bypasses page-cache data
-   transfer when the filesystem accepts the request.
+4. `O_DIRECT` requests direct input/output (I/O). Linux says it tries to
+   minimize cache effects and transfers data directly between storage and the
+   user buffer. It does not promise that `mincore`, the Linux page-residency
+   query, will report zero resident pages afterward.
 
 The page cache stores file-backed memory in page-sized units. Current upstream
 Linux groups pages in a `folio`, a physically contiguous group managed as one
 memory-management unit. A file's `address_space` maps file offsets to those
 cached folios. These names explain kernel internals; applications program the
 system-call contract.
+
+The Portable Operating System Interface (POSIX) names a family of application
+interfaces shared across Unix-like systems. Linux implements the
+`posix_fadvise` access-pattern hint used below.
 
 ## Choose the path from the workload
 
@@ -38,8 +44,8 @@ system-call contract.
 | `posix_fadvise` | Gives Linux an access-pattern hint | A guaranteed cache state or fixed read-ahead window | `DONTNEED` is best effort | The application knows its access pattern |
 | `RWF_DONTCACHE` | Requests cache dropping after buffered I/O | Direct I/O or a strict no-cache guarantee | Linux added the flag in 6.14; dropping is best effort | Buffered semantics are useful but reuse is not |
 | Buffered `write` plus `fdatasync` | Coalesced writes followed by a durability boundary | A bound on pre-sync dirty memory | Throttling can arrive as a latency cliff | The application can batch a durability point |
-| `O_DIRECT` | Cache bypass and explicit ownership of buffers | Asynchrony, durability, or speed | Alignment and queue depth become application work | The application owns reuse and concurrency |
-| `O_DIRECT | O_DSYNC` | Cache bypass plus synchronous data-integrity completion | Transactional atomicity | Every write pays a completion boundary | Each direct write needs a durability contract |
+| `O_DIRECT` | Minimized cache effects and explicit ownership of buffers | Asynchrony, durability, speed, or zero page-cache residency | Alignment and queue depth become application work | The application owns reuse and concurrency |
+| `O_DIRECT | O_DSYNC` | Minimized cache effects plus synchronous data-integrity completion | Transactional atomicity | Every write pays a completion boundary | Each direct write needs a durability contract |
 
 Do not infer a cold device from a cold page-cache range. Device, virtual-machine,
 and storage-service caches can remain warm after `POSIX_FADV_DONTNEED`.
@@ -83,7 +89,8 @@ window_bytes >= consumption_bytes_per_second * (latency + jitter)
 ```
 
 At 1 GiB/s, 80 microseconds of device latency, and 42 microseconds of jitter,
-the lower bound is 127.93 KiB. Fetching 128 KiB for one 4 KiB demand has 32x
+the lower bound is 127.93 kibibytes (KiB). Fetching 128 KiB for one 4 KiB
+demand has 32x
 read amplification if the application never uses the other bytes.
 
 A buffered writer exhausts dirty headroom when production outruns writeback:
@@ -132,6 +139,9 @@ The one-read probe checks page residency and `/proc/self/io` accounting. The
 write check measures buffered `write`, `fdatasync`, residency, and supporting
 global dirty-page counters. Generated assembly and disassembly confirm that the
 compiler retained the I/O and content-verification paths.
+Direct-read residency is recorded, not forced to zero, because the Linux
+application binary interface only promises an attempt to minimize cache
+effects.
 
 See [the experiment contract](experiment/README.md) and [measurement
 records](measurements/README.md). The raw bundle binds both hosts to one pushed
@@ -156,6 +166,8 @@ explain possible mechanisms; the measured hosts ran patched Linux 6.12 kernels.
   to the file mapping.
 - `POSIX_FADV_DONTNEED` is a hint. Verify residency instead of assuming eviction.
 - `O_DIRECT` does not imply asynchronous, zero-copy, durable, or faster I/O.
+- `O_DIRECT` does not guarantee that a later `mincore` call reports zero
+  resident pages.
 - `fdatasync` supplies a completion boundary. Page residency after the call is
   not evidence of missing durability.
 - `/proc/self/io` byte accounting does not identify the completion time of
@@ -172,5 +184,5 @@ Choose buffered I/O when the kernel owns reuse and access prediction. Add
 advice when the pattern is known. Add an explicit
 sync operation when success means durable data. Choose direct I/O when the
 application can own alignment, cache policy, queue depth, and ordering. Measure
-the exact path because cache bypass changes who performs the work; it does not
+the exact path because direct I/O changes who performs the work; it does not
 remove the work.

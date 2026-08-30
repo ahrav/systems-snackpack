@@ -2,17 +2,36 @@
 
 This experiment tests three narrow claims on one Linux host at a time:
 
-1. `POSIX_FADV_SEQUENTIAL` can populate more page-cache pages than the one page that a process asks to read.
-2. `POSIX_FADV_RANDOM` can suppress that read-ahead effect for the same one-page read.
-3. The same 16 MiB file takes different elapsed time to scan with sequential buffered reads, randomized buffered reads, and aligned direct input/output where the filesystem reports support.
+The Portable Operating System Interface (POSIX) defines the
+`POSIX_FADV_*` advice values used below.
 
-The experiment does not prove device-cold latency. It uses `POSIX_FADV_DONTNEED` and `mincore` to verify that the test mapping has zero resident pages before each measured scan. The backing device can still contain the data in an internal cache. The timing result applies only to the recorded host, kernel, filesystem, device path, compiler, binary, file, and run window.
+1. `POSIX_FADV_SEQUENTIAL` can populate more page-cache pages than the one
+   page that a process asks to read.
+2. `POSIX_FADV_RANDOM` can suppress that read-ahead effect for the same
+   one-page read.
+3. The same 16-mebibyte (MiB) file takes different elapsed time to scan with
+   sequential buffered reads, randomized buffered reads, and aligned direct
+   input/output where the filesystem reports support.
+
+The experiment does not prove device-cold latency. It uses
+`POSIX_FADV_DONTNEED` and `mincore`, Linux's page-residency query, to verify
+that the test mapping has zero resident pages before each measured scan. The
+backing device can still contain the data in an internal cache. The timing
+result applies only to the recorded host, kernel, filesystem, device path,
+compiler, binary, file, and run window.
 
 ## Workload
 
-[`pcbench.c`](pcbench.c) creates deterministic 4 KiB blocks and verifies each block after `pread`. The native program emits one JSON object per process. It records startup separately from the measured read loop, process input/output counters from `/proc/self/io`, page residency from `mincore`, and direct-I/O alignment from `statx` with `STATX_DIOALIGN`.
+[`pcbench.c`](pcbench.c) creates deterministic 4-kibibyte (KiB) blocks. It
+verifies each block after `pread`. The native program emits one JavaScript Object Notation
+(JSON) object per process. It records startup separately from the measured
+read loop. It also records process input/output counters from `/proc/self/io`,
+page residency from `mincore`, and direct-I/O alignment from the `statx`
+metadata query with the `STATX_DIOALIGN` mask.
 
-[`run_processes.py`](run_processes.py) starts a fresh native process for every observation. It uses fixed, order-balanced four-process blocks:
+[`run_processes.py`](run_processes.py) starts a fresh native process for every
+observation. It uses fixed, order-balanced four-process blocks. ABBA and BAAB
+place both treatments in early and late positions:
 
 | Campaign | Fixed blocks | Ratio |
 |---|---:|---|
@@ -20,7 +39,15 @@ The experiment does not prove device-cold latency. It uses `POSIX_FADV_DONTNEED`
 | `aa` | 8 | sequential label Y / sequential label X |
 | `direct` | 4 | direct sequential / buffered sequential |
 
-The runner journals each planned process before launch. It stops at the first invalid attempt and never replaces a failed observation. [`analyze.py`](analyze.py) treats one complete four-process block as the independent unit. It reports the geometric mean ratio and a two-sided 95% Student-t interval across block log ratios. The interval covers process-to-process variation within this fixed run window. It does not cover other hosts, builds, kernels, or devices. The A/A campaign checks whether the two mechanically identical label paths behave alike. It is not a calibrated noise floor.
+The runner journals each planned process before launch. It stops at the first
+invalid attempt and never replaces a failed observation.
+[`analyze.py`](analyze.py) treats one complete four-process block as the
+independent unit. It reports the geometric mean ratio and a two-sided 95%
+Student-t interval across block log ratios. This interval uses the variation
+between complete blocks. It covers process-to-process variation within this
+fixed run window. It does not cover other hosts, builds, kernels, or devices.
+The A/A campaign runs the same treatment under two labels. It checks whether
+the label paths behave alike, but it is not a calibrated noise floor.
 
 The semantic controls also:
 
@@ -28,7 +55,8 @@ The semantic controls also:
 - confirm that a buffered write populates the page cache;
 - time `write` separately from `fdatasync`;
 - confirm that `fdatasync` does not imply page-cache eviction;
-- require direct reads to leave zero pages resident when direct I/O is measured.
+- record page residency after each direct read without treating zero residency
+  as an application binary interface guarantee.
 
 ## Exact-source host run
 
@@ -93,7 +121,10 @@ python3 -I -B experiment/validate_receipts.py /path/to/receipt \
 - Success requires every timed scan to begin with zero resident pages and
   report one file-size worth of physical read bytes at the process boundary.
 - Success requires buffered scans to leave all file pages resident. A supported
-  direct scan must leave zero pages resident.
+  direct scan records final residency but does not require zero. Linux
+  documents `O_DIRECT` as trying to minimize cache effects, so zero resident
+  pages is an observation rather than an application binary interface
+  guarantee.
 - The primary hypothesis is that the randomized buffered scan takes longer
   than the sequential buffered scan because it prevents sequential read-ahead
   and request locality. Treat the observed ratio as a host-specific

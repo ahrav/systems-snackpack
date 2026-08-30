@@ -10,6 +10,7 @@ import math
 import os
 from pathlib import Path
 import subprocess
+import struct
 import sys
 import time
 from typing import Any, NoReturn
@@ -110,19 +111,26 @@ def validate_observed(
         value = observed.get(key)
         if type(value) is not int or value <= 0:
             errors.append(f"{key} must be a positive integer")
-    wanted_residency = 0 if mode == "direct_seq" else page_count
-    if observed.get("resident_after") != wanted_residency:
+    resident_after = observed.get("resident_after")
+    if type(resident_after) is not int or not 0 <= resident_after <= page_count:
         errors.append(
-            f"resident_after: expected {wanted_residency}, got {observed.get('resident_after')!r}"
+            f"resident_after must be an integer from 0 through {page_count}, got {resident_after!r}"
         )
+    elif mode != "direct_seq" and resident_after != page_count:
+        errors.append(f"resident_after: expected {page_count}, got {resident_after!r}")
     if mode == "direct_seq":
         if observed.get("dio_align_reported") != 1:
             errors.append("direct I/O requires STATX_DIOALIGN evidence")
         memory_alignment = observed.get("dio_mem_align")
+        allocation_alignment = observed.get("dio_allocation_align")
         offset_alignment = observed.get("dio_offset_align")
         if (
             type(memory_alignment) is not int
             or memory_alignment <= 0
+            or type(allocation_alignment) is not int
+            or allocation_alignment < struct.calcsize("P")
+            or (allocation_alignment & (allocation_alignment - 1)) != 0
+            or allocation_alignment % memory_alignment != 0
             or type(offset_alignment) is not int
             or offset_alignment <= 0
             or IO_BLOCK % offset_alignment != 0

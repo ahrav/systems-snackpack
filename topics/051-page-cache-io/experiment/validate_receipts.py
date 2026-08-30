@@ -10,6 +10,7 @@ import math
 from pathlib import Path, PurePosixPath
 import stat
 import statistics
+import struct
 import tarfile
 from typing import Any, NoReturn
 
@@ -322,6 +323,7 @@ def verify_scenario(root: Path, name: str, all_pids: set[int]) -> dict[str, Any]
     journal = read_jsonl(scenario / "attempt-journal.jsonl")
     require(len(journal) == expected_count * 2, f"{name}: journal count differs")
     expected_sequence = 0
+    direct_resident_after: list[int] = []
     for block, template in enumerate(templates, 1):
         for period, letter in enumerate(template, 1):
             expected_sequence += 1
@@ -362,11 +364,35 @@ def verify_scenario(root: Path, name: str, all_pids: set[int]) -> dict[str, Any]
             require(observed.get("read_bytes_delta") == FILE_BYTES, f"{name}: physical-read byte count differs")
             require(type(observed.get("measurement_ns")) is int and observed["measurement_ns"] > 0, f"{name}: timing is invalid")
             require(type(observed.get("startup_to_measure_ns")) is int and observed["startup_to_measure_ns"] > 0, f"{name}: startup timing is invalid")
-            wanted_resident = 0 if mode == "direct_seq" else FILE_BYTES // PAGE_BYTES
-            require(observed.get("resident_after") == wanted_resident, f"{name}: final residency differs")
+            resident_after = observed.get("resident_after")
+            require(
+                type(resident_after) is int and 0 <= resident_after <= FILE_BYTES // PAGE_BYTES,
+                f"{name}: final residency is invalid",
+            )
+            if mode != "direct_seq":
+                require(
+                    resident_after == FILE_BYTES // PAGE_BYTES,
+                    f"{name}: buffered final residency differs",
+                )
             if mode == "direct_seq":
+                direct_resident_after.append(resident_after)
                 require(observed.get("dio_align_reported") == 1, "direct I/O lacks STATX_DIOALIGN evidence")
-        
+                memory_alignment = observed.get("dio_mem_align")
+                allocation_alignment = observed.get("dio_allocation_align")
+                offset_alignment = observed.get("dio_offset_align")
+                require(
+                    type(memory_alignment) is int
+                    and memory_alignment > 0
+                    and type(allocation_alignment) is int
+                    and allocation_alignment >= struct.calcsize("P")
+                    and (allocation_alignment & (allocation_alignment - 1)) == 0
+                    and allocation_alignment % memory_alignment == 0
+                    and type(offset_alignment) is int
+                    and offset_alignment > 0
+                    and PAGE_BYTES % offset_alignment == 0,
+                    "direct I/O alignment evidence is invalid",
+                )
+
     for index, event in enumerate(journal):
         sequence = index // 2 + 1
         expected_event = "planned" if index % 2 == 0 else "completed"
@@ -377,7 +403,18 @@ def verify_scenario(root: Path, name: str, all_pids: set[int]) -> dict[str, Any]
     require(complete.get("attempt_count") == expected_count and complete.get("unique_pid_count") == expected_count, f"{name}: completion marker differs")
     require(not (scenario / "failures.jsonl").exists(), f"{name}: failure ledger exists")
     point, interval = recompute_ratio(rows, templates, t975)
-    return {"attempt_count": expected_count, "point_ratio": point, "interval": interval}
+    result: dict[str, Any] = {
+        "attempt_count": expected_count,
+        "point_ratio": point,
+        "interval": interval,
+    }
+    if direct_resident_after:
+        result["direct_resident_after"] = {
+            "minimum": min(direct_resident_after),
+            "maximum": max(direct_resident_after),
+            "values": direct_resident_after,
+        }
+    return result
 
 
 def close_enough(left: float, right: object) -> bool:

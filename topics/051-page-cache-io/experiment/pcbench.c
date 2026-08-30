@@ -259,12 +259,13 @@ static void bench_file(const char *path,
 
     unsigned memory_alignment = IO_BLOCK;
     unsigned offset_alignment = IO_BLOCK;
+    unsigned allocation_alignment = IO_BLOCK;
     int alignment_reported = 0;
     int direct_fd = -1;
     if (direct) {
         (void)query_dio_alignment(path, &memory_alignment, &offset_alignment,
                                   &alignment_reported);
-        if (memory_alignment < sizeof(void *) ||
+        if (memory_alignment == 0 ||
             (memory_alignment & (memory_alignment - 1U)) != 0 ||
             offset_alignment == 0 || IO_BLOCK % offset_alignment != 0) {
             printf("{\"kind\":\"bench\",\"status\":\"unsupported\","
@@ -277,6 +278,10 @@ static void bench_file(const char *path,
             close(buffered_fd);
             free(order);
             return;
+        }
+        allocation_alignment = memory_alignment;
+        if (allocation_alignment < sizeof(void *)) {
+            allocation_alignment = sizeof(void *);
         }
         direct_fd = open(path, O_RDONLY | O_DIRECT);
         if (direct_fd < 0) {
@@ -295,7 +300,7 @@ static void bench_file(const char *path,
     }
 
     unsigned char *buffer;
-    if (posix_memalign((void **)&buffer, memory_alignment, IO_BLOCK) != 0) {
+    if (posix_memalign((void **)&buffer, allocation_alignment, IO_BLOCK) != 0) {
         die("posix_memalign benchmark");
     }
     memset(buffer, 0, IO_BLOCK);
@@ -337,6 +342,7 @@ static void bench_file(const char *path,
            "\"minor_faults_delta\":%ld,\"major_faults_delta\":%ld,"
            "\"checksum\":%" PRIu64 ",\"errors\":%zu,"
            "\"dio_align_reported\":%d,\"dio_mem_align\":%u,"
+           "\"dio_allocation_align\":%u,"
            "\"dio_offset_align\":%u}\n",
            (long)getpid(), started_realtime, mode, label, seed, length, blocks,
            pages, resident_before, resident_before == 0, resident_after,
@@ -346,7 +352,8 @@ static void bench_file(const char *path,
            io_after.syscr - io_before.syscr,
            usage_after.ru_minflt - usage_before.ru_minflt,
            usage_after.ru_majflt - usage_before.ru_majflt,
-           checksum, errors, alignment_reported, memory_alignment, offset_alignment);
+           checksum, errors, alignment_reported, memory_alignment,
+           allocation_alignment, offset_alignment);
     if (direct_fd >= 0) close(direct_fd);
     close(buffered_fd);
     free(order);
