@@ -43,7 +43,10 @@ rustc_path=$(command -v rustc) || {
     printf 'Topic 51 publication receipts require rustc in the host environment\n' >&2
     exit 2
 }
-rustc_path=$(realpath -- "$rustc_path")
+if [[ $rustc_path != /* || ! -x $rustc_path ]]; then
+    printf 'rustc must resolve to an executable absolute path, got %s\n' "$rustc_path" >&2
+    exit 2
+fi
 rustc_version=$("$rustc_path" -Vv) || {
     printf 'failed to record the Rust toolchain through %s\n' "$rustc_path" >&2
     exit 2
