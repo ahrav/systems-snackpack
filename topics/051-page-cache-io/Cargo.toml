@@ -1,0 +1,17 @@
+[package]
+name = "page-cache-io"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "page_cache_io"
+path = "src/lib.rs"
+
+[[example]]
+name = "page_cache_costs"
+path = "examples/page_cache_costs.rs"
+
+[lints]
+workspace = true
