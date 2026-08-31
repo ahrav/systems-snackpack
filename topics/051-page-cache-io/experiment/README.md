@@ -63,6 +63,12 @@ The semantic controls also:
 
 Run only from a pushed commit. Create a Git archive that contains Topic 51, upload the archive and this launcher to each authorized host, and execute the launcher from outside the extracted archive. The launcher checks that its bytes match the archived launcher before it builds anything.
 
+Each host needs Linux user-space API headers 6.1 or newer. `pcbench.c` reads the
+direct-I/O alignment that `statx` reports through `stx_dio_mem_align` and
+`stx_dio_offset_align`, which Linux 6.1 added alongside the `STATX_DIOALIGN`
+mask bit. Older headers stop the build with an explicit `#error`. The launcher
+also requires `rustc`, `sysctl`, `cc`, `python3`, and `rg` on `PATH`.
+
 Controller example:
 
 ```bash

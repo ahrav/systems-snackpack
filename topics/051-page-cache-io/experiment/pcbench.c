@@ -15,8 +15,9 @@
 #include <time.h>
 #include <unistd.h>
 
+/* STATX_DIOALIGN requires statx alignment members added in Linux 6.1 headers. */
 #ifndef STATX_DIOALIGN
-#define STATX_DIOALIGN 0x00002000U
+#error "pcbench requires Linux UAPI headers 6.1 or newer for STATX_DIOALIGN"
 #endif
 
 enum { IO_BLOCK = 4096 };

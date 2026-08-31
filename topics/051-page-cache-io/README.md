@@ -45,7 +45,7 @@ interfaces shared across Unix-like systems. Linux implements the
 | `RWF_DONTCACHE` | Requests cache dropping after buffered I/O | Direct I/O or a strict no-cache guarantee | Linux added the flag in 6.14; dropping is best effort | Buffered semantics are useful but reuse is not |
 | Buffered `write` plus `fdatasync` | Coalesced writes followed by a durability boundary | A bound on pre-sync dirty memory | Throttling can arrive as a latency cliff | The application can batch a durability point |
 | `O_DIRECT` | Minimized cache effects and explicit ownership of buffers | Asynchrony, durability, speed, or zero page-cache residency | Alignment and queue depth become application work | The application owns reuse and concurrency |
-| `O_DIRECT | O_DSYNC` | Minimized cache effects plus synchronous data-integrity completion | Transactional atomicity | Every write pays a completion boundary | Each direct write needs a durability contract |
+| `O_DIRECT \| O_DSYNC` | Minimized cache effects plus synchronous data-integrity completion | Transactional atomicity | Every write pays a completion boundary | Each direct write needs a durability contract |
 
 Do not infer a cold device from a cold page-cache range. Device, virtual-machine,
 and storage-service caches can remain warm after `POSIX_FADV_DONTNEED`.

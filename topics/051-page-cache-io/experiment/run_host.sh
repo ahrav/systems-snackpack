@@ -61,6 +61,15 @@ if [[ $sysctl_path != /* || ! -x $sysctl_path ]]; then
     exit 2
 fi
 
+rg_path=$(command -v rg) || {
+    printf 'Topic 51 publication receipts require ripgrep in the host environment\n' >&2
+    exit 2
+}
+if [[ $rg_path != /* || ! -x $rg_path ]]; then
+    printf 'rg must resolve to an executable absolute path, got %s\n' "$rg_path" >&2
+    exit 2
+fi
+
 if [[ ! $source_commit =~ ^[0-9a-f]{40}$ || ! $source_archive_sha256 =~ ^[0-9a-f]{64}$ ]]; then
     printf 'source commit or archive digest has the wrong shape\n' >&2
     exit 2
@@ -534,8 +543,14 @@ install -m 0400 -- "$preseal_validation" "$output_dir/receipt-validation.json"
     mapfile -t receipt_files < <(
         rg --files --hidden --no-ignore | rg -v '^(MANIFEST\.sha256|SEALED)$' | LC_ALL=C sort
     )
+    # Process substitution hides the enumeration exit status; reject an empty
+    # array before sha256sum reads standard input.
+    if ((${#receipt_files[@]} == 0)); then
+        printf 'receipt enumeration produced no files\n' >&2
+        exit 1
+    fi
     sha256sum -- "${receipt_files[@]}" >MANIFEST.sha256
-)
+) </dev/null
 printf 'topic51-receipt.v1\n' >"$output_dir/SEALED"
 chmod -R a-w -- "$output_dir"
 

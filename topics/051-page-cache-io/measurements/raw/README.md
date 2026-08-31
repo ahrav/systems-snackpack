@@ -7,6 +7,7 @@ host.json
 source-archive.tar.gz
 source-manifest-before.sha256
 source-manifest-after.sha256
+source-manifest.diff
 source-files.sha256
 build/
 bin/
