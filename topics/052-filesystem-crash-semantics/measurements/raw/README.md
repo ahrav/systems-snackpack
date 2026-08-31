@@ -16,3 +16,7 @@ Before deleting a remote receipt:
 A tree without both `MANIFEST.sha256` and `SEALED` is incomplete. Do not accept
 an exit status or a self-reported `pass` field in place of independent
 validation.
+
+A receipt validated before a validator change carries only the guarantees that
+version checked. Revalidate the retained archive with the current validator
+before citing it, extracting it so that its stored mode bits survive.

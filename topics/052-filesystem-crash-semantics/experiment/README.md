@@ -12,9 +12,12 @@ OpenZFS.
 
 ## Cases and oracles
 
-Every case begins in a fresh block-backed `/var/tmp` directory. Initialization
-writes and synchronizes generation 41 and its parent directory. The update then
-writes checksummed generation 42 to a unique `next.tmp` file.
+Every case begins in a fresh block-backed `/var/tmp` directory. The runner reads
+the work directory's filesystem type and exits before compiling unless it is
+XFS, so a host whose `/var/tmp` moved to Btrfs, overlayfs, or tmpfs cannot
+produce a passing receipt for these XFS observations. Initialization writes and
+synchronizes generation 41 and its parent directory. The update then writes
+checksummed generation 42 to a unique `next.tmp` file.
 
 | Cut | Process exit | Required live-kernel observation |
 |---|---:|---|
@@ -35,9 +38,13 @@ mutating the clone must invalidate only the clone. That control demonstrates
 range-level reflink isolation for the tested files, not whole-filesystem tree
 CoW or crash recovery.
 
-No benchmark is justified for this visit. Code generation is still inspected
-to confirm that the compiler and linker retain calls to `openat`, `fsync`, and
-`renameat`, plus the checksum path.
+No benchmark is justified for this visit. Code generation is still inspected to
+confirm that the compiler and linker retain call instructions to `openat`,
+`fsync`, and `renameat`. The checksum path carries no such evidence: `fnv1a` has
+internal linkage and is inlined at `-O2`, so the disassembly holds no call to it
+and its name survives only in diagnostic strings and debug entries. The
+corruption control is what proves that path executed, because a build that
+dropped the checksum could not separate a valid record from a one-byte mutation.
 
 ## Exact-source run
 
@@ -61,12 +68,13 @@ xxl_arch=$(ssh xxl uname -m)
 test "$xxl_arch" = x86_64
 ```
 
-Upload the archive and launcher to a unique exact path. Example for the literal
-Arm target:
+Upload the archive and launcher to a unique exact path. Both commands below run
+from the repository root, so the launcher is referenced through its topic path:
 
 ```bash
-arm=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
-scp "$archive" experiment/run_host.sh "$arm:/tmp/"
+arm=<arm-host-fqdn>
+scp "$archive" topics/052-filesystem-crash-semantics/experiment/run_host.sh \
+  "$arm:/tmp/"
 ssh "$arm" bash /tmp/run_host.sh \
   "/tmp/topic52-${commit:0:7}-arm-receipt" \
   "/tmp/topic52-${commit}.tar.gz" \
@@ -75,17 +83,22 @@ ssh "$arm" bash /tmp/run_host.sh \
 
 Use label `xxl`, the freshly resolved hostname, and architecture `x86_64` for
 the second target. The runner requires `bash`, `tar`, `rg`, `cc`, `objdump`,
-`sha256sum`, `python3`, `cp --reflink`, `filefrag`, `findmnt`, and standard Linux
-host-inspection tools. It rejects a hostname, architecture, archive digest, or
-source layout mismatch before compiling.
+`sha256sum`, `cp --reflink`, `filefrag`, `findmnt`, `hostname`, `uname`,
+`mktemp`, `nproc`, `lscpu`, `lsblk`, `df`, `stat`, `cmp`, `awk`, `sort`,
+`xargs`, and `date`. It captures `rustc --version` when a Rust toolchain is
+present and continues without one, because the probe is C only. It rejects a
+hostname, architecture, archive digest, or source layout mismatch before
+compiling, requires an XFS work mount, and requires a call instruction to each
+synchronization syscall in the disassembly.
 
 ## Independent receipt validation
 
-Retrieve each read-only receipt without modifying it. Validate the expected
-identity from the controller:
+Retrieve each read-only receipt without modifying it, preserving its mode bits.
+Validate the expected identity from the controller:
 
 ```bash
-python3 -I -B experiment/validate_receipt.py /path/to/receipt \
+python3 -I -B topics/052-filesystem-crash-semantics/experiment/validate_receipt.py \
+  /path/to/receipt \
   --expected-target-label xxl \
   --expected-hostname "$xxl_host" \
   --expected-architecture x86_64 \
@@ -93,7 +106,17 @@ python3 -I -B experiment/validate_receipt.py /path/to/receipt \
   --expected-source-archive-sha256 "$archive_sha"
 ```
 
-The validator rejects a missing seal, an incomplete content manifest, changed
-source, wrong host identity, missing semantic result, failed corruption or
-reflink control, or absent code-generation symbol. Archive and retain the
-validated receipt before removing its exact remote path.
+The validator rejects a missing seal, a receipt path that carries any write bit,
+a symbolic link, an incomplete content manifest, a nested file named after a
+root metadata file, a source inventory that disagrees with the retained archive,
+changed source, wrong host identity, a missing or duplicated semantic
+observation, a missing scope declaration, a failed corruption or reflink
+control, or a missing syscall call instruction. Its rejection cases are exercised
+by `test_validate_receipt.py`:
+
+```bash
+cd topics/052-filesystem-crash-semantics/experiment
+python3 -B -m unittest test_validate_receipt
+```
+
+Archive and retain the validated receipt before removing its exact remote path.

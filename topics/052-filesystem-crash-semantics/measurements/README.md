@@ -17,7 +17,9 @@ Each checked-in host record must bind:
 
 Full receipts remain outside Git. A compact comparison may report only exact
 observations and derived model outputs. It must state that process exit leaves
-the kernel alive and does not test power loss or filesystem recovery.
+the kernel alive, and it must carry the full experiment boundary: no power-loss,
+filesystem-replay, torn-sector, controller-cache-loss, delayed input/output
+error, timing, Btrfs, or OpenZFS claim.
 
 The preliminary exploration is not publication evidence. Only a receipt built
 from the final path-limited Git archive qualifies.

@@ -60,7 +60,7 @@ cp "$source_file" "$receipt/cow_crash_probe.c"
     lscpu
     cc --version
     cc -dumpmachine
-    rustc --version --verbose
+    rustc --version --verbose || printf 'rustc=absent\n'
 } > "$receipt/host.txt" 2>&1
 
 {
@@ -70,6 +70,15 @@ cp "$source_file" "$receipt/cow_crash_probe.c"
     lsblk -o NAME,TYPE,SIZE,FSTYPE,MOUNTPOINTS
     xfs_info "$work" 2>&1 || true
 } > "$receipt/filesystem.txt"
+
+work_fstype=$(findmnt -T "$work" -no FSTYPE)
+printf 'work_fstype=%s required_fstype=xfs\n' "$work_fstype" \
+    >> "$receipt/filesystem.txt"
+if [[ "$work_fstype" != xfs ]]; then
+    printf 'error: %s is on %s; the published observations are XFS only\n' \
+        "$work" "$work_fstype" >&2
+    exit 1
+fi
 
 build_flags=(-O2 -g -std=c11 -Wall -Wextra -Werror -fno-omit-frame-pointer)
 {
@@ -83,6 +92,15 @@ objdump -dr "$receipt/cow_crash_probe" > "$receipt/codegen/objdump.txt"
 rg -n 'openat|fsync|renameat|fnv1a' \
     "$receipt/codegen/cow_crash_probe.s" \
     "$receipt/codegen/objdump.txt" > "$receipt/codegen/retained-paths.txt"
+
+# Match call instructions to exclude string and debug-symbol references.
+for symbol in openat fsync renameat; do
+    if ! rg -q "^\s*[0-9a-f]+:\s.*\b(call|callq|bl|blr|jmp|jmpq|b)\s+[0-9a-f]+\s+<${symbol}(@plt)?[+>]" \
+        "$receipt/codegen/objdump.txt"; then
+        printf 'error: disassembly lacks a call instruction to %s\n' "$symbol" >&2
+        exit 1
+    fi
+done
 
 "$receipt/cow_crash_probe" model > "$receipt/results/model.txt"
 

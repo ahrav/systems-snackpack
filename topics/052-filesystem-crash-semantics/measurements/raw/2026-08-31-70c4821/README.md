@@ -19,5 +19,7 @@ runs, a corruption control, a reflink isolation control, the receipt content
 manifest, and a read-only seal.
 
 The runs test process exits on XFS while the kernel remains live. They make no
-power-loss, replay, timing, instruction-set performance, Btrfs, or OpenZFS
-claim.
+power-loss, filesystem-replay, torn-sector, controller-cache-loss, delayed
+input/output error, timing, instruction-set performance, Btrfs, or OpenZFS
+claim. That exclusion list matches the experiment boundary in
+`topics/052-filesystem-crash-semantics/experiment/README.md`.
