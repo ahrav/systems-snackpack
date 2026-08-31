@@ -242,12 +242,15 @@ if [[ ! -d $data_parent || ! -w $data_parent ]]; then
     exit 2
 fi
 data_fstype=$(findmnt -n -T "$data_parent" -o FSTYPE)
-case $data_fstype in
-    tmpfs|ramfs)
-        printf 'data parent must use a block-backed filesystem, got %s\n' "$data_fstype" >&2
-        exit 2
-        ;;
-esac
+data_source=$(findmnt -n -T "$data_parent" -o SOURCE)
+# Only block-device sources support /sys/block queue settings. Network, FUSE,
+# and overlay mounts name a non-device source and fail here.
+data_source_device=${data_source%%[*}
+if [[ ! -b $data_source_device ]]; then
+    printf 'data parent must use a block-backed filesystem, got %s on %s\n' \
+        "$data_fstype" "$data_source" >&2
+    exit 2
+fi
 data_dir=$(mktemp -d "$data_parent/topic51-data.XXXXXX")
 chmod 0700 "$data_dir"
 
@@ -535,6 +538,7 @@ python3 -I -B "$archive_script_dir/validate_receipts.py" "$output_dir" \
     --expected-architecture "$expected_architecture" \
     --expected-source-commit "$source_commit" \
     --expected-source-archive-sha256 "$source_archive_sha256" \
+    --allow-unsealed \
     >"$preseal_validation"
 install -m 0400 -- "$preseal_validation" "$output_dir/receipt-validation.json"
 

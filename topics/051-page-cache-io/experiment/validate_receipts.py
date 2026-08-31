@@ -486,6 +486,12 @@ def main() -> int:
     parser.add_argument("--expected-architecture", required=True, choices=("aarch64", "x86_64"))
     parser.add_argument("--expected-source-commit", required=True)
     parser.add_argument("--expected-source-archive-sha256", required=True)
+    parser.add_argument(
+        "--allow-unsealed",
+        action="store_true",
+        help="accept a receipt that carries neither MANIFEST.sha256 nor SEALED; "
+        "the launcher uses this for its pre-seal check only",
+    )
     args = parser.parse_args()
     root = args.receipt_root.resolve(strict=True)
     require(root.is_dir(), "receipt root is not a directory")
@@ -510,6 +516,8 @@ def main() -> int:
     }
     verify_cleanup(root)
     result["sealed"] = verify_seal(root)
+    if not result["sealed"] and not args.allow_unsealed:
+        fail("receipt carries neither MANIFEST.sha256 nor SEALED")
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
 

@@ -119,7 +119,19 @@ python3 -I -B experiment/validate_receipts.py /path/to/receipt \
   --expected-source-archive-sha256 "$archive_sha"
 ```
 
-[`validate_receipts.py`](validate_receipts.py) independently checks the archive boundary, source freeze, host identity, block-backed mount evidence, build and code generation, semantic controls, fixed schedules, raw hashes, process uniqueness, complete-block estimates, cleanup record, and final manifest.
+[`validate_receipts.py`](validate_receipts.py) independently checks the archive boundary, source freeze, host identity, recorded mount evidence, build and code generation, semantic controls, fixed schedules, raw hashes, process uniqueness, complete-block estimates, cleanup record, and final manifest.
+
+A sealed receipt is required by default: a tree carrying neither
+`MANIFEST.sha256` nor `SEALED` is rejected rather than reported as passing, so
+an exit status or `pass` field cannot accept an incomplete receipt. The launcher
+passes `--allow-unsealed` for its own pre-seal pass, which runs before the
+manifest and seal exist. Do not pass that flag when validating a retrieved
+receipt.
+
+The launcher, not the validator, enforces that the data parent is block-backed;
+it requires the mount source to be a block device so the recorded `/sys/block`
+queue settings describe the device under test. The receipt stores the `findmnt`,
+`df`, and `lsblk` output as evidence.
 
 ## Expected observations
 
