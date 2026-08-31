@@ -38,6 +38,42 @@ def require_line(path: pathlib.Path, pattern: str) -> None:
         raise ValueError(f"{path.name} lacks required line {pattern!r}")
 
 
+def validate_complete_and_reflink_controls(root: pathlib.Path) -> None:
+    """Validate the A/A completion and reflink-isolation oracles."""
+    expected_complete = (
+        "verify current=NEW temp=absent magic=valid checksum=valid generation=42"
+    )
+    first_path = root / "results" / "complete-1-oracle.txt"
+    second_path = root / "results" / "complete-2-oracle.txt"
+    first = first_path.read_bytes()
+    second = second_path.read_bytes()
+    if first != second:
+        raise ValueError("A/A oracle mismatch")
+    for path in (first_path, second_path):
+        if path.read_text(encoding="utf-8").splitlines() != [expected_complete]:
+            raise ValueError(f"{path.name} is not the valid generation 42 oracle")
+    require_line(
+        root / "results" / "aa-control.txt",
+        r"aa_control=pass complete verifier outputs match",
+    )
+
+    reflink_path = root / "results" / "reflink.txt"
+    require_line(reflink_path, r"reflink_copy=success")
+    require_line(reflink_path, r"reflink_clone_verify_exit=3 expected_exit=3")
+    require_line(
+        reflink_path,
+        r"reflink_post_write_cmp_exit=[1-9][0-9]* expected_nonzero=yes",
+    )
+    require_line(
+        root / "results" / "reflink-clone-verify.txt",
+        r"verify current=INVALID temp=absent magic=valid checksum=invalid generation=42",
+    )
+    require_line(
+        root / "results" / "reflink-source-verify.txt",
+        re.escape(expected_complete),
+    )
+
+
 def validate(args: argparse.Namespace) -> dict[str, object]:
     """Validate content, manifest, source, host, and semantic oracles."""
     root = args.receipt.resolve()
@@ -100,18 +136,12 @@ def validate(args: argparse.Namespace) -> dict[str, object]:
             rf"verify current={state} temp={temporary} magic=valid checksum=valid generation={generation}",
         )
 
-    first = (root / "results" / "complete-1-oracle.txt").read_bytes()
-    second = (root / "results" / "complete-2-oracle.txt").read_bytes()
-    if first != second:
-        raise ValueError("A/A oracle mismatch")
-    require_line(root / "results" / "aa-control.txt", r"aa_control=pass complete verifier outputs match")
+    validate_complete_and_reflink_controls(root)
     require_line(root / "results" / "corrupt-status.txt", r"corrupt_verify_exit=3 expected_exit=3")
     require_line(
         root / "results" / "corrupt-verify.txt",
         r"verify current=INVALID temp=absent magic=valid checksum=invalid generation=42",
     )
-    require_line(root / "results" / "reflink.txt", r"reflink_copy=success")
-    require_line(root / "results" / "reflink-source-verify.txt", r"verify current=NEW temp=absent magic=valid checksum=valid generation=42")
     require_line(root / "run-status.txt", r"run=pass")
     require_line(root / "run-status.txt", r"process_crash_only=yes")
     require_line(root / "run-status.txt", r"power_loss_tested=no")
