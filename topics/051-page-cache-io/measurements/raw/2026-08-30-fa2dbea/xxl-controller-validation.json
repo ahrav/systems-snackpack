@@ -1,0 +1,67 @@
+{
+  "build": {
+    "binary_sha256": "6b9efd43017fc4f6b94a3ba6f760deb29cd64637b1e584ea7a8e607c5cc05970"
+  },
+  "campaign": {
+    "fresh_process_count": 80,
+    "scenarios": {
+      "aa": {
+        "attempt_count": 32,
+        "interval": [
+          0.98911755012261,
+          1.0035173059665765
+        ],
+        "point_ratio": 0.9962914127820743
+      },
+      "direct": {
+        "attempt_count": 16,
+        "direct_resident_after": {
+          "maximum": 0,
+          "minimum": 0,
+          "values": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "interval": [
+          46.907396133534526,
+          49.46278290818705
+        ],
+        "point_ratio": 48.16814665047173
+      },
+      "primary": {
+        "attempt_count": 32,
+        "interval": [
+          47.60430558914832,
+          49.28200959087769
+        ],
+        "point_ratio": 48.43589417582255
+      }
+    }
+  },
+  "controls": {
+    "fdatasync_ns": 2710824,
+    "random_resident_pages_after_20ms": 1,
+    "sequential_resident_pages_after_20ms": 12,
+    "write_ns": 3961262
+  },
+  "host": {
+    "allowed_cpu_count": 192,
+    "architecture": "x86_64",
+    "runtime_hostname": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+    "target_label": "xxl"
+  },
+  "pass": true,
+  "schema": "topic51-receipt-validation.v1",
+  "sealed": true,
+  "source": {
+    "archive_file_count": 14,
+    "archive_uncompressed_bytes": 122024
+  }
+}

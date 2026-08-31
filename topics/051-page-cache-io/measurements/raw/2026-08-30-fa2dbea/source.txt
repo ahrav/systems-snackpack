@@ -1,0 +1,4 @@
+source_commit=fa2dbeab31589618b8710096dd7b6f5a8e1fff89
+source_archive_sha256=05d940c7f05dbb40bb4a039ad7d87d1897068c0379712a28355553b56de244d0
+source_path=topics/051-page-cache-io
+archive_prefix=systems-snackpack-fa2dbeab31589618b8710096dd7b6f5a8e1fff89/

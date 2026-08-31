@@ -1,0 +1,67 @@
+{
+  "build": {
+    "binary_sha256": "d4c8109e86a68bc15d561b38621301ff46efb47f3482a8faed2484e9465b22b2"
+  },
+  "campaign": {
+    "fresh_process_count": 80,
+    "scenarios": {
+      "aa": {
+        "attempt_count": 32,
+        "interval": [
+          0.9861962457958898,
+          1.0131452436516764
+        ],
+        "point_ratio": 0.9995799296380682
+      },
+      "direct": {
+        "attempt_count": 16,
+        "direct_resident_after": {
+          "maximum": 0,
+          "minimum": 0,
+          "values": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "interval": [
+          46.41959672940346,
+          48.99183411266128
+        ],
+        "point_ratio": 47.688375759125705
+      },
+      "primary": {
+        "attempt_count": 32,
+        "interval": [
+          47.53836601965496,
+          48.41573422539352
+        ],
+        "point_ratio": 47.97504449937585
+      }
+    }
+  },
+  "controls": {
+    "fdatasync_ns": 5633615,
+    "random_resident_pages_after_20ms": 1,
+    "sequential_resident_pages_after_20ms": 12,
+    "write_ns": 5001820
+  },
+  "host": {
+    "allowed_cpu_count": 64,
+    "architecture": "aarch64",
+    "runtime_hostname": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+    "target_label": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com"
+  },
+  "pass": true,
+  "schema": "topic51-receipt-validation.v1",
+  "sealed": true,
+  "source": {
+    "archive_file_count": 14,
+    "archive_uncompressed_bytes": 122024
+  }
+}
