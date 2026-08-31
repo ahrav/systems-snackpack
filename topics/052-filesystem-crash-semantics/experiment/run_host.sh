@@ -188,7 +188,7 @@ cmp "$work/case-complete-1/current" "$reflink_dir/current"
 reflink_cmp_status=$?
 set -e
 test "$reflink_clone_status" -eq 3
-test "$reflink_cmp_status" -ne 0
+test "$reflink_cmp_status" -eq 1
 "$receipt/cow_crash_probe" verify "$work/case-complete-1" \
     > "$receipt/results/reflink-source-verify.txt"
 filefrag -v "$work/case-complete-1/current" "$reflink_dir/current" \
@@ -196,7 +196,7 @@ filefrag -v "$work/case-complete-1/current" "$reflink_dir/current" \
 {
     printf 'reflink_copy=success\n'
     printf 'reflink_clone_verify_exit=%d expected_exit=3\n' "$reflink_clone_status"
-    printf 'reflink_post_write_cmp_exit=%d expected_nonzero=yes\n' "$reflink_cmp_status"
+    printf 'reflink_post_write_cmp_exit=%d expected_exit=1\n' "$reflink_cmp_status"
     printf '%s\n' 'boundary=range-level clone isolation only; not crash recovery or whole-tree CoW evidence'
 } >> "$receipt/results/reflink.txt"
 

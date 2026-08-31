@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import io
+import os
 import pathlib
 import subprocess
 import tarfile
@@ -121,6 +122,24 @@ class CompleteAndReflinkControlsTest(unittest.TestCase):
             "reflink_post_write_cmp_exit=0 expected_nonzero=yes\n",
         )
         self.assert_rejected()
+
+    def test_rejects_a_comparison_that_failed_instead_of_differing(self) -> None:
+        self.write(
+            "reflink.txt",
+            "reflink_copy=success\n"
+            "reflink_clone_verify_exit=3 expected_exit=3\n"
+            "reflink_post_write_cmp_exit=2 expected_exit=1\n",
+        )
+        self.assert_rejected()
+
+    def test_accepts_the_current_comparison_annotation(self) -> None:
+        self.write(
+            "reflink.txt",
+            "reflink_copy=success\n"
+            "reflink_clone_verify_exit=3 expected_exit=3\n"
+            "reflink_post_write_cmp_exit=1 expected_exit=1\n",
+        )
+        validate_complete_and_reflink_controls(self.root)
 
 
 def source_archive() -> bytes:
@@ -277,6 +296,22 @@ class ValidateReceiptTest(unittest.TestCase):
         self.seal()
         subprocess.run(["chmod", "u+w", str(self.root / "results")], check=True)
         (self.root / "results" / "link.txt").symlink_to("corrupt-verify.txt")
+        subprocess.run(["chmod", "a-w", str(self.root / "results")], check=True)
+        with self.assertRaises(ValueError):
+            self.run_validate()
+
+    def test_rejects_a_dangling_symbolic_link_in_the_receipt(self) -> None:
+        self.seal()
+        subprocess.run(["chmod", "u+w", str(self.root / "results")], check=True)
+        (self.root / "results" / "link.txt").symlink_to("absent.txt")
+        subprocess.run(["chmod", "a-w", str(self.root / "results")], check=True)
+        with self.assertRaises(ValueError):
+            self.run_validate()
+
+    def test_rejects_an_unmanifested_fifo_in_the_receipt(self) -> None:
+        self.seal()
+        subprocess.run(["chmod", "u+w", str(self.root / "results")], check=True)
+        os.mkfifo(self.root / "results" / "pipe", 0o400)
         subprocess.run(["chmod", "a-w", str(self.root / "results")], check=True)
         with self.assertRaises(ValueError):
             self.run_validate()

@@ -61,19 +61,26 @@ def require_line(path: pathlib.Path, pattern: str, family: str | None = None) ->
         )
 
 
-def require_read_only(root: pathlib.Path) -> None:
-    """Require that the sealed receipt carries no write bit on any path.
+def require_sealed_tree(root: pathlib.Path) -> None:
+    """Require a sealed shape: only unwritable directories and regular files.
 
     The runner seals a receipt by removing every write bit, and the published
     evidence claims `read_only=true`. Checking the empty `SEALED` marker alone
     would certify a copy whose bits were restored, so a writable receipt or
     archive is rejected here instead of being trusted.
+
+    Node kind is rejected here as well, because the manifest coverage check
+    compares regular files only. A symbolic link, FIFO, socket, or device node
+    would otherwise sit in the tree outside that comparison.
     """
     for path in [root, *sorted(root.rglob("*"))]:
         name = "." if path == root else path.relative_to(root).as_posix()
         if path.is_symlink():
             raise ValueError(f"receipt holds a symbolic link: {name}")
-        mode = stat.S_IMODE(path.stat().st_mode)
+        status = path.stat()
+        if not stat.S_ISDIR(status.st_mode) and not stat.S_ISREG(status.st_mode):
+            raise ValueError(f"receipt holds a non-regular entry: {name}")
+        mode = stat.S_IMODE(status.st_mode)
         if mode & WRITE_BITS:
             raise ValueError(f"receipt path is writable: {name} mode={mode:04o}")
 
@@ -212,9 +219,10 @@ def validate_complete_and_reflink_controls(root: pathlib.Path) -> None:
         r"reflink_clone_verify_exit=3 expected_exit=3",
         r"reflink_clone_verify_exit=.*",
     )
+    # cmp exits 1 when inputs differ; exit 2 indicates an error.
     require_line(
         reflink_path,
-        r"reflink_post_write_cmp_exit=[1-9][0-9]* expected_nonzero=yes",
+        r"reflink_post_write_cmp_exit=1 .*",
         r"reflink_post_write_cmp_exit=.*",
     )
     require_line(
@@ -236,7 +244,7 @@ def validate(args: argparse.Namespace) -> dict[str, object]:
         raise ValueError("receipt is not a directory")
     if not (root / "SEALED").is_file() or (root / "SEALED").stat().st_size != 0:
         raise ValueError("receipt lacks an empty SEALED marker")
-    require_read_only(root)
+    require_sealed_tree(root)
 
     manifest_path = root / "MANIFEST.sha256"
     manifest_lines = manifest_path.read_text(encoding="utf-8").splitlines()
