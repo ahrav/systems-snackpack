@@ -21,3 +21,8 @@ the kernel alive and does not test power loss or filesystem recovery.
 
 The preliminary exploration is not publication evidence. Only a receipt built
 from the final path-limited Git archive qualifies.
+
+The accepted exact-source records are the [Arm host record](2026-08-31-arm.md),
+the [`xxl` host record](2026-08-31-xxl.md), the [bounded
+comparison](2026-08-31-comparison.md), and the [compact receipt
+bundle](raw/2026-08-31-70c4821/README.md).

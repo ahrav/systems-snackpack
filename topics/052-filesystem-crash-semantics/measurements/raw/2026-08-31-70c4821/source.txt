@@ -1,0 +1,5 @@
+source_commit=70c4821cb0241b3acd620b2d2126521728739c15
+source_path=topics/052-filesystem-crash-semantics
+archive_prefix=systems-snackpack-70c4821cb0241b3acd620b2d2126521728739c15/
+source_archive_sha256=71d3fd5f65e5a0cef794c058afa5067009c731bacf5464160ff0ab7b4759d486
+retained_archive=/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-052/2026-08-31-70c4821/source.tar.gz
