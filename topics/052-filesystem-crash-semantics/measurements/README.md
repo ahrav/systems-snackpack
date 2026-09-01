@@ -11,7 +11,8 @@ Each checked-in host record must bind:
   compiler, build flags, and binary digest;
 - filesystem type, mount source and options, block size, and reflink capability;
 - all four deterministic cut results, two complete A/A results, the checksum
-  corruption control, reflink isolation control, and code-generation checks;
+  corruption control, reflink isolation control, and the retained syscall call
+  instructions;
 - a sealed external receipt archive, its SHA-256, its uncompressed manifest
   digest, and the independent controller validation result.
 

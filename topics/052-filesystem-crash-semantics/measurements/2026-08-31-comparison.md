@@ -12,7 +12,7 @@ correctness oracles.
 | complete A/A control | identical | identical |
 | corruption rejection | exit 3 | exit 3 |
 | reflink clone isolation | pass | pass |
-| code-generation paths | retained | retained |
+| retained syscall call instructions | `openat`, `fsync`, `renameat` | `openat`, `fsync`, `renameat` |
 | independent sealed validation | 50 files | 50 files |
 
 The matching observations show that the exact application protocol and oracle
