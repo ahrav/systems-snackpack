@@ -201,9 +201,9 @@ write_source_manifest() {
 }
 write_source_manifest "$receipt/source/source-files-before.sha256"
 
-filesystem_source=$(findmnt -n -T "$data_dir" -o SOURCE)
-filesystem_fstype=$(findmnt -n -T "$data_dir" -o FSTYPE)
-filesystem_major_minor=$(findmnt -n -T "$data_dir" -o MAJ:MIN)
+filesystem_source=$(findmnt -n -r -T "$data_dir" -o SOURCE)
+filesystem_fstype=$(findmnt -n -r -T "$data_dir" -o FSTYPE)
+filesystem_major_minor=$(findmnt -n -r -T "$data_dir" -o MAJ:MIN)
 case ${filesystem_fstype,,} in
     tmpfs|ramfs|overlay|overlayfs|nfs|nfs4|cifs|9p|virtiofs|fuse.*)
         printf 'data filesystem is not an eligible block-backed local filesystem: %s\n' \
