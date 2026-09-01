@@ -58,6 +58,11 @@ COMPLETE_LOG = (
     + FSYNC_DIRECTORY_LINE
     + "acknowledgement=success generation=NEW value=42\n"
 )
+CORRUPTION_LOG = (
+    OPEN_LINE
+    + "syscall=fsync name=corruption-control result=success\n"
+    + "corruption_control=applied offset=128\n"
+)
 FILESYSTEM = (
     "TARGET   SOURCE         FSTYPE OPTIONS\n"
     "/var/tmp /dev/nvme0n1p1 xfs    rw,noatime\n"
@@ -69,6 +74,8 @@ COMMIT = "b" * 40
 TOPIC = "topics/052-filesystem-crash-semantics/"
 PROBE_SOURCE = TOPIC + "experiment/cow_crash_probe.c"
 PROBE_BYTES = b"int main(void) { return 0; }\n"
+RUNNER_SOURCE = TOPIC + "experiment/run_host.sh"
+RUNNER_BYTES = b"#!/usr/bin/env bash\nset -euo pipefail\n"
 NOTES_SOURCE = TOPIC + "README.md"
 NOTES_BYTES = b"# Topic 52\n"
 OBJDUMP = (
@@ -201,12 +208,29 @@ def source_archive(commit: str = COMMIT, comment: str | None = COMMIT) -> bytes:
     with tarfile.open(
         fileobj=buffer, mode="w:gz", format=tarfile.PAX_FORMAT, pax_headers=headers
     ) as bundle:
-        for relative, content in ((PROBE_SOURCE, PROBE_BYTES), (NOTES_SOURCE, NOTES_BYTES)):
+        members = (
+            (PROBE_SOURCE, PROBE_BYTES),
+            (RUNNER_SOURCE, RUNNER_BYTES),
+            (NOTES_SOURCE, NOTES_BYTES),
+        )
+        for relative, content in members:
             info = tarfile.TarInfo(f"systems-snackpack-{commit}/{relative}")
             info.size = len(content)
             info.mtime = int(time.time())
             bundle.addfile(info, io.BytesIO(content))
     return buffer.getvalue()
+
+
+def identity_text(archive: bytes, runner: bytes = RUNNER_BYTES) -> bytes:
+    """Return one receipt identity file for the given archive and launcher."""
+    return (
+        "target_label=fixture\n"
+        "hostname=fixture.example\n"
+        "architecture=x86_64\n"
+        f"source_commit={COMMIT}\n"
+        f"source_archive_sha256={hashlib.sha256(archive).hexdigest()}\n"
+        f"runner_sha256={hashlib.sha256(runner).hexdigest()}\n"
+    ).encode("utf-8")
 
 
 def inventory(entries: dict[str, bytes]) -> str:
@@ -224,7 +248,11 @@ class ValidateReceiptTest(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.root = pathlib.Path(self.temporary.name) / "receipt"
         self.archive = source_archive()
-        self.sources = {PROBE_SOURCE: PROBE_BYTES, NOTES_SOURCE: NOTES_BYTES}
+        self.sources = {
+            PROBE_SOURCE: PROBE_BYTES,
+            RUNNER_SOURCE: RUNNER_BYTES,
+            NOTES_SOURCE: NOTES_BYTES,
+        }
         listing = inventory(self.sources)
         cuts = {
             "after_write": (101, "OLD", "present", 41),
@@ -237,13 +265,7 @@ class ValidateReceiptTest(unittest.TestCase):
             "cow_crash_probe.c": PROBE_BYTES,
             "source-files-before.sha256": listing.encode("utf-8"),
             "source-files-after.sha256": listing.encode("utf-8"),
-            "identity.txt": (
-                "target_label=fixture\n"
-                "hostname=fixture.example\n"
-                "architecture=x86_64\n"
-                f"source_commit={COMMIT}\n"
-                f"source_archive_sha256={hashlib.sha256(self.archive).hexdigest()}\n"
-            ).encode("utf-8"),
+            "identity.txt": identity_text(self.archive),
             "run-status.txt": (
                 "run=pass\n"
                 "process_crash_only=yes\n"
@@ -262,6 +284,10 @@ class ValidateReceiptTest(unittest.TestCase):
             "results/complete-1-update.txt": COMPLETE_LOG.encode("utf-8"),
             "results/complete-2-update.txt": COMPLETE_LOG.encode("utf-8"),
             "results/corrupt-status.txt": b"corrupt_verify_exit=3 expected_exit=3\n",
+            "results/corrupt-init.txt": INIT_LOG.encode("utf-8"),
+            "results/corrupt-update.txt": COMPLETE_LOG.encode("utf-8"),
+            "results/corrupt-action.txt": CORRUPTION_LOG.encode("utf-8"),
+            "results/reflink-corrupt-clone.txt": CORRUPTION_LOG.encode("utf-8"),
             "results/corrupt-verify.txt": (OPEN_LINE + CORRUPT).encode("utf-8"),
             "results/reflink.txt": (
                 "reflink_copy=success\n"
@@ -292,13 +318,7 @@ class ValidateReceiptTest(unittest.TestCase):
         """Replace the retained source archive and the identity digest that binds it."""
         self.archive = archive
         self.files["source.tar.gz"] = archive
-        self.files["identity.txt"] = (
-            "target_label=fixture\n"
-            "hostname=fixture.example\n"
-            "architecture=x86_64\n"
-            f"source_commit={COMMIT}\n"
-            f"source_archive_sha256={hashlib.sha256(archive).hexdigest()}\n"
-        ).encode("utf-8")
+        self.files["identity.txt"] = identity_text(archive)
 
     def seal(self) -> None:
         """Materialize the fixture, write its manifest, and remove every write bit."""
@@ -571,6 +591,68 @@ class ValidateReceiptTest(unittest.TestCase):
         ).encode("utf-8")
         self.seal()
         self.assertTrue(self.run_validate()["pass"])
+
+    def test_rejects_an_identity_without_a_launcher_digest(self) -> None:
+        self.files["identity.txt"] = b"".join(
+            line + b"\n"
+            for line in self.files["identity.txt"].splitlines()
+            if not line.startswith(b"runner_sha256=")
+        )
+        self.assert_rejected()
+
+    def test_rejects_a_launcher_digest_that_left_the_archive(self) -> None:
+        self.files["identity.txt"] = identity_text(
+            self.archive, runner=b"#!/usr/bin/env bash\nexit 0\n"
+        )
+        self.assert_rejected()
+
+    def test_rejects_an_archive_without_the_launcher(self) -> None:
+        buffer = io.BytesIO()
+        with tarfile.open(
+            fileobj=buffer,
+            mode="w:gz",
+            format=tarfile.PAX_FORMAT,
+            pax_headers={"comment": COMMIT},
+        ) as bundle:
+            info = tarfile.TarInfo(f"systems-snackpack-{COMMIT}/{PROBE_SOURCE}")
+            info.size = len(PROBE_BYTES)
+            bundle.addfile(info, io.BytesIO(PROBE_BYTES))
+        self.use_archive(buffer.getvalue())
+        self.files["source-files-before.sha256"] = inventory(
+            {PROBE_SOURCE: PROBE_BYTES}
+        ).encode("utf-8")
+        self.files["source-files-after.sha256"] = self.files[
+            "source-files-before.sha256"
+        ]
+        self.assert_rejected()
+
+    def test_rejects_a_truncated_archive_without_a_traceback(self) -> None:
+        self.use_archive(self.archive[: len(self.archive) // 2])
+        self.seal()
+        with self.assertRaises(ValueError):
+            self.run_validate()
+
+    def test_rejects_a_missing_corruption_setup(self) -> None:
+        self.files["results/corrupt-update.txt"] = CUT_LOGS["after_write"].encode(
+            "utf-8"
+        )
+        self.assert_rejected()
+
+    def test_rejects_a_corruption_action_at_another_offset(self) -> None:
+        self.files["results/corrupt-action.txt"] = CORRUPTION_LOG.replace(
+            "offset=128", "offset=4096"
+        ).encode("utf-8")
+        self.assert_rejected()
+
+    def test_rejects_an_unsynchronized_corruption_action(self) -> None:
+        self.files["results/corrupt-action.txt"] = (
+            OPEN_LINE + "corruption_control=applied offset=128\n"
+        ).encode("utf-8")
+        self.assert_rejected()
+
+    def test_rejects_a_clone_mutation_that_never_happened(self) -> None:
+        self.files["results/reflink-corrupt-clone.txt"] = OPEN_LINE.encode("utf-8")
+        self.assert_rejected()
 
 
 if __name__ == "__main__":

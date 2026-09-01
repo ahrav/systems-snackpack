@@ -20,3 +20,8 @@ validation.
 A receipt validated before a validator change carries only the guarantees that
 version checked. Revalidate the retained archive with the current validator
 before citing it, extracting it so that its stored mode bits survive.
+
+A receipt sealed before the launcher binding holds no `runner_sha256`, so the
+current validator rejects it on that check. Such a receipt cannot establish which
+launcher produced it; that provenance rests on the controller procedure until the
+measurement is collected again.

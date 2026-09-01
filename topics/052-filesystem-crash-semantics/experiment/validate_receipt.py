@@ -11,15 +11,23 @@ import re
 import stat
 import sys
 import tarfile
+import zlib
 
 TOPIC_PREFIX = "topics/052-filesystem-crash-semantics/"
 PROBE_SOURCE = TOPIC_PREFIX + "experiment/cow_crash_probe.c"
+RUNNER_SOURCE = TOPIC_PREFIX + "experiment/run_host.sh"
 INVENTORY_LINE = re.compile(r"([0-9a-f]{64})  (.+)")
 WRITE_BITS = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
 
 # Ordered probe records distinguish crash cuts by their completed synchronization
 # steps.
-RECORD_LOG = ("syscall=", "failpoint=", "init=", "acknowledgement=")
+RECORD_LOG = (
+    "syscall=",
+    "failpoint=",
+    "init=",
+    "acknowledgement=",
+    "corruption_control=",
+)
 OPEN_DIRECTORY = r"syscall=open-directory result=[0-9]+"
 INIT_SEQUENCE = (
     OPEN_DIRECTORY,
@@ -60,6 +68,11 @@ COMPLETE_SEQUENCE = UPDATE_PREFIX + (
     RENAME_TEMPORARY,
     FSYNC_DIRECTORY,
     r"acknowledgement=success generation=NEW value=42",
+)
+CORRUPTION_SEQUENCE = (
+    OPEN_DIRECTORY,
+    r"syscall=fsync name=corruption-control result=success",
+    r"corruption_control=applied offset=128",
 )
 
 
@@ -203,42 +216,52 @@ def archive_inventory(archive: pathlib.Path, commit: str) -> dict[str, str]:
     """
     prefix = f"systems-snackpack-{commit}/"
     entries: dict[str, str] = {}
-    with tarfile.open(archive, "r:gz") as bundle:
-        embedded = bundle.pax_headers.get("comment", "").strip()
-        if embedded != commit:
-            raise ValueError(
-                f"retained archive names commit {embedded!r}, not {commit!r}"
-            )
-        for member in bundle:
-            if not member.isfile():
-                continue
-            if not member.name.startswith(prefix):
+    try:
+        with tarfile.open(archive, "r:gz") as bundle:
+            embedded = bundle.pax_headers.get("comment", "").strip()
+            if embedded != commit:
                 raise ValueError(
-                    f"archive member outside the commit prefix: {member.name!r}"
+                    f"retained archive names commit {embedded!r}, not {commit!r}"
                 )
-            relative = member.name[len(prefix) :]
-            if not relative.startswith(TOPIC_PREFIX):
-                raise ValueError(
-                    f"archive member outside {TOPIC_PREFIX}: {member.name!r}"
-                )
-            stream = bundle.extractfile(member)
-            if stream is None:
-                raise ValueError(f"archive member is not readable: {member.name!r}")
-            digest = hashlib.sha256()
-            with stream:
-                while True:
-                    chunk = stream.read(1024 * 1024)
-                    if not chunk:
-                        break
-                    digest.update(chunk)
-            entries[relative] = digest.hexdigest()
-    if PROBE_SOURCE not in entries:
-        raise ValueError(f"retained archive lacks {PROBE_SOURCE}")
+            for member in bundle:
+                if not member.isfile():
+                    continue
+                if not member.name.startswith(prefix):
+                    raise ValueError(
+                        f"archive member outside the commit prefix: {member.name!r}"
+                    )
+                relative = member.name[len(prefix) :]
+                if not relative.startswith(TOPIC_PREFIX):
+                    raise ValueError(
+                        f"archive member outside {TOPIC_PREFIX}: {member.name!r}"
+                    )
+                stream = bundle.extractfile(member)
+                if stream is None:
+                    raise ValueError(
+                        f"archive member is not readable: {member.name!r}"
+                    )
+                digest = hashlib.sha256()
+                with stream:
+                    while True:
+                        chunk = stream.read(1024 * 1024)
+                        if not chunk:
+                            break
+                        digest.update(chunk)
+                entries[relative] = digest.hexdigest()
+    except (tarfile.TarError, EOFError, zlib.error) as error:
+        raise ValueError(f"retained archive is not readable: {error}") from error
+    for required in (PROBE_SOURCE, RUNNER_SOURCE):
+        if required not in entries:
+            raise ValueError(f"retained archive lacks {required}")
     return entries
 
 
-def validate_source_inventory(root: pathlib.Path, commit: str) -> None:
-    """Validate the receipt's source inventories against the retained archive."""
+def validate_source_inventory(root: pathlib.Path, commit: str) -> dict[str, str]:
+    """Validate the receipt's source inventories against the retained archive.
+
+    Returns the archive-derived inventory, which binds every retained source file
+    to the expected commit.
+    """
     before_path = root / "source-files-before.sha256"
     after_path = root / "source-files-after.sha256"
     if before_path.read_bytes() != after_path.read_bytes():
@@ -259,6 +282,7 @@ def validate_source_inventory(root: pathlib.Path, commit: str) -> None:
         )
     if sha256(root / "cow_crash_probe.c") != archived[PROBE_SOURCE]:
         raise ValueError("retained probe source does not match the archived source")
+    return archived
 
 
 def require_retained_calls(root: pathlib.Path) -> None:
@@ -387,7 +411,12 @@ def validate(args: argparse.Namespace) -> dict[str, object]:
             raise ValueError(f"identity mismatch for {key}: {identity.get(key)!r} != {expected!r}")
     if sha256(root / "source.tar.gz") != args.expected_source_archive_sha256:
         raise ValueError("retained source archive digest mismatch")
-    validate_source_inventory(root, identity["source_commit"])
+    archived = validate_source_inventory(root, identity["source_commit"])
+    if identity.get("runner_sha256") != archived[RUNNER_SOURCE]:
+        raise ValueError(
+            "launcher digest mismatch: "
+            f"{identity.get('runner_sha256')!r} != {archived[RUNNER_SOURCE]!r}"
+        )
     require_xfs_evidence(root)
 
     expected_cuts = {
@@ -411,6 +440,12 @@ def validate(args: argparse.Namespace) -> dict[str, object]:
         )
 
     validate_complete_and_reflink_controls(root)
+    require_sequence(root / "results" / "corrupt-init.txt", INIT_SEQUENCE)
+    require_sequence(root / "results" / "corrupt-update.txt", COMPLETE_SEQUENCE)
+    require_sequence(root / "results" / "corrupt-action.txt", CORRUPTION_SEQUENCE)
+    require_sequence(
+        root / "results" / "reflink-corrupt-clone.txt", CORRUPTION_SEQUENCE
+    )
     require_line(
         root / "results" / "corrupt-status.txt",
         r"corrupt_verify_exit=3 expected_exit=3",

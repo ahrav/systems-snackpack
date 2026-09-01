@@ -113,9 +113,10 @@ The validator rejects a missing seal, a receipt path that carries any write bit,
 an entry that is not a directory or a regular file, an incomplete content
 manifest, a nested file named after a root metadata file, a retained archive
 whose embedded commit disagrees with the expected one, a source inventory that
-disagrees with that archive, changed source, wrong host identity, a work mount
-that the retained capture does not identify as XFS, a missing or duplicated
-semantic observation, an initialization or update log whose ordered syscall and
+disagrees with that archive, a launcher digest that is absent or does not match
+the archived launcher, a malformed or truncated archive, changed source, wrong
+host identity, a work mount that the retained capture does not identify as XFS, a
+missing or duplicated semantic observation, an initialization or update log whose ordered syscall and
 failpoint records do not match the cut, a missing or contradicted scope
 declaration, a failed corruption or reflink control, and a missing syscall call
 instruction. The XFS record it reads is the `stat -f` capture in
