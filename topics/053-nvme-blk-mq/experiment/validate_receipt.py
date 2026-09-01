@@ -28,6 +28,39 @@ HEX64 = re.compile(r"[0-9a-f]{64}\Z")
 DEVICE = re.compile(r"[A-Za-z0-9_.-]+\Z")
 WRITE_BITS = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
 VMSTAT_KEYS = ("pgpgin", "pgpgout", "nr_dirty", "nr_writeback")
+SYSFS_KEYS = {
+    "dev",
+    "stat",
+    "inflight",
+    "device/model",
+    "device/vendor",
+    "device/queue_depth",
+    "device_driver",
+    "queue/scheduler",
+    "queue/nr_requests",
+    "queue/logical_block_size",
+    "queue/physical_block_size",
+    "queue/max_sectors_kb",
+    "queue/max_hw_sectors_kb",
+    "queue/read_ahead_kb",
+    "queue/nomerges",
+    "queue/rq_affinity",
+    "queue/rotational",
+    "queue/write_cache",
+    "queue/fua",
+    "queue/wbt_lat_usec",
+    "queue/io_poll",
+}
+ALWAYS_AVAILABLE_SYSFS_KEYS = {"dev", "stat", "inflight"}
+MQ_REQUIRED_QUEUE_KEYS = {
+    "queue/scheduler",
+    "queue/nr_requests",
+    "queue/logical_block_size",
+    "queue/physical_block_size",
+    "queue/max_sectors_kb",
+    "queue/max_hw_sectors_kb",
+    "queue/rotational",
+}
 RESULT_KEYS = {
     "schema",
     "kind",
@@ -587,6 +620,68 @@ def command_receipt(value: object, name: str) -> dict[str, Any]:
     return value
 
 
+def validate_sysfs(sysfs: object, devices: list[str]) -> None:
+    """Validate complete per-device sysfs evidence for one block stack."""
+    require(
+        isinstance(sysfs, dict) and set(sysfs) == set(devices),
+        "sysfs device set differs",
+    )
+    mq_device_count = 0
+    for device in devices:
+        values = sysfs[device]
+        require(isinstance(values, dict), f"{device}: sysfs evidence is missing")
+        mq_fields = set(values) - SYSFS_KEYS
+        require(
+            set(values) == SYSFS_KEYS | mq_fields
+            and all(
+                re.fullmatch(
+                    r"mq/[^/]+/(cpu_list|nr_tags|nr_reserved_tags)", key
+                )
+                for key in mq_fields
+            ),
+            f"{device}: sysfs key set differs",
+        )
+        require(
+            all(
+                isinstance(values[key], str) and bool(values[key])
+                for key in SYSFS_KEYS
+            ),
+            f"{device}: sysfs value is not retained text",
+        )
+        for relative in ALWAYS_AVAILABLE_SYSFS_KEYS:
+            require(
+                not values[relative].startswith("unavailable:"),
+                f"{device}: {relative} unavailable",
+            )
+
+        queues = {key.split("/")[1] for key in mq_fields}
+        if queues:
+            mq_device_count += 1
+            for relative in MQ_REQUIRED_QUEUE_KEYS:
+                require(
+                    not values[relative].startswith("unavailable:"),
+                    f"{device}: {relative} unavailable",
+                )
+        for queue in queues:
+            wanted = {
+                f"mq/{queue}/cpu_list",
+                f"mq/{queue}/nr_tags",
+                f"mq/{queue}/nr_reserved_tags",
+            }
+            require(
+                wanted.issubset(mq_fields),
+                f"{device}: blk-mq queue fields are incomplete",
+            )
+            for key in wanted:
+                require(
+                    isinstance(values[key], str)
+                    and bool(values[key])
+                    and not values[key].startswith("unavailable:"),
+                    f"{device}: {key} unavailable",
+                )
+    require(mq_device_count > 0, "block stack exposes no retained blk-mq queue")
+
+
 def validate_host(
     root: Path,
     *,
@@ -782,75 +877,7 @@ def validate_host(
     for token in ("nr_dirty ", "nr_writeback ", "pgpgin ", "pgpgout "):
         require(token in files["proc_vmstat_selected"], f"vmstat omits {token.strip()}")
 
-    sysfs = host["sysfs"]
-    require(isinstance(sysfs, dict) and set(sysfs) == set(devices), "sysfs device set differs")
-    required_sysfs = {
-        "dev",
-        "stat",
-        "inflight",
-        "device/model",
-        "device/vendor",
-        "device/queue_depth",
-        "device_driver",
-        "queue/scheduler",
-        "queue/nr_requests",
-        "queue/logical_block_size",
-        "queue/physical_block_size",
-        "queue/max_sectors_kb",
-        "queue/max_hw_sectors_kb",
-        "queue/read_ahead_kb",
-        "queue/nomerges",
-        "queue/rq_affinity",
-        "queue/rotational",
-        "queue/write_cache",
-        "queue/fua",
-        "queue/wbt_lat_usec",
-        "queue/io_poll",
-    }
-    mq_device_count = 0
-    for device in devices:
-        values = sysfs[device]
-        require(isinstance(values, dict), f"{device}: sysfs evidence is missing")
-        mq_fields = set(values) - required_sysfs
-        require(
-            set(values) == required_sysfs | mq_fields
-            and all(re.fullmatch(r"mq/[^/]+/(cpu_list|nr_tags|nr_reserved_tags)", key) for key in mq_fields),
-            f"{device}: sysfs key set differs",
-        )
-        for relative in (
-            "dev",
-            "stat",
-            "inflight",
-            "queue/scheduler",
-            "queue/nr_requests",
-            "queue/logical_block_size",
-            "queue/physical_block_size",
-            "queue/max_sectors_kb",
-            "queue/max_hw_sectors_kb",
-            "queue/rotational",
-        ):
-            value = values[relative]
-            require(isinstance(value, str) and value and not value.startswith("unavailable:"), f"{device}: {relative} unavailable")
-        require(
-            all(isinstance(values[key], str) and bool(values[key]) for key in required_sysfs),
-            f"{device}: sysfs value is not retained text",
-        )
-        queues = {key.split("/")[1] for key in mq_fields}
-        if queues:
-            mq_device_count += 1
-        for queue in queues:
-            wanted = {
-                f"mq/{queue}/cpu_list",
-                f"mq/{queue}/nr_tags",
-                f"mq/{queue}/nr_reserved_tags",
-            }
-            require(wanted.issubset(mq_fields), f"{device}: blk-mq queue fields are incomplete")
-            for key in wanted:
-                require(
-                    bool(values[key]) and not values[key].startswith("unavailable:"),
-                    f"{device}: {key} unavailable",
-                )
-    require(mq_device_count > 0, "block stack exposes no retained blk-mq queue")
+    validate_sysfs(host["sysfs"], devices)
 
     nvme = host["nvme"]
     require(isinstance(nvme, dict), "NVMe evidence is not an object")

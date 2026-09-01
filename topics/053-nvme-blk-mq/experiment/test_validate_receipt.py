@@ -246,6 +246,24 @@ def snapshot(
     }
 
 
+def sysfs_device(*, mq: bool, queue_available: bool) -> dict[str, str]:
+    """Return complete synthetic sysfs evidence for one stack device."""
+    values = {key: f"retained {key}\n" for key in validator.SYSFS_KEYS}
+    if not queue_available:
+        for key in values:
+            if key.startswith("queue/"):
+                values[key] = "unavailable:2\n"
+    if mq:
+        values.update(
+            {
+                "mq/0/cpu_list": "0-3\n",
+                "mq/0/nr_tags": "128\n",
+                "mq/0/nr_reserved_tags": "0\n",
+            }
+        )
+    return values
+
+
 def make_campaign_validator_ready(receipt: Path, scenario: str) -> None:
     """Expand an analyzer fixture into the runner's complete raw receipt."""
     campaign = receipt / "campaign"
@@ -485,6 +503,37 @@ class IntegrityTests(unittest.TestCase):
         del snapshot["proc_vmstat"]["pgpgin"]
         with self.assertRaisesRegex(ValueError, "vmstat differs"):
             validator.validate_snapshot(snapshot, "before", ["testdisk"])
+
+    def test_partition_queue_unavailable_with_mq_parent_is_accepted(self) -> None:
+        devices = ["nvme0n1p1", "nvme0n1"]
+        sysfs = {
+            "nvme0n1p1": sysfs_device(mq=False, queue_available=False),
+            "nvme0n1": sysfs_device(mq=True, queue_available=True),
+        }
+
+        validator.validate_sysfs(sysfs, devices)
+
+    def test_mq_parent_missing_or_unavailable_queue_evidence_is_rejected(self) -> None:
+        devices = ["nvme0n1p1", "nvme0n1"]
+        valid = {
+            "nvme0n1p1": sysfs_device(mq=False, queue_available=False),
+            "nvme0n1": sysfs_device(mq=True, queue_available=True),
+        }
+        cases = {
+            "missing": None,
+            "unavailable": "unavailable:2\n",
+        }
+        for name, replacement in cases.items():
+            with self.subTest(name=name):
+                sysfs = copy.deepcopy(valid)
+                if replacement is None:
+                    del sysfs["nvme0n1"]["queue/nr_requests"]
+                    pattern = "sysfs key set differs"
+                else:
+                    sysfs["nvme0n1"]["queue/nr_requests"] = replacement
+                    pattern = "queue/nr_requests unavailable"
+                with self.assertRaisesRegex(ValueError, pattern):
+                    validator.validate_sysfs(sysfs, devices)
 
     def test_manifest_rejects_duplicates_and_unsafe_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
