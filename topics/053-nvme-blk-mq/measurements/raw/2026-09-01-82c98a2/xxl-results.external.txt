@@ -1,0 +1,4 @@
+archive_path=/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-053/2026-09-01-f47b88a/xxl/receipt.tar.gz
+archive_sha256=628631c2d020e5e5dbe4cda4c5ef69e4b918fbc9e426a6443332086442e91395
+receipt_manifest_sha256=4cb37ff98c003225307d56fabf0fc5db296b41650b5e26d2ea01a768cbef6e33
+mode=0444

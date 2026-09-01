@@ -1,0 +1,4 @@
+source_commit=82c98a25eb4ad31fd9e18fc8d8f9463dab6854d7
+source_path=topics/053-nvme-blk-mq
+archive_prefix=systems-snackpack-82c98a25eb4ad31fd9e18fc8d8f9463dab6854d7/
+source_archive_sha256=44085d1001f8566bdf0f7a58af509b8b7acb1f633c09f1f7c218a88ab85e4c45
