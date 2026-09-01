@@ -63,6 +63,10 @@ name = "ebpf-internals"
 version = "0.1.0"
 
 [[package]]
+name = "filesystem-crash-semantics"
+version = "0.1.0"
+
+[[package]]
 name = "finite-state-transducers-compact-dictionaries"
 version = "0.1.0"
 

@@ -1,0 +1,14 @@
+{
+  "architecture": "aarch64",
+  "files_verified": 50,
+  "hostname": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+  "manifest_sha256": "19065d32b466bf5b6cc7beb7961890343189623e81353616df1c3ccaca5269af",
+  "pass": true,
+  "power_loss_tested": false,
+  "process_crash_only": true,
+  "sealed": true,
+  "source_archive_sha256": "71d3fd5f65e5a0cef794c058afa5067009c731bacf5464160ff0ab7b4759d486",
+  "source_commit": "70c4821cb0241b3acd620b2d2126521728739c15",
+  "target_label": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+  "timing_claim": false
+}

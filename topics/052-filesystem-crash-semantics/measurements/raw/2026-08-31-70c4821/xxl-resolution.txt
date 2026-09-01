@@ -1,0 +1,4 @@
+alias=xxl
+resolved_hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+architecture=x86_64
+uname=Linux dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com 6.12.95-124.187.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Mon Jul 27 20:39:41 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux

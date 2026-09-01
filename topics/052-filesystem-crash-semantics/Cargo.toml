@@ -1,0 +1,17 @@
+[package]
+name = "filesystem-crash-semantics"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "filesystem_crash_semantics"
+path = "src/lib.rs"
+
+[[example]]
+name = "crash_costs"
+path = "examples/crash_costs.rs"
+
+[lints]
+workspace = true

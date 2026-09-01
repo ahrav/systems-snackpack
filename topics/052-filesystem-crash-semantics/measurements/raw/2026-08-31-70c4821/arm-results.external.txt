@@ -1,0 +1,6 @@
+receipt_archive=/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-052/2026-08-31-70c4821/arm-receipt.tar.gz
+receipt_archive_sha256=9b29feaf804731111c8eb3b0530845b17db034801c1dfc56be47476ee25516b7
+receipt_manifest_sha256=19065d32b466bf5b6cc7beb7961890343189623e81353616df1c3ccaca5269af
+files_verified=50
+sealed=true
+read_only=true
