@@ -20,6 +20,44 @@ from validate_receipt import validate, validate_complete_and_reflink_controls
 COMPLETE = "verify current=NEW temp=absent magic=valid checksum=valid generation=42\n"
 CORRUPT = "verify current=INVALID temp=absent magic=valid checksum=invalid generation=42\n"
 OPEN_LINE = "syscall=open-directory result=3\n"
+INIT_LOG = (
+    OPEN_LINE
+    + "syscall=openat name=current result=4\n"
+    + "syscall=write name=current bytes=8192 result=success\n"
+    + "syscall=fsync name=current result=success\n"
+    + "syscall=fsync name=directory result=success\n"
+    + "init=complete generation=OLD value=41\n"
+)
+UPDATE_PREFIX_LOG = (
+    OPEN_LINE
+    + "syscall=openat name=next.tmp result=4\n"
+    + "syscall=write name=next.tmp bytes=8192 result=success\n"
+)
+FSYNC_TEMPORARY_LINE = "syscall=fsync name=next.tmp result=success\n"
+RENAME_LINE = "syscall=renameat from=next.tmp to=current result=success\n"
+FSYNC_DIRECTORY_LINE = "syscall=fsync name=directory result=success\n"
+CUT_LOGS = {
+    "after_write": UPDATE_PREFIX_LOG + "failpoint=after_write action=_exit code=101\n",
+    "after_file_fsync": UPDATE_PREFIX_LOG
+    + FSYNC_TEMPORARY_LINE
+    + "failpoint=after_file_fsync action=_exit code=102\n",
+    "after_rename": UPDATE_PREFIX_LOG
+    + FSYNC_TEMPORARY_LINE
+    + RENAME_LINE
+    + "failpoint=after_rename action=_exit code=103\n",
+    "after_dir_fsync": UPDATE_PREFIX_LOG
+    + FSYNC_TEMPORARY_LINE
+    + RENAME_LINE
+    + FSYNC_DIRECTORY_LINE
+    + "failpoint=after_dir_fsync action=_exit code=104\n",
+}
+COMPLETE_LOG = (
+    UPDATE_PREFIX_LOG
+    + FSYNC_TEMPORARY_LINE
+    + RENAME_LINE
+    + FSYNC_DIRECTORY_LINE
+    + "acknowledgement=success generation=NEW value=42\n"
+)
 COMMIT = "b" * 40
 TOPIC = "topics/052-filesystem-crash-semantics/"
 PROBE_SOURCE = TOPIC + "experiment/cow_crash_probe.c"
@@ -54,6 +92,9 @@ class CompleteAndReflinkControlsTest(unittest.TestCase):
         results.mkdir()
         self.write("complete-1-oracle.txt", COMPLETE)
         self.write("complete-2-oracle.txt", COMPLETE)
+        for repetition in (1, 2):
+            self.write(f"complete-{repetition}-init.txt", INIT_LOG)
+            self.write(f"complete-{repetition}-update.txt", COMPLETE_LOG)
         self.write("aa-control.txt", "aa_control=pass complete verifier outputs match\n")
         self.write(
             "reflink.txt",
@@ -208,6 +249,10 @@ class ValidateReceiptTest(unittest.TestCase):
             "results/aa-control.txt": b"aa_control=pass complete verifier outputs match\n",
             "results/complete-1-oracle.txt": COMPLETE.encode("utf-8"),
             "results/complete-2-oracle.txt": COMPLETE.encode("utf-8"),
+            "results/complete-1-init.txt": INIT_LOG.encode("utf-8"),
+            "results/complete-2-init.txt": INIT_LOG.encode("utf-8"),
+            "results/complete-1-update.txt": COMPLETE_LOG.encode("utf-8"),
+            "results/complete-2-update.txt": COMPLETE_LOG.encode("utf-8"),
             "results/corrupt-status.txt": b"corrupt_verify_exit=3 expected_exit=3\n",
             "results/corrupt-verify.txt": (OPEN_LINE + CORRUPT).encode("utf-8"),
             "results/reflink.txt": (
@@ -219,6 +264,8 @@ class ValidateReceiptTest(unittest.TestCase):
             "results/reflink-source-verify.txt": (OPEN_LINE + COMPLETE).encode("utf-8"),
         }
         for cut, (status, state, temporary, generation) in cuts.items():
+            self.files[f"results/{cut}-init.txt"] = INIT_LOG.encode("utf-8")
+            self.files[f"results/{cut}-update.txt"] = CUT_LOGS[cut].encode("utf-8")
             self.files[f"results/{cut}-status.txt"] = (
                 f"cut={cut} update_exit={status} expected_exit={status}\n"
             ).encode("utf-8")
@@ -403,6 +450,71 @@ class ValidateReceiptTest(unittest.TestCase):
     def test_rejects_a_contradictory_timing_declaration(self) -> None:
         self.files["run-status.txt"] += b"timing_claim=yes\n"
         self.assert_rejected()
+
+    def test_rejects_an_appended_replay_declaration(self) -> None:
+        self.files["run-status.txt"] += b"filesystem_replay_tested=yes\n"
+        self.assert_rejected()
+
+    def test_rejects_a_duplicated_aa_control_record(self) -> None:
+        self.files["results/aa-control.txt"] += b"aa_control=fail outputs differ\n"
+        self.assert_rejected()
+
+    def test_rejects_a_duplicated_reflink_copy_record(self) -> None:
+        self.files["results/reflink.txt"] += b"reflink_copy=failure\n"
+        self.assert_rejected()
+
+    def test_rejects_a_cut_that_skipped_the_temporary_fsync(self) -> None:
+        self.files["results/after_file_fsync-update.txt"] = (
+            UPDATE_PREFIX_LOG + "failpoint=after_file_fsync action=_exit code=102\n"
+        ).encode("utf-8")
+        self.assert_rejected()
+
+    def test_rejects_a_cut_that_skipped_the_directory_fsync(self) -> None:
+        self.files["results/after_dir_fsync-update.txt"] = (
+            UPDATE_PREFIX_LOG
+            + FSYNC_TEMPORARY_LINE
+            + RENAME_LINE
+            + "failpoint=after_dir_fsync action=_exit code=104\n"
+        ).encode("utf-8")
+        self.assert_rejected()
+
+    def test_rejects_a_cut_whose_steps_are_out_of_order(self) -> None:
+        self.files["results/after_rename-update.txt"] = (
+            UPDATE_PREFIX_LOG
+            + RENAME_LINE
+            + FSYNC_TEMPORARY_LINE
+            + "failpoint=after_rename action=_exit code=103\n"
+        ).encode("utf-8")
+        self.assert_rejected()
+
+    def test_rejects_an_extra_step_before_the_failpoint(self) -> None:
+        self.files["results/after_write-update.txt"] = (
+            UPDATE_PREFIX_LOG
+            + FSYNC_TEMPORARY_LINE
+            + "failpoint=after_write action=_exit code=101\n"
+        ).encode("utf-8")
+        self.assert_rejected()
+
+    def test_rejects_an_initialization_that_skipped_the_directory_fsync(self) -> None:
+        self.files["results/after_write-init.txt"] = (
+            INIT_LOG.replace(FSYNC_DIRECTORY_LINE, "").encode("utf-8")
+        )
+        self.assert_rejected()
+
+    def test_rejects_a_complete_run_without_an_acknowledgement(self) -> None:
+        self.files["results/complete-1-update.txt"] = (
+            COMPLETE_LOG.replace(
+                "acknowledgement=success generation=NEW value=42\n", ""
+            ).encode("utf-8")
+        )
+        self.assert_rejected()
+
+    def test_tolerates_a_diagnostic_line_in_a_probe_log(self) -> None:
+        self.files["results/after_write-update.txt"] = (
+            CUT_LOGS["after_write"] + "note: unrelated diagnostic output\n"
+        ).encode("utf-8")
+        self.seal()
+        self.assertTrue(self.run_validate()["pass"])
 
     def test_rejects_codegen_evidence_without_a_call_instruction(self) -> None:
         self.files["codegen/objdump.txt"] = (

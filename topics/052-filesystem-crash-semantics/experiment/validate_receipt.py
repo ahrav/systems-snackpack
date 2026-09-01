@@ -17,6 +17,51 @@ PROBE_SOURCE = TOPIC_PREFIX + "experiment/cow_crash_probe.c"
 INVENTORY_LINE = re.compile(r"([0-9a-f]{64})  (.+)")
 WRITE_BITS = stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH
 
+# Ordered probe records distinguish crash cuts by their completed synchronization
+# steps.
+RECORD_LOG = ("syscall=", "failpoint=", "init=", "acknowledgement=")
+OPEN_DIRECTORY = r"syscall=open-directory result=[0-9]+"
+INIT_SEQUENCE = (
+    OPEN_DIRECTORY,
+    r"syscall=openat name=current result=[0-9]+",
+    r"syscall=write name=current bytes=8192 result=success",
+    r"syscall=fsync name=current result=success",
+    r"syscall=fsync name=directory result=success",
+    r"init=complete generation=OLD value=41",
+)
+UPDATE_PREFIX = (
+    OPEN_DIRECTORY,
+    r"syscall=openat name=next.tmp result=[0-9]+",
+    r"syscall=write name=next.tmp bytes=8192 result=success",
+)
+FSYNC_TEMPORARY = r"syscall=fsync name=next\.tmp result=success"
+RENAME_TEMPORARY = r"syscall=renameat from=next\.tmp to=current result=success"
+FSYNC_DIRECTORY = r"syscall=fsync name=directory result=success"
+CUT_SEQUENCES = {
+    "after_write": UPDATE_PREFIX + (r"failpoint=after_write action=_exit code=101",),
+    "after_file_fsync": UPDATE_PREFIX
+    + (FSYNC_TEMPORARY, r"failpoint=after_file_fsync action=_exit code=102"),
+    "after_rename": UPDATE_PREFIX
+    + (
+        FSYNC_TEMPORARY,
+        RENAME_TEMPORARY,
+        r"failpoint=after_rename action=_exit code=103",
+    ),
+    "after_dir_fsync": UPDATE_PREFIX
+    + (
+        FSYNC_TEMPORARY,
+        RENAME_TEMPORARY,
+        FSYNC_DIRECTORY,
+        r"failpoint=after_dir_fsync action=_exit code=104",
+    ),
+}
+COMPLETE_SEQUENCE = UPDATE_PREFIX + (
+    FSYNC_TEMPORARY,
+    RENAME_TEMPORARY,
+    FSYNC_DIRECTORY,
+    r"acknowledgement=success generation=NEW value=42",
+)
+
 
 def sha256(path: pathlib.Path) -> str:
     """Return the SHA-256 digest for one file."""
@@ -59,6 +104,26 @@ def require_line(path: pathlib.Path, pattern: str, family: str | None = None) ->
         raise ValueError(
             f"{path.name} holds {related} {family!r} records; exactly one is required"
         )
+
+
+def require_sequence(path: pathlib.Path, patterns: tuple[str, ...]) -> None:
+    """Require the file's probe records to equal one ordered sequence.
+
+    Records are selected by their key prefixes, so an unexpected diagnostic line
+    cannot displace the comparison; the process exit status is checked separately.
+    An ordered comparison is what separates the cuts, since two of them share
+    exit status and live verifier state and differ only in the steps reached.
+    """
+    lines = [
+        line
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines()
+        if line.startswith(RECORD_LOG)
+    ]
+    if len(lines) != len(patterns) or any(
+        re.fullmatch(pattern, line) is None
+        for pattern, line in zip(patterns, lines)
+    ):
+        raise ValueError(f"{path.name} does not hold the required sequence: {lines}")
 
 
 def require_sealed_tree(root: pathlib.Path) -> None:
@@ -216,13 +281,21 @@ def validate_complete_and_reflink_controls(root: pathlib.Path) -> None:
     for path in (first_path, second_path):
         if path.read_text(encoding="utf-8").splitlines() != [expected_complete]:
             raise ValueError(f"{path.name} is not the valid generation 42 oracle")
+    for repetition in (1, 2):
+        require_sequence(
+            root / "results" / f"complete-{repetition}-init.txt", INIT_SEQUENCE
+        )
+        require_sequence(
+            root / "results" / f"complete-{repetition}-update.txt", COMPLETE_SEQUENCE
+        )
     require_line(
         root / "results" / "aa-control.txt",
         r"aa_control=pass complete verifier outputs match",
+        r"aa_control=.*",
     )
 
     reflink_path = root / "results" / "reflink.txt"
-    require_line(reflink_path, r"reflink_copy=success")
+    require_line(reflink_path, r"reflink_copy=success", r"reflink_copy=.*")
     require_line(
         reflink_path,
         r"reflink_clone_verify_exit=3 expected_exit=3",
@@ -306,6 +379,8 @@ def validate(args: argparse.Namespace) -> dict[str, object]:
         "after_dir_fsync": (104, "NEW", "absent", 42),
     }
     for cut, (status, state, temporary, generation) in expected_cuts.items():
+        require_sequence(root / "results" / f"{cut}-init.txt", INIT_SEQUENCE)
+        require_sequence(root / "results" / f"{cut}-update.txt", CUT_SEQUENCES[cut])
         require_line(
             root / "results" / f"{cut}-status.txt",
             rf"cut={cut} update_exit={status} expected_exit={status}",
