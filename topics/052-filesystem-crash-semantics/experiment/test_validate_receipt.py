@@ -58,6 +58,13 @@ COMPLETE_LOG = (
     + FSYNC_DIRECTORY_LINE
     + "acknowledgement=success generation=NEW value=42\n"
 )
+FILESYSTEM = (
+    "TARGET   SOURCE         FSTYPE OPTIONS\n"
+    "/var/tmp /dev/nvme0n1p1 xfs    rw,noatime\n"
+    "type=xfs block=4096 namelen=255\n"
+    "Filesystem 1B-blocks Used Available Use% Mounted on\n"
+    "meta-data=/dev/nvme0n1p1 isize=512 agcount=4\n"
+)
 COMMIT = "b" * 40
 TOPIC = "topics/052-filesystem-crash-semantics/"
 PROBE_SOURCE = TOPIC + "experiment/cow_crash_probe.c"
@@ -246,6 +253,7 @@ class ValidateReceiptTest(unittest.TestCase):
             ).encode("utf-8"),
             "codegen/objdump.txt": OBJDUMP.encode("utf-8"),
             "codegen/retained-paths.txt": RETAINED_PATHS.encode("utf-8"),
+            "filesystem.txt": FILESYSTEM.encode("utf-8"),
             "results/aa-control.txt": b"aa_control=pass complete verifier outputs match\n",
             "results/complete-1-oracle.txt": COMPLETE.encode("utf-8"),
             "results/complete-2-oracle.txt": COMPLETE.encode("utf-8"),
@@ -512,6 +520,35 @@ class ValidateReceiptTest(unittest.TestCase):
     def test_tolerates_a_diagnostic_line_in_a_probe_log(self) -> None:
         self.files["results/after_write-update.txt"] = (
             CUT_LOGS["after_write"] + "note: unrelated diagnostic output\n"
+        ).encode("utf-8")
+        self.seal()
+        self.assertTrue(self.run_validate()["pass"])
+
+    def test_rejects_a_non_xfs_work_mount(self) -> None:
+        self.files["filesystem.txt"] = FILESYSTEM.replace(
+            "type=xfs block=4096", "type=btrfs block=4096"
+        ).encode("utf-8")
+        self.assert_rejected()
+
+    def test_rejects_missing_filesystem_evidence(self) -> None:
+        self.files["filesystem.txt"] = b"TARGET SOURCE FSTYPE OPTIONS\n"
+        self.assert_rejected()
+
+    def test_rejects_a_contradictory_work_fstype_record(self) -> None:
+        self.files["filesystem.txt"] = (
+            FILESYSTEM + "work_fstype=overlay required_fstype=xfs\n"
+        ).encode("utf-8")
+        self.assert_rejected()
+
+    def test_rejects_a_second_filesystem_type_record(self) -> None:
+        self.files["filesystem.txt"] = (
+            FILESYSTEM + "type=tmpfs block=4096 namelen=255\n"
+        ).encode("utf-8")
+        self.assert_rejected()
+
+    def test_accepts_the_enforced_work_fstype_record(self) -> None:
+        self.files["filesystem.txt"] = (
+            FILESYSTEM + "work_fstype=xfs required_fstype=xfs\n"
         ).encode("utf-8")
         self.seal()
         self.assertTrue(self.run_validate()["pass"])

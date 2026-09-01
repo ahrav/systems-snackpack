@@ -113,16 +113,20 @@ The validator rejects a missing seal, a receipt path that carries any write bit,
 an entry that is not a directory or a regular file, an incomplete content
 manifest, a nested file named after a root metadata file, a retained archive
 whose embedded commit disagrees with the expected one, a source inventory that
-disagrees with that archive, changed source, wrong host identity, a missing or
-duplicated semantic observation, an initialization or update log whose ordered
-syscall and failpoint records do not match the cut, a missing or contradicted
-scope declaration, a failed corruption or reflink control, and a missing syscall
-call instruction. The ordered records are what separate the cuts: the first two
-share their exit status and their live verifier state, so a probe that dropped
-the temporary file's `fsync` would leave every other observation unchanged. It
-reads the commit from the archive's PAX `comment` field, which `git archive`
-writes, rather than from the member path prefix, which `--prefix` supplies as
-plain text. Its rejection cases are exercised by `test_validate_receipt.py`:
+disagrees with that archive, changed source, wrong host identity, a work mount
+that the retained capture does not identify as XFS, a missing or duplicated
+semantic observation, an initialization or update log whose ordered syscall and
+failpoint records do not match the cut, a missing or contradicted scope
+declaration, a failed corruption or reflink control, and a missing syscall call
+instruction. The XFS record it reads is the `stat -f` capture in
+`filesystem.txt`, which every receipt carries, so the launcher's precondition is
+also checkable after the fact. The ordered records are what separate the cuts:
+the first two share their exit status and their live verifier state, so a probe
+that dropped the temporary file's `fsync` would leave every other observation
+unchanged. It reads the commit from the archive's PAX `comment` field, which
+`git archive` writes, rather than from the member path prefix, which `--prefix`
+supplies as plain text. Its rejection cases are exercised by
+`test_validate_receipt.py`:
 
 ```bash
 cd topics/052-filesystem-crash-semantics/experiment

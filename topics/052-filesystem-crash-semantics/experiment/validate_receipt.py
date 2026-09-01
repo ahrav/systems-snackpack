@@ -126,6 +126,23 @@ def require_sequence(path: pathlib.Path, patterns: tuple[str, ...]) -> None:
         raise ValueError(f"{path.name} does not hold the required sequence: {lines}")
 
 
+def require_xfs_evidence(root: pathlib.Path) -> None:
+    """Require the retained mount capture to identify the work directory as XFS.
+
+    The published observations are XFS only, and `stat -f` records the work
+    directory's filesystem type in every receipt, so that record is the evidence
+    checked here. A `work_fstype` record that disagrees is rejected as well.
+    """
+    path = root / "filesystem.txt"
+    require_line(path, r"type=xfs block=[0-9]+ namelen=[0-9]+", r"type=.*")
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        if (
+            line.startswith("work_fstype=")
+            and line != "work_fstype=xfs required_fstype=xfs"
+        ):
+            raise ValueError(f"filesystem evidence contradicts XFS: {line!r}")
+
+
 def require_sealed_tree(root: pathlib.Path) -> None:
     """Require a sealed shape: only unwritable directories and regular files.
 
@@ -371,6 +388,7 @@ def validate(args: argparse.Namespace) -> dict[str, object]:
     if sha256(root / "source.tar.gz") != args.expected_source_archive_sha256:
         raise ValueError("retained source archive digest mismatch")
     validate_source_inventory(root, identity["source_commit"])
+    require_xfs_evidence(root)
 
     expected_cuts = {
         "after_write": (101, "OLD", "present", 41),
