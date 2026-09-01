@@ -755,9 +755,9 @@ static int run_direct(const char *path,
     int fd = open(path, O_RDONLY | O_DIRECT | O_CLOEXEC);
     off_t file_size;
     uint64_t blocks;
-    uint32_t memory_alignment;
-    uint32_t offset_alignment;
-    size_t allocation_alignment;
+    uint32_t memory_alignment = 0;
+    uint32_t offset_alignment = 0;
+    size_t allocation_alignment = 0;
     struct slot *slots;
     struct iocb **batch;
     struct io_event *events;
