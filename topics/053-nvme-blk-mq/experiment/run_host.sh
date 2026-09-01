@@ -124,6 +124,7 @@ import tarfile
 
 archive = pathlib.Path(sys.argv[1])
 source_prefix = sys.argv[2]
+source_root = source_prefix.rstrip("/")
 topic_prefix = source_prefix + sys.argv[3]
 required = {
     topic_prefix + "experiment/nvme_aio_depth_probe.c",
@@ -139,7 +140,9 @@ with tarfile.open(archive, "r:gz") as source:
         path = pathlib.PurePosixPath(member.name)
         if path.is_absolute() or ".." in path.parts:
             raise SystemExit(f"unsafe archive path: {member.name}")
-        if not member.name.startswith(source_prefix):
+        if member.name == source_root and not member.isdir():
+            raise SystemExit(f"archive root is not a directory: {member.name}")
+        if member.name != source_root and not member.name.startswith(source_prefix):
             raise SystemExit(f"archive member escapes source prefix: {member.name}")
         if not (member.isdir() or member.isfile()):
             raise SystemExit(f"archive contains a non-file member: {member.name}")
