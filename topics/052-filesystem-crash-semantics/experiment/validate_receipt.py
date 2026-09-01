@@ -114,10 +114,19 @@ def archive_inventory(archive: pathlib.Path, commit: str) -> dict[str, str]:
     yields an independent inventory. Comparing the receipt's self-reported
     inventory against this one establishes coverage of the built tree, which
     equality between the receipt's own two inventories cannot.
+
+    `--prefix` only prepends text to member names, so member paths alone would
+    let an archive of one tree carry another tree's commit. `git archive` records
+    the commit in the PAX global `comment` field, which is required to match.
     """
     prefix = f"systems-snackpack-{commit}/"
     entries: dict[str, str] = {}
     with tarfile.open(archive, "r:gz") as bundle:
+        embedded = bundle.pax_headers.get("comment", "").strip()
+        if embedded != commit:
+            raise ValueError(
+                f"retained archive names commit {embedded!r}, not {commit!r}"
+            )
         for member in bundle:
             if not member.isfile():
                 continue
@@ -319,11 +328,19 @@ def validate(args: argparse.Namespace) -> dict[str, object]:
         r"verify current=INVALID temp=absent magic=valid checksum=invalid generation=42",
         r"verify .*",
     )
-    require_line(root / "run-status.txt", r"run=pass")
-    require_line(root / "run-status.txt", r"process_crash_only=yes")
-    require_line(root / "run-status.txt", r"power_loss_tested=no")
-    require_line(root / "run-status.txt", r"filesystem_replay_tested=no")
-    require_line(root / "run-status.txt", r"timing_claim=no")
+    require_line(root / "run-status.txt", r"run=pass", r"run=.*")
+    require_line(
+        root / "run-status.txt", r"process_crash_only=yes", r"process_crash_only=.*"
+    )
+    require_line(
+        root / "run-status.txt", r"power_loss_tested=no", r"power_loss_tested=.*"
+    )
+    require_line(
+        root / "run-status.txt",
+        r"filesystem_replay_tested=no",
+        r"filesystem_replay_tested=.*",
+    )
+    require_line(root / "run-status.txt", r"timing_claim=no", r"timing_claim=.*")
 
     require_retained_calls(root)
 

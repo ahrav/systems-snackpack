@@ -88,8 +88,11 @@ the second target. The runner requires `bash`, `tar`, `rg`, `cc`, `objdump`,
 `xargs`, and `date`. It captures `rustc --version` when a Rust toolchain is
 present and continues without one, because the probe is C only. It rejects a
 hostname, architecture, archive digest, or source layout mismatch before
-compiling, requires an XFS work mount, and requires a call instruction to each
-synchronization syscall in the disassembly.
+compiling, refuses to run unless it is byte-identical to the launcher inside the
+archive, requires an XFS work mount, and requires a call instruction to each
+synchronization syscall in the disassembly. Upload the launcher from a clean
+checkout of the same commit; a copy from a dirty tree or another revision cannot
+produce a receipt.
 
 ## Independent receipt validation
 
@@ -107,12 +110,15 @@ python3 -I -B topics/052-filesystem-crash-semantics/experiment/validate_receipt.
 ```
 
 The validator rejects a missing seal, a receipt path that carries any write bit,
-a symbolic link, an incomplete content manifest, a nested file named after a
-root metadata file, a source inventory that disagrees with the retained archive,
-changed source, wrong host identity, a missing or duplicated semantic
-observation, a missing scope declaration, a failed corruption or reflink
-control, or a missing syscall call instruction. Its rejection cases are exercised
-by `test_validate_receipt.py`:
+an entry that is not a directory or a regular file, an incomplete content
+manifest, a nested file named after a root metadata file, a retained archive
+whose embedded commit disagrees with the expected one, a source inventory that
+disagrees with that archive, changed source, wrong host identity, a missing or
+duplicated semantic observation, a missing or contradicted scope declaration, a
+failed corruption or reflink control, and a missing syscall call instruction. It
+reads the commit from the archive's PAX `comment` field, which `git archive`
+writes, rather than from the member path prefix, which `--prefix` supplies as
+plain text. Its rejection cases are exercised by `test_validate_receipt.py`:
 
 ```bash
 cd topics/052-filesystem-crash-semantics/experiment

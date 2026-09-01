@@ -142,12 +142,19 @@ class CompleteAndReflinkControlsTest(unittest.TestCase):
         validate_complete_and_reflink_controls(self.root)
 
 
-def source_archive() -> bytes:
-    """Return one gzip source archive holding the topic files under a commit prefix."""
+def source_archive(commit: str = COMMIT, comment: str | None = COMMIT) -> bytes:
+    """Return one gzip source archive holding the topic files under a commit prefix.
+
+    `git archive` records the commit in the PAX global `comment` field, so the
+    fixture carries it too. Passing `comment=None` builds an archive without one.
+    """
     buffer = io.BytesIO()
-    with tarfile.open(fileobj=buffer, mode="w:gz") as bundle:
+    headers = {} if comment is None else {"comment": comment}
+    with tarfile.open(
+        fileobj=buffer, mode="w:gz", format=tarfile.PAX_FORMAT, pax_headers=headers
+    ) as bundle:
         for relative, content in ((PROBE_SOURCE, PROBE_BYTES), (NOTES_SOURCE, NOTES_BYTES)):
-            info = tarfile.TarInfo(f"systems-snackpack-{COMMIT}/{relative}")
+            info = tarfile.TarInfo(f"systems-snackpack-{commit}/{relative}")
             info.size = len(content)
             info.mtime = int(time.time())
             bundle.addfile(info, io.BytesIO(content))
@@ -225,6 +232,18 @@ class ValidateReceiptTest(unittest.TestCase):
     def tearDown(self) -> None:
         subprocess.run(["chmod", "-R", "u+w", str(self.root)], check=False)
         self.temporary.cleanup()
+
+    def use_archive(self, archive: bytes) -> None:
+        """Replace the retained source archive and the identity digest that binds it."""
+        self.archive = archive
+        self.files["source.tar.gz"] = archive
+        self.files["identity.txt"] = (
+            "target_label=fixture\n"
+            "hostname=fixture.example\n"
+            "architecture=x86_64\n"
+            f"source_commit={COMMIT}\n"
+            f"source_archive_sha256={hashlib.sha256(archive).hexdigest()}\n"
+        ).encode("utf-8")
 
     def seal(self) -> None:
         """Materialize the fixture, write its manifest, and remove every write bit."""
@@ -363,6 +382,26 @@ class ValidateReceiptTest(unittest.TestCase):
 
     def test_rejects_a_retained_probe_copy_that_left_the_archive(self) -> None:
         self.files["cow_crash_probe.c"] = b"int main(void) { return 1; }\n"
+        self.assert_rejected()
+
+    def test_rejects_an_archive_without_an_embedded_commit(self) -> None:
+        self.use_archive(source_archive(comment=None))
+        self.assert_rejected()
+
+    def test_rejects_an_archive_that_names_another_commit(self) -> None:
+        self.use_archive(source_archive(comment="c" * 40))
+        self.assert_rejected()
+
+    def test_rejects_a_contradictory_run_declaration(self) -> None:
+        self.files["run-status.txt"] += b"run=fail\n"
+        self.assert_rejected()
+
+    def test_rejects_a_contradictory_power_loss_declaration(self) -> None:
+        self.files["run-status.txt"] += b"power_loss_tested=yes\n"
+        self.assert_rejected()
+
+    def test_rejects_a_contradictory_timing_declaration(self) -> None:
+        self.files["run-status.txt"] += b"timing_claim=yes\n"
         self.assert_rejected()
 
     def test_rejects_codegen_evidence_without_a_call_instruction(self) -> None:

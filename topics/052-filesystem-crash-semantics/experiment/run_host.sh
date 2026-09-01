@@ -33,7 +33,18 @@ tar -xzf "$archive" -C "$work"
 
 source_root="$work/systems-snackpack-$source_commit"
 source_file="$source_root/topics/052-filesystem-crash-semantics/experiment/cow_crash_probe.c"
+archived_runner="$source_root/topics/052-filesystem-crash-semantics/experiment/run_host.sh"
 test -f "$source_file"
+test -f "$archived_runner"
+
+# Reject a launcher that differs from the archived commit before recording its
+# hash, because the receipt attributes every check to that commit.
+if ! cmp -s "${BASH_SOURCE[0]}" "$archived_runner"; then
+    printf 'error: %s differs from the archived launcher at %s\n' \
+        "${BASH_SOURCE[0]}" "$source_commit" >&2
+    exit 1
+fi
+runner_sha256=$(sha256sum "$archived_runner" | awk '{print $1}')
 
 cp "$archive" "$receipt/source.tar.gz"
 cp "$source_file" "$receipt/cow_crash_probe.c"
@@ -51,6 +62,7 @@ cp "$source_file" "$receipt/cow_crash_probe.c"
     printf 'architecture=%s\n' "$actual_architecture"
     printf 'source_commit=%s\n' "$source_commit"
     printf 'source_archive_sha256=%s\n' "$actual_archive_sha256"
+    printf 'runner_sha256=%s\n' "$runner_sha256"
     printf 'run_utc=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 } > "$receipt/identity.txt"
 
