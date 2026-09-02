@@ -1,0 +1,17 @@
+[package]
+name = "nvme-blk-mq"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "nvme_blk_mq"
+path = "src/lib.rs"
+
+[[example]]
+name = "nvme_costs"
+path = "examples/nvme_costs.rs"
+
+[lints]
+workspace = true

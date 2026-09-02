@@ -1,0 +1,29 @@
+{
+  "aa_acceptance": {
+    "interval_contains_1": true,
+    "interval_within_0_90_to_1_10": true,
+    "point_ratio_within_0_95_to_1_05": true
+  },
+  "aa_process_count": 32,
+  "architecture": "x86_64",
+  "binary_sha256": "099d7f9250bb3586c2766984743bb5ee75a2f16b39b523687f75247e0de51bb3",
+  "complete_block_count_per_scenario": 8,
+  "depth_process_count": 32,
+  "filesystem_fstype": "xfs",
+  "filesystem_source": "/dev/nvme0n1p1",
+  "manifest_sha256": "4cb37ff98c003225307d56fabf0fc5db296b41650b5e26d2ea01a768cbef6e33",
+  "measurement_usable": true,
+  "pass": true,
+  "primary_device": "nvme0n1",
+  "probe_source_sha256": "c0fabb92b6ee4b442dbb293394042058ff441388e577060fb3f23d186fe2f28d",
+  "runtime_hostname": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+  "schema": "topic53-receipt-validation.v1",
+  "sealed": true,
+  "source_archive_sha256": "44085d1001f8566bdf0f7a58af509b8b7acb1f633c09f1f7c218a88ab85e4c45",
+  "source_commit": "82c98a25eb4ad31fd9e18fc8d8f9463dab6854d7",
+  "stack_devices": [
+    "nvme0n1p1",
+    "nvme0n1"
+  ],
+  "target_label": "xxl"
+}
