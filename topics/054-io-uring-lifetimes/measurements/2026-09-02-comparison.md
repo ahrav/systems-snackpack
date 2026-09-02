@@ -5,7 +5,7 @@ correctness oracles.
 
 | Check | Arm | `xxl` |
 |---|---|---|
-| source commit | `e8f5f459` | `e8f5f459` |
+| source commit | `3f1f083` | `3f1f083` |
 | archive and runner identity | pass | pass |
 | source inventory before and after | identical | identical |
 | baseline setup | SQ 8, CQ 16 | SQ 8, CQ 16 |

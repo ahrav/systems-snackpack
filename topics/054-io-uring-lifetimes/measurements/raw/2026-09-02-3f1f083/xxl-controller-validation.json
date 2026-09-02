@@ -1,0 +1,21 @@
+{
+  "architecture": "x86_64",
+  "hostname": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+  "manifest_entries": 17,
+  "pass": true,
+  "runner_sha256": "580cd605e9dd45299dab908f6095f42fa7cba03895f6257113fd75736e0677be",
+  "sealed": true,
+  "semantic_result": {
+    "baseline": "baseline_setup=ok sq_entries=8 cq_entries=16 features=0xffff",
+    "cancel_completions": [
+      ["0x3001", "-125"],
+      ["0x3002", "0"]
+    ],
+    "deferred": "defer_taskrun cqes_before_getevents=0 terminal={user_data=0x2001,res=-62}",
+    "owner": "single_issuer owner_cqe={user_data=0x1001,res=0} other_task_enter=-17 (File exists)",
+    "result": "ok"
+  },
+  "source_archive_sha256": "cc1e7340d7119bbbcc1956b26676ca817eb61b61a006ef4dd866e9736288b253",
+  "source_commit": "3f1f083caf53a1dce29fdfe50586b6156662d1a6",
+  "target_label": "xxl"
+}
