@@ -18,6 +18,10 @@ from typing import Any, NoReturn
 
 BLOCK_BYTES = 4096
 MASK64 = (1 << 64) - 1
+# Bound on the post-SIGKILL wait. A probe blocked in an uninterruptible kernel
+# sleep on the block path cannot die until that I/O settles, so an unbounded
+# wait here would hang the whole campaign instead of failing the attempt.
+KILL_GRACE_SECONDS = 30.0
 BASE_ENVIRONMENT = {
     "LANG": "C",
     "LC_ALL": "C",
@@ -351,6 +355,7 @@ def _run_attempt(
     operations: int,
     file_bytes: int,
     timeout_seconds: float,
+    seen_pids: frozenset[int],
 ) -> tuple[dict[str, Any], int]:
     raw = output / "raw"
     stem = f"{sequence:03d}-b{block:02d}-p{period}-{label}"
@@ -398,12 +403,17 @@ def _run_attempt(
         env=BASE_ENVIRONMENT,
     )
     timed_out = False
+    kill_escaped = False
     try:
         stdout, stderr = process.communicate(timeout=timeout_seconds)
     except subprocess.TimeoutExpired:
         timed_out = True
         process.kill()
-        stdout, stderr = process.communicate()
+        try:
+            stdout, stderr = process.communicate(timeout=KILL_GRACE_SECONDS)
+        except subprocess.TimeoutExpired:
+            kill_escaped = True
+            stdout, stderr = "", ""
     ended = time.monotonic_ns()
     _write_text(stdout_path, stdout)
     _write_text(stderr_path, stderr)
@@ -412,8 +422,14 @@ def _run_attempt(
 
     validation_errors: list[str] = []
     observed: dict[str, Any] | None = None
+    if process.pid in seen_pids:
+        validation_errors.append(f"process identifier reused: {process.pid}")
     if timed_out:
         validation_errors.append("native process timed out")
+    if kill_escaped:
+        validation_errors.append(
+            f"native process outlived SIGKILL by {KILL_GRACE_SECONDS:g}s; output abandoned"
+        )
     if process.returncode != 0:
         validation_errors.append(f"native return code is {process.returncode}")
     if stderr:
@@ -604,9 +620,9 @@ def main() -> int:
                 operations=args.ops,
                 file_bytes=args.file_bytes,
                 timeout_seconds=args.timeout_seconds,
+                seen_pids=frozenset(seen_pids),
             )
             if pid in seen_pids:
-                _append_jsonl(failures, {**attempt, "pid_reused": True})
                 _fail(f"process identifier reused: {pid}")
             seen_pids.add(pid)
             if attempt["valid"] is not True:
