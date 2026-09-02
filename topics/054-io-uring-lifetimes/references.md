@@ -1,9 +1,9 @@
 # Primary sources
 
 Implementation snapshots below use Linux v7.1 and liburing commit
-`e50e32a6b9030faba2e30fa0ba999571a0cffe28`. The host receipts will record each
-exact running kernel release. Version-based support claims still require a
-direct setup, opcode, or registration probe.
+`e50e32a6b9030faba2e30fa0ba999571a0cffe28`. The host receipts record each exact
+running kernel release. Version-based support claims still require a direct
+setup, opcode, or registration probe.
 
 - [`io_uring_setup(2)`](https://man7.org/linux/man-pages/man2/io_uring_setup.2.html)
   defines setup flags, including `SINGLE_ISSUER` and `DEFER_TASKRUN`.
