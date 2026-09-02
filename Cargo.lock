@@ -79,6 +79,10 @@ name = "idempotency-concurrency"
 version = "0.1.0"
 
 [[package]]
+name = "io-uring-lifetimes"
+version = "0.1.0"
+
+[[package]]
 name = "iommu-dma-device-memory"
 version = "0.1.0"
 
