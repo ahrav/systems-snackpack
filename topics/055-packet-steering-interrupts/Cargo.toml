@@ -1,0 +1,17 @@
+[package]
+name = "packet-steering-interrupts"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+name = "packet_steering_interrupts"
+path = "src/lib.rs"
+
+[[example]]
+name = "steering_costs"
+path = "examples/steering_costs.rs"
+
+[lints]
+workspace = true
