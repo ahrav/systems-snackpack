@@ -194,10 +194,12 @@ PY
         -o "$receipt/bin/model_tests" \
         >"$receipt/build/model-test-compile.stdout" 2>"$receipt/build/model-test-compile.stderr"
     "$receipt/bin/model_tests" >"$receipt/build/model-tests.txt"
-    rustdoc --edition 2024 --test "$topic_dir/src/lib.rs" \
-        --crate-name packet_steering_interrupts >"$receipt/build/doctests.txt"
     rustc --edition 2024 --crate-name packet_steering_interrupts --crate-type lib \
         -D warnings "$topic_dir/src/lib.rs" -o "$receipt/build/libpacket_steering_interrupts.rlib"
+    rustdoc --edition 2024 --test "$topic_dir/src/lib.rs" \
+        --crate-name packet_steering_interrupts \
+        --extern packet_steering_interrupts="$receipt/build/libpacket_steering_interrupts.rlib" \
+        >"$receipt/build/doctests.txt"
     rustc --edition 2024 -D warnings "$topic_dir/examples/steering_costs.rs" \
         --extern packet_steering_interrupts="$receipt/build/libpacket_steering_interrupts.rlib" \
         -o "$receipt/bin/steering_costs"
