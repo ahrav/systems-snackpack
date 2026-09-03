@@ -296,7 +296,7 @@ snapshot() {
     local route="$receipt/snapshots/${name}.route.txt"
     ip -4 route get "$peer" >"$route"
     local interface
-    interface=$(awk '{for (index = 1; index <= NF; index++) if ($index == "dev") {print $(index + 1); exit}}' "$route")
+    interface=$(awk '{for (field = 1; field <= NF; field++) if ($field == "dev") {print $(field + 1); exit}}' "$route")
     [[ -n $interface && $interface != lo ]] || fail 'tested route must not use loopback'
     ip -s link show dev "$interface" >"$receipt/snapshots/${name}.link.txt"
     cp -- /proc/interrupts "$receipt/snapshots/${name}.interrupts.txt"
