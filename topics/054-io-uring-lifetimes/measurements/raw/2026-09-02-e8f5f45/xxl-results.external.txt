@@ -1,7 +1,0 @@
-target_label=xxl
-hostname=dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
-receipt_directory=/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-054/2026-09-02-e8f5f45/xxl/receipt
-receipt_manifest_sha256=d1054002019f4a8761cea2a76577992fc25d2a5805b96dd855962903e287c3c2
-manifest_entries=17
-sealed=true
-controller_validation=pass
