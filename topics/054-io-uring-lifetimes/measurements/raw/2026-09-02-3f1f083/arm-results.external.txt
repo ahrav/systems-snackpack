@@ -1,0 +1,7 @@
+target_label=arm
+hostname=dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+receipt_directory=/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-054/2026-09-02-3f1f083/arm/receipt
+receipt_manifest_sha256=ca867720727a141fa683691e427e9efccab0f8cc4a0c0570148436d414c65195
+manifest_entries=17
+sealed=true
+controller_validation=pass
