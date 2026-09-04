@@ -52,17 +52,28 @@ The records must state these limits:
 
 - A positive NAPI identifier does not reveal the RSS hash fields, key, or
   indirection table.
+- Multiple NAPI identifiers do not by themselves prove multiple CPUs, RSS as
+  the unique cause, or a one-to-one queue/NAPI mapping.
+- On the pinned v6.12 UDP path, incoming CPU and NAPI ID are socket snapshots
+  updated before enqueue rather than metadata bound to the exact datagram read;
+  valid NAPI-ID reporting also depends on build-time
+  `CONFIG_NET_RX_BUSY_POLL`.
 - A queue count does not prove that the experiment used every queue.
 - A stable flow does not prove that a specific hardware hash caused its
   placement.
-- Zero RPS, RFS, and XPS files establish observed configuration, not a universal
-  default and not a guarantee about another host.
+- Zero RPS and RFS files exclude classic generic RPS and software RFS on the
+  inspected ingress queues. They do not exclude redirects or another device or
+  driver path.
+  Zero XPS map files establish only those map families are empty; they do not
+  exclude every driver TX-queue policy. None establishes a universal default or
+  a guarantee about another host.
 - A shared server socket's incoming CPU or NAPI observation describes that
   socket topology only.
 - IRQ deltas include moderation and ambient traffic. They are not packet
   counts.
 - `/proc/net/softnet_stat` backlog drops do not cover every physical receive
-  path drop.
+  path drop. Its rows aggregate devices per CPU, `processed` is receive-stack
+  passes, and `time_squeeze` does not by itself prove ksoftirqd ran.
 - The focused probe checks correctness and placement. It is not a throughput or
   latency benchmark and does not isolate architecture effects.
 - A missing `ethtool` result is missing capability evidence. It must not be

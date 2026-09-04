@@ -1,7 +1,7 @@
 # Cross-host steering experiment
 
 This Linux-only experiment checks UDP integrity and receive-placement
-observations across two physical-interface routes. It compares one live flow
+observations across two non-loopback interface routes. It compares one live flow
 with 128 live flows while holding each process at 256 request and echo pairs.
 It is a correctness and topology experiment. It makes no throughput or latency
 claim.
@@ -35,11 +35,14 @@ Every period runs Arm receive plus x86-64 echo receive, then the reverse
 direction. All 24 periods use fresh server and client processes. Inner packets
 are correctness workload, not independent samples. No elapsed value is used.
 
-The connected client sockets expose one incoming CPU and NAPI identifier per
-echoed flow. The wildcard-bound shared server socket does not expose a valid
-per-flow CPU mapping through these socket options. Its flow records prove peer
-identity and packet completeness only. Its CPU and NAPI values are recorded as
-shared-socket diagnostics.
+The connected client sockets expose an incoming CPU and NAPI-ID socket snapshot
+for each echoed flow. On the pinned v6.12 path, those fields are updated before
+enqueue and are not metadata bound to the exact datagram later read. Valid
+NAPI-ID retrieval also depends on `CONFIG_NET_RX_BUSY_POLL`. The unconnected,
+wildcard-bound shared server marks NAPI only once and does not continuously
+update incoming CPU, so it cannot expose a valid per-flow CPU mapping through
+these options. Its flow records prove peer identity and packet completeness
+only; its CPU and NAPI values are shared-socket diagnostics.
 
 ## Frozen source
 
@@ -118,13 +121,17 @@ read-only seal.
 
 - Positive NAPI identifiers do not reveal an RSS key, hash fields, or
   indirection entry.
+- Multiple NAPI identifiers do not prove CPU fanout, RSS as the unique cause,
+  or a one-to-one queue/NAPI mapping.
 - A stable flow placement does not prove which hardware hash caused it.
 - A shared server socket's incoming CPU and NAPI values are socket-wide
   diagnostics, not per-flow observations.
 - Interrupt deltas include ambient work and interrupt moderation. They are not
   packet counts.
-- Zero RPS, RFS, or XPS files show configuration on the observed host. They do
-  not prove a universal default.
+- Zero RPS/RFS files exclude classic generic RPS and software RFS on the
+  inspected ingress queues. They do not exclude redirects or another device or
+  driver path. Zero XPS map files exclude only those map families, not every driver
+  TX-queue selection policy. They do not prove a universal default.
 - A missing or unsupported `ethtool` query remains missing capability evidence.
 - The two hosts differ in far more than instruction set. Cross-host differences
   do not establish architecture or vendor effects.

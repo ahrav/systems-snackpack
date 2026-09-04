@@ -17,9 +17,12 @@
   queue selection. Vendor kernels may backport later behavior.
 - [Linux v6.12 `net/ipv4/udp.c`](https://github.com/torvalds/linux/blob/v6.12/net/ipv4/udp.c)
   is pinned implementation evidence for the different incoming CPU and NAPI
-  updates on connected UDP sockets and a wildcard-bound shared server socket.
+  updates on connected and unconnected UDP sockets.
   This is why the experiment uses connected client sockets for per-flow
   placement observations and labels the server values as socket-wide only.
+- [Linux v6.12 busy-poll helpers](https://github.com/torvalds/linux/blob/v6.12/include/net/busy_poll.h)
+  define valid NAPI-ID storage, the build-time busy-poll gate, and the one-shot
+  update used by unconnected UDP.
 - [Amazon EC2 ENA queue guidance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ena-queues.html)
   describes queue availability and queue-count considerations for ENA-backed
   instances.
@@ -32,7 +35,9 @@
 The Linux documentation pages track current upstream documentation. The source
 link is pinned to v6.12 because both required experiment hosts run Amazon Linux
 vendor 6.12 kernels. A matching major and minor version does not prove matching
-source. Distro and provider kernels backport changes.
+source. Distro and provider kernels backport changes. In particular, current
+RSS-table and RFS-size rules of thumb postdate v6.12 and remain guidance rather
+than kernel contracts.
 
 Documentation and source establish mechanism and interface contracts. Host
 receipts establish only what the scripts observed on the named host. When an
@@ -46,8 +51,8 @@ Useful claims and their evidence class:
 |---|---|
 | RSS selects a hardware RX queue before the host stack | Linux scaling documentation |
 | RPS can enqueue receive work to another CPU backlog | Linux scaling documentation and pinned v6.12 source |
-| RFS delays migration until old queued work drains | Linux scaling documentation and pinned v6.12 source |
+| An ordinary matched-entry desired-CPU change waits for the recorded old backlog tail to drain; unset/offline targets are exceptions | Linux scaling documentation and pinned v6.12 source |
 | XPS maps CPUs or RX queues to TX queues | Linux scaling documentation and pinned v6.12 source |
 | A named host exposed a queue count or zero steering map | Exact-run host receipt |
-| Positive NAPI fanout with RPS and RFS disabled is consistent with hardware fanout | Inference from exact-run observations |
+| Positive connected-socket NAPI-ID fanout with classic RPS and software RFS unconfigured on the inspected ingress queues supports multiple observed NAPI origins, not RSS or CPU fanout | Inference from exact-run observations |
 | A particular RSS key or indirection entry caused a flow placement | Requires direct device inspection; not established when `ethtool` is absent |
