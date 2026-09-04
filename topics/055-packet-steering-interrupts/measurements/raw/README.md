@@ -17,3 +17,7 @@ Before removing remote scratch:
 Git stores compact controller-validation results, external archive locators,
 source identity, runtime `xxl` resolution, and hashes of those compact files.
 It does not store the full receipts.
+
+Accepted bundles:
+
+- [`2026-09-04-d20ee11`](2026-09-04-d20ee11/README.md)

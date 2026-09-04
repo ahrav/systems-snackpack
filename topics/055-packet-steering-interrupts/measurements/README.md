@@ -70,3 +70,10 @@ The records must state these limits:
 
 Pre-commit exploration is not publication evidence. Only receipts built from
 the final path-limited Git archive qualify.
+
+## Accepted campaign
+
+The accepted `2026-09-04` campaign is summarized in the [Arm
+record](2026-09-04-arm.md), [`xxl` record](2026-09-04-xxl.md), and [cross-host
+comparison](2026-09-04-comparison.md). Compact validator outputs and retained
+receipt locators are under [`raw/2026-09-04-d20ee11`](raw/2026-09-04-d20ee11/README.md).

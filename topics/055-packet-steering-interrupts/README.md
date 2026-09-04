@@ -336,6 +336,21 @@ ambient traffic and moderation, so they are retained as diagnostics rather
 than packet counts. An earlier DNS probe routed through loopback and was
 discarded as physical-path evidence.
 
+## Exact-source accepted observation
+
+The final campaign built source commit
+`d20ee11bbb3c2cef2e98a69194d287783c5e29d6` from one path-limited archive on
+both hosts. It ran 24 fresh periods in both directions and passed independent
+validation of both 149-file sealed receipts.
+
+Every connected client flow kept a stable peer, known incoming CPU, and
+positive stable NAPI identifier. Each 128-flow run observed eight CPUs and
+eight NAPI identifiers on the Arm host, and 16 of each on `xxl`. The hosts
+exposed eight and 16 RX queues respectively. All observed RPS, RFS, and XPS
+maps remained zero. These observations are consistent with receive fanout
+before optional software steering, but they do not expose the RSS hash or
+indirection table. See the [accepted comparison](measurements/2026-09-04-comparison.md).
+
 ## Evidence boundary
 
 Keep these evidence classes separate:
