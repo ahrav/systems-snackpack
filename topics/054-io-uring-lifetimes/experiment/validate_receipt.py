@@ -96,8 +96,13 @@ def semantic_output(text: str) -> dict[str, object]:
 
 
 def _receipt_files(receipt: Path) -> list[Path]:
+    def _fail(error: OSError) -> None:
+        raise ValueError(f"receipt cannot be fully traversed: {error}")
+
     files: list[Path] = []
-    for root, directories, names in os.walk(receipt, followlinks=False):
+    for root, directories, names in os.walk(
+        receipt, onerror=_fail, followlinks=False
+    ):
         root_path = Path(root)
         for name in [*directories, *names]:
             path = root_path / name

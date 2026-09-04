@@ -346,6 +346,13 @@ pub const fn visible_completion_bound_us(
     }
 }
 
+/// Largest SQ ring size `io_uring_setup` accepts (`IORING_MAX_ENTRIES`).
+pub const MAX_SQ_ENTRIES: u64 = 32_768;
+
+/// Largest explicit CQ ring size `IORING_SETUP_CQSIZE` accepts
+/// (`IORING_MAX_CQ_ENTRIES`).
+pub const MAX_CQ_ENTRIES: u64 = 65_536;
+
 /// Returns a checked power-of-two CQ size for an SQ and one completion burst.
 ///
 /// The unrounded requirement is
@@ -357,9 +364,11 @@ pub const fn visible_completion_bound_us(
 ///
 /// # Errors
 ///
-/// Returns `None` if `sq_entries` is zero, the multiplication, ceiling
-/// adjustment, or either addition exceeds [`u64::MAX`], or either next power
-/// of two is not representable as a `u64`.
+/// Returns `None` when `sq_entries` is zero, checked arithmetic overflows,
+/// a required power of two is unrepresentable, the rounded SQ exceeds
+/// [`MAX_SQ_ENTRIES`], or the CQ exceeds [`MAX_CQ_ENTRIES`]. When the CQ
+/// requirement exceeds [`MAX_CQ_ENTRIES`], split work across rings or drain
+/// more often.
 #[must_use]
 pub const fn required_cq_entries(
     sq_entries: u64,
@@ -375,6 +384,9 @@ pub const fn required_cq_entries(
         Some(value) => value,
         None => return None,
     };
+    if rounded_sq > MAX_SQ_ENTRIES {
+        return None;
+    }
     let product = match burst_cqes_per_second.checked_mul(drain_interval_us) {
         Some(value) => value,
         None => return None,
@@ -395,11 +407,15 @@ pub const fn required_cq_entries(
         Some(value) => value,
         None => return None,
     };
-    Some(if rounded_sq > rounded_burst {
+    let cq_entries = if rounded_sq > rounded_burst {
         rounded_sq
     } else {
         rounded_burst
-    })
+    };
+    if cq_entries > MAX_CQ_ENTRIES {
+        return None;
+    }
+    Some(cq_entries)
 }
 
 #[cfg(test)]
@@ -542,6 +558,23 @@ mod tests {
     fn cq_size_never_undersizes_rounded_sq() {
         assert_eq!(required_cq_entries(300, 0, 0, 0, 0), Some(512));
         assert_eq!(required_cq_entries(0, 50_000, 2_000, 24, 32), None);
+    }
+
+    #[test]
+    fn cq_size_fails_closed_on_ring_limits() {
+        assert_eq!(
+            required_cq_entries(MAX_SQ_ENTRIES, 0, 0, 0, 0),
+            Some(MAX_SQ_ENTRIES)
+        );
+        assert_eq!(
+            required_cq_entries(MAX_SQ_ENTRIES, MAX_CQ_ENTRIES, 1_000_000, 0, 0),
+            Some(MAX_CQ_ENTRIES)
+        );
+        assert_eq!(required_cq_entries(MAX_SQ_ENTRIES + 1, 0, 0, 0, 0), None);
+        assert_eq!(
+            required_cq_entries(MAX_SQ_ENTRIES, MAX_CQ_ENTRIES + 1, 1_000_000, 0, 0),
+            None
+        );
     }
 
     #[test]
