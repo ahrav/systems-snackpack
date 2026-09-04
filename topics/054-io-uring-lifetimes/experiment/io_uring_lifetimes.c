@@ -274,8 +274,17 @@ static int test_deferred_progress(void)
         return rc;
     }
 
+    /* The full 80 ms must elapse before sampling readiness: an
+     * EINTR-interrupted sleep lets the 20 ms timeout fire during
+     * ring_enter() instead, passing without proving deferred delivery.
+     * Resume with the kernel-reported remainder on EINTR. */
     struct timespec pause = {.tv_sec = 0, .tv_nsec = 80 * 1000 * 1000};
-    nanosleep(&pause, NULL);
+    while (nanosleep(&pause, &pause) != 0) {
+        if (errno != EINTR) {
+            ring_close(&r);
+            return -errno;
+        }
+    }
     unsigned before = ring_ready(&r);
     rc = ring_enter(&r, 0, 1, IORING_ENTER_GETEVENTS);
     struct io_uring_cqe cqe;

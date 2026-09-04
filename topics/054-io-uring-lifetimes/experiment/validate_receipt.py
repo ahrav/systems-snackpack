@@ -240,6 +240,10 @@ def validate(
         raise ValueError("expected source identity is malformed")
     if not receipt.is_dir() or receipt.is_symlink():
         raise ValueError("receipt is not a real directory")
+    # _receipt_files() walks only descendants; a writable root can replace
+    # direct read-only entries after validation.
+    if receipt.stat().st_mode & 0o222:
+        raise ValueError("receipt root retains write permission")
     files = _receipt_files(receipt)
     if not (receipt / "SEALED").is_file() or (receipt / "SEALED").stat().st_size != 0:
         raise ValueError("receipt lacks an empty SEALED marker")
