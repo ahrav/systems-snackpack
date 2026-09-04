@@ -102,7 +102,7 @@ run_direction() {
     local client_host=$9
     local client_receipt=${10}
     local client_name=${11}
-    local port=$((46_000 + sequence))
+    local port=$((46000 + sequence))
     local server_job
 
     ssh "$server_host" \
