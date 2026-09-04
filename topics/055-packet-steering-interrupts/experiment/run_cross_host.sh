@@ -96,7 +96,7 @@ stop_server_job() {
     local host=$1
     local receipt=$2
     local job=$3
-    ssh -n "$host" "pkill -f -- '$receipt/bin/udp_steering_probe'" 2>/dev/null || true
+    timeout 10 ssh -n "$host" "pkill -f -- '$receipt/bin/udp_steering_probe'" 2>/dev/null || true
     kill -- "$job" 2>/dev/null || true
     wait "$job" 2>/dev/null || true
 }

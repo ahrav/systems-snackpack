@@ -156,7 +156,10 @@ PY
 
     local source_work
     source_work=$(mktemp -d /tmp/topic55-source.XXXXXXXX)
-    trap 'rm -rf -- "$source_work"' EXIT
+    # The trap expands at exit, after this local is gone, so bake the path in now.
+    local cleanup_command
+    printf -v cleanup_command 'rm -rf -- %q' "$source_work"
+    trap "$cleanup_command" EXIT
     tar -xzf "$archive_path" --no-same-owner -C "$source_work"
     local archive_root="$source_work/${source_prefix%/}"
     local topic_dir="$archive_root/${topic_prefix%/}"
