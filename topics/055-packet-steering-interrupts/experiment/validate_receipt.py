@@ -178,7 +178,7 @@ def validate_manifest(root: Path) -> tuple[int, str]:
         require(not path.is_symlink(), f"receipt contains a link: {relative}")
         mode = path.stat().st_mode
         require(mode & WRITE_BITS == 0, f"receipt path is writable: {relative}")
-        if path.is_file() and path.name != "MANIFEST.sha256":
+        if path.is_file() and path != manifest:
             observed.add(relative)
             require(relative in declared, f"manifest omits {relative}")
             require(sha256_file(path) == declared[relative], f"hash differs: {relative}")
@@ -239,6 +239,7 @@ def validate(args: argparse.Namespace) -> dict[str, object]:
     require(root.is_dir(), "receipt is not a directory")
     require(HEX40.fullmatch(args.commit) is not None, "expected commit is invalid")
     require(HEX64.fullmatch(args.archive_sha256) is not None, "expected archive hash is invalid")
+    receipt_files, manifest_sha256 = validate_manifest(root)
     require((root / "STATE").read_text(encoding="utf-8") == "sealed\n", "receipt is not sealed")
     require((root / "SEALED").is_file(), "seal marker is missing")
 
@@ -346,9 +347,13 @@ def validate(args: argparse.Namespace) -> dict[str, object]:
                 flow_cpus.add(cpu)
                 flow_napis.add(napi)
                 positive_napis.add(napi)
-            require(int(summary["unique_cpus"]) == len(flow_cpus), f"{output.name}: CPU aggregate differs")
-            require(int(summary["unique_napi_ids"]) == len(flow_napis), f"{output.name}: NAPI aggregate differs")
-            require(int(summary["positive_napi_ids"]) == len(flow_napis), f"{output.name}: positive NAPI aggregate differs")
+            for key, expected_count in (
+                ("unique_cpus", len(flow_cpus)),
+                ("unique_napi_ids", len(flow_napis)),
+                ("positive_napi_ids", len(flow_napis)),
+            ):
+                require(key in summary, f"{output.name}: summary lacks {key}")
+                require(int(summary[key]) == expected_count, f"{output.name}: {key} aggregate differs")
         else:
             server_outputs += 1
             for line in flow_lines:
@@ -393,8 +398,8 @@ def validate(args: argparse.Namespace) -> dict[str, object]:
         == (root / "host/irq-affinity.seal.txt").read_bytes(),
         "IRQ affinity changed during the campaign",
     )
-    require("test result: ok" in (root / "build/model-tests.txt").read_text(), "model tests failed")
-    require("test result: ok" in (root / "build/doctests.txt").read_text(), "doctests failed")
+    require("test result: ok" in (root / "build/model-tests.txt").read_text(encoding="utf-8"), "model tests failed")
+    require("test result: ok" in (root / "build/doctests.txt").read_text(encoding="utf-8"), "doctests failed")
     example = (root / "build/steering-costs.txt").read_text(encoding="utf-8")
     for line in (
         "balanced_queue_utilization=0.093333",
@@ -405,7 +410,6 @@ def validate(args: argparse.Namespace) -> dict[str, object]:
     ):
         require(line in example, f"checked model output is missing: {line}")
 
-    receipt_files, manifest_sha256 = validate_manifest(root)
     queue_text = (root / "host/queues.txt").read_text(encoding="utf-8")
     route_interface = next(iter(route_interfaces))
     queue_marker = f"/net/{route_interface}/queues/"

@@ -134,9 +134,9 @@ pub struct QueueUtilization {
 /// # Errors
 ///
 /// Returns [`CostError::NonFinite`] or [`CostError::Negative`] for invalid
-/// floating-point inputs, [`CostError::ZeroDenominator`] for a zero per-packet
-/// cost or cycle rate, and [`CostError::Overflow`] for an unrepresentable sum
-/// or result.
+/// floating-point inputs, [`CostError::ZeroDenominator`] when an input or the
+/// derived service rate is zero, and [`CostError::Overflow`] for an
+/// unrepresentable sum or result.
 pub fn queue_utilization(
     flow_rates_packets_per_second: &[f64],
     receive_cycles_per_packet: f64,
@@ -151,6 +151,7 @@ pub fn queue_utilization(
         arrival = finite_result(arrival + rate)?;
     }
     let service = finite_result(usable_cycles_per_second / receive_cycles_per_packet)?;
+    positive(service)?;
     let utilization = finite_result(arrival / service)?;
     Ok(QueueUtilization {
         arrival_packets_per_second: arrival,

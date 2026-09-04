@@ -156,7 +156,7 @@ PY
 
     local source_work
     source_work=$(mktemp -d /tmp/topic55-source.XXXXXXXX)
-    trap 'rm -rf -- "$source_work"' RETURN
+    trap 'rm -rf -- "$source_work"' EXIT
     tar -xzf "$archive_path" --no-same-owner -C "$source_work"
     local archive_root="$source_work/${source_prefix%/}"
     local topic_dir="$archive_root/${topic_prefix%/}"
@@ -322,8 +322,14 @@ seal() {
     local output_count
     output_count=$(find "$receipt/campaign" -type f -name '*.out' | wc -l | awk '{print $1}')
     [[ $output_count -eq 48 ]] || fail "expected 48 probe outputs, found $output_count"
+    local error_count
+    error_count=$(find "$receipt/campaign" -type f -name '*.err' | wc -l | awk '{print $1}')
+    [[ $error_count -eq 48 ]] || fail "expected 48 probe stderr artifacts, found $error_count"
     local output
     while IFS= read -r output; do
+        local error_file=${output%.out}.err
+        [[ -f $error_file ]] || fail "probe stderr artifact is missing: $error_file"
+        [[ ! -s $error_file ]] || fail "probe stderr artifact is nonempty: $error_file"
         [[ $(grep -c '^summary status=ok ' "$output") -eq 1 ]] || \
             fail "probe output lacks one successful summary: $output"
         local summary
@@ -349,21 +355,32 @@ seal() {
     cp -- /proc/net/softnet_stat "$receipt/host/softnet.seal.txt"
     write_steering_state "$receipt/host/steering.seal.txt"
     write_irq_affinity "$receipt/host/irq-affinity.seal.txt"
-    printf 'sealed\n' >"$receipt/STATE"
-    printf 'source-bound correctness and placement receipt; no timing claim\n' >"$receipt/SEALED"
-    local manifest_temporary
-    manifest_temporary=$(mktemp /tmp/topic55-manifest.XXXXXXXX)
+    # Every step between the STATE flip and the final read-only transition is
+    # guarded: a mid-seal failure restores the prepared state so seal can rerun.
+    manifest_temporary=''
+    seal_rollback() {
+        chmod -R u+w -- "$receipt" 2>/dev/null || true
+        rm -f -- "$receipt/SEALED" "$receipt/MANIFEST.sha256"
+        [[ -n $manifest_temporary ]] && rm -f -- "$manifest_temporary"
+        printf 'prepared\n' >"$receipt/STATE"
+        fail 'sealing failed; receipt restored to prepared'
+    }
+    printf 'sealed\n' >"$receipt/STATE" || seal_rollback
+    printf 'source-bound correctness and placement receipt; no timing claim\n' \
+        >"$receipt/SEALED" || seal_rollback
+    manifest_temporary=$(mktemp /tmp/topic55-manifest.XXXXXXXX) || seal_rollback
     (
         cd "$receipt"
         find . -type f ! -name MANIFEST.sha256 -print0 | LC_ALL=C sort -z | \
             xargs -0 sha256sum
-    ) >"$manifest_temporary"
-    mv -- "$manifest_temporary" "$receipt/MANIFEST.sha256"
+    ) >"$manifest_temporary" || seal_rollback
+    mv -- "$manifest_temporary" "$receipt/MANIFEST.sha256" || seal_rollback
+    manifest_temporary=''
     local manifest_sha256
     local files
-    manifest_sha256=$(sha256sum -- "$receipt/MANIFEST.sha256" | awk '{print $1}')
-    files=$(wc -l <"$receipt/MANIFEST.sha256" | awk '{print $1}')
-    chmod -R a-w -- "$receipt"
+    manifest_sha256=$(sha256sum -- "$receipt/MANIFEST.sha256" | awk '{print $1}') || seal_rollback
+    files=$(wc -l <"$receipt/MANIFEST.sha256" | awk '{print $1}') || seal_rollback
+    chmod -R a-w -- "$receipt" || seal_rollback
     printf 'SEAL_OK receipt=%s files=%s manifest_sha256=%s\n' \
         "$receipt" "$files" "$manifest_sha256"
 }

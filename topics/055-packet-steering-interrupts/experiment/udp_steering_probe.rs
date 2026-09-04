@@ -39,11 +39,16 @@ fn socket_i32(socket: &UdpSocket, option_name: i32) -> io::Result<i32> {
             &raw mut length,
         )
     };
-    if result == 0 && length as usize == size_of::<i32>() {
-        Ok(value)
-    } else {
-        Err(io::Error::last_os_error())
+    if result != 0 {
+        return Err(io::Error::last_os_error());
     }
+    if length as usize != size_of::<i32>() {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "getsockopt returned an unexpected option length",
+        ));
+    }
+    Ok(value)
 }
 
 fn message(flow: u32, sequence: u32) -> [u8; MESSAGE_BYTES] {
@@ -279,7 +284,11 @@ fn run_client(
 }
 
 fn parse_endpoint(ip: &str, port: &str) -> Result<SocketAddrV4, Box<dyn std::error::Error>> {
-    Ok(SocketAddrV4::new(ip.parse()?, port.parse()?))
+    let port: u16 = port.parse()?;
+    if port == 0 {
+        return Err("port must be nonzero".into());
+    }
+    Ok(SocketAddrV4::new(ip.parse()?, port))
 }
 
 fn valid_sha256(value: &str) -> bool {

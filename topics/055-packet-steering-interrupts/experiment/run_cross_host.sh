@@ -28,7 +28,7 @@ x86_receipt=$7
 x86_ip=$8
 
 for host in "$arm_host" "$x86_host"; do
-    [[ -n $host && $host != *[!A-Za-z0-9._-]* ]] || fail "unsafe host: $host"
+    [[ $host == [A-Za-z0-9]* && $host != *[!A-Za-z0-9._-]* ]] || fail "unsafe host: $host"
 done
 for path in "$arm_runner" "$arm_receipt" "$x86_runner" "$x86_receipt"; do
     [[ $path == /* && $path != *[!A-Za-z0-9._/-]* ]] || fail "unsafe remote path: $path"
@@ -90,6 +90,17 @@ write_plan "$x86_host" "$x86_receipt"
 ssh "$arm_host" "'$arm_runner' snapshot '$arm_receipt' before '$x86_ip'"
 ssh "$x86_host" "'$x86_runner' snapshot '$x86_receipt' before '$arm_ip'"
 
+# The remote probe holds its UDP port for up to a 30-second read timeout;
+# killing it before reaping the SSH job keeps error reporting immediate.
+stop_server_job() {
+    local host=$1
+    local receipt=$2
+    local job=$3
+    ssh -n "$host" "pkill -f -- '$receipt/bin/udp_steering_probe'" 2>/dev/null || true
+    kill -- "$job" 2>/dev/null || true
+    wait "$job" 2>/dev/null || true
+}
+
 run_direction() {
     local sequence=$1
     local stem=$2
@@ -105,10 +116,10 @@ run_direction() {
     local port=$((46000 + sequence))
     local server_job
 
-    ssh "$server_host" \
+    ssh -n "$server_host" \
         "'$server_receipt/bin/udp_steering_probe' server '$server_ip' '$port' '$flows' '$packets_per_flow' '$source_sha256' >'$server_receipt/campaign/$stem-$server_name.out' 2>'$server_receipt/campaign/$stem-$server_name.err'" &
     server_job=$!
-    ready=0
+    local ready=0
     for _ in {1..40}; do
         if ! kill -0 "$server_job" 2>/dev/null; then
             wait "$server_job" || true
@@ -122,12 +133,12 @@ run_direction() {
         sleep 0.25
     done
     if ((ready == 0)); then
-        wait "$server_job" || true
+        stop_server_job "$server_host" "$server_receipt" "$server_job"
         fail "server did not become ready: $stem $server_name"
     fi
     if ! ssh "$client_host" \
         "'$client_receipt/bin/udp_steering_probe' client '$server_ip' '$port' '$flows' '$packets_per_flow' '$source_sha256' >'$client_receipt/campaign/$stem-$client_name.out' 2>'$client_receipt/campaign/$stem-$client_name.err'"; then
-        wait "$server_job" || true
+        stop_server_job "$server_host" "$server_receipt" "$server_job"
         fail "client failed: $stem $client_name"
     fi
     wait "$server_job" || fail "server failed: $stem $server_name"
