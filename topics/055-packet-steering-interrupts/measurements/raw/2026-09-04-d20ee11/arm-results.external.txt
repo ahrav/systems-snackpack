@@ -1,0 +1,6 @@
+evidence_root=/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-055/2026-09-04-d20ee11
+receipt_directory=/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-055/2026-09-04-d20ee11/arm
+receipt_archive=/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-055/2026-09-04-d20ee11/topic55-arm-d20ee11-receipt.tar.gz
+receipt_archive_sha256=6c88276ee3555a49fa796d27d687c90710dd53849372f32fe3eee88482bb6559
+manifest_sha256=93147418905698b44b7c4cddcd14b1c1bd0dd8964a82784be6cd90d798a0a75b
+receipt_files=149
