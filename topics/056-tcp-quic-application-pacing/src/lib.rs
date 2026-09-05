@@ -19,7 +19,7 @@ use std::io;
 const NS_PER_SECOND: u128 = 1_000_000_000;
 
 /// The result of one nonblocking admission attempt.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Admission {
     /// There was no input. The writer was not called.
     Empty,

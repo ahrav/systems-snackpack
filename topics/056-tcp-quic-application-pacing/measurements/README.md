@@ -8,14 +8,15 @@ and after source manifests match. Each sealed receipt contains 11 data files.
 
 | Host | Correctness | No-pause overdue/capped burst | Paused overdue/capped burst |
 | --- | --- | --- | --- |
-| Arm, 64 online CPUs, implementer 0x41 / part 0xd40 | 7 tests passed | 1 / 2 chunks | 51 / 2 chunks |
+| Arm, 64 online CPUs, lscpu Vendor ARM / Model 1 | 7 tests passed | 1 / 2 chunks | 51 / 2 chunks |
 | xxl, x86-64, Xeon Platinum 8488C, 192 online CPUs | 7 tests passed | 1 / 2 chunks | 51 / 2 chunks |
 
 The xxl alias resolved at runtime to
 `dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com` and returned `x86_64`.
 Arm host: `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`.
 Kernel, toolchain, available CPU counts, and default build features are in the
-host records. The Arm model was recorded through its numeric implementer/part;
+host records. The Arm model is identified from the committed host record's lscpu output
+(Vendor ID ARM, Model 1, Stepping r1p1);
 no processor marketing name is inferred.
 
 Compact test logs trim surrounding blank lines; full logs remain in the sealed
