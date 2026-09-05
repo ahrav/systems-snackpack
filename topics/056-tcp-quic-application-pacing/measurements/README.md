@@ -18,6 +18,9 @@ Kernel, toolchain, available CPU counts, and default build features are in the
 host records. The Arm model was recorded through its numeric implementer/part;
 no processor marketing name is inferred.
 
+Compact test logs trim surrounding blank lines; full logs remain in the sealed
+receipts.
+
 Both examples admitted all 100 chunks and checked every contiguous interval
 against the capped byte envelope. Simulated completion times were 9,900/9,800
 microseconds without the pause and 9,900/14,700 with it, overdue/capped.
