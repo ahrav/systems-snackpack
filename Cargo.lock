@@ -211,6 +211,10 @@ name = "tail-latency-histogram-merge-errors"
 version = "0.1.0"
 
 [[package]]
+name = "tcp-quic-application-pacing"
+version = "0.1.0"
+
+[[package]]
 name = "topic-021-store-write-path"
 version = "0.1.0"
 
