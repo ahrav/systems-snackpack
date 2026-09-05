@@ -1,0 +1,10 @@
+{
+  "host": "arm",
+  "archive_sha256": "9591abf3439d621a55301e4afadf46f1af12ffc9d9d6df011365a6fce60f087f",
+  "manifest_sha256": "f0b8a5a639df7f643435db160d8ed298c27b788dc0651c66a2768fdec3a2fab0",
+  "source_head": "b2473a3d231f3504b483ce0b33e60b9d28b61f90",
+  "verified_files": 11,
+  "source_matches_git": true,
+  "tests_passed": 7,
+  "timing_claim": false
+}

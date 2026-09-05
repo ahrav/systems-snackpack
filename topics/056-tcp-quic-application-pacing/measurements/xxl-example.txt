@@ -1,0 +1,2 @@
+pause=false overdue_burst=1 capped_burst=2 overdue_finish_us=9900 capped_finish_us=9800
+pause=true overdue_burst=51 capped_burst=2 overdue_finish_us=9900 capped_finish_us=14700

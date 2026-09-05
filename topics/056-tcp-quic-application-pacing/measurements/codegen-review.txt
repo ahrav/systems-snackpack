@@ -1,0 +1,1 @@
+Reviewed 2026-09-05. Arm pacing.s:1056-1062 retains refill multiply/add and cmp #2400 with csel. x86 pacing.s:946-954 retains elapsed calculation, scaled adds, cmp $2400 and cmovaeq. Library test assembly also retains scaled-credit saturation and capped refill (x86 lines 1162-1178). These are code-shape observations only; no speed comparison or transport-pacing inference.
