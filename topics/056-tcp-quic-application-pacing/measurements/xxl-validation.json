@@ -1,0 +1,10 @@
+{
+  "host": "xxl",
+  "receipt_archive_sha256": "c364b2886aa911808ba0ae6f44db4e7af6cec73c660a2359c678862c55ac3853",
+  "manifest_sha256": "88e6e523ed30ee7344f38942c96e39570be71140d9a3da424fab1a7ea5444cec",
+  "source_head": "b2473a3d231f3504b483ce0b33e60b9d28b61f90",
+  "verified_files": 11,
+  "source_matches_git": true,
+  "tests_passed": 7,
+  "timing_claim": false
+}

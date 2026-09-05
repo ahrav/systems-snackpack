@@ -1,0 +1,5 @@
+source_head=b2473a3d231f3504b483ce0b33e60b9d28b61f90
+archive_sha256=bb1a91a03b2b4a55863023982cd553988bc959b8ff2d3c4a46c767cdcf3e5432
+runner_sha256=88dd527034c211697f6ef4eb8b4c8d62762be9fb25d72e7050e2681559b5d7b1
+expected_arch=x86_64
+flags=--edition=2024 -D warnings -C opt-level=2; default target CPU/features

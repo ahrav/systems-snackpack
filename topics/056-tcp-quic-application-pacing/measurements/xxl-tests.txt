@@ -1,0 +1,10 @@
+running 7 tests
+test tests::fractional_refill_survives_frequent_polls ... ok
+test tests::every_interval_obeys_the_byte_envelope_under_partial_and_blocked_writes ... ok
+test tests::invalid_configuration_empty_input_and_writer_errors ... ok
+test tests::partial_write_preserves_suffix_and_charges_only_accepted_bytes ... ok
+test tests::pause_and_extreme_arithmetic_never_exceed_capacity ... ok
+test tests::regression_leaves_state_and_writer_untouched ... ok
+test tests::would_block_does_not_consume_credit ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

@@ -1,0 +1,7 @@
+ccafd475afa05fbb1d425c1ee85d80fdc7c7bb369d9ca6fa96c5dcaf0b5348d9  topics/056-tcp-quic-application-pacing/Cargo.toml
+eab642269a51af0a06d6b74df52d1f2925c630533fa1a21bfce98195824c41dd  topics/056-tcp-quic-application-pacing/README.md
+d5f2859e7a5ce1ac61e95063b1a53566f2900f5eb81f6a0ba485b356c7548073  topics/056-tcp-quic-application-pacing/examples/pacing.rs
+88dd527034c211697f6ef4eb8b4c8d62762be9fb25d72e7050e2681559b5d7b1  topics/056-tcp-quic-application-pacing/experiment/run_host.sh
+7d400bd0bc1e9e994e5914cd8116f759023fb3421146255f3d2e557392220f54  topics/056-tcp-quic-application-pacing/references.md
+3cd3c025f927a1fade4ee6016988940eff1a9c73a1dc8343e1aeccaf2ba67c4f  topics/056-tcp-quic-application-pacing/rounds/01.md
+66e9e4545d443c93bef4aaaf2375bcc5153ec79d4974cc70a2a936b2c44c5912  topics/056-tcp-quic-application-pacing/src/lib.rs

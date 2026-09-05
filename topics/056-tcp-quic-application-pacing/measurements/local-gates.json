@@ -1,0 +1,59 @@
+[
+  {
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--lib",
+      "--examples"
+    ],
+    "exit_code": 0,
+    "log": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-056/2026-09-05-b2473a3/gate-0.log"
+  },
+  {
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--doc"
+    ],
+    "exit_code": 0,
+    "log": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-056/2026-09-05-b2473a3/gate-1.log"
+  },
+  {
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "log": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-056/2026-09-05-b2473a3/gate-2.log"
+  },
+  {
+    "command": [
+      "cargo",
+      "bench",
+      "--workspace",
+      "--no-run"
+    ],
+    "exit_code": 0,
+    "log": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-056/2026-09-05-b2473a3/gate-3.log"
+  },
+  {
+    "command": [
+      "cargo",
+      "doc",
+      "--workspace",
+      "--no-deps"
+    ],
+    "exit_code": 0,
+    "log": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-056/2026-09-05-b2473a3/gate-4.log",
+    "environment": {
+      "RUSTDOCFLAGS": "-D warnings"
+    }
+  }
+]
