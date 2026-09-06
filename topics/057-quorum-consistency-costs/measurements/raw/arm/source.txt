@@ -1,0 +1,6 @@
+source_commit=8754251dfb00b8af11e2ede2e6b33b4d482a5ada
+archive_sha256=c3c650551519dbf89d3b0fe9d28e4a09d0cd72a7dce522b256bf7c240d2440ee
+c3c650551519dbf89d3b0fe9d28e4a09d0cd72a7dce522b256bf7c240d2440ee  /tmp/topic57-initial-arm.rMZmGx8w/topic57-source.tar.gz
+5ddd9ff6d8438b87f3e5001096f80c99341dbffe9d1403112762bf0d38d00d2e  ../run_host.sh
+f58e7390ff5a414a595ae1dfc426dd1d2e7f7c4efa00a138eb18da120f32dce5  source/topics/057-quorum-consistency-costs/src/lib.rs
+caabc7a1c70e93817edbca4c810e0ba8ed7fb520cd34436763a2c78413e924a5  source/topics/057-quorum-consistency-costs/examples/quorum.rs
