@@ -2,13 +2,21 @@
 
 ## Frozen identity
 
-- Source commit: `8754251dfb00b8af11e2ede2e6b33b4d482a5ada`.
-- Path-limited archive SHA-256: `c3c650551519dbf89d3b0fe9d28e4a09d0cd72a7dce522b256bf7c240d2440ee`.
-- Exact runner SHA-256: `5ddd9ff6d8438b87f3e5001096f80c99341dbffe9d1403112762bf0d38d00d2e`.
+- Source commit: `4e006d61e733c3f2c011d8343ee25351f6b1d085`.
+- Path-limited archive SHA-256: `88bf2c81f61b8b7b5339504634918ca1dd30443338329f0355b3594051986a55`.
+- Exact runner SHA-256: `b7361b10e892fa5b8e470ff187deab568655046736fc14a4300dea8089ffbfd2`.
 - Scope: root Cargo.toml/Cargo.lock and this topic only. Remote archive hashes
   matched; the transferred runner matched the archived runner byte for byte.
-- The later evidence commit changes documentation and receipts only. Rust and
-  runner bytes remain identical to the tested source commit.
+- The runner reads the commit ID that `git archive` stores in the tar's pax
+  global header and refuses to run unless it equals the supplied source commit,
+  so `source.txt` cannot name a commit the digest-verified archive does not
+  contain. A deliberate mismatch run on the x86 host exited 1 before writing
+  any receipt.
+- Rust source bytes (`src/lib.rs`, `examples/quorum.rs`) are identical to the
+  first tested commit `8754251dfb00b8af11e2ede2e6b33b4d482a5ada`; only the
+  runner and receipts changed between the two runs. Both hosts' `library.s`
+  and `quorum` example binaries hash identically across the two runs; only the
+  rlib metadata (both hosts) and the x86 test binary differ.
 
 ## Hosts and results
 
