@@ -1,0 +1,13 @@
+
+running 9 tests
+test tests::delayed_older_message_cannot_erase_newer_tag ... ok
+test tests::completed_write_is_visible_to_every_intersecting_read ... ok
+test tests::incomplete_write_allows_read_inversion ... ok
+test tests::invalid_sets_never_mutate ... ok
+test tests::no_write_control_stays_at_zero ... ok
+test tests::phase_cost_uses_threshold_and_reachable_responses ... ok
+test tests::sloppy_sets_use_a_different_universe ... ok
+test tests::strict_overlap_matches_all_sets_through_seven_replicas ... ok
+test tests::write_back_protects_every_later_majority ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s

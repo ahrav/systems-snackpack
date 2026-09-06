@@ -1,0 +1,6 @@
+source_commit=4e006d61e733c3f2c011d8343ee25351f6b1d085
+archive_sha256=88bf2c81f61b8b7b5339504634918ca1dd30443338329f0355b3594051986a55
+88bf2c81f61b8b7b5339504634918ca1dd30443338329f0355b3594051986a55  /tmp/topic57-rerun-arm.HXTF2qow/topic57-source.tar.gz
+b7361b10e892fa5b8e470ff187deab568655046736fc14a4300dea8089ffbfd2  ../run_host.sh
+f58e7390ff5a414a595ae1dfc426dd1d2e7f7c4efa00a138eb18da120f32dce5  source/topics/057-quorum-consistency-costs/src/lib.rs
+caabc7a1c70e93817edbca4c810e0ba8ed7fb520cd34436763a2c78413e924a5  source/topics/057-quorum-consistency-costs/examples/quorum.rs

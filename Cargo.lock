@@ -135,6 +135,10 @@ name = "queueing-service-design"
 version = "0.1.0"
 
 [[package]]
+name = "quorum-consistency-costs"
+version = "0.1.0"
+
+[[package]]
 name = "roaring-bitmaps-compressed-sets"
 version = "0.1.0"
 

@@ -1,0 +1,4 @@
+without write-back: 1 then 0
+write-back protected 9/9 quorum pairs
+hypothetical phase=4200000 ns; two equal phases=8400000 ns
+correctness model only; no transport timing measured
