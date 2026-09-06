@@ -11,4 +11,3 @@ test tests::strict_overlap_matches_all_sets_through_seven_replicas ... ok
 test tests::write_back_protects_every_later_majority ... ok
 
 test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
-

@@ -60,3 +60,6 @@ source archive, runner, native assembly, linked disassembly, binaries, initial
 logs and local gate logs are retained in the curriculum evidence directory for
 Topic 57. The full receipt includes hashes of large replay assets omitted from
 this compact repository artifact.
+
+Repository test-log copies trim trailing blank lines for diff hygiene. Their
+SHA256SUMS cover those copies; retained sealed originals remain unchanged.
