@@ -1,0 +1,83 @@
+[
+  {
+    "gate": "diff",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "time": "2026-09-09T16:49:12.257759+00:00"
+  },
+  {
+    "gate": "fmt",
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit_code": 0,
+    "time": "2026-09-09T16:49:12.942478+00:00"
+  },
+  {
+    "gate": "tests",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--lib",
+      "--examples"
+    ],
+    "exit_code": 0,
+    "time": "2026-09-09T16:50:12.464721+00:00"
+  },
+  {
+    "gate": "doctests",
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--doc"
+    ],
+    "exit_code": 0,
+    "time": "2026-09-09T16:50:53.009554+00:00"
+  },
+  {
+    "gate": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "time": "2026-09-09T16:50:57.598118+00:00"
+  },
+  {
+    "gate": "bench-build",
+    "command": [
+      "cargo",
+      "bench",
+      "--workspace",
+      "--no-run"
+    ],
+    "exit_code": 0,
+    "time": "2026-09-09T16:51:07.277034+00:00"
+  },
+  {
+    "gate": "docs",
+    "command": [
+      "cargo",
+      "doc",
+      "--workspace",
+      "--no-deps"
+    ],
+    "exit_code": 0,
+    "time": "2026-09-09T16:51:18.432955+00:00"
+  }
+]

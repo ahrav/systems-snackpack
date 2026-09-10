@@ -1,0 +1,2 @@
+stale_accepted=false final_value=20
+union_majority=true joint_majority=false

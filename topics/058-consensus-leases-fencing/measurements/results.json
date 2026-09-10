@@ -1,0 +1,37 @@
+{
+  "source_commit": "4fe5b86c75345beebfc2fa7ea2a6d4e2d6ec0ac8",
+  "hosts": [
+    {
+      "label": "arm",
+      "host": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+      "arch": "aarch64",
+      "remote": "/tmp/topic58-initial-arm.rysvYwVf/final-4fe5b86c",
+      "commit": "4fe5b86c75345beebfc2fa7ea2a6d4e2d6ec0ac8",
+      "archive_sha256": "0e2348c601df6f4ee188dd30b678b92df5695a34aac996b22cb49a435ccc5348",
+      "runner_sha256": "a3e789b886a94aad63220b3446d9323df5669d8d4b710663e4b5b99de5972864",
+      "manifest_sha256": "5d3e9ac3c6f0a97bebfe566986d6acc19e60bd84ada88f16b81d879c33d594d9",
+      "validated_files": 10,
+      "tests": 11,
+      "doctests": 1,
+      "result": "stale_accepted=false final_value=20\nunion_majority=true joint_majority=false\n"
+    },
+    {
+      "label": "xxl",
+      "host": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+      "arch": "x86_64",
+      "remote": "/tmp/topic58-initial-xxl.zWJaZa5p/final-4fe5b86c",
+      "commit": "4fe5b86c75345beebfc2fa7ea2a6d4e2d6ec0ac8",
+      "archive_sha256": "0e2348c601df6f4ee188dd30b678b92df5695a34aac996b22cb49a435ccc5348",
+      "runner_sha256": "a3e789b886a94aad63220b3446d9323df5669d8d4b710663e4b5b99de5972864",
+      "manifest_sha256": "a841d6062a2477d27580f61f160f830a833d2e77776020f1d992af5009fbad74",
+      "validated_files": 10,
+      "tests": 11,
+      "doctests": 1,
+      "result": "stale_accepted=false final_value=20\nunion_majority=true joint_majority=false\n"
+    }
+  ],
+  "evidence_path": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-058/2026-09-09-4fe5b86c",
+  "evidence_manifest_sha256": "b7ed6b362e28045aebd3b40720959a5afc05ee86dce0af58050fa21a94e053af",
+  "normalization": "Compact text copies strip trailing line whitespace and terminal blank lines. Original sealed receipts and byte hashes remain in retained evidence.",
+  "scope": "Deterministic correctness and code generation only; no distributed-system timing or persistence experiment."
+}

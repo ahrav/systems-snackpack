@@ -1,0 +1,23 @@
+[
+  {
+    "mutant": "unguarded-write",
+    "exit_code": 101,
+    "detected": true,
+    "failures": [
+      "test tests::a_pause_after_a_valid_lease_check_cannot_bypass_the_sink ... FAILED",
+      "test tests::all_interleavings_with_successor_install_before_its_write ... FAILED",
+      "test tests::checkpoint_preservation_and_reset_have_different_contracts ... FAILED",
+      "test tests::uninstalled_zero_and_future_writes_leave_state_unchanged ... FAILED"
+    ]
+  },
+  {
+    "mutant": "union-majority",
+    "exit_code": 101,
+    "detected": true,
+    "failures": [
+      "test tests::duplicate_and_outside_votes_do_not_create_a_majority ... FAILED",
+      "test tests::exhaustive_five_voter_quorum_intersections ... FAILED",
+      "test tests::majority_of_union_is_not_a_joint_majority ... FAILED"
+    ]
+  }
+]
