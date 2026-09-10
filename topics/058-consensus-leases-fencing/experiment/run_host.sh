@@ -10,21 +10,33 @@ runner_hash=$5
 [[ "$(hostname)" == "$expected_host" ]]
 [[ "$(uname -m)" == "$expected_arch" ]]
 printf '%s  source.tar\n%s  run_host.sh\n' "$archive_hash" "$runner_hash" | sha256sum -c -
-python3 - <<'PY'
+# Validation uses explicit checks, not `assert`: PYTHONOPTIMIZE strips asserts.
+python3 - "$source_commit" <<'PY'
 from pathlib import Path, PurePosixPath
+import sys
 import tarfile
+def require(condition, message):
+    if not condition:
+        raise SystemExit(f'run_host.sh: {message}')
+source_commit = sys.argv[1]
 prefix = 'source/topics/058-consensus-leases-fencing/'
 with tarfile.open('source.tar') as archive:
+    # git archive records the archived commit in the tar's pax global header.
+    # source.txt must not publish a commit absent from the digest-verified archive.
+    archive_commit = archive.pax_headers.get('comment')
+    require(archive_commit == source_commit,
+            f'archive commit {archive_commit!r} != source_commit {source_commit!r}')
     for member in archive.getmembers():
         name = member.name
         parts = PurePosixPath(name).parts
-        assert not name.startswith('/') and '..' not in parts
-        assert member.isdir() or member.isfile()
+        require(not name.startswith('/') and '..' not in parts, f'unsafe path {name!r}')
+        require(member.isdir() or member.isfile(), f'unsupported member type {name!r}')
         if member.isdir():
-            assert prefix.startswith(name.rstrip('/') + '/') or name.startswith(prefix)
+            require(prefix.startswith(name.rstrip('/') + '/') or name.startswith(prefix),
+                    f'directory outside prefix {name!r}')
             Path(name).mkdir(parents=True, exist_ok=True)
         else:
-            assert name.startswith(prefix)
+            require(name.startswith(prefix), f'file outside prefix {name!r}')
             path = Path(name)
             path.parent.mkdir(parents=True, exist_ok=True)
             with archive.extractfile(member) as src:
@@ -57,6 +69,9 @@ rustc --edition 2024 -D warnings -D missing_docs -C opt-level=2 "$topic/examples
 receipt/handoff > receipt/example.txt
 python3 - <<'PY'
 from pathlib import Path
+def require(condition, message):
+    if not condition:
+        raise SystemExit(f'run_host.sh: {message}')
 text=Path('receipt/consensus_leases_fencing.s').read_text()
 lines=text.splitlines()
 blocks=[]
@@ -64,11 +79,12 @@ for i,line in enumerate(lines):
     if 'accepts_generation' in line and line.endswith(':'):
         end=next((j+1 for j in range(i+1,len(lines)) if lines[j].strip().startswith('.Lfunc_end')),min(i+30,len(lines)))
         blocks.append('\n'.join(lines[i:end]))
-assert len(blocks)==1, len(blocks)
+require(len(blocks)==1, f'expected one accepts_generation block, found {len(blocks)}')
 Path('receipt/generation-guard.s').write_text(blocks[0]+'\n')
-assert '11 passed; 0 failed' in Path('receipt/tests.txt').read_text()
-assert '1 passed; 0 failed' in Path('receipt/doctests.txt').read_text()
-assert Path('receipt/example.txt').read_text()=='stale_accepted=false final_value=20\nunion_majority=true joint_majority=false\n'
+require('11 passed; 0 failed' in Path('receipt/tests.txt').read_text(), 'unit test summary mismatch')
+require('1 passed; 0 failed' in Path('receipt/doctests.txt').read_text(), 'doctest summary mismatch')
+require(Path('receipt/example.txt').read_text()=='stale_accepted=false final_value=20\nunion_majority=true joint_majority=false\n',
+        'example output mismatch')
 PY
 (cd receipt && sha256sum host.txt source.txt tests tests.txt libconsensus_leases_fencing.rlib consensus_leases_fencing.s doctests.txt handoff example.txt generation-guard.s > SHA256SUMS)
 chmod a-w receipt/*
