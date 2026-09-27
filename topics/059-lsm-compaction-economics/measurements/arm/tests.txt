@@ -1,0 +1,10 @@
+running 7 tests
+test tests::debt_growth_drain_and_overflow ... ok
+test tests::empty_and_ambiguous_inputs ... ok
+test tests::every_snapshot_from_floor_is_preserved ... ok
+test tests::input_order_does_not_change_result ... ok
+test tests::job_counts_both_read_inputs_and_output ... ok
+test tests::outside_version_requires_tombstone ... ok
+test tests::pinned_snapshot_requires_older_value ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
