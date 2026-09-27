@@ -1,0 +1,14 @@
+{
+  "topic": 60,
+  "source_commit": "5560b4aa1b921f2701e3816a7de83f8efec76bec",
+  "archive_sha256": "1caef7be546bacff42b8e3cd03763f9925428273fdc4cdc74e8c7b115211fc06",
+  "runner_sha256": "0a9e927c0426c7082e0b07c2dccbbcd226da0a6f8c551fc0a944037ea898fc5d",
+  "retained_path": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-060/2026-09-27-5560b4aa",
+  "manifest_sha256": "9b4b39be366bdfb4f48f6712eb14481c7b98ed6cec198a3e3c24adcb4b102445",
+  "files": 41,
+  "host_results": {
+    "arm": "8 tests + 1 doctest, example, codegen PASS",
+    "xxl": "8 tests + 1 doctest, example, codegen PASS"
+  },
+  "boundary": "Finite sequentially consistent model correctness; no performance, production liveness, weak-memory, or implementation-refinement claim."
+}

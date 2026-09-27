@@ -235,5 +235,9 @@ name = "topic-033-wal-crash-consistency"
 version = "0.1.0"
 
 [[package]]
+name = "topic060-deterministic-simulation"
+version = "0.1.0"
+
+[[package]]
 name = "zero-copy-limits"
 version = "0.1.0"
