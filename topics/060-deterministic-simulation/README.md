@@ -44,6 +44,8 @@ inspection confirms the compiled search path, not model fidelity or CPU atomics.
 
 ## Primary sources
 
+See the [source ledger](references.md) for versions and claim boundaries.
+
 - [FoundationDB 7.4.8 simulation and testing](https://apple.github.io/foundationdb/testing.html):
   deterministic cluster simulation complements live performance and hardware tests.
 - [Loom 0.7.2](https://docs.rs/loom/0.7.2/loom/): instrumented concurrency testing,
