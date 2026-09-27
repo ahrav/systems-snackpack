@@ -99,6 +99,10 @@ name = "lock-free-reclamation-aba"
 version = "0.1.0"
 
 [[package]]
+name = "lsm-compaction-economics"
+version = "0.1.0"
+
+[[package]]
 name = "memory-level-parallelism"
 version = "0.1.0"
 
