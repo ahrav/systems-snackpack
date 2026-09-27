@@ -1,0 +1,2 @@
+pinned=3 guarded=1 reclaimed=0
+transfer_mib=608 debt_mib=420

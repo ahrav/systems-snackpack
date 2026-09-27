@@ -1,0 +1,23 @@
+{
+  "label": "arm",
+  "hostname": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+  "architecture": "aarch64",
+  "remote_directory": "/tmp/topic59-initial-arm.42R0g3B5/final-a2c902dd8fd9",
+  "commit": "a2c902dd8fd9e8b44d8c3ece6af6d1add15b6290",
+  "archive_sha256": "aa20a831d1a611685ff1789504185cd4f171636c707376172237774c1c88285d",
+  "runner_sha256": "0519ac664ba7b4249e815d025655d4a8e2fc4b9d853efeb92a27a0bc3a9ea4fa",
+  "receipt_archive_sha256": "4fac2c036048db3b117acd15cc477105cd6423a43510d04d75834ada551d3cbf",
+  "verified_files": [
+    "host.txt",
+    "source.txt",
+    "tests",
+    "tests.txt",
+    "liblsm_compaction_economics.rlib",
+    "lsm_compaction_economics.s",
+    "doctests.txt",
+    "accounting",
+    "example.txt",
+    "debt-accounting.s"
+  ],
+  "pass": true
+}
