@@ -5,7 +5,7 @@ mixer and service-cost inputs do not claim to satisfy or measure every premise.
 
 - [Bloom (1970)](https://courses.cs.washington.edu/courses/csep521/21wi/readings/bloom_cacm.pdf):
   membership prefilter, allowable false positives, space/time tradeoff.
-- [Broder and Mitzenmacher, Network Applications of Bloom Filters](https://www.eecs.harvard.edu/~michaelm/postscripts/tr-02-05.pdf):
+- [Kirsch and Mitzenmacher, Building a Better Bloom Filter](https://www.eecs.harvard.edu/~michaelm/postscripts/tr-02-05.pdf):
   Section 2, occupancy approximation and optimal probe/space calculation.
 - [Cormode and Muthukrishnan, Count-Min](https://www.cs.ox.ac.uk/people/graham.cormode/pubs/papers/cm-full.pdf):
   Sections 2-4, signed-stream distinctions, dimensions, nonnegative point-query
