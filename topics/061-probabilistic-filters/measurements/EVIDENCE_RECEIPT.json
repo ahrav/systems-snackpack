@@ -1,0 +1,10 @@
+{
+  "source_commit": "09bdf7aca886f3e18e8e438cb7e3c4a5620921bf",
+  "retained_evidence": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-061/2026-09-28-09bdf7ac",
+  "manifest_sha256": "730a9f1d97a2b8d30a85a302d586a80d9d9df32a6d66ef9211609293684e6556",
+  "files": 46,
+  "archive_sha256": "94188336d720d43b0a5179131bc565d1a655573dba42637333e99de59183ab47",
+  "runner_sha256": "777bf07d90b11f4b079e9b69989ce8c0c6cd83102f3149953d45657df6f458a8",
+  "two_host_correctness": "10 tests and one doctest per host; matching deterministic example counts",
+  "scope": "correctness and empirical seed counts; no throughput or theorem-validation claim"
+}
