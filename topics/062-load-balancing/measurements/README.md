@@ -1,17 +1,44 @@
-# Correctness evidence
+# Exact-source correctness evidence: 2026-09-29
 
-Initial scratch runs passed on the required Arm host and runtime-resolved x86-64
-`xxl`. Exact committed-source results and archive receipts follow in the retained
-completion record. There is no measured proxy latency or throughput comparison.
+Source commit: `30fdab0b9b9ca46d5a757431f8b7b5d42e221490`. Later commits add this evidence only.
+Source archive SHA-256: `152be30de1c8492af8764c0ccd14e4190a5558e2a18dc54776b492a3624babd6`.
+Exact runner SHA-256: `5989f0d060bfa6cff00b4a4358dc4325329948b7f5a579275b3daf9adf147b05`.
+Both transfer identities and retrieved inner receipts were checked locally.
 
-Run the exact topic source on Linux with:
+| Host | Hardware and kernel | Toolchain | Result |
+|---|---|---|---|
+| `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com` | aarch64; CPU implementer 0x41, part 0xd40, variant 1, revision 1; 64 available CPUs; Linux 6.12.103-129.197.amzn2023.aarch64 | rustc 1.98.1, LLVM 22.1.8 | 10 tests, one doctest, example and code generation passed |
+| `xxl`, resolved at runtime to `dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com` | x86_64; Intel Xeon Platinum 8488C; 192 available CPUs; Linux 6.12.103-127.188.amzn2023.x86_64 | rustc 1.98.0, LLVM 22.1.8 | 10 tests, one doctest, example and code generation passed |
+
+Cargo default release optimization level three; default target CPU; `RUSTFLAGS`
+and `CARGO_ENCODED_RUSTFLAGS` unset. Host receipts retain `uname -a`, CPU data,
+`rustc -Vv`, Cargo version and `rustc --print cfg` target features.
+
+Both hosts produced stale `[16,1,1,1]`, reserved `[5,5,5,4]`, and all-ordered-pair
+`[7,4,4,4]` final counts. Batch drain times were ten and four model units for
+equal and capacity-proportional assignments. These are model outputs, not
+measured proxy latency, throughput, random-sample intervals or architecture speed.
+
+Generated `two_choice` code retains candidate bounds checks on both hosts.
+AArch64 uses two loads plus `csel`; x86-64 uses loads/comparison plus `cmovbq`.
+Both choose the first candidate on ties. No timing conclusion follows.
+
+All seven required local gates passed using the repository-pinned Rust 1.93.1:
+diff check, formatting, workspace library/examples, doctests, warning-free Clippy,
+benchmark compilation, and warning-free documentation. The initial missing
+example crate doc was fixed before accepted validation.
+
+Retained sealed replay evidence (ordinary local storage, outside Git):
+`/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-062/2026-09-29-30fdab0b`.
+It contains the path-limited source archive, exact runner, host receipts,
+initial scratch runs, optimized assembly, gate logs and SHA-256 manifest.
+
+To rerun in a Linux scratch workspace containing only the root manifest,
+lockfile and this topic:
 
 ```bash
 sh topics/062-load-balancing/scripts/run-linux.sh
 ```
 
-The runner requires a workspace containing this topic, root Cargo manifest and
-lockfile. It uses the host Rust toolchain, default target CPU, release optimization
-level three, and no `RUSTFLAGS`. It writes host metadata, tests, model outputs,
-optimized assembly, source hashes, and evidence hashes to ordinary scratch.
-Do not commit those generated files into this repository.
+The runner writes generated output under `evidence/`. Do not commit it.
+Completion lifecycle and concurrent admission are deliberately not modeled.
