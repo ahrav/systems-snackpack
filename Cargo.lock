@@ -239,5 +239,9 @@ name = "topic060-deterministic-simulation"
 version = "0.1.0"
 
 [[package]]
+name = "topic062-load-balancing"
+version = "0.1.0"
+
+[[package]]
 name = "zero-copy-limits"
 version = "0.1.0"
