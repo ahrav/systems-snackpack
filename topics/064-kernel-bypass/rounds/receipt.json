@@ -1,0 +1,12 @@
+{
+  "source_commit": "3ce052f039267561d105cfd05b04e0d16a3f6a99",
+  "archive_sha256": "23cb6a6aaec279cb00694085a526aa0c85ac426ebee9a40a0669c945648ac392",
+  "runner_sha256": "0e1de9967495578308ede50571817d5615a734f561a27a9665a8700300ba89aa",
+  "retained_path": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-064/2026-10-01-3ce052f0",
+  "retained_manifest_sha256": "d24a749b24926f4ab4a0f54b2decdefae6f3db988fc0b25352e91fe667169106",
+  "host_results": {
+    "arm": "9 unit tests + 1 doctest + example passed",
+    "xxl": "9 unit tests + 1 doctest + example passed"
+  },
+  "performance_measured": false
+}
