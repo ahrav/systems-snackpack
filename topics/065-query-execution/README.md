@@ -34,7 +34,9 @@ The runner requires Linux, Rust >=1.93, Python 3, GNU objdump, taskset, and sha2
 It uses `-C target-cpu=native`; keep each binary on its recorded machine. It emits
 source and binary hashes, tests, compiler assembly, linked disassembly, host facts,
 and independent-process observations into `evidence/` in the current directory.
-Run in an extracted scratch archive, not a dirty checkout.
+Run in an extracted scratch archive, not a dirty checkout. Input hashes are recorded
+before Cargo prunes the full-workspace lockfile to the extracted topic. The derived
+lockfile hash is recorded separately; the crate has no external dependencies.
 
 ## Experiment controls
 
