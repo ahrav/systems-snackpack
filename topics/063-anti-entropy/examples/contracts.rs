@@ -29,10 +29,11 @@ fn main() {
     let mut a = BTreeMap::from([(42, vec![deleted]), (43, vec![deleted])]);
     let mut c = BTreeMap::from([(42, vec![old]), (43, vec![old])]);
     repair_read(&mut a, &mut c, 42);
+    assert_eq!(a[&42], c[&42]);
     assert_ne!(a[&43], c[&43]);
     receive(&mut c, &a);
     assert_eq!(a, c);
-    println!("cold_key_stale_after_read_repair=true cold_key_repaired_after_full_exchange=true");
+    println!("cold_key_stale_after_read_repair=true cold_key_repaired_after_full_delivery=true");
     let a = vec![vec![old]; 16];
     let mut b = a.clone();
     b[6] = vec![deleted];

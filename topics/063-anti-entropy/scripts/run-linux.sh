@@ -1,6 +1,9 @@
 #!/bin/sh
 set -eu
-mkdir -p evidence
+unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET
+export CARGO_TARGET_DIR="$PWD/target"
+rm -rf evidence
+mkdir evidence
 {
     hostname
     uname -a
@@ -10,13 +13,19 @@ mkdir -p evidence
     rustc -Vv
     cargo -V
     rustc --print cfg
-    printf '%s\n' 'flags: Cargo defaults; release opt-level=3; default target CPU; RUSTFLAGS unset'
+    printf '%s\n' 'flags: RUSTFLAGS, CARGO_ENCODED_RUSTFLAGS, CARGO_BUILD_RUSTFLAGS and CARGO_BUILD_TARGET unset; remaining Cargo environment below; effective rustc flags recorded in codegen.txt'
+    env | LC_ALL=C sort | sed -n '/^CARGO_/p'
 } > evidence/host.txt
-unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS
 cargo test --offline -p topic063-anti-entropy > evidence/tests.txt 2>&1
 cargo run --offline --release -p topic063-anti-entropy --example contracts > evidence/example.txt 2>&1
-cargo rustc --offline --release -p topic063-anti-entropy --lib -- --emit=asm > evidence/codegen.txt 2>&1
-find target/release/deps -name 'topic063_anti_entropy-*.s' -exec cp '{}' evidence/contracts.s \;
+# Start codegen from an empty target directory: every layout is gone, so the rebuilt unit is the only candidate.
+rm -rf "$CARGO_TARGET_DIR"
+cargo rustc -v --offline --release -p topic063-anti-entropy --lib -- --emit=asm > evidence/codegen.txt 2>&1
+# shellcheck disable=SC2046  # Cargo's relative, hash-named assembly paths contain no whitespace.
+set -- $(find target -path '*/release/deps/topic063_anti_entropy-*.s')
+test "$#" -eq 1
+test -f "$1"
+cp "$1" evidence/contracts.s
 test -s evidence/contracts.s
 sha256sum topics/063-anti-entropy/src/lib.rs topics/063-anti-entropy/examples/contracts.rs topics/063-anti-entropy/scripts/run-linux.sh > evidence/source-files.sha256
 sha256sum evidence/host.txt evidence/tests.txt evidence/example.txt evidence/codegen.txt evidence/contracts.s evidence/source-files.sha256 > evidence/SHA256SUMS

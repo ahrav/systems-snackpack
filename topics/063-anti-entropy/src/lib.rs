@@ -60,6 +60,16 @@ pub fn merge(a: &[Version], b: &[Version]) -> State {
         .collect()
 }
 
+/// Absence is the only encoding of unknown history, so two catalogs holding
+/// the same knowledge compare equal.
+fn store(catalog: &mut Catalog, key: u32, state: State) {
+    if state.is_empty() {
+        catalog.remove(&key);
+    } else {
+        catalog.insert(key, state);
+    }
+}
+
 /// Merge all records from one delivered snapshot into a local catalog.
 ///
 /// Missing keys are absence of knowledge, not evidence of deletion.
@@ -67,11 +77,12 @@ pub fn merge(a: &[Version], b: &[Version]) -> State {
 pub fn receive(local: &mut Catalog, incoming: &Catalog) {
     for (&key, versions) in incoming {
         let merged = merge(local.get(&key).map_or(&[], Vec::as_slice), versions);
-        local.insert(key, merged);
+        store(local, key, merged);
     }
 }
 
 /// Repair exactly the selected key in two replicas, ignoring all other keys.
+/// A key unknown to both replicas stays absent from both.
 ///
 /// This idealized two-replica operation models coverage, not a product's quorum
 /// protocol, failure behavior, latency, or partition-level atomicity.
@@ -81,8 +92,8 @@ pub fn repair_read(a: &mut Catalog, b: &mut Catalog, key: u32) {
         a.get(&key).map_or(&[], Vec::as_slice),
         b.get(&key).map_or(&[], Vec::as_slice),
     );
-    a.insert(key, state.clone());
-    b.insert(key, state);
+    store(a, key, state.clone());
+    store(b, key, state);
 }
 
 /// Bidirectionally exchange full catalog state between distinct replicas.
@@ -217,6 +228,17 @@ mod tests {
     }
 
     #[test]
+    fn unknown_key_stays_absent_after_repair_and_delivery() {
+        let mut a = Catalog::new();
+        let mut c = Catalog::new();
+        repair_read(&mut a, &mut c, 7);
+        assert!(a.is_empty());
+        assert!(c.is_empty());
+        receive(&mut a, &BTreeMap::from([(7, Vec::new())]));
+        assert!(a.is_empty());
+    }
+
+    #[test]
     fn finite_schedule_converges_despite_duplicate_delivery() {
         let mut replicas = [catalog(DELETED), catalog(EDITED), catalog(OLD)];
         for (a, b) in [(0, 1), (0, 1), (1, 2), (2, 0)] {
@@ -233,6 +255,9 @@ mod tests {
         for _ in 0..10 {
             exchange(&mut replicas, 0, 1);
         }
+        assert_eq!(replicas[0], replicas[1]);
+        assert_eq!(replicas[0][&42], vec![EDITED, DELETED]);
+        assert_eq!(replicas[2], catalog(OLD));
         assert_ne!(replicas[0], replicas[2]);
     }
 
