@@ -222,6 +222,7 @@ mod tests {
         assert_eq!(drain_time(&[1], &[0]), None);
         assert_eq!(drain_time(&[0], &[0]), Some(0));
         assert_eq!(drain_time(&[], &[]), Some(0));
+        assert_eq!(drain_time(&[5, 4], &[2, 2]), Some(3));
     }
 
     #[test]

@@ -24,7 +24,7 @@ sh "$runner" > /dev/null 2>&1 || { echo "FAIL: rerun with a stale .s exited non-
 grep -q -- '-C opt-level=3' evidence/codegen.txt || { echo "FAIL: rerun codegen.txt lost the rustc invocation (Fresh unit)"; exit 1; }
 ! grep -q '^stale$' evidence/contracts.s || { echo "FAIL: stale assembly copied into evidence"; exit 1; }
 set -- target/release/deps/topic062_load_balancing-*.s
-[ "$#" -eq 1 ] || { echo "FAIL: $# candidate .s files remain after the run"; exit 1; }
+[ "$#" -eq 1 ] && [ -f "$1" ] || { echo "FAIL: expected exactly one candidate .s file after the run, found $#"; exit 1; }
 
 # The runner pins its own target directory, so the assembly it inspects comes from the build it ran.
 CARGO_TARGET_DIR=$work/other sh "$runner" > /dev/null 2>&1 || { echo "FAIL: run with caller CARGO_TARGET_DIR exited non-zero"; exit 1; }
@@ -35,6 +35,7 @@ grep -q "^CARGO_TARGET_DIR=$work/target\$" evidence/host.txt || { echo "FAIL: ho
 rm -rf target evidence
 CARGO_BUILD_TARGET=$host sh "$runner" > /dev/null 2>&1 || { echo "FAIL: run with caller CARGO_BUILD_TARGET exited non-zero"; exit 1; }
 [ -s evidence/contracts.s ] || { echo "FAIL: CARGO_BUILD_TARGET run produced no evidence/contracts.s"; exit 1; }
+[ ! -d "target/$host" ] || { echo "FAIL: caller CARGO_BUILD_TARGET was used for the build"; exit 1; }
 
 # Receipts record the effective optimization level when CARGO_PROFILE_RELEASE_OPT_LEVEL overrides the default.
 rm -rf target evidence

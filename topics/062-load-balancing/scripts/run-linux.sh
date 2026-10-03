@@ -22,6 +22,7 @@ cargo clean --offline --release -p topic062-load-balancing > evidence/codegen.tx
 cargo rustc -v --offline --release -p topic062-load-balancing --lib -- --emit=asm >> evidence/codegen.txt 2>&1
 # Cargo single-quotes the directory when the path has a space.
 out_dir=$(sed -n "/--crate-name topic062_load_balancing /{s/.*--out-dir '\([^']*\)'.*/\1/p;t;s/.*--out-dir \([^ ]*\).*/\1/p}" evidence/codegen.txt)
+test -n "$out_dir" || { echo "run-linux.sh: no --out-dir in evidence/codegen.txt" >&2; exit 1; }
 set -- "$out_dir"/topic062_load_balancing-*.s
 test "$#" -eq 1
 test -f "$1"
