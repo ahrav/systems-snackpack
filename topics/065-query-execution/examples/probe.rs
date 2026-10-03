@@ -11,7 +11,7 @@ fn main() {
     let mask = args[3].parse().unwrap();
     let batch = args[4].parse().unwrap();
     let repeats: u32 = args[5].parse().unwrap();
-    assert!(n > 0 && repeats > 0);
+    assert!(n > 0 && repeats > 0 && batch > 0);
     let data = Columns::generated(n);
     let expected = data.oracle(mask);
     let scan = || match args[1].as_str() {
