@@ -2,19 +2,20 @@
 # Run this test from the repository root.
 set -eu
 root=$(pwd)
-work=$(mktemp -d)
+expected_rustc=$(rustc -V)
+# A space in the path exercises the quoted --out-dir case.
+work=$(mktemp -d "${TMPDIR:-/tmp}/topic 062.XXXXXX")
 trap 'rm -rf "$work"' EXIT
 mkdir -p "$work/topics"
 cp Cargo.toml Cargo.lock rust-toolchain.toml "$work/"
 cp -R topics/062-load-balancing "$work/topics/"
 cd "$work"
 runner=topics/062-load-balancing/scripts/run-linux.sh
-pinned=$(sed -n 's/^channel = "\(.*\)"/\1/p' rust-toolchain.toml)
 host=$(rustc -vV | sed -n 's/^host: //p')
 
 sh "$runner" > /dev/null 2>&1 || { echo "FAIL: fresh run exited non-zero"; exit 1; }
 [ -s evidence/contracts.s ] || { echo "FAIL: fresh run produced no evidence/contracts.s"; exit 1; }
-grep -q "^release: $pinned\$" evidence/host.txt || { echo "FAIL: scratch run used a toolchain other than the pinned $pinned"; exit 1; }
+grep -qxF "$expected_rustc" evidence/host.txt || { echo "FAIL: scratch run used a toolchain other than the checkout ($expected_rustc)"; exit 1; }
 grep -q -- '-C opt-level=3' evidence/codegen.txt || { echo "FAIL: codegen.txt does not record the effective opt-level"; exit 1; }
 
 # The per-package clean removes a stale .s from an earlier build and forces a rebuild that records rustc flags.
