@@ -239,6 +239,22 @@ name = "topic060-deterministic-simulation"
 version = "0.1.0"
 
 [[package]]
+name = "topic061-probabilistic-filters"
+version = "0.1.0"
+
+[[package]]
+name = "topic062-load-balancing"
+version = "0.1.0"
+
+[[package]]
+name = "topic063-anti-entropy"
+version = "0.1.0"
+
+[[package]]
+name = "topic064-kernel-bypass"
+version = "0.1.0"
+
+[[package]]
 name = "topic065-query-execution"
 version = "0.1.0"
 
