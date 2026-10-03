@@ -1,7 +1,9 @@
 #!/bin/sh
 set -eu
-unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS
-mkdir -p evidence
+unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET
+export CARGO_TARGET_DIR="$PWD/target"
+rm -rf evidence
+mkdir evidence
 {
     hostname
     uname -a
@@ -11,12 +13,16 @@ mkdir -p evidence
     rustc -Vv
     cargo -V
     rustc --print cfg
-    printf '%s\n' 'flags: Cargo defaults; release opt-level=3; default target CPU; RUSTFLAGS unset'
+    printf '%s\n' 'flags: RUSTFLAGS, CARGO_ENCODED_RUSTFLAGS, CARGO_BUILD_RUSTFLAGS and CARGO_BUILD_TARGET unset; remaining Cargo environment below; effective rustc flags recorded in codegen.txt'
+    env | LC_ALL=C sort | sed -n '/^CARGO_/p'
 } > evidence/host.txt
 cargo test --offline -p topic064-kernel-bypass > evidence/tests.txt 2>&1
 cargo run --offline --release -p topic064-kernel-bypass --example contracts > evidence/example.txt 2>&1
-cargo rustc --offline --release -p topic064-kernel-bypass --lib -- --emit=asm > evidence/codegen.txt 2>&1
-set -- target/release/deps/topic064_kernel_bypass-*.s
+# Start codegen from an empty target directory: every layout is gone, so the rebuilt unit is the only candidate.
+rm -rf "$CARGO_TARGET_DIR"
+cargo rustc -v --offline --release -p topic064-kernel-bypass --lib -- --emit=asm > evidence/codegen.txt 2>&1
+# shellcheck disable=SC2046  # Cargo's relative, hash-named assembly paths contain no whitespace.
+set -- $(find target -path '*/release/deps/topic064_kernel_bypass-*.s')
 test "$#" -eq 1
 test -f "$1"
 cp "$1" evidence/contracts.s
