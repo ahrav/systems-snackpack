@@ -2,7 +2,8 @@
 set -eu
 unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_TARGET
 export CARGO_TARGET_DIR="$PWD/target"
-mkdir -p evidence
+rm -rf evidence
+mkdir evidence
 {
     hostname
     uname -a
@@ -19,7 +20,8 @@ cargo test --offline -p topic062-load-balancing > evidence/tests.txt 2>&1
 cargo run --offline --release -p topic062-load-balancing --example contracts > evidence/example.txt 2>&1
 cargo clean --offline --release -p topic062-load-balancing > evidence/codegen.txt 2>&1
 cargo rustc -v --offline --release -p topic062-load-balancing --lib -- --emit=asm >> evidence/codegen.txt 2>&1
-set -- target/release/deps/topic062_load_balancing-*.s
+# shellcheck disable=SC2046  # relative hash-named paths under target/, split on purpose
+set -- $(find target -path '*/release/deps/topic062_load_balancing-*.s')
 test "$#" -eq 1
 test -f "$1"
 cp "$1" evidence/contracts.s

@@ -18,7 +18,8 @@ Cargo default release optimization level three; default target CPU; `RUSTFLAGS`,
 `CARGO_ENCODED_RUSTFLAGS` and `CARGO_BUILD_TARGET` unset. Host receipts retain `uname -a`, CPU data,
 `rustc -Vv`, Cargo version and `rustc --print cfg` target features. The current
 runner pins `CARGO_TARGET_DIR` to `./target`, cleans the package before the codegen
-step so every run rebuilds, and writes the effective `rustc` invocation to
+step so every run rebuilds, locates the assembly under whichever `release/deps`
+layout Cargo used, and writes the effective `rustc` invocation to
 `codegen.txt` and any `CARGO_*` environment to `host.txt`, so a replay under
 overrides or a reused target directory is visible.
 
@@ -48,5 +49,5 @@ lockfile and this topic:
 sh topics/062-load-balancing/scripts/run-linux.sh
 ```
 
-The runner writes generated output under `evidence/`. Do not commit it.
+The runner clears and rewrites `evidence/` on every run. Do not commit it.
 Completion lifecycle and concurrent admission are deliberately not modeled.
