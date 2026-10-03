@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS
+unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_TARGET
 export CARGO_TARGET_DIR="$PWD/target"
 mkdir -p evidence
 {
@@ -12,7 +12,7 @@ mkdir -p evidence
     rustc -Vv
     cargo -V
     rustc --print cfg
-    printf '%s\n' 'flags: RUSTFLAGS and CARGO_ENCODED_RUSTFLAGS unset; remaining Cargo environment below; effective rustc flags recorded in codegen.txt'
+    printf '%s\n' 'flags: RUSTFLAGS, CARGO_ENCODED_RUSTFLAGS and CARGO_BUILD_TARGET unset; remaining Cargo environment below; effective rustc flags recorded in codegen.txt'
     env | LC_ALL=C sort | sed -n '/^CARGO_/p'
 } > evidence/host.txt
 cargo test --offline -p topic062-load-balancing > evidence/tests.txt 2>&1

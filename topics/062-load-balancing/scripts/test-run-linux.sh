@@ -27,9 +27,14 @@ CARGO_TARGET_DIR=$work/other sh "$runner" > /dev/null 2>&1 || { echo "FAIL: run 
 [ ! -d "$work/other" ] || { echo "FAIL: caller CARGO_TARGET_DIR was used for the build"; exit 1; }
 grep -q "^CARGO_TARGET_DIR=$work/target\$" evidence/host.txt || { echo "FAIL: host.txt does not record the pinned target dir"; exit 1; }
 
+# The runner builds for the host; a caller's CARGO_BUILD_TARGET keeps artifacts out of target/<triple>/.
+rm -rf target evidence
+CARGO_BUILD_TARGET=$(rustc -vV | sed -n 's/^host: //p') sh "$runner" > /dev/null 2>&1 || { echo "FAIL: run with caller CARGO_BUILD_TARGET exited non-zero"; exit 1; }
+[ -s evidence/contracts.s ] || { echo "FAIL: CARGO_BUILD_TARGET run produced no evidence/contracts.s"; exit 1; }
+
 # Receipts record the effective optimization level when CARGO_PROFILE_RELEASE_OPT_LEVEL overrides the default.
 rm -rf target evidence
 CARGO_PROFILE_RELEASE_OPT_LEVEL=1 sh "$runner" > /dev/null 2>&1 || { echo "FAIL: override run exited non-zero"; exit 1; }
 grep -q -- '-C opt-level=1' evidence/codegen.txt || { echo "FAIL: codegen.txt does not record the overridden opt-level"; exit 1; }
 grep -q '^CARGO_PROFILE_RELEASE_OPT_LEVEL=1$' evidence/host.txt || { echo "FAIL: host.txt does not record the Cargo override"; exit 1; }
-echo "PASS: $root/$runner rebuilds codegen each run, pins its target dir, and records effective build flags"
+echo "PASS: $root/$runner rebuilds codegen each run, pins its target dir and host target, and records effective build flags"

@@ -14,8 +14,8 @@ Both transfer identities and retrieved inner receipts were checked locally.
 | `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com` | aarch64; CPU implementer 0x41, part 0xd40, variant 1, revision 1; 64 available CPUs; Linux 6.12.103-129.197.amzn2023.aarch64 | rustc 1.98.1, LLVM 22.1.8 | 10 tests, one doctest, example and code generation passed |
 | `xxl`, resolved at runtime to `dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com` | x86_64; Intel Xeon Platinum 8488C; 192 available CPUs; Linux 6.12.103-127.188.amzn2023.x86_64 | rustc 1.98.0, LLVM 22.1.8 | 10 tests, one doctest, example and code generation passed |
 
-Cargo default release optimization level three; default target CPU; `RUSTFLAGS`
-and `CARGO_ENCODED_RUSTFLAGS` unset. Host receipts retain `uname -a`, CPU data,
+Cargo default release optimization level three; default target CPU; `RUSTFLAGS`,
+`CARGO_ENCODED_RUSTFLAGS` and `CARGO_BUILD_TARGET` unset. Host receipts retain `uname -a`, CPU data,
 `rustc -Vv`, Cargo version and `rustc --print cfg` target features. The current
 runner pins `CARGO_TARGET_DIR` to `./target`, cleans the package before the codegen
 step so every run rebuilds, and writes the effective `rustc` invocation to
