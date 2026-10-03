@@ -1,6 +1,8 @@
 #!/bin/sh
 set -eu
+phase="${1:-final}"
 unset CARGO_ENCODED_RUSTFLAGS
+export CARGO_TARGET_DIR="$PWD/target"
 export RUSTFLAGS='-C target-cpu=native'
 mkdir -p evidence
 {
@@ -24,7 +26,7 @@ test -f "$1"
 cp "$1" evidence/query.s
 test -s evidence/query.s
 objdump -d target/release/examples/probe > evidence/linked-code.txt
-python3 topics/065-query-execution/scripts/measure.py "${1:-final}" > evidence/measurement.txt
+python3 topics/065-query-execution/scripts/measure.py "$phase" > evidence/measurement.txt
 sha256sum Cargo.lock > evidence/derived-lock.sha256
 sha256sum target/release/examples/probe > evidence/binary.sha256
 find evidence -type f ! -name SHA256SUMS -print | sort | xargs sha256sum > evidence/SHA256SUMS
