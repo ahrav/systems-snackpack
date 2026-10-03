@@ -49,6 +49,9 @@ sh "$runner" > /dev/null 2>&1 || { echo "FAIL: run with configured build.target 
 [ -s evidence/contracts.s ] || { echo "FAIL: configured build.target run produced no evidence/contracts.s"; exit 1; }
 rm -rf .cargo
 
+# Back on the host layout, the stale target/<triple>/ assembly stays outside the directory the runner inspects.
+sh "$runner" > /dev/null 2>&1 || { echo "FAIL: host-layout run after a configured build.target exited non-zero"; exit 1; }
+
 # A failed replay leaves no receipts from an earlier successful run.
 printf 'fn broken(' >> topics/062-load-balancing/src/lib.rs
 if sh "$runner" > /dev/null 2>&1; then echo "FAIL: runner exited 0 with a compile error"; exit 1; fi

@@ -20,8 +20,8 @@ cargo test --offline -p topic062-load-balancing > evidence/tests.txt 2>&1
 cargo run --offline --release -p topic062-load-balancing --example contracts > evidence/example.txt 2>&1
 cargo clean --offline --release -p topic062-load-balancing > evidence/codegen.txt 2>&1
 cargo rustc -v --offline --release -p topic062-load-balancing --lib -- --emit=asm >> evidence/codegen.txt 2>&1
-# shellcheck disable=SC2046  # relative hash-named paths under target/, split on purpose
-set -- $(find target -path '*/release/deps/topic062_load_balancing-*.s')
+out_dir=$(sed -n '/--crate-name topic062_load_balancing /s/.*--out-dir \([^ ]*\).*/\1/p' evidence/codegen.txt)
+set -- "$out_dir"/topic062_load_balancing-*.s
 test "$#" -eq 1
 test -f "$1"
 cp "$1" evidence/contracts.s

@@ -18,8 +18,8 @@ Cargo default release optimization level three; default target CPU; `RUSTFLAGS`,
 `CARGO_ENCODED_RUSTFLAGS` and `CARGO_BUILD_TARGET` unset. Host receipts retain `uname -a`, CPU data,
 `rustc -Vv`, Cargo version and `rustc --print cfg` target features. The current
 runner pins `CARGO_TARGET_DIR` to `./target`, cleans the package before the codegen
-step so every run rebuilds, locates the assembly under whichever `release/deps`
-layout Cargo used, and writes the effective `rustc` invocation to
+step so every run rebuilds, copies the assembly from the `--out-dir` of the recorded
+`rustc` invocation, and writes the effective `rustc` invocation to
 `codegen.txt` and any `CARGO_*` environment to `host.txt`, so a replay under
 overrides or a reused target directory is visible.
 
