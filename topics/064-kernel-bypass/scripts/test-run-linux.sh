@@ -17,6 +17,9 @@ sh "$runner" > /dev/null 2>&1 || { echo "FAIL: fresh run exited non-zero"; exit 
 [ -s evidence/contracts.s ] || { echo "FAIL: fresh run produced no evidence/contracts.s"; exit 1; }
 grep -qxF "$expected_rustc" evidence/host.txt || { echo "FAIL: scratch run used a toolchain other than the checkout ($expected_rustc)"; exit 1; }
 grep -q -- '-C opt-level=3' evidence/codegen.txt || { echo "FAIL: codegen.txt does not record the effective opt-level"; exit 1; }
+for f in Cargo.toml Cargo.lock rust-toolchain.toml topics/064-kernel-bypass/Cargo.toml; do
+    grep -q " $f\$" evidence/source-files.sha256 || { echo "FAIL: source-files.sha256 does not cover $f"; exit 1; }
+done
 
 # The target reset removes a stale .s from an earlier build and forces a rebuild that records rustc flags.
 printf 'stale\n' > target/release/deps/topic064_kernel_bypass-0000000000stale.s
@@ -48,6 +51,15 @@ rm -rf target evidence
 CARGO_BUILD_RUSTFLAGS='-C opt-level=1' sh "$runner" > /dev/null 2>&1 || { echo "FAIL: run with caller CARGO_BUILD_RUSTFLAGS exited non-zero"; exit 1; }
 ! grep -q -- '-C opt-level=1' evidence/codegen.txt || { echo "FAIL: caller CARGO_BUILD_RUSTFLAGS reached rustc"; exit 1; }
 grep -q 'CARGO_BUILD_RUSTFLAGS.* unset' evidence/host.txt || { echo "FAIL: host.txt does not name the unset flag variables"; exit 1; }
+
+# Cargo applies build.rustflags from a checkout's .cargo/config.toml; the sealed codegen.txt records the effective flags.
+rm -rf target evidence
+mkdir -p .cargo
+printf '[build]\nrustflags = ["-C", "opt-level=1"]\n' > .cargo/config.toml
+sh "$runner" > /dev/null 2>&1 || { echo "FAIL: run with configured build.rustflags exited non-zero"; exit 1; }
+grep -q -- '-C opt-level=1' evidence/codegen.txt || { echo "FAIL: codegen.txt does not record configured build.rustflags"; exit 1; }
+grep -q 'evidence/codegen.txt' evidence/SHA256SUMS || { echo "FAIL: SHA256SUMS does not seal codegen.txt"; exit 1; }
+rm -rf .cargo
 
 # A configured build.target moves artifacts under target/<triple>/; the runner locates the assembly there.
 rm -rf target evidence

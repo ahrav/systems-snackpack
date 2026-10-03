@@ -27,6 +27,6 @@ test "$#" -eq 1
 test -f "$1"
 cp "$1" evidence/contracts.s
 test -s evidence/contracts.s
-sha256sum topics/064-kernel-bypass/src/lib.rs topics/064-kernel-bypass/examples/contracts.rs topics/064-kernel-bypass/scripts/run-linux.sh > evidence/source-files.sha256
+sha256sum Cargo.toml Cargo.lock rust-toolchain.toml topics/064-kernel-bypass/Cargo.toml topics/064-kernel-bypass/src/lib.rs topics/064-kernel-bypass/examples/contracts.rs topics/064-kernel-bypass/scripts/run-linux.sh > evidence/source-files.sha256
 sha256sum evidence/host.txt evidence/tests.txt evidence/example.txt evidence/codegen.txt evidence/contracts.s evidence/source-files.sha256 > evidence/SHA256SUMS
 cat evidence/example.txt

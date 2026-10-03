@@ -134,9 +134,11 @@ impl Pool {
 
 /// Normalize an aligned UMEM address to its chunk identity.
 ///
-/// Unaligned mode and packed address flags are outside this helper's contract.
+/// Chunk size is 2048 or 4096 bytes, matching `XDP_UMEM_REG` in the pinned
+/// Linux v6.12 AF_XDP reference. Unaligned mode and packed address flags are
+/// outside this helper's contract.
 pub fn aligned_frame(address: usize, bytes: usize, chunk: usize) -> Result<usize, Error> {
-    if !chunk.is_power_of_two() || bytes == 0 || !bytes.is_multiple_of(chunk) || address >= bytes {
+    if !matches!(chunk, 2048 | 4096) || bytes == 0 || !bytes.is_multiple_of(chunk) || address >= bytes {
         return Err(Error::Invalid);
     }
     Ok(address / chunk)
@@ -276,6 +278,8 @@ mod tests {
             (0, 8192, 0),
             (0, 8192, 3),
             (0, 8191, 2048),
+            (0, 8192, 1024),
+            (0, 16384, 8192),
         ] {
             assert_eq!(aligned_frame(addr, bytes, chunk), Err(Error::Invalid));
         }
