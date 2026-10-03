@@ -10,4 +10,4 @@ The output directory must not exist. Python 3.9+ and Rust 1.93+ are required.
 The runner records exact inputs, host/toolchain, generated assembly, correctness,
 486 balanced processes, dispersion and the predeclared selection rule.
 See [experiment controls](EXPERIMENT.md), [round notes](rounds/01.md), and
-[measurement status](measurements/README.md).
+[measurement status](measurements/README.md), and [primary references](references.md).
