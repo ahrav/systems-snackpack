@@ -1,5 +1,7 @@
 {
   "source_commit": "a6abe84804454a28a4cf93f999e608383b1880f6",
+  "source_commit_note": "local pre-publication commit, not pushed; source_sha256 files are byte-identical to published_source_commit",
+  "published_source_commit": "b1c36b996a601153ad1190484e003d5002714752",
   "source_sha256": {
     "src/lib.rs": "eed8f8d13a794e5e13ccf4942df8d9393f91bb2efef6a4bc707eb087dd3b10b6",
     "examples/compare.rs": "6c367541fb6e02d921d0d1bd812ced0eb32ea7c616dbe8a1345441122b373d0c",

@@ -222,16 +222,20 @@ mod tests {
     }
     #[test]
     fn padding_is_not_a_row() {
-        let mut t = Tiles::from_rows(&input(17));
-        let n = t.narrow();
-        let w = t.wide();
-        for f in 0..8 {
-            for lane in 1..16 {
-                t.blocks[1][f][lane] = u64::MAX;
+        // Unused lanes sit in block 0 for n < 16 and in the tail block otherwise.
+        for n in [1, 15, 17, 31] {
+            let mut t = Tiles::from_rows(&input(n));
+            let narrow = t.narrow();
+            let wide = t.wide();
+            let last = t.blocks.len() - 1;
+            for f in 0..8 {
+                for lane in n % 16..16 {
+                    t.blocks[last][f][lane] = u64::MAX;
+                }
             }
+            assert_eq!(t.narrow(), narrow, "n={n}");
+            assert_eq!(t.wide(), wide, "n={n}");
         }
-        assert_eq!(t.narrow(), n);
-        assert_eq!(t.wide(), w);
     }
     #[test]
     fn duplicate_and_reverse_visits() {

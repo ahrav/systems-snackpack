@@ -1,6 +1,6 @@
 # Exact committed-source local results
 
-Source commit `a6abe84804454a28a4cf93f999e608383b1880f6`. See [receipt](receipt.json) for hashes and host/build details.
+Measured source: the three files whose SHA256 values are listed in [receipt](receipt.json). They are byte-identical to commit `b1c36b99` on this branch; `a6abe84804454a28a4cf93f999e608383b1880f6` in the receipt is the local pre-publication commit that produced the run and is not pushed. Later review commits on this branch change `scripts/run.py` (child-process timeout, inclusive 5% boundary, unconditional source-integrity error) and extend one test in `src/lib.rs`; the measured `compare` binary and its timings are unchanged. The receipt holds the host/build details.
 
 Apple M1 Pro, arm64 Darwin25.6.0, rustc1.93.1/LLVM21.1.8, `-O -C target-cpu=native`, 10 logical CPUs, no CPU affinity. Six independent balanced processes per candidate/case; 486 total. Every checksum, 8 unit tests and 1 doctest passed. All seven required workspace gates passed.
 
@@ -48,7 +48,7 @@ Raw evidence is outside Git at `/Users/ahrav/.codex/learning/advanced-systems-ev
 
 Arm host dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com and runtime-resolved xxl (dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com) both rejected SSH twice with expired Midway authentication. No Linux source transfer, host-architecture check or execution succeeded.
 
-After authentication is restored: re-resolve xxl, verify Arm aarch64 and xxl x86_64, transfer only the frozen replay files with matching SHA256 values from receipt.json, run `python3 scripts/run.py <new-output-dir>`, verify source and runner hashes, retrieve evidence and record each actual host. These are pending measurements; macOS does not satisfy them.
+After authentication is restored: re-resolve xxl, verify Arm aarch64 and xxl x86_64, transfer the source files from commit `b1c36b99` (SHA256 values in receipt.json) or the current branch head and record which, run `python3 scripts/run.py <new-output-dir>`, verify source and runner hashes, retrieve evidence and record each actual host. These are pending measurements; macOS does not satisfy them.
 
 ## Catalog note
 

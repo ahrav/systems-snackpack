@@ -17,7 +17,7 @@ inputs = [root / p for p in ['src/lib.rs', 'examples/compare.rs', 'scripts/run.p
 manifest = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}
 (out / 'source.json').write_text(json.dumps(manifest, indent=2) + '\n')
 def run(args):
-    return subprocess.check_output([str(x) for x in args], text=True, stderr=subprocess.STDOUT)
+    return subprocess.check_output([str(x) for x in args], text=True, stderr=subprocess.STDOUT, timeout=600)
 available = sorted(os.sched_getaffinity(0)) if hasattr(os, 'sched_getaffinity') else None
 if available:
     os.sched_setaffinity(0, {available[0]})
@@ -55,11 +55,12 @@ for n,op,boundary in workloads:
     fastest=min(med,key=med.get)
     ratios={c:[by[fastest][i]/by[c][i] for i in range(6)] for c in by if c!=fastest}
     # A strict descriptive rule, not a significance test or population confidence interval.
-    decisive=all(max(v)<0.95 for v in ratios.values())
+    decisive=all(max(v)<=0.95 for v in ratios.values())
     summary.append({'n':n,'operation':op,'boundary':boundary,'median_ns':med,
                     'minmax_ns':{c:[min(v),max(v)] for c,v in by.items()},
                     'lowest_median':fastest,'selection':fastest if decisive else 'unresolved',
                     'paired_fastest_ratios':ratios})
 (out/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
-assert manifest == {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}, 'source changed during run'
+if manifest != {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in inputs}:
+    raise RuntimeError('source changed during run')
 print(f'{len(records)} processes; all checksums passed')
