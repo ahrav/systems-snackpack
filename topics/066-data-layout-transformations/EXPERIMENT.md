@@ -1,0 +1,13 @@
+# Frozen experiment, declared before measurement
+
+Three candidates preserve eight u64 fields per row: borrowed AoS (simple baseline), eight-column SoA, 16-lane AoSoA. One immutable table, no mutation or concurrency speed claim. Input n=31,4096,1048576; narrow field0, full scan of all8 fields, and Fisher-Yates indexed whole-row reads weighted by visit position. Full scans use the natural field-major traversal for SoA and tiles; this compares useful layout+loop implementations, not pure layout causality.
+
+Oracle: separate u128 element-by-element accumulation reduced to u64, outside timers. Conversion round trips compare every field; tests cover empty input, boundaries before/at/after tiles, poisoned padding, duplicate visits, and overflow. Every timed checksum is checked. All fields are retained in conversions; no dead-field projection.
+
+Resident: build outside timer, 3 query warmups, 32768/256/16 timed queries for small/medium/large n. Life1/life16: time conversion+1 or16 queries+drop. n=31 batches512; n=4096 batches32; large batch1. Borrowed AoS incurs no conversion; all start with the same existing AoS source. Generation, visit arrays, oracle, process startup and final printing excluded. No conversion back is needed for read-only checksums. Conversion includes allocation and initialization. Source and visit vectors stay live for all candidates. Resident teardown excluded; lifecycle teardown included. First-use lifecycle is not a cold-cache or cold-allocator claim, because validation and construction touch memory before timing.
+
+Six independent process blocks per workload, all six candidate permutations. Inner repetitions only stabilize one process estimate. Single scheduled CPU on Linux when available; macOS cannot provide equivalent affinity and is supplementary. Record available CPU list, CPU model, uname, rustc, native features, source and executable hashes. No counter attribution. Local operating-system noise remains.
+
+Predeclared selection: lowest median ns/query among correct candidates. Call it a decisive tested winner only if its paired time is at least5% lower than every competitor in all6 blocks. Otherwise report lowest median with unresolved separation. Report min/max process dispersion and paired ratios; these are not confidence intervals. No adaptive repetitions or candidate tuning after seeing results.
+
+No output arrays beyond checksum. Peak logical payload: AoS64n; SoA source64n+columns64n; tiles source64n+1024ceil(n/16), excluding capacities, allocator metadata and two n-element usize visit vectors. Exactly one tile width tested; no optimal-width claim. Update-heavy, concurrent, GPU, NUMA, cache-flush and two-host results require separate evidence.

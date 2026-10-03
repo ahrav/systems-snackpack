@@ -1,0 +1,40 @@
+{
+  "source_commit": "a6abe84804454a28a4cf93f999e608383b1880f6",
+  "source_sha256": {
+    "src/lib.rs": "eed8f8d13a794e5e13ccf4942df8d9393f91bb2efef6a4bc707eb087dd3b10b6",
+    "examples/compare.rs": "6c367541fb6e02d921d0d1bd812ced0eb32ea7c616dbe8a1345441122b373d0c",
+    "scripts/run.py": "e5b2a88f795aaf2111eb6f8ae3058dbf8c5550a41b44c90ad318b9f4f0aac108"
+  },
+  "binary_sha256": "c62ff33658ffb6d51edde949be454f2a50644ef2b38421d5a2040bd1679e0beb",
+  "host": {
+    "hostname": "b0f1d8752aba",
+    "machine": "arm64",
+    "uname": [
+      "Darwin",
+      "b0f1d8752aba",
+      "25.6.0",
+      "Darwin Kernel Version 25.6.0: Tue Aug 18 17:49:13 PDT 2026; root:xnu-12377.161.15.700.19~2/RELEASE_ARM64_T6000",
+      "arm64",
+      "arm"
+    ],
+    "available_cpus": null,
+    "pinned_cpu": null,
+    "logical_cpu_count": 10,
+    "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+    "flags": [
+      "--edition=2024",
+      "-O",
+      "-C",
+      "target-cpu=native"
+    ],
+    "target_cfg": "debug_assertions\npanic=\"unwind\"\ntarget_abi=\"\"\ntarget_arch=\"aarch64\"\ntarget_endian=\"little\"\ntarget_env=\"\"\ntarget_family=\"unix\"\ntarget_feature=\"aes\"\ntarget_feature=\"crc\"\ntarget_feature=\"dit\"\ntarget_feature=\"dotprod\"\ntarget_feature=\"dpb\"\ntarget_feature=\"dpb2\"\ntarget_feature=\"fcma\"\ntarget_feature=\"fhm\"\ntarget_feature=\"flagm\"\ntarget_feature=\"fp16\"\ntarget_feature=\"frintts\"\ntarget_feature=\"jsconv\"\ntarget_feature=\"lor\"\ntarget_feature=\"lse\"\ntarget_feature=\"neon\"\ntarget_feature=\"paca\"\ntarget_feature=\"pacg\"\ntarget_feature=\"pan\"\ntarget_feature=\"pmuv3\"\ntarget_feature=\"ras\"\ntarget_feature=\"rcpc\"\ntarget_feature=\"rcpc2\"\ntarget_feature=\"rdm\"\ntarget_feature=\"sb\"\ntarget_feature=\"sha2\"\ntarget_feature=\"sha3\"\ntarget_feature=\"ssbs\"\ntarget_feature=\"vh\"\ntarget_has_atomic=\"128\"\ntarget_has_atomic=\"16\"\ntarget_has_atomic=\"32\"\ntarget_has_atomic=\"64\"\ntarget_has_atomic=\"8\"\ntarget_has_atomic=\"ptr\"\ntarget_os=\"macos\"\ntarget_pointer_width=\"64\"\ntarget_vendor=\"apple\"\nunix\n",
+    "cpu": "Apple M1 Pro\n"
+  },
+  "processes": 486,
+  "unit_tests": 8,
+  "doc_tests": 1,
+  "selection": "lowest median; >=5% paired advantage in all six blocks against all others, else unresolved",
+  "evidence": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-066/2026-10-03-a6abe848",
+  "linux_status": "Both declared hosts unavailable: expired Midway session; no transfer or architecture verification. Initial and committed-source runs pending.",
+  "excluded_attempt": "final-local timings overlapped cargo workspace validation; retained for correctness only"
+}
