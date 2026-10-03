@@ -2,7 +2,7 @@
 
 Source commit: `30fdab0b9b9ca46d5a757431f8b7b5d42e221490`. The evidence commit adds this
 directory only. Later review-fix commits harden the runner (pinned `CARGO_TARGET_DIR`,
-per-package clean before codegen, exactly one assembly candidate, effective rustc
+target reset before codegen, exactly one assembly candidate, effective rustc
 flags and Cargo environment recorded) and add `scripts/test-run-linux.sh`; tested
 Rust source is unchanged.
 Source archive SHA-256: `152be30de1c8492af8764c0ccd14e4190a5558e2a18dc54776b492a3624babd6`.
@@ -17,9 +17,8 @@ Both transfer identities and retrieved inner receipts were checked locally.
 Cargo default release optimization level three; default target CPU; `RUSTFLAGS`,
 `CARGO_ENCODED_RUSTFLAGS` and `CARGO_BUILD_TARGET` unset. Host receipts retain `uname -a`, CPU data,
 `rustc -Vv`, Cargo version and `rustc --print cfg` target features. The current
-runner pins `CARGO_TARGET_DIR` to `./target`, cleans the package before the codegen
-step so every run rebuilds, copies the assembly from the `--out-dir` of the recorded
-`rustc` invocation, and writes the effective `rustc` invocation to
+runner pins `CARGO_TARGET_DIR` to `./target`, empties it before the codegen step so
+every run rebuilds and yields exactly one assembly file, and writes the effective `rustc` invocation to
 `codegen.txt` and any `CARGO_*` environment to `host.txt`, so a replay under
 overrides or a reused target directory is visible.
 

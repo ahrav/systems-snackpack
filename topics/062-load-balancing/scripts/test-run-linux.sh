@@ -3,8 +3,8 @@
 set -eu
 root=$(pwd)
 expected_rustc=$(rustc -V)
-# A space in the path exercises the quoted --out-dir case.
-work=$(mktemp -d "${TMPDIR:-/tmp}/topic 062.XXXXXX")
+# A space and a quote in the path keep the runner free of path parsing assumptions.
+work=$(mktemp -d "${TMPDIR:-/tmp}/topic '062.XXXXXX")
 trap 'rm -rf "$work"' EXIT
 mkdir -p "$work/topics"
 cp Cargo.toml Cargo.lock rust-toolchain.toml "$work/"
@@ -18,7 +18,7 @@ sh "$runner" > /dev/null 2>&1 || { echo "FAIL: fresh run exited non-zero"; exit 
 grep -qxF "$expected_rustc" evidence/host.txt || { echo "FAIL: scratch run used a toolchain other than the checkout ($expected_rustc)"; exit 1; }
 grep -q -- '-C opt-level=3' evidence/codegen.txt || { echo "FAIL: codegen.txt does not record the effective opt-level"; exit 1; }
 
-# The per-package clean removes a stale .s from an earlier build and forces a rebuild that records rustc flags.
+# The target reset removes a stale .s from an earlier build and forces a rebuild that records rustc flags.
 printf 'stale\n' > target/release/deps/topic062_load_balancing-0000000000stale.s
 sh "$runner" > /dev/null 2>&1 || { echo "FAIL: rerun with a stale .s exited non-zero"; exit 1; }
 grep -q -- '-C opt-level=3' evidence/codegen.txt || { echo "FAIL: rerun codegen.txt lost the rustc invocation (Fresh unit)"; exit 1; }
