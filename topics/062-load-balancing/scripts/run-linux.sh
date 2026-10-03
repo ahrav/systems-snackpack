@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS
 mkdir -p evidence
 {
     hostname
@@ -10,13 +11,16 @@ mkdir -p evidence
     rustc -Vv
     cargo -V
     rustc --print cfg
-    printf '%s\n' 'flags: Cargo defaults; release opt-level=3; default target CPU; RUSTFLAGS unset'
+    printf '%s\n' 'flags: RUSTFLAGS and CARGO_ENCODED_RUSTFLAGS unset; remaining Cargo environment below; effective rustc flags recorded in codegen.txt'
+    env | LC_ALL=C sort | sed -n '/^CARGO_/p'
 } > evidence/host.txt
-unset RUSTFLAGS CARGO_ENCODED_RUSTFLAGS
 cargo test --offline -p topic062-load-balancing > evidence/tests.txt 2>&1
 cargo run --offline --release -p topic062-load-balancing --example contracts > evidence/example.txt 2>&1
-cargo rustc --offline --release -p topic062-load-balancing --lib -- --emit=asm > evidence/codegen.txt 2>&1
-find target/release/deps -name 'topic062_load_balancing-*.s' -exec cp '{}' evidence/contracts.s \;
+cargo rustc -v --offline --release -p topic062-load-balancing --lib -- --emit=asm > evidence/codegen.txt 2>&1
+set -- target/release/deps/topic062_load_balancing-*.s
+test "$#" -eq 1
+test -f "$1"
+cp "$1" evidence/contracts.s
 test -s evidence/contracts.s
 sha256sum topics/062-load-balancing/src/lib.rs topics/062-load-balancing/examples/contracts.rs topics/062-load-balancing/scripts/run-linux.sh > evidence/source-files.sha256
 sha256sum evidence/host.txt evidence/tests.txt evidence/example.txt evidence/codegen.txt evidence/contracts.s evidence/source-files.sha256 > evidence/SHA256SUMS
