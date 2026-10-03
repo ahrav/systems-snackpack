@@ -255,5 +255,9 @@ name = "topic064-kernel-bypass"
 version = "0.1.0"
 
 [[package]]
+name = "topic065-query-execution"
+version = "0.1.0"
+
+[[package]]
 name = "zero-copy-limits"
 version = "0.1.0"
