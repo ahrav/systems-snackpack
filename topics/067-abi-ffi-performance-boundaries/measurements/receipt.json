@@ -1,0 +1,167 @@
+{
+  "source_commit": "9f7214ad71eceb2dc613ee6e8ac84e48beff9190",
+  "archive_sha256": "9c5df96efbbcb0eebc888ced9fc5fe03f67793d60608927200a0babec11a9340",
+  "source_sha256": {
+    "Cargo.toml": "6626f86dfd8b93519f865ab4af74432415fb51174f735c225359655c47d310e7",
+    "build.rs": "5ebf81df389723981d24e2c0733a628b0423d9a49bad1cb597cc1eb011894acb",
+    "c/kernel.c": "ec29dc302d743ce9717b053dcc2b5aa28c09a3ca8f6f30bf29dc280ea02294f1",
+    "src/lib.rs": "d37ce6d963ebfc6774575d9f3324d21fcfe4690af7d6fe7967ce8d37c2d3e848",
+    "examples/compare.rs": "ef6dd1c4b676ed4f605063459b800354d3ad1f3c85e03886e0e108260a342fdb",
+    "scripts/run.py": "6d9c528c3c156a897071035f78e12094cec0e8511d83f66deabbbd9022abf027",
+    "EXPERIMENT.md": "6dc404478627aa82ff1c9b61d44ee45fcd682f065d62e48c1ea6b6729dae5886"
+  },
+  "evidence": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-067/2026-10-04-9f7214ad",
+  "hosts": {
+    "arm": {
+      "metadata": {
+        "hostname": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+        "architecture": "aarch64",
+        "uname": [
+          "Linux",
+          "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+          "6.12.110-135.202.amzn2023.aarch64",
+          "#1 SMP Fri Sep 25 01:46:28 UTC 2026",
+          "aarch64",
+          "aarch64"
+        ],
+        "affinity_cpu": 0,
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: aarch64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8\n",
+        "cc": "cc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)\nCopyright (C) 2021 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+        "source_sha256": {
+          "Cargo.toml": "6626f86dfd8b93519f865ab4af74432415fb51174f735c225359655c47d310e7",
+          "build.rs": "5ebf81df389723981d24e2c0733a628b0423d9a49bad1cb597cc1eb011894acb",
+          "c/kernel.c": "ec29dc302d743ce9717b053dcc2b5aa28c09a3ca8f6f30bf29dc280ea02294f1",
+          "src/lib.rs": "d37ce6d963ebfc6774575d9f3324d21fcfe4690af7d6fe7967ce8d37c2d3e848",
+          "examples/compare.rs": "ef6dd1c4b676ed4f605063459b800354d3ad1f3c85e03886e0e108260a342fdb",
+          "scripts/run.py": "6d9c528c3c156a897071035f78e12094cec0e8511d83f66deabbbd9022abf027"
+        },
+        "rustflags": "-C target-cpu=native -C lto=off",
+        "c_flags": "-std=c11 -O3 -fno-lto -Wall -Wextra -Werror -mcpu=native",
+        "start_utc": "2026-10-04T13:46:21Z",
+        "design": "10 paired balanced blocks, rotating order then reverse; fixed 10ms doubling calibration before timed loop; fresh process per candidate/workload; medians and paired order-statistic interval [2nd,9th] for 10 pairs (97.85% marginal under iid continuous pairs); fastest declared only when all paired competitor/candidate interval lower ends exceed 1.02; otherwise unresolved; no multiplicity-adjusted simultaneous claim.",
+        "arm_midr": "0x00000000411fd401",
+        "target_cfg": "debug_assertions\npanic=\"unwind\"\ntarget_abi=\"\"\ntarget_arch=\"aarch64\"\ntarget_endian=\"little\"\ntarget_env=\"gnu\"\ntarget_family=\"unix\"\ntarget_feature=\"aes\"\ntarget_feature=\"bf16\"\ntarget_feature=\"crc\"\ntarget_feature=\"dit\"\ntarget_feature=\"dotprod\"\ntarget_feature=\"dpb\"\ntarget_feature=\"dpb2\"\ntarget_feature=\"fcma\"\ntarget_feature=\"fhm\"\ntarget_feature=\"flagm\"\ntarget_feature=\"fp16\"\ntarget_feature=\"i8mm\"\ntarget_feature=\"jsconv\"\ntarget_feature=\"lor\"\ntarget_feature=\"lse\"\ntarget_feature=\"neon\"\ntarget_feature=\"paca\"\ntarget_feature=\"pacg\"\ntarget_feature=\"pan\"\ntarget_feature=\"pmuv3\"\ntarget_feature=\"rand\"\ntarget_feature=\"ras\"\ntarget_feature=\"rcpc\"\ntarget_feature=\"rcpc2\"\ntarget_feature=\"rdm\"\ntarget_feature=\"sha2\"\ntarget_feature=\"sha3\"\ntarget_feature=\"sm4\"\ntarget_feature=\"spe\"\ntarget_feature=\"ssbs\"\ntarget_feature=\"sve\"\ntarget_feature=\"vh\"\ntarget_has_atomic=\"128\"\ntarget_has_atomic=\"16\"\ntarget_has_atomic=\"32\"\ntarget_has_atomic=\"64\"\ntarget_has_atomic=\"8\"\ntarget_has_atomic=\"ptr\"\ntarget_has_atomic_primitive_alignment=\"128\"\ntarget_has_atomic_primitive_alignment=\"16\"\ntarget_has_atomic_primitive_alignment=\"32\"\ntarget_has_atomic_primitive_alignment=\"64\"\ntarget_has_atomic_primitive_alignment=\"8\"\ntarget_has_atomic_primitive_alignment=\"ptr\"\ntarget_os=\"linux\"\ntarget_pointer_width=\"64\"\ntarget_vendor=\"unknown\"\nunix\n",
+        "binary_sha256": "9970800afd0307cfd26a1541cb743c53d90cf0dce71ab5f88faed1727510df81",
+        "available_cpu_count": 64,
+        "cpu_model": "0x00000000411fd401"
+      },
+      "processes": 400,
+      "summary_sha256": "8914e15624fa32b97d01a8187a9a68bf2e8d53526624423a0af492c7ac72f42b",
+      "processes_sha256": "637aeb95d7ae22f36a2948dbe05fd63dd238db0e067667dae8332546fd5ea0c2"
+    },
+    "xxl": {
+      "metadata": {
+        "hostname": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+        "architecture": "x86_64",
+        "uname": [
+          "Linux",
+          "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+          "6.12.110-135.202.amzn2023.x86_64",
+          "#1 SMP PREEMPT_DYNAMIC Fri Sep 25 01:45:58 UTC 2026",
+          "x86_64",
+          "x86_64"
+        ],
+        "affinity_cpu": 0,
+        "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.0\nLLVM version: 22.1.8\n",
+        "cc": "cc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)\nCopyright (C) 2021 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+        "source_sha256": {
+          "Cargo.toml": "6626f86dfd8b93519f865ab4af74432415fb51174f735c225359655c47d310e7",
+          "build.rs": "5ebf81df389723981d24e2c0733a628b0423d9a49bad1cb597cc1eb011894acb",
+          "c/kernel.c": "ec29dc302d743ce9717b053dcc2b5aa28c09a3ca8f6f30bf29dc280ea02294f1",
+          "src/lib.rs": "d37ce6d963ebfc6774575d9f3324d21fcfe4690af7d6fe7967ce8d37c2d3e848",
+          "examples/compare.rs": "ef6dd1c4b676ed4f605063459b800354d3ad1f3c85e03886e0e108260a342fdb",
+          "scripts/run.py": "6d9c528c3c156a897071035f78e12094cec0e8511d83f66deabbbd9022abf027"
+        },
+        "rustflags": "-C target-cpu=native -C lto=off",
+        "c_flags": "-std=c11 -O3 -fno-lto -Wall -Wextra -Werror -march=native",
+        "start_utc": "2026-10-04T13:46:22Z",
+        "design": "10 paired balanced blocks, rotating order then reverse; fixed 10ms doubling calibration before timed loop; fresh process per candidate/workload; medians and paired order-statistic interval [2nd,9th] for 10 pairs (97.85% marginal under iid continuous pairs); fastest declared only when all paired competitor/candidate interval lower ends exceed 1.02; otherwise unresolved; no multiplicity-adjusted simultaneous claim.",
+        "arm_midr": null,
+        "target_cfg": "debug_assertions\npanic=\"unwind\"\ntarget_abi=\"\"\ntarget_arch=\"x86_64\"\ntarget_endian=\"little\"\ntarget_env=\"gnu\"\ntarget_family=\"unix\"\ntarget_feature=\"adx\"\ntarget_feature=\"aes\"\ntarget_feature=\"avx\"\ntarget_feature=\"avx2\"\ntarget_feature=\"avx512bf16\"\ntarget_feature=\"avx512bitalg\"\ntarget_feature=\"avx512bw\"\ntarget_feature=\"avx512cd\"\ntarget_feature=\"avx512dq\"\ntarget_feature=\"avx512f\"\ntarget_feature=\"avx512fp16\"\ntarget_feature=\"avx512ifma\"\ntarget_feature=\"avx512vbmi\"\ntarget_feature=\"avx512vbmi2\"\ntarget_feature=\"avx512vl\"\ntarget_feature=\"avx512vnni\"\ntarget_feature=\"avx512vpopcntdq\"\ntarget_feature=\"avxvnni\"\ntarget_feature=\"bmi1\"\ntarget_feature=\"bmi2\"\ntarget_feature=\"cmpxchg16b\"\ntarget_feature=\"f16c\"\ntarget_feature=\"fma\"\ntarget_feature=\"fxsr\"\ntarget_feature=\"gfni\"\ntarget_feature=\"lzcnt\"\ntarget_feature=\"movbe\"\ntarget_feature=\"pclmulqdq\"\ntarget_feature=\"popcnt\"\ntarget_feature=\"rdrand\"\ntarget_feature=\"rdseed\"\ntarget_feature=\"sha\"\ntarget_feature=\"sse\"\ntarget_feature=\"sse2\"\ntarget_feature=\"sse3\"\ntarget_feature=\"sse4.1\"\ntarget_feature=\"sse4.2\"\ntarget_feature=\"ssse3\"\ntarget_feature=\"vaes\"\ntarget_feature=\"vpclmulqdq\"\ntarget_feature=\"xsave\"\ntarget_feature=\"xsavec\"\ntarget_feature=\"xsaveopt\"\ntarget_feature=\"xsaves\"\ntarget_has_atomic=\"16\"\ntarget_has_atomic=\"32\"\ntarget_has_atomic=\"64\"\ntarget_has_atomic=\"8\"\ntarget_has_atomic=\"ptr\"\ntarget_has_atomic_primitive_alignment=\"16\"\ntarget_has_atomic_primitive_alignment=\"32\"\ntarget_has_atomic_primitive_alignment=\"64\"\ntarget_has_atomic_primitive_alignment=\"8\"\ntarget_has_atomic_primitive_alignment=\"ptr\"\ntarget_os=\"linux\"\ntarget_pointer_width=\"64\"\ntarget_vendor=\"unknown\"\nunix\n",
+        "binary_sha256": "942665e0281c02aa4aa3642112bd1498c5f221a87c8f4460ee680a1d3509cadd",
+        "available_cpu_count": 192,
+        "cpu_model": "Intel Xeon Platinum 8488C"
+      },
+      "processes": 400,
+      "summary_sha256": "bf54c96f9a86fbcd8504f4c1b899cef8ff1affe6db2cbdad8d43a1dbc755470d",
+      "processes_sha256": "2ef1d85beb61a599afdc506104d682f319534b891b2d4a77516b9736a372b241"
+    }
+  },
+  "source_changes_after_initial": "runner adds CPU identification and a 120-second process timeout; Rust/C candidate source unchanged",
+  "validation": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "elapsed": 0.06263303756713867
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "elapsed": 0.4278090000152588
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--lib",
+        "--examples"
+      ],
+      "exit": 0,
+      "elapsed": 66.43365001678467
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--doc"
+      ],
+      "exit": 0,
+      "elapsed": 42.20139026641846
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "elapsed": 3.166382074356079
+    },
+    {
+      "command": [
+        "cargo",
+        "bench",
+        "--workspace",
+        "--no-run"
+      ],
+      "exit": 0,
+      "elapsed": 8.483377933502197
+    },
+    {
+      "command": [
+        "cargo",
+        "doc",
+        "--workspace",
+        "--no-deps"
+      ],
+      "exit": 0,
+      "elapsed": 7.305788993835449
+    }
+  ]
+}
