@@ -239,6 +239,10 @@ name = "topic-033-wal-crash-consistency"
 version = "0.1.0"
 
 [[package]]
+name = "topic-067-abi-ffi-performance-boundaries"
+version = "0.1.0"
+
+[[package]]
 name = "topic060-deterministic-simulation"
 version = "0.1.0"
 
