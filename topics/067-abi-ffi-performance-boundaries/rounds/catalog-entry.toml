@@ -1,0 +1,9 @@
+[[session]]
+id = 67
+cycle = 1
+topic_id = 67
+round = 1
+title = "ABI and FFI performance boundaries"
+published = "2026-10-04"
+path = "topics/067-abi-ffi-performance-boundaries/rounds/01.md"
+tags = ["abi", "ffi", "ownership", "batching", "benchmarking"]
