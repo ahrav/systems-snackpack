@@ -10,20 +10,20 @@ for p in FILES:
  dest=build/'topic'/p;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/p,dest)
 shutil.copy2(ROOT/'experiment.lock',build/'Cargo.lock')
 (build/'Cargo.toml').write_text('[workspace]\nmembers=["topic"]\nresolver="3"\n[workspace.package]\nedition="2024"\nrust-version="1.93"\n[workspace.lints.rust]\nmissing_docs="deny"\n[workspace.lints.rustdoc]\nbroken_intra_doc_links="deny"\n')
-def capture(args):return subprocess.check_output(args,text=True,stderr=subprocess.STDOUT,timeout=120)
+def capture(args):return subprocess.check_output(args,cwd=build,text=True,stderr=subprocess.STDOUT,timeout=120)
 cpus=sorted(os.sched_getaffinity(0)) if hasattr(os,'sched_getaffinity') else list(range(os.cpu_count()))
-meta={'hostname':platform.node(),'architecture':platform.machine(),'uname':list(platform.uname()),'available_cpus':cpus,'cpu_model':capture(['lscpu']) if sys.platform=='linux' else capture(['sysctl','-n','machdep.cpu.brand_string']),'rustc':capture(['rustc','-Vv']),'target_cfg':capture(['rustc','--print','cfg','-C','target-cpu=native']),'flags':'-C target-cpu=native -C lto=off','source_sha256':frozen,'start_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'design':'12 paired blocks per workload; rotate 3 candidates and reverse each second group of 3; fresh processes; 5ms doubling warmup then one timed batch; timer covers indirect call/black_box/checksum, not allocation/oracle/startup/teardown. Resident small buffers only. Select full-scan lowest median only if all paired competitor/winner ratios have second-smallest >1.02 (interval second..eleventh; 99.365% marginal iid sign interval, no familywise claim). early is security-rejected control; xor is uncertified teaching code; no timing-security certification.'}
-meta['arm_midr']=pathlib.Path('/sys/devices/system/cpu/cpu0/regs/identification/midr_el1').read_text().strip() if sys.platform=='linux' and platform.machine()=='aarch64' else None
+prefix=['taskset','-c',str(cpus[0])] if sys.platform=='linux' else []
+meta={'hostname':platform.node(),'architecture':platform.machine(),'uname':list(platform.uname()),'available_cpus':cpus,'cpu_model':capture(['lscpu']) if sys.platform=='linux' else capture(['sysctl','-n','machdep.cpu.brand_string']),'rustc':capture(['rustc','-Vv']),'target_cfg':capture(prefix+['rustc','--print','cfg','-C','target-cpu=native']),'flags':'-C target-cpu=native -C lto=off','source_sha256':frozen,'start_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),'design':'12 paired blocks per workload; rotate 3 candidates and reverse each second group of 3; fresh processes; 5ms doubling warmup then one timed batch; timer covers indirect call/black_box/checksum, not allocation/oracle/startup/teardown. Resident small buffers only. Select full-scan lowest median only if all paired competitor/winner ratios have second-smallest >1.02 (interval second..eleventh; 99.365% marginal iid sign interval, no familywise claim). early is security-rejected control; xor is uncertified teaching code; no timing-security certification.'}
+midr=pathlib.Path('/sys/devices/system/cpu/cpu0/regs/identification/midr_el1'); meta['arm_midr']=midr.read_text().strip() if midr.exists() else None
 (OUT/'metadata.json').write_text(json.dumps(meta,indent=2)+'\n')
-env=os.environ.copy();env.update(RUSTFLAGS=meta['flags'],CARGO_TARGET_DIR=str(OUT/'target'))
+env=os.environ.copy();env.pop('CARGO_ENCODED_RUSTFLAGS',None);env.pop('CARGO_BUILD_TARGET',None);env.update(RUSTFLAGS=meta['flags'],CARGO_TARGET_DIR=str(OUT/'target'))
 def command(args,log):
- with (OUT/log).open('w') as f:subprocess.run(args,cwd=build,env=env,stdout=f,stderr=subprocess.STDOUT,check=True)
+ with (OUT/log).open('w') as f:subprocess.run(args,cwd=build,env=env,stdout=f,stderr=subprocess.STDOUT,check=True,timeout=1800)
 command(['cargo','test','--locked','--workspace'],'correctness.log')
-command(['cargo','build','--locked','--release','--example','compare'],'build.log')
+command(prefix+['cargo','build','--locked','--release','--example','compare'],'build.log')
 exe=OUT/'target/release/examples/compare'; meta['binary_sha256']=hashlib.sha256(exe.read_bytes()).hexdigest()
 command(['objdump','-d',str(exe)] if sys.platform=='linux' else ['otool','-tvV',str(exe)],'linked-disassembly.txt')
 command(['nm',str(exe)],'symbols.txt')
-prefix=['taskset','-c',str(cpus[0])] if sys.platform=='linux' else []
 rows=[]; candidates=['early','xor','subtle']
 with (OUT/'processes.jsonl').open('w') as f:
  for n in [16,32,256,4096]:

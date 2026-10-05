@@ -4,6 +4,8 @@ Source `9f9c86feb00a8bdc74ad8e053875558522b591d5`; archive SHA256 `8dd3b786ab8e3
 
 Both hosts passed 3 unit tests, 1 doctest and 432 process checksums. Seven local workspace gates passed. See [frozen timing contract](../EXPERIMENT.md). This is throughput and code inspection, not a security certification or dudect campaign.
 
+The receipt's `target_cfg` is `rustc --print cfg -C target-cpu=native` output: it lists the native target features and rustc's profile-free defaults, including `debug_assertions`. The measured binary came from `cargo build --release`, whose profile disables debug assertions; `build.log` on the evidence host records that build. Review commits after `9f9c86fe` change `scripts/run.py` (inherited `CARGO_ENCODED_RUSTFLAGS`/`CARGO_BUILD_TARGET` removal, toolchain capture from the build directory, pinned build CPU, `midr_el1` guard, build timeout); the receipt pins the runner hash that produced these measurements.
+
 ## arm: dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
 
 Architecture `aarch64`; kernel `6.12.110-135.202.amzn2023.aarch64`; CPU `0x00000000411fd401`; 64 available logical CPUs; pinned CPU 0. rustc 1.98.1 (48a229cea 2026-09-01). Native release, LTO off, subtle default features disabled. Effective Cargo release debug assertions disabled. Toolchain/features in receipt. No architecture-only comparison.

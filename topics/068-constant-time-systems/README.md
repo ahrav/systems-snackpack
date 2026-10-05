@@ -10,13 +10,14 @@ Do not use the handwritten candidates as authentication primitives.
 
 ```bash
 cargo test -p constant-time-systems
-python3 topics/068-constant-time-systems/scripts/run.py "$PWD/topic68-results"
+python3 topics/068-constant-time-systems/scripts/run.py /tmp/topic68-results
 ```
 
-The runner requires a new output directory, Cargo, Python 3 and (on Linux)
-taskset, objdump, nm and lscpu. It builds an isolated workspace using the pinned
-experiment.lock, records input hashes before Cargo, and preserves raw process
-samples outside the repository. Network access or a Cargo cache is needed for
+The runner requires a new output directory outside the repository, Cargo,
+Python 3 and (on Linux) taskset, objdump, nm and lscpu. It builds an isolated
+workspace using the pinned experiment.lock, records input hashes before Cargo,
+and writes the build, binaries, disassembly and raw process samples under that
+output directory. Network access or a Cargo cache is needed for
 subtle 2.6.1. Rust 1.93 or newer is required by the workspace.
 
 See [experiment](EXPERIMENT.md), [round notes](rounds/01.md),
