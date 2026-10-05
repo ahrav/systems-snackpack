@@ -1,0 +1,152 @@
+{
+  "source_commit": "9f9c86feb00a8bdc74ad8e053875558522b591d5",
+  "source_sha256": {
+    "Cargo.toml": "e8791830b038f01da3b64c265c52124df9faea5d742a7327890ad748934d9af6",
+    "experiment.lock": "aee93e2795aa7774cb77397b68362001fc14f79372fbe8eeb0bbb926dfc5df90",
+    "src/lib.rs": "7ae471b07ef087dd079bb0ebb08b9b2972c5e1bf9406f8293fb24bddb1ed7624",
+    "examples/compare.rs": "386fa81005191bfc423a68a94cd036855b98339f70251aeb41f11df9825efe2b",
+    "scripts/run.py": "7153b06eb1477ace41c1280681098d841c47c76c77ff2db66747e0c554d2e3b9"
+  },
+  "archive_sha256": "8dd3b786ab8e38da40719a57780d5644cffdea87259068093e596dda93639808",
+  "evidence": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-068/2026-10-05-9f9c86fe",
+  "hosts": {
+    "arm": {
+      "metadata": {
+        "hostname": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+        "architecture": "aarch64",
+        "uname": [
+          "Linux",
+          "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+          "6.12.110-135.202.amzn2023.aarch64",
+          "#1 SMP Fri Sep 25 01:46:28 UTC 2026",
+          "aarch64",
+          "aarch64"
+        ],
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: aarch64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8\n",
+        "target_cfg": "debug_assertions\npanic=\"unwind\"\ntarget_abi=\"\"\ntarget_arch=\"aarch64\"\ntarget_endian=\"little\"\ntarget_env=\"gnu\"\ntarget_family=\"unix\"\ntarget_feature=\"aes\"\ntarget_feature=\"bf16\"\ntarget_feature=\"crc\"\ntarget_feature=\"dit\"\ntarget_feature=\"dotprod\"\ntarget_feature=\"dpb\"\ntarget_feature=\"dpb2\"\ntarget_feature=\"fcma\"\ntarget_feature=\"fhm\"\ntarget_feature=\"flagm\"\ntarget_feature=\"fp16\"\ntarget_feature=\"i8mm\"\ntarget_feature=\"jsconv\"\ntarget_feature=\"lor\"\ntarget_feature=\"lse\"\ntarget_feature=\"neon\"\ntarget_feature=\"paca\"\ntarget_feature=\"pacg\"\ntarget_feature=\"pan\"\ntarget_feature=\"pmuv3\"\ntarget_feature=\"rand\"\ntarget_feature=\"ras\"\ntarget_feature=\"rcpc\"\ntarget_feature=\"rcpc2\"\ntarget_feature=\"rdm\"\ntarget_feature=\"sha2\"\ntarget_feature=\"sha3\"\ntarget_feature=\"sm4\"\ntarget_feature=\"spe\"\ntarget_feature=\"ssbs\"\ntarget_feature=\"sve\"\ntarget_feature=\"vh\"\ntarget_has_atomic=\"128\"\ntarget_has_atomic=\"16\"\ntarget_has_atomic=\"32\"\ntarget_has_atomic=\"64\"\ntarget_has_atomic=\"8\"\ntarget_has_atomic=\"ptr\"\ntarget_has_atomic_primitive_alignment=\"128\"\ntarget_has_atomic_primitive_alignment=\"16\"\ntarget_has_atomic_primitive_alignment=\"32\"\ntarget_has_atomic_primitive_alignment=\"64\"\ntarget_has_atomic_primitive_alignment=\"8\"\ntarget_has_atomic_primitive_alignment=\"ptr\"\ntarget_os=\"linux\"\ntarget_pointer_width=\"64\"\ntarget_vendor=\"unknown\"\nunix\n",
+        "flags": "-C target-cpu=native -C lto=off",
+        "source_sha256": {
+          "Cargo.toml": "e8791830b038f01da3b64c265c52124df9faea5d742a7327890ad748934d9af6",
+          "experiment.lock": "aee93e2795aa7774cb77397b68362001fc14f79372fbe8eeb0bbb926dfc5df90",
+          "src/lib.rs": "7ae471b07ef087dd079bb0ebb08b9b2972c5e1bf9406f8293fb24bddb1ed7624",
+          "examples/compare.rs": "386fa81005191bfc423a68a94cd036855b98339f70251aeb41f11df9825efe2b",
+          "scripts/run.py": "7153b06eb1477ace41c1280681098d841c47c76c77ff2db66747e0c554d2e3b9"
+        },
+        "start_utc": "2026-10-05T13:41:18Z",
+        "design": "12 paired blocks per workload; rotate 3 candidates and reverse each second group of 3; fresh processes; 5ms doubling warmup then one timed batch; timer covers indirect call/black_box/checksum, not allocation/oracle/startup/teardown. Resident small buffers only. Select full-scan lowest median only if all paired competitor/winner ratios have second-smallest >1.02 (interval second..eleventh; 99.365% marginal iid sign interval, no familywise claim). early is security-rejected control; xor is uncertified teaching code; no timing-security certification.",
+        "arm_midr": "0x00000000411fd401",
+        "binary_sha256": "300689d828efbcb16b5ef4a0a32d608fc05dbf965b19e8b09f2c1da29e39709f",
+        "cpu_model": "0x00000000411fd401",
+        "available_cpu_count": 64,
+        "affinity_cpu": 0
+      },
+      "processes": 432,
+      "raw_sha256": "3760118a9dc996bf090f07d477f49e0555e8d6aff0936511161492d5b6c66874",
+      "summary_sha256": "4cbfa4d3edd18e963ceb0e2f546f12b4c9d808c4a71e872b08cfcc2a537e9095"
+    },
+    "xxl": {
+      "metadata": {
+        "hostname": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+        "architecture": "x86_64",
+        "uname": [
+          "Linux",
+          "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+          "6.12.110-135.202.amzn2023.x86_64",
+          "#1 SMP PREEMPT_DYNAMIC Fri Sep 25 01:45:58 UTC 2026",
+          "x86_64",
+          "x86_64"
+        ],
+        "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.0\nLLVM version: 22.1.8\n",
+        "target_cfg": "debug_assertions\npanic=\"unwind\"\ntarget_abi=\"\"\ntarget_arch=\"x86_64\"\ntarget_endian=\"little\"\ntarget_env=\"gnu\"\ntarget_family=\"unix\"\ntarget_feature=\"adx\"\ntarget_feature=\"aes\"\ntarget_feature=\"avx\"\ntarget_feature=\"avx2\"\ntarget_feature=\"avx512bf16\"\ntarget_feature=\"avx512bitalg\"\ntarget_feature=\"avx512bw\"\ntarget_feature=\"avx512cd\"\ntarget_feature=\"avx512dq\"\ntarget_feature=\"avx512f\"\ntarget_feature=\"avx512fp16\"\ntarget_feature=\"avx512ifma\"\ntarget_feature=\"avx512vbmi\"\ntarget_feature=\"avx512vbmi2\"\ntarget_feature=\"avx512vl\"\ntarget_feature=\"avx512vnni\"\ntarget_feature=\"avx512vpopcntdq\"\ntarget_feature=\"avxvnni\"\ntarget_feature=\"bmi1\"\ntarget_feature=\"bmi2\"\ntarget_feature=\"cmpxchg16b\"\ntarget_feature=\"f16c\"\ntarget_feature=\"fma\"\ntarget_feature=\"fxsr\"\ntarget_feature=\"gfni\"\ntarget_feature=\"lzcnt\"\ntarget_feature=\"movbe\"\ntarget_feature=\"pclmulqdq\"\ntarget_feature=\"popcnt\"\ntarget_feature=\"rdrand\"\ntarget_feature=\"rdseed\"\ntarget_feature=\"sha\"\ntarget_feature=\"sse\"\ntarget_feature=\"sse2\"\ntarget_feature=\"sse3\"\ntarget_feature=\"sse4.1\"\ntarget_feature=\"sse4.2\"\ntarget_feature=\"ssse3\"\ntarget_feature=\"vaes\"\ntarget_feature=\"vpclmulqdq\"\ntarget_feature=\"xsave\"\ntarget_feature=\"xsavec\"\ntarget_feature=\"xsaveopt\"\ntarget_feature=\"xsaves\"\ntarget_has_atomic=\"16\"\ntarget_has_atomic=\"32\"\ntarget_has_atomic=\"64\"\ntarget_has_atomic=\"8\"\ntarget_has_atomic=\"ptr\"\ntarget_has_atomic_primitive_alignment=\"16\"\ntarget_has_atomic_primitive_alignment=\"32\"\ntarget_has_atomic_primitive_alignment=\"64\"\ntarget_has_atomic_primitive_alignment=\"8\"\ntarget_has_atomic_primitive_alignment=\"ptr\"\ntarget_os=\"linux\"\ntarget_pointer_width=\"64\"\ntarget_vendor=\"unknown\"\nunix\n",
+        "flags": "-C target-cpu=native -C lto=off",
+        "source_sha256": {
+          "Cargo.toml": "e8791830b038f01da3b64c265c52124df9faea5d742a7327890ad748934d9af6",
+          "experiment.lock": "aee93e2795aa7774cb77397b68362001fc14f79372fbe8eeb0bbb926dfc5df90",
+          "src/lib.rs": "7ae471b07ef087dd079bb0ebb08b9b2972c5e1bf9406f8293fb24bddb1ed7624",
+          "examples/compare.rs": "386fa81005191bfc423a68a94cd036855b98339f70251aeb41f11df9825efe2b",
+          "scripts/run.py": "7153b06eb1477ace41c1280681098d841c47c76c77ff2db66747e0c554d2e3b9"
+        },
+        "start_utc": "2026-10-05T13:41:18Z",
+        "design": "12 paired blocks per workload; rotate 3 candidates and reverse each second group of 3; fresh processes; 5ms doubling warmup then one timed batch; timer covers indirect call/black_box/checksum, not allocation/oracle/startup/teardown. Resident small buffers only. Select full-scan lowest median only if all paired competitor/winner ratios have second-smallest >1.02 (interval second..eleventh; 99.365% marginal iid sign interval, no familywise claim). early is security-rejected control; xor is uncertified teaching code; no timing-security certification.",
+        "arm_midr": null,
+        "binary_sha256": "c9d0f140a2f7e3fbf4330a573beac2061a78e41ad754b16a6d88c30aca096d68",
+        "cpu_model": "Intel Xeon Platinum 8488C",
+        "available_cpu_count": 192,
+        "affinity_cpu": 0
+      },
+      "processes": 432,
+      "raw_sha256": "11b03121a1bde8d39594e8da16886c70dcd93b1561accb7ae1d725435f65739c",
+      "summary_sha256": "3a87c5b69ab7c3e438ef8c86a00c3895b48bc735a467ac76d73e1adbfc6ef538"
+    }
+  },
+  "validation": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--lib",
+        "--examples"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--doc"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "bench",
+        "--workspace",
+        "--no-run"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "doc",
+        "--workspace",
+        "--no-deps"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "initial_to_final": "Runner adds Arm MIDR and bounded metadata/process captures. Candidate and dependency inputs unchanged."
+}

@@ -1,0 +1,9 @@
+[package]
+name = "constant-time-systems"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+[lints]
+workspace = true
+[dependencies]
+subtle = { version = "=2.6.1", default-features = false }
