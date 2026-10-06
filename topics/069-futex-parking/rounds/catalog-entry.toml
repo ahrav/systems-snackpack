@@ -1,0 +1,9 @@
+[[session]]
+id = 69
+cycle = 1
+topic_id = 69
+round = 1
+title = "Futex fast paths, parking behavior, and wakeup storms"
+published = "2026-10-06"
+path = "topics/069-futex-parking/rounds/01.md"
+tags = ["futex", "parking", "mutex", "benchmarking"]
