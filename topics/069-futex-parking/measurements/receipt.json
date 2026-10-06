@@ -1,0 +1,58 @@
+{
+  "recorded_utc": "2026-10-06T13:54:49.966394+00:00",
+  "measured_source": "35c6b5a00f0f761ccbf9a6bff6052610cd613358",
+  "base": "ab5f8943d9f9a8c5c14fed0a0b3cfea5946295b3",
+  "source_inputs_sha256": {
+    "Cargo.toml": "ab39e46d30524dad2144fb4557f42b097fc0f5e1de6a24628b844e8187cca26d",
+    "src/lib.rs": "a0d86c2e4a26f8452aeec33500567a127eb4173b066b8b12c70931827396062d",
+    "examples/compare.rs": "dc8d7ac9adf73e75cca184812e974ed14a8407041478ccb5b14696f3580d17c7",
+    "scripts/run.py": "3629106b016b3d1473ab98a17b07f99f2d43818dfa21e232aa26977fe195e543",
+    "scripts/remote.sh": "86db0be773b9535ebf592fc2274b76e961b15a07a45c0a3143f62294865e753a",
+    "scripts/summarize.py": "918686858e10bfd00bed80989996162d7986e9774d4ae725a87ad23facdb7f8b"
+  },
+  "external_evidence": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-069/2026-10-06-35c6b5a0",
+  "hosts": {
+    "arm": {
+      "hostname": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+      "uname": "Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.110-135.202.amzn2023.aarch64 #1 SMP Fri Sep 25 01:46:28 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux",
+      "cpu": "MIDR 0x411fd401;64 available CPUs",
+      "rustc": "1.98.1 / LLVM22.1.8",
+      "unit_tests": 4,
+      "doctests": 1,
+      "processes": 192,
+      "clippy": "library and example pass with -D warnings",
+      "input_checks": "before compile, after measurement, after clippy pass",
+      "run_sha256": "c8e7369d2e81151ab90b84c48db646aed19479ac2be97c3d7ebbbd2aeb2231c6",
+      "plan_sha256": "2c4fe4cb975bcf342b4be1dc75d29130c477affea9ccd92cb894aa66048ac862",
+      "host_sha256": "7af8b21f28416b748bb28de4861a56f398f677b47625f6b8dd4b4186f5021b35",
+      "native_audit_sha256": "a944fb85e47f6e2b972b68507199fc932670f5f8c62e9b90ae60b56cd2234856",
+      "midr_sha256": "065628f68530ca93c3ad535b1a675324889017876e52d87b16e379b9d09c109a"
+    },
+    "xxl": {
+      "hostname": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+      "uname": "Linux dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com 6.12.110-135.202.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Fri Sep 25 01:45:58 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux",
+      "cpu": "Intel Xeon Platinum8488C;192 available CPUs",
+      "rustc": "1.98.0 / LLVM22.1.8",
+      "unit_tests": 4,
+      "doctests": 1,
+      "processes": 192,
+      "clippy": "library and example pass with -D warnings",
+      "input_checks": "before compile, after measurement, after clippy pass",
+      "run_sha256": "ca89a03edb7c862a301ce3eff39b0dd2f6f38ebbc8864013841ffd427d857396",
+      "plan_sha256": "ab850637e07cd2d4393fbb5dc7f102fc8cb6b848f77357becfdb46d13099d9c7",
+      "host_sha256": "231a4e531fa25d32ef515a3dcb8ce5299030d24f41578bb66ee133e47474f279",
+      "native_audit_sha256": "6951f2b182018485bcc203dd4cb9082a9e93ee2cdbc97cde878f5f84a11e3e4e"
+    }
+  },
+  "boundary": "readiness before clocks; timed release through joins; atomic checks and stats included; creation/oracle/output excluded",
+  "selection": "lowest median wall ns/op;>=2percent better and all paired bootstrap95percent median ratio upper bounds<1; otherwise unresolved",
+  "limitations": [
+    "Instrumented teaching locks, not production-library ranking",
+    "Eight independent process blocks; shared hosts; exploratory intervals without multiplicity adjustment",
+    "No fairness bound, priority inheritance, owner-death recovery, cancellation or timeout support",
+    "One-CPU short case has essentially no contention and does not prove lock-holder-preemption costs",
+    "Warm-process tiny burst, no cold-cache or energy claim",
+    "Initial timing boundary differed; never pooled with final",
+    "Finite atomic-sentinel/count/wrapping-checksum checks cannot prove absence of defects"
+  ]
+}
