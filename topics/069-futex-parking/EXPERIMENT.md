@@ -9,19 +9,19 @@
   allocation of shared state, warmup, post-run serial oracle, and output are excluded.
 - Process CPU time uses CLOCK_PROCESS_CPUTIME_ID. It is aggregate CPU usage over
   approximately the wall interval, not latency or energy.
-- Cases: one worker/100000 operations; four workers/10000 each with one arithmetic
-  step; four/2000 with256steps; eight/2000 on one CPU; four/50 with a requested50us
+- Cases: one worker / 100000 operations; four workers / 10000 each with one arithmetic
+  step; four / 2000 with 256 steps; eight / 2000 on one CPU; four / 50 with a requested 50 us
   sleep while holding the lock; four/one operation. The other cases use four CPUs.
 - CPUs are the first allowed logical CPU IDs, not asserted independent physical
   cores. No governor, host workload, NUMA, or cache-flush intervention is made.
-- No parallel benchmark processes on a host. Optimization3, target-cpu=native,
-  Rust2024, default panic unwind and LTO policy. Exact compiler, kernel, affinity,
+- No parallel benchmark processes on a host. Optimization 3, target-cpu=native,
+  Rust 2024, default panic unwind and LTO policy. Exact compiler, kernel, affinity,
   feature cfg, binary hashes and disassembly are retained externally.
 - Each process checks exclusion and completed work against a separate sequential
   traversal. Reject any incorrect candidate before selecting from timings.
-- Criterion: smallest median wall ns/op; at least2% below each other median and
-  each paired 95% bootstrap median-ratio upper bound below1. Resample eight process
-  blocks10000times with seed69. Otherwise report unresolved. This is descriptive
+- Criterion: smallest median wall ns/op; at least 2% below each other median and
+  each paired 95% bootstrap median-ratio upper bound below 1. Resample eight process
+  blocks 10000 times with seed 69. Otherwise report unresolved. This is descriptive
   evidence from a small shared-host sample, not a population guarantee or a
   multiple-comparison-corrected confidence claim. Report IQR and CPU cost too.
 - Initial scratch timing included arrival at the first barrier. That campaign is
