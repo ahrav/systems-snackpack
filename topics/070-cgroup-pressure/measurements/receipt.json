@@ -1,0 +1,77 @@
+{
+  "topic": 70,
+  "measured_source": "6719300145a9b640fa923eda3a88ca5afd2547e3",
+  "archive_sha256": "2ba7abb71ed87f6691df86a671a3118689ae1eb039dd7e291ab63e1ea1eced2e",
+  "hosts": {
+    "arm": {
+      "hostname": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+      "uname": "Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.110-135.202.amzn2023.aarch64 #1 SMP Fri Sep 25 01:46:28 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux",
+      "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: aarch64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8",
+      "available_cpu_count": 64,
+      "selected_cpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "source_sha256": {
+        "Cargo.toml": "3e59a6a92b5f7693e2d13ac4cac0f242f7ffcc3e34b72b20ddb0df7e4a60233c",
+        "src/lib.rs": "8fc4f9039cb22cc37a39e9908c75860247c212b89ec6da9f3a4dea85858730c5",
+        "examples/quota.rs": "810c156d017d75b9d57907e12b06aef6615f8518773ce3a306f8c9c646784806",
+        "scripts/run.py": "c3f17f0b91f502411c9a411d31a1744968862f887d4a65330c7fde965358742f",
+        "scripts/analyze.py": "f8aaa35f15560c6185382e0674f0d133761f5db856fa0bc0f342240e2945a2a6"
+      },
+      "workspace_sha256": {
+        "Cargo.toml": "f4fafc36b3b192392e9596a60ea28331b976460c76a737ac6ae8b90fc5ca18c5",
+        "Cargo.lock": "091f39c06f814a9495dfaae865d46691e7a442cf61f7e0f33933a6947203a2a0"
+      },
+      "binary_sha256": "594395ef55717361c71f9939136292de2334511468b13763dba2bd616b46f58f",
+      "processes": 108,
+      "correctness": "4 unit tests, 1 doctest, every output of all108processes checked",
+      "raw_runs_sha256": "38b3c648a15f8a7dd2c498152b1bfaaad99fd4f6f9631d2ad7278c9e3799a237",
+      "effective_flags": "edition2024; opt-level3; embed-bitcode=no; strip=debuginfo; no target-cpu or target-feature overrides",
+      "verbose_build_sha256": "142f40dd015d9a623d8262fecb4f7e46b66ca29acde7aa15cd920ca7fa8c01d0",
+      "rebuild_reproduced_measured_binary": true
+    },
+    "x86": {
+      "hostname": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+      "uname": "Linux dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com 6.12.110-135.202.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Fri Sep 25 01:45:58 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux",
+      "toolchain": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1",
+      "available_cpu_count": 192,
+      "selected_cpus": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "source_sha256": {
+        "Cargo.toml": "3e59a6a92b5f7693e2d13ac4cac0f242f7ffcc3e34b72b20ddb0df7e4a60233c",
+        "src/lib.rs": "8fc4f9039cb22cc37a39e9908c75860247c212b89ec6da9f3a4dea85858730c5",
+        "examples/quota.rs": "810c156d017d75b9d57907e12b06aef6615f8518773ce3a306f8c9c646784806",
+        "scripts/run.py": "c3f17f0b91f502411c9a411d31a1744968862f887d4a65330c7fde965358742f",
+        "scripts/analyze.py": "f8aaa35f15560c6185382e0674f0d133761f5db856fa0bc0f342240e2945a2a6"
+      },
+      "workspace_sha256": {
+        "Cargo.toml": "f4fafc36b3b192392e9596a60ea28331b976460c76a737ac6ae8b90fc5ca18c5",
+        "Cargo.lock": "091f39c06f814a9495dfaae865d46691e7a442cf61f7e0f33933a6947203a2a0"
+      },
+      "binary_sha256": "50637476d8df9e0259ea5045f2bc8a1a53295a157b30805521a3f804444dcb23",
+      "processes": 108,
+      "correctness": "4 unit tests, 1 doctest, every output of all108processes checked",
+      "raw_runs_sha256": "e9703f52e94797f7fb5c34c40ea544054d9b40cc7e750f8196877fdbccb99330",
+      "effective_flags": "edition2024; opt-level3; embed-bitcode=no; strip=debuginfo; no target-cpu or target-feature overrides",
+      "verbose_build_sha256": "1be9dbb3951ad49a76e8cd412539bba6d01233f0945c127b4ce45a5a689ff181",
+      "rebuild_reproduced_measured_binary": true
+    }
+  },
+  "protocol": "EXPERIMENT.md",
+  "raw_evidence": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-070/2026-10-07-67193001",
+  "validation": {
+    "workspace_gates": 7,
+    "workspace_failures": 0,
+    "native_linux_clippy": [
+      "arm",
+      "x86"
+    ]
+  }
+}
