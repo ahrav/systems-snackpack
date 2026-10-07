@@ -60,7 +60,10 @@ pub fn batch(workers: usize, jobs: usize, steps: u32) -> Vec<u64> {
     output
 }
 
-/// Returns a nonnegative counter delta; resets invalidate the observation.
+/// Returns a nonnegative delta, or None for a decrease.
+///
+/// The caller must separately reject changed source identities; a reset followed
+/// by enough new increments cannot be detected from two values alone.
 pub fn delta(before: u64, after: u64) -> Option<u64> {
     after.checked_sub(before)
 }

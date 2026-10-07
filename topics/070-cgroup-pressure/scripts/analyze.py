@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Summarize independent process observations without pooling host identities."""
+"""Summarize one intact runner-produced, single-host runs.json file."""
 import json, pathlib, statistics, sys
 rows=json.loads(pathlib.Path(sys.argv[1]).read_text())
 assert len(rows)==108, 'incomplete experiment: require all 108 process runs'
