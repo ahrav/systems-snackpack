@@ -12,8 +12,9 @@ def run(args):
     return subprocess.check_output(args, text=True, stderr=subprocess.STDOUT, timeout=1800)
 
 files = ['Cargo.toml', 'src/lib.rs', 'examples/quota.rs', 'scripts/run.py', 'scripts/analyze.py']
-for name in ['RUSTFLAGS', 'CARGO_ENCODED_RUSTFLAGS', 'CARGO_BUILD_RUSTFLAGS', 'CARGO_BUILD_TARGET']:
-    os.environ.pop(name, None)
+for name in [n for n in os.environ if n.startswith('CARGO_') and n != 'CARGO_HOME']:
+    os.environ.pop(name)
+os.environ['RUSTFLAGS'] = ''
 os.environ['CARGO_TARGET_DIR'] = str(root/'target')
 identity = {p: hashlib.sha256((root/p).read_bytes()).hexdigest() for p in files}
 workspace = root.parents[1]
@@ -32,12 +33,14 @@ meta = dict(source_sha256=identity, workspace_sha256=workspace_identity, hostnam
             cpu=run(['lscpu']), rustc=run(['rustc','-Vv']), systemd=run(['systemd-run','--version']),
             allowed_cpus=allowed, selected_cpus=cpus, flags='cargo --release; default target features',
             target_features=run(['rustc','--print','cfg']),
+            effective_cfg=subprocess.check_output(['cargo','rustc','--release','--example','quota','--manifest-path',str(root/'Cargo.toml'),'--','--print','cfg'],text=True,timeout=1800),
             protocol='6 process blocks; all 6 worker permutations; order-balanced policy and size; 200ms idle after one small warmup; allocation/spawn/jobs/join timed; oracle and stdout excluded; counters bracket timer sequentially',
             criterion='lowest median wall_ns, >=5% paired improvement and all six paired wins versus every rival; otherwise unresolved',
             policies=['uncapped','q100','q10'], jobs=[64,4096], steps=1000000)
+assert meta['effective_cfg']==run(['rustc','-O','--print','cfg']), 'Cargo configuration changes the compiled target cfg'
 (out/'metadata.json').write_text(json.dumps(meta,indent=2))
 (out/'tests.txt').write_text(run(['cargo','test','--manifest-path',str(root/'Cargo.toml')]))
-(out/'build.txt').write_text(run(['cargo','build','--release','--example','quota','--manifest-path',str(root/'Cargo.toml')]))
+(out/'build.txt').write_text(run(['cargo','build','-v','--release','--example','quota','--manifest-path',str(root/'Cargo.toml')]))
 binary = root/'target/release/examples/quota'
 (out/'binary.sha256').write_text(hashlib.sha256(binary.read_bytes()).hexdigest()+'\n')
 (out/'job-assembly.txt').write_text(run(['objdump','-d',str(binary)]))
