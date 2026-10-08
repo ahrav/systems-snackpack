@@ -1,0 +1,15 @@
+# Frozen final experiment
+
+Three policies: rr (physical-index round robin among reclaimable blocks), greedy (full metadata scan, min live count), sample4 (four random block probes with replacement, min-live eligible sample, round-robin fallback if none). This is NOT FIFO age order, an O(1) guaranteed sampler, or a firmware emulator.
+
+13 cells: 64/256 blocks, 32 pages per block, floor(physical pages * .5/.9) logical pages; uniform, hot and cyclic writes; plus 32-write no-warmup uniform startup at 64 blocks/90% occupancy. Hot directs 90% of requests to first floor(logical/10) pages and 10% to all logical pages, so about91% hit the hot set. Xorshift modulo selection has small modulo bias and is not a security generator. All model pages are equal-size; physical page bytes are unspecified.
+
+Per cell: six independent process blocks, six permutations of policy order, same trace seed71..76 per matched block. Compile -C opt-level=3 -C target-cpu=native. Pin to first allowed CPU; shared host, no exclusive core or cold-cache control. After initial logical fill, warmup5*logical overwrites; measure20000overwrites without resetting state. Fixed preconditioning is NOT evidence of statistical steady state. The 32-write cell has no warmup and measures an initial free-space phase, not cold instruction/cache latency.
+
+Timer: Instant wall-clock around only measured write replay, including GC selection, copies, metadata updates and per-write assertions. Excludes process startup, trace generation, model allocation/fill, warmup, oracle traversal, output and teardown. Setup time separately covers model+oracle allocation and initial fill; process_wall_ns separately includes process launch and all work. No candidate-only hardware counters. No per-write heap allocation in the model loop.
+
+Each candidate must pass 4 unit tests, a doctest, Clippy, full final-value oracle and mapping/frontier/reserve checks. Assert free_end-free_start = 32*erases-host-copies each process. Reject any failed process before ranking.
+
+Predeclared FINAL selection (initial pilot is descriptive only): elapsed winner must be >=5% faster than EACH rival in ALL six paired blocks; otherwise unresolved. Report median and interquartile range (IQR) plus paired min/max ratios. Lowest model WAF winner must use >=1% fewer total programmed pages than EACH rival in ALL six paired traces; otherwise report equal counts if exact for every paired trace, or unresolved. These strict finite-sample rules are not confidence probabilities. WAF=(host+copies)/host; preserve free-inventory boundary counters. Report all cells and both hosts; identical model counts across hosts are a replay check, not independent device observations.
+
+No physical SSD throughput, p99, durability, media wear, energy, temperature, cache folding, compression, metadata/parity writes, placement separation or wear leveling is modeled/measured. Compare simulator implementation speed separately from modeled program-work efficiency. Generated code is descriptive and cannot establish SSD mechanisms.

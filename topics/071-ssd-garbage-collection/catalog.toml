@@ -1,0 +1,7 @@
+# Scoped catalog entry; the root legacy session ledger is preserved.
+[[topic]]
+id = 71
+slug = "ssd-garbage-collection"
+title = "SSD garbage collection and write amplification"
+next_topic_id = 72
+next_title = "Storage layout and device geometry: sparse files, extents, and zoned storage"
