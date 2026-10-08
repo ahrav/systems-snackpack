@@ -12,4 +12,3 @@ path = "examples/compare.rs"
 missing_docs = "deny"
 [lints.rustdoc]
 broken_intra_doc_links = "deny"
-
