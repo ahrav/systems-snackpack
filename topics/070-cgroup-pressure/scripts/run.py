@@ -7,7 +7,7 @@ out.mkdir(parents=True, exist_ok=False)
 assert platform.system() == 'Linux'
 
 def run(args):
-    return subprocess.check_output(args, text=True, stderr=subprocess.STDOUT)
+    return subprocess.check_output(args, text=True, stderr=subprocess.STDOUT, timeout=1800)
 
 files = ['Cargo.toml', 'src/lib.rs', 'examples/quota.rs', 'scripts/run.py', 'scripts/analyze.py']
 os.environ['CARGO_TARGET_DIR'] = str(root/'target')

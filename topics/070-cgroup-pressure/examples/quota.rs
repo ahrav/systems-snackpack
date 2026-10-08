@@ -29,6 +29,17 @@ fn counters(path: &Path) -> BTreeMap<String, u64> {
             }
         }
     }
+    for key in [
+        "cpu.stat.usage_usec",
+        "cpu.stat.throttled_usec",
+        "cpu.pressure.some",
+    ] {
+        assert!(
+            result.contains_key(key),
+            "{key} missing under {}",
+            path.display()
+        );
+    }
     result
 }
 fn main() {
@@ -100,4 +111,50 @@ fn main() {
         output.iter().fold(0_u64, |a, b| a.wrapping_add(*b))
     );
     println!("correct=true");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::counters;
+    use std::fs;
+
+    fn cgroup_dir(name: &str, cpu_pressure: Option<&str>) -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!("quota-{name}-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        fs::write(
+            dir.join("cpu.stat"),
+            "usage_usec 1500\nuser_usec 1000\nsystem_usec 500\nnr_throttled 2\nthrottled_usec 300\n",
+        )
+        .unwrap();
+        if let Some(text) = cpu_pressure {
+            fs::write(dir.join("cpu.pressure"), text).unwrap();
+        }
+        dir
+    }
+
+    #[test]
+    fn counters_parse_stat_and_pressure_totals() {
+        let dir = cgroup_dir(
+            "present",
+            Some(
+                "some avg10=0.00 avg60=0.00 avg300=0.00 total=123\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=45\n",
+            ),
+        );
+        let result = counters(&dir);
+        fs::remove_dir_all(&dir).unwrap();
+        assert_eq!(result["cpu.stat.usage_usec"], 1500);
+        assert_eq!(result["cpu.stat.throttled_usec"], 300);
+        assert_eq!(result["cpu.pressure.some"], 123);
+    }
+
+    #[test]
+    #[should_panic(expected = "cpu.pressure.some")]
+    fn counters_require_cpu_pressure() {
+        let dir = cgroup_dir("absent", None);
+        let result = std::panic::catch_unwind(|| counters(&dir));
+        fs::remove_dir_all(&dir).unwrap();
+        if let Err(payload) = result {
+            std::panic::resume_unwind(payload);
+        }
+    }
 }

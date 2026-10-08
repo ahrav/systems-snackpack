@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Summarize one intact runner-produced, single-host runs.json file."""
-import json, pathlib, statistics, sys
+import itertools, json, pathlib, statistics, sys
 rows=json.loads(pathlib.Path(sys.argv[1]).read_text())
 assert len(rows)==108, 'incomplete experiment: require all 108 process runs'
-assert len({(r['block'],r['policy'],r['jobs'],r['workers']) for r in rows})==108
+assert {(r['block'],r['policy'],r['jobs'],r['workers']) for r in rows}==set(itertools.product(range(6),['uncapped','q100','q10'],[64,4096],[1,2,4])), 'tuple set differs from the frozen 6x3x2x3 matrix'
 assert all(r['correct']=='true' for r in rows)
 for policy in ['uncapped','q100','q10']:
     for jobs in [64,4096]:
