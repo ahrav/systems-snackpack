@@ -13,11 +13,11 @@ def rows():
                  **{'delta_cpu.stat.usage_usec': 1, 'delta_cpu.pressure.some': 1, 'delta_cpu.stat.throttled_usec': 1})
             for b, p, j, w in itertools.product(range(6), ['uncapped', 'q100', 'q10'], [64, 4096], [1, 2, 4])]
 
-def analyze_exit(matrix):
+def analyze_exit(matrix, *flags):
     with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False) as f:
         json.dump(matrix, f)
     try:
-        return subprocess.run([sys.executable, str(analyze), f.name], text=True, capture_output=True, timeout=60).returncode
+        return subprocess.run([sys.executable, *flags, str(analyze), f.name], text=True, capture_output=True, timeout=60).returncode
     finally:
         pathlib.Path(f.name).unlink()
 
@@ -28,4 +28,5 @@ substituted[0]['workers'] = 3
 assert len({(r['block'], r['policy'], r['jobs'], r['workers']) for r in substituted}) == 108
 assert analyze_exit(substituted) != 0, 'analyzer accepted an unexpected tuple in place of a required one'
 assert analyze_exit(complete[:-1]) != 0
+assert analyze_exit(complete, '-O') != 0, 'analyzer ran with assert statements stripped'
 print('ok')

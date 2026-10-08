@@ -42,6 +42,13 @@ fn counters(path: &Path) -> BTreeMap<String, u64> {
     }
     result
 }
+fn cpus_allowed(status: &str) -> &str {
+    status
+        .lines()
+        .find_map(|s| s.strip_prefix("Cpus_allowed:"))
+        .expect("Cpus_allowed in /proc/self/status")
+        .trim()
+}
 fn main() {
     let args: Vec<_> = std::env::args().collect();
     assert_eq!(args.len(), 4, "usage: quota WORKERS JOBS STEPS");
@@ -59,6 +66,8 @@ fn main() {
     let cpu_max = fs::read_to_string(path.join("cpu.max")).unwrap();
     println!("cgroup={}", path.display());
     println!("cpu_max={}", cpu_max.trim());
+    let status = fs::read_to_string("/proc/self/status").unwrap();
+    println!("cpus_allowed={}", cpus_allowed(&status));
     let mut ancestor = Some(path.as_path());
     while let Some(p) = ancestor {
         if !p.starts_with("/sys/fs/cgroup") {
@@ -115,7 +124,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use super::counters;
+    use super::{counters, cpus_allowed};
     use std::fs;
 
     fn cgroup_dir(name: &str, cpu_pressure: Option<&str>) -> std::path::PathBuf {
@@ -145,6 +154,12 @@ mod tests {
         assert_eq!(result["cpu.stat.usage_usec"], 1500);
         assert_eq!(result["cpu.stat.throttled_usec"], 300);
         assert_eq!(result["cpu.pressure.some"], 123);
+    }
+
+    #[test]
+    fn cpus_allowed_reads_the_mask_words() {
+        let status = "Name:\tquota\nCpus_allowed:\t00000000,0000000f\nCpus_allowed_list:\t0-3\n";
+        assert_eq!(cpus_allowed(status), "00000000,0000000f");
     }
 
     #[test]

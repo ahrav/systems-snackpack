@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Summarize one intact runner-produced, single-host runs.json file."""
 import itertools, json, pathlib, statistics, sys
+if sys.flags.optimize:
+    raise SystemExit('validation uses assert: run without python -O or PYTHONOPTIMIZE')
 rows=json.loads(pathlib.Path(sys.argv[1]).read_text())
 assert len(rows)==108, 'incomplete experiment: require all 108 process runs'
 assert {(r['block'],r['policy'],r['jobs'],r['workers']) for r in rows}==set(itertools.product(range(6),['uncapped','q100','q10'],[64,4096],[1,2,4])), 'tuple set differs from the frozen 6x3x2x3 matrix'

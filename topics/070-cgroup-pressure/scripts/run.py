@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Run independent paired processes in user-owned transient systemd cgroups."""
 import hashlib, itertools, json, os, pathlib, platform, subprocess, sys, time
+if sys.flags.optimize:
+    raise SystemExit('validation uses assert: run without python -O or PYTHONOPTIMIZE')
 root = pathlib.Path(__file__).resolve().parents[1]
 out = pathlib.Path(sys.argv[1]).resolve()
 out.mkdir(parents=True, exist_ok=False)
@@ -10,6 +12,8 @@ def run(args):
     return subprocess.check_output(args, text=True, stderr=subprocess.STDOUT, timeout=1800)
 
 files = ['Cargo.toml', 'src/lib.rs', 'examples/quota.rs', 'scripts/run.py', 'scripts/analyze.py']
+for name in ['RUSTFLAGS', 'CARGO_ENCODED_RUSTFLAGS', 'CARGO_BUILD_RUSTFLAGS', 'CARGO_BUILD_TARGET']:
+    os.environ.pop(name, None)
 os.environ['CARGO_TARGET_DIR'] = str(root/'target')
 identity = {p: hashlib.sha256((root/p).read_bytes()).hexdigest() for p in files}
 workspace = root.parents[1]
@@ -63,6 +67,7 @@ for block, order in enumerate(itertools.permutations([1,2,4])):
                 actual=values['cpu_max'].split()
                 expected=['max','100000'] if policy=='uncapped' else (['50000','100000'] if policy=='q100' else ['5000','10000'])
                 assert actual==expected, (actual, expected)
+                assert int(values['cpus_allowed'].replace(',',''),16)==sum(1<<c for c in cpus), (values['cpus_allowed'], cpus)
                 row=dict(block=block,policy=policy,jobs=jobs,workers=workers,launch_ns=launch_ns,
                          **{k:(int(v) if v.isdigit() else v) for k,v in values.items()})
                 records.append(row)
