@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Run independent paired processes in user-owned transient systemd cgroups."""
-import hashlib, itertools, json, os, pathlib, platform, subprocess, sys, time
+import hashlib, itertools, json, os, pathlib, platform, shutil, subprocess, sys, time
 if sys.flags.optimize:
     raise SystemExit('validation uses assert: run without python -O or PYTHONOPTIMIZE')
 root = pathlib.Path(__file__).resolve().parents[1]
@@ -41,7 +41,7 @@ assert meta['effective_cfg']==run(['rustc','-O','--print','cfg']), 'Cargo config
 (out/'metadata.json').write_text(json.dumps(meta,indent=2))
 (out/'tests.txt').write_text(run(['cargo','test','--manifest-path',str(root/'Cargo.toml')]))
 (out/'build.txt').write_text(run(['cargo','build','-v','--release','--example','quota','--manifest-path',str(root/'Cargo.toml')]))
-binary = root/'target/release/examples/quota'
+binary = pathlib.Path(shutil.copy2(root/'target/release/examples/quota', out/'quota'))
 (out/'binary.sha256').write_text(hashlib.sha256(binary.read_bytes()).hexdigest()+'\n')
 (out/'job-assembly.txt').write_text(run(['objdump','-d',str(binary)]))
 records=[]
