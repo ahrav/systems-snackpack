@@ -1,8 +1,8 @@
 {
   "topic": 71,
-  "source_commit": "64dd765c496a355ff2f518925666e637189d7b65",
+  "source_commit": "d6be170cfe0f60718374b387e0295c20556ec90f",
   "source_sha256": {
-    "Cargo.toml": "2c86d30d3c14dcf76e7175939e386d37d4418be427296ab5a75b32e097922699",
+    "Cargo.toml": "5a0b0a59fd67159a7cde5db584dfc348a37391aa0841a9f06f96df30263d19c7",
     "src/lib.rs": "8ccdad9d21dbe1f392a8f8995162f6d7c8a6c1408f455751ca98fb68baa6689a",
     "examples/compare.rs": "de27b9a11229ce2ca25c3815dc219b00e52c690a15627b2d37c1f4016c9f4a85",
     "run.py": "f6d1a5f073b47e6aa4c6b88fa50b574a118807ad749040f7e04995ef9b8d5ca2",
@@ -98,14 +98,15 @@
       "binary_sha256": "4d510d4037bc21ce4fe9eb0909d06994bcd0b39894b0e38ec1b14c16eae4ebae",
       "lscpu": "Architecture:                            aarch64\nCPU op-mode(s):                          32-bit, 64-bit\nByte Order:                              Little Endian\nCPU(s):                                  64\nOn-line CPU(s) list:                     0-63\nVendor ID:                               ARM\nModel:                                   1\nThread(s) per core:                      1\nCore(s) per socket:                      64\nSocket(s):                               1\nStepping:                                r1p1\nBogoMIPS:                                2100.00\nFlags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nL1d cache:                               4 MiB (64 instances)\nL1i cache:                               4 MiB (64 instances)\nL2 cache:                                64 MiB (64 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-63\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; CSV2, BHB\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
       "raw_sha256": {
-        "runs.jsonl": "53a698c7dec8bc504fe208e2c7863361c98d25ecd29b4b6f8ad0d3af6fb08c5d",
-        "metadata.json": "9090190589495ae2b7be9489707bf32b56c83bfc49160c90d423b359559eeecc",
+        "runs.jsonl": "a963bff6a0459584fb51085b9dcea52039233eceb96a990f75a2e4b5ecaabffc",
+        "metadata.json": "3d7fe0fb794cd50a95a283551ad74e79257577be8b988147f16f9a00c57c2096",
         "tests.log": "e2cdc356b0b40a533b29b1325abb842eedb5a2d34033eb4c570b8d1721aa85a7",
         "doctest.log": "52f4e506d7074bb43ba7e3948061bdc150762c01f62198b0091f8e3634d52eac",
-        "clippy.log": "0e894dc7ad35c9c63981d3ac02c4e4ae32881aa8d55dd7f35d396fd44997e561"
+        "clippy.log": "10fdde3a67a7aca9e33af177de068350606cfcd4bf9308f460ee17d22fe8d9fa"
       },
       "rows": 234,
-      "cpu_model_identifier": "MIDR_EL1 0x411fd401 (live read on same declared host 2026-10-08)"
+      "cpu_model_identifier": "MIDR_EL1 0x411fd401 (live read on same declared host 2026-10-08)",
+      "binary_equal_previous_campaign": true
     },
     "x86": {
       "hostname": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
@@ -324,13 +325,14 @@
       "binary_sha256": "476f8f1dd2a6d2cfa728932beacc69dc3cd4f2b116a2543cbdcefbdf186ac453",
       "lscpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           46 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  192\nOn-line CPU(s) list:                     0-191\nVendor ID:                               GenuineIntel\nModel name:                              Intel(R) Xeon(R) Platinum 8488C\nCPU family:                              6\nModel:                                   143\nThread(s) per core:                      2\nCore(s) per socket:                      48\nSocket(s):                               2\nStepping:                                8\nBogoMIPS:                                4800.00\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd ida arat avx512vbmi umip pku ospke waitpkg avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg tme avx512_vpopcntdq rdpid cldemote movdiri movdir64b md_clear serialize amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nHypervisor vendor:                       KVM\nVirtualization type:                     full\nL1d cache:                               4.5 MiB (96 instances)\nL1i cache:                               3 MiB (96 instances)\nL2 cache:                                192 MiB (96 instances)\nL3 cache:                                210 MiB (2 instances)\nNUMA node(s):                            2\nNUMA node0 CPU(s):                       0-47,96-143\nNUMA node1 CPU(s):                       48-95,144-191\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
       "raw_sha256": {
-        "runs.jsonl": "509f8a0053021fe2eb42768d9930088d598ce410ecf05be5d556aee9c54e4365",
-        "metadata.json": "d2a0e97080577d212de10a7a2ae167ebb8def84eedd262915c57b862717616c8",
+        "runs.jsonl": "c94a92ca5e1f72963cd752f03ba9c2383bd719655f511e065879a3bcf859fd42",
+        "metadata.json": "7a17461e06844daa4b737910b56851ed2bf70cfaff3954b67133ab7040bc2545",
         "tests.log": "106f5303b005d421a18f99b58054301c8a196cc6ceac0ed0eb8db6dbc64e9882",
-        "doctest.log": "41707908116e3ce38c0ac14be7aa84f0cca0e8f893b73dcad8e6ad2be041c1de",
-        "clippy.log": "c7de3f31d1d548c884ece572237a30a91f119c7e0f2e2470cfe3c18dc917da6e"
+        "doctest.log": "84f366390809e2801de453e07741a3036cc1b324e0cc7efd3e868452d38ddf77",
+        "clippy.log": "1ee3f6c14c44d2f3566703debac2ae4501e1e4ada897028e30b59f17adb8d1fc"
       },
-      "rows": 234
+      "rows": 234,
+      "binary_equal_previous_campaign": true
     }
   },
   "limitations": [
@@ -345,5 +347,7 @@
     "program_work": "candidate_programs / rival_programs <= 0.99 for every rival in all six paired traces",
     "interpretation": "descriptive finite-sample rule; unresolved is not equivalence"
   },
-  "cfg_query_scope": "target_features retains rustc --print cfg -C target-cpu=native output. Only target_feature entries describe native features; debug_assertions from that separate unoptimized query is not an optimized-build flag. Actual measured compilation uses -C opt-level=3 as recorded in run.py."
+  "cfg_query_scope": "target_features retains rustc --print cfg -C target-cpu=native output. Only target_feature entries describe native features; debug_assertions from that separate unoptimized query is not an optimized-build flag. Actual measured compilation uses -C opt-level=3 as recorded in run.py.",
+  "campaign": "final-fixed",
+  "prior_campaign": "final retained separately; superseded solely by manifest EOF whitespace repair, no timings pooled"
 }
