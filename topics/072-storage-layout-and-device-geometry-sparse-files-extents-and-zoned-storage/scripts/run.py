@@ -92,9 +92,11 @@ assert not unexpected, unexpected
 messages = [json.loads(line) for line in command(['cargo','build','--release','--example','layout','--message-format=json']).stdout.splitlines()]
 executables = [m['executable'] for m in messages if m.get('reason') == 'compiler-artifact' and m.get('executable')]
 assert len(executables) == 1, executables
-binary = Path(executables[0])
+# Measurements run a private copy of the artifact held in the evidence directory.
+binary = Path(shutil.copy2(executables[0], OUT/'layout'))
 assert source_hashes() == identity['sha256'], 'sources changed during the Cargo gates'
-(OUT/'binary.sha256').write_text(hashlib.sha256(binary.read_bytes()).hexdigest()+'\n')
+binary_sha256 = hashlib.sha256(binary.read_bytes()).hexdigest()
+(OUT/'binary.sha256').write_text(binary_sha256+'\n')
 workloads = [('small_empty',65536,'empty'),('small_scatter',65536,'scattered'),
              ('small_dense',65536,'dense'),('large_empty',16777216,'empty'),
              ('large_scatter',16777216,'scattered'),('large_cluster',16777216,'clustered'),
@@ -130,5 +132,6 @@ for candidate in candidates:
     file.unlink()
 assert not list(DATA.iterdir())
 assert source_hashes() == identity['sha256'], 'sources changed during measurement'
+assert hashlib.sha256(binary.read_bytes()).hexdigest() == binary_sha256, 'binary changed during measurement'
 (OUT/'complete.json').write_text(json.dumps({'measured_processes':144,'warmup_processes':24,'map_processes':3,'finished_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())})+'\n')
 print(json.dumps({'complete':str(OUT),'hostname':platform.node()}))
