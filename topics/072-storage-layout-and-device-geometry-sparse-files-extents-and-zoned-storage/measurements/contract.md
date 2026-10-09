@@ -26,8 +26,9 @@ Only byte content and modeled zone placement are correctness contracts;
 allocation counts and elapsed times are observations of this host/workload.
 
 To replay outside the workspace, copy Cargo.toml, src/lib.rs,
-examples/layout.rs, scripts/run.py and the retained source-identity.json
+examples/layout.rs, scripts/run.py, scripts/summarize.py and the retained source-identity.json
 into a fresh directory. Run `python3 scripts/run.py`. The script requires
-Linux, cargo, taskset, filefrag, findmnt, lsblk and free disk space. It creates
+64-bit Arm or x86 Linux, Rust 1.93+, Cargo with Clippy, Python 3, taskset,
+filefrag, findmnt, lsblk, lscpu, df, stat and free disk space. It creates
 new data/evidence directories and refuses to reuse existing ones. Keep the
 identity JSON's source paths unchanged and verify hashes before execution.
