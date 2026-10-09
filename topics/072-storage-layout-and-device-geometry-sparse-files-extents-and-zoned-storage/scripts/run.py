@@ -17,12 +17,12 @@ os.chdir(ROOT)
 SOURCES = ['Cargo.toml', 'src/lib.rs', 'examples/layout.rs', 'scripts/run.py', 'scripts/summarize.py']
 # Cargo reads flags, paths and the compiler from CARGO_* (including
 # CARGO_ENCODED_RUSTFLAGS), RUSTC, RUSTC_WRAPPER, RUSTC_WORKSPACE_WRAPPER and config
-# files; an empty RUSTFLAGS overrides config rustflags.
-for name in [n for n in os.environ if (n.startswith('CARGO_') and n != 'CARGO_HOME')
-             or n in ('RUSTC', 'RUSTC_WRAPPER', 'RUSTC_WORKSPACE_WRAPPER')]:
+# files. Environment values take precedence over config files: an empty RUSTFLAGS
+# overrides config rustflags and an empty wrapper disables a configured wrapper.
+for name in [n for n in os.environ if n.startswith('CARGO_') and n != 'CARGO_HOME']:
     os.environ.pop(name)
-os.environ['RUSTFLAGS'] = ''
-os.environ['CARGO_TARGET_DIR'] = str(ROOT/'target')
+os.environ.update(RUSTFLAGS='', RUSTC='rustc', RUSTC_WRAPPER='', RUSTC_WORKSPACE_WRAPPER='',
+                  CARGO_TARGET_DIR=str(ROOT/'target'))
 OUT = ROOT / 'evidence'
 OUT.mkdir(exist_ok=False)
 DATA = ROOT / 'data'
@@ -59,7 +59,11 @@ for label,args in [('tests',['cargo','test','--lib','--examples']),('doc',['carg
     result = subprocess.run(args,text=True,capture_output=True)
     (OUT/(label+'.log')).write_text(result.stdout+result.stderr)
     if result.returncode: raise RuntimeError(label)
-binary = ROOT/'target/release/examples/layout'
+# A configured build.target moves the artifact under target/<triple>; Cargo reports the path.
+messages = [json.loads(line) for line in command(['cargo','build','--release','--example','layout','--message-format=json']).stdout.splitlines()]
+executables = [m['executable'] for m in messages if m.get('reason') == 'compiler-artifact' and m.get('executable')]
+assert len(executables) == 1, executables
+binary = Path(executables[0])
 (OUT/'binary.sha256').write_text(hashlib.sha256(binary.read_bytes()).hexdigest()+'\n')
 workloads = [('small_empty',65536,'empty'),('small_scatter',65536,'scattered'),
              ('small_dense',65536,'dense'),('large_empty',16777216,'empty'),
