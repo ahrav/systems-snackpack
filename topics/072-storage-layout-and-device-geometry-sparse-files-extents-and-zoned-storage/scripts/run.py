@@ -11,6 +11,13 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 os.chdir(ROOT)
+SOURCES = ['Cargo.toml', 'src/lib.rs', 'examples/layout.rs', 'scripts/run.py', 'scripts/summarize.py']
+# Cargo reads flags and paths from CARGO_* (including CARGO_ENCODED_RUSTFLAGS) and
+# config files; an empty RUSTFLAGS overrides config rustflags.
+for name in [n for n in os.environ if n.startswith('CARGO_') and n != 'CARGO_HOME']:
+    os.environ.pop(name)
+os.environ['RUSTFLAGS'] = ''
+os.environ['CARGO_TARGET_DIR'] = str(ROOT/'target')
 OUT = ROOT / 'evidence'
 OUT.mkdir(exist_ok=False)
 DATA = ROOT / 'data'
@@ -19,9 +26,7 @@ DATA.mkdir(exist_ok=False)
 def command(args, **kwargs):
     return subprocess.run(args, text=True, capture_output=True, check=True, **kwargs)
 
-identity = json.loads((ROOT/'source-identity.json').read_text())
-for name, expected in identity['sha256'].items():
-    assert hashlib.sha256((ROOT/name).read_bytes()).hexdigest() == expected, name
+identity = {'sha256': {name: hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in SOURCES}}
 (OUT/'source-identity.json').write_text(json.dumps(identity, indent=2)+'\n')
 cpu = min(os.sched_getaffinity(0))
 meta = {'hostname':platform.node(), 'architecture':platform.machine(),
@@ -30,7 +35,6 @@ meta = {'hostname':platform.node(), 'architecture':platform.machine(),
         'flags':'cargo --release; default target CPU; no RUSTFLAGS; taskset one allowed CPU',
         'source':identity, 'commands':{}}
 assert meta['architecture'] in ('aarch64','x86_64')
-assert not os.environ.get('RUSTFLAGS')
 for args in [['rustc','-Vv'],['rustc','--print','cfg'],['lscpu'],['df','-T',str(DATA)],
              ['findmnt','-T',str(DATA),'-o','TARGET,SOURCE,FSTYPE,OPTIONS'],
              ['lsblk','-o','NAME,TYPE,SIZE,LOG-SEC,PHY-SEC,ZONED,MOUNTPOINT'],
@@ -38,6 +42,8 @@ for args in [['rustc','-Vv'],['rustc','--print','cfg'],['lscpu'],['df','-T',str(
     result = subprocess.run(args,text=True,capture_output=True)
     meta['commands'][' '.join(args)] = {'exit':result.returncode,'stdout':result.stdout,'stderr':result.stderr}
 (OUT/'host.json').write_text(json.dumps(meta,indent=2)+'\n')
+failed_probes = [name for name, r in meta['commands'].items() if r['exit']]
+assert not failed_probes, failed_probes
 for label,args in [('tests',['cargo','test','--lib','--examples']),('doc',['cargo','test','--doc']),
                    ('clippy',['cargo','clippy','--all-targets','--','-D','warnings']),
                    ('build',['cargo','build','--release','--example','layout','-vv'])]:

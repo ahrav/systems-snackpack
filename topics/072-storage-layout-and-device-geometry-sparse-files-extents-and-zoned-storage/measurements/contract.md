@@ -26,9 +26,14 @@ Only byte content and modeled zone placement are correctness contracts;
 allocation counts and elapsed times are observations of this host/workload.
 
 To replay outside the workspace, copy Cargo.toml, src/lib.rs,
-examples/layout.rs, scripts/run.py, scripts/summarize.py and the retained source-identity.json
-into a fresh directory. Run `python3 scripts/run.py`. The script requires
+examples/layout.rs, scripts/run.py and scripts/summarize.py into a fresh
+directory. Run `python3 scripts/run.py`. The script requires
 64-bit Arm or x86 Linux, Rust 1.93+, Cargo with Clippy, Python 3, taskset,
 filefrag, findmnt, lsblk, lscpu, df, stat and free disk space. It creates
-new data/evidence directories and refuses to reuse existing ones. Keep the
-identity JSON's source paths unchanged and verify hashes before execution.
+new data/evidence directories and refuses to reuse existing ones, clears
+CARGO_* and RUSTFLAGS from its environment, builds into its own target
+directory, and stops before building when any host probe exits nonzero.
+It records the SHA-256 of the five copied files in evidence/source-identity.json.
+Compare that file with receipt.json before pooling: the receipt identities are
+those of the measured commit, whose scripts/run.py predates the replay hygiene
+above; the Rust sources and measurement procedure are unchanged.
