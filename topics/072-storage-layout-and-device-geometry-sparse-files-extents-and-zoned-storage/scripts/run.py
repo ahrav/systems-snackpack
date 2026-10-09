@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import platform
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -22,7 +23,12 @@ SOURCES = ['Cargo.toml', 'src/lib.rs', 'examples/layout.rs', 'scripts/run.py', '
 # overrides config rustflags and an empty wrapper disables a configured wrapper.
 for name in [n for n in os.environ if n.startswith('CARGO_') and n != 'CARGO_HOME']:
     os.environ.pop(name)
-os.environ.update(RUSTFLAGS='', RUSTC='rustc', RUSTC_WRAPPER='', RUSTC_WORKSPACE_WRAPPER='',
+# A dynamic-loader interposer can replace the storage calls under measurement.
+assert not {'LD_PRELOAD', 'LD_AUDIT'} & set(os.environ), sorted({'LD_PRELOAD', 'LD_AUDIT'} & set(os.environ))
+# An absolute RUSTC survives a PATH rewritten through Cargo's [env] table.
+rustc_path = shutil.which('rustc')
+assert rustc_path, 'rustc is required on PATH'
+os.environ.update(RUSTFLAGS='', RUSTC=rustc_path, RUSTC_WRAPPER='', RUSTC_WORKSPACE_WRAPPER='',
                   CARGO_TARGET_DIR=str(ROOT/'target'))
 # These environment variables pin release-profile codegen settings to Cargo's documented
 # defaults and take precedence over [profile.release] in Cargo config files.
@@ -41,7 +47,10 @@ def command(args, **kwargs):
 # An explicit host target outranks a configured build.target.
 host_target = next(line.split()[1] for line in command(['rustc','-vV']).stdout.splitlines() if line.startswith('host: '))
 os.environ['CARGO_BUILD_TARGET'] = host_target
-identity = {'sha256': {name: hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in SOURCES}}
+def source_hashes():
+    return {name: hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in SOURCES}
+
+identity = {'sha256': source_hashes()}
 (OUT/'source-identity.json').write_text(json.dumps(identity, indent=2)+'\n')
 cpu = min(os.sched_getaffinity(0))
 midr = Path(f'/sys/devices/system/cpu/cpu{cpu}/regs/identification/midr_el1')
@@ -84,6 +93,7 @@ messages = [json.loads(line) for line in command(['cargo','build','--release','-
 executables = [m['executable'] for m in messages if m.get('reason') == 'compiler-artifact' and m.get('executable')]
 assert len(executables) == 1, executables
 binary = Path(executables[0])
+assert source_hashes() == identity['sha256'], 'sources changed during the Cargo gates'
 (OUT/'binary.sha256').write_text(hashlib.sha256(binary.read_bytes()).hexdigest()+'\n')
 workloads = [('small_empty',65536,'empty'),('small_scatter',65536,'scattered'),
              ('small_dense',65536,'dense'),('large_empty',16777216,'empty'),
@@ -119,5 +129,6 @@ for candidate in candidates:
     (OUT/(candidate+'-stat.txt')).write_text(command(['stat','-c','size=%s blocks_512=%b io_hint=%o',str(file)]).stdout)
     file.unlink()
 assert not list(DATA.iterdir())
+assert source_hashes() == identity['sha256'], 'sources changed during measurement'
 (OUT/'complete.json').write_text(json.dumps({'measured_processes':144,'warmup_processes':24,'map_processes':3,'finished_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())})+'\n')
 print(json.dumps({'complete':str(OUT),'hostname':platform.node()}))
