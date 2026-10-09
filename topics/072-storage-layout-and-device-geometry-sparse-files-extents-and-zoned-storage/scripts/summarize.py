@@ -1,10 +1,18 @@
 from pathlib import Path
 import json,statistics,sys
 base=Path(sys.argv[1]); result={}; lines=['| Host / workload | Dense ms | Sparse ms | Prealloc ms | Selected |','|---|---:|---:|---:|---|']
-for host in ['arm','x86']:
+hosts=['arm','x86']
+identities={h:json.loads((base/h/'evidence/source-identity.json').read_text())['sha256'] for h in hosts}
+if len({json.dumps(i,sort_keys=True) for i in identities.values()})!=1:
+    raise ValueError(f'source identities differ across hosts: {identities}')
+for host in hosts:
     rows=[json.loads(l) for l in (base/host/'evidence/runs.jsonl').read_text().splitlines()]; rows=[r for r in rows if r['phase']=='measured']
+    expected=[w[0] for w in json.loads((base/host/'evidence/contract.json').read_text())['workloads']]
+    cells=list(dict.fromkeys(r['cell'] for r in rows))
+    if cells!=expected:
+        raise ValueError(f'{host}: measured cells {cells}, contract expects {expected}')
     result[host]={}
-    for cell in dict.fromkeys(r['cell'] for r in rows):
+    for cell in cells:
         groups={c:sorted([r for r in rows if r['cell']==cell and r['candidate']==c],key=lambda r:r['block']) for c in ['dense','sparse','prealloc']}
         for c,v in groups.items():
             blocks=[r['block'] for r in v]

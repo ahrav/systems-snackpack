@@ -15,9 +15,11 @@ if sys.flags.optimize:
 ROOT = Path(__file__).resolve().parents[1]
 os.chdir(ROOT)
 SOURCES = ['Cargo.toml', 'src/lib.rs', 'examples/layout.rs', 'scripts/run.py', 'scripts/summarize.py']
-# Cargo reads flags and paths from CARGO_* (including CARGO_ENCODED_RUSTFLAGS) and
-# config files; an empty RUSTFLAGS overrides config rustflags.
-for name in [n for n in os.environ if n.startswith('CARGO_') and n != 'CARGO_HOME']:
+# Cargo reads flags, paths and the compiler from CARGO_* (including
+# CARGO_ENCODED_RUSTFLAGS), RUSTC, RUSTC_WRAPPER, RUSTC_WORKSPACE_WRAPPER and config
+# files; an empty RUSTFLAGS overrides config rustflags.
+for name in [n for n in os.environ if (n.startswith('CARGO_') and n != 'CARGO_HOME')
+             or n in ('RUSTC', 'RUSTC_WRAPPER', 'RUSTC_WORKSPACE_WRAPPER')]:
     os.environ.pop(name)
 os.environ['RUSTFLAGS'] = ''
 os.environ['CARGO_TARGET_DIR'] = str(ROOT/'target')
@@ -32,9 +34,10 @@ def command(args, **kwargs):
 identity = {'sha256': {name: hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in SOURCES}}
 (OUT/'source-identity.json').write_text(json.dumps(identity, indent=2)+'\n')
 cpu = min(os.sched_getaffinity(0))
+midr = Path(f'/sys/devices/system/cpu/cpu{cpu}/regs/identification/midr_el1')
 meta = {'hostname':platform.node(), 'architecture':platform.machine(),
         'uname':list(platform.uname()), 'allowed_cpus':sorted(os.sched_getaffinity(0)),
-        'pinned_cpu':cpu, 'arm_midr': (Path('/sys/devices/system/cpu/cpu0/regs/identification/midr_el1').read_text().strip() if Path('/sys/devices/system/cpu/cpu0/regs/identification/midr_el1').exists() else None), 'start_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),
+        'pinned_cpu':cpu, 'arm_midr': (midr.read_text().strip() if midr.exists() else None), 'start_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime()),
         'flags':'cargo --release; default target CPU; no RUSTFLAGS; taskset one allowed CPU',
         'source':identity, 'commands':{}}
 assert meta['architecture'] in ('aarch64','x86_64')
@@ -47,6 +50,9 @@ for args in [['rustc','-Vv'],['rustc','--print','cfg'],['lscpu'],['df','-T',str(
 (OUT/'host.json').write_text(json.dumps(meta,indent=2)+'\n')
 failed_probes = [name for name, r in meta['commands'].items() if r['exit']]
 assert not failed_probes, failed_probes
+# The contract requires a disk-backed directory; memory-backed filesystems measure RAM.
+fstype = command(['findmnt','-n','-o','FSTYPE','-T',str(DATA)]).stdout.strip()
+assert fstype not in ('tmpfs','ramfs','devtmpfs'), fstype
 for label,args in [('tests',['cargo','test','--lib','--examples']),('doc',['cargo','test','--doc']),
                    ('clippy',['cargo','clippy','--all-targets','--','-D','warnings']),
                    ('build',['cargo','build','--release','--example','layout','-vv'])]:
