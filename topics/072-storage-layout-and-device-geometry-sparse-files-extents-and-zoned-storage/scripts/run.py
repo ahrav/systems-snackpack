@@ -7,8 +7,11 @@ import os
 from pathlib import Path
 import platform
 import subprocess
+import sys
 import time
 
+if sys.flags.optimize:
+    raise SystemExit('validation uses assert: run without python -O or PYTHONOPTIMIZE')
 ROOT = Path(__file__).resolve().parents[1]
 os.chdir(ROOT)
 SOURCES = ['Cargo.toml', 'src/lib.rs', 'examples/layout.rs', 'scripts/run.py', 'scripts/summarize.py']
