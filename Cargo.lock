@@ -268,6 +268,10 @@ name = "topic-067-abi-ffi-performance-boundaries"
 version = "0.1.0"
 
 [[package]]
+name = "topic-072-storage-layout"
+version = "0.1.0"
+
+[[package]]
 name = "topic060-deterministic-simulation"
 version = "0.1.0"
 
