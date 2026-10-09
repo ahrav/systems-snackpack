@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import shlex
 import subprocess
 import sys
 import time
@@ -37,6 +38,9 @@ DATA.mkdir(exist_ok=False)
 def command(args, **kwargs):
     return subprocess.run(args, text=True, capture_output=True, check=True, **kwargs)
 
+# An explicit host target outranks a configured build.target.
+host_target = next(line.split()[1] for line in command(['rustc','-vV']).stdout.splitlines() if line.startswith('host: '))
+os.environ['CARGO_BUILD_TARGET'] = host_target
 identity = {'sha256': {name: hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in SOURCES}}
 (OUT/'source-identity.json').write_text(json.dumps(identity, indent=2)+'\n')
 cpu = min(os.sched_getaffinity(0))
@@ -65,7 +69,17 @@ for label,args in [('tests',['cargo','test','--lib','--examples']),('doc',['carg
     result = subprocess.run(args,text=True,capture_output=True)
     (OUT/(label+'.log')).write_text(result.stdout+result.stderr)
     if result.returncode: raise RuntimeError(label)
-# A configured build.target moves the artifact under target/<triple>; Cargo reports the path.
+# The -vv log holds the exact rustc invocation. Package-specific profile tables in Cargo
+# config files can override the release settings above, so these assertions verify
+# rustc's target and codegen flags.
+running = [line for line in (OUT/'build.log').read_text().splitlines() if 'Running `' in line and '--crate-name layout' in line]
+assert len(running) == 1, len(running)
+tokens = shlex.split(running[0].split('Running `', 1)[1].rsplit('`', 1)[0])
+codegen = sorted(tokens[i+1] for i, t in enumerate(tokens[:-1]) if t == '-C')
+assert tokens[tokens.index('--target')+1] == host_target, tokens
+assert 'opt-level=3' in codegen and 'codegen-units=16' in codegen, codegen
+unexpected = [c for c in codegen if c.split('=')[0] in ('lto','panic','debug-assertions','overflow-checks','incremental','debuginfo','target-cpu','target-feature','linker','link-arg','link-args','relocation-model','code-model')]
+assert not unexpected, unexpected
 messages = [json.loads(line) for line in command(['cargo','build','--release','--example','layout','--message-format=json']).stdout.splitlines()]
 executables = [m['executable'] for m in messages if m.get('reason') == 'compiler-artifact' and m.get('executable')]
 assert len(executables) == 1, executables
