@@ -1,0 +1,101 @@
+{
+  "measured_source_commit": "a637af7f65a00d7da75040400a9545df66a3fc87",
+  "source_identity": {
+    "commit": "a637af7f65a00d7da75040400a9545df66a3fc87",
+    "sha256": {
+      "Cargo.toml": "3f7f1de7c96a1f9210c864b55172575db2bc36a163a9be6063d3177b0ada1761",
+      "src/lib.rs": "995ec485141728accf01e9eae97e119f26d1e77f68b988930ab8a3b304b4b265",
+      "examples/layout.rs": "4b745c2d825b8813f588e1d459513e5ff45ea42e4375d55b86f7badd0f318839",
+      "scripts/run.py": "c8e08f415fd268bc8872d9b87ddfa13181f6c3ef6eb660ca64dfa02f1fc24195",
+      "scripts/summarize.py": "bafa76e36c9a344bbf1e464bbd7ac9ac14bf7122bcd32ec6698ec270182d9b1d"
+    }
+  },
+  "raw_evidence": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-072/2026-10-09-layout/committed",
+  "hosts": {
+    "arm": {
+      "host": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+      "role": "arm",
+      "remote": "/local/home/ahrav/scratch/codex-systems-072-committed-20261009",
+      "source_archive_sha256": "8e9c1c153aca867ee0a30853e00f43e2d4c42b00360a95d3452706736b4192a5",
+      "evidence_archive_sha256": "225f0e4dea5146739a2c5befa42edc964fb801f2edc58e372bc6ae081aa5f5b2",
+      "exit": 0
+    },
+    "x86": {
+      "host": "xxl",
+      "role": "x86",
+      "remote": "/local/home/ahrav/scratch/codex-systems-072-committed-20261009",
+      "source_archive_sha256": "8e9c1c153aca867ee0a30853e00f43e2d4c42b00360a95d3452706736b4192a5",
+      "evidence_archive_sha256": "2ff479530453342d3f4444731abeab0c98fd2acaea58b9a41c3f398340d34f07",
+      "exit": 0
+    }
+  },
+  "gates": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--lib",
+        "--examples"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--doc"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "bench",
+        "--workspace",
+        "--no-run"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "doc",
+        "--workspace",
+        "--no-deps"
+      ],
+      "exit": 0
+    }
+  ]
+}
