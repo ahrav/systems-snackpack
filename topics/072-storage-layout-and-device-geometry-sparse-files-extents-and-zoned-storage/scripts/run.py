@@ -23,6 +23,12 @@ for name in [n for n in os.environ if n.startswith('CARGO_') and n != 'CARGO_HOM
     os.environ.pop(name)
 os.environ.update(RUSTFLAGS='', RUSTC='rustc', RUSTC_WRAPPER='', RUSTC_WORKSPACE_WRAPPER='',
                   CARGO_TARGET_DIR=str(ROOT/'target'))
+# These environment variables pin release-profile codegen settings to Cargo's documented
+# defaults and take precedence over [profile.release] in Cargo config files.
+os.environ.update(CARGO_PROFILE_RELEASE_OPT_LEVEL='3', CARGO_PROFILE_RELEASE_DEBUG='false',
+                  CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS='false', CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS='false',
+                  CARGO_PROFILE_RELEASE_LTO='false', CARGO_PROFILE_RELEASE_PANIC='unwind',
+                  CARGO_PROFILE_RELEASE_INCREMENTAL='false', CARGO_PROFILE_RELEASE_CODEGEN_UNITS='16')
 OUT = ROOT / 'evidence'
 OUT.mkdir(exist_ok=False)
 DATA = ROOT / 'data'

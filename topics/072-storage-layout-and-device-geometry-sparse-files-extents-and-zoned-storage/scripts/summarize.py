@@ -1,11 +1,16 @@
 from pathlib import Path
 import json,statistics,sys
 base=Path(sys.argv[1]); result={}; lines=['| Host / workload | Dense ms | Sparse ms | Prealloc ms | Selected |','|---|---:|---:|---:|---|']
-hosts=['arm','x86']
+hosts={'arm':'aarch64','x86':'x86_64'}
 identities={h:json.loads((base/h/'evidence/source-identity.json').read_text())['sha256'] for h in hosts}
 if len({json.dumps(i,sort_keys=True) for i in identities.values()})!=1:
     raise ValueError(f'source identities differ across hosts: {identities}')
-for host in hosts:
+for host,architecture in hosts.items():
+    if not (base/host/'evidence/complete.json').is_file():
+        raise ValueError(f'{host}: evidence/complete.json is missing; the campaign did not finish')
+    recorded=json.loads((base/host/'evidence/host.json').read_text())['architecture']
+    if recorded!=architecture:
+        raise ValueError(f'{host}: host.json records architecture {recorded!r}, expected {architecture!r}')
     rows=[json.loads(l) for l in (base/host/'evidence/runs.jsonl').read_text().splitlines()]; rows=[r for r in rows if r['phase']=='measured']
     expected=[w[0] for w in json.loads((base/host/'evidence/contract.json').read_text())['workloads']]
     cells=list(dict.fromkeys(r['cell'] for r in rows))
