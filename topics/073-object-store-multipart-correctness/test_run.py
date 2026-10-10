@@ -14,6 +14,7 @@ REJECTED = {
     "CARGO_BUILD_RUSTC_WRAPPER": "/usr/bin/env",
     "CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER": "/usr/bin/env",
     "RUSTFLAGS": "-C target-cpu=native",
+    "CARGO_ENCODED_RUSTFLAGS": "",
     "CARGO_PROFILE_RELEASE_LTO": "fat",
     "LD_PRELOAD": "/nonexistent/interposer.so",
     "LD_AUDIT": "/nonexistent/auditor.so",

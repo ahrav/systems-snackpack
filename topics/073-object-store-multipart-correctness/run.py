@@ -1,5 +1,5 @@
 """Six balanced blocks, one fresh process per candidate and cell per block."""
-import csv, hashlib, itertools, json, os, pathlib, platform, statistics, subprocess, sys
+import csv, hashlib, itertools, json, os, pathlib, platform, re, shlex, shutil, statistics, subprocess, sys
 def require(ok, message):
     # Evidence gates stay active under python -O and PYTHONOPTIMIZE.
     if not ok:
@@ -7,7 +7,8 @@ def require(ok, message):
 require(len(sys.argv) == 2, 'run.py <fresh-output-directory>')
 root = pathlib.Path(__file__).resolve().parent
 # Measured processes inherit this environment; reject compiler/profile and loader-interposition settings before any work.
-overrides = {k:v for k,v in os.environ.items() if v and (k in ['RUSTFLAGS','CARGO_ENCODED_RUSTFLAGS','CARGO_BUILD_RUSTFLAGS','RUSTC','CARGO_BUILD_RUSTC','RUSTC_WRAPPER','CARGO_BUILD_RUSTC_WRAPPER','RUSTC_WORKSPACE_WRAPPER','CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER','LD_PRELOAD','LD_AUDIT','DYLD_INSERT_LIBRARIES'] or k.startswith('CARGO_PROFILE_') or (k.startswith('CARGO_TARGET_') and k.endswith('_RUSTFLAGS')))}
+# Presence is the test: Cargo treats an empty RUSTFLAGS or CARGO_ENCODED_RUSTFLAGS as the selected flag source.
+overrides = {k:v for k,v in os.environ.items() if (k in ['RUSTFLAGS','CARGO_ENCODED_RUSTFLAGS','CARGO_BUILD_RUSTFLAGS','RUSTC','CARGO_BUILD_RUSTC','RUSTC_WRAPPER','CARGO_BUILD_RUSTC_WRAPPER','RUSTC_WORKSPACE_WRAPPER','CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER','LD_PRELOAD','LD_AUDIT','DYLD_INSERT_LIBRARIES'] or k.startswith('CARGO_PROFILE_') or (k.startswith('CARGO_TARGET_') and k.endswith('_RUSTFLAGS')))}
 require(not overrides, f'clear Cargo compiler/profile and loader-interposition environment overrides before running: {sorted(overrides)}')
 out = pathlib.Path(sys.argv[1]).resolve()
 out.mkdir(parents=True, exist_ok=False)
@@ -44,6 +45,12 @@ executables = [a['executable'] for a in artifacts if a.get('reason') == 'compile
 require(len(executables) == 1, f'expected one manifest executable in Cargo JSON: {executables}')
 binary = pathlib.Path(executables[0]).resolve()
 meta['binary_sha256']=hashlib.sha256(binary.read_bytes()).hexdigest()
+# The compiler Cargo invoked, read from the verbose log, must be the unwrapped ambient rustc recorded above.
+programs = {tuple(itertools.takewhile(lambda t: t != '--crate-name', [t for t in shlex.split(line.split('Running `',1)[1].rsplit('`',1)[0]) if not re.match(r'[A-Z_][A-Z0-9_]*=', t)])) for line in build.stderr.splitlines() if 'Running `' in line and '--crate-name' in line}
+require(len(programs) == 1 and len(next(iter(programs))) == 1, f'expected one unwrapped compiler executable across build.log rustc invocations: {sorted(programs)}')
+compiler = pathlib.Path(shutil.which(next(iter(programs))[0]) or next(iter(programs))[0]).resolve()
+meta['effective_rustc'] = {'path': str(compiler), 'sha256': hashlib.sha256(compiler.read_bytes()).hexdigest(), 'version': run([str(compiler), '-Vv'])}
+require(meta['effective_rustc']['version'] == meta['ambient_rustc_version'], f"Cargo selected {compiler}, which differs from the ambient rustc; clear build.rustc configuration")
 # host.json attributes the binary to the hashed inputs; the inputs must be unchanged at build time and after measurement.
 require(digests() == meta['inputs'], 'source inputs changed before the build; rerun from a quiescent tree')
 (out/'host.json').write_text(json.dumps(meta,indent=2)+'\n')

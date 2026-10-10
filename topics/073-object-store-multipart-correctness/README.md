@@ -29,8 +29,10 @@ The runner includes compilation, tests, Clippy, input and binary hashes, host
 metadata, warmups, 108 fresh measured processes, paired selection, and raw output.
 Compiler/profile overrides (`RUSTFLAGS`, `CARGO_BUILD_RUSTFLAGS`, wrappers,
 `CARGO_PROFILE_*`) and loader interposition (`LD_PRELOAD`, `LD_AUDIT`,
-`DYLD_INSERT_LIBRARIES`) must be unset; the runner rejects them before creating
-the output directory. Input hashes cover this topic's sources, the workspace
+`DYLD_INSERT_LIBRARIES`) must be unset, including empty values; the runner
+rejects them before creating the output directory. The compiler Cargo invokes is
+read from the verbose build log and must be the unwrapped ambient `rustc`; its
+path, digest, and version are recorded as `effective_rustc`. Input hashes cover this topic's sources, the workspace
 `Cargo.toml`, `Cargo.lock`, and `rust-toolchain.toml`, and every Cargo config file
 on the search path (`.cargo/config[.toml]` from this directory upward and
 `$CARGO_HOME/config[.toml]`); they are recomputed after the build and after
