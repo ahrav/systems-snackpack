@@ -27,8 +27,14 @@ python3 run.py /tmp/topic073-results
 
 The runner includes compilation, tests, Clippy, input and binary hashes, host
 metadata, warmups, 108 fresh measured processes, paired selection, and raw output.
-Compiler/profile environment overrides must be empty. Exact build arguments
-are retained; the executable is selected from Cargo JSON. See [measurement contract](measurements.md).
+Compiler/profile overrides (`RUSTFLAGS`, `CARGO_BUILD_RUSTFLAGS`, wrappers,
+`CARGO_PROFILE_*`) and loader interposition (`LD_PRELOAD`, `LD_AUDIT`,
+`DYLD_INSERT_LIBRARIES`) must be unset; the runner rejects them before creating
+the output directory. Input hashes are recomputed after the build and after
+measurement; a changed source file fails the campaign. Every child process has a
+600 s bound. Exact build arguments are retained; the executable is selected from
+Cargo JSON. `python3 test_run.py` checks the environment guard. See
+[measurement contract](measurements.md).
 
 ## Contracts and failure cases
 
