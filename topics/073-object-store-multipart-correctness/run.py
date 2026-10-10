@@ -24,7 +24,7 @@ def digests():
     files += [p for d in config_dirs for p in [d/'config.toml', d/'config'] if p.is_file()]
     return {os.path.relpath(p, root): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
 workspace = pathlib.Path(run(['cargo','locate-project','--workspace','--message-format','plain']).strip()).parent
-cargo_home = pathlib.Path(os.environ.get('CARGO_HOME') or pathlib.Path.home()/'.cargo').resolve()
+cargo_home = (root / (os.environ.get('CARGO_HOME') or pathlib.Path.home()/'.cargo')).resolve()  # relative CARGO_HOME is relative to Cargo's cwd, which is root
 meta = {"hostname": platform.node(), "uname": list(platform.uname()), "available_cpus": sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else os.cpu_count(), "ambient_rustc_version": run(["rustc", "-Vv"]), "flags": "release requested; exact compiler arguments in build.log; default rustc cfg is informational; effective settings from build log", "boundary": "allocate, validate, normalize, produce output, drop; source generation/oracle/process startup excluded", "selection": "candidate <= 0.95*rival in ALL six paired process blocks against every rival; otherwise unresolved", "inputs": digests()}
 meta['default_rustc_cfg'] = run(['rustc','--print','cfg'])
 if sys.platform == 'darwin':
