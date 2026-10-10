@@ -22,12 +22,13 @@ cargo run --release -p multipart-correctness --example manifest -- slots 1024 sh
 From this topic directory, run a full campaign with a fresh output path:
 
 ```sh
-python3 run.py /tmp/topic073-results ../../target/release/examples/manifest
+python3 run.py /tmp/topic073-results
 ```
 
 The runner includes compilation, tests, Clippy, input and binary hashes, host
 metadata, warmups, 108 fresh measured processes, paired selection, and raw output.
-`RUSTFLAGS` must be empty. See [measurement contract](measurements.md).
+Compiler/profile environment overrides must be empty. Exact build arguments
+are retained; the executable is selected from Cargo JSON. See [measurement contract](measurements.md).
 
 ## Contracts and failure cases
 

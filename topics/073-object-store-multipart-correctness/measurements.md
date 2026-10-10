@@ -14,7 +14,8 @@ macOS has no affinity control in this runner. No separate A/A calibration.
 
 Select a candidate only if its time is <=0.95 times every rival in every paired
 block. Otherwise report unresolved. Report medians and observed min/max, not a
-confidence interval. Fixed seeded shuffling and native default release flags.
+confidence interval. Fixed seeded shuffling; release mode requested. The fresh verbose build retains
+actual compiler arguments, including configuration-file effects.
 No CPU counter or candidate-only assembly-based causal claim.
 
 The independent scanning oracle exhaustively checks 19,531 streams of length
