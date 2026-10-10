@@ -5,12 +5,12 @@ root = pathlib.Path(__file__).resolve().parent
 out = pathlib.Path(sys.argv[1]).resolve(); out.mkdir(parents=True, exist_ok=False)
 def run(args):
     return subprocess.check_output(args, cwd=root, text=True, stderr=subprocess.STDOUT)
-meta = {"hostname": platform.node(), "uname": list(platform.uname()), "available_cpus": sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else os.cpu_count(), "toolchain": run(["rustc", "-Vv"]), "flags": "release requested; exact compiler arguments in build.log; target cfg in host metadata", "boundary": "allocate, validate, normalize, produce output, drop; source generation/oracle/process startup excluded", "selection": "candidate <= 0.95*rival in ALL six paired process blocks against every rival; otherwise unresolved", "inputs": {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.rglob('*')) if p.is_file() and ('target' not in p.parts) and p.suffix in ['.rs','.toml','.py']}}
-overrides = {k:v for k,v in os.environ.items() if v and (k in ['RUSTFLAGS','CARGO_ENCODED_RUSTFLAGS','RUSTC_WRAPPER','RUSTC_WORKSPACE_WRAPPER'] or k.startswith('CARGO_PROFILE_') or (k.startswith('CARGO_TARGET_') and k.endswith('_RUSTFLAGS')))}
+meta = {"hostname": platform.node(), "uname": list(platform.uname()), "available_cpus": sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else os.cpu_count(), "ambient_rustc_version": run(["rustc", "-Vv"]), "flags": "release requested; exact compiler arguments in build.log; default rustc cfg is informational; effective settings from build log", "boundary": "allocate, validate, normalize, produce output, drop; source generation/oracle/process startup excluded", "selection": "candidate <= 0.95*rival in ALL six paired process blocks against every rival; otherwise unresolved", "inputs": {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.rglob('*')) if p.is_file() and ('target' not in p.parts) and p.suffix in ['.rs','.toml','.py']}}
+overrides = {k:v for k,v in os.environ.items() if v and (k in ['RUSTFLAGS','CARGO_ENCODED_RUSTFLAGS','RUSTC','CARGO_BUILD_RUSTC','RUSTC_WRAPPER','RUSTC_WORKSPACE_WRAPPER'] or k.startswith('CARGO_PROFILE_') or (k.startswith('CARGO_TARGET_') and k.endswith('_RUSTFLAGS')))}
 assert not overrides, 'clear Cargo compiler/profile environment overrides before running'
-meta['features'] = run(['rustc','--print','cfg'])
+meta['default_rustc_cfg'] = run(['rustc','--print','cfg'])
 if sys.platform == 'darwin': meta['cpu'] = run(['sysctl','-n','machdep.cpu.brand_string'])
-else: meta['cpu'] = run(['lscpu']); meta['features'] = run(['rustc','--print','cfg'])
+else: meta['cpu'] = run(['lscpu']); meta['default_rustc_cfg'] = run(['rustc','--print','cfg'])
 (out/'host.json').write_text(json.dumps(meta,indent=2)+'\n')
 for name, args in [('test',['cargo','test']),('clippy',['cargo','clippy','--all-targets','--','-D','warnings'])]:
     (out/f'{name}.log').write_text(run(args))
