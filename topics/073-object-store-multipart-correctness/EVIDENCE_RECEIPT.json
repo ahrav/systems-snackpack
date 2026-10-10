@@ -1,0 +1,246 @@
+{
+  "source_commit": "e91e7352dc12e2da20bcc407418c29c757cbb4a8",
+  "source_archive_sha256": "c8c5c9e7ca14eedac47e094a249bdcade3c1449f9ce11c84a7c0a1a05460760e",
+  "inputs": {
+    "Cargo.toml": "a822ff366ce9783f108d294ce52656cc3232b646496fb2678c9fdacc03f891b2",
+    "examples/manifest.rs": "38307984fdafa54e7e400672e6e5f6563d7db4027c31ed54e1217c26bf619202",
+    "run.py": "3a976bbe43cf01b3b3d20679fdfe326835edc3860a027475c27fa7f0793ca345",
+    "src/lib.rs": "ccf5c4aa98b51f96b149a9af50b3fa538653d642fe1c7b2a26bf89e2b07e0e4e",
+    "topic.toml": "75b2403153b26ae8ba688cae298e29bd19f2a69f12563e5a1b5d96a622c1a9b4"
+  },
+  "binary_sha256": "6e925b4a46de353e9f7358c035de380eb173bd4520a4320b30dd69761a96486f",
+  "raw_evidence": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-073/2026-10-10-multipart",
+  "local_host": {
+    "hostname": "b0f1d8752aba",
+    "uname": [
+      "Darwin",
+      "b0f1d8752aba",
+      "25.6.0",
+      "Darwin Kernel Version 25.6.0: Tue Aug 18 17:49:13 PDT 2026; root:xnu-12377.161.15.700.19~2/RELEASE_ARM64_T6000",
+      "arm64",
+      "arm"
+    ],
+    "available_cpus": 10,
+    "ambient_rustc_version": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+    "flags": "release requested; exact compiler arguments in build.log; default rustc cfg is informational; effective settings from build log",
+    "boundary": "allocate, validate, normalize, produce output, drop; source generation/oracle/process startup excluded",
+    "selection": "candidate <= 0.95*rival in ALL six paired process blocks against every rival; otherwise unresolved",
+    "default_rustc_cfg": "debug_assertions\npanic=\"unwind\"\ntarget_abi=\"\"\ntarget_arch=\"aarch64\"\ntarget_endian=\"little\"\ntarget_env=\"\"\ntarget_family=\"unix\"\ntarget_feature=\"aes\"\ntarget_feature=\"crc\"\ntarget_feature=\"dit\"\ntarget_feature=\"dotprod\"\ntarget_feature=\"dpb\"\ntarget_feature=\"dpb2\"\ntarget_feature=\"fcma\"\ntarget_feature=\"fhm\"\ntarget_feature=\"flagm\"\ntarget_feature=\"fp16\"\ntarget_feature=\"frintts\"\ntarget_feature=\"jsconv\"\ntarget_feature=\"lor\"\ntarget_feature=\"lse\"\ntarget_feature=\"neon\"\ntarget_feature=\"paca\"\ntarget_feature=\"pacg\"\ntarget_feature=\"pan\"\ntarget_feature=\"pmuv3\"\ntarget_feature=\"ras\"\ntarget_feature=\"rcpc\"\ntarget_feature=\"rcpc2\"\ntarget_feature=\"rdm\"\ntarget_feature=\"sb\"\ntarget_feature=\"sha2\"\ntarget_feature=\"sha3\"\ntarget_feature=\"ssbs\"\ntarget_feature=\"vh\"\ntarget_has_atomic=\"128\"\ntarget_has_atomic=\"16\"\ntarget_has_atomic=\"32\"\ntarget_has_atomic=\"64\"\ntarget_has_atomic=\"8\"\ntarget_has_atomic=\"ptr\"\ntarget_os=\"macos\"\ntarget_pointer_width=\"64\"\ntarget_vendor=\"apple\"\nunix\n",
+    "cpu": "Apple M1 Pro\n",
+    "binary_sha256": "6e925b4a46de353e9f7358c035de380eb173bd4520a4320b30dd69761a96486f"
+  },
+  "effective_compiler": "Verbose build path independently checked: rustc 1.93.1 LLVM21.1.8; opt-level3, no explicit target-cpu/features. Ambient cfg is not effective-build cfg.",
+  "processes": 108,
+  "unit_tests": 4,
+  "doctests": 1,
+  "selection": "candidate <= 0.95*rival in ALL six paired process blocks against every rival; otherwise unresolved",
+  "summary": [
+    {
+      "cell": "8-ordered-1",
+      "winner": "slots",
+      "ns": {
+        "sort": {
+          "median": 49.6105,
+          "min": 48.239,
+          "max": 52.028
+        },
+        "tree": {
+          "median": 154.013,
+          "min": 152.102,
+          "max": 166.553
+        },
+        "slots": {
+          "median": 40.8525,
+          "min": 40.368,
+          "max": 44.096
+        }
+      }
+    },
+    {
+      "cell": "8-shuffle-4",
+      "winner": "slots",
+      "ns": {
+        "sort": {
+          "median": 203.3165,
+          "min": 198.928,
+          "max": 264.061
+        },
+        "tree": {
+          "median": 275.15,
+          "min": 268.631,
+          "max": 298.918
+        },
+        "slots": {
+          "median": 76.2125,
+          "min": 75.343,
+          "max": 81.109
+        }
+      }
+    },
+    {
+      "cell": "1024-reverse-1",
+      "winner": "slots",
+      "ns": {
+        "sort": {
+          "median": 2084.0585,
+          "min": 2065.412,
+          "max": 2257.19
+        },
+        "tree": {
+          "median": 32240.303499999998,
+          "min": 28024.642,
+          "max": 44125.726
+        },
+        "slots": {
+          "median": 1499.1570000000002,
+          "min": 1482.356,
+          "max": 1984.81
+        }
+      }
+    },
+    {
+      "cell": "1024-shuffle-4",
+      "winner": "slots",
+      "ns": {
+        "sort": {
+          "median": 39928.193499999994,
+          "min": 39575.393,
+          "max": 40706.795
+        },
+        "tree": {
+          "median": 189073.2585,
+          "min": 184818.904,
+          "max": 203625.941
+        },
+        "slots": {
+          "median": 5029.03,
+          "min": 4656.592,
+          "max": 5447.404
+        }
+      }
+    },
+    {
+      "cell": "10000-ordered-1",
+      "winner": "unresolved",
+      "ns": {
+        "sort": {
+          "median": 19131.3525,
+          "min": 18432.29,
+          "max": 22326.875
+        },
+        "tree": {
+          "median": 569217.6025,
+          "min": 546789.375,
+          "max": 628456.665
+        },
+        "slots": {
+          "median": 16103.6475,
+          "min": 15580.415,
+          "max": 18930.0
+        }
+      }
+    },
+    {
+      "cell": "10000-shuffle-4",
+      "winner": "slots",
+      "ns": {
+        "sort": {
+          "median": 613145.0,
+          "min": 586540.0,
+          "max": 967933.34
+        },
+        "tree": {
+          "median": 2700286.25,
+          "min": 2646450.0,
+          "max": 5026085.82
+        },
+        "slots": {
+          "median": 99205.0,
+          "min": 94171.66,
+          "max": 104395.84
+        }
+      }
+    }
+  ],
+  "required_linux": {
+    "arm": "PENDING: Midway authentication rejected before host verification or source transfer",
+    "xxl": "PENDING: Midway authentication rejected before host verification or source transfer"
+  },
+  "earlier_campaigns": "Retained separately, not pooled. Runner provenance repaired; final benchmark binary byte-identical.",
+  "gates": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.16284918785095215
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.7165060043334961
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--lib",
+        "--examples"
+      ],
+      "exit": 0,
+      "seconds": 74.32295608520508
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--doc"
+      ],
+      "exit": 0,
+      "seconds": 48.96173906326294
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "seconds": 3.9208037853240967
+    },
+    {
+      "command": [
+        "cargo",
+        "bench",
+        "--workspace",
+        "--no-run"
+      ],
+      "exit": 0,
+      "seconds": 9.616533041000366
+    },
+    {
+      "command": [
+        "cargo",
+        "doc",
+        "--workspace",
+        "--no-deps"
+      ],
+      "exit": 0,
+      "seconds": 8.97498607635498
+    }
+  ]
+}
