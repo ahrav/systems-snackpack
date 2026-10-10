@@ -1,4 +1,6 @@
-"""run.py rejects inherited compiler, profile, and loader-interposition settings before touching the output path."""
+"""run.py rejects inherited compiler, profile, and loader-interposition settings before touching the output path,
+with and without Python optimization enabled."""
+import itertools
 import os
 import pathlib
 import subprocess
@@ -21,13 +23,13 @@ REJECTED = {
 
 class EnvironmentGuard(unittest.TestCase):
     def test_rejected_variables_stop_the_campaign_before_output(self):
-        base = {k: v for k, v in os.environ.items() if k not in REJECTED}
-        for name, value in REJECTED.items():
-            with self.subTest(variable=name), tempfile.TemporaryDirectory() as tmp:
+        base = {k: v for k, v in os.environ.items() if k not in REJECTED and k != "PYTHONOPTIMIZE"}
+        for (name, value), optimize in itertools.product(REJECTED.items(), ("", "1")):
+            with self.subTest(variable=name, PYTHONOPTIMIZE=optimize), tempfile.TemporaryDirectory() as tmp:
                 out = pathlib.Path(tmp) / "campaign"
                 proc = subprocess.run(
                     [sys.executable, str(ROOT / "run.py"), str(out)],
-                    cwd=ROOT, env={**base, name: value}, text=True, capture_output=True, timeout=120,
+                    cwd=ROOT, env={**base, name: value, "PYTHONOPTIMIZE": optimize}, text=True, capture_output=True, timeout=120,
                 )
                 self.assertNotEqual(proc.returncode, 0, proc.stdout)
                 self.assertIn(name, proc.stderr)
