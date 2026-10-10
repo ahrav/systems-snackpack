@@ -30,10 +30,11 @@ metadata, warmups, 108 fresh measured processes, paired selection, and raw outpu
 Compiler/profile overrides (`RUSTFLAGS`, `CARGO_BUILD_RUSTFLAGS`, wrappers,
 `CARGO_PROFILE_*`) and loader interposition (`LD_PRELOAD`, `LD_AUDIT`,
 `DYLD_INSERT_LIBRARIES`) must be unset; the runner rejects them before creating
-the output directory. Input hashes cover this topic's sources plus the workspace
-`Cargo.toml`, `Cargo.lock`, `rust-toolchain.toml`, and `.cargo/config.toml`; they
-are recomputed after the build and after measurement, and the binary is rehashed
-after measurement. Any change fails the campaign. Every child process has a
+the output directory. Input hashes cover this topic's sources, the workspace
+`Cargo.toml`, `Cargo.lock`, and `rust-toolchain.toml`, and every Cargo config file
+on the search path (`.cargo/config[.toml]` from this directory upward and
+`$CARGO_HOME/config[.toml]`); they are recomputed after the build and after
+measurement, and the binary is rehashed after measurement. Any change fails the campaign. Every child process has a
 600 s bound. Exact build arguments are retained; the executable is selected from
 Cargo JSON. `python3 test_run.py` checks the environment guard. See
 [measurement contract](measurements.md).

@@ -17,9 +17,13 @@ def run(args):
 def digests():
     # Workspace build configuration is part of the hashed identity: it selects the compiler, profile, and dependency resolution.
     files = [p for p in sorted(root.rglob('*')) if p.is_file() and ('target' not in p.parts) and p.suffix in ['.rs','.toml','.py']]
-    files += [p for p in [workspace/'Cargo.toml', workspace/'Cargo.lock', workspace/'rust-toolchain.toml', workspace/'.cargo'/'config.toml'] if p.is_file()]
+    files += [p for p in [workspace/'Cargo.toml', workspace/'Cargo.lock', workspace/'rust-toolchain.toml'] if p.is_file()]
+    # Cargo merges .cargo/config[.toml] from this directory upward, then $CARGO_HOME/config[.toml].
+    config_dirs = [d/'.cargo' for d in [root, *root.parents]] + [cargo_home]
+    files += [p for d in config_dirs for p in [d/'config.toml', d/'config'] if p.is_file()]
     return {os.path.relpath(p, root): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
 workspace = pathlib.Path(run(['cargo','locate-project','--workspace','--message-format','plain']).strip()).parent
+cargo_home = pathlib.Path(os.environ.get('CARGO_HOME') or pathlib.Path.home()/'.cargo').resolve()
 meta = {"hostname": platform.node(), "uname": list(platform.uname()), "available_cpus": sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else os.cpu_count(), "ambient_rustc_version": run(["rustc", "-Vv"]), "flags": "release requested; exact compiler arguments in build.log; default rustc cfg is informational; effective settings from build log", "boundary": "allocate, validate, normalize, produce output, drop; source generation/oracle/process startup excluded", "selection": "candidate <= 0.95*rival in ALL six paired process blocks against every rival; otherwise unresolved", "inputs": digests()}
 meta['default_rustc_cfg'] = run(['rustc','--print','cfg'])
 if sys.platform == 'darwin':

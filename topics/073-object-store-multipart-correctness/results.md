@@ -37,4 +37,7 @@ The runner binds the executable to Cargo JSON from a new verbose build target.
 Four unit tests, one doctest, Clippy, and all seven workspace gates passed.
 A fresh review reproduced two runner provenance defects and verified their repairs.
 Final 108 rows, summaries, exact source hashes and byte-identical binary independently
-recomputed. See EVIDENCE_RECEIPT.json for source, binary, host, results and raw paths.
+recomputed. The runner at `e91e735` predates the environment, `-O`, Cargo-config, and
+binary-rehash guards added during this PR's review; the retained verbose `build.log`
+records the effective compiler invocation, and the absence of loader interposition
+during those 108 processes is unverified. See EVIDENCE_RECEIPT.json for source, binary, host, results and raw paths.
