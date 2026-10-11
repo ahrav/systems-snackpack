@@ -12,6 +12,28 @@
 static void check(int ok, const char *msg) {
     if (!ok) { fprintf(stderr, "%s\n", msg); ERR_print_errors_fp(stderr); exit(1); }
 }
+/* Library identity of the loaded OpenSSL, mirroring `openssl version -a`, so metadata
+   attributes timings to the library the probe actually linked and loaded. */
+static void json_string(const char *s) {
+    putchar('"');
+    for (; *s; s++) {
+        if (*s=='"' || *s=='\\') { putchar('\\'); putchar(*s); }
+        else if ((unsigned char)*s < 0x20) printf("\\u%04x", (unsigned char)*s);
+        else putchar(*s);
+    }
+    putchar('"');
+}
+static void json_library(void) {
+    static const struct { const char *key; int which; } fields[] = {
+        {"version",OPENSSL_VERSION},{"built_on",OPENSSL_BUILT_ON},{"platform",OPENSSL_PLATFORM},{"dir",OPENSSL_DIR},
+        {"cflags",OPENSSL_CFLAGS},{"cpu_info",OPENSSL_CPU_INFO},{"modules_dir",OPENSSL_MODULES_DIR}};
+    putchar('{');
+    for (size_t i=0;i<sizeof fields/sizeof fields[0];i++) {
+        if (i) putchar(',');
+        json_string(fields[i].key); putchar(':'); json_string(OpenSSL_version(fields[i].which));
+    }
+    putchar('}');
+}
 static double now(void) {
     struct timespec t; check(clock_gettime(CLOCK_MONOTONIC, &t)==0,"clock");
     return (double)t.tv_sec + (double)t.tv_nsec/1e9;
@@ -132,6 +154,8 @@ int main(int argc,char **argv) {
     double elapsed=now()-begin;
     check(total_wire==wire*reps && memcmp(input,output,len)==0,"final oracle");
     double drop_start=now();pair_free(&p);free(input);free(output);double drop=now()-drop_start;
-    printf("{\"cap\":%zu,\"length\":%zu,\"write_size\":%zu,\"repeats\":%zu,\"records\":%zu,\"wire_bytes\":%zu,\"ns_per_response\":%.3f,\"setup_us\":%.3f,\"teardown_us\":%.3f,\"openssl\":\"%s\",\"correct\":true}\n",cap,len,write_size,reps,records,wire,elapsed*1e9/(double)reps,setup*1e6,drop*1e6,OpenSSL_version(OPENSSL_VERSION));
+    printf("{\"cap\":%zu,\"length\":%zu,\"write_size\":%zu,\"repeats\":%zu,\"records\":%zu,\"wire_bytes\":%zu,\"ns_per_response\":%.3f,\"setup_us\":%.3f,\"teardown_us\":%.3f,\"openssl\":\"%s\",\"library\":",cap,len,write_size,reps,records,wire,elapsed*1e9/(double)reps,setup*1e6,drop*1e6,OpenSSL_version(OPENSSL_VERSION));
+    json_library();
+    printf(",\"correct\":true}\n");
     return 0;
 }

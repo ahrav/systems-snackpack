@@ -17,6 +17,9 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parent
 SCRIPTS = ("check.py", "run.py", "analyze.py")
 CLI_VERSION = "OpenSSL 9.9.9 1 Jan 2030"
+LIBRARY = {"version": CLI_VERSION, "built_on": "built on: Wed Jan  1 00:00:00 2030 UTC", "platform": "platform: fake",
+           "dir": "OPENSSLDIR: /fake/ssl", "cflags": "compiler: cc -O3", "cpu_info": "CPUINFO: N/A",
+           "modules_dir": "MODULESDIR: /fake/ossl-modules"}
 MODES = ("", "1")
 
 
@@ -26,27 +29,32 @@ def executable(path, body):
     return path
 
 
-def fake_probe(path, *, correct=True, runtime=CLI_VERSION, before=""):
-    """Shell probe printing one row shaped like probe.c output; `before` runs first."""
-    row = {
-        "cap": 16384, "length": 16384, "write_size": 16384, "repeats": 8, "records": 1,
-        "wire_bytes": 16406, "ns_per_response": 1.0, "setup_us": 1.0, "teardown_us": 1.0,
-        "openssl": runtime, "correct": correct,
-    }
-    return executable(path, "#!/bin/sh\n" + before + "\nprintf '%s\\n' '" + json.dumps(row) + "'\n")
+def fake_probe(path, *, correct=True, library=LIBRARY, before="", echo=('"$1"', '"$2"', '"$3"', '"$4"'), built_on=None):
+    """Shell probe printing one row shaped like probe.c output.
+
+    `before` runs first, `echo` gives the shell expressions reported as cap/length/write_size/repeats,
+    and `built_on` is a shell expression substituted for the library built_on field when set.
+    """
+    lib = dict(library, built_on="%s")
+    row = ('{"cap":%s,"length":%s,"write_size":%s,"repeats":%s,"records":1,"wire_bytes":16406,"ns_per_response":1.0,'
+           '"setup_us":1.0,"teardown_us":1.0,"openssl":"' + library["version"] + '","library":' + json.dumps(lib)
+           + ',"correct":' + json.dumps(correct) + '}')
+    args = " ".join([*echo, built_on or json.dumps(library["built_on"])])
+    return executable(path, "#!/bin/sh\n" + before + "\nprintf '" + row + "\\n' " + args + "\n")
 
 
 def oracle_probe(path):
     """Python probe that reproduces check.py's framing arithmetic and accepts every input."""
     return executable(path, f"""#!{sys.executable}
 import json, sys
-cap, length, write_size = (int(x) for x in sys.argv[1:4])
+cap, length, write_size, repeats = (int(x) for x in sys.argv[1:5])
 pending, records, wire = max(length, 0), 0, 0
 while pending and min(cap, write_size) > 0:
     group = min(pending, write_size); pending -= group
     while group:
         take = min(group, cap); group -= take; records += 1; wire += take + 22
-print(json.dumps({{"correct": True, "records": records, "wire_bytes": wire, "openssl": {CLI_VERSION!r}}}))
+print(json.dumps({{"cap": cap, "length": length, "write_size": write_size, "repeats": repeats, "correct": True,
+                  "records": records, "wire_bytes": wire, "openssl": {CLI_VERSION!r}, "library": {LIBRARY!r}}}))
 """)
 
 
@@ -170,13 +178,34 @@ class RunGates(unittest.TestCase):
                 self.assertNotEqual(proc.returncode, 0, proc.stdout)
                 self.assertNotIn("108 correct", proc.stdout)
 
-    def test_runtime_library_mismatch_fails(self):
+    def test_echoed_arguments_must_match_invocation(self):
         for mode in MODES:
             with self.subTest(PYTHONOPTIMIZE=mode), tempfile.TemporaryDirectory() as tmp:
-                probe = fake_probe(pathlib.Path(tmp) / "probe", runtime="OpenSSL 1.1.1w 11 Sep 2023")
+                probe = fake_probe(pathlib.Path(tmp) / "probe", echo=('"$1"', '"$(( $2 + 1 ))"', '"$3"', '"$4"'))
                 proc, _, _ = self.campaign(tmp, probe, mode)
                 self.assertNotEqual(proc.returncode, 0, proc.stdout)
                 self.assertNotIn("108 correct", proc.stdout)
+
+    def test_inconsistent_library_identity_fails(self):
+        for mode in MODES:
+            with self.subTest(PYTHONOPTIMIZE=mode), tempfile.TemporaryDirectory() as tmp:
+                counter = pathlib.Path(tmp) / "counter"
+                probe = fake_probe(pathlib.Path(tmp) / "probe",
+                                   before=f"n=$(( $(cat {counter} 2>/dev/null || echo 0) + 1 )); echo $n > {counter}",
+                                   built_on='"built on: build $n"')
+                proc, _, _ = self.campaign(tmp, probe, mode)
+                self.assertNotEqual(proc.returncode, 0, proc.stdout)
+                self.assertNotIn("108 correct", proc.stdout)
+
+    def test_metadata_records_probe_library_identity(self):
+        for mode in MODES:
+            with self.subTest(PYTHONOPTIMIZE=mode), tempfile.TemporaryDirectory() as tmp:
+                probe = fake_probe(pathlib.Path(tmp) / "probe")
+                proc, out, _ = self.campaign(tmp, probe, mode)
+                self.assertEqual(proc.returncode, 0, proc.stderr)
+                meta = json.loads((out / "metadata.json").read_text())
+                self.assertEqual(meta["library"], LIBRARY)
+                self.assertIn(CLI_VERSION, meta["openssl_cli"])
 
     def test_source_change_during_campaign_fails(self):
         for mode in MODES:

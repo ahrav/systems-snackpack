@@ -14,6 +14,7 @@ for cap in (1024,4096,16384):
                 group=min(pending,write_size);pending-=group
                 while group:
                     take=min(group,cap);group-=take;records+=1;wire+=take+22
+            if (row['cap'],row['length'],row['write_size'],row['repeats'])!=(cap,length,write_size,1):sys.exit(f'row echoes ({row["cap"]},{row["length"]},{row["write_size"]},{row["repeats"]}) for invocation ({cap},{length},{write_size},1)')
             if not (row['correct'] and row['records']==records and row['wire_bytes']==wire):sys.exit(f'oracle mismatch cap={cap} length={length} write_size={write_size}: expected records={records} wire_bytes={wire}, got {row}')
             count+=1
 for args in [('0','1','1','1'),('16385','1','1','1'),('1024','0','1','1'),('1024','1','0','1'),('1024','1','1','0'),('1024','1048577','1','1'),('1024','-1','1','1')]:
