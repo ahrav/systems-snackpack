@@ -160,6 +160,7 @@ class RunGates(unittest.TestCase):
                 proc, out, _ = self.campaign(tmp, probe, mode)
                 self.assertEqual(proc.returncode, 0, proc.stderr)
                 self.assertEqual(len((out / "runs.jsonl").read_text().splitlines()), 108)
+                self.assertFalse((out / "runs.jsonl.partial").exists())
 
     def test_incorrect_row_fails(self):
         for mode in MODES:
@@ -182,10 +183,13 @@ class RunGates(unittest.TestCase):
             with self.subTest(PYTHONOPTIMIZE=mode), tempfile.TemporaryDirectory() as tmp:
                 source = pathlib.Path(tmp) / "topic" / "probe.c"
                 probe = fake_probe(pathlib.Path(tmp) / "probe", before=f"echo '// tampered' >> {source}")
-                proc, _, work = self.campaign(tmp, probe, mode)
+                proc, out, work = self.campaign(tmp, probe, mode)
                 self.assertNotEqual(proc.returncode, 0, proc.stdout)
                 self.assertNotIn("108 correct", proc.stdout)
                 self.assertNotEqual((work / "probe.c").read_bytes(), (ROOT / "probe.c").read_bytes())
+                self.assertFalse((out / "runs.jsonl").exists(), "rejected campaign must not leave runs.jsonl for analyze.py")
+                analyzed = run_script("analyze.py", [out], cwd=ROOT, mode=mode)
+                self.assertNotEqual(analyzed.returncode, 0, analyzed.stdout)
 
 
 if __name__ == "__main__":

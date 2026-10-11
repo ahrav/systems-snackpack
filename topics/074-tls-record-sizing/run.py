@@ -4,6 +4,8 @@
 Every gate is an explicit conditional so `python -O` cannot disable it. Source
 hashes are taken before compilation, and source and binary hashes are rechecked
 after the campaign, so metadata describes the exact inputs behind every row.
+Rows accumulate in `runs.jsonl.partial`; `runs.jsonl` exists only after every
+gate passes, so `analyze.py` never sees a rejected campaign.
 """
 import hashlib,itertools,json,os,pathlib,platform,subprocess,sys,time
 ROOT=pathlib.Path(__file__).resolve().parent
@@ -30,8 +32,9 @@ for block,order in enumerate(itertools.permutations([1024,4096,16384])):
             if not row['correct']:sys.exit(f'incorrect row rejected: {row}')
             if row['openssl'] not in cli_openssl:sys.exit(f"probe runtime {row['openssl']!r} differs from recorded CLI metadata {cli_openssl!r}; metadata.json would describe the wrong library")
             rows.append(row)
-            with (OUT/'runs.jsonl').open('a') as f:f.write(json.dumps(row)+'\n')
+            with (OUT/'runs.jsonl.partial').open('a') as f:f.write(json.dumps(row)+'\n')
     print('block',block,'complete',flush=True)
 if len(rows)!=108:sys.exit(f'expected 108 rows, recorded {len(rows)}')
 if {f:sha256(ROOT/f) for f in sources}!=sources or sha256(OUT/'probe')!=meta['binary_sha256']:sys.exit('source or binary changed during the campaign; evidence rejected')
+(OUT/'runs.jsonl.partial').rename(OUT/'runs.jsonl')
 print('108 correct independent processes',flush=True)
