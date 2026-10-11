@@ -260,6 +260,10 @@ name = "tcp-quic-application-pacing"
 version = "0.1.0"
 
 [[package]]
+name = "tls-record-sizing"
+version = "0.1.0"
+
+[[package]]
 name = "topic-021-store-write-path"
 version = "0.1.0"
 

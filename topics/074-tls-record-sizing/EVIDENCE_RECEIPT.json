@@ -1,0 +1,306 @@
+{
+  "recorded_utc": "2026-10-11T13:46:14.644793+00:00",
+  "source_commit": "bd99e4bdb3dce73eaa5f33973ec93acd6e0f3c97",
+  "source_archive_sha256": "1fd563ea61bab8d80d55aa9890cd71012b680e7253cebd84bc95a160849bed0e",
+  "inputs": {
+    "Cargo.toml": "ddbff944b3a489e618388fafe6f9625e9d5a13433ac1192284b62b056e80ae11",
+    "run.py": "704558221a057ed192551dc1254583579cbfd588901cfaccd9e2e52d6c6a3de2",
+    "check.py": "d0cf368438faf83896c6ee8d1cdcc72399b1e2a41b8acdab1f57e2cbfc648487",
+    "measurements.md": "a9a23c2d382a4ca916d00d9081124ec16de45bf49c9ca72e2590fac6de666738",
+    "README.md": "c634d4d95a3961cfad6a40e05b352000c612d0553f86fba802c27f5d9d049723",
+    "references.md": "6e1dc18a6c5e33354723341ad5ccff1307d0d3c02b5629b054b8e47a60baec91",
+    "topic.toml": "6ee80535bccfbff4240817a5de4a9dd21589d4dbb1fe60f0a64655e0945fdf90",
+    "probe.c": "9b321e23659de951c61e9df8405d4103877a1effc97bce4878d8c98ca276ab17",
+    "analyze.py": "ef8f7b70f8c4fa2ba686591c8268b5ff997041d3b2b4f5f3de2919e78d6ebfd3",
+    "examples/budget.rs": "4a77a819ca00ab18ffb56fe9a353c19fd46adeaf2b8f346f716365395e62ea33",
+    "rounds/01.md": "23d1ed43a6ad5dbf6b48e005e590d7def0b00bdcab752c2bbd719f4f17d7d44a",
+    "src/lib.rs": "5100a240fac11f74731a3457c8999964030c2f67962023d98db8b0988105a856"
+  },
+  "binary_sha256": "6e6d09512febcaf5b7a47676cab5e41fd066fe6bcf7e35698120d34538dd1286",
+  "metadata": {
+    "started_utc": "2026-10-11T13:44:46Z",
+    "hostname": "b0f1d8752aba",
+    "platform": "macOS-26.7.1-arm64-arm-64bit-Mach-O",
+    "architecture": "arm64",
+    "cpu_count": 10,
+    "affinity": "uncontrolled macOS scheduling",
+    "compiler": "Apple clang version 17.0.0 (clang-1700.4.4.1)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin\n",
+    "openssl": "OpenSSL 3.6.2 7 Apr 2026 (Library: OpenSSL 3.6.2 7 Apr 2026)\nbuilt on: Tue Apr  7 12:17:57 2026 UTC\nplatform: darwin64-arm64-cc\noptions:  bn(64,64)\ncompiler: clang -fPIC -arch arm64 -O3 -Wall -DL_ENDIAN -DOPENSSL_PIC -D_REENTRANT -DOPENSSL_BUILDING_OPENSSL -DNDEBUG\nOPENSSLDIR: \"/opt/homebrew/etc/openssl@3\"\nENGINESDIR: \"/opt/homebrew/Cellar/openssl@3/3.6.2/lib/engines-3\"\nMODULESDIR: \"/opt/homebrew/Cellar/openssl@3/3.6.2/lib/ossl-modules\"\nSeeding source: os-specific\nCPUINFO: OPENSSL_armcap=0x987d\n",
+    "command": [
+      "cc",
+      "-std=c11",
+      "-O3",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "/Users/ahrav/Documents/Codex/2026-10-11/advanced-systems-daily-curriculum-deliver-a/work/committed-replay/topics/074-tls-record-sizing/probe.c",
+      "-I/opt/homebrew/Cellar/openssl@3/3.6.2/include",
+      "-L/opt/homebrew/Cellar/openssl@3/3.6.2/lib",
+      "-lssl",
+      "-lcrypto",
+      "-o",
+      "/Users/ahrav/Documents/Codex/2026-10-11/advanced-systems-daily-curriculum-deliver-a/work/committed-local/probe"
+    ],
+    "hashes": {
+      "probe.c": "9b321e23659de951c61e9df8405d4103877a1effc97bce4878d8c98ca276ab17",
+      "run.py": "704558221a057ed192551dc1254583579cbfd588901cfaccd9e2e52d6c6a3de2"
+    },
+    "binary_sha256": "6e6d09512febcaf5b7a47676cab5e41fd066fe6bcf7e35698120d34538dd1286",
+    "boundary": "steady-state encrypt + memory BIO copies + decrypt + byte-count checks; 8 warmup responses; fixture/key generation/handshake, framing and full-byte oracle, buffers, startup and final teardown excluded; setup and teardown separately recorded; no network",
+    "criterion": "winner only if every paired rival/candidate ratio >=1.05 across six balanced blocks; otherwise unresolved, not equivalence",
+    "cpu_model": "Apple M1 Pro"
+  },
+  "summary": [
+    {
+      "workload": "tiny",
+      "winner": "unresolved",
+      "candidates": {
+        "1024": {
+          "median_us": 0.7383730000000001,
+          "min_us": 0.725616,
+          "max_us": 0.749817,
+          "records": 1,
+          "wire_bytes": 150
+        },
+        "4096": {
+          "median_us": 0.723816,
+          "min_us": 0.7183229999999999,
+          "max_us": 0.7574460000000001,
+          "records": 1,
+          "wire_bytes": 150
+        },
+        "16384": {
+          "median_us": 0.736725,
+          "min_us": 0.730927,
+          "max_us": 0.751465,
+          "records": 1,
+          "wire_bytes": 150
+        }
+      }
+    },
+    {
+      "workload": "one_k",
+      "winner": "unresolved",
+      "candidates": {
+        "1024": {
+          "median_us": 1.043579,
+          "min_us": 1.000488,
+          "max_us": 1.110107,
+          "records": 1,
+          "wire_bytes": 1046
+        },
+        "4096": {
+          "median_us": 1.0297855,
+          "min_us": 0.9936520000000001,
+          "max_us": 1.0756839999999999,
+          "records": 1,
+          "wire_bytes": 1046
+        },
+        "16384": {
+          "median_us": 1.0267335,
+          "min_us": 0.988037,
+          "max_us": 1.035645,
+          "records": 1,
+          "wire_bytes": 1046
+        }
+      }
+    },
+    {
+      "workload": "sixteen_k",
+      "winner": 16384,
+      "candidates": {
+        "1024": {
+          "median_us": 15.5585935,
+          "min_us": 15.257813,
+          "max_us": 16.140625,
+          "records": 16,
+          "wire_bytes": 16736
+        },
+        "4096": {
+          "median_us": 8.404296500000001,
+          "min_us": 8.238281,
+          "max_us": 8.761719,
+          "records": 4,
+          "wire_bytes": 16472
+        },
+        "16384": {
+          "median_us": 6.5390625,
+          "min_us": 6.171875,
+          "max_us": 7.328125,
+          "records": 1,
+          "wire_bytes": 16406
+        }
+      }
+    },
+    {
+      "workload": "bulk",
+      "winner": 16384,
+      "candidates": {
+        "1024": {
+          "median_us": 1031.749998,
+          "min_us": 1006.874998,
+          "max_us": 1081.374998,
+          "records": 1024,
+          "wire_bytes": 1071104
+        },
+        "4096": {
+          "median_us": 578.750005,
+          "min_us": 562.249988,
+          "max_us": 598.375002,
+          "records": 256,
+          "wire_bytes": 1054208
+        },
+        "16384": {
+          "median_us": 460.1875045,
+          "min_us": 443.875004,
+          "max_us": 473.25000900000003,
+          "records": 64,
+          "wire_bytes": 1049984
+        }
+      }
+    },
+    {
+      "workload": "tiny_writes",
+      "winner": "unresolved",
+      "candidates": {
+        "1024": {
+          "median_us": 94.50195300000001,
+          "min_us": 91.839844,
+          "max_us": 101.546875,
+          "records": 128,
+          "wire_bytes": 19200
+        },
+        "4096": {
+          "median_us": 94.22070300000001,
+          "min_us": 91.09375,
+          "max_us": 99.773437,
+          "records": 128,
+          "wire_bytes": 19200
+        },
+        "16384": {
+          "median_us": 94.222656,
+          "min_us": 91.5,
+          "max_us": 96.441406,
+          "records": 128,
+          "wire_bytes": 19200
+        }
+      }
+    },
+    {
+      "workload": "four_k_writes",
+      "winner": "unresolved",
+      "candidates": {
+        "1024": {
+          "median_us": 1021.875003,
+          "min_us": 998.3750060000001,
+          "max_us": 1055.875007,
+          "records": 1024,
+          "wire_bytes": 1071104
+        },
+        "4096": {
+          "median_us": 550.6250015,
+          "min_us": 541.37499,
+          "max_us": 603.374996,
+          "records": 256,
+          "wire_bytes": 1054208
+        },
+        "16384": {
+          "median_us": 555.812505,
+          "min_us": 551.1250060000001,
+          "max_us": 564.250004,
+          "records": 256,
+          "wire_bytes": 1054208
+        }
+      }
+    }
+  ],
+  "gates": [
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.029773950576782227
+    },
+    {
+      "command": [
+        "cargo",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.7108421325683594
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--lib",
+        "--examples"
+      ],
+      "exit": 0,
+      "seconds": 73.89465093612671
+    },
+    {
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--doc"
+      ],
+      "exit": 0,
+      "seconds": 48.323318004608154
+    },
+    {
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit": 0,
+      "seconds": 3.9035820960998535
+    },
+    {
+      "command": [
+        "cargo",
+        "bench",
+        "--workspace",
+        "--no-run"
+      ],
+      "exit": 0,
+      "seconds": 9.112074136734009
+    },
+    {
+      "command": [
+        "cargo",
+        "doc",
+        "--workspace",
+        "--no-deps"
+      ],
+      "exit": 0,
+      "seconds": 8.630608797073364
+    }
+  ],
+  "correctness": {
+    "rust_unit": 4,
+    "rust_doc": 1,
+    "boundary_cases": 102,
+    "invalid_inputs": 7,
+    "corrupted_and_truncated": "each process",
+    "sanitizers": "UNVERIFIED: combined ASan/UBSan process did not finish within two minutes; terminated task-owned PID11332"
+  },
+  "required_linux": {
+    "arm": "PENDING Midway expired-cookie rejection before identity/transfer",
+    "xxl": "PENDING same rejection; alias resolved dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com; architecture unverified"
+  },
+  "raw_evidence": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-074/2026-10-11-tls"
+}
