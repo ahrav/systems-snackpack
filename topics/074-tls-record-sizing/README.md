@@ -12,11 +12,15 @@ cd topics/074-tls-record-sizing
 cc -std=c11 -O3 -Wall -Wextra -Werror probe.c $(pkg-config --cflags --libs openssl) -o /tmp/topic074-probe
 /tmp/topic074-probe 16384 65536 65536 64
 python3 check.py /tmp/topic074-probe
+python3 -m unittest test_gates
 python3 run.py /tmp/topic074-new-results
 python3 analyze.py /tmp/topic074-new-results
 ```
 
-Use a new output directory. Requirements: Python 3, C compiler, `pkg-config`,
+Use a new output directory. `test_gates.py` runs each script against fake probes
+with and without `PYTHONOPTIMIZE` and requires explicit rejection of incorrect
+rows, accepted invalid inputs, partial candidate sets, missing blocks, runtime
+library mismatches, and source changes during a campaign. Requirements: Python 3, C compiler, `pkg-config`,
 OpenSSL 3.x headers/libraries, and the workspace Rust toolchain. The fixture
 creates and trusts an ephemeral certificate in memory, verifies its hostname,
 and never opens a network listener. It is not a production TLS wrapper.

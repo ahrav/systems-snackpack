@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Check cap/write boundaries against an iterative external framing oracle."""
+"""Check cap/write boundaries against an iterative external framing oracle.
+
+Every gate is an explicit conditional so `python -O` cannot disable it.
+"""
 import json,pathlib,subprocess,sys
 binary=str(pathlib.Path(sys.argv[1]).resolve());count=0
 for cap in (1024,4096,16384):
@@ -11,8 +14,8 @@ for cap in (1024,4096,16384):
                 group=min(pending,write_size);pending-=group
                 while group:
                     take=min(group,cap);group-=take;records+=1;wire+=take+22
-            assert row['correct'] and row['records']==records and row['wire_bytes']==wire
+            if not (row['correct'] and row['records']==records and row['wire_bytes']==wire):sys.exit(f'oracle mismatch cap={cap} length={length} write_size={write_size}: expected records={records} wire_bytes={wire}, got {row}')
             count+=1
 for args in [('0','1','1','1'),('16385','1','1','1'),('1024','0','1','1'),('1024','1','0','1'),('1024','1','1','0'),('1024','1048577','1','1'),('1024','-1','1','1')]:
-    assert subprocess.run([binary,*args],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode!=0
+    if subprocess.run([binary,*args],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0:sys.exit(f'invalid input accepted: {args}')
 print(f'{count} boundary oracle cases; 7 invalid-input rejections passed')
