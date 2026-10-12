@@ -11,7 +11,7 @@ Three candidates: scan, bitmap, tree. Six cases: tiny (64 ports, 1 destination,
 1024 per destination); skew (4096, 16, 3891 in destination zero, 16 elsewhere,
 90% forced hot churn plus incidental hot traffic); short (4096, 16, initially
 empty, 32 steps). Other cases have 10000 churn steps. Each step releases a
-seeded selected occupied slot and allocates the lowest free port. A full pool
+seeded selected occupied slot when one exists, then allocates the lowest free port. A full pool
 also attempts allocation before release to check rejection. Initial filling is
 ascending. Global limit is unlimited in timed traces; separate tests cover it.
 
