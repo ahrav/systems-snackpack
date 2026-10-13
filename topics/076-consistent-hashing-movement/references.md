@@ -6,7 +6,7 @@
 - Eisenbud et al., NSDI2016, https://www.usenix.org/system/files/conference/nsdi16/nsdi16-paper-eisenbud.pdf . Maglev table and connection tracking.
 - Redis Cluster specification, https://redis.io/docs/latest/operate/oss_and_stack/reference/cluster-spec/ . Slots, redirects, migration states. Read2026-10-13.
 
-Derived here:adjacent modulo unchanged1/(N+1); ideal equal-weight HRW replacement
-endpoint2/(N+1), fully materialized remove/add transfer events2/N. Fixed rings and
+Derived here:adjacent modulo unchanged 1/(N+1); ideal equal-weight HRW replacement
+endpoint 2/(N+1), fully materialized remove/add transfer events 2/N. Fixed rings and
 finite keys need observed counts. Membership authority and safe cutover are outside
 this single-process placement experiment.
