@@ -47,6 +47,10 @@ name = "consensus-leases-fencing"
 version = "0.1.0"
 
 [[package]]
+name = "consistent-hashing-movement"
+version = "0.1.0"
+
+[[package]]
 name = "constant-time-systems"
 version = "0.1.0"
 dependencies = [

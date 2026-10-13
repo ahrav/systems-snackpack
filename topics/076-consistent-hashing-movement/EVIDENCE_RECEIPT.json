@@ -1,0 +1,45 @@
+{
+  "source": {
+    "source_commit": "b6c88c1fb7c57c4b47ace1a5a6c9a24dcc289b5e",
+    "source_files": {
+      "Cargo.toml": "63754c8812e8af81598c64b949b27e5f97a3d82db655f50f8f6471f5f4492f04",
+      "src/lib.rs": "1216bd581cbaf22e693ddd06732df30f7984a44c085853fd8dcea963f5d16e2a",
+      "examples/placement.rs": "eeae96aacc3d2000831495479cc1998b30be6de8f816b5ec7a9226e2e89873d7",
+      "run.py": "a3bd543665e8e1b130db5cef75ae13eecb9279c23dd9ad3b2ef4825eafec1bec"
+    },
+    "archive_sha256": "72ebb8580e1cc6707b8a13fd5d12f1c33dc38fc5784538f4ac611f0de7e15d3b"
+  },
+  "raw_evidence": "/Users/ahrav/.codex/learning/advanced-systems-evidence/topic-076/2026-10-13-placement",
+  "local_host": {
+    "hostname": "b0f1d8752aba",
+    "uname": [
+      "Darwin",
+      "b0f1d8752aba",
+      "25.6.0",
+      "Darwin Kernel Version 25.6.0: Tue Aug 18 17:49:13 PDT 2026; root:xnu-12377.161.15.700.19~2/RELEASE_ARM64_T6000",
+      "arm64",
+      "arm"
+    ],
+    "available_cpus": 10,
+    "compiler": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+    "flags": "cargo build --release --example placement; default target features; no target-cpu=native",
+    "binary_sha256": "2a71e4d4b41d4f9b1ed3157aab58633305583bbcacdf45592b3351a14a606b74",
+    "runner_sha256": "a3bd543665e8e1b130db5cef75ae13eecb9279c23dd9ad3b2ef4825eafec1bec",
+    "cpu": "Apple M1 Pro\n",
+    "selection": "For each workload and timing boundary, candidate beats every eligible rival by >=5% in ALL six process pairs. Otherwise unresolved. Report all-scheme and HRW/ring64-only eligibility separately.",
+    "boundary": "steady: 262144 prehashed-key owner calls plus wrapping checksum and black_box; excludes input, map construction, output and drop. cold: map allocation/build plus first 128 or32768 lookups; excludes input and drop; first pass, not hardware cache flush. One untimed in-process pass before steady; one external warmup per candidate/workload.",
+    "independent_unit": "process; six blocks alternate forward/reverse order; 4 candidates x9workloads x6=216 measured plus36 warmup processes"
+  },
+  "summary_sha256": "805817d03668b64d216ed37a407bcd63007c3a8b714c95808ccc8f5940c4bcfa",
+  "validation": "5 unit tests, 1 doctest, 216 measured + 36 warmup local processes; independent reconstruction of 12 movement rows and 1696 public-API fixtures; all seven workspace gates passed.",
+  "required_linux": {
+    "arm": "authentication rejected before identity/transfer; retry failed",
+    "xxl": "resolved dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com; authentication rejected before architecture verification/transfer; retry failed"
+  },
+  "measurement_limits": [
+    "local macOS only",
+    "prehashed-key owner selection, not migration",
+    "steady excludes setup/drop/output; first-pass includes setup",
+    "no cache flush, affinity, or power-state control"
+  ]
+}

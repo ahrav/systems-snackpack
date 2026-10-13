@@ -1,0 +1,7 @@
+[package]
+name = "consistent-hashing-movement"
+version = "0.1.0"
+edition = "2024"
+
+[lints.rust]
+missing_docs = "deny"
