@@ -1,0 +1,21 @@
+   Compiling metadata-scalability v0.1.0 (/tmp/codex-topic077-20261014-33216b7de044)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.40s
+     Running unittests src/lib.rs (target/debug/deps/metadata_scalability-77c11900e27ada9b)
+
+running 5 tests
+test tests::deletion_replay_cannot_resurrect_route ... ok
+test tests::empty_batches_and_sequence_ceiling ... ok
+test tests::gap_and_malformed_suffix_are_atomic ... ok
+test tests::snapshot_recovers_compaction_and_removes_absent_keys ... ok
+test tests::all_short_histories_match_independent_map_oracle ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+   Doc-tests metadata_scalability
+
+running 1 test
+test src/lib.rs - (line 9) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.31s; merged doctests compilation took 0.30s
