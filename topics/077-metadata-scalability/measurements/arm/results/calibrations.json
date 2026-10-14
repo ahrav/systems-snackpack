@@ -1,0 +1,62 @@
+[
+  {
+    "variant": "snapshot",
+    "workload": "sparse",
+    "iterations": "512",
+    "updates": "64",
+    "elapsed_ns": "13170488",
+    "ns_per_batch": 25723.609,
+    "snapshot_bytes": "1048576",
+    "delta_bytes": "1536"
+  },
+  {
+    "variant": "delta",
+    "workload": "sparse",
+    "iterations": "512",
+    "updates": "64",
+    "elapsed_ns": "38570",
+    "ns_per_batch": 75.332,
+    "snapshot_bytes": "1048576",
+    "delta_bytes": "1536"
+  },
+  {
+    "variant": "snapshot",
+    "workload": "dense",
+    "iterations": "512",
+    "updates": "65536",
+    "elapsed_ns": "12998990",
+    "ns_per_batch": 25388.652,
+    "snapshot_bytes": "1048576",
+    "delta_bytes": "1572864"
+  },
+  {
+    "variant": "delta",
+    "workload": "dense",
+    "iterations": "512",
+    "updates": "65536",
+    "elapsed_ns": "68333128",
+    "ns_per_batch": 133463.141,
+    "snapshot_bytes": "1048576",
+    "delta_bytes": "1572864"
+  },
+  {
+    "variant": "snapshot",
+    "workload": "hot",
+    "iterations": "512",
+    "updates": "262144",
+    "elapsed_ns": "13541282",
+    "ns_per_batch": 26447.816,
+    "snapshot_bytes": "1048576",
+    "delta_bytes": "6291456"
+  },
+  {
+    "variant": "delta",
+    "workload": "hot",
+    "iterations": "512",
+    "updates": "262144",
+    "elapsed_ns": "155127868",
+    "ns_per_batch": 302984.117,
+    "snapshot_bytes": "1048576",
+    "delta_bytes": "6291456"
+  }
+]
