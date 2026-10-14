@@ -8,7 +8,7 @@ p.add_argument('--out', required=True)
 p.add_argument('--source-commit', required=True)
 a = p.parse_args()
 out = pathlib.Path(a.out)
-out.mkdir(parents=True, exist_ok=True)
+out.mkdir(parents=True, exist_ok=False)
 binary = pathlib.Path(a.binary).resolve()
 fields = ['variant', 'workload', 'iterations', 'updates', 'elapsed_ns', 'ns_per_batch', 'snapshot_bytes', 'delta_bytes']
 
@@ -17,8 +17,10 @@ def run(variant, workload, iterations):
     values = raw.split(',')
     if len(values) != len(fields):
         raise ValueError('unexpected benchmark output')
-    row = dict(zip(fields, values))
+    row: dict = dict(zip(fields, values))
     row['ns_per_batch'] = float(row['ns_per_batch'])
+    for key in ['iterations', 'updates', 'elapsed_ns', 'snapshot_bytes', 'delta_bytes']:
+        row[key] = int(row[key])
     return row
 
 identity = {'source_commit': a.source_commit, 'platform': platform.platform(),
@@ -56,7 +58,7 @@ for workload in ['sparse', 'dense', 'hot']:
         cell[variant] = {'median_us':statistics.median(values), 'min_us':min(values), 'max_us':max(values)}
     summary.append(cell)
     print(json.dumps(cell), flush=True)
-with (out/'samples.csv').open('w') as f:
-    w=csv.DictWriter(f,fieldnames=fields+['pair','position']);w.writeheader();w.writerows(rows)
+with (out/'samples.csv').open('w', newline='') as f:
+    w=csv.DictWriter(f,fieldnames=fields+['pair','position'],lineterminator='\n');w.writeheader();w.writerows(rows)
 (out/'calibrations.json').write_text(json.dumps(calibrations,indent=2)+'\n')
 (out/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
