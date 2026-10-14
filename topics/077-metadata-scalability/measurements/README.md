@@ -49,3 +49,6 @@ The first remote setup failed because Python 3.9 lacks zip(strict=True).
 A committed explicit length check fixed the runner before final measurements.
 One local exploratory run overlapped workspace validation and is excluded.
 No required Topic 077 Linux measurement remains missing.
+
+Published CSV files use LF line endings; sample values are unchanged. Original
+remote output is also retained in the daily evidence archives.
