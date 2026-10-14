@@ -15,7 +15,9 @@ fields = ['variant', 'workload', 'iterations', 'updates', 'elapsed_ns', 'ns_per_
 def run(variant, workload, iterations):
     raw = subprocess.check_output([str(binary), variant, workload, str(iterations)], text=True).strip()
     values = raw.split(',')
-    row = dict(zip(fields, values, strict=True))
+    if len(values) != len(fields):
+        raise ValueError('unexpected benchmark output')
+    row = dict(zip(fields, values))
     row['ns_per_batch'] = float(row['ns_per_batch'])
     return row
 
