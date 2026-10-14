@@ -1,8 +1,12 @@
 # Topic 077 measurements
 
 Exact source commit: `33216b7de0448010e9dcd670f7b0edab99a9680a`. Archive SHA-256:
-`bf08fbc9f0bb9f40c58b6a19620a4ce5a49365d97e2e0b42fe3432b06ff337cd`. Every transferred core source and runner hash
-matches that commit and the publication tree.
+`bf08fbc9f0bb9f40c58b6a19620a4ce5a49365d97e2e0b42fe3432b06ff337cd`. Every transferred core source hash matches
+that commit and the publication tree. The measured runner is the `run.py` at that commit (SHA-256
+`fb13a9525c70ba521c07875436c1ce4e14067f5c7667a6fe1648c1b4757772b6`, recorded in each `inputs.sha256`). The published
+runner differs after review: it refuses an existing output directory, writes `samples.csv` with LF line endings, and
+serializes integer calibration fields as JSON numbers. Measured sample values and the timed region are unchanged;
+the retained `calibrations.json` files keep the measured runner's string-typed integers.
 
 Both Linux hosts used **Rust 1.93.1**, default Cargo release optimization, and
 Python 3.9.25. No native CPU flags, pinning, or frequency controls. AArch64 host:

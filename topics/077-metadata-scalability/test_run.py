@@ -11,11 +11,13 @@ ROOT = pathlib.Path(__file__).resolve().parent
 FAKE_ROW = "{variant},{workload},{iterations},64,13170488,25723.609,1048576,1536"
 
 
-def fake_binary(directory, fail=False):
-    """A stand-in for compare.rs that echoes one well-formed row (or exits 1)."""
+def fake_binary(directory, fail=False, echo_iterations="i"):
+    """A stand-in for compare.rs that echoes one well-formed row (or exits 1).
+    echo_iterations is a Python expression over the invocation's iteration string ``i``."""
     path = pathlib.Path(directory) / "fake-compare"
     body = "import sys; sys.exit(1)" if fail else (
-        "import sys; v,w,i=sys.argv[1:4]; print(" + repr(FAKE_ROW) + ".format(variant=v,workload=w,iterations=i))"
+        "import sys; v,w,i=sys.argv[1:4]; print(" + repr(FAKE_ROW)
+        + ".format(variant=v,workload=w,iterations=" + echo_iterations + "))"
     )
     path.write_text("#!" + sys.executable + "\n" + body + "\n")
     path.chmod(0o755)
@@ -43,6 +45,12 @@ class OutputDirectory(unittest.TestCase):
 
 
 class Outputs(unittest.TestCase):
+    def test_echoed_arguments_must_match_invocation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = pathlib.Path(tmp) / "campaign"
+            proc = run_py(fake_binary(tmp, echo_iterations="str(int(i) + 1)"), out)
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertFalse((out / "samples.csv").exists(), "a mislabeled row must stop the campaign before output")
     def test_csv_uses_lf_and_calibration_integers_are_numbers(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = pathlib.Path(tmp) / "campaign"

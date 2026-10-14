@@ -26,6 +26,7 @@ cargo test -p metadata-scalability
 cargo clippy -p metadata-scalability --all-targets -- -D warnings
 cargo build --release -p metadata-scalability --example compare
 python3 topics/077-metadata-scalability/demo.py
+python3 -m unittest topics/077-metadata-scalability/test_run.py
 python3 topics/077-metadata-scalability/run.py \
   --binary target/release/examples/compare \
   --out /tmp/metadata-results --source-commit "$(git rev-parse HEAD)"

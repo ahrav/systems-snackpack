@@ -18,6 +18,8 @@ def run(variant, workload, iterations):
     if len(values) != len(fields):
         raise ValueError('unexpected benchmark output')
     row: dict = dict(zip(fields, values))
+    if (row['variant'], row['workload'], row['iterations']) != (variant, workload, str(iterations)):
+        raise ValueError(f'row echoes {values[:3]} for invocation {[variant, workload, str(iterations)]}')
     row['ns_per_batch'] = float(row['ns_per_batch'])
     for key in ['iterations', 'updates', 'elapsed_ns', 'snapshot_bytes', 'delta_bytes']:
         row[key] = int(row[key])
@@ -59,6 +61,8 @@ for workload in ['sparse', 'dense', 'hot']:
     summary.append(cell)
     print(json.dumps(cell), flush=True)
 with (out/'samples.csv').open('w', newline='') as f:
-    w=csv.DictWriter(f,fieldnames=fields+['pair','position'],lineterminator='\n');w.writeheader();w.writerows(rows)
+    w = csv.DictWriter(f, fieldnames=fields+['pair','position'], lineterminator='\n')
+    w.writeheader()
+    w.writerows(rows)
 (out/'calibrations.json').write_text(json.dumps(calibrations,indent=2)+'\n')
 (out/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
