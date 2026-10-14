@@ -134,6 +134,10 @@ name = "memory-level-parallelism"
 version = "0.1.0"
 
 [[package]]
+name = "metadata-scalability"
+version = "0.1.0"
+
+[[package]]
 name = "multipart-correctness"
 version = "0.1.0"
 
