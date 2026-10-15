@@ -5,8 +5,17 @@ under the declared rule: every one of six paired ratios exceeds 1.05 in its favo
 These are saturated integer-job transfers with an outer yield on full/empty.
 They do not establish a universal queue winner.
 
-Measured source: `fc53924e10865e70e9c076c4a0ace48ac4d04131`. Final documentation/results commits leave the
-measured source, runner, toolchain and lockfile unchanged. Rust 1.93.1, LLVM 21.1.8,
+Measured source: `fc53924e10865e70e9c076c4a0ace48ac4d04131`. The measured runner is the `run.py`
+(SHA-256 `5e15959f6b8aedce8b081d40b9b26ef1e9af9ca86be78dc638b5e8e5cb911174`) and `linux-run.sh`
+(SHA-256 `4d5c09b63cbf2224d17c44efe1bbfe1afd10e26d308bcc920a79b0b05095011b`) at that commit.
+The published runner differs after review: it refuses an existing output directory, verifies
+SOURCE_COMMIT against HEAD and the tracked inputs, clears Cargo rustflags, profile and target
+environment overrides, records the verbose build, honors `CARGO_TARGET_DIR`, searches every socket
+for eight cores, rejects a row whose echoed configuration differs from its command, and publishes
+`results.json` only after the summary is complete. The published library adds a checked
+participant-count addition before the barriers. The timed loop, campaign commands, toolchain and
+lockfile are unchanged; the retained `binary.sha256` files hash the measured commit's build.
+Rust 1.93.1, LLVM 21.1.8,
 Cargo release defaults, no target-cpu override, crossbeam-queue 0.3.12 and
 crossbeam-utils 0.8.23. Both hosts use Amazon Linux 2023, kernel 6.12.110.
 
@@ -54,7 +63,7 @@ these wrappers and this workload; attribution to cache coherence or instruction
 sets remains inference. Parking channels, SPSC queues and real job service time
 were not measured. Retain those options when their contracts fit better.
 
-Replay from the source root with:
+Replay from the root of a git checkout at SOURCE_COMMIT with a new output path:
 
 ```sh
 bash topics/078-bounded-mpmc-queue/linux-run.sh results SOURCE_COMMIT

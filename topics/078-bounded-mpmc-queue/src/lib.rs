@@ -105,8 +105,12 @@ pub fn transfer(
     assert_eq!(total % consumers, 0);
     let quota = total / consumers;
     let q = Queue::new(mode, capacity);
-    let ready = Barrier::new(producers + consumers + 1);
-    let start = Barrier::new(producers + consumers + 1);
+    let participants = producers
+        .checked_add(consumers)
+        .and_then(|workers| workers.checked_add(1))
+        .unwrap();
+    let ready = Barrier::new(participants);
+    let start = Barrier::new(participants);
     let (elapsed, retries, received) = thread::scope(|scope| {
         let mut senders = Vec::new();
         let mut receivers = Vec::new();
@@ -249,5 +253,12 @@ mod tests {
     #[should_panic]
     fn zero_capacity_rejected() {
         Queue::new(Mode::Mutex, 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn participant_count_overflow_panics_before_spawning() {
+        // producers * per_producer fits in usize; producers + consumers + 1 overflows usize.
+        transfer(Mode::Mutex, 1, usize::MAX, 1, 1);
     }
 }

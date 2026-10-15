@@ -8,6 +8,7 @@ integers, not a concurrent queue or a weak-memory proof.
 ```sh
 python3 topics/078-bounded-mpmc-queue/model.py
 cargo test -p bounded-mpmc-queue
+python3 -m unittest topics/078-bounded-mpmc-queue/test_run.py
 cargo run --release -p bounded-mpmc-queue -- array 4 4 4 100000
 cargo run --release -p bounded-mpmc-queue -- mutex 4 4 4 100000
 python3 topics/078-bounded-mpmc-queue/run.py target/release/bounded-mpmc-queue results.json
@@ -43,6 +44,10 @@ throughput. Stress and sequential oracles do not establish every concurrent
 history's linearizability or the library's weak-memory correctness.
 
 Linux replay uses `bash topics/078-bounded-mpmc-queue/linux-run.sh OUTPUT SOURCE_COMMIT`.
+OUTPUT must be a new path. SOURCE_COMMIT must resolve to HEAD of a git checkout
+whose tracked workspace manifests, toolchain file and topic files match it. The
+script clears Cargo rustflags, profile and target environment overrides, records
+the effective rustc invocation in `build.txt`, and honors `CARGO_TARGET_DIR`.
 It selects eight available physical cores on one socket and runs both variants
 inside the same CPU mask. Threads can migrate within that mask. Other host work,
 frequency scaling and sibling activity are uncontrolled. Rust is pinned by the
