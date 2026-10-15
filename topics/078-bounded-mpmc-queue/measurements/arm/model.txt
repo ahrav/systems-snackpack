@@ -1,0 +1,2 @@
+publication hole observed; FIFO restored after A publishes
+80000 deque-oracle steps and all 24 publication orders passed
