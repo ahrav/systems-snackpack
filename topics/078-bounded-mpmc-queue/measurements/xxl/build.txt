@@ -1,0 +1,4 @@
+   Compiling crossbeam-utils v0.8.23
+   Compiling crossbeam-queue v0.3.12
+   Compiling bounded-mpmc-queue v0.1.0 (/tmp/codex-topic078-20261015-fc53924e1086/topics/078-bounded-mpmc-queue)
+    Finished `release` profile [optimized] target(s) in 0.81s
