@@ -92,7 +92,9 @@ fn exact_delivery(mut values: Vec<usize>, total: usize) -> bool {
 ///
 /// # Panics
 /// Panics for zero counts/capacity, count overflow, indivisible quotas, a worker
-/// panic, or incorrect delivery. An implementation stall needs an external timeout.
+/// panic, or incorrect delivery. An implementation stall needs an external timeout,
+/// and so does a thread spawn refused by the OS after earlier workers reached the
+/// ready barrier: those workers wait for participants that never arrive.
 pub fn transfer(
     mode: Mode,
     capacity: usize,
