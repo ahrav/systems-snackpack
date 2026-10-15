@@ -38,9 +38,11 @@ def fake_binary(directory, consumers="int(consumers)", elapsed_ns="1000"):
 
 
 def run_py(binary, destination, env=None):
+    """Run run.py with PYTHONOPTIMIZE=1 so a validation that relied on assert would be stripped."""
     return subprocess.run(
         [sys.executable, str(ROOT / "run.py"), str(binary), str(destination)],
-        cwd=ROOT, text=True, capture_output=True, timeout=300, check=False, env=env,
+        cwd=ROOT, text=True, capture_output=True, timeout=300, check=False,
+        env={"PYTHONOPTIMIZE": "1", "PATH": "/usr/bin:/bin", **(env or {})},
     )
 
 
@@ -64,7 +66,7 @@ class Runner(unittest.TestCase):
             destination = pathlib.Path(tmp) / "results.json"
             counter = pathlib.Path(tmp) / "calls"
             counter.write_text("0")
-            proc = run_py(fake_binary(tmp), destination, env={"FAKE_COUNTER": str(counter), "PATH": "/usr/bin:/bin"})
+            proc = run_py(fake_binary(tmp), destination, env={"FAKE_COUNTER": str(counter)})
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
             self.assertFalse(destination.exists(), "an interrupted campaign must not leave results.json")
             partial = json.loads(pathlib.Path(str(destination) + ".partial").read_text())

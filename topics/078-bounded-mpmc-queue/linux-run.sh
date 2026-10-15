@@ -13,9 +13,16 @@ if [ "$source_commit" != "$(git rev-parse HEAD)" ]; then
   printf 'HEAD %s differs from SOURCE_COMMIT %s\n' "$(git rev-parse HEAD)" "$source_commit" >&2
   exit 2
 fi
-dirty=$(git status --porcelain --untracked-files=no -- Cargo.lock Cargo.toml rust-toolchain.toml topics/078-bounded-mpmc-queue)
+dirty=$(git status --porcelain --untracked-files=all -- Cargo.lock Cargo.toml rust-toolchain.toml topics/078-bounded-mpmc-queue)
 if [ -n "$dirty" ]; then
-  printf 'tracked inputs differ from %s:\n%s\n' "$source_commit" "$dirty" >&2
+  printf 'build inputs differ from %s:\n%s\n' "$source_commit" "$dirty" >&2
+  exit 2
+fi
+unset RUSTUP_TOOLCHAIN
+pinned=$(sed -n 's/^channel *= *"\(.*\)"/\1/p' rust-toolchain.toml)
+active=$(rustc --version | awk '{print $2}')
+if [ "$active" != "$pinned" ]; then
+  printf 'active rustc %s differs from pinned channel %s\n' "$active" "$pinned" >&2
   exit 2
 fi
 unset CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET

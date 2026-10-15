@@ -9,8 +9,8 @@ Measured source: `fc53924e10865e70e9c076c4a0ace48ac4d04131`. The measured runner
 (SHA-256 `5e15959f6b8aedce8b081d40b9b26ef1e9af9ca86be78dc638b5e8e5cb911174`) and `linux-run.sh`
 (SHA-256 `4d5c09b63cbf2224d17c44efe1bbfe1afd10e26d308bcc920a79b0b05095011b`) at that commit.
 The published runner differs after review: it refuses an existing output directory, verifies
-SOURCE_COMMIT against HEAD and the tracked inputs, clears Cargo rustflags, profile and target
-environment overrides, records the verbose build, honors `CARGO_TARGET_DIR`, searches every socket
+SOURCE_COMMIT against HEAD and the modified or untracked build inputs, enforces the pinned rustc
+version, clears Cargo rustflags, profile and target environment overrides, records the verbose build, honors `CARGO_TARGET_DIR`, searches every socket
 for eight cores, rejects a row whose echoed configuration differs from its command, and publishes
 `results.json` only after the summary is complete. The published library adds a checked
 participant-count addition before the barriers. The timed loop, campaign commands, toolchain and

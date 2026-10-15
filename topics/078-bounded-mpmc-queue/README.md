@@ -45,9 +45,11 @@ history's linearizability or the library's weak-memory correctness.
 
 Linux replay uses `bash topics/078-bounded-mpmc-queue/linux-run.sh OUTPUT SOURCE_COMMIT`.
 OUTPUT must be a new path. SOURCE_COMMIT must resolve to HEAD of a git checkout
-whose tracked workspace manifests, toolchain file and topic files match it. The
-script clears Cargo rustflags, profile and target environment overrides, records
-the effective rustc invocation in `build.txt`, and honors `CARGO_TARGET_DIR`.
+whose workspace manifests, toolchain file and topic directory carry no modified
+or untracked files. The script clears `RUSTUP_TOOLCHAIN` and requires the active
+rustc to match the pinned channel, clears Cargo rustflags, profile and target
+environment overrides, records the effective rustc invocation in `build.txt`, and
+honors `CARGO_TARGET_DIR`.
 It selects eight available physical cores on one socket and runs both variants
 inside the same CPU mask. Threads can migrate within that mask. Other host work,
 frequency scaling and sibling activity are uncontrolled. Rust is pinned by the
