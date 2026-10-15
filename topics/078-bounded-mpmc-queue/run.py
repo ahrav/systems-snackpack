@@ -17,6 +17,7 @@ for producers, capacity in [(1, 4), (1, 1024), (4, 4), (4, 1024)]:
             row = json.loads(subprocess.check_output(command, text=True, timeout=120))
             expected = {"mode": mode, "capacity": capacity, "producers": producers, "consumers": producers, "per_producer": 100000, "jobs": producers * 100000, "verified": True}
             assert {key: row.get(key) for key in expected} == expected, (command, row)
+            assert type(row.get("elapsed_ns")) is int and row["elapsed_ns"] > 0, (command, row)
             row.update(block=block, warmup=block == -1)
             rows.append(row)
             partial.write_text(json.dumps({"platform": platform.platform(), "rows": rows}, indent=2) + "\n")

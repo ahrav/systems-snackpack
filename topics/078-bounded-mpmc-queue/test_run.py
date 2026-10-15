@@ -24,15 +24,15 @@ if counter:
         sys.exit(3)
 consumers = {consumers}
 print(json.dumps(dict(mode=mode, capacity=int(capacity), producers=int(producers), consumers=consumers,
-      per_producer=int(per_producer), jobs=int(producers) * int(per_producer), elapsed_ns=1000,
+      per_producer=int(per_producer), jobs=int(producers) * int(per_producer), elapsed_ns={elapsed_ns},
       outer_retries=0, verified=True)))
 """
 
 
-def fake_binary(directory, consumers="int(consumers)"):
-    """A stand-in for src/main.rs that echoes one row; `consumers` is a Python expression."""
+def fake_binary(directory, consumers="int(consumers)", elapsed_ns="1000"):
+    """A stand-in for src/main.rs that echoes one row; `consumers` and `elapsed_ns` are Python expressions."""
     path = pathlib.Path(directory) / "fake-queue"
-    path.write_text(FAKE.format(python=sys.executable, consumers=consumers))
+    path.write_text(FAKE.format(python=sys.executable, consumers=consumers, elapsed_ns=elapsed_ns))
     path.chmod(0o755)
     return path
 
@@ -51,6 +51,13 @@ class Runner(unittest.TestCase):
             proc = run_py(fake_binary(tmp, consumers="1"), destination)
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
             self.assertFalse(destination.exists(), "a row whose echoed consumers differ from the request must not be published")
+
+    def test_nonpositive_elapsed_time_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = pathlib.Path(tmp) / "results.json"
+            proc = run_py(fake_binary(tmp, elapsed_ns="-1000"), destination)
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertFalse(destination.exists(), "a row with a negative elapsed time must not be published")
 
     def test_failed_campaign_leaves_no_results_json(self):
         with tempfile.TemporaryDirectory() as tmp:
