@@ -25,16 +25,17 @@ writes = {writes}
 seconds = {seconds}
 fallback = {fallback}
 min_reader_reads = {min_reader_reads}
+odd = {odd}
 print(json.dumps(dict(mode=mode, workload=workload, readers=int(readers), seconds=seconds,
-      reads=reads, odd=0, changed=0, fallback=fallback, min_reader_reads=min_reader_reads,
+      reads=reads, odd=odd, changed=0, fallback=fallback, min_reader_reads=min_reader_reads,
       writes=writes, skipped_slots=0)))
 """
 
 
-def fake_binary(directory, mode="mode", reads="4000", writes='0 if workload == "none" else 10', seconds="int(milliseconds) / 1000", fallback="0", min_reader_reads="reads // 4"):
+def fake_binary(directory, mode="mode", reads="4000", writes='0 if workload == "none" else 10', seconds="int(milliseconds) / 1000", fallback="0", min_reader_reads="reads // 4", odd="0"):
     """A stand-in for src/main.rs that echoes one row; the keyword arguments are Python expressions evaluated in the stand-in."""
     path = pathlib.Path(directory) / "fake-sequence-locks"
-    path.write_text(FAKE.format(python=sys.executable, mode=mode, reads=reads, writes=writes, seconds=seconds, fallback=fallback, min_reader_reads=min_reader_reads))
+    path.write_text(FAKE.format(python=sys.executable, mode=mode, reads=reads, writes=writes, seconds=seconds, fallback=fallback, min_reader_reads=min_reader_reads, odd=odd))
     path.chmod(0o755)
     return path
 
@@ -101,6 +102,20 @@ class Runner(unittest.TestCase):
             proc = run_py(fake_binary(tmp, min_reader_reads="reads // 4 + 1"), destination)
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
             self.assertFalse(destination.exists(), "a per-reader minimum above reads / 4 must not be published")
+
+    def test_retries_in_the_no_writer_workload_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = pathlib.Path(tmp) / "results.json"
+            proc = run_py(fake_binary(tmp, odd='3 if workload == "none" and mode == "seq" else 0'), destination)
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertFalse(destination.exists(), "a `none` row reporting retries must not be published")
+
+    def test_fallback_rows_above_eight_failures_per_read_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = pathlib.Path(tmp) / "results.json"
+            proc = run_py(fake_binary(tmp, odd='9 * reads if mode == "fallback" else 0'), destination)
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertFalse(destination.exists(), "a `fallback` row with more than eight failures per read must not be published")
 
     def test_counters_impossible_for_the_mode_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:

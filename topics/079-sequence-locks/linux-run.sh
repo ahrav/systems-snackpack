@@ -18,7 +18,8 @@ for name in $(compgen -v | grep '^CARGO_PROFILE_' || true); do unset "$name"; do
 export RUSTFLAGS=""
 CARGO_TARGET_DIR=$(realpath -m -- "${CARGO_TARGET_DIR:-../../target}")
 export CARGO_TARGET_DIR
-binary="$CARGO_TARGET_DIR/release/sequence-locks"
+target=$(rustc -vV | sed -n 's/^host: //p')
+binary="$CARGO_TARGET_DIR/$target/release/sequence-locks"
 mkdir -p "$output"
 {
   printf 'source_commit=%s\n' "$source_commit"
@@ -36,8 +37,9 @@ mkdir -p "$output"
 } > "$output"/host.txt
 python3 model.py > "$output"/model.txt
 cargo test --locked -p sequence-locks > "$output"/tests.txt 2>&1
+python3 -m unittest test_run.py >> "$output"/tests.txt 2>&1
 cargo clippy --locked -p sequence-locks --all-targets -- -D warnings > "$output"/clippy.txt 2>&1
-cargo build --locked --release --verbose -p sequence-locks > "$output"/build.txt 2>&1
+cargo build --locked --release --verbose --target "$target" -p sequence-locks > "$output"/build.txt 2>&1
 cpus=$(python3 select_cpus.py)
 printf '\nselected CPU set: %s\n' "$cpus" >> "$output"/host.txt
 sha256sum "$binary" > "$output"/binary.sha256

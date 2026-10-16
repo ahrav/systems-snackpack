@@ -24,6 +24,7 @@ From the repository root, with Rust 1.93.1 and Python 3.9 or newer:
 ```sh
 cargo test --locked -p sequence-locks
 python3 topics/079-sequence-locks/model.py
+python3 -m unittest topics/079-sequence-locks/test_run.py
 cargo run --locked --release -p sequence-locks -- fallback held 4 300
 python3 topics/079-sequence-locks/run.py --binary target/release/sequence-locks --out results.json
 bash topics/079-sequence-locks/linux-run.sh [output-directory]
@@ -42,8 +43,9 @@ Every measured read checks the pair; every process checks its final state.
 Four readers and one potential writer share a two-u64 record. Each process runs
 for a nominal 300 ms, with one synchronized start. The start is stamped after
 every worker exists, before the barrier that releases them; the release ramp
-from that stamp to the last running worker is part of elapsed time (on the x86
-host, median 30 us and worst 4.6 ms over 2,000 trials, under 1.6% of the window).
+from that stamp to the last running worker is part of elapsed time (on an
+AArch64 development host, median 30 us and worst 4.6 ms over 2,000 trials,
+under 1.6% of the window).
 Elapsed time also includes the final in-flight operations and thread joins; one
 operation begun before the boundary may finish afterward. A thread spawn refused
 by the OS after earlier workers reached the start barrier stalls the process;
