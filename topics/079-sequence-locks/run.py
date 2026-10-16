@@ -27,10 +27,14 @@ def main():
         command = prefix + [str(pathlib.Path(args.binary).resolve()), mode, workload, '4', str(args.milliseconds)]
         row = json.loads(subprocess.check_output(command, text=True, timeout=20))
         expected = {'mode': mode, 'workload': workload, 'readers': 4}
+        zero = {'seq': ['fallback'], 'fallback': [], 'rw': ['odd', 'changed', 'fallback']}[mode]
+        if workload in ('none', 'hot'):
+            zero = zero + ['skipped_slots']
         if ({key: row.get(key) for key in expected} != expected
                 or any(type(row.get(key)) is not int or row[key] < 0 for key in counts)
                 or type(row.get('seconds')) not in (int, float) or not math.isfinite(row['seconds']) or row['seconds'] <= 0
-                or row['reads'] <= 0 or row['min_reader_reads'] <= 0
+                or row['reads'] <= 0 or row['min_reader_reads'] <= 0 or row['fallback'] > row['reads']
+                or any(row[key] != 0 for key in zero)
                 or (row['writes'] > 0) != (workload != 'none')):
             raise SystemExit('row does not match its command: %s -> %s' % (command, row))
         row.update(block=block, warmup=warmup, command=command)

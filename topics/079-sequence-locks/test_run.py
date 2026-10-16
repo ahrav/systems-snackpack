@@ -23,16 +23,17 @@ mode = {mode}
 reads = {reads}
 writes = {writes}
 seconds = {seconds}
+fallback = {fallback}
 print(json.dumps(dict(mode=mode, workload=workload, readers=int(readers), seconds=seconds,
-      reads=reads, odd=0, changed=0, fallback=0, min_reader_reads=reads // 4,
+      reads=reads, odd=0, changed=0, fallback=fallback, min_reader_reads=reads // 4,
       writes=writes, skipped_slots=0)))
 """
 
 
-def fake_binary(directory, mode="mode", reads="4000", writes='0 if workload == "none" else 10', seconds="int(milliseconds) / 1000"):
-    """A stand-in for src/main.rs that echoes one row; `mode`, `reads`, `writes` and `seconds` are Python expressions."""
+def fake_binary(directory, mode="mode", reads="4000", writes='0 if workload == "none" else 10', seconds="int(milliseconds) / 1000", fallback="0"):
+    """A stand-in for src/main.rs that echoes one row; `mode`, `reads`, `writes`, `seconds` and `fallback` are Python expressions."""
     path = pathlib.Path(directory) / "fake-sequence-locks"
-    path.write_text(FAKE.format(python=sys.executable, mode=mode, reads=reads, writes=writes, seconds=seconds))
+    path.write_text(FAKE.format(python=sys.executable, mode=mode, reads=reads, writes=writes, seconds=seconds, fallback=fallback))
     path.chmod(0o755)
     return path
 
@@ -85,6 +86,13 @@ class Runner(unittest.TestCase):
             self.assertFalse(destination.exists(), "an interrupted campaign must not leave results.json")
             partial = json.loads(pathlib.Path(str(destination) + ".partial").read_text())
             self.assertEqual(len(partial), 10)
+
+    def test_counters_impossible_for_the_mode_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = pathlib.Path(tmp) / "results.json"
+            proc = run_py(fake_binary(tmp, fallback="5"), destination)
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertFalse(destination.exists(), "a `seq` row reporting fallback acquisitions must not be published")
 
     def test_existing_results_file_is_rejected_before_any_run(self):
         with tempfile.TemporaryDirectory() as tmp:
