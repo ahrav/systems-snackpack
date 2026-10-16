@@ -28,7 +28,7 @@ def main():
                 or any(type(row.get(key)) is not int or row[key] < 0 for key in counts)
                 or type(row.get('seconds')) not in (int, float) or row['seconds'] <= 0
                 or row['reads'] <= 0 or row['min_reader_reads'] <= 0
-                or (row['writes'] <= 0 and workload != 'none')):
+                or (row['writes'] > 0) != (workload != 'none')):
             raise SystemExit('row does not match its command: %s -> %s' % (command, row))
         row.update(block=block, warmup=warmup, command=command)
         rows.append(row)
