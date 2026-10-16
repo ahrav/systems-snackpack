@@ -32,8 +32,10 @@ def main():
             zero = zero + ['skipped_slots']
         if ({key: row.get(key) for key in expected} != expected
                 or any(type(row.get(key)) is not int or row[key] < 0 for key in counts)
-                or type(row.get('seconds')) not in (int, float) or not math.isfinite(row['seconds']) or row['seconds'] <= 0
-                or row['reads'] <= 0 or row['min_reader_reads'] <= 0 or row['fallback'] > row['reads']
+                or type(row.get('seconds')) not in (int, float) or not math.isfinite(row['seconds'])
+                or row['seconds'] < args.milliseconds / 1000
+                or row['reads'] <= 0 or row['min_reader_reads'] <= 0 or row['min_reader_reads'] * 4 > row['reads']
+                or row['fallback'] > row['reads']
                 or any(row[key] != 0 for key in zero)
                 or (row['writes'] > 0) != (workload != 'none')):
             raise SystemExit('row does not match its command: %s -> %s' % (command, row))

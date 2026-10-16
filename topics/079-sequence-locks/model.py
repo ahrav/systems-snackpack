@@ -42,7 +42,8 @@ def schedules(writes):
 
 def main():
     rows = [row for n in range(1, 5) for row in schedules(n)]
-    assert all(check(row) for row in rows)
+    if not all(check(row) for row in rows):
+        raise SystemExit('FAIL: an SC schedule passes validation with an inconsistent pair')
     for name, kwargs in [('missing parity', {'parity': False}), ('missing validation', {'validate': False})]:
         witness = next(row for row in rows if not check(row, **kwargs))
         print(name + ' counterexample: ' + witness)
@@ -50,13 +51,15 @@ def main():
     # y after, and see the same even generation across both updates.
     seq_before, read_x = 0, 0
     seq_after, read_y = (seq_before + 4) % 4, 4
-    assert seq_before == seq_after and read_y != read_x * 2
+    if not (seq_before == seq_after and read_y != read_x * 2):
+        raise SystemExit('FAIL: the wraparound counterexample did not reproduce')
     # Two concurrent begins can make an even value while writers are active.
     seq, x, y = 0, 0, 0
     seq += 1  # writer A begins
     seq += 1  # writer B begins without serialization
     x = 1     # A has updated only x
-    assert seq % 2 == 0 and y != x * 2
+    if not (seq % 2 == 0 and y != x * 2):
+        raise SystemExit('FAIL: the concurrent-writer counterexample did not reproduce')
     print('PASS: %d SC schedules; parity, validation, wrap, serialization counterexamples' % len(rows))
 
 

@@ -1,5 +1,5 @@
 """run.py rejects rows that do not match their command and publishes results.json only for a complete campaign;
-linux-run.sh refuses an existing output directory and modified build inputs."""
+linux-run.sh refuses an existing output directory and modified build inputs; model.py keeps its oracle under -O."""
 import json
 import pathlib
 import subprocess
@@ -24,16 +24,17 @@ reads = {reads}
 writes = {writes}
 seconds = {seconds}
 fallback = {fallback}
+min_reader_reads = {min_reader_reads}
 print(json.dumps(dict(mode=mode, workload=workload, readers=int(readers), seconds=seconds,
-      reads=reads, odd=0, changed=0, fallback=fallback, min_reader_reads=reads // 4,
+      reads=reads, odd=0, changed=0, fallback=fallback, min_reader_reads=min_reader_reads,
       writes=writes, skipped_slots=0)))
 """
 
 
-def fake_binary(directory, mode="mode", reads="4000", writes='0 if workload == "none" else 10', seconds="int(milliseconds) / 1000", fallback="0"):
-    """A stand-in for src/main.rs that echoes one row; `mode`, `reads`, `writes`, `seconds` and `fallback` are Python expressions."""
+def fake_binary(directory, mode="mode", reads="4000", writes='0 if workload == "none" else 10', seconds="int(milliseconds) / 1000", fallback="0", min_reader_reads="reads // 4"):
+    """A stand-in for src/main.rs that echoes one row; the keyword arguments are Python expressions evaluated in the stand-in."""
     path = pathlib.Path(directory) / "fake-sequence-locks"
-    path.write_text(FAKE.format(python=sys.executable, mode=mode, reads=reads, writes=writes, seconds=seconds, fallback=fallback))
+    path.write_text(FAKE.format(python=sys.executable, mode=mode, reads=reads, writes=writes, seconds=seconds, fallback=fallback, min_reader_reads=min_reader_reads))
     path.chmod(0o755)
     return path
 
@@ -87,6 +88,20 @@ class Runner(unittest.TestCase):
             partial = json.loads(pathlib.Path(str(destination) + ".partial").read_text())
             self.assertEqual(len(partial), 10)
 
+    def test_seconds_below_the_requested_window_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = pathlib.Path(tmp) / "results.json"
+            proc = run_py(fake_binary(tmp, seconds="int(milliseconds) / 1000 / 2"), destination)
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertFalse(destination.exists(), "a row shorter than its requested window must not be published")
+
+    def test_per_reader_minimum_above_the_mean_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = pathlib.Path(tmp) / "results.json"
+            proc = run_py(fake_binary(tmp, min_reader_reads="reads // 4 + 1"), destination)
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertFalse(destination.exists(), "a per-reader minimum above reads / 4 must not be published")
+
     def test_counters_impossible_for_the_mode_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             destination = pathlib.Path(tmp) / "results.json"
@@ -114,6 +129,17 @@ class Runner(unittest.TestCase):
             self.assertFalse(pathlib.Path(str(destination) + ".partial").exists())
             self.assertEqual(len(proc.stdout.splitlines()), 12)
             self.assertTrue(all("skipped slots 0-0" in line for line in proc.stdout.splitlines()), proc.stdout)
+
+
+class Model(unittest.TestCase):
+    def test_oracle_failure_is_reported_under_optimized_python(self):
+        """A `check` that rejects every schedule must fail the script even when -O strips assert."""
+        proc = subprocess.run(
+            [sys.executable, "-O", "-c", "import model; model.check = lambda *a, **k: False; model.main()"],
+            cwd=ROOT, text=True, capture_output=True, timeout=300, check=False,
+        )
+        self.assertNotEqual(proc.returncode, 0, proc.stdout)
+        self.assertNotIn("PASS", proc.stdout)
 
 
 class Replay(unittest.TestCase):

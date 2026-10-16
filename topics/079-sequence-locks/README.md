@@ -59,7 +59,10 @@ invariant checks and instrumentation.
 | `hot` | Continuous closed-loop updates |
 
 Paced writers skip missed slots instead of issuing catch-up bursts. Report
-achieved write rate and skipped slots alongside read throughput. The hot case
+achieved write rate and skipped slots alongside read throughput. `skipped_slots`
+counts slots missed before a later write; slots between the last write and the
+deadline are unattempted and uncounted, so writes plus skipped slots is at most
+the nominal slot count. The hot case
 is a joint reader/writer workload; different completed-write counts prevent an
 equal-update-rate claim. The held case models a prolonged update, not an actual
 scheduler preemption experiment. Spinning consumes CPU; no CPU-efficiency or
