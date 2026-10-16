@@ -1,0 +1,12 @@
+none  seq      reads M/s median 115.834 [108.194, 115.858]; failures/read 0.000; fallback 0.000%; writes/s 0
+none  fallback reads M/s median 112.920 [100.672, 113.959]; failures/read 0.000; fallback 0.000%; writes/s 0
+none  rw       reads M/s median 16.326 [13.288, 20.306]; failures/read 0.000; fallback 0.000%; writes/s 0
+paced seq      reads M/s median 110.401 [100.097, 115.189]; failures/read 0.001; fallback 0.000%; writes/s 9997
+paced fallback reads M/s median 112.219 [112.129, 113.654]; failures/read 0.001; fallback 0.003%; writes/s 9997
+paced rw       reads M/s median 15.484 [11.828, 19.522]; failures/read 0.000; fallback 0.000%; writes/s 9997
+held  seq      reads M/s median 91.792 [90.722, 92.725]; failures/read 0.490; fallback 0.000%; writes/s 8512
+held  fallback reads M/s median 80.641 [79.981, 81.976]; failures/read 0.004; fallback 0.050%; writes/s 9998
+held  rw       reads M/s median 11.751 [10.147, 13.026]; failures/read 0.000; fallback 0.000%; writes/s 9998
+hot   seq      reads M/s median 20.791 [13.180, 34.416]; failures/read 1.025; fallback 0.000%; writes/s 2241974
+hot   fallback reads M/s median 18.195 [11.188, 21.624]; failures/read 1.136; fallback 2.898%; writes/s 1975086
+hot   rw       reads M/s median 7.255 [6.230, 12.016]; failures/read 0.000; fallback 0.000%; writes/s 1202488

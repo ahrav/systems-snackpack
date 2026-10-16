@@ -1,0 +1,2 @@
+    Checking sequence-locks v0.1.0 (/tmp/topic079-20261016-arm/topics/079-sequence-locks)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.28s

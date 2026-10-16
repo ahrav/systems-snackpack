@@ -1,0 +1,28 @@
+   Compiling sequence-locks v0.1.0 (/tmp/topic079-20261016-xxl/topics/079-sequence-locks)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.93s
+     Running unittests src/lib.rs (/tmp/topic079-20261016-xxl/target/debug/deps/sequence_locks-92e31279033065f9)
+
+running 6 tests
+test tests::odd_generation_is_rejected ... ok
+test tests::overflow_leaves_previous_snapshot_readable ... ok
+test tests::zero_budget_uses_lock ... ok
+test tests::fallback_waits_for_same_writer_mutex ... ok
+test tests::concurrent_writers_preserve_invariant ... ok
+test tests::sequential_matches_independent_pair_oracle ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/main.rs (/tmp/topic079-20261016-xxl/target/debug/deps/sequence_locks-cb95325cb6abf44c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests sequence_locks
+
+running 1 test
+test topics/079-sequence-locks/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.18s; merged doctests compilation took 0.18s

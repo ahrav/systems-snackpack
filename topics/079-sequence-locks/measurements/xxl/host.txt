@@ -1,0 +1,253 @@
+2026-10-16T13:37:47Z
+dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+Linux dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com 6.12.111-136.204.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Oct  6 18:01:06 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           46 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  192
+On-line CPU(s) list:                     0-191
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Xeon(R) Platinum 8488C
+CPU family:                              6
+Model:                                   143
+Thread(s) per core:                      2
+Core(s) per socket:                      48
+Socket(s):                               2
+Stepping:                                8
+BogoMIPS:                                4800.00
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd ida arat avx512vbmi umip pku ospke waitpkg avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg tme avx512_vpopcntdq rdpid cldemote movdiri movdir64b md_clear serialize amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities
+Hypervisor vendor:                       KVM
+Virtualization type:                     full
+L1d cache:                               4.5 MiB (96 instances)
+L1i cache:                               3 MiB (96 instances)
+L2 cache:                                192 MiB (96 instances)
+L3 cache:                                210 MiB (2 instances)
+NUMA node(s):                            2
+NUMA node0 CPU(s):                       0-47,96-143
+NUMA node1 CPU(s):                       48-95,144-191
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+binary: rustc
+commit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf
+commit-date: 2026-02-11
+host: x86_64-unknown-linux-gnu
+release: 1.93.1
+LLVM version: 21.1.8
+cargo 1.93.1 (083ac5135 2025-12-15)
+Python 3.9.25
+allowed CPUs: pid 1769915's current affinity list: 0-191
+# The following is the parsable format, which can be fed to other
+# programs. Each different item in every column has an unique ID
+# starting usually from zero.
+# CPU,Core,Socket
+0,0,0
+1,1,0
+2,2,0
+3,3,0
+4,4,0
+5,5,0
+6,6,0
+7,7,0
+8,8,0
+9,9,0
+10,10,0
+11,11,0
+12,12,0
+13,13,0
+14,14,0
+15,15,0
+16,16,0
+17,17,0
+18,18,0
+19,19,0
+20,20,0
+21,21,0
+22,22,0
+23,23,0
+24,24,0
+25,25,0
+26,26,0
+27,27,0
+28,28,0
+29,29,0
+30,30,0
+31,31,0
+32,32,0
+33,33,0
+34,34,0
+35,35,0
+36,36,0
+37,37,0
+38,38,0
+39,39,0
+40,40,0
+41,41,0
+42,42,0
+43,43,0
+44,44,0
+45,45,0
+46,46,0
+47,47,0
+48,48,1
+49,49,1
+50,50,1
+51,51,1
+52,52,1
+53,53,1
+54,54,1
+55,55,1
+56,56,1
+57,57,1
+58,58,1
+59,59,1
+60,60,1
+61,61,1
+62,62,1
+63,63,1
+64,64,1
+65,65,1
+66,66,1
+67,67,1
+68,68,1
+69,69,1
+70,70,1
+71,71,1
+72,72,1
+73,73,1
+74,74,1
+75,75,1
+76,76,1
+77,77,1
+78,78,1
+79,79,1
+80,80,1
+81,81,1
+82,82,1
+83,83,1
+84,84,1
+85,85,1
+86,86,1
+87,87,1
+88,88,1
+89,89,1
+90,90,1
+91,91,1
+92,92,1
+93,93,1
+94,94,1
+95,95,1
+96,0,0
+97,1,0
+98,2,0
+99,3,0
+100,4,0
+101,5,0
+102,6,0
+103,7,0
+104,8,0
+105,9,0
+106,10,0
+107,11,0
+108,12,0
+109,13,0
+110,14,0
+111,15,0
+112,16,0
+113,17,0
+114,18,0
+115,19,0
+116,20,0
+117,21,0
+118,22,0
+119,23,0
+120,24,0
+121,25,0
+122,26,0
+123,27,0
+124,28,0
+125,29,0
+126,30,0
+127,31,0
+128,32,0
+129,33,0
+130,34,0
+131,35,0
+132,36,0
+133,37,0
+134,38,0
+135,39,0
+136,40,0
+137,41,0
+138,42,0
+139,43,0
+140,44,0
+141,45,0
+142,46,0
+143,47,0
+144,48,1
+145,49,1
+146,50,1
+147,51,1
+148,52,1
+149,53,1
+150,54,1
+151,55,1
+152,56,1
+153,57,1
+154,58,1
+155,59,1
+156,60,1
+157,61,1
+158,62,1
+159,63,1
+160,64,1
+161,65,1
+162,66,1
+163,67,1
+164,68,1
+165,69,1
+166,70,1
+167,71,1
+168,72,1
+169,73,1
+170,74,1
+171,75,1
+172,76,1
+173,77,1
+174,78,1
+175,79,1
+176,80,1
+177,81,1
+178,82,1
+179,83,1
+180,84,1
+181,85,1
+182,86,1
+183,87,1
+184,88,1
+185,89,1
+186,90,1
+187,91,1
+188,92,1
+189,93,1
+190,94,1
+191,95,1
+
+selected CPU set: 0,1,2,3,4
