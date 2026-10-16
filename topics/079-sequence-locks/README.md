@@ -44,10 +44,12 @@ for a nominal 300 ms, with one synchronized start. The start is stamped after
 every worker exists, before the barrier that releases them; the release ramp
 from that stamp to the last running worker is part of elapsed time (on the x86
 host, median 30 us and worst 4.6 ms over 2,000 trials, under 1.6% of the window).
-Elapsed time also includes the
-final in-flight operations and thread joins; one operation begun before the
-boundary may finish afterward. Each operation checks the clock. Counts and
-checksums are thread-local. Timings include invariant checks and instrumentation.
+Elapsed time also includes the final in-flight operations and thread joins; one
+operation begun before the boundary may finish afterward. A thread spawn refused
+by the OS after earlier workers reached the start barrier stalls the process;
+`run.py` kills any process after 20 s and fails the campaign. Each operation
+checks the clock. Counts and checksums are thread-local. Timings include
+invariant checks and instrumentation.
 
 | Workload | Writer policy |
 |---|---|

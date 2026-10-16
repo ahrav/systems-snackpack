@@ -86,6 +86,15 @@ class Runner(unittest.TestCase):
             partial = json.loads(pathlib.Path(str(destination) + ".partial").read_text())
             self.assertEqual(len(partial), 10)
 
+    def test_existing_results_file_is_rejected_before_any_run(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = pathlib.Path(tmp) / "results.json"
+            destination.write_text("stale\n")
+            proc = run_py(fake_binary(tmp), destination)
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertEqual(destination.read_text(), "stale\n")
+            self.assertFalse(pathlib.Path(str(destination) + ".partial").exists(), "nothing runs while a results file occupies --out")
+
     def test_complete_campaign_publishes_results(self):
         with tempfile.TemporaryDirectory() as tmp:
             destination = pathlib.Path(tmp) / "results.json"

@@ -15,6 +15,8 @@ def main():
     p.add_argument('--milliseconds', type=int, default=300)
     p.add_argument('--cpus', default='')
     args = p.parse_args()
+    if pathlib.Path(args.out).exists():
+        raise SystemExit('results file already exists: %s' % args.out)
     modes = ['seq', 'fallback', 'rw']
     workloads = ['none', 'paced', 'held', 'hot']
     prefix = ['taskset', '-c', args.cpus] if args.cpus else []
