@@ -13,6 +13,13 @@ if [ -n "$dirty" ]; then
   printf 'build inputs differ from %s:\n%s\n' "$source_commit" "$dirty" >&2
   exit 2
 fi
+unset RUSTUP_TOOLCHAIN
+pinned=$(sed -n 's/^channel *= *"\(.*\)"/\1/p' ../../rust-toolchain.toml)
+active=$(rustc --version | awk '{print $2}')
+if [ "$active" != "$pinned" ]; then
+  printf 'active rustc %s differs from pinned channel %s\n' "$active" "$pinned" >&2
+  exit 2
+fi
 unset CARGO_ENCODED_RUSTFLAGS CARGO_BUILD_RUSTFLAGS CARGO_BUILD_TARGET
 for name in $(compgen -v | grep '^CARGO_PROFILE_' || true); do unset "$name"; done
 export RUSTFLAGS=""
