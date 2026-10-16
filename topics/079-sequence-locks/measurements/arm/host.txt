@@ -1,0 +1,119 @@
+2026-10-16T13:37:47Z
+dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.110-135.202.amzn2023.aarch64 #1 SMP Fri Sep 25 01:46:28 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+Architecture:                            aarch64
+CPU op-mode(s):                          32-bit, 64-bit
+Byte Order:                              Little Endian
+CPU(s):                                  64
+On-line CPU(s) list:                     0-63
+Vendor ID:                               ARM
+Model:                                   1
+Thread(s) per core:                      1
+Core(s) per socket:                      64
+Socket(s):                               1
+Stepping:                                r1p1
+BogoMIPS:                                2100.00
+Flags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng
+L1d cache:                               4 MiB (64 instances)
+L1i cache:                               4 MiB (64 instances)
+L2 cache:                                64 MiB (64 instances)
+L3 cache:                                32 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-63
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; CSV2, BHB
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+binary: rustc
+commit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf
+commit-date: 2026-02-11
+host: aarch64-unknown-linux-gnu
+release: 1.93.1
+LLVM version: 21.1.8
+cargo 1.93.1 (083ac5135 2025-12-15)
+Python 3.9.25
+allowed CPUs: pid 2574877's current affinity list: 0-63
+# The following is the parsable format, which can be fed to other
+# programs. Each different item in every column has an unique ID
+# starting usually from zero.
+# CPU,Core,Socket
+0,0,0
+1,1,0
+2,2,0
+3,3,0
+4,4,0
+5,5,0
+6,6,0
+7,7,0
+8,8,0
+9,9,0
+10,10,0
+11,11,0
+12,12,0
+13,13,0
+14,14,0
+15,15,0
+16,16,0
+17,17,0
+18,18,0
+19,19,0
+20,20,0
+21,21,0
+22,22,0
+23,23,0
+24,24,0
+25,25,0
+26,26,0
+27,27,0
+28,28,0
+29,29,0
+30,30,0
+31,31,0
+32,32,0
+33,33,0
+34,34,0
+35,35,0
+36,36,0
+37,37,0
+38,38,0
+39,39,0
+40,40,0
+41,41,0
+42,42,0
+43,43,0
+44,44,0
+45,45,0
+46,46,0
+47,47,0
+48,48,0
+49,49,0
+50,50,0
+51,51,0
+52,52,0
+53,53,0
+54,54,0
+55,55,0
+56,56,0
+57,57,0
+58,58,0
+59,59,0
+60,60,0
+61,61,0
+62,62,0
+63,63,0
+
+selected CPU set: 0,1,2,3,4

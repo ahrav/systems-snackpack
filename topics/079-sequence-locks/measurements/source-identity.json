@@ -1,0 +1,15 @@
+{
+  "source_commit": "d52d5d744d75de976c2ceeed4aef522be5f4003a",
+  "archive_sha256": "0bcac688fdc125202ac8ac8a0e47f9f99929b78391c7ceddce4baa41564d580c",
+  "files": {
+    "topics/079-sequence-locks/Cargo.toml": "73737d77172b678da7cbf788be2cf7f810455fdf175bd7f2758ca1b7afcd7aa9",
+    "topics/079-sequence-locks/README.md": "0ce3d5a2027b5e1ec2c219b0371dbb0c922c6eed533da33e5a30816be3706690",
+    "topics/079-sequence-locks/linux-run.sh": "680f402ba885a0c245e7544d09df2537575d586565a6c2c0811c8d96d65cfb1a",
+    "topics/079-sequence-locks/model.py": "2978a3980f1a99905b465433ff7b3c09e55bfea3b40db8876d8f065f0e190ded",
+    "topics/079-sequence-locks/run.py": "2df86775ba82e69afcd2709a32c4112fc7a294328ce13e7a8f372bfd797a0d8d",
+    "topics/079-sequence-locks/select_cpus.py": "2c145d3bd91a141b38b13915d060c260484ec89754a0b362f7644edd58ee9b20",
+    "topics/079-sequence-locks/sources.md": "b121f91dc27d137e0fc5aafd44c253c9d0e769ac0b2d7555106d53b8710979e4",
+    "topics/079-sequence-locks/src/lib.rs": "a6a5a0b1bae0182dd920684309ee15d16d588eb4f9ceca54226ff03b5d0b08b9",
+    "topics/079-sequence-locks/src/main.rs": "68a937b6e5b0cd22e55f8de88eca7bc539ec6f466a6ab4a43073b01e1281d058"
+  }
+}

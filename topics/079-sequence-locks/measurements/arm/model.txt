@@ -1,0 +1,3 @@
+missing parity counterexample: WRRWWRRW
+missing validation counterexample: RRWWWRRW
+PASS: 7230 SC schedules; parity, validation, wrap, serialization counterexamples
