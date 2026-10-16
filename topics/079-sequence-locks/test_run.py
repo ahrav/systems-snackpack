@@ -1,4 +1,5 @@
-"""run.py rejects rows that do not match their command and publishes results.json only for a complete campaign."""
+"""run.py rejects rows that do not match their command and publishes results.json only for a complete campaign;
+linux-run.sh refuses an existing output directory and modified build inputs."""
 import json
 import pathlib
 import subprocess
@@ -7,6 +8,7 @@ import tempfile
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parent
+REPO = ROOT.parents[1]
 
 FAKE = """#!{python}
 import json, os, sys
@@ -20,16 +22,17 @@ if counter:
 mode = {mode}
 reads = {reads}
 writes = {writes}
-print(json.dumps(dict(mode=mode, workload=workload, readers=int(readers), seconds=int(milliseconds) / 1000,
+seconds = {seconds}
+print(json.dumps(dict(mode=mode, workload=workload, readers=int(readers), seconds=seconds,
       reads=reads, odd=0, changed=0, fallback=0, min_reader_reads=reads // 4,
       writes=writes, skipped_slots=0)))
 """
 
 
-def fake_binary(directory, mode="mode", reads="4000", writes='0 if workload == "none" else 10'):
-    """A stand-in for src/main.rs that echoes one row; `mode`, `reads` and `writes` are Python expressions."""
+def fake_binary(directory, mode="mode", reads="4000", writes='0 if workload == "none" else 10', seconds="int(milliseconds) / 1000"):
+    """A stand-in for src/main.rs that echoes one row; `mode`, `reads`, `writes` and `seconds` are Python expressions."""
     path = pathlib.Path(directory) / "fake-sequence-locks"
-    path.write_text(FAKE.format(python=sys.executable, mode=mode, reads=reads, writes=writes))
+    path.write_text(FAKE.format(python=sys.executable, mode=mode, reads=reads, writes=writes, seconds=seconds))
     path.chmod(0o755)
     return path
 
@@ -65,6 +68,13 @@ class Runner(unittest.TestCase):
             self.assertNotEqual(proc.returncode, 0, proc.stdout)
             self.assertFalse(destination.exists(), "a `none` row reporting writes must not be published")
 
+    def test_nonfinite_seconds_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = pathlib.Path(tmp) / "results.json"
+            proc = run_py(fake_binary(tmp, seconds='float("nan")'), destination)
+            self.assertNotEqual(proc.returncode, 0, proc.stdout)
+            self.assertFalse(destination.exists(), "a row with NaN seconds must not be published")
+
     def test_failed_campaign_leaves_no_results_json(self):
         with tempfile.TemporaryDirectory() as tmp:
             destination = pathlib.Path(tmp) / "results.json"
@@ -86,6 +96,39 @@ class Runner(unittest.TestCase):
             self.assertEqual(sum(1 for r in results if r["warmup"]), 12)
             self.assertFalse(pathlib.Path(str(destination) + ".partial").exists())
             self.assertEqual(len(proc.stdout.splitlines()), 12)
+            self.assertTrue(all("skipped slots 0-0" in line for line in proc.stdout.splitlines()), proc.stdout)
+
+
+class Replay(unittest.TestCase):
+    def linux_run(self, script, output):
+        return subprocess.run(
+            ["bash", str(script), str(output)],
+            cwd=REPO, text=True, capture_output=True, timeout=60, check=False,
+        )
+
+    def test_existing_output_directory_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = pathlib.Path(tmp) / "campaign"
+            output.mkdir()
+            stale = output / "results.json"
+            stale.write_text("stale\n")
+            proc = self.linux_run(ROOT / "linux-run.sh", output)
+            self.assertEqual(proc.returncode, 2, proc.stderr)
+            self.assertEqual(stale.read_text(), "stale\n")
+            self.assertFalse((output / "host.txt").exists())
+
+    def test_modified_build_inputs_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            clone = pathlib.Path(tmp) / "clone"
+            subprocess.run(["git", "clone", "--quiet", "--shared", str(REPO), str(clone)], check=True, timeout=120)
+            topic = clone / "topics" / "079-sequence-locks"
+            (topic / "linux-run.sh").write_text((ROOT / "linux-run.sh").read_text())  # the script under test, in a clone it may dirty
+            (topic / "build.rs").write_text("fn main() {}\n")
+            output = pathlib.Path(tmp) / "campaign"
+            proc = self.linux_run(topic / "linux-run.sh", output)
+            self.assertEqual(proc.returncode, 2, proc.stderr)
+            self.assertIn("build.rs", proc.stderr)
+            self.assertFalse(output.exists(), "nothing is written before the build inputs are verified")
 
 
 if __name__ == "__main__":

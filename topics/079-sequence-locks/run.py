@@ -2,6 +2,7 @@
 import argparse
 import itertools
 import json
+import math
 import pathlib
 import statistics
 import subprocess
@@ -26,7 +27,7 @@ def main():
         expected = {'mode': mode, 'workload': workload, 'readers': 4}
         if ({key: row.get(key) for key in expected} != expected
                 or any(type(row.get(key)) is not int or row[key] < 0 for key in counts)
-                or type(row.get('seconds')) not in (int, float) or row['seconds'] <= 0
+                or type(row.get('seconds')) not in (int, float) or not math.isfinite(row['seconds']) or row['seconds'] <= 0
                 or row['reads'] <= 0 or row['min_reader_reads'] <= 0
                 or (row['writes'] > 0) != (workload != 'none')):
             raise SystemExit('row does not match its command: %s -> %s' % (command, row))
@@ -44,7 +45,8 @@ def main():
             retries = [(r['odd'] + r['changed']) / r['reads'] for r in group]
             writes = [r['writes'] / r['seconds'] for r in group]
             fallback = [r['fallback'] / r['reads'] * 100 for r in group]
-            print('%-5s %-8s reads M/s median %.3f [%.3f, %.3f]; failures/read %.3f; fallback %.3f%%; writes/s %.0f' % (workload, mode, statistics.median(rates), min(rates), max(rates), statistics.median(retries), statistics.median(fallback), statistics.median(writes)))
+            skipped = [r['skipped_slots'] for r in group]
+            print('%-5s %-8s reads M/s median %.3f [%.3f, %.3f]; failures/read %.3f; fallback %.3f%%; writes/s %.0f; skipped slots %d-%d' % (workload, mode, statistics.median(rates), min(rates), max(rates), statistics.median(retries), statistics.median(fallback), statistics.median(writes), min(skipped), max(skipped)))
     partial.replace(args.out)
 
 

@@ -26,7 +26,7 @@ cargo test --locked -p sequence-locks
 python3 topics/079-sequence-locks/model.py
 cargo run --locked --release -p sequence-locks -- fallback held 4 300
 python3 topics/079-sequence-locks/run.py --binary target/release/sequence-locks --out results.json
-bash topics/079-sequence-locks/linux-run.sh
+bash topics/079-sequence-locks/linux-run.sh [output-directory]
 ```
 
 The model enumerates 7,230 sequentially consistent schedules with one reader
