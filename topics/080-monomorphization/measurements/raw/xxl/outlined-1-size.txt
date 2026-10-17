@@ -1,0 +1,43 @@
+/tmp/codex-topic080-20261017/results/outlined-1  :
+section                    size     addr
+.interp                      28      736
+.note.ABI-tag                32      764
+.note.gnu.build-id           36      796
+.dynsym                    1632      832
+.gnu.version                136     2464
+.gnu.version_r              304     2600
+.gnu.hash                    28     2904
+.dynstr                    1044     2932
+.rela.dyn                 17064     3976
+.rela.plt                    48    21040
+.rodata                   22568    21088
+.gcc_except_table         11080    43656
+.eh_frame_hdr              4476    54736
+.eh_frame                 22168    59216
+.text                    263360    85488
+.init                        27   348848
+.fini                        13   348876
+.plt                         48   348896
+.tdata                       32   353040
+.tbss                        48   353072
+.data.rel.ro               8072   353072
+.fini_array                   8   361144
+.init_array                  16   361152
+.dynamic                    464   361168
+.got                       2344   361632
+.got.plt                     40   363976
+.relro_padding              528   364016
+.tm_clone_table               0   368112
+.data                      2488   368112
+.bss                        200   370600
+.comment                    185        0
+.gnu.build.attributes       324        0
+.debug_abbrev              3740        0
+.debug_info             1061362        0
+.debug_aranges            30832        0
+.debug_ranges            449536        0
+.debug_str              1459817        0
+.debug_line              447663        0
+Total                   3811791
+
+
