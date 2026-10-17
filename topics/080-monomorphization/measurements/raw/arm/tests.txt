@@ -1,0 +1,9 @@
+
+running 4 tests
+test tests::all_byte_values_and_boundary_lengths_agree ... ok
+test tests::empty_returns_seed_including_extremes ... ok
+test tests::fixture_spans_every_byte ... ok
+test tests::zero_byte_has_known_rotation ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

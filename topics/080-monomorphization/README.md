@@ -21,6 +21,8 @@ Expected correctness output: four unit tests pass, one Cargo doctest passes,
 and the campaign reports 442 independently checked policy/input values.
 Every timed process's final checksum is also checked by the Python oracle.
 
+![Specialized bodies and a shared concrete loop](layout.svg)
+
 ## Contract and alternatives
 
 `generic<P>` begins at `P::SEED` and performs XOR, wrapping multiply, and rotate
