@@ -115,10 +115,10 @@ def main():
                     row.update(mode=mode, block=block, kind="measured")
                     rows.append(row)
     with (out / "runtime.csv").open("w", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(file, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
-    print(json.dumps({"result": "pass", "oracle_values": checked, "runtime_processes": len(rows), "fresh_builds": len(builds), "output": str(out)}))
+    print(json.dumps({"result": "pass", "oracle_values": checked, "runtime_processes": len(rows), "fresh_builds": sum(b["block"] >= 0 for b in builds), "output": str(out)}))
 
 
 if __name__ == "__main__":

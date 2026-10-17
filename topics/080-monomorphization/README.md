@@ -67,7 +67,8 @@ fixed source and workload.
   are descriptive; no population confidence interval or universal verdict.
 
 Inspect `*-nm.txt` for kernel families, `*-objdump.txt` for loop and adapter
-calls, and `*-size.txt` for the exact `.text` section. File size and the default
+calls, and `*-size.txt` for the exact `.text` section. The committed excerpts
+under `measurements/raw/` carry those as `*-symbols.txt` and `*-kernels.asm`. File size and the default
 GNU size text aggregate are different metrics. Compiler work, file bytes,
 executable code size, and elapsed runtime answer separate questions.
 
