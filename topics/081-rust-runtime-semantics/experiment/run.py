@@ -22,8 +22,11 @@ def source_hashes(out):
     """SHA-256 of every committed topic source file, keyed by topic-relative path.
 
     Generated trees (`measurements/`, `__pycache__/`, and the output directory,
-    which may sit inside the topic) are not sources.
+    which may sit inside the topic) are not sources. An output directory that
+    holds sources would hide them from the record, so it is rejected up front.
     """
+    if P.is_relative_to(out) or any(out.is_relative_to(P/d) for d in ('src', 'experiment')):
+        raise SystemExit(f'output directory {out} contains topic sources; choose one outside src/ and experiment/')
     return {str(f.relative_to(P)):hashlib.sha256(f.read_bytes()).hexdigest()
             for f in sorted(P.rglob('*')) if f.is_file() and not f.is_relative_to(out)
             and not {'measurements', '__pycache__'} & set(f.parts)}
@@ -50,6 +53,7 @@ def main():
     ap.add_argument('--no-affinity', action='store_true')
     a = ap.parse_args()
     out = a.out.resolve()
+    sources = source_hashes(out)
     out.mkdir(parents=True, exist_ok=True)
     if not a.no_affinity:
         os.sched_setaffinity(0, {a.cpu})
@@ -130,7 +134,7 @@ def main():
         affinity=sorted(os.sched_getaffinity(0)) if hasattr(os,'sched_getaffinity') else None,
         rustc=command(rust+['-Vv']).stdout,commands=commands,
         binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),
-        sources=source_hashes(out),
+        sources=sources,
         measured_processes=len(rows),warmup_processes=sum(len(v) for _,_,v in cells),
         calibration_processes=sum(len(v) for _,_,v in cells))
     if platform.system()=='Linux':

@@ -24,6 +24,12 @@ class SourceHashes(unittest.TestCase):
         self.assertIn('src/lib.rs', recorded)
         self.assertIn('experiment/run.py', recorded)
 
+    def test_output_directory_holding_sources_is_rejected(self):
+        for bad in (run.P, run.P.parent, run.P / 'src', run.P / 'experiment' / 'nested'):
+            with self.assertRaises(SystemExit, msg=str(bad)):
+                run.source_hashes(bad)
+        self.assertIn('src/lib.rs', run.source_hashes(run.P / 'out'))
+
 
 if __name__ == '__main__':
     unittest.main()
