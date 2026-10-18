@@ -19,8 +19,11 @@ def command(args, **kw):
     return subprocess.run(args, check=True, text=True, capture_output=True, **kw)
 
 def source_hashes(out):
-    """SHA-256 of every committed topic source file, keyed by topic-relative path.
+    """SHA-256 of every topic source file in the tree being built, keyed by topic-relative path.
 
+    The measurement protocol builds from a hash-verified `git archive` of the
+    commit in `measurements/source-commit.txt`; these digests let a reader check
+    the built bytes against that commit's tree.
     Generated trees (`measurements/`, `__pycache__/`, and the output directory,
     which may sit inside the topic) are not sources. An output directory that
     holds sources would hide them from the record, so it is rejected up front.
