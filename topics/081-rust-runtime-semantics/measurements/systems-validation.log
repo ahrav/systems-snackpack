@@ -1,0 +1,2597 @@
+   Compiling crossbeam-utils v0.8.23
+    Checking cpu-memory-model-atomic-lowering v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/022-cpu-memory-model-atomic-lowering)
+   Compiling topic-067-abi-ffi-performance-boundaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/067-abi-ffi-performance-boundaries)
+    Checking subtle v2.6.1
+    Checking database-index-internals v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/031-database-index-internals)
+    Checking sequence-locks v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/079-sequence-locks)
+    Checking spectre-era-performance-tradeoffs v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/043-spectre-era-performance-tradeoffs)
+    Checking advanced-benchmarking-methodology v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/015-advanced-benchmarking-methodology)
+    Checking topic-033-wal-crash-consistency v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/033-wal-crash-consistency)
+    Checking systems-snackpack-topic-009 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/009-succinct-static-index-structures)
+    Checking compiler-optimization-boundaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/016-compiler-optimization-boundaries)
+    Checking systems-snackpack-topic-012 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/012-mmap-page-faults)
+    Checking topic081-rust-runtime v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/081-rust-runtime-semantics)
+    Checking systems-snackpack-topic-004 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/004-reading-assembly-performance)
+    Checking systems-snackpack-topic-010 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/010-hashing-checksums-prng)
+    Checking systems-snackpack-topic-007 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/007-branchless-predictable-control-flow)
+    Checking systems-snackpack-topic-013 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/013-cache-aware-oblivious)
+    Checking string-matching-selection v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/034-string-matching-selection)
+    Checking systems-snackpack-topic-008 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/008-tlbs-address-translation)
+    Checking mvcc-hot-vacuum v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/032-mvcc-hot-vacuum)
+    Checking finite-state-transducers-compact-dictionaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/035-finite-state-transducers-compact-dictionaries)
+    Checking queueing-service-design v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/027-queueing-service-design)
+    Checking backpressure-overload v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/028-backpressure-overload)
+    Checking topic-021-store-write-path v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/021-store-write-path)
+    Checking zero-copy-limits v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/038-zero-copy-limits)
+    Checking compression-systems-primitive v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/037-compression-systems-primitive)
+    Checking systems-snackpack-topic-001 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/001-swar-simd-scalar)
+    Checking systems-snackpack-topic-014 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/014-cpu-dispatch-portable-optimization)
+    Checking systems-snackpack-topic-003 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/003-linux-perf-workflow)
+    Checking systems-snackpack-topic-011 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/011-cycle-accurate-measurement)
+    Checking distributed-time-ordering v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/029-distributed-time-ordering)
+    Checking systems-snackpack-topic-002 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/002-intrinsics-vs-assembly)
+    Checking iommu-dma-device-memory v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/039-iommu-dma-device-memory)
+    Checking roaring-bitmaps-compressed-sets v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/036-roaring-bitmaps-compressed-sets)
+    Checking idempotency-concurrency v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/030-idempotency-concurrency)
+    Checking systems-snackpack-topic-006 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/006-ngram-text-indexing)
+    Checking memory-level-parallelism v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/020-memory-level-parallelism)
+    Checking lock-free-reclamation-aba v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/023-lock-free-reclamation-aba)
+    Checking constant-time-systems v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/068-constant-time-systems)
+    Checking rust-aliasing-provenance v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/042-rust-aliasing-provenance)
+    Checking pgo-post-link-optimization v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/018-pgo-post-link-optimization)
+    Checking systems-snackpack-topic-005 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/005-webassembly-performance-model)
+    Checking atomics-under-contention v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/047-atomics-under-contention)
+    Checking packet-steering-interrupts v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/055-packet-steering-interrupts)
+    Checking nvme-blk-mq v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/053-nvme-blk-mq)
+    Checking consistent-hashing-movement v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/076-consistent-hashing-movement)
+    Checking tail-latency-histogram-merge-errors v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/044-tail-latency-histogram-merge-errors)
+    Checking multipart-correctness v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/073-object-store-multipart-correctness)
+    Checking page-cache-io v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/051-page-cache-io)
+    Checking topic061-probabilistic-filters v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/061-probabilistic-filters)
+    Checking topic065-query-execution v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/065-query-execution)
+    Checking tls-record-sizing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/074-tls-record-sizing)
+    Checking io-uring-lifetimes v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/054-io-uring-lifetimes)
+    Checking quorum-consistency-costs v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/057-quorum-consistency-costs)
+    Checking ssd-gc v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/071-ssd-garbage-collection)
+    Checking cpu-frontend-bottlenecks v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/019-cpu-frontend-bottlenecks)
+    Checking hardware-software-prefetching v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/048-hardware-software-prefetching)
+    Checking connection-tracking-nat-limits v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/075-connection-tracking-nat-limits)
+    Checking topic-072-storage-layout v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/072-storage-layout-and-device-geometry-sparse-files-extents-and-zoned-storage)
+    Checking metadata-scalability v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/077-metadata-scalability)
+    Checking ebpf-internals v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/040-ebpf-internals)
+    Checking cpu-service-chain v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/050-cpu-service-chain)
+    Checking lsm-compaction-economics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/059-lsm-compaction-economics)
+    Checking monomorphization v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/080-monomorphization)
+    Checking cache-coherence-false-sharing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/046-cache-coherence-false-sharing)
+    Checking cgroup-pressure v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/070-cgroup-pressure)
+    Checking topic060-deterministic-simulation v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/060-deterministic-simulation)
+    Checking data-layout-transformations v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/066-data-layout-transformations)
+    Checking filesystem-crash-semantics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/052-filesystem-crash-semantics)
+    Checking async-runtime-mechanics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/041-async-runtime-mechanics)
+    Checking topic062-load-balancing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/062-load-balancing)
+    Checking tcp-quic-application-pacing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/056-tcp-quic-application-pacing)
+    Checking topic064-kernel-bypass v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/064-kernel-bypass)
+    Checking futex-parking v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/069-futex-parking)
+    Checking consensus-leases-fencing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/058-consensus-leases-fencing)
+    Checking dram-memory-controller-behavior v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/049-dram-memory-controller-behavior)
+    Checking linkers-loaders-binary-layout v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/017-linkers-loaders-binary-layout)
+    Checking topic063-anti-entropy v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/063-anti-entropy)
+    Checking crossbeam-queue v0.3.12
+    Checking bounded-mpmc-queue v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/078-bounded-mpmc-queue)
+    Checking performance-portability-vector-width v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/045-performance-portability-vector-width)
+    Checking nic-datapath-cost-model v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/026-nic-datapath)
+    Checking numa-first-touch-migration v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/025-numa-first-touch-migration)
+    Checking allocator-internals-fragmentation v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/024-allocator-internals-fragmentation)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.77s
+   Compiling topic-067-abi-ffi-performance-boundaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/067-abi-ffi-performance-boundaries)
+   Compiling cpu-memory-model-atomic-lowering v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/022-cpu-memory-model-atomic-lowering)
+   Compiling subtle v2.6.1
+   Compiling sequence-locks v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/079-sequence-locks)
+   Compiling ssd-gc v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/071-ssd-garbage-collection)
+   Compiling systems-snackpack-topic-006 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/006-ngram-text-indexing)
+   Compiling topic-033-wal-crash-consistency v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/033-wal-crash-consistency)
+   Compiling nvme-blk-mq v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/053-nvme-blk-mq)
+   Compiling tail-latency-histogram-merge-errors v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/044-tail-latency-histogram-merge-errors)
+   Compiling crossbeam-utils v0.8.23
+   Compiling constant-time-systems v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/068-constant-time-systems)
+   Compiling spectre-era-performance-tradeoffs v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/043-spectre-era-performance-tradeoffs)
+   Compiling filesystem-crash-semantics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/052-filesystem-crash-semantics)
+   Compiling crossbeam-queue v0.3.12
+   Compiling tls-record-sizing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/074-tls-record-sizing)
+   Compiling bounded-mpmc-queue v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/078-bounded-mpmc-queue)
+   Compiling topic065-query-execution v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/065-query-execution)
+   Compiling io-uring-lifetimes v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/054-io-uring-lifetimes)
+   Compiling topic061-probabilistic-filters v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/061-probabilistic-filters)
+   Compiling cgroup-pressure v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/070-cgroup-pressure)
+   Compiling database-index-internals v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/031-database-index-internals)
+   Compiling systems-snackpack-topic-003 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/003-linux-perf-workflow)
+   Compiling lsm-compaction-economics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/059-lsm-compaction-economics)
+   Compiling systems-snackpack-topic-009 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/009-succinct-static-index-structures)
+   Compiling topic062-load-balancing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/062-load-balancing)
+   Compiling rust-aliasing-provenance v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/042-rust-aliasing-provenance)
+   Compiling quorum-consistency-costs v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/057-quorum-consistency-costs)
+   Compiling systems-snackpack-topic-004 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/004-reading-assembly-performance)
+   Compiling consensus-leases-fencing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/058-consensus-leases-fencing)
+   Compiling topic063-anti-entropy v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/063-anti-entropy)
+   Compiling tcp-quic-application-pacing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/056-tcp-quic-application-pacing)
+   Compiling multipart-correctness v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/073-object-store-multipart-correctness)
+   Compiling advanced-benchmarking-methodology v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/015-advanced-benchmarking-methodology)
+   Compiling monomorphization v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/080-monomorphization)
+   Compiling systems-snackpack-topic-012 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/012-mmap-page-faults)
+   Compiling backpressure-overload v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/028-backpressure-overload)
+   Compiling systems-snackpack-topic-011 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/011-cycle-accurate-measurement)
+   Compiling consistent-hashing-movement v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/076-consistent-hashing-movement)
+   Compiling page-cache-io v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/051-page-cache-io)
+   Compiling roaring-bitmaps-compressed-sets v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/036-roaring-bitmaps-compressed-sets)
+   Compiling topic064-kernel-bypass v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/064-kernel-bypass)
+   Compiling futex-parking v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/069-futex-parking)
+   Compiling systems-snackpack-topic-008 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/008-tlbs-address-translation)
+   Compiling lock-free-reclamation-aba v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/023-lock-free-reclamation-aba)
+   Compiling idempotency-concurrency v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/030-idempotency-concurrency)
+   Compiling systems-snackpack-topic-014 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/014-cpu-dispatch-portable-optimization)
+   Compiling systems-snackpack-topic-005 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/005-webassembly-performance-model)
+   Compiling topic081-rust-runtime v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/081-rust-runtime-semantics)
+   Compiling memory-level-parallelism v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/020-memory-level-parallelism)
+   Compiling systems-snackpack-topic-007 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/007-branchless-predictable-control-flow)
+   Compiling distributed-time-ordering v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/029-distributed-time-ordering)
+   Compiling data-layout-transformations v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/066-data-layout-transformations)
+   Compiling systems-snackpack-topic-001 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/001-swar-simd-scalar)
+   Compiling connection-tracking-nat-limits v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/075-connection-tracking-nat-limits)
+   Compiling pgo-post-link-optimization v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/018-pgo-post-link-optimization)
+   Compiling packet-steering-interrupts v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/055-packet-steering-interrupts)
+   Compiling string-matching-selection v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/034-string-matching-selection)
+   Compiling compression-systems-primitive v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/037-compression-systems-primitive)
+   Compiling systems-snackpack-topic-002 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/002-intrinsics-vs-assembly)
+   Compiling cache-coherence-false-sharing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/046-cache-coherence-false-sharing)
+   Compiling dram-memory-controller-behavior v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/049-dram-memory-controller-behavior)
+   Compiling queueing-service-design v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/027-queueing-service-design)
+   Compiling systems-snackpack-topic-013 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/013-cache-aware-oblivious)
+   Compiling mvcc-hot-vacuum v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/032-mvcc-hot-vacuum)
+   Compiling finite-state-transducers-compact-dictionaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/035-finite-state-transducers-compact-dictionaries)
+   Compiling zero-copy-limits v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/038-zero-copy-limits)
+   Compiling topic-072-storage-layout v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/072-storage-layout-and-device-geometry-sparse-files-extents-and-zoned-storage)
+   Compiling ebpf-internals v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/040-ebpf-internals)
+   Compiling hardware-software-prefetching v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/048-hardware-software-prefetching)
+   Compiling topic-021-store-write-path v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/021-store-write-path)
+   Compiling metadata-scalability v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/077-metadata-scalability)
+   Compiling systems-snackpack-topic-010 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/010-hashing-checksums-prng)
+   Compiling cpu-frontend-bottlenecks v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/019-cpu-frontend-bottlenecks)
+   Compiling iommu-dma-device-memory v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/039-iommu-dma-device-memory)
+   Compiling cpu-service-chain v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/050-cpu-service-chain)
+   Compiling async-runtime-mechanics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/041-async-runtime-mechanics)
+   Compiling compiler-optimization-boundaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/016-compiler-optimization-boundaries)
+   Compiling topic060-deterministic-simulation v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/060-deterministic-simulation)
+   Compiling atomics-under-contention v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/047-atomics-under-contention)
+   Compiling allocator-internals-fragmentation v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/024-allocator-internals-fragmentation)
+   Compiling nic-datapath-cost-model v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/026-nic-datapath)
+   Compiling performance-portability-vector-width v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/045-performance-portability-vector-width)
+   Compiling linkers-loaders-binary-layout v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/017-linkers-loaders-binary-layout)
+   Compiling numa-first-touch-migration v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/025-numa-first-touch-migration)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.98s
+     Running unittests src/lib.rs (target/debug/deps/advanced_benchmarking_methodology-4a013442a219fcbe)
+
+running 4 tests
+test tests::checksum_wraps_without_panicking ... ok
+test tests::invalid_ratios_are_rejected ... ok
+test tests::reciprocal_position_effect_cancels ... ok
+test tests::pair_uses_identical_work ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/order_bias.rs (target/debug/examples/order_bias-8dd2a42baf826110)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/allocator_internals_fragmentation-8cb5f0318cfcd449)
+
+running 3 tests
+test tests::rejects_geometry_without_equal_spacing ... ok
+test tests::scattering_expands_fixed_stride_span ... ok
+test tests::layouts_keep_equal_counts_and_requested_bytes ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/debug/deps/async_runtime_mechanics-dce72e29300f5a9e)
+
+running 4 tests
+test tests::future_state_screen_checks_multiplication ... ok
+test tests::residency_checks_each_arithmetic_step ... ok
+test tests::cancellation_screen_checks_duration_sum ... ok
+test tests::residency_distinguishes_output_overlap ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/state_and_cancellation.rs (target/debug/examples/state_and_cancellation-f115b8b307ec2636)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/atomics_under_contention-e3ff57813f806558)
+
+running 5 tests
+test tests::batched_kernel_flushes_a_partial_tail ... ok
+test tests::configuration_checks_counts_and_placement ... ok
+test tests::modes_round_trip_through_the_cli_names ... ok
+test tests::stripes_have_the_declared_alignment_and_stride ... ok
+test tests::shared_and_cas_kernels_are_exact_under_contention ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests examples/atomic_contention.rs (target/debug/examples/atomic_contention-32e38f6e60b9aa34)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/backpressure_overload-d4893b1cf9e4f4b6)
+
+running 6 tests
+test tests::configuration_rejects_zero_resource_fields ... ok
+test tests::controlled_wave_shares_one_flight_and_budget ... ok
+test tests::one_retry_token_exhausts_and_propagates ... ok
+test tests::primary_naive_wave_has_three_attempts_per_caller ... ok
+test tests::waiter_cap_sheds_without_growing_the_flight ... ok
+test tests::schedule_is_balanced_and_aa_is_identical_controlled ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/overload_probe.rs (target/debug/deps/overload_probe-ece18a66e76f106f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/bounded_mpmc_queue-541ba167629bec76)
+
+running 7 tests
+test tests::oracle_rejects_duplicate_missing_and_out_of_range ... ok
+test tests::zero_capacity_rejected - should panic ... ok
+test tests::participant_count_overflow_panics_before_spawning - should panic ... ok
+test tests::full_returns_ownership_and_fifo_wraps ... ok
+test tests::generated_operations_match_deque_oracle ... ok
+test tests::single_consumer_preserves_each_producer_order ... ok
+test tests::concurrent_exact_delivery ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running unittests src/main.rs (target/debug/deps/bounded_mpmc_queue-d5d5a0cd6536c175)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/cache_coherence_false_sharing-cdc9fb0aa927d39f)
+
+running 2 tests
+test tests::average_cost_rejects_invalid_inputs ... ok
+test tests::split_model_can_favor_packing ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/cache_coherence_probe.rs (target/debug/examples/cache_coherence_probe-989c999d612d9ba9)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/cgroup_pressure-7e9e1b00859d7044)
+
+running 4 tests
+test tests::resets_are_not_zero ... ok
+test tests::reject_zero_workers - should panic ... ok
+test tests::every_output_matches_oracle ... ok
+test tests::oracle_matches_recurrence_edges ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/quota.rs (target/debug/examples/quota-0878453cb96cd37b)
+
+running 3 tests
+test tests::cpus_allowed_reads_the_mask_words ... ok
+test tests::counters_require_cpu_pressure - should panic ... ok
+test tests::counters_parse_stat_and_pressure_totals ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/compiler_optimization_boundaries-fc9a54d7712a6ffc)
+
+running 1 test
+test tests::visible_and_opaque_forms_agree ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/boundary_probe.rs (target/debug/examples/boundary_probe-9a4de28e543fbd99)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/compression_systems_primitive-4db0f3ce7d07feb8)
+
+running 9 tests
+test tests::decoder_budget_checks_absolute_dimensions ... ok
+test tests::decoder_budget_is_aggregate_and_transactional ... ok
+test tests::fallback_counts_lz4_wrapper_bytes ... ok
+test tests::fallback_rejects_identity_and_checked_savings_overflow ... ok
+test tests::read_amplification_respects_partial_final_unit ... ok
+test tests::read_amplification_rejects_invalid_ranges ... ok
+test tests::lz4_raw_wrapper_is_exact_and_rejects_trailing_bytes ... ok
+test tests::serial_model_includes_fixed_cost_and_saved_io ... ok
+test tests::serial_model_rounds_up_and_rejects_zero_rates ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/compression_contract_probe.rs (target/debug/deps/compression_contract_probe-dee15279e2d3e564)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/connection_tracking_nat_limits-1683ded16288bc87)
+
+running 3 tests
+test tests::global_capacity_is_separate ... ok
+test tests::word_edges_and_exhaustion ... ok
+test tests::exhaustive_event_streams ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.97s
+
+     Running unittests examples/ports.rs (target/debug/examples/ports-b0f05fa10a77c9db)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/consensus_leases_fencing-28aaaede146c6844)
+
+running 11 tests
+test tests::equal_generations_do_not_deduplicate_or_order_operations ... ok
+test tests::checkpoint_preservation_and_reset_have_different_contracts ... ok
+test tests::a_pause_after_a_valid_lease_check_cannot_bypass_the_sink ... ok
+test tests::duplicate_and_outside_votes_do_not_create_a_majority ... ok
+test tests::majority_of_union_is_not_a_joint_majority ... ok
+test tests::separated_check_and_effect_is_a_counterexample ... ok
+test tests::old_writes_can_succeed_before_installation ... ok
+test tests::installation_does_not_regress_or_wrap ... ok
+test tests::uninstalled_zero_and_future_writes_leave_state_unchanged ... ok
+test tests::all_interleavings_with_successor_install_before_its_write ... ok
+test tests::exhaustive_five_voter_quorum_intersections ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests examples/handoff.rs (target/debug/examples/handoff-54def48f85160e82)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/consistent_hashing_movement-ccf51c4955161aeb)
+
+running 5 tests
+test tests::collision_and_wrap_policy ... ok
+test tests::empty_is_rejected - should panic ... ok
+test tests::duplicate_is_rejected - should panic ... ok
+test tests::exact_modulo_periods ... ok
+test tests::oracle_and_movement_contracts ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running unittests examples/placement.rs (target/debug/examples/placement-f5cd603302a32808)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/constant_time_systems-4d7db9ba0c962e56)
+
+running 3 tests
+test tests::deterministic_random_multi_mismatch ... ok
+test tests::exhaustive_single_bytes ... ok
+test tests::lengths_positions_and_unaligned_slices ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+
+     Running unittests examples/compare.rs (target/debug/examples/compare-8a2c2702414f96e2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/cpu_frontend_bottlenecks-9bbfa055678a73a0)
+
+running 5 tests
+test tests::invalid_frontend_inputs_are_rejected ... ok
+test tests::outlining_rejects_invalid_or_overflowing_inputs ... ok
+test tests::outlining_uses_a_strict_break_even_rule ... ok
+test tests::frontend_estimate_preserves_term_boundaries ... ok
+test tests::phase_floor_rejects_invalid_cycles ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/cost_model.rs (target/debug/examples/cost_model-1f14a330f63bf114)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/atomic_lowering-c581e01051ff92b8)
+
+running 2 tests
+test tests::zero_rounds_is_rejected - should panic ... ok
+test tests::release_acquire_publishes_payload ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/bin/atomic_cost.rs (target/debug/deps/atomic_cost-7ec86d4b121f1926)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/store_buffering.rs (target/debug/deps/store_buffering-6d8c650860c6400e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/publication.rs (target/debug/examples/publication-f871d61c0ea26f7e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/cpu_service_chain-ffad2873ae2d4549)
+
+running 17 tests
+test tests::deadline_utilization_matches_lesson_and_empty_sum ... ok
+test tests::fair_share_matches_equal_and_skewed_weights ... ok
+test tests::deadline_utilization_rejects_invalid_inputs_and_overflow ... ok
+test tests::fair_share_rejects_invalid_domains ... ok
+test tests::lock_blocking_matches_lesson_and_accepts_no_chain ... ok
+test tests::lock_blocking_rejects_invalid_inputs_and_overflow ... ok
+test tests::response_time_matches_lesson_and_accepts_zero_terms ... ok
+test tests::model_error_is_composable_and_descriptive ... ok
+test tests::response_time_rejects_invalid_inputs_and_overflow ... ok
+test tests::smt_helpers_match_lesson_and_zero_aggregate ... ok
+test tests::smt_helpers_reject_invalid_inputs_and_non_finite_ratio ... ok
+test tests::wake_service_accepts_zero_work_and_delay ... ok
+test tests::symmetric_slowdown_reports_negative_values_as_speedup ... ok
+test tests::wake_service_matches_lesson_decomposition ... ok
+test tests::wake_service_rejects_non_finite_derived_values ... ok
+test tests::wake_service_rejects_invalid_input_domains ... ok
+test tests::wake_service_represents_extreme_but_finite_execution_times ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/service_chain_cost_model.rs (target/debug/examples/service_chain_cost_model-09a5379a4f60f9ac)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/data_layout_transformations-c4b5e281bf5807de)
+
+running 8 tests
+test tests::pinned_row_geometry ... ok
+test tests::duplicate_and_reverse_visits ... ok
+test tests::padding_is_not_a_row ... ok
+test tests::tile_capacity_is_not_length - should panic ... ok
+test tests::column_bounds - should panic ... ok
+test tests::extreme_values ... ok
+test tests::permutations_preserve_identity ... ok
+test tests::boundaries_and_round_trip ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests examples/compare.rs (target/debug/examples/compare-abbd8c7d4bbfe0dc)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/database_index_internals-a5fb0fc69e9b42d4)
+
+running 4 tests
+test tests::boundary_keys_are_correct ... ok
+test tests::logical_and_rust_layouts_are_explicit ... ok
+test tests::layouts_match_oracle_for_hits_and_misses ... ok
+test tests::treatments_have_identical_checksums ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/index_layout_probe-ba39655a82b85717)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/distributed_time_ordering-5ef154d2a01fe501)
+
+running 9 tests
+test tests::hlc_equal_physical_components_advance_greater_logical ... ok
+test tests::hlc_handles_physical_advance_stall_rollback_and_receive ... ok
+test tests::hlc_overflow_preserves_state ... ok
+test tests::inspection_hooks_use_documented_sentinels ... ok
+test tests::interval_validation_and_strict_boundaries ... ok
+test tests::lamport_tick_and_receive_are_checked_and_transactional ... ok
+test tests::lww_uses_physical_time_then_replica_tie_break ... ok
+test tests::vector_overflow_does_not_partially_merge ... ok
+test tests::vector_relation_distinguishes_causal_and_concurrent ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/ordering_probe.rs (target/debug/deps/ordering_probe-a24196082051f8f5)
+
+running 1 test
+test tests::self_check_output_is_stable ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/dram_memory_controller_behavior-1823088a42c1f5e4)
+
+running 9 tests
+test tests::bank_state_components_match_lesson_arithmetic ... ok
+test tests::expected_component_matches_lesson_mix ... ok
+test tests::refresh_fraction_matches_lesson_and_checks_domain ... ok
+test tests::mix_rejects_invalid_probabilities_and_sum ... ok
+test tests::little_law_helpers_are_inverse_for_same_inputs ... ok
+test tests::throughput_cap_validates_candidates_and_has_stable_ties ... ok
+test tests::throughput_helpers_match_lesson_arithmetic ... ok
+test tests::timing_rejects_negative_and_overflowing_components ... ok
+test tests::scalar_helpers_reject_invalid_inputs ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/dram_cost_model.rs (target/debug/examples/dram_cost_model-da604d6ed05591f3)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/ebpf_internals-6f426ff080231bf0)
+
+running 5 tests
+test tests::event_terms_and_setup_share_match_the_running_example ... ok
+test tests::capacity_examples_preserve_headers_and_alignment ... ok
+test tests::independent_path_bound_is_explicitly_loose ... ok
+test tests::out_of_range_jump_reports_source_and_target ... ok
+test tests::valid_constant_return_passes_the_narrow_check ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/cost_and_control.rs (target/debug/examples/cost_and_control-3a3b1ba23c6f1641)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/filesystem_crash_semantics-9b0301c0c2acc837)
+
+running 7 tests
+test tests::byte_models_reject_overflow ... ok
+test tests::cut_points_cross_acknowledgement_only_after_directory_sync ... ok
+test tests::invalid_latency_inputs_fail_closed ... ok
+test tests::worked_byte_models_match_the_lesson ... ok
+test tests::worked_latency_models_match_the_lesson ... ok
+test tests::record_oracle_rejects_corruption_and_unknown_generation ... ok
+test tests::record_oracle_accepts_old_and_new ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/crash_costs.rs (target/debug/examples/crash_costs-161c596aa96bcd81)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/finite_state_transducers_compact_dictionaries-2c8d7074eb4dc0d8)
+
+running 6 tests
+test tests::rejects_duplicate_and_descending_keys ... ok
+test tests::handles_empty_prefix_and_arbitrary_bytes ... ok
+test tests::running_example_has_expected_topology ... ok
+test tests::exhaustive_binary_dictionaries_match_oracle ... ok
+test tests::benchmark_corpora_have_stable_topology ... ok
+test tests::fixed_queries_have_half_hits ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.07s
+
+     Running unittests src/bin/dictionary_probe.rs (target/debug/deps/dictionary_probe-58ee6b79807d90d1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/futex_parking-af6fbd06ef7ee772)
+
+running 1 test
+test tests::serial_boundary ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare.rs (target/debug/examples/compare-3dce06b5868d9302)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/hardware_software_prefetching-557fe010e25c8fcb)
+
+running 10 tests
+test tests::footprint_checks_zeros_and_overflow ... ok
+test tests::lead_distance_rounds_up ... ok
+test tests::throughput_preserves_subnormal_operand_ratios ... ok
+test tests::throughput_rejects_invalid_inputs ... ok
+test tests::throughput_survives_huge_denominator_product ... ok
+test tests::throughput_reports_each_limiting_factor ... ok
+test tests::throughput_rejects_unrepresentable_ceilings ... ok
+test tests::throughput_survives_huge_numerator_and_mixed_factors ... ok
+test tests::useful_fraction_exposes_impossible_break_even ... ok
+test tests::useful_fraction_rejects_unrepresentable_ratios ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/prefetch_cost_model.rs (target/debug/examples/prefetch_cost_model-7eafd6cddc8db8d2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/idempotency_concurrency-102fcca72ca134e5)
+
+running 5 tests
+test tests::codegen_hooks_cover_all_decisions ... ok
+test tests::replay_and_distinct_intent_preserve_effect_count ... ok
+test tests::scoped_keys_do_not_share_state ... ok
+test tests::split_writes_expose_both_crash_windows ... ok
+test tests::takeover_fences_stale_owner ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/idempotency_probe.rs (target/debug/deps/idempotency_probe-f5568ee1224cef9f)
+
+running 1 test
+test tests::self_check_output_is_stable ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/io_uring_lifetimes-595f25f1c8d18930)
+
+running 10 tests
+test tests::cost_models_fail_closed_on_overflow ... ok
+test tests::cancel_completion_never_retires_target ... ok
+test tests::cost_models_match_running_example ... ok
+test tests::cq_size_fails_closed_on_ring_limits ... ok
+test tests::generation_changes_raw_identity ... ok
+test tests::cq_size_never_undersizes_rounded_sq ... ok
+test tests::multishot_more_cqe_never_retires_target ... ok
+test tests::rejects_duplicate_or_mismatched_records ... ok
+test tests::registered_resource_requires_retirement ... ok
+test tests::target_can_complete_before_cancel_request ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/lifecycle_costs.rs (target/debug/examples/lifecycle_costs-d05344c90b27edd4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/iommu_dma_device_memory-c25c0238fc2d8e99)
+
+running 7 tests
+test tests::aperture_rejects_outside_but_accepts_wrong_inside_offset ... ok
+test tests::contiguous_iova_selects_noncontiguous_backing ... ok
+test tests::early_unmap_and_mapped_count_are_rejected ... ok
+test tests::direction_epoch_and_ownership_are_checked ... ok
+test tests::reset_invalidates_inflight_completion ... ok
+test tests::memory_roles_do_not_conflate_visibility_and_streaming_cycles ... ok
+test tests::geometry_rejects_overflow_mask_and_bad_counts ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/dma_contract_probe.rs (target/debug/deps/dma_contract_probe-9c7ced5631cb9b1c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/linkers_loaders_binary_layout-0bb6bf06d7393c10)
+
+running 4 tests
+test tests::summary_requires_two_finite_blocks ... ok
+test tests::abba_and_baab_have_the_same_contrast ... ok
+test tests::constant_ratios_have_a_zero_width_interval ... ok
+test tests::malformed_blocks_are_rejected ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/lock_free_reclamation_aba-a4f3609012081337)
+
+running 4 tests
+test tests::generation_bits_repeat_after_wrap ... ok
+test tests::generation_rejects_bounded_aba_history ... ok
+test tests::packing_round_trips ... ok
+test tests::raw_control_accepts_stale_identity ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/aba_lab.rs (target/debug/deps/aba_lab-2335365c159612bd)
+
+running 2 tests
+test tests::raw_kernel_matches_its_contract ... ok
+test tests::tagged_kernel_matches_its_contract ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/lsm_compaction_economics-ccf613e7f71616a5)
+
+running 7 tests
+test tests::debt_growth_drain_and_overflow ... ok
+test tests::empty_and_ambiguous_inputs ... ok
+test tests::pinned_snapshot_requires_older_value ... ok
+test tests::job_counts_both_read_inputs_and_output ... ok
+test tests::outside_version_requires_tombstone ... ok
+test tests::input_order_does_not_change_result ... ok
+test tests::every_snapshot_from_floor_is_preserved ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/accounting.rs (target/debug/examples/accounting-867e8d814dfdd8f1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/memory_level_parallelism-6fe237d2756e4dd2)
+
+running 3 tests
+test tests::node_is_64_bytes_and_64_byte_aligned ... ok
+test tests::cycle_visits_every_node_once ... ok
+test tests::explicit_walkers_match_reference_steps ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/chain_probe.rs (target/debug/examples/chain_probe-d95383e12164628f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/metadata_scalability-508e621230448451)
+
+running 5 tests
+test tests::empty_batches_and_sequence_ceiling ... ok
+test tests::deletion_replay_cannot_resurrect_route ... ok
+test tests::gap_and_malformed_suffix_are_atomic ... ok
+test tests::snapshot_recovers_compaction_and_removes_absent_keys ... ok
+test tests::all_short_histories_match_independent_map_oracle ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests examples/compare.rs (target/debug/examples/compare-bee69d68acad3788)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/monomorphization-8f4be838cee6bfa9)
+
+running 4 tests
+test tests::empty_returns_seed_including_extremes ... ok
+test tests::zero_byte_has_known_rotation ... ok
+test tests::fixture_spans_every_byte ... ok
+test tests::all_byte_values_and_boundary_lengths_agree ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/probe.rs (target/debug/examples/probe-01b3d58ec1b09c1f)
+
+running 4 tests
+test kernels::tests::empty_returns_seed_including_extremes ... ok
+test kernels::tests::zero_byte_has_known_rotation ... ok
+test kernels::tests::fixture_spans_every_byte ... ok
+test kernels::tests::all_byte_values_and_boundary_lengths_agree ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/multipart_correctness-3e3d49abfecef61c)
+
+running 4 tests
+test tests::completion_truth_table ... ok
+test tests::rejects_header_only_success_policy ... ok
+test tests::limits_and_maximum ... ok
+test tests::exhaustive_receipts ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests examples/manifest.rs (target/debug/examples/manifest-c292f1c08a90b0ac)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/mvcc_hot_vacuum-2e8c663ba0922b96)
+
+running 4 tests
+test tests::bounded_walk_rejects_invalid_and_cyclic_chains ... ok
+test tests::cleanup_hook_keeps_the_equal_horizon ... ok
+test tests::visibility_hook_covers_every_bound_case ... ok
+test tests::stable_receipt_matches_the_checked_in_oracle ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/mvcc_hot_vacuum_probe.rs (target/debug/deps/mvcc_hot_vacuum_probe-258917f079384695)
+
+running 3 tests
+test tests::extra_argument_returns_usage ... ok
+test tests::non_unicode_argument_returns_usage ... ok
+test tests::exact_self_check_argument_runs_the_model ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/nic_datapath_cost_model-45c88ee39f2f6e0d)
+
+running 9 tests
+test tests::backlog_accounts_for_arrivals_not_drained_during_burst ... ok
+test tests::gro_preserves_wire_work_and_reduces_stack_units ... ok
+test tests::gro_rejects_zero_grouping_and_non_finite_cost ... ok
+test tests::scalar_models_reject_negative_and_non_finite_inputs ... ok
+test tests::tcp_window_is_bandwidth_times_round_trip_time ... ok
+test tests::transmit_accounting_separates_batching_levels ... ok
+test tests::transmit_rejects_invalid_costs_grouping_and_overflow ... ok
+test tests::transmit_zero_work_has_zero_cost ... ok
+test tests::udp_fill_time_handles_growth_balance_and_zero_capacity ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/numa_first_touch_migration-070360182c0a2b82)
+
+running 7 tests
+test tests::latency_cost_preserves_components ... ok
+test tests::latency_cost_rejects_invalid_inputs_and_overflow ... ok
+test tests::locality_is_identifier_equality ... ok
+test tests::migration_break_even_uses_remote_increment ... ok
+test tests::replication_break_even_includes_write_maintenance ... ok
+test tests::strategy_can_keep_migrate_or_replicate ... ok
+test tests::strategy_ties_prefer_less_placement_state ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/nvme_blk_mq-d5efb1745731562e)
+
+running 7 tests
+test tests::bandwidth_converts_operation_rate_to_byte_rate ... ok
+test tests::batching_amortizes_fixed_cycles ... ok
+test tests::batching_rejects_invalid_denominators_and_overflow ... ok
+test tests::effective_depth_reports_slot_product_overflow ... ok
+test tests::effective_depth_uses_each_possible_bottleneck ... ok
+test tests::iops_rejects_invalid_inputs_and_result_overflow ... ok
+test tests::iops_applies_concurrency_and_device_caps ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/nvme_costs.rs (target/debug/examples/nvme_costs-d484388d4cc619ff)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/packet_steering_interrupts-9a779175592b9c21)
+
+running 7 tests
+test tests::alias_model_handles_edges_and_example ... ok
+test tests::interrupt_batch_amortizes_fixed_work ... ok
+test tests::invalid_values_fail_closed ... ok
+test tests::rps_matches_running_example ... ok
+test tests::xps_savings_can_be_positive_or_negative ... ok
+test tests::rfs_exposes_stable_and_migrating_regimes ... ok
+test tests::queue_model_exposes_balanced_and_elephant_load ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/steering_costs.rs (target/debug/examples/steering_costs-6c9e6b483982313d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/page_cache_io-2beb1100eb65ce89)
+
+running 7 tests
+test tests::exhausted_headroom_is_zero_even_when_writeback_keeps_up ... ok
+test tests::expected_read_checks_probability ... ok
+test tests::headroom_is_unbounded_when_writeback_keeps_up ... ok
+test tests::headroom_rejects_reversed_bounds ... ok
+test tests::queue_depth_rejects_the_saturating_cast_boundary ... ok
+test tests::queue_depth_rounds_up ... ok
+test tests::reuse_switches_with_pass_count ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/page_cache_costs.rs (target/debug/examples/page_cache_costs-61518101670a22d2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/performance_portability_vector_width-fb501be8651c6589)
+
+running 4 tests
+test tests::fixed_work_example_changes_winner ... ok
+test tests::invalid_inputs_do_not_create_decisions ... ok
+test tests::roofline_selects_compute_bound ... ok
+test tests::roofline_selects_memory_bound ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/pgo_post_link_optimization-f646cab0f9f9edc9)
+
+running 5 tests
+test tests::geometric_mean_uses_log_space ... ok
+test tests::invalid_samples_are_rejected ... ok
+test tests::constant_ratios_have_zero_width ... ok
+test tests::extreme_finite_inputs_are_rejected ... ok
+test tests::wide_but_representable_inputs_are_accepted ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/pgo_probe.rs (target/debug/examples/pgo_probe-243128d66489ac0e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/queueing_service_design-5f332bf93754ce50)
+
+running 6 tests
+test tests::quarter_iteration_conversion_is_exact_and_checked ... ok
+test tests::configuration_rejects_unmatched_or_zero_inputs ... ok
+test tests::variable_second_moment_matches_declared_cs2 ... ok
+test tests::variable_group_has_nine_small_jobs_and_one_large_job ... ok
+test tests::schedule_has_complete_balanced_blocks_and_identical_aa_treatments ... ok
+test tests::fixed_and_variable_offer_identical_work_per_complete_group ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/queue_probe.rs (target/debug/deps/queue_probe-1f3f6f3b209ee241)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/quorum_consistency_costs-91fec328d3a6836c)
+
+running 9 tests
+test tests::delayed_older_message_cannot_erase_newer_tag ... ok
+test tests::incomplete_write_allows_read_inversion ... ok
+test tests::invalid_sets_never_mutate ... ok
+test tests::no_write_control_stays_at_zero ... ok
+test tests::sloppy_sets_use_a_different_universe ... ok
+test tests::phase_cost_uses_threshold_and_reachable_responses ... ok
+test tests::completed_write_is_visible_to_every_intersecting_read ... ok
+test tests::strict_overlap_matches_all_sets_through_seven_replicas ... ok
+test tests::write_back_protects_every_later_majority ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running unittests examples/quorum.rs (target/debug/examples/quorum-c5e36234702c2efb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/roaring_bitmaps_compressed_sets-02023c2c16dbc109)
+
+running 6 tests
+test tests::exact_payload_crossovers_are_explicit ... ok
+test tests::run_constructor_rejects_reversed_endpoints ... ok
+test tests::terminal_run_endpoint_does_not_overflow ... ok
+test tests::split_and_membership_cover_unsigned_boundaries ... ok
+test tests::deterministic_case_contracts_do_not_drift ... ok
+test tests::all_representations_match_the_oracle ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/bin/bitmap_probe.rs (target/debug/deps/bitmap_probe-cfd8d4f43e6fa35c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/rust_aliasing_provenance-58584a7b982a502a)
+
+running 4 tests
+test tests::distinct_reference_and_raw_calls_agree ... ok
+test tests::exposed_address_is_compared_without_being_dereferenced ... ok
+test tests::permitted_raw_alias_observes_the_intervening_store ... ok
+test tests::strict_provenance_write_stays_within_the_array ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/provenance_demo.rs (target/debug/examples/provenance_demo-e8d8b6fd57b3994a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/sequence_locks-f155fc2462f75cb0)
+
+running 6 tests
+test tests::overflow_leaves_previous_snapshot_readable ... ok
+test tests::zero_budget_uses_lock ... ok
+test tests::odd_generation_is_rejected ... ok
+test tests::fallback_waits_for_same_writer_mutex ... ok
+test tests::concurrent_writers_preserve_invariant ... ok
+test tests::sequential_matches_independent_pair_oracle ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/main.rs (target/debug/deps/sequence_locks-ad1795b928261f94)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/spectre_era_performance_tradeoffs-9853b51969e3ed6a)
+
+running 4 tests
+test tests::modes_match_for_empty_input ... ok
+test tests::modes_match_on_boundary_cases ... ok
+test tests::modes_preserve_words_wider_than_u32 ... ok
+test tests::fixed_stream_has_one_checksum ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/spectre_tradeoff_probe.rs (target/debug/deps/spectre_tradeoff_probe-49fccffa76b14944)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/ssd_gc-28ca1134aa0650f8)
+
+running 4 tests
+test tests::invalidation_does_not_reopen_frontier ... ok
+test tests::reserve_is_required - should panic ... ok
+test tests::near_full_repeated_overwrites ... ok
+test tests::exhaustive_short_histories ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running unittests examples/compare.rs (target/debug/examples/compare-ed08c4f1d93800fb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/string_matching_selection-e8f69c168f9cc8ea)
+
+running 1 test
+test tests::matchers_agree_with_oracle ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running unittests src/bin/string_match_probe.rs (target/debug/deps/string_match_probe-45578e8033d62c8d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_001-dd94ffa884f069c4)
+
+running 2 tests
+test tests::variants_match_for_empty_and_short_inputs ... ok
+test tests::variants_match_for_deterministic_data ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/count_eq.rs (target/debug/examples/count_eq-2bb70f5dec903b90)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_002-8a81b6daeeec418a)
+
+running 2 tests
+test tests::empty_input_has_a_stable_fold ... ok
+test tests::public_paths_match_the_reference ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare.rs (target/debug/examples/compare-f4b82f914b931e78)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_003-efcd3b3f3bcd4eb6)
+
+running 4 tests
+test tests::completed_iterations_count_both_phases ... ok
+test tests::phase_kernels_transform_state ... ok
+test tests::zero_rounds_preserve_the_seed ... ok
+test tests::alternating_run_is_deterministic ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/perf_workload.rs (target/debug/examples/perf_workload-b2f60e082d6d776e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_004-a2010bbd859d84db)
+
+running 2 tests
+test tests::zero_iterations_return_the_seed ... ok
+test tests::constant_and_runtime_division_match_for_seven ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/compare_division.rs (target/debug/examples/compare_division-979f59c464d518b5)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_005-ec6433ecce17a658)
+
+running 3 tests
+test tests::one_step_matches_the_formula ... ok
+test tests::zero_steps_preserve_the_seed ... ok
+test tests::ten_million_step_digest_matches_the_recorded_experiment ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running unittests examples/check_digest.rs (target/debug/examples/check_digest-c1bf65725626cef4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_006-8c22025c24455005)
+
+running 4 tests
+test tests::short_patterns_fall_back_to_all_documents ... ok
+test tests::document_postings_admit_wrong_distance ... ok
+test tests::repeated_grams_keep_a_lossless_presence_filter ... ok
+test tests::index_matches_scan_across_edge_cases ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_equivalence.rs (target/debug/examples/check_equivalence-34100dfe719d2834)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_007-2fadf176d9e83878)
+
+running 2 tests
+test tests::hinted_selection_matches_the_value_contract ... ok
+test tests::variants_match_for_binary_and_nonbinary_conditions ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_equivalence.rs (target/debug/examples/check_equivalence-ec5fff2fe3479adc)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_008-be701e9df414a9ac)
+
+running 5 tests
+test tests::smaps_parser_preserves_an_explicit_zero_huge_page_count ... ok
+test tests::smaps_parser_rejects_a_missing_huge_page_count ... ok
+test tests::rejects_invalid_lengths_before_platform_dispatch ... ok
+test tests::vma_header_parser_rejects_nonincreasing_ranges ... ok
+test tests::random_stream_is_repeatable_and_nonconstant ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_translation.rs (target/debug/examples/check_translation-1158c5ece2e2946e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_009-e9ef9a363b7610bd)
+
+running 7 tests
+test tests::empty_input_has_one_valid_prefix ... ok
+test tests::rejects_word_count_beyond_u32_rank_range ... ok
+test tests::logical_bytes_match_the_fixed_layout ... ok
+test tests::all_zero_and_all_one_boundaries_match ... ok
+test tests::dataset_rejects_partial_trailing_word - should panic ... ok
+test tests::superblock_and_word_boundaries_match ... ok
+test tests::deterministic_random_input_matches_exhaustively ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_equivalence.rs (target/debug/examples/check_equivalence-c14be8ede2dea917)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_010-e7aa9fa81422d267)
+
+running 4 tests
+test tests::kernel_metadata_matches_selection ... ok
+test tests::standard_check_vectors_distinguish_the_polynomials ... ok
+test tests::empty_and_fragmented_updates_match_the_oracle ... ok
+test tests::every_short_length_and_offset_matches ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running unittests examples/check_equivalence.rs (target/debug/examples/check_equivalence-65d483c7a57b6355)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_011-776bfbe86b7f1d69)
+
+running 4 tests
+test tests::conversion_rejects_invalid_intervals_and_overflow ... ok
+test tests::dependent_chain_matches_repeated_steps ... ok
+test tests::fixed_point_vectors_preserve_endpoint_rounding ... ok
+test tests::quantization_guard_rounds_up ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_contracts.rs (target/debug/examples/check_contracts-d67d6bafdf1b2694)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_012-441c7b8832392718)
+
+running 4 tests
+test tests::balance_validator_accepts_the_schedule_and_rejects_violations ... ok
+test tests::cold_validation_requires_each_observable_condition ... ok
+test tests::schedule_balances_modes_and_positions ... ok
+test tests::ratios_remain_derived_metrics ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_contracts.rs (target/debug/examples/check_contracts-e13bccb5e37c3c4c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_013-6974a3bdc56a057b)
+
+running 7 tests
+test tests::empty_matrix_is_valid ... ok
+test tests::modulo_cycle_exposes_power_of_two_collapse ... ok
+test tests::schedule_validator_rejects_duplicate_mode ... ok
+test tests::recorded_schedule_is_complete_and_balanced ... ok
+test tests::validation_distinguishes_short_buffers ... ok
+test tests::validation_precedes_destination_writes ... ok
+test tests::all_kernels_handle_odd_padded_edges ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests examples/check_contracts.rs (target/debug/examples/check_contracts-9b7254e7c995680c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/systems_snackpack_topic_014-de6baf90f86c0ba6)
+
+running 2 tests
+test tests::zero_chunk_size_is_rejected ... ok
+test tests::variants_match_scalar_at_vector_and_chunk_boundaries ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/check_contracts.rs (target/debug/examples/check_contracts-3f720fc617d95608)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/histogram_merge_errors-e5325c473f299dfa)
+
+running 11 tests
+test tests::counter_reset_is_not_treated_as_a_negative_delta ... ok
+test tests::cumulative_snapshots_accept_counters_whose_sum_exceeds_u64 ... ok
+test tests::cumulative_snapshots_reject_counter_length_mismatch ... ok
+test tests::delta_rejects_aggregate_interval_overflow ... ok
+test tests::exact_coarsening_preserves_count_and_bracket ... ok
+test tests::four_bucket_merge_is_transactional_on_overflow ... ok
+test tests::merge_rejects_aggregate_total_overflow_without_mutation ... ok
+test tests::nearest_rank_avoids_intermediate_overflow_at_large_total_counts ... ok
+test tests::record_rejects_observations_that_overflow_the_total_count ... ok
+test tests::schema_mismatch_is_rejected_without_mutation ... ok
+test tests::union_quantile_differs_from_both_averages_of_shard_quantiles ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/histogram_merge_probe.rs (target/debug/examples/histogram_merge_probe-4f9a1f3212755b30)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/tcp_quic_application_pacing-9284d3fff8573c48)
+
+running 7 tests
+test tests::invalid_configuration_empty_input_and_writer_errors ... ok
+test tests::regression_leaves_state_and_writer_untouched ... ok
+test tests::fractional_refill_survives_frequent_polls ... ok
+test tests::would_block_does_not_consume_credit ... ok
+test tests::pause_and_extreme_arithmetic_never_exceed_capacity ... ok
+test tests::partial_write_preserves_suffix_and_charges_only_accepted_bytes ... ok
+test tests::every_interval_obeys_the_byte_envelope_under_partial_and_blocked_writes ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/pacing.rs (target/debug/examples/pacing-c9182c016588009c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/tls_record_sizing-461c8719093fa6dd)
+
+running 4 tests
+test tests::receive_limit_counts_inner_type_and_padding ... ok
+test tests::flushes_prevent_coalescing ... ok
+test tests::arithmetic_overflow_is_rejected ... ok
+test tests::independent_fragmentation_oracle ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/budget.rs (target/debug/examples/budget-cd553acd6c5dd46f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/topic_021_store_write_path-912b1dcac97a0293)
+
+running 4 tests
+test tests::both_stlf_geometries_match_the_oracle ... ok
+test tests::stlf_kernels_update_memory_and_track_small_iteration_counts ... ok
+test tests::both_write_paths_publish_the_full_pattern ... ok
+test tests::verify_pattern_detects_corruption ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/store_path.rs (target/debug/examples/store_path-7b92c1043f83866b)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/wal_crash_consistency-5df00c864026661a)
+
+running 5 tests
+test tests::crc32c_matches_standard_check_value ... ok
+test tests::payload_limit_is_checked_without_allocating ... ok
+test tests::nonzero_flags_and_reserved_fail_even_with_valid_checksum ... ok
+test tests::required_history_distinguishes_committed_from_tail_damage ... ok
+test tests::deterministic_model_covers_prefixes_and_corruption ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/wal_crash_probe.rs (target/debug/deps/wal_crash_probe-b007b78833c6884c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/topic_067_abi_ffi_performance_boundaries-83636f55f53c3c6d)
+
+running 4 tests
+test tests::c_accepts_null_only_for_zero_length ... ok
+test tests::adversarial_values_and_immutability ... ok
+test tests::partition_sum_matches_full_sum ... ok
+test tests::tails_and_work_sweep ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests examples/compare.rs (target/debug/examples/compare-22a093e3204a08fb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/topic_072_storage_layout-8594953d733610bb)
+
+running 3 tests
+test tests::capacity_tail_is_not_writable ... ok
+test tests::invalid_geometry_and_writes ... ok
+test tests::write_list_matches_byte_oracle ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests examples/layout.rs (target/debug/examples/layout-90076f3679c1878b)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/topic060_deterministic_simulation-bdf5c00c8bb9a82a)
+
+running 8 tests
+test tests::atomic_control_exhausts_both_orders ... ok
+test tests::incomplete_replay_is_not_success ... ok
+test tests::invalid_replay_is_rejected ... ok
+test tests::larger_bound_does_not_add_schedules ... ok
+test tests::witness_replays_and_serial_control_passes ... ok
+test tests::shallow_search_is_not_a_pass ... ok
+test tests::zero_depth_is_cut_off_at_initial_state ... ok
+test tests::negative_control_finds_four_lost_updates ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/explore.rs (target/debug/examples/explore-efd0695d9a725dad)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/topic061_probabilistic_filters-8fb833045f32a08b)
+
+running 10 tests
+test tests::arbitrary_negative_counts_and_saturation_break_upper_bounds ... ok
+test tests::incompatible_bloom_merges_reject_without_mutation ... ok
+test tests::add_and_merge_overflow_are_transactional ... ok
+test tests::bit_clearing_can_erase_another_key ... ok
+test tests::max_union_is_idempotent_but_does_not_retain_runner_up ... ok
+test tests::snapshot_replay_counts_events_twice ... ok
+test tests::incompatible_count_min_merges_reject_without_mutation ... ok
+test tests::bloom_union_equals_serial_build_and_replay_is_idempotent ... ok
+test tests::inserted_members_survive_and_insert_is_idempotent ... ok
+test tests::count_min_matches_additive_merge_and_never_underestimates ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/contracts.rs (target/debug/examples/contracts-a3a2a0e0c327a067)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/topic062_load_balancing-c3b3156f477ff367)
+
+running 10 tests
+test tests::count_and_completion_time_can_disagree ... ok
+test tests::empty_and_invalid_candidates_are_explicit ... ok
+test tests::equal_initial_load_control_is_balanced_with_reservations ... ok
+test tests::saturation_cannot_wrap_counts ... ok
+test tests::reservations_respect_health_and_limits ... ok
+test tests::weighted_batch_uses_heterogeneous_capacity ... ok
+test tests::unique_stale_minimum_herds_without_a_tie ... ok
+test tests::two_hosts_can_sample_busy_twice ... ok
+test tests::pair_comparison_exhaustive_small_domain ... ok
+test tests::malformed_mask_rejects_setup - should panic ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/contracts.rs (target/debug/examples/contracts-1ab50c1d412b486f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/topic063_anti_entropy-9f2c4f8354ab0536)
+
+running 12 tests
+test tests::causality_is_not_lexicographic_order ... ok
+test tests::concurrent_delete_and_edit_remain_siblings ... ok
+test tests::range_oracle_includes_history_and_tombstones ... ok
+test tests::forgotten_delete_resurrects_obsolete_value ... ok
+test tests::resolving_write_must_cover_all_siblings ... ok
+test tests::read_repair_leaves_cold_key_stale ... ok
+test tests::finite_schedule_converges_despite_duplicate_delivery ... ok
+test tests::isolation_prevents_convergence_even_with_valid_merge ... ok
+test tests::retained_delete_beats_obsolete_value ... ok
+test tests::unknown_key_stays_absent_after_repair_and_delivery ... ok
+test tests::history_identity_reuse_is_rejected - should panic ... ok
+test tests::merge_laws_hold_for_all_32_fixture_subsets ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running unittests examples/contracts.rs (target/debug/examples/contracts-b23b3625fbbc4855)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/topic064_kernel_bypass-157f2f02c7e9ceb9)
+
+running 9 tests
+test tests::aligned_alias_cannot_be_assigned_twice ... ok
+test tests::completion_is_required_after_descriptor_consumption ... ok
+test tests::malformed_packet_retains_frames_until_explicit_abort ... ok
+test tests::packet_crosses_batch_without_premature_return ... ok
+test tests::rejected_bursts_are_atomic ... ok
+test tests::receive_needs_supply_and_consumption ... ok
+test tests::wakeup_flag_controls_explicit_progress_request ... ok
+test tests::every_partial_transmit_preserves_unsent_suffix ... ok
+test tests::recycled_frames_survive_repeated_complete_cycles ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/contracts.rs (target/debug/examples/contracts-364066cababd6fc2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/topic065_query_execution-8e365fd75155c022)
+
+running 11 tests
+test tests::exhausted_is_not_completed ... ok
+test tests::nulls_and_no_matches ... ok
+test tests::explicit_overflow_contract ... ok
+test tests::rejects_zero_morsel - should panic ... ok
+test tests::rejects_lengths - should panic ... ok
+test tests::rejects_zero_workers - should panic ... ok
+test tests::rejects_zero_batch - should panic ... ok
+test tests::rejects_validity - should panic ... ok
+test tests::scans_agree_across_partial_batches ... ok
+test tests::parallel_sums_agree ... ok
+test tests::concurrent_claims_cover_exactly_once ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/probe.rs (target/debug/examples/probe-bee5f40db9503909)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/topic081_rust_runtime-c81ee7f06e143ae7)
+
+running 6 tests
+test tests::documented_option_layout ... ok
+test tests::fields_drop_in_declaration_order ... ok
+test tests::share_only_with_a_suitable_payload ... ok
+test tests::unwind_drops_live_locals_in_reverse_order ... ok
+test tests::unequal_inputs_reject_in_both_directions ... ok
+test tests::kernels_match_wide_arithmetic_at_boundaries ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/topic081_rust_runtime-8ca688aef71a605e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/debug/deps/zero_copy_limits-6bf1ac1b7cdd11ce)
+
+running 7 tests
+test tests::buffered_path_counts_two_named_copies ... ok
+test tests::bounded_pipe_sets_a_call_count_floor ... ok
+test tests::cost_model_checks_inputs_and_accounts_serial_terms ... ok
+test tests::page_span_accounts_for_unaligned_ends ... ok
+test tests::kernel_paths_do_not_claim_total_zero_copy ... ok
+test tests::held_memory_scales_with_completion_latency ... ok
+test tests::completion_tracker_handles_coalescing_order_and_wrap ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/bin/zero_copy_contract_probe.rs (target/debug/deps/zero_copy_contract_probe-538bbd4696c680a4)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling allocator-internals-fragmentation v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/024-allocator-internals-fragmentation)
+   Compiling numa-first-touch-migration v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/025-numa-first-touch-migration)
+   Compiling nic-datapath-cost-model v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/026-nic-datapath)
+   Compiling performance-portability-vector-width v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/045-performance-portability-vector-width)
+   Compiling linkers-loaders-binary-layout v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/017-linkers-loaders-binary-layout)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.56s
+   Doc-tests advanced_benchmarking_methodology
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests allocator_internals_fragmentation
+
+running 1 test
+test topics/024-allocator-internals-fragmentation/src/lib.rs - Geometry::new (line 45) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.79s; merged doctests compilation took 0.37s
+   Doc-tests async_runtime_mechanics
+
+running 4 tests
+test topics/041-async-runtime-mechanics/src/lib.rs - CancellationLatency::checked_floor (line 233) ... ok
+test topics/041-async-runtime-mechanics/src/lib.rs - TaskResidency::checked_peak_bytes (line 153) ... ok
+test topics/041-async-runtime-mechanics/src/lib.rs - checked_future_state_bytes (line 95) ... ok
+test topics/041-async-runtime-mechanics/src/lib.rs - future_frame_screen (line 53) ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.74s; merged doctests compilation took 0.31s
+   Doc-tests atomics_under_contention
+
+running 1 test
+test topics/047-atomics-under-contention/src/lib.rs - (line 22) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.71s; merged doctests compilation took 0.28s
+   Doc-tests backpressure_overload
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests bounded_mpmc_queue
+
+running 1 test
+test topics/078-bounded-mpmc-queue/src/lib.rs - (line 9) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.73s; merged doctests compilation took 0.29s
+   Doc-tests cache_coherence_false_sharing
+
+running 2 tests
+test topics/046-cache-coherence-false-sharing/src/lib.rs - split_layout_saving_ns (line 69) ... ok
+test topics/046-cache-coherence-false-sharing/src/lib.rs - average_update_cost_ns (line 34) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.81s; merged doctests compilation took 0.28s
+   Doc-tests cgroup_pressure
+
+running 1 test
+test topics/070-cgroup-pressure/src/lib.rs - oracle (line 21) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.75s; merged doctests compilation took 0.26s
+   Doc-tests compiler_optimization_boundaries
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests compression_systems_primitive
+
+running 1 test
+test topics/037-compression-systems-primitive/src/lib.rs - (line 12) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.74s; merged doctests compilation took 0.27s
+   Doc-tests connection_tracking_nat_limits
+
+running 1 test
+test topics/075-connection-tracking-nat-limits/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.78s; merged doctests compilation took 0.28s
+   Doc-tests consensus_leases_fencing
+
+running 1 test
+test topics/058-consensus-leases-fencing/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.76s; merged doctests compilation took 0.28s
+   Doc-tests consistent_hashing_movement
+
+running 1 test
+test topics/076-consistent-hashing-movement/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.71s; merged doctests compilation took 0.27s
+   Doc-tests constant_time_systems
+
+running 1 test
+test topics/068-constant-time-systems/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.74s; merged doctests compilation took 0.27s
+   Doc-tests cpu_frontend_bottlenecks
+
+running 6 tests
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - (line 19) ... ok
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - phase_cycle_floor (line 229) ... ok
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - ExposedPenalty::new (line 96) ... ok
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - SupplyTerm::new (line 61) ... ok
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - estimate_frontend_cycles (line 171) ... ok
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - evaluate_outlining (line 282) ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 0.81s; merged doctests compilation took 0.29s
+   Doc-tests atomic_lowering
+
+running 2 tests
+test topics/022-cpu-memory-model-atomic-lowering/src/lib.rs - publication_roundtrip (line 166) ... ok
+test topics/022-cpu-memory-model-atomic-lowering/src/lib.rs - (line 16) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.71s; merged doctests compilation took 0.26s
+   Doc-tests cpu_service_chain
+
+running 9 tests
+test topics/050-cpu-service-chain/src/lib.rs - smt_symmetric_per_thread_slowdown (line 213) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - (line 21) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - response_time (line 57) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - lock_blocking (line 92) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - deadline_utilization (line 241) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - fair_share (line 140) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - WakeService::new (line 316) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - smt_aggregate_gain (line 173) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - deadline_utilization_sum (line 267) ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+all doctests ran in 0.77s; merged doctests compilation took 0.30s
+   Doc-tests data_layout_transformations
+
+running 1 test
+test topics/066-data-layout-transformations/src/lib.rs - (line 4) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.72s; merged doctests compilation took 0.27s
+   Doc-tests database_index_internals
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests distributed_time_ordering
+
+running 5 tests
+test topics/029-distributed-time-ordering/src/lib.rs - UncertaintyInterval (line 522) ... ok
+test topics/029-distributed-time-ordering/src/lib.rs - wall_clock_lww (line 97) ... ok
+test topics/029-distributed-time-ordering/src/lib.rs - LamportClock (line 128) ... ok
+test topics/029-distributed-time-ordering/src/lib.rs - VectorClock (line 224) ... ok
+test topics/029-distributed-time-ordering/src/lib.rs - HybridLogicalClock (line 358) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+all doctests ran in 0.81s; merged doctests compilation took 0.35s
+   Doc-tests dram_memory_controller_behavior
+
+running 9 tests
+test topics/049-dram-memory-controller-behavior/src/lib.rs - required_inflight (line 276) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - inflight_payload_ceiling (line 311) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - (line 20) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - refresh_duty_fraction (line 505) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - expected_device_component_ns (line 237) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - useful_throughput_cap (line 430) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - BankStateMix::new (line 188) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - pin_bandwidth (line 344) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - DramTiming::new (line 86) ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+all doctests ran in 0.81s; merged doctests compilation took 0.29s
+   Doc-tests ebpf_internals
+
+running 10 tests
+test topics/040-ebpf-internals/src/lib.rs - independent_binary_path_bound (line 340) ... ok
+test topics/040-ebpf-internals/src/lib.rs - ControlFlowProgram::check (line 88) ... ok
+test topics/040-ebpf-internals/src/lib.rs - ControlFlowProgram::instructions (line 65) ... ok
+test topics/040-ebpf-internals/src/lib.rs - per_cpu_payload_bytes (line 254) ... ok
+test topics/040-ebpf-internals/src/lib.rs - ControlFlowProgram::new (line 50) ... ok
+test topics/040-ebpf-internals/src/lib.rs - align_to_eight (line 233) ... ok
+test topics/040-ebpf-internals/src/lib.rs - amortized_setup_nanoseconds (line 213) ... ok
+test topics/040-ebpf-internals/src/lib.rs - ring_record_bytes (line 278) ... ok
+test topics/040-ebpf-internals/src/lib.rs - ring_fill_seconds (line 300) ... ok
+test topics/040-ebpf-internals/src/lib.rs - EventCost::total_nanoseconds (line 181) ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+all doctests ran in 0.82s; merged doctests compilation took 0.30s
+   Doc-tests filesystem_crash_semantics
+
+running 1 test
+test topics/052-filesystem-crash-semantics/src/lib.rs - (line 27) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.75s; merged doctests compilation took 0.28s
+   Doc-tests finite_state_transducers_compact_dictionaries
+
+running 1 test
+test topics/035-finite-state-transducers-compact-dictionaries/src/lib.rs - (line 24) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.79s; merged doctests compilation took 0.28s
+   Doc-tests futex_parking
+
+running 1 test
+test topics/069-futex-parking/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.80s; merged doctests compilation took 0.27s
+   Doc-tests hardware_software_prefetching
+
+running 1 test
+test topics/048-hardware-software-prefetching/src/lib.rs - (line 12) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.74s; merged doctests compilation took 0.28s
+   Doc-tests idempotency_concurrency
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests io_uring_lifetimes
+
+running 1 test
+test topics/054-io-uring-lifetimes/src/lib.rs - (line 33) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.71s; merged doctests compilation took 0.27s
+   Doc-tests iommu_dma_device_memory
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests linkers_loaders_binary_layout
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests lock_free_reclamation_aba
+
+running 2 tests
+test topics/023-lock-free-reclamation-aba/src/lib.rs - run_aba_witness (line 79) ... ok
+test topics/023-lock-free-reclamation-aba/src/lib.rs - pack_head (line 46) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.78s; merged doctests compilation took 0.29s
+   Doc-tests lsm_compaction_economics
+
+running 1 test
+test topics/059-lsm-compaction-economics/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.75s; merged doctests compilation took 0.28s
+   Doc-tests memory_level_parallelism
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests metadata_scalability
+
+running 1 test
+test topics/077-metadata-scalability/src/lib.rs - (line 9) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.76s; merged doctests compilation took 0.29s
+   Doc-tests monomorphization
+
+running 1 test
+test topics/080-monomorphization/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.73s; merged doctests compilation took 0.27s
+   Doc-tests multipart_correctness
+
+running 1 test
+test topics/073-object-store-multipart-correctness/src/lib.rs - (line 5) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.71s; merged doctests compilation took 0.27s
+   Doc-tests mvcc_hot_vacuum
+
+running 5 tests
+test topics/032-mvcc-hot-vacuum/src/lib.rs - (line 12) ... ok
+test topics/032-mvcc-hot-vacuum/src/lib.rs - visible_version (line 134) ... ok
+test topics/032-mvcc-hot-vacuum/src/lib.rs - self_check_receipt (line 209) ... ok
+test topics/032-mvcc-hot-vacuum/src/lib.rs - reclaimable_count (line 178) ... ok
+test topics/032-mvcc-hot-vacuum/src/lib.rs - xid_visible (line 106) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.81s; merged doctests compilation took 0.29s
+   Doc-tests nic_datapath_cost_model
+
+running 6 tests
+test topics/026-nic-datapath/src/lib.rs - (line 34) ... ok
+test topics/026-nic-datapath/src/lib.rs - udp_buffer_fill_time_seconds (line 406) ... ok
+test topics/026-nic-datapath/src/lib.rs - compare_transmit_cost (line 157) ... ok
+test topics/026-nic-datapath/src/lib.rs - tcp_bandwidth_delay_window_bytes (line 323) ... ok
+test topics/026-nic-datapath/src/lib.rs - listen_backlog_burst_need (line 358) ... ok
+test topics/026-nic-datapath/src/lib.rs - compare_gro_receive_cost (line 268) ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 0.72s; merged doctests compilation took 0.28s
+   Doc-tests numa_first_touch_migration
+
+running 6 tests
+test topics/025-numa-first-touch-migration/src/lib.rs - (line 16) ... ok
+test topics/025-numa-first-touch-migration/src/lib.rs - migration_break_even_accesses (line 182) ... ok
+test topics/025-numa-first-touch-migration/src/lib.rs - classify_access (line 60) ... ok
+test topics/025-numa-first-touch-migration/src/lib.rs - replication_break_even_remote_reads (line 242) ... ok
+test topics/025-numa-first-touch-migration/src/lib.rs - estimate_latency_cost (line 123) ... ok
+test topics/025-numa-first-touch-migration/src/lib.rs - choose_strategy (line 330) ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 0.75s; merged doctests compilation took 0.29s
+   Doc-tests nvme_blk_mq
+
+running 5 tests
+test topics/053-nvme-blk-mq/src/lib.rs - (line 18) ... ok
+test topics/053-nvme-blk-mq/src/lib.rs - concurrency_limited_iops (line 149) ... ok
+test topics/053-nvme-blk-mq/src/lib.rs - bandwidth_bytes_per_second (line 180) ... ok
+test topics/053-nvme-blk-mq/src/lib.rs - cpu_batch_cost (line 219) ... ok
+test topics/053-nvme-blk-mq/src/lib.rs - effective_queue_depth (line 113) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+all doctests ran in 0.79s; merged doctests compilation took 0.29s
+   Doc-tests packet_steering_interrupts
+
+running 1 test
+test topics/055-packet-steering-interrupts/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.79s; merged doctests compilation took 0.30s
+   Doc-tests page_cache_io
+
+running 6 tests
+test topics/051-page-cache-io/src/lib.rs - dirty_headroom (line 176) ... ok
+test topics/051-page-cache-io/src/lib.rs - expected_read_seconds (line 75) ... ok
+test topics/051-page-cache-io/src/lib.rs - required_direct_queue_depth (line 224) ... ok
+test topics/051-page-cache-io/src/lib.rs - reuse_ledger (line 269) ... ok
+test topics/051-page-cache-io/src/lib.rs - read_amplification (line 141) ... ok
+test topics/051-page-cache-io/src/lib.rs - required_readahead_bytes (line 111) ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 0.80s; merged doctests compilation took 0.30s
+   Doc-tests performance_portability_vector_width
+
+running 4 tests
+test topics/045-performance-portability-vector-width/src/lib.rs - fixed_work_time_ns (line 127) ... ok
+test topics/045-performance-portability-vector-width/src/lib.rs - roofline_elements_per_second (line 58) ... ok
+test topics/045-performance-portability-vector-width/src/lib.rs - clock_adjusted_time_ratio (line 104) ... ok
+test topics/045-performance-portability-vector-width/src/lib.rs - break_even_elements (line 162) ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.79s; merged doctests compilation took 0.28s
+   Doc-tests pgo_post_link_optimization
+
+running 1 test
+test topics/018-pgo-post-link-optimization/src/lib.rs - summarize_ratios (line 29) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.77s; merged doctests compilation took 0.29s
+   Doc-tests queueing_service_design
+
+running 1 test
+test topics/027-queueing-service-design/src/lib.rs - (line 14) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.77s; merged doctests compilation took 0.32s
+   Doc-tests quorum_consistency_costs
+
+running 1 test
+test topics/057-quorum-consistency-costs/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.82s; merged doctests compilation took 0.28s
+   Doc-tests roaring_bitmaps_compressed_sets
+
+running 1 test
+test topics/036-roaring-bitmaps-compressed-sets/src/lib.rs - (line 8) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.77s; merged doctests compilation took 0.27s
+   Doc-tests rust_aliasing_provenance
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests sequence_locks
+
+running 1 test
+test topics/079-sequence-locks/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.83s; merged doctests compilation took 0.29s
+   Doc-tests spectre_era_performance_tradeoffs
+
+running 5 tests
+test topics/043-spectre-era-performance-tradeoffs/src/lib.rs - topic43_barrier_lookup (line 207) ... ok
+test topics/043-spectre-era-performance-tradeoffs/src/lib.rs - lookup (line 227) ... ok
+test topics/043-spectre-era-performance-tradeoffs/src/lib.rs - topic43_plain_lookup (line 52) ... ok
+test topics/043-spectre-era-performance-tradeoffs/src/lib.rs - topic43_mask_lookup (line 74) ... ok
+test topics/043-spectre-era-performance-tradeoffs/src/lib.rs - topic43_speculation_barrier (line 188) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.77s; merged doctests compilation took 0.28s
+   Doc-tests ssd_gc
+
+running 1 test
+test topics/071-ssd-garbage-collection/src/lib.rs - (line 5) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.75s; merged doctests compilation took 0.28s
+   Doc-tests string_matching_selection
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_001
+
+running 1 test
+test topics/001-swar-simd-scalar/src/lib.rs - (line 9) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.88s; merged doctests compilation took 0.27s
+   Doc-tests systems_snackpack_topic_002
+
+running 1 test
+test topics/002-intrinsics-vs-assembly/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.76s; merged doctests compilation took 0.28s
+   Doc-tests systems_snackpack_topic_003
+
+running 1 test
+test topics/003-linux-perf-workflow/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.77s; merged doctests compilation took 0.29s
+   Doc-tests systems_snackpack_topic_004
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_005
+
+running 1 test
+test topics/005-webassembly-performance-model/src/lib.rs - iterate (line 22) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.76s; merged doctests compilation took 0.28s
+   Doc-tests systems_snackpack_topic_006
+
+running 5 tests
+test topics/006-ngram-text-indexing/src/lib.rs - TrigramIndex::document_count (line 96) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - TrigramIndex::build (line 64) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - scan_count (line 179) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - TrigramIndex::query (line 116) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - (line 14) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.82s; merged doctests compilation took 0.30s
+   Doc-tests systems_snackpack_topic_007
+
+running 1 test
+test topics/007-branchless-predictable-control-flow/src/lib.rs - (line 15) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.76s; merged doctests compilation took 0.28s
+   Doc-tests systems_snackpack_topic_008
+
+running 1 test
+test topics/008-tlbs-address-translation/src/lib.rs - (line 13) - compile ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.79s; merged doctests compilation took 0.37s
+   Doc-tests systems_snackpack_topic_009
+
+running 1 test
+test topics/009-succinct-static-index-structures/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.79s; merged doctests compilation took 0.29s
+   Doc-tests systems_snackpack_topic_010
+
+running 1 test
+test topics/010-hashing-checksums-prng/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.78s; merged doctests compilation took 0.27s
+   Doc-tests systems_snackpack_topic_011
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_012
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_013
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_014
+
+running 1 test
+test topics/014-cpu-dispatch-portable-optimization/src/lib.rs - (line 16) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.73s; merged doctests compilation took 0.27s
+   Doc-tests histogram_merge_errors
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests tcp_quic_application_pacing
+
+running 1 test
+test topics/056-tcp-quic-application-pacing/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.75s; merged doctests compilation took 0.29s
+   Doc-tests tls_record_sizing
+
+running 1 test
+test topics/074-tls-record-sizing/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.75s; merged doctests compilation took 0.27s
+   Doc-tests topic_021_store_write_path
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests wal_crash_consistency
+
+running 3 tests
+test topics/033-wal-crash-consistency/src/lib.rs - recover_prefix (line 257) ... ok
+test topics/033-wal-crash-consistency/src/lib.rs - topic33_crc32c (line 124) ... ok
+test topics/033-wal-crash-consistency/src/lib.rs - encode_frame (line 158) ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.77s; merged doctests compilation took 0.27s
+   Doc-tests topic_067_abi_ffi_performance_boundaries
+
+running 1 test
+test topics/067-abi-ffi-performance-boundaries/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.77s; merged doctests compilation took 0.27s
+   Doc-tests topic_072_storage_layout
+
+running 1 test
+test topics/072-storage-layout-and-device-geometry-sparse-files-extents-and-zoned-storage/src/lib.rs - Zone::new (line 75) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.74s; merged doctests compilation took 0.27s
+   Doc-tests topic060_deterministic_simulation
+
+running 1 test
+test topics/060-deterministic-simulation/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.76s; merged doctests compilation took 0.27s
+   Doc-tests topic061_probabilistic_filters
+
+running 1 test
+test topics/061-probabilistic-filters/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.76s; merged doctests compilation took 0.27s
+   Doc-tests topic062_load_balancing
+
+running 1 test
+test topics/062-load-balancing/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.74s; merged doctests compilation took 0.27s
+   Doc-tests topic063_anti_entropy
+
+running 1 test
+test topics/063-anti-entropy/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.87s; merged doctests compilation took 0.28s
+   Doc-tests topic064_kernel_bypass
+
+running 1 test
+test topics/064-kernel-bypass/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.72s; merged doctests compilation took 0.29s
+   Doc-tests topic065_query_execution
+
+running 1 test
+test topics/065-query-execution/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.70s; merged doctests compilation took 0.28s
+   Doc-tests topic081_rust_runtime
+
+running 2 tests
+test topics/081-rust-runtime-semantics/src/lib.rs - (line 4) - compile fail ... ok
+test topics/081-rust-runtime-semantics/src/lib.rs - (line 10) - compile fail ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+   Doc-tests zero_copy_limits
+
+running 2 tests
+test topics/038-zero-copy-limits/src/lib.rs - (line 9) ... ok
+test topics/038-zero-copy-limits/src/lib.rs - pages_spanned (line 155) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.76s; merged doctests compilation took 0.28s
+   Compiling crossbeam-utils v0.8.23
+   Compiling database-index-internals v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/031-database-index-internals)
+   Compiling cpu-memory-model-atomic-lowering v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/022-cpu-memory-model-atomic-lowering)
+   Compiling topic-067-abi-ffi-performance-boundaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/067-abi-ffi-performance-boundaries)
+   Compiling systems-snackpack-topic-007 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/007-branchless-predictable-control-flow)
+   Compiling sequence-locks v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/079-sequence-locks)
+   Compiling linkers-loaders-binary-layout v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/017-linkers-loaders-binary-layout)
+   Compiling systems-snackpack-topic-010 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/010-hashing-checksums-prng)
+   Compiling zero-copy-limits v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/038-zero-copy-limits)
+   Compiling iommu-dma-device-memory v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/039-iommu-dma-device-memory)
+   Compiling mvcc-hot-vacuum v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/032-mvcc-hot-vacuum)
+   Compiling systems-snackpack-topic-003 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/003-linux-perf-workflow)
+   Compiling systems-snackpack-topic-014 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/014-cpu-dispatch-portable-optimization)
+   Compiling queueing-service-design v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/027-queueing-service-design)
+   Compiling systems-snackpack-topic-012 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/012-mmap-page-faults)
+   Compiling systems-snackpack-topic-013 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/013-cache-aware-oblivious)
+   Compiling idempotency-concurrency v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/030-idempotency-concurrency)
+   Compiling compression-systems-primitive v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/037-compression-systems-primitive)
+   Compiling systems-snackpack-topic-002 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/002-intrinsics-vs-assembly)
+   Compiling systems-snackpack-topic-004 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/004-reading-assembly-performance)
+   Compiling topic-021-store-write-path v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/021-store-write-path)
+   Compiling systems-snackpack-topic-008 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/008-tlbs-address-translation)
+   Compiling memory-level-parallelism v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/020-memory-level-parallelism)
+   Compiling distributed-time-ordering v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/029-distributed-time-ordering)
+   Compiling topic081-rust-runtime v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/081-rust-runtime-semantics)
+   Compiling roaring-bitmaps-compressed-sets v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/036-roaring-bitmaps-compressed-sets)
+   Compiling systems-snackpack-topic-011 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/011-cycle-accurate-measurement)
+   Compiling compiler-optimization-boundaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/016-compiler-optimization-boundaries)
+   Compiling subtle v2.6.1
+   Compiling lock-free-reclamation-aba v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/023-lock-free-reclamation-aba)
+   Compiling systems-snackpack-topic-001 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/001-swar-simd-scalar)
+   Compiling string-matching-selection v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/034-string-matching-selection)
+   Compiling systems-snackpack-topic-006 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/006-ngram-text-indexing)
+   Compiling spectre-era-performance-tradeoffs v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/043-spectre-era-performance-tradeoffs)
+   Compiling topic-033-wal-crash-consistency v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/033-wal-crash-consistency)
+   Compiling advanced-benchmarking-methodology v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/015-advanced-benchmarking-methodology)
+   Compiling systems-snackpack-topic-009 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/009-succinct-static-index-structures)
+   Compiling backpressure-overload v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/028-backpressure-overload)
+   Compiling finite-state-transducers-compact-dictionaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/035-finite-state-transducers-compact-dictionaries)
+   Compiling crossbeam-queue v0.3.12
+   Compiling bounded-mpmc-queue v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/078-bounded-mpmc-queue)
+   Compiling constant-time-systems v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/068-constant-time-systems)
+   Compiling tcp-quic-application-pacing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/056-tcp-quic-application-pacing)
+   Compiling cpu-frontend-bottlenecks v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/019-cpu-frontend-bottlenecks)
+   Compiling numa-first-touch-migration v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/025-numa-first-touch-migration)
+   Compiling connection-tracking-nat-limits v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/075-connection-tracking-nat-limits)
+   Compiling tls-record-sizing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/074-tls-record-sizing)
+   Compiling metadata-scalability v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/077-metadata-scalability)
+   Compiling rust-aliasing-provenance v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/042-rust-aliasing-provenance)
+   Compiling allocator-internals-fragmentation v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/024-allocator-internals-fragmentation)
+   Compiling quorum-consistency-costs v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/057-quorum-consistency-costs)
+   Compiling monomorphization v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/080-monomorphization)
+   Compiling packet-steering-interrupts v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/055-packet-steering-interrupts)
+   Compiling performance-portability-vector-width v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/045-performance-portability-vector-width)
+   Compiling ssd-gc v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/071-ssd-garbage-collection)
+   Compiling page-cache-io v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/051-page-cache-io)
+   Compiling topic065-query-execution v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/065-query-execution)
+   Compiling data-layout-transformations v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/066-data-layout-transformations)
+   Compiling consistent-hashing-movement v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/076-consistent-hashing-movement)
+   Compiling multipart-correctness v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/073-object-store-multipart-correctness)
+   Compiling topic063-anti-entropy v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/063-anti-entropy)
+   Compiling pgo-post-link-optimization v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/018-pgo-post-link-optimization)
+   Compiling topic060-deterministic-simulation v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/060-deterministic-simulation)
+   Compiling io-uring-lifetimes v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/054-io-uring-lifetimes)
+   Compiling filesystem-crash-semantics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/052-filesystem-crash-semantics)
+   Compiling nic-datapath-cost-model v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/026-nic-datapath)
+   Compiling async-runtime-mechanics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/041-async-runtime-mechanics)
+   Compiling consensus-leases-fencing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/058-consensus-leases-fencing)
+   Compiling nvme-blk-mq v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/053-nvme-blk-mq)
+   Compiling cpu-service-chain v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/050-cpu-service-chain)
+   Compiling systems-snackpack-topic-005 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/005-webassembly-performance-model)
+   Compiling topic-072-storage-layout v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/072-storage-layout-and-device-geometry-sparse-files-extents-and-zoned-storage)
+   Compiling ebpf-internals v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/040-ebpf-internals)
+   Compiling topic061-probabilistic-filters v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/061-probabilistic-filters)
+   Compiling futex-parking v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/069-futex-parking)
+   Compiling topic062-load-balancing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/062-load-balancing)
+   Compiling lsm-compaction-economics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/059-lsm-compaction-economics)
+   Compiling cache-coherence-false-sharing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/046-cache-coherence-false-sharing)
+   Compiling cgroup-pressure v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/070-cgroup-pressure)
+   Compiling topic064-kernel-bypass v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/064-kernel-bypass)
+   Compiling atomics-under-contention v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/047-atomics-under-contention)
+   Compiling dram-memory-controller-behavior v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/049-dram-memory-controller-behavior)
+   Compiling tail-latency-histogram-merge-errors v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/044-tail-latency-histogram-merge-errors)
+   Compiling hardware-software-prefetching v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/048-hardware-software-prefetching)
+    Finished `bench` profile [optimized] target(s) in 11.26s
+  Executable benches src/lib.rs (target/release/deps/advanced_benchmarking_methodology-5902be5e9afcf940)
+  Executable benches/checksum.rs (target/release/deps/checksum-fdbb01cf18d72240)
+  Executable benches src/lib.rs (target/release/deps/allocator_internals_fragmentation-4549d076a3e68c88)
+  Executable benches src/lib.rs (target/release/deps/async_runtime_mechanics-00948a5390373634)
+  Executable benches src/lib.rs (target/release/deps/atomics_under_contention-0902bcd85e24053c)
+  Executable benches src/lib.rs (target/release/deps/backpressure_overload-f71f72b6d4ad3ddb)
+  Executable benches src/bin/overload_probe.rs (target/release/deps/overload_probe-ee6a580d52fecf92)
+  Executable benches src/lib.rs (target/release/deps/bounded_mpmc_queue-547b690727f2f797)
+  Executable benches src/main.rs (target/release/deps/bounded_mpmc_queue-7f9b1d30ccc4886a)
+  Executable benches src/lib.rs (target/release/deps/cache_coherence_false_sharing-76e87747a5385920)
+  Executable benches src/lib.rs (target/release/deps/cgroup_pressure-30902af2d7a8c235)
+  Executable benches src/lib.rs (target/release/deps/compiler_optimization_boundaries-2a4153f5cb24a3f2)
+  Executable benches/boundary.rs (target/release/deps/boundary-cd124c9a1ca54d89)
+  Executable benches src/lib.rs (target/release/deps/compression_systems_primitive-102ea7f959c08acc)
+  Executable benches src/bin/compression_contract_probe.rs (target/release/deps/compression_contract_probe-19702f4b6c429424)
+  Executable benches src/lib.rs (target/release/deps/connection_tracking_nat_limits-2f61646c022980cd)
+  Executable benches src/lib.rs (target/release/deps/consensus_leases_fencing-c44ac4665f6f2561)
+  Executable benches src/lib.rs (target/release/deps/consistent_hashing_movement-07a1ace91b2a6816)
+  Executable benches src/lib.rs (target/release/deps/constant_time_systems-5f20934f9ff6fe7f)
+  Executable benches src/lib.rs (target/release/deps/cpu_frontend_bottlenecks-dbe158e1cb623353)
+  Executable benches src/lib.rs (target/release/deps/atomic_lowering-9ef5131a92a8ec5d)
+  Executable benches src/bin/atomic_cost.rs (target/release/deps/atomic_cost-fc1e0fabdd5adac4)
+  Executable benches src/bin/store_buffering.rs (target/release/deps/store_buffering-6e7fe8e569bc70c4)
+  Executable benches src/lib.rs (target/release/deps/cpu_service_chain-6572d4f1bbaff06d)
+  Executable benches src/lib.rs (target/release/deps/data_layout_transformations-5171c316e09ebaf0)
+  Executable benches src/lib.rs (target/release/deps/database_index_internals-3dddaa235f01c27d)
+  Executable benches src/main.rs (target/release/deps/index_layout_probe-80284e38791c18a4)
+  Executable benches/lookup.rs (target/release/deps/lookup-550009eb85df20f7)
+  Executable benches src/lib.rs (target/release/deps/distributed_time_ordering-b6497a826bfb9f75)
+  Executable benches src/bin/ordering_probe.rs (target/release/deps/ordering_probe-d34d3308a9e7a19b)
+  Executable benches src/lib.rs (target/release/deps/dram_memory_controller_behavior-fe6645a990a0da24)
+  Executable benches src/lib.rs (target/release/deps/ebpf_internals-7dac90fd491a6bc7)
+  Executable benches src/lib.rs (target/release/deps/filesystem_crash_semantics-37c870350db7b849)
+  Executable benches src/lib.rs (target/release/deps/finite_state_transducers_compact_dictionaries-49253e52cf4fb7b0)
+  Executable benches src/bin/dictionary_probe.rs (target/release/deps/dictionary_probe-4762626c2d13c36d)
+  Executable benches src/lib.rs (target/release/deps/futex_parking-2a0e2e88f2bec982)
+  Executable benches src/lib.rs (target/release/deps/hardware_software_prefetching-fb42946893506b98)
+  Executable benches src/lib.rs (target/release/deps/idempotency_concurrency-b9cf7273b84bd033)
+  Executable benches src/bin/idempotency_probe.rs (target/release/deps/idempotency_probe-b6ed5a42cea439b9)
+  Executable benches src/lib.rs (target/release/deps/io_uring_lifetimes-4f6b28caf47f61b7)
+  Executable benches src/lib.rs (target/release/deps/iommu_dma_device_memory-54d69060afecaf27)
+  Executable benches src/bin/dma_contract_probe.rs (target/release/deps/dma_contract_probe-be1bbd72a0778b90)
+  Executable benches src/lib.rs (target/release/deps/linkers_loaders_binary_layout-a6691f241bc6d6ee)
+  Executable benches/block_summary.rs (target/release/deps/block_summary-7c7abad875711201)
+  Executable benches src/lib.rs (target/release/deps/lock_free_reclamation_aba-d34f72f06b5e78e0)
+  Executable benches src/bin/aba_lab.rs (target/release/deps/aba_lab-9fb06a585525f908)
+  Executable benches src/lib.rs (target/release/deps/lsm_compaction_economics-aa4d25b3983c7d0f)
+  Executable benches src/lib.rs (target/release/deps/memory_level_parallelism-ec9ab40db4ab51f7)
+  Executable benches/chain_sweep.rs (target/release/deps/chain_sweep-809c5b7ef3e7d60c)
+  Executable benches src/lib.rs (target/release/deps/metadata_scalability-ddd59b11feb6ab8f)
+  Executable benches src/lib.rs (target/release/deps/monomorphization-6563697a75fd6e22)
+  Executable benches src/lib.rs (target/release/deps/multipart_correctness-36d6dc029b819b77)
+  Executable benches src/lib.rs (target/release/deps/mvcc_hot_vacuum-d19919cf946d37af)
+  Executable benches src/bin/mvcc_hot_vacuum_probe.rs (target/release/deps/mvcc_hot_vacuum_probe-4df7b7c737123f22)
+  Executable benches src/lib.rs (target/release/deps/nic_datapath_cost_model-21fdf951de9ba13d)
+  Executable benches src/lib.rs (target/release/deps/numa_first_touch_migration-6186d1c369c0c880)
+  Executable benches src/lib.rs (target/release/deps/nvme_blk_mq-8518497574d2c38d)
+  Executable benches src/lib.rs (target/release/deps/packet_steering_interrupts-1aba8fbd9fc0e2ea)
+  Executable benches src/lib.rs (target/release/deps/page_cache_io-0418bf9041a03ddf)
+  Executable benches src/lib.rs (target/release/deps/performance_portability_vector_width-2f206fc84f44fe2c)
+  Executable benches src/lib.rs (target/release/deps/pgo_post_link_optimization-b1cb38467ba8b6b8)
+  Executable benches src/lib.rs (target/release/deps/queueing_service_design-0a80e183f48fab80)
+  Executable benches src/bin/queue_probe.rs (target/release/deps/queue_probe-79e9bb2134519abc)
+  Executable benches src/lib.rs (target/release/deps/quorum_consistency_costs-091ace6d73c02245)
+  Executable benches src/lib.rs (target/release/deps/roaring_bitmaps_compressed_sets-b11957ff898fd20b)
+  Executable benches src/bin/bitmap_probe.rs (target/release/deps/bitmap_probe-0899fc1e78f2c70c)
+  Executable benches src/lib.rs (target/release/deps/rust_aliasing_provenance-49ee2922847c9e57)
+  Executable benches src/lib.rs (target/release/deps/sequence_locks-c609bed1ba00c765)
+  Executable benches src/main.rs (target/release/deps/sequence_locks-80065c773b6419a0)
+  Executable benches src/lib.rs (target/release/deps/spectre_era_performance_tradeoffs-df910eeea7289408)
+  Executable benches src/bin/spectre_tradeoff_probe.rs (target/release/deps/spectre_tradeoff_probe-e1320bcd78e9ebc8)
+  Executable benches src/lib.rs (target/release/deps/ssd_gc-ea3689e514df9845)
+  Executable benches src/lib.rs (target/release/deps/string_matching_selection-7ec7a5f8fda7c838)
+  Executable benches src/bin/string_match_probe.rs (target/release/deps/string_match_probe-ca9739271c2cf133)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_001-a8034e4b9d70bc65)
+  Executable benches/throughput.rs (target/release/deps/throughput-53f7d28aed4177a3)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_002-8bf2a7f79342c0f7)
+  Executable benches/fold.rs (target/release/deps/fold-8e9d64a110fc3ea4)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_003-af132e8426a6b185)
+  Executable benches/phase_workload.rs (target/release/deps/phase_workload-40157f53c86b4e57)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_004-021879e33ad4698e)
+  Executable benches/division_chain.rs (target/release/deps/division_chain-4b5cb8d8a770b58a)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_005-716cf20b52053917)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_006-f6f36bb5522141cc)
+  Executable benches/selectivity.rs (target/release/deps/selectivity-bea8183deabac115)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_007-704ac48811d26ad2)
+  Executable benches/control_flow.rs (target/release/deps/control_flow-8c5f468b25b79451)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_008-bf6dd359abc1b4d1)
+  Executable benches/address_translation.rs (target/release/deps/address_translation-be7a6448e82b646b)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_009-ec4db45d75123b9f)
+  Executable benches/succinct_rank.rs (target/release/deps/succinct_rank-244bba797036c2f8)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_010-241029ce613b7dab)
+  Executable benches/crc32c.rs (target/release/deps/crc32c-f9313a8185739a18)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_011-ad196af1c6cda198)
+  Executable benches/cycle_probe.rs (target/release/deps/cycle_probe-3e86ae669af01e38)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_012-bd9e891e441ad947)
+  Executable benches/fault_cost_model.rs (target/release/deps/fault_cost_model-72f5e6da78229772)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_013-6e8d7ead3d3677e9)
+  Executable benches/cache_layout.rs (target/release/deps/cache_layout-0701c7d1d3912ee9)
+  Executable benches src/lib.rs (target/release/deps/systems_snackpack_topic_014-31b41bb438f178ee)
+  Executable benches/cpu_dispatch.rs (target/release/deps/cpu_dispatch-d823100a0b545341)
+  Executable benches src/lib.rs (target/release/deps/histogram_merge_errors-36b7c7ed9bfae8f5)
+  Executable benches src/lib.rs (target/release/deps/tcp_quic_application_pacing-7bd42f263f33edc6)
+  Executable benches src/lib.rs (target/release/deps/tls_record_sizing-1238b75799d78c97)
+  Executable benches src/lib.rs (target/release/deps/topic_021_store_write_path-82b59417a6ce3e4f)
+  Executable benches/write_path.rs (target/release/deps/write_path-d01a525e554e0658)
+  Executable benches src/lib.rs (target/release/deps/wal_crash_consistency-41aa16aa58babded)
+  Executable benches src/bin/wal_crash_probe.rs (target/release/deps/wal_crash_probe-191e967e4936be09)
+  Executable benches src/lib.rs (target/release/deps/topic_067_abi_ffi_performance_boundaries-237592a3addcb4f8)
+  Executable benches src/lib.rs (target/release/deps/topic_072_storage_layout-6461554f46b87d84)
+  Executable benches src/lib.rs (target/release/deps/topic060_deterministic_simulation-949addf5e1601ddc)
+  Executable benches src/lib.rs (target/release/deps/topic061_probabilistic_filters-c1294e5bde94d953)
+  Executable benches src/lib.rs (target/release/deps/topic062_load_balancing-255dadc64a0e683c)
+  Executable benches src/lib.rs (target/release/deps/topic063_anti_entropy-5ef36e28e389fe34)
+  Executable benches src/lib.rs (target/release/deps/topic064_kernel_bypass-4a294408cdcc9f3a)
+  Executable benches src/lib.rs (target/release/deps/topic065_query_execution-565b332fd2db6472)
+  Executable benches src/lib.rs (target/release/deps/topic081_rust_runtime-73d2bffcc47989ef)
+  Executable benches src/main.rs (target/release/deps/topic081_rust_runtime-814ca9577718a9c0)
+  Executable benches src/lib.rs (target/release/deps/zero_copy_limits-1e086021fbaf1d78)
+  Executable benches src/bin/zero_copy_contract_probe.rs (target/release/deps/zero_copy_contract_probe-0df06123130a2fd6)
+ Documenting cpu-memory-model-atomic-lowering v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/022-cpu-memory-model-atomic-lowering)
+    Checking cpu-memory-model-atomic-lowering v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/022-cpu-memory-model-atomic-lowering)
+    Checking idempotency-concurrency v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/030-idempotency-concurrency)
+ Documenting compression-systems-primitive v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/037-compression-systems-primitive)
+    Checking backpressure-overload v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/028-backpressure-overload)
+ Documenting roaring-bitmaps-compressed-sets v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/036-roaring-bitmaps-compressed-sets)
+    Checking distributed-time-ordering v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/029-distributed-time-ordering)
+    Checking lock-free-reclamation-aba v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/023-lock-free-reclamation-aba)
+    Checking mvcc-hot-vacuum v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/032-mvcc-hot-vacuum)
+    Checking spectre-era-performance-tradeoffs v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/043-spectre-era-performance-tradeoffs)
+    Checking database-index-internals v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/031-database-index-internals)
+    Checking zero-copy-limits v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/038-zero-copy-limits)
+ Documenting finite-state-transducers-compact-dictionaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/035-finite-state-transducers-compact-dictionaries)
+    Checking queueing-service-design v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/027-queueing-service-design)
+ Documenting backpressure-overload v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/028-backpressure-overload)
+    Checking compression-systems-primitive v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/037-compression-systems-primitive)
+ Documenting topic-033-wal-crash-consistency v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/033-wal-crash-consistency)
+ Documenting spectre-era-performance-tradeoffs v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/043-spectre-era-performance-tradeoffs)
+ Documenting distributed-time-ordering v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/029-distributed-time-ordering)
+    Checking roaring-bitmaps-compressed-sets v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/036-roaring-bitmaps-compressed-sets)
+ Documenting idempotency-concurrency v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/030-idempotency-concurrency)
+    Checking string-matching-selection v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/034-string-matching-selection)
+ Documenting string-matching-selection v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/034-string-matching-selection)
+    Checking topic-033-wal-crash-consistency v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/033-wal-crash-consistency)
+ Documenting lock-free-reclamation-aba v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/023-lock-free-reclamation-aba)
+    Checking iommu-dma-device-memory v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/039-iommu-dma-device-memory)
+ Documenting zero-copy-limits v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/038-zero-copy-limits)
+ Documenting iommu-dma-device-memory v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/039-iommu-dma-device-memory)
+ Documenting mvcc-hot-vacuum v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/032-mvcc-hot-vacuum)
+ Documenting queueing-service-design v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/027-queueing-service-design)
+    Checking finite-state-transducers-compact-dictionaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/035-finite-state-transducers-compact-dictionaries)
+ Documenting database-index-internals v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/031-database-index-internals)
+ Documenting constant-time-systems v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/068-constant-time-systems)
+ Documenting bounded-mpmc-queue v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/078-bounded-mpmc-queue)
+ Documenting topic-067-abi-ffi-performance-boundaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/067-abi-ffi-performance-boundaries)
+ Documenting systems-snackpack-topic-002 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/002-intrinsics-vs-assembly)
+ Documenting systems-snackpack-topic-010 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/010-hashing-checksums-prng)
+ Documenting numa-first-touch-migration v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/025-numa-first-touch-migration)
+ Documenting dram-memory-controller-behavior v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/049-dram-memory-controller-behavior)
+ Documenting async-runtime-mechanics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/041-async-runtime-mechanics)
+ Documenting monomorphization v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/080-monomorphization)
+ Documenting topic060-deterministic-simulation v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/060-deterministic-simulation)
+ Documenting memory-level-parallelism v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/020-memory-level-parallelism)
+ Documenting allocator-internals-fragmentation v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/024-allocator-internals-fragmentation)
+ Documenting topic061-probabilistic-filters v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/061-probabilistic-filters)
+ Documenting rust-aliasing-provenance v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/042-rust-aliasing-provenance)
+ Documenting topic062-load-balancing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/062-load-balancing)
+ Documenting multipart-correctness v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/073-object-store-multipart-correctness)
+ Documenting topic-072-storage-layout v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/072-storage-layout-and-device-geometry-sparse-files-extents-and-zoned-storage)
+ Documenting systems-snackpack-topic-013 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/013-cache-aware-oblivious)
+ Documenting topic064-kernel-bypass v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/064-kernel-bypass)
+ Documenting quorum-consistency-costs v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/057-quorum-consistency-costs)
+ Documenting ssd-gc v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/071-ssd-garbage-collection)
+ Documenting systems-snackpack-topic-001 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/001-swar-simd-scalar)
+ Documenting systems-snackpack-topic-006 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/006-ngram-text-indexing)
+ Documenting cpu-service-chain v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/050-cpu-service-chain)
+ Documenting systems-snackpack-topic-011 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/011-cycle-accurate-measurement)
+ Documenting futex-parking v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/069-futex-parking)
+ Documenting pgo-post-link-optimization v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/018-pgo-post-link-optimization)
+ Documenting systems-snackpack-topic-014 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/014-cpu-dispatch-portable-optimization)
+ Documenting metadata-scalability v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/077-metadata-scalability)
+ Documenting performance-portability-vector-width v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/045-performance-portability-vector-width)
+ Documenting tcp-quic-application-pacing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/056-tcp-quic-application-pacing)
+ Documenting atomics-under-contention v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/047-atomics-under-contention)
+ Documenting io-uring-lifetimes v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/054-io-uring-lifetimes)
+ Documenting consensus-leases-fencing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/058-consensus-leases-fencing)
+ Documenting advanced-benchmarking-methodology v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/015-advanced-benchmarking-methodology)
+ Documenting compiler-optimization-boundaries v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/016-compiler-optimization-boundaries)
+ Documenting systems-snackpack-topic-009 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/009-succinct-static-index-structures)
+ Documenting systems-snackpack-topic-012 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/012-mmap-page-faults)
+ Documenting linkers-loaders-binary-layout v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/017-linkers-loaders-binary-layout)
+ Documenting data-layout-transformations v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/066-data-layout-transformations)
+ Documenting cache-coherence-false-sharing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/046-cache-coherence-false-sharing)
+ Documenting cpu-frontend-bottlenecks v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/019-cpu-frontend-bottlenecks)
+ Documenting connection-tracking-nat-limits v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/075-connection-tracking-nat-limits)
+ Documenting lsm-compaction-economics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/059-lsm-compaction-economics)
+ Documenting topic-021-store-write-path v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/021-store-write-path)
+ Documenting hardware-software-prefetching v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/048-hardware-software-prefetching)
+ Documenting ebpf-internals v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/040-ebpf-internals)
+ Documenting systems-snackpack-topic-003 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/003-linux-perf-workflow)
+ Documenting sequence-locks v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/079-sequence-locks)
+ Documenting systems-snackpack-topic-008 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/008-tlbs-address-translation)
+ Documenting nic-datapath-cost-model v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/026-nic-datapath)
+ Documenting filesystem-crash-semantics v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/052-filesystem-crash-semantics)
+ Documenting systems-snackpack-topic-005 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/005-webassembly-performance-model)
+ Documenting tls-record-sizing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/074-tls-record-sizing)
+ Documenting cgroup-pressure v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/070-cgroup-pressure)
+ Documenting topic063-anti-entropy v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/063-anti-entropy)
+ Documenting systems-snackpack-topic-004 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/004-reading-assembly-performance)
+ Documenting page-cache-io v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/051-page-cache-io)
+ Documenting nvme-blk-mq v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/053-nvme-blk-mq)
+ Documenting topic065-query-execution v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/065-query-execution)
+ Documenting topic081-rust-runtime v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/081-rust-runtime-semantics)
+ Documenting consistent-hashing-movement v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/076-consistent-hashing-movement)
+ Documenting systems-snackpack-topic-007 v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/007-branchless-predictable-control-flow)
+ Documenting tail-latency-histogram-merge-errors v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/044-tail-latency-histogram-merge-errors)
+ Documenting packet-steering-interrupts v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/topics/055-packet-steering-interrupts)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.72s
+   Generated /Users/ahrav/Documents/Codex/2026-10-18/advanced-systems-daily-lesson-every-local/work/systems/target/doc/advanced_benchmarking_methodology/index.html and 97 other files

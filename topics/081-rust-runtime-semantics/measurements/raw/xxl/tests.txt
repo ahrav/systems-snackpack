@@ -1,0 +1,11 @@
+
+running 6 tests
+test tests::documented_option_layout ... ok
+test tests::fields_drop_in_declaration_order ... ok
+test tests::kernels_match_wide_arithmetic_at_boundaries ... ok
+test tests::share_only_with_a_suitable_payload ... ok
+test tests::unequal_inputs_reject_in_both_directions ... ok
+test tests::unwind_drops_live_locals_in_reverse_order ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

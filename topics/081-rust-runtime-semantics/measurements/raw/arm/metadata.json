@@ -1,0 +1,90 @@
+{
+  "host": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+  "uname": [
+    "Linux",
+    "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+    "6.12.111-136.204.amzn2023.aarch64",
+    "#1 SMP Tue Oct  6 18:01:38 UTC 2026",
+    "aarch64",
+    "aarch64"
+  ],
+  "affinity": [
+    0
+  ],
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-unknown-linux-gnu\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "commands": [
+    [
+      "rustup",
+      "run",
+      "1.93.1",
+      "rustc",
+      "--edition=2024",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "target-cpu=native",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "lto=off",
+      "-C",
+      "panic=unwind",
+      "--crate-type=rlib",
+      "--crate-name",
+      "topic081_rust_runtime",
+      "/tmp/codex-topic081-20261018-2094380-arm/topics/081-rust-runtime-semantics/src/lib.rs",
+      "-o",
+      "/tmp/codex-topic081-20261018-2094380-arm/out/libtopic081_rust_runtime.rlib"
+    ],
+    [
+      "rustup",
+      "run",
+      "1.93.1",
+      "rustc",
+      "--edition=2024",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "target-cpu=native",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "lto=off",
+      "-C",
+      "panic=unwind",
+      "/tmp/codex-topic081-20261018-2094380-arm/topics/081-rust-runtime-semantics/src/main.rs",
+      "--extern",
+      "topic081_rust_runtime=/tmp/codex-topic081-20261018-2094380-arm/out/libtopic081_rust_runtime.rlib",
+      "-o",
+      "/tmp/codex-topic081-20261018-2094380-arm/out/runtime"
+    ],
+    [
+      "rustup",
+      "run",
+      "1.93.1",
+      "rustc",
+      "--edition=2024",
+      "--test",
+      "/tmp/codex-topic081-20261018-2094380-arm/topics/081-rust-runtime-semantics/src/lib.rs",
+      "-o",
+      "/tmp/codex-topic081-20261018-2094380-arm/out/tests"
+    ]
+  ],
+  "binary_sha256": "5f442f21ad3f567dbfa003c084c6cacdc0acb08923f2cb33de4869ce6aeb7905",
+  "sources": {
+    "Cargo.toml": "215c4be81a089e2d59d5dee9e6916e8a1a74cd347de3572a6707c757f8495d7e",
+    "README.md": "fc1b866460eaf03c065dc78ad643e804d3b6c50821bcee804c36bdc9a5cc2afe",
+    "SOURCES.md": "8edea4cb9a6420395407e5648a3f12a7590afd1d43ed6edfbfa6ca0df7a9f280",
+    "experiment/panic_probe.rs": "02c2f873c64a716f008a9643f3aac5f7c22b960fd15a0690c15e270c1b98a608",
+    "experiment/run.py": "8729bf3907d9dbc3427d6494455354e65039531bb1826adf66cc3febb6cb8500",
+    "src/lib.rs": "1911a479d7164e4a3ea5971ec96878097b9440fa458abe545d739b8c7be79f66",
+    "src/main.rs": "3fbd664c348e1e6e5d7d5ba0c60f13f7767a0ebb28010a2ebbe99e4339afa322",
+    "topic81-contracts.png": "50aac8acea570e36928bfce54ebac9b1e68d76c8af2b422a062d2b9ad73ffbe8",
+    "topic81-contracts.svg": "644df66bd899be583e3ae3b88c135c47573d6b2f0cf4a63fe3b8fa37027b20e3",
+    "topic81-demo.rs": "555fc3a718fa35b82bcd12cb5e02f65e2190146fd56e8088e2ceaa9884821143"
+  },
+  "measured_processes": 120,
+  "warmup_processes": 20,
+  "calibration_processes": 20,
+  "lscpu": "Architecture:                            aarch64\nCPU op-mode(s):                          32-bit, 64-bit\nByte Order:                              Little Endian\nCPU(s):                                  64\nOn-line CPU(s) list:                     0-63\nVendor ID:                               ARM\nModel:                                   1\nThread(s) per core:                      1\nCore(s) per socket:                      64\nSocket(s):                               1\nStepping:                                r1p1\nBogoMIPS:                                2100.00\nFlags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nL1d cache:                               4 MiB (64 instances)\nL1i cache:                               4 MiB (64 instances)\nL2 cache:                                64 MiB (64 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-63\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; CSV2, BHB\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n"
+}

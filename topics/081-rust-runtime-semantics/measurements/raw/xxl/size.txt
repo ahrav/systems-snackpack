@@ -1,0 +1,2 @@
+   text	   data	    bss	    dec	    hex	filename
+ 352335	  13752	    424	 366511	  597af	/tmp/codex-topic081-20261018-2094380-xxl/out/runtime

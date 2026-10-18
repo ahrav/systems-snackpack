@@ -1,0 +1,12 @@
+{
+  "unwind": {
+    "returncode": 0,
+    "stdout": "CAUGHT_MARKER\n",
+    "stderr": "\nthread 'main' (188516) panicked at /tmp/codex-topic081-20261018-2094380-xxl/topics/081-rust-runtime-semantics/experiment/panic_probe.rs:11:9:\nintentional probe\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\nDROP_MARKER\n"
+  },
+  "abort": {
+    "returncode": -6,
+    "stdout": "",
+    "stderr": "\nthread 'main' (188529) panicked at /tmp/codex-topic081-20261018-2094380-xxl/topics/081-rust-runtime-semantics/experiment/panic_probe.rs:11:9:\nintentional probe\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n"
+  }
+}
