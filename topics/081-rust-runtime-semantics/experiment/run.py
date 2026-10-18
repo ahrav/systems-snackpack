@@ -7,8 +7,8 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import resource
-import statistics
 import subprocess
 
 P = Path(__file__).resolve().parents[1]
@@ -17,6 +17,16 @@ VARIANTS = ['generic', 'enum', 'dyn-item', 'dyn-batch']
 
 def command(args, **kw):
     return subprocess.run(args, check=True, text=True, capture_output=True, **kw)
+
+def source_hashes(out):
+    """SHA-256 of every committed topic source file, keyed by topic-relative path.
+
+    Generated trees (`measurements/`, `__pycache__/`, and the output directory,
+    which may sit inside the topic) are not sources.
+    """
+    return {str(f.relative_to(P)):hashlib.sha256(f.read_bytes()).hexdigest()
+            for f in sorted(P.rglob('*')) if f.is_file() and not f.is_relative_to(out)
+            and not {'measurements', '__pycache__'} & set(f.parts)}
 
 def oracle(policy, n, seed, dot=False):
     total = 0
@@ -112,7 +122,7 @@ def main():
                 ns=sample(v,policy,n,reps,123)
                 rows.append(dict(policy=name,n=n,block=block,position=position,variant=v,
                                  reps=reps,ns=ns,ns_per_item=ns/(reps*n)))
-    with (out/'runtime.csv').open('w') as f:
+    with (out/'runtime.csv').open('w', newline='') as f:
         writer=csv.DictWriter(f,fieldnames=list(rows[0]))
         writer.writeheader(); writer.writerows(rows)
     (out/'calibration.json').write_text(json.dumps(calibration,indent=2)+'\n')
@@ -120,15 +130,13 @@ def main():
         affinity=sorted(os.sched_getaffinity(0)) if hasattr(os,'sched_getaffinity') else None,
         rustc=command(rust+['-Vv']).stdout,commands=commands,
         binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),
-        sources={str(f.relative_to(P)):hashlib.sha256(f.read_bytes()).hexdigest()
-                 for f in sorted(P.rglob('*')) if f.is_file() and 'measurements' not in f.parts},
+        sources=source_hashes(out),
         measured_processes=len(rows),warmup_processes=sum(len(v) for _,_,v in cells),
         calibration_processes=sum(len(v) for _,_,v in cells))
     if platform.system()=='Linux':
         meta['lscpu']=command(['lscpu']).stdout
         full=command(['objdump','-d','-C',str(binary)]).stdout
         # Keep complete function blocks for this crate, from the linked executable.
-        import re
         blocks=re.split(r'(?=^[0-9a-f]+ <)',full,flags=re.M)
         selected=[b for b in blocks if 'topic081_rust_runtime::' in b.split('\n',1)[0]]
         assert selected
