@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="690" viewBox="0 0 1220 690">
+<rect width="1220" height="690" fill="#f5f7fb"/>
+<style>text{font-family:Arial,sans-serif;fill:#142b45}.title{font-size:29px;font-weight:bold}.h{font-size:18px;font-weight:bold}.t{font-size:17px}.sub{font-size:18px;fill:#466078}</style>
+<text x="40" y="53" class="title">One batch processor, five contracts the optimizer must respect</text>
+<text x="40" y="86" class="sub">Language guarantees decide what is legal. The compiled artifact shows which costs remain.</text>
+<rect x="35" y="115" width="1150" height="88" rx="12" fill="white" stroke="#c9d5e4"/>
+<rect x="35" y="115" width="7" height="88" rx="3" fill="#247a93"/>
+<text x="60" y="145" class="h">Policy call</text>
+<text x="60" y="175" class="t">generic / enum / dyn</text>
+<text x="330" y="145" class="t">Concrete code may inline; erased calls may remain.</text>
+<text x="330" y="175" class="h">Inspect the final loop.</text>
+<rect x="35" y="218" width="1150" height="88" rx="12" fill="white" stroke="#c9d5e4"/>
+<rect x="35" y="218" width="7" height="88" rx="3" fill="#247a93"/>
+<text x="60" y="248" class="h">Optional batch ID</text>
+<text x="60" y="278" class="t">Option&lt;NonZeroU64&gt;</text>
+<text x="330" y="248" class="t">Zero encodes None; valid IDs remain nonzero.</text>
+<text x="330" y="278" class="h">Use documented layout guarantees.</text>
+<rect x="35" y="321" width="1150" height="88" rx="12" fill="white" stroke="#c9d5e4"/>
+<rect x="35" y="321" width="7" height="88" rx="3" fill="#247a93"/>
+<text x="60" y="351" class="h">Cleanup</text>
+<text x="60" y="381" class="t">scope exit / unwind / abort</text>
+<text x="330" y="351" class="t">Unwind drops live locals; abort skips unwinding.</text>
+<text x="330" y="381" class="h">Keep fallible commit explicit.</text>
+<rect x="35" y="424" width="1150" height="88" rx="12" fill="white" stroke="#c9d5e4"/>
+<rect x="35" y="424" width="7" height="88" rx="3" fill="#247a93"/>
+<text x="60" y="454" class="h">Thread boundary</text>
+<text x="60" y="484" class="t">Send / Sync</text>
+<text x="330" y="454" class="t">Move ownership safely / share references safely.</text>
+<text x="330" y="484" class="h">Arc does not repair an unsafe payload.</text>
+<rect x="35" y="527" width="1150" height="88" rx="12" fill="white" stroke="#c9d5e4"/>
+<rect x="35" y="527" width="7" height="88" rx="3" fill="#247a93"/>
+<text x="60" y="557" class="h">Slice traversal</text>
+<text x="60" y="587" class="t">index / iterator / zip</text>
+<text x="330" y="557" class="t">Proven bounds can remove checks. Zip truncates.</text>
+<text x="330" y="587" class="h">Preserve the input contract.</text>
+<text x="40" y="663" class="sub">Measure complete correct alternatives. A removed check or smaller value is not automatically a faster service.</text>
+</svg>

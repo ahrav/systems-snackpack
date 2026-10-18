@@ -346,5 +346,9 @@ name = "topic065-query-execution"
 version = "0.1.0"
 
 [[package]]
+name = "topic081-rust-runtime"
+version = "0.1.0"
+
+[[package]]
 name = "zero-copy-limits"
 version = "0.1.0"
