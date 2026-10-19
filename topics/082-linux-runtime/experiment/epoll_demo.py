@@ -8,6 +8,7 @@ pipes = [os.pipe2(os.O_NONBLOCK | os.O_CLOEXEC) for _ in range(3)]
 ep = select.epoll()
 ready, queued = collections.deque(), set()
 received = {r: bytearray() for r, _ in pipes}
+served = []
 
 def enqueue(fd):
     if fd not in queued:
@@ -37,10 +38,13 @@ try:
             ep.unregister(fd)
             continue
         received[fd].extend(data)
+        served.append(fd)
         enqueue(fd)  # Budget used: preserve readiness until EAGAIN.
         if [len(received[r]) for r, _ in pipes] == [128, 16, 16]:
             break
     assert [bytes(received[r]) for r, _ in pipes] == [b'A' * 128, b'B' * 16, b'C' * 16]
+    hot_done = len(served) - 1 - served[::-1].index(pipes[0][0])
+    assert served.index(pipes[1][0]) < hot_done and served.index(pipes[2][0]) < hot_done, served
     print('PASS: hot=128 cold=16 late=16; no second hot-pipe write needed')
 finally:
     ep.close()
