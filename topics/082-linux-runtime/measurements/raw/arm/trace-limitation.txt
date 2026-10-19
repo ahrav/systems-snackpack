@@ -1,0 +1,1 @@
+strace is unavailable; no syscall-path observation. Timing alone does not prove a vDSO path.

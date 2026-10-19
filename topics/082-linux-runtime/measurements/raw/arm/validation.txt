@@ -1,0 +1,44 @@
+$ cargo test --locked -p topic082-linux-runtime
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running unittests src/lib.rs (target/debug/deps/topic082_linux_runtime-d4d6ed6c17369c82)
+
+running 6 tests
+test tests::cannot_block_or_pop_over_active_visit - should panic ... ok
+test tests::duplicate_notifications_do_not_add_turns ... ok
+test tests::empty_input_has_no_visits ... ok
+test tests::hot_connection_yields_to_cold_and_late_arrival ... ok
+test tests::exact_budget_still_needs_eagain ... ok
+test tests::zero_budget_is_rejected - should panic ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests topic082_linux_runtime
+
+running 1 test
+test topics/082-linux-runtime/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.28s; merged doctests compilation took 0.28s
+
+$ cargo clippy --locked -p topic082-linux-runtime --all-targets -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+
+$ cargo build --locked --release -p topic082-linux-runtime --example oracle_cases
+    Finished `release` profile [optimized] target(s) in 0.04s
+
+$ python3 /tmp/topic082-20261019-3bac31e46c/topics/082-linux-runtime/experiment/oracle.py /tmp/topic082-20261019-3bac31e46c/target/release/examples/oracle_cases
+PASS: 864 schedules against independent round/rank oracle
+
+$ python3 /tmp/topic082-20261019-3bac31e46c/topics/082-linux-runtime/experiment/epoll_checks.py
+PASS: hot=128 cold=16 late=16; no second hot-pipe write needed
+PASS: level partial drain, rearm if needed, data before EOF
+PASS: edge partial drain, rearm if needed, data before EOF
+PASS: oneshot partial drain, rearm if needed, data before EOF
+
+
+
+PASS: 2000 syscall/libc/syscall clock brackets
+
+PASS: two blocked standard signals coalesce into one signalfd record
+PASS: absolute monotonic one-shot timerfd expires and drains once; no precision claim
