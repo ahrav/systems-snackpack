@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 import sys
 
@@ -52,6 +53,10 @@ for clock in ['monotonic','cpu']:
             r.update(phase='measured', block=block); rows.append(r)
 (out/'runs.json').write_text(json.dumps(rows,indent=2)+'\n')
 # Trace only short diagnostic runs, never the timed campaign.
+if shutil.which('strace') is None:
+    (out/'trace-limitation.txt').write_text('strace is unavailable; no syscall-path observation. Timing alone does not prove a vDSO path.\n')
+    print('PASS: correctness and 24 measured + 4 warmup processes; strace unavailable:', out)
+    sys.exit(0)
 for clock in ['monotonic','cpu']:
     for mode in ['libc','syscall']:
         trace = out/('strace-'+clock+'-'+mode+'.txt')

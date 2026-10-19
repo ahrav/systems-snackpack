@@ -15,7 +15,7 @@ From the repository root:
 cargo test --locked -p topic082-linux-runtime
 cargo build --locked --release -p topic082-linux-runtime --example oracle_cases
 python3 topics/082-linux-runtime/experiment/oracle.py target/release/examples/oracle_cases
-# Linux only; requires cc, Python 3, taskset and strace. No root or host changes.
+# Linux only; requires cc, Python 3 and taskset; strace is optional. No root or host changes.
 python3 topics/082-linux-runtime/experiment/run.py /tmp/topic082-results 0
 ```
 
