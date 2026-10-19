@@ -3,15 +3,17 @@
 import hashlib
 import json
 import os
-from pathlib import Path
 import platform
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 root = Path(__file__).resolve().parents[3]
 topic = Path(__file__).resolve().parents[1]
 out = Path(sys.argv[1]).resolve()
+if out.exists() and any(out.iterdir()):
+    sys.exit(f'{out} holds files from an earlier run; choose a new or empty directory')
 out.mkdir(parents=True, exist_ok=True)
 cpu = int(sys.argv[2]) if len(sys.argv) > 2 else min(os.sched_getaffinity(0))
 assert cpu in os.sched_getaffinity(0)
@@ -24,7 +26,7 @@ facts = {'host': platform.node(), 'uname': platform.uname()._asdict(), 'cpu': cp
          'libc': call(['getconf', 'GNU_LIBC_VERSION']), 'lscpu': call(['lscpu']),
          'affinity': sorted(os.sched_getaffinity(0)),
          'source_hashes': {str(p.relative_to(topic)): hashlib.sha256(p.read_bytes()).hexdigest()
-                           for p in sorted(topic.rglob('*')) if p.is_file() and 'measurements' not in p.parts}}
+                           for p in sorted(topic.rglob('*')) if p.is_file() and 'measurements' not in p.relative_to(topic).parts}}
 (out/'host.json').write_text(json.dumps(facts, indent=2)+'\n')
 logs = []
 for cmd in [
@@ -45,12 +47,14 @@ rows = []
 for clock in ['monotonic','cpu']:
     for mode in ['libc','syscall']:
         r = json.loads(call(['taskset','-c',cpu,out/'clock',mode,clock,1000000]))
-        r.update(phase='warmup', block=-1); rows.append(r)
+        r.update(phase='warmup', block=-1)
+        rows.append(r)
     for block in range(6):
         order = ['libc','syscall'] if block % 2 == 0 else ['syscall','libc']
         for mode in order:
             r = json.loads(call(['taskset','-c',cpu,out/'clock',mode,clock,1000000]))
-            r.update(phase='measured', block=block); rows.append(r)
+            r.update(phase='measured', block=block)
+            rows.append(r)
 (out/'runs.json').write_text(json.dumps(rows,indent=2)+'\n')
 # Trace only short diagnostic runs, never the timed campaign.
 if shutil.which('strace') is None:

@@ -4,6 +4,9 @@ import itertools
 import subprocess
 import sys
 
+if sys.flags.optimize:
+    sys.exit('this probe checks with assert statements; run it with Python optimization off')
+
 lines = subprocess.check_output([sys.argv[1]], text=True).splitlines()
 assert len(lines) == 864
 seen = set()

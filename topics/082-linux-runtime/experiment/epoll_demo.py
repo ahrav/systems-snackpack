@@ -3,6 +3,10 @@
 import collections
 import os
 import select
+import sys
+
+if sys.flags.optimize:
+    sys.exit('this probe checks with assert statements; run it with Python optimization off')
 
 pipes = [os.pipe2(os.O_NONBLOCK | os.O_CLOEXEC) for _ in range(3)]
 ep = select.epoll()

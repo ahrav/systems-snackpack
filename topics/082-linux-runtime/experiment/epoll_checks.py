@@ -6,6 +6,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+if sys.flags.optimize:
+    sys.exit('this probe checks with assert statements; run it with Python optimization off')
+
 for mode in ['level', 'edge', 'oneshot']:
     r, w = os.pipe2(os.O_NONBLOCK | os.O_CLOEXEC)
     ep = select.epoll()
