@@ -1,0 +1,254 @@
+[
+  {
+    "mode": "libc",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 31.924804,
+    "checksum": 61419167,
+    "phase": "warmup",
+    "block": -1
+  },
+  {
+    "mode": "syscall",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 293.181136,
+    "checksum": 35030106,
+    "phase": "warmup",
+    "block": -1
+  },
+  {
+    "mode": "libc",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 31.927124,
+    "checksum": 8653799,
+    "phase": "measured",
+    "block": 0
+  },
+  {
+    "mode": "syscall",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 293.52043,
+    "checksum": 4332115,
+    "phase": "measured",
+    "block": 0
+  },
+  {
+    "mode": "syscall",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 293.555903,
+    "checksum": 1072773455,
+    "phase": "measured",
+    "block": 1
+  },
+  {
+    "mode": "libc",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 31.948992,
+    "checksum": 37182408,
+    "phase": "measured",
+    "block": 1
+  },
+  {
+    "mode": "libc",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 31.915857,
+    "checksum": 122202804,
+    "phase": "measured",
+    "block": 2
+  },
+  {
+    "mode": "syscall",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 292.744288,
+    "checksum": 235377569,
+    "phase": "measured",
+    "block": 2
+  },
+  {
+    "mode": "syscall",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 293.387579,
+    "checksum": 57749798,
+    "phase": "measured",
+    "block": 3
+  },
+  {
+    "mode": "libc",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 31.896426,
+    "checksum": 61879433,
+    "phase": "measured",
+    "block": 3
+  },
+  {
+    "mode": "libc",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 31.984062,
+    "checksum": 18565670,
+    "phase": "measured",
+    "block": 4
+  },
+  {
+    "mode": "syscall",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 292.620185,
+    "checksum": 409888288,
+    "phase": "measured",
+    "block": 4
+  },
+  {
+    "mode": "syscall",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 292.437517,
+    "checksum": 1002266129,
+    "phase": "measured",
+    "block": 5
+  },
+  {
+    "mode": "libc",
+    "clock": "monotonic",
+    "n": 1000000,
+    "ns_per_call": 31.963572,
+    "checksum": 67011524,
+    "phase": "measured",
+    "block": 5
+  },
+  {
+    "mode": "libc",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 368.755283,
+    "checksum": 439424705,
+    "phase": "warmup",
+    "block": -1
+  },
+  {
+    "mode": "syscall",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 365.610308,
+    "checksum": 328184908,
+    "phase": "warmup",
+    "block": -1
+  },
+  {
+    "mode": "libc",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 369.472823,
+    "checksum": 441470413,
+    "phase": "measured",
+    "block": 0
+  },
+  {
+    "mode": "syscall",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 364.84415,
+    "checksum": 367956030,
+    "phase": "measured",
+    "block": 0
+  },
+  {
+    "mode": "syscall",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 365.714043,
+    "checksum": 82865874,
+    "phase": "measured",
+    "block": 1
+  },
+  {
+    "mode": "libc",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 369.179585,
+    "checksum": 136302905,
+    "phase": "measured",
+    "block": 1
+  },
+  {
+    "mode": "libc",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 368.844228,
+    "checksum": 32032686,
+    "phase": "measured",
+    "block": 2
+  },
+  {
+    "mode": "syscall",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 365.838595,
+    "checksum": 151673339,
+    "phase": "measured",
+    "block": 2
+  },
+  {
+    "mode": "syscall",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 364.973623,
+    "checksum": 194496195,
+    "phase": "measured",
+    "block": 3
+  },
+  {
+    "mode": "libc",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 369.021439,
+    "checksum": 242482933,
+    "phase": "measured",
+    "block": 3
+  },
+  {
+    "mode": "libc",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 367.869427,
+    "checksum": 245104293,
+    "phase": "measured",
+    "block": 4
+  },
+  {
+    "mode": "syscall",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 364.272682,
+    "checksum": 84519426,
+    "phase": "measured",
+    "block": 4
+  },
+  {
+    "mode": "syscall",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 365.38174,
+    "checksum": 160076398,
+    "phase": "measured",
+    "block": 5
+  },
+  {
+    "mode": "libc",
+    "clock": "cpu",
+    "n": 1000000,
+    "ns_per_call": 368.982425,
+    "checksum": 392388292,
+    "phase": "measured",
+    "block": 5
+  }
+]
