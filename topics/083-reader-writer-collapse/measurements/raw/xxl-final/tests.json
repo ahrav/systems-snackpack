@@ -1,0 +1,9 @@
+{
+  "command": [
+    "/tmp/ahrav-topic083-20261020-7589a370-xxl-final/results/tests"
+  ],
+  "started": 1792503601.249008,
+  "returncode": 0,
+  "stdout": "\nrunning 6 tests\ntest tests::rejects_time_overflow - should panic ... ok\ntest tests::snapshot_survives_publication ... ok\ntest tests::rejects_wrong_arrival_order - should panic ... ok\ntest tests::writer_gate_and_reader_extension ... ok\ntest tests::candidates_agree_over_requests ... ok\ntest tests::concurrent_versions_remain_whole ... ok\n\ntest result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n",
+  "stderr": ""
+}

@@ -1,0 +1,38 @@
+{
+  "platform": "Linux-6.12.111-136.204.amzn2023.aarch64-aarch64-with-glibc2.34",
+  "hostname": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+  "source_sha256": {
+    "Cargo.toml": "0c3b833a9fcf7a8cc6cd77ba81053ec7b39196861f6f1df5c84f56eec0d25ec3",
+    "experiment/oracle.py": "c3e99eeb81d4efb71951b18dc3299150ebfaac9569c5ac6d8f6c584ac4931090",
+    "experiment/run.py": "4f933a9a8f61378f34374078b35613e6b4d8554953189e51ac6a1f16b9bb4648",
+    "src/lib.rs": "2f2387c24ae094796a0595aec6789c6db1d181553d11e5b8ede14c0c6802dd8c",
+    "src/main.rs": "dcf63ef35984f7b6a117a603fae35c7ffd2ff25931df7381d2e3d4e0001e867f"
+  },
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-unknown-linux-gnu\nrelease: 1.93.1\nLLVM version: 21.1.8\n",
+  "lscpu": "Architecture:                            aarch64\nCPU op-mode(s):                          32-bit, 64-bit\nByte Order:                              Little Endian\nCPU(s):                                  64\nOn-line CPU(s) list:                     0-63\nVendor ID:                               ARM\nModel:                                   1\nThread(s) per core:                      1\nCore(s) per socket:                      64\nSocket(s):                               1\nStepping:                                r1p1\nBogoMIPS:                                2100.00\nFlags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nL1d cache:                               4 MiB (64 instances)\nL1i cache:                               4 MiB (64 instances)\nL2 cache:                                64 MiB (64 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-63\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; CSV2, BHB\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+  "cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "affinity_note": "per-worker singleton affinity verified",
+  "flags": [
+    "--edition=2024",
+    "-C",
+    "opt-level=3",
+    "-C",
+    "target-cpu=native",
+    "-C",
+    "codegen-units=1",
+    "-C",
+    "lto=off",
+    "-C",
+    "panic=unwind"
+  ],
+  "binary_sha256": "0c122037dc197502438eab75ce372d3d8610897eaa1166a7d003bce5c5516ae5"
+}

@@ -1,0 +1,4 @@
+{
+  "measured_source": "7589a370efcf2ee2e41b7378352325edec68e373",
+  "scope": "Rust, manifest and Python runner/oracle unchanged between measurement and the results/docs commits; later review commits harden the runner (timeout retention, NUMA node choice, LF CSV, usage, optimized-Python refusal) and the probe (pinning failure surfaces at join). identity.json source_sha256 records the measured bytes."
+}
