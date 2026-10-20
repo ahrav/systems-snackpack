@@ -28,9 +28,11 @@ The runner uses Rust 1.93.1 and refuses an existing output directory. On Linux i
 selects the first socket/NUMA node exposing eight distinct allowed cores and
 verifies per-worker affinity on them; a worker that cannot be pinned fails the
 process at join. Other systems record uncontrolled placement. Every attempt,
-including a timed-out one, is retained as `<name>.json`. Output CSV has mode,
-worker count, operations per worker, arithmetic rounds, elapsed nanoseconds, and
-checksum. Identical workloads must have identical checksums across candidates.
+including a timed-out one, is retained as `<name>.json`. The runner and oracle
+refuse optimized Python because their checks are `assert` statements. Output
+CSV has mode, worker count, operations per worker, arithmetic rounds, elapsed
+nanoseconds, and checksum. Identical workloads must have identical checksums
+across candidates.
 
 Six unit tests and one doctest cover guard lifetime, whole versions under updates,
 model boundaries, and equivalent candidate computations. The Python oracle checks

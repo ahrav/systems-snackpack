@@ -11,6 +11,9 @@ import subprocess
 import sys
 import time
 
+if sys.flags.optimize:
+    raise SystemExit('validation uses assert: run without python -O or PYTHONOPTIMIZE')
+
 ROOT = Path(__file__).resolve().parents[1]
 FLAGS = ['--edition=2024', '-C', 'opt-level=3', '-C', 'target-cpu=native', '-C', 'codegen-units=1', '-C', 'lto=off', '-C', 'panic=unwind']
 FIELDS = ['phase', 'rep', 'mode', 'threads', 'ops', 'rounds', 'elapsed_ns', 'checksum']

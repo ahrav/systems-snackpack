@@ -4,6 +4,9 @@ import itertools
 import subprocess
 import sys
 
+if sys.flags.optimize:
+    raise SystemExit('validation uses assert: run without python -O or PYTHONOPTIMIZE')
+
 
 def schedule(prefer, length, writer_at, reader_at, write_time, read_time):
     writer_start = reader_start = None

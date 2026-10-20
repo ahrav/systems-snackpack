@@ -53,6 +53,20 @@ class Usage(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn('usage: run.py OUTPUT_DIRECTORY', result.stderr)
 
+    def test_optimized_python_is_rejected_before_any_work(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = pathlib.Path(tmp) / 'out'
+            result = subprocess.run([sys.executable, '-O', run.__file__, str(out)], text=True, capture_output=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('PYTHONOPTIMIZE', result.stderr)
+            self.assertFalse(out.exists())
+
+    def test_optimized_python_is_rejected_by_the_oracle(self):
+        oracle = pathlib.Path(run.__file__).with_name('oracle.py')
+        result = subprocess.run([sys.executable, '-O', str(oracle), '/nonexistent/probe'], text=True, capture_output=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('PYTHONOPTIMIZE', result.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()
