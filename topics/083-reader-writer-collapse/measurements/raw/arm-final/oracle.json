@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "experiment/oracle.py",
+    "/tmp/ahrav-topic083-20261020-7589a370-arm-final/results/probe"
+  ],
+  "started": 1792503602.0678275,
+  "returncode": 0,
+  "stdout": "PASS: 3420 schedule cases, 48 arithmetic cases\n",
+  "stderr": ""
+}

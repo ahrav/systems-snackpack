@@ -21,7 +21,7 @@ cargo test -p reader-writer-collapse
 cargo run --release -p reader-writer-collapse -- bench rwlock 4 250000 0
 python3 topics/083-reader-writer-collapse/experiment/oracle.py target/release/reader-writer-collapse
 cd topics/083-reader-writer-collapse
-python3 experiment/run.py /tmp/topic083-new-output-directory
+rustup run 1.93.1 python3 experiment/run.py /tmp/topic083-new-output-directory
 ```
 
 The runner uses Rust 1.93.1 and refuses an existing output directory. On Linux it
