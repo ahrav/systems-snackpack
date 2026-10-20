@@ -6,31 +6,46 @@ use std::sync::{Barrier, Mutex, RwLock};
 use std::thread;
 use std::time::Instant;
 
-fn pin(cpu: Option<usize>) {
-    if let Some(cpu) = cpu {
-        let tid = std::fs::read_link("/proc/thread-self").unwrap();
-        let tid = tid.file_name().unwrap();
-        let result = std::process::Command::new("taskset")
-            .args(["-pc", &cpu.to_string()])
-            .arg(tid)
-            .output()
-            .unwrap();
-        assert!(result.status.success(), "affinity failed: {:?}", result);
-        let status = std::fs::read_to_string("/proc/thread-self/status").unwrap();
-        let allowed = status
-            .lines()
-            .find(|line| line.starts_with("Cpus_allowed_list:"))
-            .unwrap();
-        assert_eq!(allowed.split_whitespace().last().unwrap(), cpu.to_string());
+fn pin(cpu: Option<usize>) -> Result<(), String> {
+    let Some(cpu) = cpu else {
+        return Ok(());
+    };
+    let tid = std::fs::read_link("/proc/thread-self").map_err(|e| format!("thread id: {e}"))?;
+    let tid = tid
+        .file_name()
+        .ok_or("thread id has no file name")?
+        .to_owned();
+    let result = std::process::Command::new("taskset")
+        .args(["-pc", &cpu.to_string()])
+        .arg(tid)
+        .output()
+        .map_err(|e| format!("taskset: {e}"))?;
+    if !result.status.success() {
+        return Err(format!("affinity failed: {result:?}"));
     }
+    let status = std::fs::read_to_string("/proc/thread-self/status")
+        .map_err(|e| format!("thread status: {e}"))?;
+    let allowed = status
+        .lines()
+        .find(|line| line.starts_with("Cpus_allowed_list:"))
+        .and_then(|line| line.split_whitespace().last())
+        .ok_or("Cpus_allowed_list missing from thread status")?;
+    if allowed != cpu.to_string() {
+        return Err(format!("affinity read back {allowed}, expected {cpu}"));
+    }
+    Ok(())
 }
 
 fn bench(mode: &str, threads: usize, operations: u64, rounds: u32) {
-    assert!(["mutex", "rwlock", "snapshot"].contains(&mode));
-    assert!((1..=64).contains(&threads) && operations > 0);
     let cpus: Vec<usize> = std::env::var("BENCH_CPUS")
         .map(|s| s.split(',').map(|x| x.parse().unwrap()).collect())
         .unwrap_or_default();
+    bench_on(mode, threads, operations, rounds, &cpus);
+}
+
+fn bench_on(mode: &str, threads: usize, operations: u64, rounds: u32, cpus: &[usize]) {
+    assert!(["mutex", "rwlock", "snapshot"].contains(&mode));
+    assert!((1..=64).contains(&threads) && operations > 0);
     assert!(cpus.is_empty() || cpus.len() >= threads);
     let mutex = Mutex::new(Route::new(7));
     let rwlock = RwLock::new(Route::new(7));
@@ -42,9 +57,12 @@ fn bench(mode: &str, threads: usize, operations: u64, rounds: u32) {
             let cpu = cpus.get(worker).copied();
             let (mutex, rwlock, ready, start) = (&mutex, &rwlock, &ready, &start);
             handles.push(scope.spawn(move || {
-                pin(cpu);
+                // Every worker reaches both barriers; a pinning failure
+                // surfaces at join after both barriers complete.
+                let pinned = pin(cpu);
                 ready.wait();
                 start.wait();
+                pinned.expect("worker affinity");
                 let mut sum = 0_u64;
                 for item in 0..operations {
                     let request = item ^ u64::try_from(worker).unwrap();
@@ -133,5 +151,26 @@ fn main() {
         _ => {
             panic!("usage: reader-writer-collapse bench MODE THREADS OPS ROUNDS | model | compute")
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::bench_on;
+    use std::sync::mpsc;
+    use std::thread;
+    use std::time::Duration;
+
+    #[test]
+    fn unpinnable_worker_fails_the_run_instead_of_hanging() {
+        let (done, observed) = mpsc::channel();
+        thread::spawn(move || {
+            let outcome = thread::spawn(|| bench_on("rwlock", 2, 1, 0, &[1 << 20, 1 << 20])).join();
+            done.send(outcome.is_err()).unwrap();
+        });
+        let failed = observed
+            .recv_timeout(Duration::from_secs(10))
+            .expect("bench must terminate when a worker cannot be pinned");
+        assert!(failed, "bench must report the pinning failure");
     }
 }

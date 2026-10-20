@@ -1,6 +1,6 @@
 # Topic 083 results
 
-Measured source: `7589a370efcf2ee2e41b7378352325edec68e373`. Results are descriptive shared-host comparisons, not confidence bounds.
+Measured source: `7589a370efcf2ee2e41b7378352325edec68e373`; each `identity.json` records the measured source bytes. Later review commits change runner and probe failure handling, the CSV line terminator, and CPU-set selection on fragmented cpusets; the timed request loop is unchanged, with one pinning-result check preceding it after the start barrier. Results are descriptive shared-host comparisons, not confidence bounds.
 
 Timing is wall time per completed request, including lock operations, computation, start barrier and joins. Checksums are verified after timing. Timed cells have no writers.
 
