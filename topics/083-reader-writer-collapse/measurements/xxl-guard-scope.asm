@@ -140,7 +140,7 @@
    1a7e8:	31 d2                	xor    %edx,%edx
    1a7ea:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
    1a7f0:	48 b8 73 6e 61 70 73 	movabs $0x746f687370616e73,%rax
-   1a7f7:	68 6f 74 
+   1a7f7:	68 6f 74
    1a7fa:	49 39 07             	cmp    %rax,(%r15)
    1a7fd:	0f 85 b9 00 00 00    	jne    1a8bc <std::sys::backtrace::__rust_begin_short_backtrace+0x81c>
    1a803:	41 8b 06             	mov    (%r14),%eax
@@ -184,8 +184,8 @@
    1a895:	4c 89 f7             	mov    %r14,%rdi
    1a898:	48 89 54 24 08       	mov    %rdx,0x8(%rsp)
    1a89d:	c5 f9 7f 84 24 f0 00 	vmovdqa %xmm0,0xf0(%rsp)
-   1a8a4:	00 00 
+   1a8a4:	00 00
    1a8a6:	ff 15 1c 30 05 00    	call   *0x5301c(%rip)        # 6d8c8 <_DYNAMIC+0x2d0>
    1a8ac:	c5 f9 6f 84 24 f0 00 	vmovdqa 0xf0(%rsp),%xmm0
-   1a8b3:	00 00 
+   1a8b3:	00 00
    1a8b5:	48 8b 54 24 08       	mov    0x8(%rsp),%rdx

@@ -49,3 +49,5 @@ The model demonstrates writer gating and reader-preference writer delay. The ben
 Initial remote attempts used each host default toolchain and were rejected before build or timing (Arm 1.98.1, x86 1.99.0). They are retained outside the repository. Final runs explicitly used `rustup run 1.93.1 python3 experiment/run.py OUTPUT`. No measured samples were discarded.
 
 Candidate dispatch and generated code contribute to these complete-operation costs. The zero-round workload is not a pure lock-latency measurement. Linked assembly confirms compute precedes guard release in the held-guard candidates and follows release in the copy candidate.
+
+Repository CSV line endings and assembly trailing spaces are normalized for review. Original byte streams, full command logs and binaries are retained in the external evidence archive.
