@@ -15,7 +15,7 @@ Values are median [min, max] over six fresh processes. Each process has three wa
 
 ## Identity and limits
 
-Measured source commit: `3f6ea80d3af91ebe327e8c8a4c6dd00f89c40d37`. Final source and runner bytes match this commit. Source and archive SHA-256 are in `raw/source-identity.json`. Reproduce selection with `python3 experiment/analyze.py measurements/raw` from this topic directory.
+Measured source commit: `3f6ea80d3af91ebe327e8c8a4c6dd00f89c40d37`. `src/main.rs` matches this commit byte for byte; each `metadata.json` records its SHA-256. Later review commits change the runner's toolchain lookup, timeout record decoding and cache metadata fields, and add analyzer validation of order coverage and finite timings; the benchmark source, timed loop and reported selections are unchanged. Source and archive SHA-256 are in `raw/source-identity.json`. Reproduce selection with `python3 experiment/analyze.py measurements/raw` from this topic directory.
 
 Both hosts used Rust 1.93.1, LLVM 21.1.8, native target, opt3, one codegen unit, LTO off, panic unwind, one thread pinned to CPU0. All four unit tests and 15,393 Python rational-oracle values pass on each. Every timed process verifies every output after timing.
 

@@ -11,12 +11,10 @@ import subprocess
 import sys
 import time
 
-from oracle import check
-
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(sys.argv[1]).resolve()
 OUT.mkdir(parents=True, exist_ok=False)
-RUSTC = [str(Path.home() / ".cargo/bin/rustc"), "+1.93.1"]
+RUSTC = ["rustup", "run", "1.93.1", "rustc"]
 FLAGS = ["--edition", "2024", "-C", "opt-level=3", "-C", "target-cpu=native",
          "-C", "codegen-units=1", "-C", "lto=off", "-C", "panic=unwind"]
 
@@ -28,8 +26,10 @@ def command(name, argv, timeout=180):
         rec = dict(argv=list(map(str, argv)), start=start, seconds=time.time()-start,
                    returncode=p.returncode, stdout=p.stdout, stderr=p.stderr)
     except subprocess.TimeoutExpired as e:
+        # TimeoutExpired carries raw bytes even in text mode.
+        stdout, stderr = (None if s is None else s.decode(errors="replace") for s in (e.stdout, e.stderr))
         rec = dict(argv=list(map(str, argv)), start=start, seconds=time.time()-start,
-                   timeout=timeout, stdout=str(e.stdout), stderr=str(e.stderr))
+                   returncode=None, timeout=timeout, stdout=stdout, stderr=stderr)
         (OUT / f"{name}.json").write_text(json.dumps(rec, indent=2)+"\n")
         raise
     (OUT / f"{name}.json").write_text(json.dumps(rec, indent=2)+"\n")
@@ -53,8 +53,9 @@ if sys.platform == "linux":
     command("kernel", ["uname", "-a"])
     command("memory", ["cat", "/proc/meminfo"])
     command("load", ["cat", "/proc/loadavg"])
-    meta["cpu_cache"] = {str(p): p.read_text().strip() for p in
-                         Path(f"/sys/devices/system/cpu/cpu{cpus[0]}/cache").glob("index*/size")}
+    cache = Path(f"/sys/devices/system/cpu/cpu{cpus[0]}/cache")
+    meta["cpu_cache"] = {p.name: {k: (p / k).read_text().strip() for k in ("level", "type", "size")}
+                         for p in sorted(cache.glob("index*"))}
 else:
     meta["placement"] = "uncontrolled"
 (OUT / "metadata.json").write_text(json.dumps(meta, indent=2)+"\n")

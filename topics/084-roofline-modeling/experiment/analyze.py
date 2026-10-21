@@ -2,6 +2,7 @@
 import csv
 import itertools
 import json
+import math
 from pathlib import Path
 import statistics
 import sys
@@ -14,6 +15,12 @@ for host in ('arm', 'xxl'):
         raise RuntimeError('expected exactly 54 samples per host')
     cells = []
     for n in (1024, 262144, 16777216):
+        blocks = {}
+        for r in (r for r in rows if int(r['n']) == n):
+            blocks.setdefault(int(r['rep']), {})[int(r['position'])] = r['mode']
+        orders = sorted(tuple(b.get(p) for p in range(3)) for b in blocks.values())
+        if orders != sorted(itertools.permutations(('split', 'blocked', 'fused'))):
+            raise RuntimeError('order blocks do not cover the six permutations exactly once')
         by = {m: sorted([r for r in rows if int(r['n']) == n and r['mode'] == m],
                         key=lambda r: int(r['rep'])) for m in ('split', 'blocked', 'fused')}
         modes = {}
@@ -23,7 +30,7 @@ for host in ('arm', 'xxl'):
             if any(int(r['passes']) * n != 1 << 26 for r in rr):
                 raise RuntimeError('work mismatch')
             values = [float(r['ns_per_item']) for r in rr]
-            if any(v <= 0 for v in values):
+            if any(not math.isfinite(v) or v <= 0 for v in values):
                 raise RuntimeError('invalid elapsed value')
             modes[m] = dict(median=statistics.median(values), minimum=min(values), maximum=max(values))
         if len({r['checksum'] for rr in by.values() for r in rr}) != 1:
