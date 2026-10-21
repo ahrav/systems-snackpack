@@ -3,7 +3,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
-out=Path('measurements')
+out=Path(__file__).resolve().parents[1]/'measurements'
 x=np.geomspace(.025,32,400)
 fig,ax=plt.subplots(figsize=(9,5.1),layout='constrained')
 ax.loglog(x,np.minimum(200,50*x),lw=3,color='#2457a6',label='Illustrative roof: min(200 GFLOP/s, 50 GB/s × I)')

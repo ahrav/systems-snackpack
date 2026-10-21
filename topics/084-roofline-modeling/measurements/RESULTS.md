@@ -19,7 +19,7 @@ Measured source commit: `3f6ea80d3af91ebe327e8c8a4c6dd00f89c40d37`. Final source
 
 Both hosts used Rust 1.93.1, LLVM 21.1.8, native target, opt3, one codegen unit, LTO off, panic unwind, one thread pinned to CPU0. All four unit tests and 15,393 Python rational-oracle values pass on each. Every timed process verifies every output after timing.
 
-- Arm: `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`, AArch64, 64 visible cores, Linux 6.12.111, glibc 2.34. CPU0 has 64 KiB L1d, 1 MiB L2 and 32 MiB LLC.
+- Arm: `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`, AArch64, Arm Neoverse V1 (implementer 0x41, part 0xd40, variant r1p1, MIDR_EL1 `0x411fd401`; `lscpu` reports vendor ARM, model 1), 64 visible cores, one thread per core, Linux 6.12.111, glibc 2.34. CPU0 has 64 KiB L1d, 1 MiB L2 and 32 MiB LLC.
 - xxl: SSH resolves to `dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com`, verified x86_64, Xeon Platinum 8488C, KVM, Linux 6.12.111, glibc 2.34. CPU0 has 48 KiB L1d, 2 MiB L2 and 105 MiB LLC.
 
 Each large array is 128 MiB. The active split footprint is 384 MiB; fused uses 256 MiB; blocked uses 256 MiB plus 8 KiB scratch. Initialization and checks are excluded, so these results select warm kernel execution only. They do not measure allocation or application-wide latency.

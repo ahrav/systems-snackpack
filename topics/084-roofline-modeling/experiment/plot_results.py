@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-s=json.loads(Path('measurements/raw/summary.json').read_text())
+out=Path(__file__).resolve().parents[1]/'measurements'
+s=json.loads((out/'raw/summary.json').read_text())
 fig,axes=plt.subplots(1,2,figsize=(10,4.5),layout='constrained')
 colors=['#bd5034','#aa7a14','#188069']
 for ax,(host,cells) in zip(axes,s.items()):
@@ -19,4 +20,4 @@ for ax,(host,cells) in zip(axes,s.items()):
  ax.set(xlabel='Elements per pass',ylabel='ns/element (lower is better)',yscale='log')
  ax.grid(axis='y',alpha=.2); ax.legend(fontsize=9)
 fig.suptitle('Same transform, different memory schedules\nMedian and full range; six processes per point; one pinned CPU',fontsize=13)
-fig.savefig('measurements/schedules.png',dpi=170)
+fig.savefig(out/'schedules.png',dpi=170)
