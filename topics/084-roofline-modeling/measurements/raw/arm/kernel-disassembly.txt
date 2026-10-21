@@ -1,0 +1,323 @@
+0000000000015c00 <main::first>:
+   15c00:	d10083ff 	sub	sp, sp, #0x20
+   15c04:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15c08:	910043fd 	add	x29, sp, #0x10
+   15c0c:	eb03003f 	cmp	x1, x3
+   15c10:	a9000fe1 	stp	x1, x3, [sp]
+   15c14:	540005c1 	b.ne	15ccc <main::first+0xcc>  // b.any
+   15c18:	b4000541 	cbz	x1, 15cc0 <main::first+0xc0>
+   15c1c:	04a0e3e9 	cntw	x9
+   15c20:	eb09003f 	cmp	x1, x9
+   15c24:	54000062 	b.cs	15c30 <main::first+0x30>  // b.hs, b.nlast
+   15c28:	aa1f03e8 	mov	x8, xzr
+   15c2c:	1400001a 	b	15c94 <main::first+0x94>
+   15c30:	d1000528 	sub	x8, x9, #0x1
+   15c34:	25f9c100 	fmov	z0.d, #3.000000000000000000e+00
+   15c38:	25d8e3e0 	ptrue	p0.d
+   15c3c:	aa0003ec 	mov	x12, x0
+   15c40:	aa0203ed 	mov	x13, x2
+   15c44:	8a08002a 	and	x10, x1, x8
+   15c48:	04bf504b 	rdvl	x11, #2
+   15c4c:	cb0a0028 	sub	x8, x1, x10
+   15c50:	aa0803ee 	mov	x14, x8
+   15c54:	d503201f 	nop
+   15c58:	d503201f 	nop
+   15c5c:	d503201f 	nop
+   15c60:	85804181 	ldr	z1, [x12]
+   15c64:	85804582 	ldr	z2, [x12, #1, mul vl]
+   15c68:	eb0901ce 	subs	x14, x14, x9
+   15c6c:	8b0b018c 	add	x12, x12, x11
+   15c70:	65c00821 	fmul	z1.d, z1.d, z0.d
+   15c74:	65c00842 	fmul	z2.d, z2.d, z0.d
+   15c78:	65d88021 	fadd	z1.d, p0/m, z1.d, #1.0
+   15c7c:	65d88022 	fadd	z2.d, p0/m, z2.d, #1.0
+   15c80:	e58041a1 	str	z1, [x13]
+   15c84:	e58045a2 	str	z2, [x13, #1, mul vl]
+   15c88:	8b0b01ad 	add	x13, x13, x11
+   15c8c:	54fffea1 	b.ne	15c60 <main::first+0x60>  // b.any
+   15c90:	b400018a 	cbz	x10, 15cc0 <main::first+0xc0>
+   15c94:	1e611000 	fmov	d0, #3.000000000000000000e+00
+   15c98:	1e6e1001 	fmov	d1, #1.000000000000000000e+00
+   15c9c:	cb080029 	sub	x9, x1, x8
+   15ca0:	8b080c0a 	add	x10, x0, x8, lsl #3
+   15ca4:	8b080c48 	add	x8, x2, x8, lsl #3
+   15ca8:	fc408542 	ldr	d2, [x10], #8
+   15cac:	f1000529 	subs	x9, x9, #0x1
+   15cb0:	1e600842 	fmul	d2, d2, d0
+   15cb4:	1e612842 	fadd	d2, d2, d1
+   15cb8:	fc008502 	str	d2, [x8], #8
+   15cbc:	54ffff61 	b.ne	15ca8 <main::first+0xa8>  // b.any
+   15cc0:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15cc4:	910083ff 	add	sp, sp, #0x20
+   15cc8:	d65f03c0 	ret
+   15ccc:	90000345 	adrp	x5, 7d000 <GCC_except_table0+0x1c594>
+   15cd0:	912280a5 	add	x5, x5, #0x8a0
+   15cd4:	910003e1 	mov	x1, sp
+   15cd8:	910023e2 	add	x2, sp, #0x8
+   15cdc:	2a1f03e0 	mov	w0, wzr
+   15ce0:	aa1f03e3 	mov	x3, xzr
+   15ce4:	97fffb3b 	bl	149d0 <core::panicking::assert_failed>
+   15ce8:	d503201f 	nop
+   15cec:	d503201f 	nop
+   15cf0:	d503201f 	nop
+   15cf4:	d503201f 	nop
+   15cf8:	d503201f 	nop
+   15cfc:	d503201f 	nop
+
+0000000000015d00 <main::fused>:
+   15d00:	d10083ff 	sub	sp, sp, #0x20
+   15d04:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15d08:	910043fd 	add	x29, sp, #0x10
+   15d0c:	eb03003f 	cmp	x1, x3
+   15d10:	a9000fe1 	stp	x1, x3, [sp]
+   15d14:	540006a1 	b.ne	15de8 <main::fused+0xe8>  // b.any
+   15d18:	b4000621 	cbz	x1, 15ddc <main::fused+0xdc>
+   15d1c:	04a0e3e9 	cntw	x9
+   15d20:	eb09003f 	cmp	x1, x9
+   15d24:	54000062 	b.cs	15d30 <main::fused+0x30>  // b.hs, b.nlast
+   15d28:	aa1f03e8 	mov	x8, xzr
+   15d2c:	1400001c 	b	15d9c <main::fused+0x9c>
+   15d30:	d1000528 	sub	x8, x9, #0x1
+   15d34:	25f9c100 	fmov	z0.d, #3.000000000000000000e+00
+   15d38:	25d8e3e0 	ptrue	p0.d
+   15d3c:	aa0003ec 	mov	x12, x0
+   15d40:	aa0203ed 	mov	x13, x2
+   15d44:	8a08002a 	and	x10, x1, x8
+   15d48:	04bf504b 	rdvl	x11, #2
+   15d4c:	cb0a0028 	sub	x8, x1, x10
+   15d50:	aa0803ee 	mov	x14, x8
+   15d54:	d503201f 	nop
+   15d58:	d503201f 	nop
+   15d5c:	d503201f 	nop
+   15d60:	85804181 	ldr	z1, [x12]
+   15d64:	85804582 	ldr	z2, [x12, #1, mul vl]
+   15d68:	eb0901ce 	subs	x14, x14, x9
+   15d6c:	8b0b018c 	add	x12, x12, x11
+   15d70:	65c00821 	fmul	z1.d, z1.d, z0.d
+   15d74:	65c00842 	fmul	z2.d, z2.d, z0.d
+   15d78:	65d88021 	fadd	z1.d, p0/m, z1.d, #1.0
+   15d7c:	65d88022 	fadd	z2.d, p0/m, z2.d, #1.0
+   15d80:	65c10021 	fadd	z1.d, z1.d, z1.d
+   15d84:	65c20042 	fadd	z2.d, z2.d, z2.d
+   15d88:	e58041a1 	str	z1, [x13]
+   15d8c:	e58045a2 	str	z2, [x13, #1, mul vl]
+   15d90:	8b0b01ad 	add	x13, x13, x11
+   15d94:	54fffe61 	b.ne	15d60 <main::fused+0x60>  // b.any
+   15d98:	b400022a 	cbz	x10, 15ddc <main::fused+0xdc>
+   15d9c:	1e611000 	fmov	d0, #3.000000000000000000e+00
+   15da0:	1e6e1001 	fmov	d1, #1.000000000000000000e+00
+   15da4:	cb080029 	sub	x9, x1, x8
+   15da8:	8b080c0a 	add	x10, x0, x8, lsl #3
+   15dac:	8b080c48 	add	x8, x2, x8, lsl #3
+   15db0:	d503201f 	nop
+   15db4:	d503201f 	nop
+   15db8:	d503201f 	nop
+   15dbc:	d503201f 	nop
+   15dc0:	fc408542 	ldr	d2, [x10], #8
+   15dc4:	f1000529 	subs	x9, x9, #0x1
+   15dc8:	1e600842 	fmul	d2, d2, d0
+   15dcc:	1e612842 	fadd	d2, d2, d1
+   15dd0:	1e622842 	fadd	d2, d2, d2
+   15dd4:	fc008502 	str	d2, [x8], #8
+   15dd8:	54ffff41 	b.ne	15dc0 <main::fused+0xc0>  // b.any
+   15ddc:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15de0:	910083ff 	add	sp, sp, #0x20
+   15de4:	d65f03c0 	ret
+   15de8:	90000345 	adrp	x5, 7d000 <GCC_except_table0+0x1c594>
+   15dec:	9122e0a5 	add	x5, x5, #0x8b8
+   15df0:	910003e1 	mov	x1, sp
+   15df4:	910023e2 	add	x2, sp, #0x8
+   15df8:	2a1f03e0 	mov	w0, wzr
+   15dfc:	aa1f03e3 	mov	x3, xzr
+   15e00:	97fffaf4 	bl	149d0 <core::panicking::assert_failed>
+   15e04:	d503201f 	nop
+   15e08:	d503201f 	nop
+   15e0c:	d503201f 	nop
+   15e10:	d503201f 	nop
+   15e14:	d503201f 	nop
+   15e18:	d503201f 	nop
+   15e1c:	d503201f 	nop
+
+0000000000015e20 <main::second>:
+   15e20:	d10083ff 	sub	sp, sp, #0x20
+   15e24:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15e28:	910043fd 	add	x29, sp, #0x10
+   15e2c:	eb03003f 	cmp	x1, x3
+   15e30:	a9000fe1 	stp	x1, x3, [sp]
+   15e34:	54000481 	b.ne	15ec4 <main::second+0xa4>  // b.any
+   15e38:	b4000401 	cbz	x1, 15eb8 <main::second+0x98>
+   15e3c:	04a0e3e9 	cntw	x9
+   15e40:	eb09003f 	cmp	x1, x9
+   15e44:	54000062 	b.cs	15e50 <main::second+0x30>  // b.hs, b.nlast
+   15e48:	aa1f03e8 	mov	x8, xzr
+   15e4c:	14000013 	b	15e98 <main::second+0x78>
+   15e50:	d1000528 	sub	x8, x9, #0x1
+   15e54:	04bf504b 	rdvl	x11, #2
+   15e58:	aa0003ec 	mov	x12, x0
+   15e5c:	aa0203ed 	mov	x13, x2
+   15e60:	8a08002a 	and	x10, x1, x8
+   15e64:	cb0a0028 	sub	x8, x1, x10
+   15e68:	aa0803ee 	mov	x14, x8
+   15e6c:	85804180 	ldr	z0, [x12]
+   15e70:	85804581 	ldr	z1, [x12, #1, mul vl]
+   15e74:	eb0901ce 	subs	x14, x14, x9
+   15e78:	8b0b018c 	add	x12, x12, x11
+   15e7c:	65c00000 	fadd	z0.d, z0.d, z0.d
+   15e80:	65c10021 	fadd	z1.d, z1.d, z1.d
+   15e84:	e58041a0 	str	z0, [x13]
+   15e88:	e58045a1 	str	z1, [x13, #1, mul vl]
+   15e8c:	8b0b01ad 	add	x13, x13, x11
+   15e90:	54fffee1 	b.ne	15e6c <main::second+0x4c>  // b.any
+   15e94:	b400012a 	cbz	x10, 15eb8 <main::second+0x98>
+   15e98:	cb080029 	sub	x9, x1, x8
+   15e9c:	8b080c0a 	add	x10, x0, x8, lsl #3
+   15ea0:	8b080c48 	add	x8, x2, x8, lsl #3
+   15ea4:	fc408540 	ldr	d0, [x10], #8
+   15ea8:	f1000529 	subs	x9, x9, #0x1
+   15eac:	1e602800 	fadd	d0, d0, d0
+   15eb0:	fc008500 	str	d0, [x8], #8
+   15eb4:	54ffff81 	b.ne	15ea4 <main::second+0x84>  // b.any
+   15eb8:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15ebc:	910083ff 	add	sp, sp, #0x20
+   15ec0:	d65f03c0 	ret
+   15ec4:	90000345 	adrp	x5, 7d000 <GCC_except_table0+0x1c594>
+   15ec8:	912340a5 	add	x5, x5, #0x8d0
+   15ecc:	910003e1 	mov	x1, sp
+   15ed0:	910023e2 	add	x2, sp, #0x8
+   15ed4:	2a1f03e0 	mov	w0, wzr
+   15ed8:	aa1f03e3 	mov	x3, xzr
+   15edc:	97fffabd 	bl	149d0 <core::panicking::assert_failed>
+
+0000000000015ee0 <main::transform>:
+   15ee0:	d10183ff 	sub	sp, sp, #0x60
+   15ee4:	a9017bfd 	stp	x29, x30, [sp, #16]
+   15ee8:	a90267fa 	stp	x26, x25, [sp, #32]
+   15eec:	a9035ff8 	stp	x24, x23, [sp, #48]
+   15ef0:	a90457f6 	stp	x22, x21, [sp, #64]
+   15ef4:	a9054ff4 	stp	x20, x19, [sp, #80]
+   15ef8:	910043fd 	add	x29, sp, #0x10
+   15efc:	eb05007f 	cmp	x3, x5
+   15f00:	a90017e3 	stp	x3, x5, [sp]
+   15f04:	54000ce1 	b.ne	160a0 <main::transform+0x1c0>  // b.any
+   15f08:	aa0703f4 	mov	x20, x7
+   15f0c:	aa0603f5 	mov	x21, x6
+   15f10:	aa0403f3 	mov	x19, x4
+   15f14:	aa0203f6 	mov	x22, x2
+   15f18:	f100143f 	cmp	x1, #0x5
+   15f1c:	54000441 	b.ne	15fa4 <main::transform+0xc4>  // b.any
+   15f20:	b9400008 	ldr	w8, [x0]
+   15f24:	39401009 	ldrb	w9, [x0, #4]
+   15f28:	528eacca 	mov	w10, #0x7566                	// #30054
+   15f2c:	72acae6a 	movk	w10, #0x6573, lsl #16
+   15f30:	6b0a011f 	cmp	w8, w10
+   15f34:	52800c88 	mov	w8, #0x64                  	// #100
+   15f38:	7a480120 	ccmp	w9, w8, #0x0, eq	// eq = none
+   15f3c:	540005e0 	b.eq	15ff8 <main::transform+0x118>  // b.none
+   15f40:	b9400008 	ldr	w8, [x0]
+   15f44:	39401009 	ldrb	w9, [x0, #4]
+   15f48:	528e0e6a 	mov	w10, #0x7073                	// #28787
+   15f4c:	72ad2d8a 	movk	w10, #0x696c, lsl #16
+   15f50:	6b0a011f 	cmp	w8, w10
+   15f54:	52800e88 	mov	w8, #0x74                  	// #116
+   15f58:	7a480120 	ccmp	w9, w8, #0x0, eq	// eq = none
+   15f5c:	54000b01 	b.ne	160bc <main::transform+0x1dc>  // b.any
+   15f60:	aa1603e0 	mov	x0, x22
+   15f64:	aa0303e1 	mov	x1, x3
+   15f68:	aa1503e2 	mov	x2, x21
+   15f6c:	aa0303f6 	mov	x22, x3
+   15f70:	aa1403e3 	mov	x3, x20
+   15f74:	97ffff23 	bl	15c00 <main::first>
+   15f78:	aa1503e0 	mov	x0, x21
+   15f7c:	aa1403e1 	mov	x1, x20
+   15f80:	aa1303e2 	mov	x2, x19
+   15f84:	aa1603e3 	mov	x3, x22
+   15f88:	a9454ff4 	ldp	x20, x19, [sp, #80]
+   15f8c:	a94457f6 	ldp	x22, x21, [sp, #64]
+   15f90:	a9435ff8 	ldp	x24, x23, [sp, #48]
+   15f94:	a94267fa 	ldp	x26, x25, [sp, #32]
+   15f98:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   15f9c:	910183ff 	add	sp, sp, #0x60
+   15fa0:	17ffffa0 	b	15e20 <main::second>
+   15fa4:	f1001c3f 	cmp	x1, #0x7
+   15fa8:	540008a1 	b.ne	160bc <main::transform+0x1dc>  // b.any
+   15fac:	b9400008 	ldr	w8, [x0]
+   15fb0:	b8403009 	ldur	w9, [x0, #3]
+   15fb4:	528d8c4a 	mov	w10, #0x6c62                	// #27746
+   15fb8:	72ac6dea 	movk	w10, #0x636f, lsl #16
+   15fbc:	6b0a011f 	cmp	w8, w10
+   15fc0:	528d6c68 	mov	w8, #0x6b63                	// #27491
+   15fc4:	72ac8ca8 	movk	w8, #0x6465, lsl #16
+   15fc8:	7a480120 	ccmp	w9, w8, #0x0, eq	// eq = none
+   15fcc:	54000781 	b.ne	160bc <main::transform+0x1dc>  // b.any
+   15fd0:	b4000834 	cbz	x20, 160d4 <main::transform+0x1f4>
+   15fd4:	b4000263 	cbz	x3, 16020 <main::transform+0x140>
+   15fd8:	9ad40868 	udiv	x8, x3, x20
+   15fdc:	9b148d09 	msub	x9, x8, x20, x3
+   15fe0:	f100013f 	cmp	x9, #0x0
+   15fe4:	9a880508 	cinc	x8, x8, ne	// ne = any
+   15fe8:	eb08011f 	cmp	x8, x8
+   15fec:	9a883118 	csel	x24, x8, x8, cc	// cc = lo, ul, last
+   15ff0:	b50001f8 	cbnz	x24, 1602c <main::transform+0x14c>
+   15ff4:	14000024 	b	16084 <main::transform+0x1a4>
+   15ff8:	aa1603e0 	mov	x0, x22
+   15ffc:	aa0303e1 	mov	x1, x3
+   16000:	aa1303e2 	mov	x2, x19
+   16004:	a9454ff4 	ldp	x20, x19, [sp, #80]
+   16008:	a94457f6 	ldp	x22, x21, [sp, #64]
+   1600c:	a9435ff8 	ldp	x24, x23, [sp, #48]
+   16010:	a94267fa 	ldp	x26, x25, [sp, #32]
+   16014:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   16018:	910183ff 	add	sp, sp, #0x60
+   1601c:	17ffff39 	b	15d00 <main::fused>
+   16020:	eb1f03ff 	cmp	xzr, xzr
+   16024:	9a9f33f8 	csel	x24, xzr, xzr, cc	// cc = lo, ul, last
+   16028:	b40002f8 	cbz	x24, 16084 <main::transform+0x1a4>
+   1602c:	d37df299 	lsl	x25, x20, #3
+   16030:	d503201f 	nop
+   16034:	d503201f 	nop
+   16038:	d503201f 	nop
+   1603c:	d503201f 	nop
+   16040:	eb14007a 	subs	x26, x3, x20
+   16044:	aa1603e0 	mov	x0, x22
+   16048:	aa1503e2 	mov	x2, x21
+   1604c:	9a838297 	csel	x23, x20, x3, hi	// hi = pmore
+   16050:	aa1703e1 	mov	x1, x23
+   16054:	aa1703e3 	mov	x3, x23
+   16058:	97fffeea 	bl	15c00 <main::first>
+   1605c:	aa1503e0 	mov	x0, x21
+   16060:	aa1703e1 	mov	x1, x23
+   16064:	aa1303e2 	mov	x2, x19
+   16068:	aa1703e3 	mov	x3, x23
+   1606c:	97ffff6d 	bl	15e20 <main::second>
+   16070:	f1000718 	subs	x24, x24, #0x1
+   16074:	8b190273 	add	x19, x19, x25
+   16078:	8b1902d6 	add	x22, x22, x25
+   1607c:	aa1a03e3 	mov	x3, x26
+   16080:	54fffe01 	b.ne	16040 <main::transform+0x160>  // b.any
+   16084:	a9454ff4 	ldp	x20, x19, [sp, #80]
+   16088:	a94457f6 	ldp	x22, x21, [sp, #64]
+   1608c:	a9435ff8 	ldp	x24, x23, [sp, #48]
+   16090:	a94267fa 	ldp	x26, x25, [sp, #32]
+   16094:	a9417bfd 	ldp	x29, x30, [sp, #16]
+   16098:	910183ff 	add	sp, sp, #0x60
+   1609c:	d65f03c0 	ret
+   160a0:	f0000325 	adrp	x5, 7d000 <GCC_except_table0+0x1c594>
+   160a4:	9123a0a5 	add	x5, x5, #0x8e8
+   160a8:	910003e1 	mov	x1, sp
+   160ac:	910023e2 	add	x2, sp, #0x8
+   160b0:	2a1f03e0 	mov	w0, wzr
+   160b4:	aa1f03e3 	mov	x3, xzr
+   160b8:	97fffa46 	bl	149d0 <core::panicking::assert_failed>
+   160bc:	900001e0 	adrp	x0, 52000 <_fini+0x47d8>
+   160c0:	9103e800 	add	x0, x0, #0xfa
+   160c4:	f0000322 	adrp	x2, 7d000 <GCC_except_table0+0x1c594>
+   160c8:	91246042 	add	x2, x2, #0x918
+   160cc:	52800961 	mov	w1, #0x4b                  	// #75
+   160d0:	97fffab9 	bl	14bb4 <core::panicking::panic_fmt>
+   160d4:	900001e0 	adrp	x0, 52000 <_fini+0x47d8>
+   160d8:	91035400 	add	x0, x0, #0xd5
+   160dc:	f0000322 	adrp	x2, 7d000 <GCC_except_table0+0x1c594>
+   160e0:	91240042 	add	x2, x2, #0x900
+   160e4:	528004a1 	mov	w1, #0x25                  	// #37
+   160e8:	97fffaae 	bl	14ba0 <core::panicking::panic>
+   160ec:	d503201f 	nop

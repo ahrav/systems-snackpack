@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "/tmp/topic084-20261021-9Tgr6U03/topics/084-roofline-modeling/experiment/oracle.py",
+    "/tmp/topic084-20261021-9Tgr6U03/results/demo"
+  ],
+  "start": 1792589971.579297,
+  "seconds": 0.15528273582458496,
+  "returncode": 0,
+  "stdout": "independent rational oracle: 15393 values passed\n",
+  "stderr": ""
+}
