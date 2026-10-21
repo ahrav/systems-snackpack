@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/tmp/topic084-20261021-geYC4q0i/results/tests"
+  ],
+  "start": 1792589970.8694553,
+  "seconds": 0.004758119583129883,
+  "returncode": 0,
+  "stdout": "\nrunning 4 tests\ntest tests::all_schedules_match_integer_oracle ... ok\ntest tests::block_edges_and_negative_inputs ... ok\ntest tests::rejects_empty_tile - should panic ... ok\ntest tests::rejects_output_length_mismatch - should panic ... ok\n\ntest result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+  "stderr": ""
+}

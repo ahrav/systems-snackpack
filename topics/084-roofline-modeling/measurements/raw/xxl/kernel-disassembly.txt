@@ -1,0 +1,428 @@
+00000000000179c0 <main::first>:
+   179c0:	48 83 ec 18          	sub    $0x18,%rsp
+   179c4:	48 89 74 24 08       	mov    %rsi,0x8(%rsp)
+   179c9:	48 89 4c 24 10       	mov    %rcx,0x10(%rsp)
+   179ce:	48 39 ce             	cmp    %rcx,%rsi
+   179d1:	0f 85 27 01 00 00    	jne    17afe <main::first+0x13e>
+   179d7:	48 85 f6             	test   %rsi,%rsi
+   179da:	0f 84 16 01 00 00    	je     17af6 <main::first+0x136>
+   179e0:	48 83 fe 03          	cmp    $0x3,%rsi
+   179e4:	77 07                	ja     179ed <main::first+0x2d>
+   179e6:	31 c0                	xor    %eax,%eax
+   179e8:	e9 e1 00 00 00       	jmp    17ace <main::first+0x10e>
+   179ed:	48 b9 f0 ff ff ff ff 	movabs $0xffffffffffffff0,%rcx
+   179f4:	ff ff 0f 
+   179f7:	48 83 fe 10          	cmp    $0x10,%rsi
+   179fb:	73 07                	jae    17a04 <main::first+0x44>
+   179fd:	31 c0                	xor    %eax,%eax
+   179ff:	e9 86 00 00 00       	jmp    17a8a <main::first+0xca>
+   17a04:	48 89 f0             	mov    %rsi,%rax
+   17a07:	48 21 c8             	and    %rcx,%rax
+   17a0a:	4c 8d 04 f5 00 00 00 	lea    0x0(,%rsi,8),%r8
+   17a11:	00 
+   17a12:	49 83 e0 80          	and    $0xffffffffffffff80,%r8
+   17a16:	45 31 c9             	xor    %r9d,%r9d
+   17a19:	c4 e2 7d 19 05 2e df 	vbroadcastsd -0x120d2(%rip),%ymm0        # 5950 <__abi_tag+0x5654>
+   17a20:	fe ff 
+   17a22:	c4 e2 7d 19 0d fd de 	vbroadcastsd -0x12103(%rip),%ymm1        # 5928 <__abi_tag+0x562c>
+   17a29:	fe ff 
+   17a2b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+   17a30:	c4 a1 7d 59 14 0f    	vmulpd (%rdi,%r9,1),%ymm0,%ymm2
+   17a36:	c4 a1 7d 59 5c 0f 20 	vmulpd 0x20(%rdi,%r9,1),%ymm0,%ymm3
+   17a3d:	c4 a1 7d 59 64 0f 40 	vmulpd 0x40(%rdi,%r9,1),%ymm0,%ymm4
+   17a44:	c4 a1 7d 59 6c 0f 60 	vmulpd 0x60(%rdi,%r9,1),%ymm0,%ymm5
+   17a4b:	c5 ed 58 d1          	vaddpd %ymm1,%ymm2,%ymm2
+   17a4f:	c5 e5 58 d9          	vaddpd %ymm1,%ymm3,%ymm3
+   17a53:	c5 dd 58 e1          	vaddpd %ymm1,%ymm4,%ymm4
+   17a57:	c5 d5 58 e9          	vaddpd %ymm1,%ymm5,%ymm5
+   17a5b:	c4 a1 7d 11 14 0a    	vmovupd %ymm2,(%rdx,%r9,1)
+   17a61:	c4 a1 7d 11 5c 0a 20 	vmovupd %ymm3,0x20(%rdx,%r9,1)
+   17a68:	c4 a1 7d 11 64 0a 40 	vmovupd %ymm4,0x40(%rdx,%r9,1)
+   17a6f:	c4 a1 7d 11 6c 0a 60 	vmovupd %ymm5,0x60(%rdx,%r9,1)
+   17a76:	49 83 e9 80          	sub    $0xffffffffffffff80,%r9
+   17a7a:	4d 39 c8             	cmp    %r9,%r8
+   17a7d:	75 b1                	jne    17a30 <main::first+0x70>
+   17a7f:	48 39 c6             	cmp    %rax,%rsi
+   17a82:	74 72                	je     17af6 <main::first+0x136>
+   17a84:	40 f6 c6 0c          	test   $0xc,%sil
+   17a88:	74 44                	je     17ace <main::first+0x10e>
+   17a8a:	49 89 c0             	mov    %rax,%r8
+   17a8d:	48 83 c1 0c          	add    $0xc,%rcx
+   17a91:	48 89 c8             	mov    %rcx,%rax
+   17a94:	48 21 f0             	and    %rsi,%rax
+   17a97:	c4 e2 7d 19 05 b0 de 	vbroadcastsd -0x12150(%rip),%ymm0        # 5950 <__abi_tag+0x5654>
+   17a9e:	fe ff 
+   17aa0:	c4 e2 7d 19 0d 7f de 	vbroadcastsd -0x12181(%rip),%ymm1        # 5928 <__abi_tag+0x562c>
+   17aa7:	fe ff 
+   17aa9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+   17ab0:	c4 a1 7d 59 14 c7    	vmulpd (%rdi,%r8,8),%ymm0,%ymm2
+   17ab6:	c5 ed 58 d1          	vaddpd %ymm1,%ymm2,%ymm2
+   17aba:	c4 a1 7d 11 14 c2    	vmovupd %ymm2,(%rdx,%r8,8)
+   17ac0:	49 83 c0 04          	add    $0x4,%r8
+   17ac4:	4c 39 c0             	cmp    %r8,%rax
+   17ac7:	75 e7                	jne    17ab0 <main::first+0xf0>
+   17ac9:	48 39 c6             	cmp    %rax,%rsi
+   17acc:	74 28                	je     17af6 <main::first+0x136>
+   17ace:	c5 fb 10 05 7a de fe 	vmovsd -0x12186(%rip),%xmm0        # 5950 <__abi_tag+0x5654>
+   17ad5:	ff 
+   17ad6:	c5 fb 10 0d 4a de fe 	vmovsd -0x121b6(%rip),%xmm1        # 5928 <__abi_tag+0x562c>
+   17add:	ff 
+   17ade:	66 90                	xchg   %ax,%ax
+   17ae0:	c5 fb 59 14 c7       	vmulsd (%rdi,%rax,8),%xmm0,%xmm2
+   17ae5:	c5 eb 58 d1          	vaddsd %xmm1,%xmm2,%xmm2
+   17ae9:	c5 fb 11 14 c2       	vmovsd %xmm2,(%rdx,%rax,8)
+   17aee:	48 ff c0             	inc    %rax
+   17af1:	48 39 c6             	cmp    %rax,%rsi
+   17af4:	75 ea                	jne    17ae0 <main::first+0x120>
+   17af6:	48 83 c4 18          	add    $0x18,%rsp
+   17afa:	c5 f8 77             	vzeroupper
+   17afd:	c3                   	ret
+   17afe:	4c 8d 0d 2b 59 04 00 	lea    0x4592b(%rip),%r9        # 5d430 <__dso_handle+0x120>
+   17b05:	48 8d 74 24 08       	lea    0x8(%rsp),%rsi
+   17b0a:	48 8d 54 24 10       	lea    0x10(%rsp),%rdx
+   17b0f:	31 ff                	xor    %edi,%edi
+   17b11:	31 c9                	xor    %ecx,%ecx
+   17b13:	ff 15 cf 7e 04 00    	call   *0x47ecf(%rip)        # 5f9e8 <_DYNAMIC+0x2d8>
+   17b19:	cc                   	int3
+   17b1a:	cc                   	int3
+   17b1b:	cc                   	int3
+   17b1c:	cc                   	int3
+   17b1d:	cc                   	int3
+   17b1e:	cc                   	int3
+   17b1f:	cc                   	int3
+
+0000000000017b20 <main::fused>:
+   17b20:	48 83 ec 18          	sub    $0x18,%rsp
+   17b24:	48 89 74 24 08       	mov    %rsi,0x8(%rsp)
+   17b29:	48 89 4c 24 10       	mov    %rcx,0x10(%rsp)
+   17b2e:	48 39 ce             	cmp    %rcx,%rsi
+   17b31:	0f 85 4b 01 00 00    	jne    17c82 <main::fused+0x162>
+   17b37:	48 85 f6             	test   %rsi,%rsi
+   17b3a:	0f 84 3a 01 00 00    	je     17c7a <main::fused+0x15a>
+   17b40:	48 83 fe 03          	cmp    $0x3,%rsi
+   17b44:	77 07                	ja     17b4d <main::fused+0x2d>
+   17b46:	31 c0                	xor    %eax,%eax
+   17b48:	e9 f5 00 00 00       	jmp    17c42 <main::fused+0x122>
+   17b4d:	48 b9 f0 ff ff ff ff 	movabs $0xffffffffffffff0,%rcx
+   17b54:	ff ff 0f 
+   17b57:	48 83 fe 10          	cmp    $0x10,%rsi
+   17b5b:	73 07                	jae    17b64 <main::fused+0x44>
+   17b5d:	31 c0                	xor    %eax,%eax
+   17b5f:	e9 9a 00 00 00       	jmp    17bfe <main::fused+0xde>
+   17b64:	48 89 f0             	mov    %rsi,%rax
+   17b67:	48 21 c8             	and    %rcx,%rax
+   17b6a:	4c 8d 04 f5 00 00 00 	lea    0x0(,%rsi,8),%r8
+   17b71:	00 
+   17b72:	49 83 e0 80          	and    $0xffffffffffffff80,%r8
+   17b76:	45 31 c9             	xor    %r9d,%r9d
+   17b79:	c4 e2 7d 19 05 ce dd 	vbroadcastsd -0x12232(%rip),%ymm0        # 5950 <__abi_tag+0x5654>
+   17b80:	fe ff 
+   17b82:	c4 e2 7d 19 0d 9d dd 	vbroadcastsd -0x12263(%rip),%ymm1        # 5928 <__abi_tag+0x562c>
+   17b89:	fe ff 
+   17b8b:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+   17b90:	c4 a1 7d 59 14 0f    	vmulpd (%rdi,%r9,1),%ymm0,%ymm2
+   17b96:	c4 a1 7d 59 5c 0f 20 	vmulpd 0x20(%rdi,%r9,1),%ymm0,%ymm3
+   17b9d:	c4 a1 7d 59 64 0f 40 	vmulpd 0x40(%rdi,%r9,1),%ymm0,%ymm4
+   17ba4:	c4 a1 7d 59 6c 0f 60 	vmulpd 0x60(%rdi,%r9,1),%ymm0,%ymm5
+   17bab:	c5 ed 58 d1          	vaddpd %ymm1,%ymm2,%ymm2
+   17baf:	c5 e5 58 d9          	vaddpd %ymm1,%ymm3,%ymm3
+   17bb3:	c5 dd 58 e1          	vaddpd %ymm1,%ymm4,%ymm4
+   17bb7:	c5 d5 58 e9          	vaddpd %ymm1,%ymm5,%ymm5
+   17bbb:	c5 ed 58 d2          	vaddpd %ymm2,%ymm2,%ymm2
+   17bbf:	c5 e5 58 db          	vaddpd %ymm3,%ymm3,%ymm3
+   17bc3:	c5 dd 58 e4          	vaddpd %ymm4,%ymm4,%ymm4
+   17bc7:	c5 d5 58 ed          	vaddpd %ymm5,%ymm5,%ymm5
+   17bcb:	c4 a1 7d 11 14 0a    	vmovupd %ymm2,(%rdx,%r9,1)
+   17bd1:	c4 a1 7d 11 5c 0a 20 	vmovupd %ymm3,0x20(%rdx,%r9,1)
+   17bd8:	c4 a1 7d 11 64 0a 40 	vmovupd %ymm4,0x40(%rdx,%r9,1)
+   17bdf:	c4 a1 7d 11 6c 0a 60 	vmovupd %ymm5,0x60(%rdx,%r9,1)
+   17be6:	49 83 e9 80          	sub    $0xffffffffffffff80,%r9
+   17bea:	4d 39 c8             	cmp    %r9,%r8
+   17bed:	75 a1                	jne    17b90 <main::fused+0x70>
+   17bef:	48 39 c6             	cmp    %rax,%rsi
+   17bf2:	0f 84 82 00 00 00    	je     17c7a <main::fused+0x15a>
+   17bf8:	40 f6 c6 0c          	test   $0xc,%sil
+   17bfc:	74 44                	je     17c42 <main::fused+0x122>
+   17bfe:	49 89 c0             	mov    %rax,%r8
+   17c01:	48 83 c1 0c          	add    $0xc,%rcx
+   17c05:	48 89 c8             	mov    %rcx,%rax
+   17c08:	48 21 f0             	and    %rsi,%rax
+   17c0b:	c4 e2 7d 19 05 3c dd 	vbroadcastsd -0x122c4(%rip),%ymm0        # 5950 <__abi_tag+0x5654>
+   17c12:	fe ff 
+   17c14:	c4 e2 7d 19 0d 0b dd 	vbroadcastsd -0x122f5(%rip),%ymm1        # 5928 <__abi_tag+0x562c>
+   17c1b:	fe ff 
+   17c1d:	0f 1f 00             	nopl   (%rax)
+   17c20:	c4 a1 7d 59 14 c7    	vmulpd (%rdi,%r8,8),%ymm0,%ymm2
+   17c26:	c5 ed 58 d1          	vaddpd %ymm1,%ymm2,%ymm2
+   17c2a:	c5 ed 58 d2          	vaddpd %ymm2,%ymm2,%ymm2
+   17c2e:	c4 a1 7d 11 14 c2    	vmovupd %ymm2,(%rdx,%r8,8)
+   17c34:	49 83 c0 04          	add    $0x4,%r8
+   17c38:	4c 39 c0             	cmp    %r8,%rax
+   17c3b:	75 e3                	jne    17c20 <main::fused+0x100>
+   17c3d:	48 39 c6             	cmp    %rax,%rsi
+   17c40:	74 38                	je     17c7a <main::fused+0x15a>
+   17c42:	c5 fb 10 05 06 dd fe 	vmovsd -0x122fa(%rip),%xmm0        # 5950 <__abi_tag+0x5654>
+   17c49:	ff 
+   17c4a:	c5 fb 10 0d d6 dc fe 	vmovsd -0x1232a(%rip),%xmm1        # 5928 <__abi_tag+0x562c>
+   17c51:	ff 
+   17c52:	66 66 66 66 66 2e 0f 	data16 data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+   17c59:	1f 84 00 00 00 00 00 
+   17c60:	c5 fb 59 14 c7       	vmulsd (%rdi,%rax,8),%xmm0,%xmm2
+   17c65:	c5 eb 58 d1          	vaddsd %xmm1,%xmm2,%xmm2
+   17c69:	c5 eb 58 d2          	vaddsd %xmm2,%xmm2,%xmm2
+   17c6d:	c5 fb 11 14 c2       	vmovsd %xmm2,(%rdx,%rax,8)
+   17c72:	48 ff c0             	inc    %rax
+   17c75:	48 39 c6             	cmp    %rax,%rsi
+   17c78:	75 e6                	jne    17c60 <main::fused+0x140>
+   17c7a:	48 83 c4 18          	add    $0x18,%rsp
+   17c7e:	c5 f8 77             	vzeroupper
+   17c81:	c3                   	ret
+   17c82:	4c 8d 0d bf 57 04 00 	lea    0x457bf(%rip),%r9        # 5d448 <__dso_handle+0x138>
+   17c89:	48 8d 74 24 08       	lea    0x8(%rsp),%rsi
+   17c8e:	48 8d 54 24 10       	lea    0x10(%rsp),%rdx
+   17c93:	31 ff                	xor    %edi,%edi
+   17c95:	31 c9                	xor    %ecx,%ecx
+   17c97:	ff 15 4b 7d 04 00    	call   *0x47d4b(%rip)        # 5f9e8 <_DYNAMIC+0x2d8>
+   17c9d:	cc                   	int3
+   17c9e:	cc                   	int3
+   17c9f:	cc                   	int3
+
+0000000000017ca0 <main::second>:
+   17ca0:	48 83 ec 18          	sub    $0x18,%rsp
+   17ca4:	48 89 74 24 08       	mov    %rsi,0x8(%rsp)
+   17ca9:	48 89 4c 24 10       	mov    %rcx,0x10(%rsp)
+   17cae:	48 39 ce             	cmp    %rcx,%rsi
+   17cb1:	0f 85 d4 00 00 00    	jne    17d8b <main::second+0xeb>
+   17cb7:	48 85 f6             	test   %rsi,%rsi
+   17cba:	0f 84 fc 00 00 00    	je     17dbc <main::second+0x11c>
+   17cc0:	48 83 fe 03          	cmp    $0x3,%rsi
+   17cc4:	77 07                	ja     17ccd <main::second+0x2d>
+   17cc6:	31 c0                	xor    %eax,%eax
+   17cc8:	e9 d9 00 00 00       	jmp    17da6 <main::second+0x106>
+   17ccd:	48 b9 f0 ff ff ff ff 	movabs $0xffffffffffffff0,%rcx
+   17cd4:	ff ff 0f 
+   17cd7:	48 83 fe 10          	cmp    $0x10,%rsi
+   17cdb:	73 04                	jae    17ce1 <main::second+0x41>
+   17cdd:	31 c0                	xor    %eax,%eax
+   17cdf:	eb 79                	jmp    17d5a <main::second+0xba>
+   17ce1:	48 89 f0             	mov    %rsi,%rax
+   17ce4:	48 21 c8             	and    %rcx,%rax
+   17ce7:	4c 8d 04 f5 00 00 00 	lea    0x0(,%rsi,8),%r8
+   17cee:	00 
+   17cef:	49 83 e0 80          	and    $0xffffffffffffff80,%r8
+   17cf3:	45 31 c9             	xor    %r9d,%r9d
+   17cf6:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+   17cfd:	00 00 00 
+   17d00:	c4 a1 7d 10 04 0f    	vmovupd (%rdi,%r9,1),%ymm0
+   17d06:	c4 a1 7d 10 4c 0f 20 	vmovupd 0x20(%rdi,%r9,1),%ymm1
+   17d0d:	c4 a1 7d 10 54 0f 40 	vmovupd 0x40(%rdi,%r9,1),%ymm2
+   17d14:	c4 a1 7d 10 5c 0f 60 	vmovupd 0x60(%rdi,%r9,1),%ymm3
+   17d1b:	c5 fd 58 c0          	vaddpd %ymm0,%ymm0,%ymm0
+   17d1f:	c5 f5 58 c9          	vaddpd %ymm1,%ymm1,%ymm1
+   17d23:	c5 ed 58 d2          	vaddpd %ymm2,%ymm2,%ymm2
+   17d27:	c5 e5 58 db          	vaddpd %ymm3,%ymm3,%ymm3
+   17d2b:	c4 a1 7d 11 04 0a    	vmovupd %ymm0,(%rdx,%r9,1)
+   17d31:	c4 a1 7d 11 4c 0a 20 	vmovupd %ymm1,0x20(%rdx,%r9,1)
+   17d38:	c4 a1 7d 11 54 0a 40 	vmovupd %ymm2,0x40(%rdx,%r9,1)
+   17d3f:	c4 a1 7d 11 5c 0a 60 	vmovupd %ymm3,0x60(%rdx,%r9,1)
+   17d46:	49 83 e9 80          	sub    $0xffffffffffffff80,%r9
+   17d4a:	4d 39 c8             	cmp    %r9,%r8
+   17d4d:	75 b1                	jne    17d00 <main::second+0x60>
+   17d4f:	48 39 c6             	cmp    %rax,%rsi
+   17d52:	74 68                	je     17dbc <main::second+0x11c>
+   17d54:	40 f6 c6 0c          	test   $0xc,%sil
+   17d58:	74 4c                	je     17da6 <main::second+0x106>
+   17d5a:	49 89 c0             	mov    %rax,%r8
+   17d5d:	48 83 c1 0c          	add    $0xc,%rcx
+   17d61:	48 89 c8             	mov    %rcx,%rax
+   17d64:	48 21 f0             	and    %rsi,%rax
+   17d67:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+   17d6e:	00 00 
+   17d70:	c4 a1 7d 10 04 c7    	vmovupd (%rdi,%r8,8),%ymm0
+   17d76:	c5 fd 58 c0          	vaddpd %ymm0,%ymm0,%ymm0
+   17d7a:	c4 a1 7d 11 04 c2    	vmovupd %ymm0,(%rdx,%r8,8)
+   17d80:	49 83 c0 04          	add    $0x4,%r8
+   17d84:	4c 39 c0             	cmp    %r8,%rax
+   17d87:	75 e7                	jne    17d70 <main::second+0xd0>
+   17d89:	eb 2c                	jmp    17db7 <main::second+0x117>
+   17d8b:	4c 8d 0d ce 56 04 00 	lea    0x456ce(%rip),%r9        # 5d460 <__dso_handle+0x150>
+   17d92:	48 8d 74 24 08       	lea    0x8(%rsp),%rsi
+   17d97:	48 8d 54 24 10       	lea    0x10(%rsp),%rdx
+   17d9c:	31 ff                	xor    %edi,%edi
+   17d9e:	31 c9                	xor    %ecx,%ecx
+   17da0:	ff 15 42 7c 04 00    	call   *0x47c42(%rip)        # 5f9e8 <_DYNAMIC+0x2d8>
+   17da6:	c5 fb 10 04 c7       	vmovsd (%rdi,%rax,8),%xmm0
+   17dab:	c5 fb 58 c0          	vaddsd %xmm0,%xmm0,%xmm0
+   17daf:	c5 fb 11 04 c2       	vmovsd %xmm0,(%rdx,%rax,8)
+   17db4:	48 ff c0             	inc    %rax
+   17db7:	48 39 c6             	cmp    %rax,%rsi
+   17dba:	75 ea                	jne    17da6 <main::second+0x106>
+   17dbc:	48 83 c4 18          	add    $0x18,%rsp
+   17dc0:	c5 f8 77             	vzeroupper
+   17dc3:	c3                   	ret
+   17dc4:	cc                   	int3
+   17dc5:	cc                   	int3
+   17dc6:	cc                   	int3
+   17dc7:	cc                   	int3
+   17dc8:	cc                   	int3
+   17dc9:	cc                   	int3
+   17dca:	cc                   	int3
+   17dcb:	cc                   	int3
+   17dcc:	cc                   	int3
+   17dcd:	cc                   	int3
+   17dce:	cc                   	int3
+   17dcf:	cc                   	int3
+
+0000000000017dd0 <main::transform>:
+   17dd0:	55                   	push   %rbp
+   17dd1:	41 57                	push   %r15
+   17dd3:	41 56                	push   %r14
+   17dd5:	41 55                	push   %r13
+   17dd7:	41 54                	push   %r12
+   17dd9:	53                   	push   %rbx
+   17dda:	48 83 ec 28          	sub    $0x28,%rsp
+   17dde:	49 89 cf             	mov    %rcx,%r15
+   17de1:	48 8b 4c 24 68       	mov    0x68(%rsp),%rcx
+   17de6:	4c 8b 64 24 60       	mov    0x60(%rsp),%r12
+   17deb:	4c 89 7c 24 18       	mov    %r15,0x18(%rsp)
+   17df0:	4c 89 4c 24 20       	mov    %r9,0x20(%rsp)
+   17df5:	4d 39 cf             	cmp    %r9,%r15
+   17df8:	0f 85 6e 01 00 00    	jne    17f6c <main::transform+0x19c>
+   17dfe:	4d 89 c5             	mov    %r8,%r13
+   17e01:	48 89 d5             	mov    %rdx,%rbp
+   17e04:	48 83 fe 05          	cmp    $0x5,%rsi
+   17e08:	75 5c                	jne    17e66 <main::transform+0x96>
+   17e0a:	b8 66 75 73 65       	mov    $0x65737566,%eax
+   17e0f:	33 07                	xor    (%rdi),%eax
+   17e11:	0f b6 57 04          	movzbl 0x4(%rdi),%edx
+   17e15:	83 f2 64             	xor    $0x64,%edx
+   17e18:	09 c2                	or     %eax,%edx
+   17e1a:	0f 84 8b 00 00 00    	je     17eab <main::transform+0xdb>
+   17e20:	b8 73 70 6c 69       	mov    $0x696c7073,%eax
+   17e25:	33 07                	xor    (%rdi),%eax
+   17e27:	0f b6 57 04          	movzbl 0x4(%rdi),%edx
+   17e2b:	83 f2 74             	xor    $0x74,%edx
+   17e2e:	09 c2                	or     %eax,%edx
+   17e30:	0f 85 51 01 00 00    	jne    17f87 <main::transform+0x1b7>
+   17e36:	48 89 ef             	mov    %rbp,%rdi
+   17e39:	4c 89 fe             	mov    %r15,%rsi
+   17e3c:	4c 89 e2             	mov    %r12,%rdx
+   17e3f:	49 89 ce             	mov    %rcx,%r14
+   17e42:	e8 79 fb ff ff       	call   179c0 <main::first>
+   17e47:	4c 89 e7             	mov    %r12,%rdi
+   17e4a:	4c 89 f6             	mov    %r14,%rsi
+   17e4d:	4c 89 ea             	mov    %r13,%rdx
+   17e50:	4c 89 f9             	mov    %r15,%rcx
+   17e53:	48 83 c4 28          	add    $0x28,%rsp
+   17e57:	5b                   	pop    %rbx
+   17e58:	41 5c                	pop    %r12
+   17e5a:	41 5d                	pop    %r13
+   17e5c:	41 5e                	pop    %r14
+   17e5e:	41 5f                	pop    %r15
+   17e60:	5d                   	pop    %rbp
+   17e61:	e9 3a fe ff ff       	jmp    17ca0 <main::second>
+   17e66:	48 83 fe 07          	cmp    $0x7,%rsi
+   17e6a:	0f 85 17 01 00 00    	jne    17f87 <main::transform+0x1b7>
+   17e70:	b8 62 6c 6f 63       	mov    $0x636f6c62,%eax
+   17e75:	33 07                	xor    (%rdi),%eax
+   17e77:	ba 63 6b 65 64       	mov    $0x64656b63,%edx
+   17e7c:	33 57 03             	xor    0x3(%rdi),%edx
+   17e7f:	09 c2                	or     %eax,%edx
+   17e81:	0f 85 00 01 00 00    	jne    17f87 <main::transform+0x1b7>
+   17e87:	48 85 c9             	test   %rcx,%rcx
+   17e8a:	0f 84 10 01 00 00    	je     17fa0 <main::transform+0x1d0>
+   17e90:	4d 85 ff             	test   %r15,%r15
+   17e93:	74 35                	je     17eca <main::transform+0xfa>
+   17e95:	4c 89 f8             	mov    %r15,%rax
+   17e98:	48 09 c8             	or     %rcx,%rax
+   17e9b:	48 c1 e8 20          	shr    $0x20,%rax
+   17e9f:	74 3c                	je     17edd <main::transform+0x10d>
+   17ea1:	4c 89 f8             	mov    %r15,%rax
+   17ea4:	31 d2                	xor    %edx,%edx
+   17ea6:	48 f7 f1             	div    %rcx
+   17ea9:	eb 39                	jmp    17ee4 <main::transform+0x114>
+   17eab:	48 89 ef             	mov    %rbp,%rdi
+   17eae:	4c 89 fe             	mov    %r15,%rsi
+   17eb1:	4c 89 ea             	mov    %r13,%rdx
+   17eb4:	4c 89 f9             	mov    %r15,%rcx
+   17eb7:	48 83 c4 28          	add    $0x28,%rsp
+   17ebb:	5b                   	pop    %rbx
+   17ebc:	41 5c                	pop    %r12
+   17ebe:	41 5d                	pop    %r13
+   17ec0:	41 5e                	pop    %r14
+   17ec2:	41 5f                	pop    %r15
+   17ec4:	5d                   	pop    %rbp
+   17ec5:	e9 56 fc ff ff       	jmp    17b20 <main::fused>
+   17eca:	31 c0                	xor    %eax,%eax
+   17ecc:	48 39 c0             	cmp    %rax,%rax
+   17ecf:	48 0f 42 c0          	cmovb  %rax,%rax
+   17ed3:	48 85 c0             	test   %rax,%rax
+   17ed6:	75 20                	jne    17ef8 <main::transform+0x128>
+   17ed8:	e9 80 00 00 00       	jmp    17f5d <main::transform+0x18d>
+   17edd:	44 89 f8             	mov    %r15d,%eax
+   17ee0:	31 d2                	xor    %edx,%edx
+   17ee2:	f7 f1                	div    %ecx
+   17ee4:	48 83 fa 01          	cmp    $0x1,%rdx
+   17ee8:	48 83 d8 ff          	sbb    $0xffffffffffffffff,%rax
+   17eec:	48 39 c0             	cmp    %rax,%rax
+   17eef:	48 0f 42 c0          	cmovb  %rax,%rax
+   17ef3:	48 85 c0             	test   %rax,%rax
+   17ef6:	74 65                	je     17f5d <main::transform+0x18d>
+   17ef8:	4c 89 e3             	mov    %r12,%rbx
+   17efb:	48 8d 14 cd 00 00 00 	lea    0x0(,%rcx,8),%rdx
+   17f02:	00 
+   17f03:	48 89 54 24 08       	mov    %rdx,0x8(%rsp)
+   17f08:	48 89 4c 24 10       	mov    %rcx,0x10(%rsp)
+   17f0d:	0f 1f 00             	nopl   (%rax)
+   17f10:	49 89 ce             	mov    %rcx,%r14
+   17f13:	4d 29 fe             	sub    %r15,%r14
+   17f16:	4c 0f 42 f9          	cmovb  %rcx,%r15
+   17f1a:	49 f7 de             	neg    %r14
+   17f1d:	48 89 ef             	mov    %rbp,%rdi
+   17f20:	4c 89 fe             	mov    %r15,%rsi
+   17f23:	48 89 da             	mov    %rbx,%rdx
+   17f26:	4c 89 f9             	mov    %r15,%rcx
+   17f29:	49 89 c4             	mov    %rax,%r12
+   17f2c:	e8 8f fa ff ff       	call   179c0 <main::first>
+   17f31:	48 89 df             	mov    %rbx,%rdi
+   17f34:	4c 89 fe             	mov    %r15,%rsi
+   17f37:	4c 89 ea             	mov    %r13,%rdx
+   17f3a:	4c 89 f9             	mov    %r15,%rcx
+   17f3d:	e8 5e fd ff ff       	call   17ca0 <main::second>
+   17f42:	4c 89 e0             	mov    %r12,%rax
+   17f45:	48 8b 4c 24 10       	mov    0x10(%rsp),%rcx
+   17f4a:	48 8b 54 24 08       	mov    0x8(%rsp),%rdx
+   17f4f:	49 01 d5             	add    %rdx,%r13
+   17f52:	48 01 d5             	add    %rdx,%rbp
+   17f55:	4d 89 f7             	mov    %r14,%r15
+   17f58:	48 ff c8             	dec    %rax
+   17f5b:	75 b3                	jne    17f10 <main::transform+0x140>
+   17f5d:	48 83 c4 28          	add    $0x28,%rsp
+   17f61:	5b                   	pop    %rbx
+   17f62:	41 5c                	pop    %r12
+   17f64:	41 5d                	pop    %r13
+   17f66:	41 5e                	pop    %r14
+   17f68:	41 5f                	pop    %r15
+   17f6a:	5d                   	pop    %rbp
+   17f6b:	c3                   	ret
+   17f6c:	4c 8d 0d 05 55 04 00 	lea    0x45505(%rip),%r9        # 5d478 <__dso_handle+0x168>
+   17f73:	48 8d 74 24 18       	lea    0x18(%rsp),%rsi
+   17f78:	48 8d 54 24 20       	lea    0x20(%rsp),%rdx
+   17f7d:	31 ff                	xor    %edi,%edi
+   17f7f:	31 c9                	xor    %ecx,%ecx
+   17f81:	ff 15 61 7a 04 00    	call   *0x47a61(%rip)        # 5f9e8 <_DYNAMIC+0x2d8>
+   17f87:	48 8d 3d 7b ec fe ff 	lea    -0x11385(%rip),%rdi        # 6c09 <__abi_tag+0x690d>
+   17f8e:	48 8d 15 13 55 04 00 	lea    0x45513(%rip),%rdx        # 5d4a8 <__dso_handle+0x198>
+   17f95:	be 4b 00 00 00       	mov    $0x4b,%esi
+   17f9a:	ff 15 00 7a 04 00    	call   *0x47a00(%rip)        # 5f9a0 <_DYNAMIC+0x290>
+   17fa0:	48 8d 3d 3d ec fe ff 	lea    -0x113c3(%rip),%rdi        # 6be4 <__abi_tag+0x68e8>
+   17fa7:	48 8d 15 e2 54 04 00 	lea    0x454e2(%rip),%rdx        # 5d490 <__dso_handle+0x180>
+   17fae:	be 25 00 00 00       	mov    $0x25,%esi
+   17fb3:	ff 15 27 7a 04 00    	call   *0x47a27(%rip)        # 5f9e0 <_DYNAMIC+0x2d0>
+   17fb9:	cc                   	int3
+   17fba:	cc                   	int3
+   17fbb:	cc                   	int3
+   17fbc:	cc                   	int3
+   17fbd:	cc                   	int3
+   17fbe:	cc                   	int3
+   17fbf:	cc                   	int3

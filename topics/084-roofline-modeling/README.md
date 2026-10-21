@@ -73,3 +73,5 @@ attribute a result to a cache level or architecture.
 - [Intel memory-level Roofline](https://www.intel.com/content/www/us/en/developer/articles/technical/memory-level-roofline-model-with-advisor.html): separate cache boundaries.
 - [STREAM methodology](https://www.cs.virginia.edu/stream/ref.html): bandwidth workloads and cache sizing.
 - [Wang et al., Time-Based Roofline](https://arxiv.org/html/2009.04598): time and algorithm work must be considered together.
+
+[Measured results and limits](measurements/RESULTS.md).
