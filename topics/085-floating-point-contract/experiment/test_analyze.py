@@ -104,6 +104,13 @@ def test_order_coverage_is_enforced():
     assert analyze_exit(data) != 0
 
 
+def test_rows_outside_matrix_are_rejected():
+    data = rows()
+    extra = dict(data[0], n=512, repeats=(1 << 24) // 512)
+    data.append(extra)
+    assert analyze_exit(data) != 0, 'analyzer ignored a process outside the declared matrix'
+
+
 def test_truncated_input_is_rejected_without_asserts():
     data = rows()[:-1]
     assert analyze_exit(data, '-O') != 0, 'analyzer ran with assert statements stripped'

@@ -12,6 +12,8 @@ for directory in map(Path, sys.argv[1:]):
         raise RuntimeError(f'duplicate result directory name: {directory.name}')
     with (directory/'samples.csv').open() as f:
         rows = list(csv.DictReader(f))
+    if len(rows) != 216:
+        raise RuntimeError(f'{directory}: expected exactly 216 measured processes, found {len(rows)}')
     cells = {}
     for n in (256, 65536, 1048576):
         for workload in ('positive', 'signed'):
