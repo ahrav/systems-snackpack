@@ -1,0 +1,276 @@
+0000000000017680 <main::compensated>:
+   17680:	48 85 f6             	test   %rsi,%rsi
+   17683:	74 21                	je     176a6 <main::compensated+0x26>
+   17685:	48 8d 0c f5 00 00 00 	lea    0x0(,%rsi,8),%rcx
+   1768c:	00 
+   1768d:	48 83 c1 f8          	add    $0xfffffffffffffff8,%rcx
+   17691:	89 c8                	mov    %ecx,%eax
+   17693:	f7 d0                	not    %eax
+   17695:	a8 18                	test   $0x18,%al
+   17697:	75 12                	jne    176ab <main::compensated+0x2b>
+   17699:	c5 f9 57 c0          	vxorpd %xmm0,%xmm0,%xmm0
+   1769d:	c5 f1 57 c9          	vxorpd %xmm1,%xmm1,%xmm1
+   176a1:	48 89 f8             	mov    %rdi,%rax
+   176a4:	eb 68                	jmp    1770e <main::compensated+0x8e>
+   176a6:	c5 f8 57 c0          	vxorps %xmm0,%xmm0,%xmm0
+   176aa:	c3                   	ret
+   176ab:	89 ca                	mov    %ecx,%edx
+   176ad:	c1 ea 03             	shr    $0x3,%edx
+   176b0:	ff c2                	inc    %edx
+   176b2:	83 e2 03             	and    $0x3,%edx
+   176b5:	48 f7 da             	neg    %rdx
+   176b8:	c5 e1 57 db          	vxorpd %xmm3,%xmm3,%xmm3
+   176bc:	c5 fb 12 15 74 12 ff 	vmovddup -0xed8c(%rip),%xmm2        # 8938 <GCC_except_table386+0x70>
+   176c3:	ff 
+   176c4:	c5 f1 57 c9          	vxorpd %xmm1,%xmm1,%xmm1
+   176c8:	48 89 f8             	mov    %rdi,%rax
+   176cb:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+   176d0:	c5 fb 10 20          	vmovsd (%rax),%xmm4
+   176d4:	48 83 c0 08          	add    $0x8,%rax
+   176d8:	c5 e3 58 c4          	vaddsd %xmm4,%xmm3,%xmm0
+   176dc:	c5 e1 54 ea          	vandpd %xmm2,%xmm3,%xmm5
+   176e0:	c5 d9 54 f2          	vandpd %xmm2,%xmm4,%xmm6
+   176e4:	c5 e3 5c f8          	vsubsd %xmm0,%xmm3,%xmm7
+   176e8:	c5 db 58 ff          	vaddsd %xmm7,%xmm4,%xmm7
+   176ec:	c5 db 5c e0          	vsubsd %xmm0,%xmm4,%xmm4
+   176f0:	c5 e3 58 dc          	vaddsd %xmm4,%xmm3,%xmm3
+   176f4:	62 f1 cf 08 c2 cd 06 	vcmpnlesd %xmm5,%xmm6,%k1
+   176fb:	62 f1 c7 09 10 fb    	vmovsd %xmm3,%xmm7,%xmm7{%k1}
+   17701:	c5 f3 58 cf          	vaddsd %xmm7,%xmm1,%xmm1
+   17705:	c5 f9 28 d8          	vmovapd %xmm0,%xmm3
+   17709:	48 ff c2             	inc    %rdx
+   1770c:	75 c2                	jne    176d0 <main::compensated+0x50>
+   1770e:	48 83 f9 18          	cmp    $0x18,%rcx
+   17712:	0f 82 ec 00 00 00    	jb     17804 <main::compensated+0x184>
+   17718:	48 8d 0c f7          	lea    (%rdi,%rsi,8),%rcx
+   1771c:	c5 fb 12 15 14 12 ff 	vmovddup -0xedec(%rip),%xmm2        # 8938 <GCC_except_table386+0x70>
+   17723:	ff 
+   17724:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+   1772b:	00 00 00 00 00 
+   17730:	c5 fb 10 18          	vmovsd (%rax),%xmm3
+   17734:	c5 fb 10 60 08       	vmovsd 0x8(%rax),%xmm4
+   17739:	c5 fb 58 eb          	vaddsd %xmm3,%xmm0,%xmm5
+   1773d:	c5 f9 54 f2          	vandpd %xmm2,%xmm0,%xmm6
+   17741:	c5 e1 54 fa          	vandpd %xmm2,%xmm3,%xmm7
+   17745:	c5 7b 5c c5          	vsubsd %xmm5,%xmm0,%xmm8
+   17749:	c5 3b 58 c3          	vaddsd %xmm3,%xmm8,%xmm8
+   1774d:	c5 e3 5c dd          	vsubsd %xmm5,%xmm3,%xmm3
+   17751:	c5 fb 58 c3          	vaddsd %xmm3,%xmm0,%xmm0
+   17755:	62 f1 c7 08 c2 ce 06 	vcmpnlesd %xmm6,%xmm7,%k1
+   1775c:	62 71 bf 09 10 c0    	vmovsd %xmm0,%xmm8,%xmm8{%k1}
+   17762:	c5 bb 58 c1          	vaddsd %xmm1,%xmm8,%xmm0
+   17766:	c5 d3 58 cc          	vaddsd %xmm4,%xmm5,%xmm1
+   1776a:	c5 d1 54 da          	vandpd %xmm2,%xmm5,%xmm3
+   1776e:	c5 d9 54 f2          	vandpd %xmm2,%xmm4,%xmm6
+   17772:	c5 d3 5c f9          	vsubsd %xmm1,%xmm5,%xmm7
+   17776:	c5 db 58 ff          	vaddsd %xmm7,%xmm4,%xmm7
+   1777a:	c5 db 5c e1          	vsubsd %xmm1,%xmm4,%xmm4
+   1777e:	c5 d3 58 e4          	vaddsd %xmm4,%xmm5,%xmm4
+   17782:	62 f1 cf 08 c2 cb 06 	vcmpnlesd %xmm3,%xmm6,%k1
+   17789:	62 f1 c7 09 10 fc    	vmovsd %xmm4,%xmm7,%xmm7{%k1}
+   1778f:	c5 fb 58 c7          	vaddsd %xmm7,%xmm0,%xmm0
+   17793:	c5 fb 10 58 10       	vmovsd 0x10(%rax),%xmm3
+   17798:	c5 f3 58 e3          	vaddsd %xmm3,%xmm1,%xmm4
+   1779c:	c5 f1 54 ea          	vandpd %xmm2,%xmm1,%xmm5
+   177a0:	c5 e1 54 f2          	vandpd %xmm2,%xmm3,%xmm6
+   177a4:	c5 f3 5c fc          	vsubsd %xmm4,%xmm1,%xmm7
+   177a8:	c5 e3 58 ff          	vaddsd %xmm7,%xmm3,%xmm7
+   177ac:	c5 e3 5c dc          	vsubsd %xmm4,%xmm3,%xmm3
+   177b0:	c5 f3 58 cb          	vaddsd %xmm3,%xmm1,%xmm1
+   177b4:	62 f1 cf 08 c2 cd 06 	vcmpnlesd %xmm5,%xmm6,%k1
+   177bb:	62 f1 c7 09 10 f9    	vmovsd %xmm1,%xmm7,%xmm7{%k1}
+   177c1:	c5 fb 58 cf          	vaddsd %xmm7,%xmm0,%xmm1
+   177c5:	c5 fb 10 58 18       	vmovsd 0x18(%rax),%xmm3
+   177ca:	c5 db 58 c3          	vaddsd %xmm3,%xmm4,%xmm0
+   177ce:	c5 d9 54 ea          	vandpd %xmm2,%xmm4,%xmm5
+   177d2:	c5 e1 54 f2          	vandpd %xmm2,%xmm3,%xmm6
+   177d6:	c5 db 5c f8          	vsubsd %xmm0,%xmm4,%xmm7
+   177da:	c5 e3 58 ff          	vaddsd %xmm7,%xmm3,%xmm7
+   177de:	c5 e3 5c d8          	vsubsd %xmm0,%xmm3,%xmm3
+   177e2:	c5 db 58 db          	vaddsd %xmm3,%xmm4,%xmm3
+   177e6:	62 f1 cf 08 c2 cd 06 	vcmpnlesd %xmm5,%xmm6,%k1
+   177ed:	62 f1 c7 09 10 fb    	vmovsd %xmm3,%xmm7,%xmm7{%k1}
+   177f3:	c5 f3 58 cf          	vaddsd %xmm7,%xmm1,%xmm1
+   177f7:	48 83 c0 20          	add    $0x20,%rax
+   177fb:	48 39 c8             	cmp    %rcx,%rax
+   177fe:	0f 85 2c ff ff ff    	jne    17730 <main::compensated+0xb0>
+   17804:	c5 f3 58 c0          	vaddsd %xmm0,%xmm1,%xmm0
+   17808:	c3                   	ret
+   17809:	cc                   	int3
+   1780a:	cc                   	int3
+   1780b:	cc                   	int3
+   1780c:	cc                   	int3
+   1780d:	cc                   	int3
+   1780e:	cc                   	int3
+   1780f:	cc                   	int3
+
+0000000000019580 <main::fused>:
+   19580:	c4 e2 f1 a9 c2       	vfmadd213sd %xmm2,%xmm1,%xmm0
+   19585:	c3                   	ret
+   19586:	cc                   	int3
+   19587:	cc                   	int3
+   19588:	cc                   	int3
+   19589:	cc                   	int3
+   1958a:	cc                   	int3
+   1958b:	cc                   	int3
+   1958c:	cc                   	int3
+   1958d:	cc                   	int3
+   1958e:	cc                   	int3
+   1958f:	cc                   	int3
+
+0000000000019590 <main::lanes4>:
+   19590:	50                   	push   %rax
+   19591:	48 b8 fc ff ff ff ff 	movabs $0xffffffffffffffc,%rax
+   19598:	ff ff 0f 
+   1959b:	48 21 f0             	and    %rsi,%rax
+   1959e:	74 1a                	je     195ba <main::lanes4+0x2a>
+   195a0:	4c 8d 46 fc          	lea    -0x4(%rsi),%r8
+   195a4:	44 89 c1             	mov    %r8d,%ecx
+   195a7:	f7 d1                	not    %ecx
+   195a9:	f6 c1 1c             	test   $0x1c,%cl
+   195ac:	75 15                	jne    195c3 <main::lanes4+0x33>
+   195ae:	c5 f9 57 c0          	vxorpd %xmm0,%xmm0,%xmm0
+   195b2:	48 89 f9             	mov    %rdi,%rcx
+   195b5:	48 89 c2             	mov    %rax,%rdx
+   195b8:	eb 41                	jmp    195fb <main::lanes4+0x6b>
+   195ba:	c5 f9 57 c0          	vxorpd %xmm0,%xmm0,%xmm0
+   195be:	e9 e5 00 00 00       	jmp    196a8 <main::lanes4+0x118>
+   195c3:	45 89 c1             	mov    %r8d,%r9d
+   195c6:	41 c1 e9 02          	shr    $0x2,%r9d
+   195ca:	41 ff c1             	inc    %r9d
+   195cd:	41 83 e1 07          	and    $0x7,%r9d
+   195d1:	c5 f9 57 c0          	vxorpd %xmm0,%xmm0,%xmm0
+   195d5:	48 89 f9             	mov    %rdi,%rcx
+   195d8:	48 89 c2             	mov    %rax,%rdx
+   195db:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+   195e0:	48 83 c2 fc          	add    $0xfffffffffffffffc,%rdx
+   195e4:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
+   195e8:	c4 e3 fd 01 09 93    	vpermpd $0x93,(%rcx),%ymm1
+   195ee:	48 83 c1 20          	add    $0x20,%rcx
+   195f2:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
+   195f6:	49 ff c9             	dec    %r9
+   195f9:	75 e5                	jne    195e0 <main::lanes4+0x50>
+   195fb:	49 83 f8 1c          	cmp    $0x1c,%r8
+   195ff:	0f 82 a3 00 00 00    	jb     196a8 <main::lanes4+0x118>
+   19605:	45 31 c0             	xor    %r8d,%r8d
+   19608:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
+   1960f:	00 
+   19610:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
+   19614:	c4 a3 fd 01 0c c1 93 	vpermpd $0x93,(%rcx,%r8,8),%ymm1
+   1961b:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
+   1961f:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
+   19623:	c4 a3 fd 01 4c c1 20 	vpermpd $0x93,0x20(%rcx,%r8,8),%ymm1
+   1962a:	93 
+   1962b:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
+   1962f:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
+   19633:	c4 a3 fd 01 4c c1 40 	vpermpd $0x93,0x40(%rcx,%r8,8),%ymm1
+   1963a:	93 
+   1963b:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
+   1963f:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
+   19643:	c4 a3 fd 01 4c c1 60 	vpermpd $0x93,0x60(%rcx,%r8,8),%ymm1
+   1964a:	93 
+   1964b:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
+   1964f:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
+   19653:	c4 a3 fd 01 8c c1 80 	vpermpd $0x93,0x80(%rcx,%r8,8),%ymm1
+   1965a:	00 00 00 93 
+   1965e:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
+   19662:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
+   19666:	c4 a3 fd 01 8c c1 a0 	vpermpd $0x93,0xa0(%rcx,%r8,8),%ymm1
+   1966d:	00 00 00 93 
+   19671:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
+   19675:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
+   19679:	c4 a3 fd 01 8c c1 c0 	vpermpd $0x93,0xc0(%rcx,%r8,8),%ymm1
+   19680:	00 00 00 93 
+   19684:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
+   19688:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
+   1968c:	c4 a3 fd 01 8c c1 e0 	vpermpd $0x93,0xe0(%rcx,%r8,8),%ymm1
+   19693:	00 00 00 93 
+   19697:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
+   1969b:	49 83 c0 20          	add    $0x20,%r8
+   1969f:	4c 39 c2             	cmp    %r8,%rdx
+   196a2:	0f 85 68 ff ff ff    	jne    19610 <main::lanes4+0x80>
+   196a8:	c1 e6 03             	shl    $0x3,%esi
+   196ab:	c5 f9 c6 c8 01       	vshufpd $0x1,%xmm0,%xmm0,%xmm1
+   196b0:	c4 e3 7d 19 c2 01    	vextractf128 $0x1,%ymm0,%xmm2
+   196b6:	c5 e9 c6 da 01       	vshufpd $0x1,%xmm2,%xmm2,%xmm3
+   196bb:	83 e6 18             	and    $0x18,%esi
+   196be:	74 20                	je     196e0 <main::lanes4+0x150>
+   196c0:	c5 f3 58 0c c7       	vaddsd (%rdi,%rax,8),%xmm1,%xmm1
+   196c5:	83 fe 08             	cmp    $0x8,%esi
+   196c8:	74 16                	je     196e0 <main::lanes4+0x150>
+   196ca:	c5 eb 58 54 c7 08    	vaddsd 0x8(%rdi,%rax,8),%xmm2,%xmm2
+   196d0:	83 fe 10             	cmp    $0x10,%esi
+   196d3:	74 0b                	je     196e0 <main::lanes4+0x150>
+   196d5:	83 fe 18             	cmp    $0x18,%esi
+   196d8:	75 17                	jne    196f1 <main::lanes4+0x161>
+   196da:	c5 e3 58 5c c7 10    	vaddsd 0x10(%rdi,%rax,8),%xmm3,%xmm3
+   196e0:	c5 f3 58 ca          	vaddsd %xmm2,%xmm1,%xmm1
+   196e4:	c5 e3 58 c0          	vaddsd %xmm0,%xmm3,%xmm0
+   196e8:	c5 f3 58 c0          	vaddsd %xmm0,%xmm1,%xmm0
+   196ec:	58                   	pop    %rax
+   196ed:	c5 f8 77             	vzeroupper
+   196f0:	c3                   	ret
+   196f1:	48 8d 15 78 6c 04 00 	lea    0x46c78(%rip),%rdx        # 60370 <__dso_handle+0x1d0>
+   196f8:	bf 04 00 00 00       	mov    $0x4,%edi
+   196fd:	be 04 00 00 00       	mov    $0x4,%esi
+   19702:	c5 f8 77             	vzeroupper
+   19705:	ff 15 95 94 04 00    	call   *0x49495(%rip)        # 62ba0 <_DYNAMIC+0x340>
+   1970b:	cc                   	int3
+   1970c:	cc                   	int3
+   1970d:	cc                   	int3
+   1970e:	cc                   	int3
+   1970f:	cc                   	int3
+
+0000000000019710 <main::ordered>:
+   19710:	48 85 f6             	test   %rsi,%rsi
+   19713:	74 13                	je     19728 <main::ordered+0x18>
+   19715:	89 f0                	mov    %esi,%eax
+   19717:	83 e0 07             	and    $0x7,%eax
+   1971a:	48 83 fe 08          	cmp    $0x8,%rsi
+   1971e:	73 0d                	jae    1972d <main::ordered+0x1d>
+   19720:	c5 f9 57 c0          	vxorpd %xmm0,%xmm0,%xmm0
+   19724:	31 c9                	xor    %ecx,%ecx
+   19726:	eb 50                	jmp    19778 <main::ordered+0x68>
+   19728:	c5 f8 57 c0          	vxorps %xmm0,%xmm0,%xmm0
+   1972c:	c3                   	ret
+   1972d:	48 b9 f8 ff ff ff ff 	movabs $0xffffffffffffff8,%rcx
+   19734:	ff ff 0f 
+   19737:	48 21 ce             	and    %rcx,%rsi
+   1973a:	c5 f9 57 c0          	vxorpd %xmm0,%xmm0,%xmm0
+   1973e:	31 c9                	xor    %ecx,%ecx
+   19740:	c5 fb 58 04 cf       	vaddsd (%rdi,%rcx,8),%xmm0,%xmm0
+   19745:	c5 fb 58 44 cf 08    	vaddsd 0x8(%rdi,%rcx,8),%xmm0,%xmm0
+   1974b:	c5 fb 58 44 cf 10    	vaddsd 0x10(%rdi,%rcx,8),%xmm0,%xmm0
+   19751:	c5 fb 58 44 cf 18    	vaddsd 0x18(%rdi,%rcx,8),%xmm0,%xmm0
+   19757:	c5 fb 58 44 cf 20    	vaddsd 0x20(%rdi,%rcx,8),%xmm0,%xmm0
+   1975d:	c5 fb 58 44 cf 28    	vaddsd 0x28(%rdi,%rcx,8),%xmm0,%xmm0
+   19763:	c5 fb 58 44 cf 30    	vaddsd 0x30(%rdi,%rcx,8),%xmm0,%xmm0
+   19769:	c5 fb 58 44 cf 38    	vaddsd 0x38(%rdi,%rcx,8),%xmm0,%xmm0
+   1976f:	48 83 c1 08          	add    $0x8,%rcx
+   19773:	48 39 ce             	cmp    %rcx,%rsi
+   19776:	75 c8                	jne    19740 <main::ordered+0x30>
+   19778:	48 85 c0             	test   %rax,%rax
+   1977b:	74 20                	je     1979d <main::ordered+0x8d>
+   1977d:	48 8d 0c cf          	lea    (%rdi,%rcx,8),%rcx
+   19781:	31 d2                	xor    %edx,%edx
+   19783:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
+   1978a:	84 00 00 00 00 00 
+   19790:	c5 fb 58 04 d1       	vaddsd (%rcx,%rdx,8),%xmm0,%xmm0
+   19795:	48 ff c2             	inc    %rdx
+   19798:	48 39 d0             	cmp    %rdx,%rax
+   1979b:	75 f3                	jne    19790 <main::ordered+0x80>
+   1979d:	c3                   	ret
+   1979e:	cc                   	int3
+   1979f:	cc                   	int3
+
+00000000000197a0 <main::separate>:
+   197a0:	c5 fb 59 c1          	vmulsd %xmm1,%xmm0,%xmm0
+   197a4:	c5 fb 58 c2          	vaddsd %xmm2,%xmm0,%xmm0
+   197a8:	c3                   	ret
+   197a9:	cc                   	int3
+   197aa:	cc                   	int3
+   197ab:	cc                   	int3
+   197ac:	cc                   	int3
+   197ad:	cc                   	int3
+   197ae:	cc                   	int3
+   197af:	cc                   	int3

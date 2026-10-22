@@ -15,7 +15,7 @@ cargo bench --workspace --no-run
 
 ## Repository rules
 
-- Topic numbers stay fixed at 1 through 103.
+- Topic numbers stay fixed at 1 through 143.
 - A revisit adds a new round inside the existing topic crate.
 - Public Rust APIs carry rustdoc. Doctests, tests, and benchmark programs must compile.
 - Measurement notes name the machine, toolchain, flags, input, and result.

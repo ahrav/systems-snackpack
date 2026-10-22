@@ -1,0 +1,11 @@
+{
+  "commit": "d6fd87a2ccc4c99f05b438b69ab4c956307b6fec",
+  "archive_sha256": "d5a40412b760473aba99601116eec5881213fdb01c4f56fc1c623e62ab8e63a9",
+  "files": {
+    "src/main.rs": "cad8aa6b5737b45f874a46a4a3ac1d2275175811bdc73658a449fdf9064bae74",
+    "experiment/run.py": "adabae9aa525e23f6b866caa28aefb698d3780138cf0ba00c570394fad4373c4",
+    "experiment/plot_model.py": "1649cf8d6110f38a1034ce67bc191dc2c0c79a854b44835ef234ec3bfc39abb7",
+    "experiment/oracle.py": "56bcdb673894c954149c7ff4c4732dd1be693c8ed8e05fd622e813008de349e1",
+    "experiment/analyze.py": "5629c24bfed4732dab719278589e54796e0c141e5bba74cae01389acddeb96f0"
+  }
+}

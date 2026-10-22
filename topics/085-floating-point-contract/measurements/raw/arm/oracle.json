@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "/tmp/topic085-20261022-nqcpmnWE/topics/085-floating-point-contract/experiment/oracle.py",
+    "/tmp/topic085-20261022-nqcpmnWE/results/demo"
+  ],
+  "start": 1792676667.1411638,
+  "seconds": 0.37697577476501465,
+  "returncode": 0,
+  "stdout": "{\n  \"cases\": 261,\n  \"value_checks\": 757,\n  \"accuracy_counterexamples\": {\n    \"ordered\": 16,\n    \"lanes4\": 15\n  },\n  \"status\": \"pass\",\n  \"limits\": \"Finite dyadic cases and cancellation fixtures; no general compensated correct-rounding claim.\"\n}\n",
+  "stderr": ""
+}

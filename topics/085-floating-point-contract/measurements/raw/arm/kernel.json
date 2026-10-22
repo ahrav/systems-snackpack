@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "uname",
+    "-a"
+  ],
+  "start": 1792676665.2548323,
+  "seconds": 0.0031235218048095703,
+  "returncode": 0,
+  "stdout": "Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.111-136.204.amzn2023.aarch64 #1 SMP Tue Oct  6 18:01:38 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux\n",
+  "stderr": ""
+}
