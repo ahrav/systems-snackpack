@@ -33,6 +33,8 @@ Values are nanoseconds per element: median [minimum, maximum] across twelve proc
 | xxl | positive | 1048576 | 0.6315 [0.6306, 0.6356] | 0.2806 [0.2788, 0.2900] | 1.3522 [1.3496, 1.3631] |
 | xxl | signed | 1048576 | 0.6313 [0.6309, 0.6363] | 0.2818 [0.2798, 0.2908] | 1.3567 [1.3510, 1.3614] |
 
+Retained CSV rows use LF line endings and disassembly excerpts have trailing spaces removed; all values and instructions are preserved. Full original tool outputs are retained in the external evidence archive.
+
 All pairwise ratios and selections are retained in [summary.json](raw/summary.json); individual measurements are in the host CSV files. The rule describes these observed blocks and supplies no population confidence interval.
 
 ## Emitted code and interpretation

@@ -2,7 +2,7 @@
    17680:	48 85 f6             	test   %rsi,%rsi
    17683:	74 21                	je     176a6 <main::compensated+0x26>
    17685:	48 8d 0c f5 00 00 00 	lea    0x0(,%rsi,8),%rcx
-   1768c:	00 
+   1768c:	00
    1768d:	48 83 c1 f8          	add    $0xfffffffffffffff8,%rcx
    17691:	89 c8                	mov    %ecx,%eax
    17693:	f7 d0                	not    %eax
@@ -21,7 +21,7 @@
    176b5:	48 f7 da             	neg    %rdx
    176b8:	c5 e1 57 db          	vxorpd %xmm3,%xmm3,%xmm3
    176bc:	c5 fb 12 15 74 12 ff 	vmovddup -0xed8c(%rip),%xmm2        # 8938 <GCC_except_table386+0x70>
-   176c3:	ff 
+   176c3:	ff
    176c4:	c5 f1 57 c9          	vxorpd %xmm1,%xmm1,%xmm1
    176c8:	48 89 f8             	mov    %rdi,%rax
    176cb:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
@@ -44,9 +44,9 @@
    17712:	0f 82 ec 00 00 00    	jb     17804 <main::compensated+0x184>
    17718:	48 8d 0c f7          	lea    (%rdi,%rsi,8),%rcx
    1771c:	c5 fb 12 15 14 12 ff 	vmovddup -0xedec(%rip),%xmm2        # 8938 <GCC_except_table386+0x70>
-   17723:	ff 
+   17723:	ff
    17724:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
-   1772b:	00 00 00 00 00 
+   1772b:	00 00 00 00 00
    17730:	c5 fb 10 18          	vmovsd (%rax),%xmm3
    17734:	c5 fb 10 60 08       	vmovsd 0x8(%rax),%xmm4
    17739:	c5 fb 58 eb          	vaddsd %xmm3,%xmm0,%xmm5
@@ -121,7 +121,7 @@
 0000000000019590 <main::lanes4>:
    19590:	50                   	push   %rax
    19591:	48 b8 fc ff ff ff ff 	movabs $0xffffffffffffffc,%rax
-   19598:	ff ff 0f 
+   19598:	ff ff 0f
    1959b:	48 21 f0             	and    %rsi,%rax
    1959e:	74 1a                	je     195ba <main::lanes4+0x2a>
    195a0:	4c 8d 46 fc          	lea    -0x4(%rsi),%r8
@@ -154,37 +154,37 @@
    195ff:	0f 82 a3 00 00 00    	jb     196a8 <main::lanes4+0x118>
    19605:	45 31 c0             	xor    %r8d,%r8d
    19608:	0f 1f 84 00 00 00 00 	nopl   0x0(%rax,%rax,1)
-   1960f:	00 
+   1960f:	00
    19610:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
    19614:	c4 a3 fd 01 0c c1 93 	vpermpd $0x93,(%rcx,%r8,8),%ymm1
    1961b:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
    1961f:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
    19623:	c4 a3 fd 01 4c c1 20 	vpermpd $0x93,0x20(%rcx,%r8,8),%ymm1
-   1962a:	93 
+   1962a:	93
    1962b:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
    1962f:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
    19633:	c4 a3 fd 01 4c c1 40 	vpermpd $0x93,0x40(%rcx,%r8,8),%ymm1
-   1963a:	93 
+   1963a:	93
    1963b:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
    1963f:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
    19643:	c4 a3 fd 01 4c c1 60 	vpermpd $0x93,0x60(%rcx,%r8,8),%ymm1
-   1964a:	93 
+   1964a:	93
    1964b:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
    1964f:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
    19653:	c4 a3 fd 01 8c c1 80 	vpermpd $0x93,0x80(%rcx,%r8,8),%ymm1
-   1965a:	00 00 00 93 
+   1965a:	00 00 00 93
    1965e:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
    19662:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
    19666:	c4 a3 fd 01 8c c1 a0 	vpermpd $0x93,0xa0(%rcx,%r8,8),%ymm1
-   1966d:	00 00 00 93 
+   1966d:	00 00 00 93
    19671:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
    19675:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
    19679:	c4 a3 fd 01 8c c1 c0 	vpermpd $0x93,0xc0(%rcx,%r8,8),%ymm1
-   19680:	00 00 00 93 
+   19680:	00 00 00 93
    19684:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
    19688:	c5 f0 57 c9          	vxorps %xmm1,%xmm1,%xmm1
    1968c:	c4 a3 fd 01 8c c1 e0 	vpermpd $0x93,0xe0(%rcx,%r8,8),%ymm1
-   19693:	00 00 00 93 
+   19693:	00 00 00 93
    19697:	c5 f5 58 c0          	vaddpd %ymm0,%ymm1,%ymm0
    1969b:	49 83 c0 20          	add    $0x20,%r8
    1969f:	4c 39 c2             	cmp    %r8,%rdx
@@ -234,7 +234,7 @@
    19728:	c5 f8 57 c0          	vxorps %xmm0,%xmm0,%xmm0
    1972c:	c3                   	ret
    1972d:	48 b9 f8 ff ff ff ff 	movabs $0xffffffffffffff8,%rcx
-   19734:	ff ff 0f 
+   19734:	ff ff 0f
    19737:	48 21 ce             	and    %rcx,%rsi
    1973a:	c5 f9 57 c0          	vxorpd %xmm0,%xmm0,%xmm0
    1973e:	31 c9                	xor    %ecx,%ecx
@@ -254,7 +254,7 @@
    1977d:	48 8d 0c cf          	lea    (%rdi,%rcx,8),%rcx
    19781:	31 d2                	xor    %edx,%edx
    19783:	66 66 66 66 2e 0f 1f 	data16 data16 data16 cs nopw 0x0(%rax,%rax,1)
-   1978a:	84 00 00 00 00 00 
+   1978a:	84 00 00 00 00 00
    19790:	c5 fb 58 04 d1       	vaddsd (%rcx,%rdx,8),%xmm0,%xmm0
    19795:	48 ff c2             	inc    %rdx
    19798:	48 39 d0             	cmp    %rdx,%rax
