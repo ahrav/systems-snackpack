@@ -6,7 +6,7 @@ The cancellation fixture has a different admissible set: only compensation retur
 
 ## Controls and identity
 
-Measured source commit: `d6fd87a2ccc4c99f05b438b69ab4c956307b6fec`. [Source hashes](raw/source-identity.json) match both hosts' recorded inputs. The published source and experiment scripts retain these exact bytes.
+Measured source commit: `d6fd87a2ccc4c99f05b438b69ab4c956307b6fec`. [Source hashes](raw/source-identity.json) match both hosts' recorded inputs. `src/main.rs`, `oracle.py`, and `plot_model.py` retain these exact bytes. Later review commits change the runner's rustup lookup and add analyzer validation of block coverage, result agreement, positive timings, and distinct host names; the benchmark source, timed loop, and reported selections are unchanged, and the committed analyzer reproduces [summary.json](raw/summary.json) from the retained CSV files.
 
 - Arm: dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com, AArch64, Linux 6.12.111.
 - xxl: resolved dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com, verified x86_64, Intel Xeon Platinum 8488C, KVM, Linux 6.12.111.

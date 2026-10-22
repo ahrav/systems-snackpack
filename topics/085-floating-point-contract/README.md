@@ -77,7 +77,7 @@ implementation rather than assuming its cost. [Neal's exact-summation paper][nea
 
 With `a=1+2^-27`, `b=1-2^-27`, the exact value of `a*b-1` is `-2^-54`.
 Separate multiplication rounds its product to 1 and returns zero after subtraction.
-Rust `a.mul_add(b,-1)` rounds the whole expression once and returns `-2^-54`.
+Rust `a.mul_add(b, -1.0)` rounds the whole expression once and returns `-2^-54`.
 This changes a separate-rounding contract even though the answer is more accurate
 for this expression. Dedicated hardware may help, but speed requires measurement.
 [Rust mul_add][fma]

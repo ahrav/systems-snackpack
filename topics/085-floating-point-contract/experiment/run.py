@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import shutil
 import subprocess
 import sys
 import time
@@ -14,7 +15,7 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(sys.argv[1]).resolve()
 OUT.mkdir(parents=True, exist_ok=False)
-RUSTC = [str(Path.home()/".cargo/bin/rustup"), "run", "1.93.1", "rustc"]
+RUSTC = [shutil.which("rustup") or str(Path.home()/".cargo/bin/rustup"), "run", "1.93.1", "rustc"]
 FLAGS = ["--edition", "2024", "-C", "opt-level=3", "-C", "target-cpu=native",
          "-C", "codegen-units=1", "-C", "lto=off", "-C", "panic=unwind"]
 
