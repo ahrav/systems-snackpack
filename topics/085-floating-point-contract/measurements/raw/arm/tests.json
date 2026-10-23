@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/tmp/topic085-20261022-nqcpmnWE/results/tests"
+  ],
+  "start": 1792676667.1372862,
+  "seconds": 0.0035507678985595703,
+  "returncode": 0,
+  "stdout": "\nrunning 5 tests\ntest tests::cancellation_changes_contract ... ok\ntest tests::exact_domain_includes_tails ... ok\ntest tests::finite_inputs_do_not_prevent_intermediate_overflow ... ok\ntest tests::fma_changes_rounding ... ok\ntest tests::special_values_are_observable ... ok\n\ntest result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n",
+  "stderr": ""
+}

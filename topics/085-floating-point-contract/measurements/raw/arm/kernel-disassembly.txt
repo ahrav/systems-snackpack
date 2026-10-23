@@ -1,0 +1,169 @@
+0000000000015360 <main::compensated>:
+   15360:	b4000301 	cbz	x1, 153c0 <main::compensated+0x60>
+   15364:	2f00e401 	movi	d1, #0x0
+   15368:	2f00e400 	movi	d0, #0x0
+   1536c:	d37df028 	lsl	x8, x1, #3
+   15370:	d503201f 	nop
+   15374:	d503201f 	nop
+   15378:	d503201f 	nop
+   1537c:	d503201f 	nop
+   15380:	fc408403 	ldr	d3, [x0], #8
+   15384:	1e604022 	fmov	d2, d1
+   15388:	1e60c044 	fabs	d4, d2
+   1538c:	1e632821 	fadd	d1, d1, d3
+   15390:	1e60c065 	fabs	d5, d3
+   15394:	1e613846 	fsub	d6, d2, d1
+   15398:	1e652080 	fcmp	d4, d5
+   1539c:	1e662866 	fadd	d6, d3, d6
+   153a0:	1e613863 	fsub	d3, d3, d1
+   153a4:	1e632842 	fadd	d2, d2, d3
+   153a8:	1e66bc42 	fcsel	d2, d2, d6, lt	// lt = tstop
+   153ac:	f1002108 	subs	x8, x8, #0x8
+   153b0:	1e622800 	fadd	d0, d0, d2
+   153b4:	54fffe61 	b.ne	15380 <main::compensated+0x20>  // b.any
+   153b8:	1e612800 	fadd	d0, d0, d1
+   153bc:	d65f03c0 	ret
+   153c0:	2f00e400 	movi	d0, #0x0
+   153c4:	d65f03c0 	ret
+   153c8:	d503201f 	nop
+   153cc:	d503201f 	nop
+   153d0:	d503201f 	nop
+   153d4:	d503201f 	nop
+   153d8:	d503201f 	nop
+   153dc:	d503201f 	nop
+
+0000000000016a90 <main::fused>:
+   16a90:	1f410800 	fmadd	d0, d0, d1, d2
+   16a94:	d65f03c0 	ret
+   16a98:	d503201f 	nop
+   16a9c:	d503201f 	nop
+
+0000000000016aa0 <main::lanes4>:
+   16aa0:	a9bf7bfd 	stp	x29, x30, [sp, #-16]!
+   16aa4:	910003fd 	mov	x29, sp
+   16aa8:	f27ee428 	ands	x8, x1, #0xffffffffffffffc
+   16aac:	540001c0 	b.eq	16ae4 <main::lanes4+0x44>  // b.none
+   16ab0:	d1001029 	sub	x9, x1, #0x4
+   16ab4:	04a0e3ec 	cntw	x12
+   16ab8:	d342fd29 	lsr	x9, x9, #2
+   16abc:	91000529 	add	x9, x9, #0x1
+   16ac0:	eb0c013f 	cmp	x9, x12
+   16ac4:	540001a2 	b.cs	16af8 <main::lanes4+0x58>  // b.hs, b.nlast
+   16ac8:	2f00e400 	movi	d0, #0x0
+   16acc:	2f00e401 	movi	d1, #0x0
+   16ad0:	2f00e402 	movi	d2, #0x0
+   16ad4:	2f00e403 	movi	d3, #0x0
+   16ad8:	aa0003e9 	mov	x9, x0
+   16adc:	aa0803ea 	mov	x10, x8
+   16ae0:	14000020 	b	16b60 <main::lanes4+0xc0>
+   16ae4:	2f00e402 	movi	d2, #0x0
+   16ae8:	2f00e401 	movi	d1, #0x0
+   16aec:	2f00e400 	movi	d0, #0x0
+   16af0:	2f00e403 	movi	d3, #0x0
+   16af4:	14000024 	b	16b84 <main::lanes4+0xe4>
+   16af8:	d100058a 	sub	x10, x12, #0x1
+   16afc:	2f00e400 	movi	d0, #0x0
+   16b00:	25d8e3e0 	ptrue	p0.d
+   16b04:	2f00e401 	movi	d1, #0x0
+   16b08:	2f00e402 	movi	d2, #0x0
+   16b0c:	2f00e403 	movi	d3, #0x0
+   16b10:	aa0003ef 	mov	x15, x0
+   16b14:	8a0a012b 	and	x11, x9, x10
+   16b18:	04bf510e 	rdvl	x14, #8
+   16b1c:	cb0b012d 	sub	x13, x9, x11
+   16b20:	8b0d1409 	add	x9, x0, x13, lsl #5
+   16b24:	cb0d090a 	sub	x10, x8, x13, lsl #2
+   16b28:	a5e0e1e4 	ld4d	{z4.d-z7.d}, p0/z, [x15]
+   16b2c:	eb0c01ad 	subs	x13, x13, x12
+   16b30:	65d820e0 	fadda	d0, p0, d0, z7.d
+   16b34:	65d820c1 	fadda	d1, p0, d1, z6.d
+   16b38:	a5e1e1f0 	ld4d	{z16.d-z19.d}, p0/z, [x15, #4, mul vl]
+   16b3c:	65d820a2 	fadda	d2, p0, d2, z5.d
+   16b40:	65d82083 	fadda	d3, p0, d3, z4.d
+   16b44:	8b0e01ef 	add	x15, x15, x14
+   16b48:	65d82260 	fadda	d0, p0, d0, z19.d
+   16b4c:	65d82241 	fadda	d1, p0, d1, z18.d
+   16b50:	65d82222 	fadda	d2, p0, d2, z17.d
+   16b54:	65d82203 	fadda	d3, p0, d3, z16.d
+   16b58:	54fffe81 	b.ne	16b28 <main::lanes4+0x88>  // b.any
+   16b5c:	b400014b 	cbz	x11, 16b84 <main::lanes4+0xe4>
+   16b60:	6d401524 	ldp	d4, d5, [x9]
+   16b64:	1e6228a2 	fadd	d2, d5, d2
+   16b68:	f100114a 	subs	x10, x10, #0x4
+   16b6c:	1e632883 	fadd	d3, d4, d3
+   16b70:	6d411524 	ldp	d4, d5, [x9, #16]
+   16b74:	1e6028a0 	fadd	d0, d5, d0
+   16b78:	91008129 	add	x9, x9, #0x20
+   16b7c:	1e612881 	fadd	d1, d4, d1
+   16b80:	54ffff01 	b.ne	16b60 <main::lanes4+0xc0>  // b.any
+   16b84:	d37d0429 	ubfiz	x9, x1, #3, #2
+   16b88:	b40001c9 	cbz	x9, 16bc0 <main::lanes4+0x120>
+   16b8c:	8b080c08 	add	x8, x0, x8, lsl #3
+   16b90:	f100213f 	cmp	x9, #0x8
+   16b94:	fd400104 	ldr	d4, [x8]
+   16b98:	1e632883 	fadd	d3, d4, d3
+   16b9c:	54000120 	b.eq	16bc0 <main::lanes4+0x120>  // b.none
+   16ba0:	fd400504 	ldr	d4, [x8, #8]
+   16ba4:	f100413f 	cmp	x9, #0x10
+   16ba8:	1e622882 	fadd	d2, d4, d2
+   16bac:	540000a0 	b.eq	16bc0 <main::lanes4+0x120>  // b.none
+   16bb0:	f100613f 	cmp	x9, #0x18
+   16bb4:	54000101 	b.ne	16bd4 <main::lanes4+0x134>  // b.any
+   16bb8:	fd400904 	ldr	d4, [x8, #16]
+   16bbc:	1e612881 	fadd	d1, d4, d1
+   16bc0:	1e622862 	fadd	d2, d3, d2
+   16bc4:	1e602820 	fadd	d0, d1, d0
+   16bc8:	1e602840 	fadd	d0, d2, d0
+   16bcc:	a8c17bfd 	ldp	x29, x30, [sp], #16
+   16bd0:	d65f03c0 	ret
+   16bd4:	f0000322 	adrp	x2, 7d000 <GCC_except_table0+0x1be84>
+   16bd8:	9119e042 	add	x2, x2, #0x678
+   16bdc:	52800080 	mov	w0, #0x4                   	// #4
+   16be0:	52800081 	mov	w1, #0x4                   	// #4
+   16be4:	97fff7bc 	bl	14ad4 <core::panicking::panic_bounds_check>
+   16be8:	d503201f 	nop
+   16bec:	d503201f 	nop
+   16bf0:	d503201f 	nop
+   16bf4:	d503201f 	nop
+   16bf8:	d503201f 	nop
+   16bfc:	d503201f 	nop
+
+0000000000016c00 <main::ordered>:
+   16c00:	b40000e1 	cbz	x1, 16c1c <main::ordered+0x1c>
+   16c04:	04a0e3e9 	cntw	x9
+   16c08:	eb09003f 	cmp	x1, x9
+   16c0c:	540000c2 	b.cs	16c24 <main::ordered+0x24>  // b.hs, b.nlast
+   16c10:	aa1f03e8 	mov	x8, xzr
+   16c14:	2f00e400 	movi	d0, #0x0
+   16c18:	14000013 	b	16c64 <main::ordered+0x64>
+   16c1c:	2f00e400 	movi	d0, #0x0
+   16c20:	d65f03c0 	ret
+   16c24:	d1000528 	sub	x8, x9, #0x1
+   16c28:	2f00e400 	movi	d0, #0x0
+   16c2c:	25d8e3e0 	ptrue	p0.d
+   16c30:	aa0003ec 	mov	x12, x0
+   16c34:	8a08002a 	and	x10, x1, x8
+   16c38:	04bf504b 	rdvl	x11, #2
+   16c3c:	cb0a0028 	sub	x8, x1, x10
+   16c40:	aa0803ed 	mov	x13, x8
+   16c44:	85804181 	ldr	z1, [x12]
+   16c48:	85804582 	ldr	z2, [x12, #1, mul vl]
+   16c4c:	eb0901ad 	subs	x13, x13, x9
+   16c50:	8b0b018c 	add	x12, x12, x11
+   16c54:	65d82020 	fadda	d0, p0, d0, z1.d
+   16c58:	65d82040 	fadda	d0, p0, d0, z2.d
+   16c5c:	54ffff41 	b.ne	16c44 <main::ordered+0x44>  // b.any
+   16c60:	b40000ea 	cbz	x10, 16c7c <main::ordered+0x7c>
+   16c64:	cb080029 	sub	x9, x1, x8
+   16c68:	8b080c08 	add	x8, x0, x8, lsl #3
+   16c6c:	fc408501 	ldr	d1, [x8], #8
+   16c70:	f1000529 	subs	x9, x9, #0x1
+   16c74:	1e612800 	fadd	d0, d0, d1
+   16c78:	54ffffa1 	b.ne	16c6c <main::ordered+0x6c>  // b.any
+   16c7c:	d65f03c0 	ret
+
+0000000000016c80 <main::separate>:
+   16c80:	1e610800 	fmul	d0, d0, d1
+   16c84:	1e622800 	fadd	d0, d0, d2
+   16c88:	d65f03c0 	ret
+   16c8c:	d503201f 	nop

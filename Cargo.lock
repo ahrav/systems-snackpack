@@ -120,6 +120,10 @@ name = "finite-state-transducers-compact-dictionaries"
 version = "0.1.0"
 
 [[package]]
+name = "floating-point-contract"
+version = "0.1.0"
+
+[[package]]
 name = "futex-parking"
 version = "0.1.0"
 
