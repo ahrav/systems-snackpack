@@ -85,6 +85,22 @@ def test_aa_rows_must_describe_one_serial_cell():
     assert analyze_exit(data, '-O') != 0
 
 
+def test_repeat_schedule_is_enforced():
+    data = rows()
+    for r in data:
+        if r['kind'] == 'measure':
+            r['repeats'] = 1
+    assert analyze_exit(data, '-O') != 0
+
+
+def test_block_order_is_enforced():
+    data = rows()
+    block = [r for r in data if r['kind'] == 'measure' and r['n'] == 4096 and r['workers'] == 1 and r['block'] == 0]
+    for r in block:  # block 0 must run serial, local, rescan; swap the last two
+        r['position'] = {'serial': 0, 'local': 2, 'rescan': 1}[r['variant']]
+    assert analyze_exit(data, '-O') != 0
+
+
 def test_missing_aa_row_is_rejected():
     data = rows()[1:]
     assert analyze_exit(data, '-O') != 0

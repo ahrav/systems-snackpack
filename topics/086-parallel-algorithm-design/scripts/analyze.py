@@ -25,10 +25,18 @@ for r in rows:
 measured = [r for r in rows if r['kind'] == 'measure']
 if len(measured) != 162:
     raise RuntimeError(f'expected 162 measured rows, found {len(measured)}')
+REPEATS = {4096: 16, 262144: 8, 4194304: 4}
+ORDERS = list(itertools.permutations(['serial', 'local', 'rescan']))
 report = []
 for n in [4096, 262144, 4194304]:
     for workers in [1, 4, 8]:
-        cells = {v: sorted([r for r in measured if int(r['n']) == n and int(r['workers']) == workers and r['variant'] == v], key=lambda r: int(r['block'])) for v in ['serial', 'local', 'rescan']}
+        cell = [r for r in measured if int(r['n']) == n and int(r['workers']) == workers]
+        if any(int(r['repeats']) != REPEATS[n] for r in cell):
+            raise RuntimeError(f'{n}/{workers}: every process must use {REPEATS[n]} timed calls')
+        for block, order in enumerate(ORDERS):
+            if sorted((int(r['position']), r['variant']) for r in cell if int(r['block']) == block) != list(enumerate(order)):
+                raise RuntimeError(f'{n}/{workers}: block {block} must run {order} in positions 0..2')
+        cells = {v: sorted([r for r in cell if r['variant'] == v], key=lambda r: int(r['block'])) for v in ['serial', 'local', 'rescan']}
         if any([int(r['block']) for r in a] != list(range(6)) for a in cells.values()):
             raise RuntimeError(f'{n}/{workers}: each variant needs blocks 0..5 exactly once')
         values = {v: [float(r['ns_call']) / n for r in a] for v, a in cells.items()}
