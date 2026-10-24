@@ -22,6 +22,8 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--source-commit', required=True)
     args = parser.parse_args()
+    if args.output.exists() and any(args.output.iterdir()):
+        parser.error(f'{args.output} is not empty; each campaign needs its own output directory')
     args.output.mkdir(parents=True, exist_ok=True)
     topology = run(['lscpu', '-p=CPU,CORE,SOCKET,NODE'])
     allowed = os.sched_getaffinity(0)

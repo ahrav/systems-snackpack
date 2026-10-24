@@ -48,7 +48,7 @@ The C benchmark has three correct alternatives: serial execution, static contigu
 
 ```bash
 python3 scripts/validate.py
-python3 scripts/run_campaign.py --source-commit 4a8ffe7be8d0b60d36d5a3913897cf1bd0f13570 --output measurements/local
+python3 scripts/run_campaign.py --source-commit "$(git rev-parse HEAD)" --output measurements/local
 ```
 
 The validation uses a separately implemented Python integer oracle and a forced

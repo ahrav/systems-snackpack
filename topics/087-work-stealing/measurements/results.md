@@ -2,7 +2,7 @@
 
 Static chunks win at grain 1 and have lower medians at grain 64 on both hosts. At grain 1024, static and stealing are an operational tie for these samples: every median differs by less than 0.4%. This is a practical selection from six observations per mode, rather than a statistical equivalence test.
 
-Measured source commit: `4a8ffe7be8d0b60d36d5a3913897cf1bd0f13570`. File hashes and archive identity are in [source.json](source.json). Both hosts ran the exact archived source. Later documentation commits retain these measured bytes.
+Measured source commit: `4a8ffe7be8d0b60d36d5a3913897cf1bd0f13570`. File hashes and archive identity are in [source.json](source.json). Both hosts ran the exact archived source. `work_stealing_bench.c` retains the measured bytes. After the campaign, review fixes removed the model's unreachable failed-steal counter from `work_stealing_demo.py` and made `scripts/run_campaign.py` refuse a nonempty output directory; neither change touches the measured binary or the recorded observations.
 
 ## Workload and controls
 
@@ -52,9 +52,9 @@ From a Linux checkout containing the topic, run:
 ```sh
 cd topics/087-work-stealing
 python3 scripts/validate.py
-python3 scripts/run_campaign.py --source-commit 4a8ffe7be8d0b60d36d5a3913897cf1bd0f13570 --output measurements/replay
+python3 scripts/run_campaign.py --source-commit "$(git rev-parse HEAD)" --output measurements/replay
 ```
 
-The replay command requires four allowed distinct cores on one NUMA node. Record the actual commit when replaying another source revision. The retained raw.csv, attempts.jsonl, validation.json, metadata.json and transfer.json files preserve observations and source identities for each host.
+The replay command requires four allowed distinct cores on one NUMA node and an empty or absent output directory, so each campaign's files stay separate. Record the actual commit when replaying another source revision. The retained raw.csv, attempts.jsonl, validation.json, metadata.json and transfer.json files preserve observations and source identities for each host.
 
 Earlier macOS timings used the completion-accounting bug and are superseded by this campaign. Their original files remain in the prior lesson output directory.

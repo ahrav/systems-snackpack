@@ -28,21 +28,19 @@ def static_blocks(depth: int, workers: int) -> list[int]:
     return loads
 
 
-def work_steal(depth: int, cutoff: int, workers: int) -> tuple[list[int], int, int, int]:
+def work_steal(depth: int, cutoff: int, workers: int) -> tuple[list[int], int, int]:
     queues = [[] for _ in range(workers)]
     queues[0].append((depth, 0))
     loads = [0] * workers
-    steals = tasks = failures = 0
+    steals = tasks = 0
 
     while any(queues):
         worker = min(range(workers), key=lambda i: loads[i])
         if queues[worker]:
             node = queues[worker].pop()  # owner takes newest work
         else:
+            # The loop condition guarantees a nonempty victim.
             victim = max(range(workers), key=lambda i: len(queues[i]))
-            if not queues[victim]:
-                failures += 1
-                continue
             node = queues[victim].pop(0)  # thief takes oldest work
             steals += 1
         remaining, path = node
@@ -54,13 +52,13 @@ def work_steal(depth: int, cutoff: int, workers: int) -> tuple[list[int], int, i
             # remains available to a thief.
             queues[worker].append((remaining - 1, path * 2))
             queues[worker].append((remaining - 1, path * 2 + 1))
-    return loads, tasks, steals, failures
+    return loads, tasks, steals
 
 
 def report(depth: int, cutoff: int, workers: int) -> dict:
     oracle = subtree_cost(depth, 0)
     static = static_blocks(depth, workers)
-    stolen, tasks, steals, failures = work_steal(depth, cutoff, workers)
+    stolen, tasks, steals = work_steal(depth, cutoff, workers)
     if sum(static) != oracle or sum(stolen) != oracle:
         raise AssertionError("scheduler lost or duplicated work")
     return {
@@ -74,7 +72,6 @@ def report(depth: int, cutoff: int, workers: int) -> dict:
         "work_steal_makespan_model": max(stolen),
         "tasks": tasks,
         "steals": steals,
-        "failed_steal_attempts": failures,
     }
 
 
