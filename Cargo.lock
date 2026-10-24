@@ -370,5 +370,9 @@ name = "topic082-linux-runtime"
 version = "0.1.0"
 
 [[package]]
+name = "work-stealing"
+version = "0.1.0"
+
+[[package]]
 name = "zero-copy-limits"
 version = "0.1.0"
