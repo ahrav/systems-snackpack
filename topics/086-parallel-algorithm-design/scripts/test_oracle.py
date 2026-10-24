@@ -25,8 +25,13 @@ def run_oracle(probe, *flags):
 
 
 def test_silent_probe_is_rejected_without_asserts():
-    p = run_oracle('/bin/true', '-O')
+    with tempfile.TemporaryDirectory() as tmp:
+        probe = pathlib.Path(tmp) / 'probe'
+        probe.write_text('#!/bin/sh\nexit 0\n')
+        probe.chmod(probe.stat().st_mode | stat.S_IXUSR)
+        p = run_oracle(str(probe), '-O')
     assert p.returncode != 0, p.stdout
+    assert 'probe answered 0 of 378 requests' in p.stderr, p.stderr
     assert '"status": "pass"' not in p.stdout
 
 
@@ -35,9 +40,11 @@ def test_trailing_empty_field_is_rejected():
         probe = pathlib.Path(tmp) / 'probe'
         probe.write_text(TRAILING_COMMA_PROBE)
         probe.chmod(probe.stat().st_mode | stat.S_IXUSR)
-        p = run_oracle(str(probe))
-        assert p.returncode != 0, p.stdout
-        assert '"status": "pass"' not in p.stdout
+        for flags in ((), ('-O',)):
+            p = run_oracle(str(probe), *flags)
+            assert p.returncode != 0, p.stdout
+            assert "ValueError: invalid literal for int() with base 10: ''" in p.stderr, p.stderr
+            assert '"status": "pass"' not in p.stdout
 
 
 def test_real_probe_passes():

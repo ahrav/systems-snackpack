@@ -27,7 +27,7 @@ def rows():
     return out
 
 
-def analyze_exit(data, *flags, _stdout=False):
+def analyze_exit(data, *flags, _stdout=False, _stderr=False):
     with tempfile.TemporaryDirectory() as tmp:
         path = pathlib.Path(tmp) / 'raw.csv'
         with path.open('w', newline='') as f:
@@ -36,6 +36,8 @@ def analyze_exit(data, *flags, _stdout=False):
             w.writerows(data)
         p = subprocess.run([sys.executable, *flags, str(analyze), str(path)],
                            text=True, capture_output=True, timeout=120, check=False)
+        if _stderr:
+            return p.returncode, p.stderr
         return (p.returncode, p.stdout) if _stdout else p.returncode
 
 
@@ -48,8 +50,10 @@ def test_substituted_block_is_rejected_without_asserts():
     data = rows()
     victim = next(r for r in data if r['kind'] == 'measure' and r['n'] == 4096
                   and r['workers'] == 8 and r['variant'] == 'local' and r['block'] == 5)
-    victim['n'] = 8192  # still 162 measured rows, one cell now has five local timings
-    assert analyze_exit(data, '-O') != 0, 'analyzer paired five ratios and reported a decision'
+    victim.update(n=8192, total=(8192 * 8193 // 2) & MASK)  # still 162 measured rows, one cell now has five local timings
+    code, err = analyze_exit(data, '-O', _stderr=True)
+    assert code != 0, 'analyzer paired five ratios and reported a decision'
+    assert '4096/8: block 5 must run' in err, err
     assert analyze_exit(data) != 0
 
 
@@ -115,8 +119,10 @@ def test_aa_ratio_follows_declared_positions():
 
 
 def test_missing_aa_row_is_rejected():
-    data = rows()[1:]
-    assert analyze_exit(data, '-O') != 0
+    data = [dict(rows()[0], kind='measure')] + rows()[1:]  # 164 rows, 163 measured, one A/A
+    code, err = analyze_exit(data, '-O', _stderr=True)
+    assert code != 0
+    assert 'expected 162 measured rows, found 163' in err, err
 
 
 if __name__ == '__main__':

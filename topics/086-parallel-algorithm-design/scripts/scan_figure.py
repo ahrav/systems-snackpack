@@ -2,7 +2,9 @@
 """Draw scan.svg and scan.png: the four-chunk exclusive scan with its phase dependencies."""
 import pathlib
 
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
 INPUT = [[3, 1], [4, 1], [5, 9], [2, 6]]
@@ -63,5 +65,5 @@ ax.text(LABEL_X, y(338), 'Only chunk summaries cross the middle phase: offset k 
         'Output chunks have separate owners.', color=MUTED, fontsize=10, va='baseline')
 
 here = pathlib.Path(__file__).resolve().parents[1]
-fig.savefig(here / 'scan.svg', facecolor=BG)
+fig.savefig(here / 'scan.svg', facecolor=BG, metadata={'Date': None})
 fig.savefig(here / 'scan.png', facecolor=BG, dpi=160)

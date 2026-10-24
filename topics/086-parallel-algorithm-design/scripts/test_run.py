@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""run.py refuses an existing campaign directory and records the inherited affinity mask."""
+"""run.py refuses an existing campaign directory, records the inherited mask, and validates affinity and probe output under -O."""
 import json
-import os
 import pathlib
 import stat
 import subprocess
@@ -15,51 +14,58 @@ _, mode, variant, n, workers, repeats = sys.argv
 n = int(n)
 print(f"{variant},{n},{workers},{repeats},{n * 0.5:.3f},{(n * (n + 1) // 2) & ((1 << 64) - 1)}")
 '''
+SWAPPED_STUB = STUB.replace('print(f"{variant},', 'variant = {"local": "rescan", "rescan": "local"}.get(variant, variant)\nprint(f"{variant},')
+# A cpuset-restricted kernel answers sched_setaffinity with the intersection, which can be narrower than requested.
+FAKE_KERNEL = (
+    "import os, runpy, sys; state = {{'cpus': {before}}}; "
+    "os.sched_getaffinity = lambda pid: set(state['cpus']); "
+    "os.sched_setaffinity = lambda pid, mask: state.update(cpus={after}); "
+    "sys.argv = sys.argv[1:]; runpy.run_path(sys.argv[0], run_name='__main__')"
+)
+EIGHT = 'set(range(8))'
 
 
-def stub(directory):
+def stub(directory, text=STUB):
     probe = directory / 'probe'
-    probe.write_text(STUB)
+    probe.write_text(text)
     probe.chmod(probe.stat().st_mode | stat.S_IXUSR)
     return probe
 
 
-SWAPPED_STUB = STUB.replace('print(f"{variant},', 'variant = {"local": "rescan", "rescan": "local"}.get(variant, variant)\nprint(f"{variant},')
-# Simulates a cpuset of CPUs 0..3: the kernel intersects the requested mask, so pinning cannot widen it.
-REDUCED_CPUSET = (
-    "import os, runpy, sys; os.sched_getaffinity = lambda pid: {0, 1, 2, 3}; "
-    "os.sched_setaffinity = lambda pid, mask: None; sys.argv = sys.argv[1:]; "
-    "runpy.run_path(sys.argv[0], run_name='__main__')"
-)
+def run(out, probe, *, before=EIGHT, after=EIGHT, flags=('-O',)):
+    code = FAKE_KERNEL.format(before=before, after=after)
+    return subprocess.run([sys.executable, *flags, '-c', code, str(run_py), str(probe), str(out)],
+                          text=True, capture_output=True, timeout=300, check=False)
 
 
-def test_reduced_cpuset_is_rejected_without_asserts():
+def test_reduced_inherited_cpuset_is_rejected_without_asserts():
     with tempfile.TemporaryDirectory() as tmp:
         tmp = pathlib.Path(tmp)
         out = tmp / 'results'
-        p = subprocess.run([sys.executable, '-O', '-c', REDUCED_CPUSET, str(run_py), str(stub(tmp)), str(out)],
-                           text=True, capture_output=True, timeout=300, check=False)
+        p = run(out, stub(tmp), before='{0, 1, 2, 3}', after='{0, 1, 2, 3}')
         assert p.returncode != 0, 'run.py measured on four CPUs while the design declares eight'
+        assert 'CPUs 0..7 must all be allowed' in p.stderr, p.stderr
         assert not (out / 'raw.csv').exists(), 'run.py collected measurements under a reduced CPU set'
 
 
-def test_mislabeled_probe_output_is_rejected_without_asserts():
-    if not runner_can_pin():
-        print('CPUs 0..7 unavailable; skipping mislabeled-output check')
-        return
+def test_intersected_pinning_is_rejected_without_asserts():
     with tempfile.TemporaryDirectory() as tmp:
         tmp = pathlib.Path(tmp)
         out = tmp / 'results'
-        probe = stub(tmp)
-        probe.write_text(SWAPPED_STUB)
-        p = subprocess.run([sys.executable, '-O', str(run_py), str(probe), str(out)],
-                           text=True, capture_output=True, timeout=300, check=False)
+        p = run(out, stub(tmp), before=EIGHT, after='{0, 1, 2, 3}')
+        assert p.returncode != 0, 'run.py measured after the kernel narrowed the requested mask'
+        assert 'pinning left affinity' in p.stderr, p.stderr
+        assert not (out / 'raw.csv').exists()
+
+
+def test_mislabeled_probe_output_is_rejected_without_asserts():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = pathlib.Path(tmp)
+        out = tmp / 'results'
+        p = run(out, stub(tmp, SWAPPED_STUB))
         assert p.returncode != 0, 'run.py accepted probe output labeled with another variant'
-        assert (out / 'failure.json').exists()
-
-
-def runner_can_pin():
-    return hasattr(os, 'sched_getaffinity') and set(range(8)).issubset(os.sched_getaffinity(0))
+        failure = json.loads((out / 'failure.json').read_text())
+        assert 'does not describe' in failure['error'], failure
 
 
 def test_existing_directory_is_rejected_before_any_attempt():
@@ -69,26 +75,22 @@ def test_existing_directory_is_rejected_before_any_attempt():
         out.mkdir()
         log = out / 'attempts.jsonl'
         log.write_text('{"sentinel": true}\n')
-        p = subprocess.run([sys.executable, str(run_py), str(stub(tmp)), str(out)],
-                           text=True, capture_output=True, timeout=300, check=False)
+        p = run(out, stub(tmp), flags=())
         assert p.returncode != 0, 'run.py reused an existing campaign directory'
+        assert 'FileExistsError' in p.stderr, p.stderr
         assert log.read_text() == '{"sentinel": true}\n', 'run.py appended to a prior campaign log'
         assert not (out / 'raw.csv').exists(), 'run.py overwrote raw.csv in an existing directory'
 
 
 def test_fresh_campaign_records_inherited_mask():
-    if not runner_can_pin():
-        print('CPUs 0..7 unavailable; skipping fresh-campaign check')
-        return
     with tempfile.TemporaryDirectory() as tmp:
         tmp = pathlib.Path(tmp)
         out = tmp / 'results'
-        p = subprocess.run([sys.executable, str(run_py), str(stub(tmp)), str(out)],
-                           text=True, capture_output=True, timeout=300, check=False)
+        p = run(out, stub(tmp), before='set(range(16))', flags=())
         assert p.returncode == 0, p.stderr
         runner = json.loads((out / 'runner.json').read_text())
-        assert runner['affinity'] == list(range(8))
-        assert set(runner['inherited_affinity']) >= set(range(8)), runner
+        assert runner['inherited_affinity'] == list(range(16)), runner
+        assert runner['affinity'] == list(range(8)), runner
         assert sum(1 for _ in (out / 'attempts.jsonl').open()) == 164
         assert sum(1 for _ in (out / 'raw.csv').open()) == 165
 
