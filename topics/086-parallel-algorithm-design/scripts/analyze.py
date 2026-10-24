@@ -3,6 +3,7 @@
 import csv
 import itertools
 import json
+import math
 import statistics
 import sys
 
@@ -18,8 +19,9 @@ for r in rows:
     n = int(r['n'])
     if int(r['total']) != (n * (n + 1) // 2) & MASK:
         raise RuntimeError(f'row total disagrees with the triangular-number oracle: {r}')
-    if not float(r['ns_call']) > 0:
-        raise RuntimeError(f'non-positive timing: {r}')
+    ns = float(r['ns_call'])
+    if not (math.isfinite(ns) and ns > 0):
+        raise RuntimeError(f'timing must be finite and positive: {r}')
 measured = [r for r in rows if r['kind'] == 'measure']
 if len(measured) != 162:
     raise RuntimeError(f'expected 162 measured rows, found {len(measured)}')
@@ -37,7 +39,8 @@ for n in [4096, 262144, 4194304]:
             decision = a if max(ratios) < 1/1.05 else b if min(ratios) > 1.05 else 'tie' if min(ratios) >= 1/1.05 and max(ratios) <= 1.05 else 'unresolved'
             pairs.append({'a': a, 'b': b, 'ratios_a_over_b': ratios, 'decision': decision})
         report.append({'n': n, 'workers': workers, 'variants': summary, 'pairs': pairs})
-aa = [float(r['ns_call']) for r in rows if r['kind'] == 'aa']
-if len(aa) != 2:
-    raise RuntimeError(f'expected 2 A/A rows, found {len(aa)}')
+aa_rows = [r for r in rows if r['kind'] == 'aa']
+if len(aa_rows) != 2 or any((r['variant'], r['n'], r['workers'], r['repeats']) != ('serial', '262144', '1', '8') for r in aa_rows):
+    raise RuntimeError(f'A/A rows must be two serial 262144/1/8 processes: {aa_rows}')
+aa = [float(r['ns_call']) for r in aa_rows]
 print(json.dumps({'cells': report, 'aa_ratio': aa[0]/aa[1], 'rule': 'Every paired ratio must clear 5 percent; descriptive only.'}, indent=2))

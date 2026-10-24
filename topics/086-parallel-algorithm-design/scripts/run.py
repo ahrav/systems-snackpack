@@ -17,10 +17,13 @@ metadata = {'host': platform.node(), 'platform': platform.platform(), 'started_u
 if hasattr(os, 'sched_getaffinity'):
     allowed = sorted(os.sched_getaffinity(0))
     # The declared campaign uses CPUs 0..7, verified as distinct visible cores.
-    assert set(range(8)).issubset(allowed), allowed
+    if not set(range(8)).issubset(allowed):
+        raise RuntimeError(f'CPUs 0..7 must all be allowed; inherited {allowed}')
     metadata['inherited_affinity'] = allowed
     os.sched_setaffinity(0, range(8))
     metadata['affinity'] = sorted(os.sched_getaffinity(0))
+    if metadata['affinity'] != list(range(8)):
+        raise RuntimeError(f'pinning left affinity {metadata["affinity"]}')
 else:
     metadata['affinity'] = 'uncontrolled local diagnostic'
 (out / 'runner.json').write_text(json.dumps(metadata, indent=2) + '\n')
@@ -37,7 +40,8 @@ with (out / 'raw.csv').open('w') as f:
             with (out / 'attempts.jsonl').open('a') as log: log.write(json.dumps(attempt) + '\n')
             result.check_returncode()
             fields = result.stdout.strip().split(',')
-            assert len(fields) == 6 and fields[:4] == [v, str(n), str(p), str(reps)]
+            if len(fields) != 6 or fields[:4] != [v, str(n), str(p), str(reps)]:
+                raise RuntimeError(f'probe output {result.stdout!r} does not describe {command}')
             writer.writerow([kind, block, pos] + fields)
             f.flush()
         except BaseException as error:

@@ -24,6 +24,40 @@ def stub(directory):
     return probe
 
 
+SWAPPED_STUB = STUB.replace('print(f"{variant},', 'variant = {"local": "rescan", "rescan": "local"}.get(variant, variant)\nprint(f"{variant},')
+# Simulates a cpuset of CPUs 0..3: the kernel intersects the requested mask, so pinning cannot widen it.
+REDUCED_CPUSET = (
+    "import os, runpy, sys; os.sched_getaffinity = lambda pid: {0, 1, 2, 3}; "
+    "os.sched_setaffinity = lambda pid, mask: None; sys.argv = sys.argv[1:]; "
+    "runpy.run_path(sys.argv[0], run_name='__main__')"
+)
+
+
+def test_reduced_cpuset_is_rejected_without_asserts():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = pathlib.Path(tmp)
+        out = tmp / 'results'
+        p = subprocess.run([sys.executable, '-O', '-c', REDUCED_CPUSET, str(run_py), str(stub(tmp)), str(out)],
+                           text=True, capture_output=True, timeout=300, check=False)
+        assert p.returncode != 0, 'run.py measured on four CPUs while the design declares eight'
+        assert not (out / 'raw.csv').exists(), 'run.py collected measurements under a reduced CPU set'
+
+
+def test_mislabeled_probe_output_is_rejected_without_asserts():
+    if not runner_can_pin():
+        print('CPUs 0..7 unavailable; skipping mislabeled-output check')
+        return
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = pathlib.Path(tmp)
+        out = tmp / 'results'
+        probe = stub(tmp)
+        probe.write_text(SWAPPED_STUB)
+        p = subprocess.run([sys.executable, '-O', str(run_py), str(probe), str(out)],
+                           text=True, capture_output=True, timeout=300, check=False)
+        assert p.returncode != 0, 'run.py accepted probe output labeled with another variant'
+        assert (out / 'failure.json').exists()
+
+
 def runner_can_pin():
     return hasattr(os, 'sched_getaffinity') and set(range(8)).issubset(os.sched_getaffinity(0))
 

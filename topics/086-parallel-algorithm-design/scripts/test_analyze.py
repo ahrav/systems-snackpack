@@ -70,6 +70,21 @@ def test_wrong_total_is_rejected():
     assert analyze_exit(data, '-O') != 0
 
 
+def test_infinite_timing_is_rejected():
+    data = rows()
+    data[9]['ns_call'] = 'inf'
+    assert analyze_exit(data, '-O') != 0
+
+
+def test_aa_rows_must_describe_one_serial_cell():
+    data = rows()
+    data[1]['variant'] = 'local'
+    assert analyze_exit(data, '-O') != 0
+    data = rows()
+    data[1]['workers'] = 8
+    assert analyze_exit(data, '-O') != 0
+
+
 def test_missing_aa_row_is_rejected():
     data = rows()[1:]
     assert analyze_exit(data, '-O') != 0
