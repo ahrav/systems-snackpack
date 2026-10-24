@@ -1,0 +1,37 @@
+{
+  "time_utc": "2026-10-24T18:13:25.764705+00:00",
+  "source_commit": "4a8ffe7be8d0b60d36d5a3913897cf1bd0f13570",
+  "hostname": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+  "platform": "Linux-6.12.111-136.204.amzn2023.x86_64-x86_64-with-glibc2.34",
+  "architecture": "x86_64",
+  "cpu_set": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "topology": "# The following is the parsable format, which can be fed to other\n# programs. Each different item in every column has an unique ID\n# starting usually from zero.\n# CPU,Core,Socket,Node\n0,0,0,0\n1,1,0,0\n2,2,0,0\n3,3,0,0\n4,4,0,0\n5,5,0,0\n6,6,0,0\n7,7,0,0\n8,8,0,0\n9,9,0,0\n10,10,0,0\n11,11,0,0\n12,12,0,0\n13,13,0,0\n14,14,0,0\n15,15,0,0\n16,16,0,0\n17,17,0,0\n18,18,0,0\n19,19,0,0\n20,20,0,0\n21,21,0,0\n22,22,0,0\n23,23,0,0\n24,24,0,0\n25,25,0,0\n26,26,0,0\n27,27,0,0\n28,28,0,0\n29,29,0,0\n30,30,0,0\n31,31,0,0\n32,32,0,0\n33,33,0,0\n34,34,0,0\n35,35,0,0\n36,36,0,0\n37,37,0,0\n38,38,0,0\n39,39,0,0\n40,40,0,0\n41,41,0,0\n42,42,0,0\n43,43,0,0\n44,44,0,0\n45,45,0,0\n46,46,0,0\n47,47,0,0\n48,48,1,1\n49,49,1,1\n50,50,1,1\n51,51,1,1\n52,52,1,1\n53,53,1,1\n54,54,1,1\n55,55,1,1\n56,56,1,1\n57,57,1,1\n58,58,1,1\n59,59,1,1\n60,60,1,1\n61,61,1,1\n62,62,1,1\n63,63,1,1\n64,64,1,1\n65,65,1,1\n66,66,1,1\n67,67,1,1\n68,68,1,1\n69,69,1,1\n70,70,1,1\n71,71,1,1\n72,72,1,1\n73,73,1,1\n74,74,1,1\n75,75,1,1\n76,76,1,1\n77,77,1,1\n78,78,1,1\n79,79,1,1\n80,80,1,1\n81,81,1,1\n82,82,1,1\n83,83,1,1\n84,84,1,1\n85,85,1,1\n86,86,1,1\n87,87,1,1\n88,88,1,1\n89,89,1,1\n90,90,1,1\n91,91,1,1\n92,92,1,1\n93,93,1,1\n94,94,1,1\n95,95,1,1\n96,0,0,0\n97,1,0,0\n98,2,0,0\n99,3,0,0\n100,4,0,0\n101,5,0,0\n102,6,0,0\n103,7,0,0\n104,8,0,0\n105,9,0,0\n106,10,0,0\n107,11,0,0\n108,12,0,0\n109,13,0,0\n110,14,0,0\n111,15,0,0\n112,16,0,0\n113,17,0,0\n114,18,0,0\n115,19,0,0\n116,20,0,0\n117,21,0,0\n118,22,0,0\n119,23,0,0\n120,24,0,0\n121,25,0,0\n122,26,0,0\n123,27,0,0\n124,28,0,0\n125,29,0,0\n126,30,0,0\n127,31,0,0\n128,32,0,0\n129,33,0,0\n130,34,0,0\n131,35,0,0\n132,36,0,0\n133,37,0,0\n134,38,0,0\n135,39,0,0\n136,40,0,0\n137,41,0,0\n138,42,0,0\n139,43,0,0\n140,44,0,0\n141,45,0,0\n142,46,0,0\n143,47,0,0\n144,48,1,1\n145,49,1,1\n146,50,1,1\n147,51,1,1\n148,52,1,1\n149,53,1,1\n150,54,1,1\n151,55,1,1\n152,56,1,1\n153,57,1,1\n154,58,1,1\n155,59,1,1\n156,60,1,1\n157,61,1,1\n158,62,1,1\n159,63,1,1\n160,64,1,1\n161,65,1,1\n162,66,1,1\n163,67,1,1\n164,68,1,1\n165,69,1,1\n166,70,1,1\n167,71,1,1\n168,72,1,1\n169,73,1,1\n170,74,1,1\n171,75,1,1\n172,76,1,1\n173,77,1,1\n174,78,1,1\n175,79,1,1\n176,80,1,1\n177,81,1,1\n178,82,1,1\n179,83,1,1\n180,84,1,1\n181,85,1,1\n182,86,1,1\n183,87,1,1\n184,88,1,1\n185,89,1,1\n186,90,1,1\n187,91,1,1\n188,92,1,1\n189,93,1,1\n190,94,1,1\n191,95,1,1\n",
+  "lscpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           46 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  192\nOn-line CPU(s) list:                     0-191\nVendor ID:                               GenuineIntel\nModel name:                              Intel(R) Xeon(R) Platinum 8488C\nCPU family:                              6\nModel:                                   143\nThread(s) per core:                      2\nCore(s) per socket:                      48\nSocket(s):                               2\nStepping:                                8\nBogoMIPS:                                4800.00\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd ida arat avx512vbmi umip pku ospke waitpkg avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg tme avx512_vpopcntdq rdpid cldemote movdiri movdir64b md_clear serialize amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nHypervisor vendor:                       KVM\nVirtualization type:                     full\nL1d cache:                               4.5 MiB (96 instances)\nL1i cache:                               3 MiB (96 instances)\nL2 cache:                                192 MiB (96 instances)\nL3 cache:                                210 MiB (2 instances)\nNUMA node(s):                            2\nNUMA node0 CPU(s):                       0-47,96-143\nNUMA node1 CPU(s):                       48-95,144-191\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+  "compiler": "cc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)\nCopyright (C) 2021 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "flags": [
+    "-std=c11",
+    "-O3",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-pthread"
+  ],
+  "n": 262144,
+  "rounds": 32,
+  "workers": 4,
+  "protocol": "One untimed warmup per mode/cell; six permutations; fresh process per sample; one invocation per process; thread startup and cleanup included.",
+  "source_sha256": {
+    "work_stealing_bench.c": "93ab18951513fa920f0fdaee66673cd75e8ed9621cbfb39bc5f1ef563345dae5",
+    "work_stealing_demo.py": "0d06f7a8f9c50ec469f1ab454399b61b1370e9f7b8b869ecf98df4bb38e95aab",
+    "scripts/validate.py": "c9ae20677f967e543dbf4917886697e2953cf58f54aabb4d38e3106b34177731",
+    "scripts/run_campaign.py": "434f911730e28b69a1713fb6632fc03272e3b0d693a7db25f917995c44c2dc8c"
+  },
+  "binary_sha256": "c46c18007c540d4503d1aa00b92c7534889cc1b26e90aa245d2fbc6c56212fd9",
+  "measured_processes": 108,
+  "warmup_processes": 18
+}
