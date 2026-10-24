@@ -1,0 +1,20 @@
+{
+  "time_utc": "2026-10-24T18:13:30.786796+00:00",
+  "host": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+  "remote": "/tmp/topic087-final-mwoX22X6",
+  "source_commit": "4a8ffe7be8d0b60d36d5a3913897cf1bd0f13570",
+  "source_sha256": {
+    ".gitignore": "ab01f8932c5ac4f331a056e2ba77f5e338c6b79db45720105a55f514c1d5e0cf",
+    "Cargo.toml": "7ca4f681cb15eb0b7c42eca5a0253a49e2e1a418dc5357dc881990358f44ad27",
+    "README.md": "f8a62d7d598667f6729da1c16a3460655bdb6c71124ce32af7987b4231089ad8",
+    "scheduler-ends.png": "8a7a95bcf92e9c3f0405301d347c4eb09e5afef3a40c18e22d588e1ddc984cf9",
+    "scheduler-ends.svg": "d485fac1527ae3fc5c599f8fa2570090da464a44651440474e563b313b53e92a",
+    "scripts/run_campaign.py": "434f911730e28b69a1713fb6632fc03272e3b0d693a7db25f917995c44c2dc8c",
+    "scripts/validate.py": "c9ae20677f967e543dbf4917886697e2953cf58f54aabb4d38e3106b34177731",
+    "src/lib.rs": "3cc2d56801a0b46cdd9232451e84b949d627d6be65e2e47e3c5cb595066d7d28",
+    "work_stealing_bench.c": "93ab18951513fa920f0fdaee66673cd75e8ed9621cbfb39bc5f1ef563345dae5",
+    "work_stealing_demo.py": "0d06f7a8f9c50ec469f1ab454399b61b1370e9f7b8b869ecf98df4bb38e95aab"
+  },
+  "archive_sha256": "f4f380784c2c98bbd62207138df274759f5e32695573240b28cf91dc075f290c",
+  "exit_code": 0
+}

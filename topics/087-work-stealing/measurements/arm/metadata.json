@@ -1,0 +1,37 @@
+{
+  "time_utc": "2026-10-24T18:13:25.588871+00:00",
+  "source_commit": "4a8ffe7be8d0b60d36d5a3913897cf1bd0f13570",
+  "hostname": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+  "platform": "Linux-6.12.111-136.204.amzn2023.aarch64-aarch64-with-glibc2.34",
+  "architecture": "aarch64",
+  "cpu_set": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "topology": "# The following is the parsable format, which can be fed to other\n# programs. Each different item in every column has an unique ID\n# starting usually from zero.\n# CPU,Core,Socket,Node\n0,0,0,0\n1,1,0,0\n2,2,0,0\n3,3,0,0\n4,4,0,0\n5,5,0,0\n6,6,0,0\n7,7,0,0\n8,8,0,0\n9,9,0,0\n10,10,0,0\n11,11,0,0\n12,12,0,0\n13,13,0,0\n14,14,0,0\n15,15,0,0\n16,16,0,0\n17,17,0,0\n18,18,0,0\n19,19,0,0\n20,20,0,0\n21,21,0,0\n22,22,0,0\n23,23,0,0\n24,24,0,0\n25,25,0,0\n26,26,0,0\n27,27,0,0\n28,28,0,0\n29,29,0,0\n30,30,0,0\n31,31,0,0\n32,32,0,0\n33,33,0,0\n34,34,0,0\n35,35,0,0\n36,36,0,0\n37,37,0,0\n38,38,0,0\n39,39,0,0\n40,40,0,0\n41,41,0,0\n42,42,0,0\n43,43,0,0\n44,44,0,0\n45,45,0,0\n46,46,0,0\n47,47,0,0\n48,48,0,0\n49,49,0,0\n50,50,0,0\n51,51,0,0\n52,52,0,0\n53,53,0,0\n54,54,0,0\n55,55,0,0\n56,56,0,0\n57,57,0,0\n58,58,0,0\n59,59,0,0\n60,60,0,0\n61,61,0,0\n62,62,0,0\n63,63,0,0\n",
+  "lscpu": "Architecture:                            aarch64\nCPU op-mode(s):                          32-bit, 64-bit\nByte Order:                              Little Endian\nCPU(s):                                  64\nOn-line CPU(s) list:                     0-63\nVendor ID:                               ARM\nModel:                                   1\nThread(s) per core:                      1\nCore(s) per socket:                      64\nSocket(s):                               1\nStepping:                                r1p1\nBogoMIPS:                                2100.00\nFlags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nL1d cache:                               4 MiB (64 instances)\nL1i cache:                               4 MiB (64 instances)\nL2 cache:                                64 MiB (64 instances)\nL3 cache:                                32 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-63\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; CSV2, BHB\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+  "compiler": "cc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)\nCopyright (C) 2021 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "flags": [
+    "-std=c11",
+    "-O3",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-pthread"
+  ],
+  "n": 262144,
+  "rounds": 32,
+  "workers": 4,
+  "protocol": "One untimed warmup per mode/cell; six permutations; fresh process per sample; one invocation per process; thread startup and cleanup included.",
+  "source_sha256": {
+    "work_stealing_bench.c": "93ab18951513fa920f0fdaee66673cd75e8ed9621cbfb39bc5f1ef563345dae5",
+    "work_stealing_demo.py": "0d06f7a8f9c50ec469f1ab454399b61b1370e9f7b8b869ecf98df4bb38e95aab",
+    "scripts/validate.py": "c9ae20677f967e543dbf4917886697e2953cf58f54aabb4d38e3106b34177731",
+    "scripts/run_campaign.py": "434f911730e28b69a1713fb6632fc03272e3b0d693a7db25f917995c44c2dc8c"
+  },
+  "binary_sha256": "48010ede411194cf81cbe44bc790150d05dac0da4dbf07cff46b22843a2e7103",
+  "measured_processes": 108,
+  "warmup_processes": 18
+}

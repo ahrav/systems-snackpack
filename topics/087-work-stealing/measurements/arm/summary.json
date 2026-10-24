@@ -1,0 +1,164 @@
+[
+  {
+    "skew": 1,
+    "grain": 1,
+    "mode": "serial",
+    "count": 6,
+    "median_ns": 13759994.0,
+    "min_ns": 13652213,
+    "max_ns": 13825426
+  },
+  {
+    "skew": 1,
+    "grain": 1,
+    "mode": "static",
+    "count": 6,
+    "median_ns": 3555138.5,
+    "min_ns": 3535528,
+    "max_ns": 3567941
+  },
+  {
+    "skew": 1,
+    "grain": 1,
+    "mode": "steal",
+    "count": 6,
+    "median_ns": 61783255.5,
+    "min_ns": 56772045,
+    "max_ns": 64232142
+  },
+  {
+    "skew": 1,
+    "grain": 64,
+    "mode": "serial",
+    "count": 6,
+    "median_ns": 13778695.5,
+    "min_ns": 13697952,
+    "max_ns": 13816555
+  },
+  {
+    "skew": 1,
+    "grain": 64,
+    "mode": "static",
+    "count": 6,
+    "median_ns": 3577494.0,
+    "min_ns": 3525240,
+    "max_ns": 3593590
+  },
+  {
+    "skew": 1,
+    "grain": 64,
+    "mode": "steal",
+    "count": 6,
+    "median_ns": 3981743.5,
+    "min_ns": 3906097,
+    "max_ns": 4027136
+  },
+  {
+    "skew": 1,
+    "grain": 1024,
+    "mode": "serial",
+    "count": 6,
+    "median_ns": 13742140.0,
+    "min_ns": 13724354,
+    "max_ns": 13815213
+  },
+  {
+    "skew": 1,
+    "grain": 1024,
+    "mode": "static",
+    "count": 6,
+    "median_ns": 3570797.0,
+    "min_ns": 3538061,
+    "max_ns": 3619077
+  },
+  {
+    "skew": 1,
+    "grain": 1024,
+    "mode": "steal",
+    "count": 6,
+    "median_ns": 3559864.5,
+    "min_ns": 3536506,
+    "max_ns": 3582373
+  },
+  {
+    "skew": 16,
+    "grain": 1,
+    "mode": "serial",
+    "count": 6,
+    "median_ns": 29055822.5,
+    "min_ns": 28963932,
+    "max_ns": 29095115
+  },
+  {
+    "skew": 16,
+    "grain": 1,
+    "mode": "static",
+    "count": 6,
+    "median_ns": 7412442.0,
+    "min_ns": 7408574,
+    "max_ns": 7421116
+  },
+  {
+    "skew": 16,
+    "grain": 1,
+    "mode": "steal",
+    "count": 6,
+    "median_ns": 52109494.0,
+    "min_ns": 49982274,
+    "max_ns": 59518222
+  },
+  {
+    "skew": 16,
+    "grain": 64,
+    "mode": "serial",
+    "count": 6,
+    "median_ns": 29112148.0,
+    "min_ns": 29048155,
+    "max_ns": 29138291
+  },
+  {
+    "skew": 16,
+    "grain": 64,
+    "mode": "static",
+    "count": 6,
+    "median_ns": 7445202.0,
+    "min_ns": 7419262,
+    "max_ns": 7536778
+  },
+  {
+    "skew": 16,
+    "grain": 64,
+    "mode": "steal",
+    "count": 6,
+    "median_ns": 7712235.0,
+    "min_ns": 7591310,
+    "max_ns": 7790216
+  },
+  {
+    "skew": 16,
+    "grain": 1024,
+    "mode": "serial",
+    "count": 6,
+    "median_ns": 29072423.5,
+    "min_ns": 28956666,
+    "max_ns": 29138168
+  },
+  {
+    "skew": 16,
+    "grain": 1024,
+    "mode": "static",
+    "count": 6,
+    "median_ns": 7425130.5,
+    "min_ns": 7416900,
+    "max_ns": 7467568
+  },
+  {
+    "skew": 16,
+    "grain": 1024,
+    "mode": "steal",
+    "count": 6,
+    "median_ns": 7404705.5,
+    "min_ns": 7358659,
+    "max_ns": 7451007
+  }
+]

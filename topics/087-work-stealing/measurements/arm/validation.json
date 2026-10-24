@@ -1,0 +1,10 @@
+{
+  "model": "self-test: 325 accounting cases passed",
+  "native_self_test": "self-test: 72 serial/static/work-steal checksum cases passed",
+  "independent_oracle_cases": 45,
+  "exactly_once_cases": 4,
+  "forced_split_remaining": {
+    "fixed": 1,
+    "publish_before_count_mutant": 0
+  }
+}

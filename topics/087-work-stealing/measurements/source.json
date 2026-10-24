@@ -1,0 +1,11 @@
+{
+  "commit": "4a8ffe7be8d0b60d36d5a3913897cf1bd0f13570",
+  "sha256": {
+    "work_stealing_bench.c": "93ab18951513fa920f0fdaee66673cd75e8ed9621cbfb39bc5f1ef563345dae5",
+    "work_stealing_demo.py": "0d06f7a8f9c50ec469f1ab454399b61b1370e9f7b8b869ecf98df4bb38e95aab",
+    "scripts/validate.py": "c9ae20677f967e543dbf4917886697e2953cf58f54aabb4d38e3106b34177731",
+    "scripts/run_campaign.py": "434f911730e28b69a1713fb6632fc03272e3b0d693a7db25f917995c44c2dc8c"
+  },
+  "archive_sha256": "f4f380784c2c98bbd62207138df274759f5e32695573240b28cf91dc075f290c",
+  "validation": "Both hosts verified every archive member against SHA256SUMS before building."
+}

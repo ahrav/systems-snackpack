@@ -26,7 +26,7 @@ The visual is an inspected SVG. The implementation follows its rule: an owner po
 
 ## Cost model and choice
 
-`parallel time ≈ useful work / workers + critical path + task_count × scheduler_cost + imbalance/locality cost`.
+A rough cost checklist is `parallel time ≈ useful work / workers + critical path + task_count × scheduler_cost + imbalance/locality cost`. These terms can overlap; use measured wall time for selection. The expected work-stealing bound applies to the paper's fully strict computation and randomized scheduler assumptions.
 
 Use static chunks for known equal-cost work. Use work stealing for recursive or data-dependent work with uneven costs. Increase the cutoff when task administration dominates. Decrease it when idle workers remain while a long task runs. Production implementations also need correct concurrent deque synchronization, memory reclamation, cancellation rules, and NUMA-aware victim policy.
 
@@ -48,7 +48,7 @@ The C benchmark has three correct alternatives: serial execution, static contigu
 
 ```bash
 python3 scripts/validate.py
-python3 scripts/run_campaign.py --output measurements/local
+python3 scripts/run_campaign.py --source-commit 4a8ffe7be8d0b60d36d5a3913897cf1bd0f13570 --output measurements/local
 ```
 
 The validation uses a separately implemented Python integer oracle and a forced
@@ -79,7 +79,7 @@ shared sum atomic and front-removal cost limit performance generalization.
 
 ## Sources
 
-- [Blumofe and Leiserson, Scheduling Multithreaded Computations by Work Stealing](https://supertech.csail.mit.edu/papers/steal.pdf)
+- [Blumofe and Leiserson, Scheduling Multithreaded Computations by Work Stealing](https://doi.org/10.1145/324133.324234)
 - [Chase and Lev, Dynamic Circular Work-Stealing Deque](https://doi.org/10.1145/1073970.1073974)
 - [OpenCilk documentation](https://www.opencilk.org/doc/)
 
