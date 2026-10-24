@@ -12,12 +12,13 @@ import time
 
 binary, directory = sys.argv[1:]
 out = Path(directory)
-out.mkdir(parents=True, exist_ok=True)
+out.mkdir(parents=True, exist_ok=False)
 metadata = {'host': platform.node(), 'platform': platform.platform(), 'started_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'pid': os.getpid()}
 if hasattr(os, 'sched_getaffinity'):
     allowed = sorted(os.sched_getaffinity(0))
     # The declared campaign uses CPUs 0..7, verified as distinct visible cores.
     assert set(range(8)).issubset(allowed), allowed
+    metadata['inherited_affinity'] = allowed
     os.sched_setaffinity(0, range(8))
     metadata['affinity'] = sorted(os.sched_getaffinity(0))
 else:

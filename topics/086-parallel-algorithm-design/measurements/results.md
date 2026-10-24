@@ -1,10 +1,10 @@
 # Topic 086: measurements
 
-Measured source: `6c20563db07c983155ba4c7bb6247d92bbda9d7a`. Rust1.93.1 / LLVM21.1.8, native opt3, one CGU, LTO off, unwind.
+Measured source: `6c20563db07c983155ba4c7bb6247d92bbda9d7a`. Rust 1.93.1 / LLVM 21.1.8, native opt3, one CGU, LTO off, unwind. `src/lib.rs`, `src/main.rs` and `scripts/build.sh`'s compiler flags retain the measured bytes recorded in each host's `hashes.txt`. Later review commits make `run.py` refuse an existing campaign directory and record the inherited affinity mask, make `build.sh` change to the topic directory, and replace `assert` checks in `analyze.py` and `oracle.py` with validation that survives `python -O`; the committed analyzer reproduces each host's `summary.json` byte for byte from its retained `raw.csv`.
 
 Both required Linux hosts completed five Rust tests, 378 independent oracle cases / 10,719 checked values, 162 measured processes and two A/A processes. Each measurement process verifies every final output against a closed-form triangular-number oracle.
 
-The serial column repeats a one-thread baseline for each worker-count cell. Parallel columns create the requested number of threads in each of two waves. The coordinator is separate. The fixed design is in [design.md](design.md).
+The serial column repeats a one-thread baseline for each worker-count cell. Parallel columns create the requested number of threads in each of two waves, because every measured n is a multiple of its worker count. The coordinator is separate. The fixed design is in [design.md](design.md).
 
 ## Arm Linux
 
@@ -40,12 +40,12 @@ A/A ratio: 1.215. Same binary, path, settings and correct output; two points are
 
 ## Interpretation and limits
 
-Serial wins every small-input cell on both hosts. At 4,194,304 values with four or eight workers, both parallel alternatives beat serial on every paired block by more than5percent. Their comparison remains unresolved in those large cells. A minimum median alone is not the winner rule.
+Serial wins every small-input cell on both hosts. At 4,194,304 values with four or eight workers, both parallel alternatives beat serial on every paired block by more than 5 percent. Their comparison remains unresolved in those large cells. A minimum median alone is not the winner rule.
 
 Local/add versus rescan ties on Arm small/four and small/eight, and x86 small/four. Rescan beats local/add for Arm medium/one and x86 medium/four. All other local/add versus rescan cells are unresolved. On x86 medium/four, serial versus either parallel alternative is also unresolved; all other non-large-parallel cells favor serial.
 
 Warm complete-operation measurements exclude input/output allocation, first-touch, validation and printing; include scratch allocation, dispatch, thread creation/join, summaries and data passes. Linux affinity is CPU0..7 inherited by children; individual worker placement and migration are uncontrolled within that set. Hosts are shared; load and frequency were not controlled. Serial first-touch, warm caches and one input family limit generalization.
 
-Logical traffic and the work-span derivation explain possible mechanisms. There are no PMU traffic measurements, DRAM-bandwidth calibration, scheduler attribution, persistent-pool comparison, or architecture-population claims. The x86 A/A contrast is21.5percent, a reason to retain variability and unresolved cells. No failed measurement process or outlier was discarded.
+Logical traffic and the work-span derivation explain possible mechanisms. There are no PMU traffic measurements, DRAM-bandwidth calibration, scheduler attribution, persistent-pool comparison, or architecture-population claims. The x86 A/A contrast is 21.5 percent, a reason to retain variability and unresolved cells. No failed measurement process or outlier was discarded.
 
 Both SSH campaigns completed on the first attempt. No required Linux run is missing. Local diagnostic results were collected before source commit and retained outside the published comparison; final claims use the committed Linux source.

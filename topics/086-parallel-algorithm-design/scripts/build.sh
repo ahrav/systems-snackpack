@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Run from the topic directory. The toolchain must already be installed.
+# Runs from the topic directory regardless of the caller's working directory. The toolchain must already be installed.
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
 mkdir -p build
 RUSTC=(rustup run 1.93.1 rustc)
 FLAGS=(--edition=2024 -C opt-level=3 -C target-cpu=native -C codegen-units=1 -C lto=off -C panic=unwind)

@@ -14,13 +14,14 @@ rows = [(v, p, xs) for xs in cases for p in [1, 3, 8] for v in ['serial', 'local
 request = '\n'.join(f'{v} {p} ' + ' '.join(map(str, xs)) for v, p, xs in rows) + '\n'
 result = subprocess.run([sys.argv[1], 'oracle'], input=request, text=True, capture_output=True, check=True, timeout=120)
 lines = result.stdout.splitlines()
-assert len(lines) == len(rows)
+if len(lines) != len(rows):
+    raise RuntimeError(f'probe answered {len(lines)} of {len(rows)} requests')
 values = 0
 for (variant, workers, xs), line in zip(rows, lines):
     total, prefixes = line.split(';')
-    actual = [int(x) for x in prefixes.split(',') if x]
+    actual = [] if not prefixes else [int(x) for x in prefixes.split(',')]
     expected = [sum(xs[:i]) & mask for i in range(len(xs))]
-    assert actual == expected, (variant, workers, xs, actual, expected)
-    assert int(total) == sum(xs) & mask
+    if actual != expected or int(total) != sum(xs) & mask:
+        raise RuntimeError(f'mismatch: {variant} {workers} {xs} -> {total};{actual}, expected {sum(xs) & mask};{expected}')
     values += len(actual) + 1
 print(json.dumps({'input_cases': len(cases), 'variant_worker_cases': len(rows), 'checked_values_including_totals': values, 'seed': 86, 'status': 'pass'}))

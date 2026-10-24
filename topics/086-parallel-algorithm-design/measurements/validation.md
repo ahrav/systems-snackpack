@@ -13,16 +13,20 @@ Both declared Linux hosts compiled the exact committed source with Rust 1.93.1.
 Each passed five unit tests, 378 independent arbitrary-precision oracle cases and
 162 measured processes, plus two A/A processes. Every final benchmark output passed
 its closed-form oracle. Source and script hashes match commit
-6c20563db07c983155ba4c7bb6247d92bbda9d7a. The final publication adds only prose,
-figures and retained measurements. Measured source and runner bytes are unchanged.
+6c20563db07c983155ba4c7bb6247d92bbda9d7a. The final publication adds prose, figures
+and retained measurements. Review commits after measurement change `run.py`,
+`build.sh`, `analyze.py` and `oracle.py` as listed in results.md; `src/` and the
+compiler flags are unchanged, and `scripts/test_*.py` exercise the changed scripts.
 
-CPU0..7 are eight distinct visible cores in one NUMA node on each host. Affinity
+CPU0..7 are eight distinct visible cores in one NUMA node on each host; topology.txt
+under arm/ and xxl/ records the core, socket and node of each CPU. Affinity
 is inherited by worker threads; the kernel can migrate them inside that set.
 Host/toolchain metadata, raw CSV, all process attempts, source hashes and analysis
 are retained under arm/ and xxl/. The complete source archive and executable images
 are retained with the automation evidence outside the repository.
 
-Both rendered figures were inspected. The standalone demo passed. The downloadable
-bundle includes the topic and minimal workspace metadata for Cargo reproduction.
+Both rendered figures were inspected; `scripts/scan_figure.py` draws scan.svg and
+scan.png. The standalone demo passed. The downloadable bundle includes the topic and
+minimal workspace metadata for Cargo reproduction.
 The experiment is descriptive and scoped to warm calls with thread spawn/join.
 See results.md for variability, pair decisions, measured-versus-inferred limits.

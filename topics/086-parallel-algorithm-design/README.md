@@ -193,7 +193,10 @@ Measured source: `6c20563db07c983155ba4c7bb6247d92bbda9d7a`.
 Both Linux hosts used Rust 1.93.1 / LLVM 21.1.8, native opt3, one codegen unit,
 LTO off and unwind. Source hashes matched on both hosts.
 
-- Arm: `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`, Linux aarch64.
+- Arm: `dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com`, Linux aarch64. The retained
+  `lscpu` names implementer ARM, revision r1p1, 64 single-threaded cores in one NUMA
+  node, 1 MiB L2 per core, 32 MiB L3, and SVE/BF16/I8MM; it records no part number
+  or instance type, so the CPU model is not in the retained evidence.
 - xxl resolved to `dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com`, verified x86_64,
   Intel Xeon Platinum 8488C under KVM.
 
