@@ -47,8 +47,8 @@ for n in [4096, 262144, 4194304]:
             decision = a if max(ratios) < 1/1.05 else b if min(ratios) > 1.05 else 'tie' if min(ratios) >= 1/1.05 and max(ratios) <= 1.05 else 'unresolved'
             pairs.append({'a': a, 'b': b, 'ratios_a_over_b': ratios, 'decision': decision})
         report.append({'n': n, 'workers': workers, 'variants': summary, 'pairs': pairs})
-aa_rows = [r for r in rows if r['kind'] == 'aa']
-if len(aa_rows) != 2 or any((r['variant'], r['n'], r['workers'], r['repeats']) != ('serial', '262144', '1', '8') for r in aa_rows):
-    raise RuntimeError(f'A/A rows must be two serial 262144/1/8 processes: {aa_rows}')
+aa_rows = sorted([r for r in rows if r['kind'] == 'aa'], key=lambda r: int(r['position']))
+if [(r['variant'], r['n'], r['workers'], r['repeats'], r['block'], r['position']) for r in aa_rows] != [('serial', '262144', '1', '8', '0', str(pos)) for pos in range(2)]:
+    raise RuntimeError(f'A/A rows must be block 0 positions 0 and 1 of serial 262144/1/8: {aa_rows}')
 aa = [float(r['ns_call']) for r in aa_rows]
 print(json.dumps({'cells': report, 'aa_ratio': aa[0]/aa[1], 'rule': 'Every paired ratio must clear 5 percent; descriptive only.'}, indent=2))

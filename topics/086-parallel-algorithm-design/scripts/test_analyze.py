@@ -27,7 +27,7 @@ def rows():
     return out
 
 
-def analyze_exit(data, *flags):
+def analyze_exit(data, *flags, _stdout=False):
     with tempfile.TemporaryDirectory() as tmp:
         path = pathlib.Path(tmp) / 'raw.csv'
         with path.open('w', newline='') as f:
@@ -36,7 +36,7 @@ def analyze_exit(data, *flags):
             w.writerows(data)
         p = subprocess.run([sys.executable, *flags, str(analyze), str(path)],
                            text=True, capture_output=True, timeout=120, check=False)
-        return p.returncode
+        return (p.returncode, p.stdout) if _stdout else p.returncode
 
 
 def test_complete_matrix_is_accepted():
@@ -98,6 +98,19 @@ def test_block_order_is_enforced():
     block = [r for r in data if r['kind'] == 'measure' and r['n'] == 4096 and r['workers'] == 1 and r['block'] == 0]
     for r in block:  # block 0 must run serial, local, rescan; swap the last two
         r['position'] = {'serial': 0, 'local': 2, 'rescan': 1}[r['variant']]
+    assert analyze_exit(data, '-O') != 0
+
+
+def test_aa_ratio_follows_declared_positions():
+    data = rows()
+    data[0], data[1] = data[1], data[0]  # same two rows, reversed physical order
+    expected = analyze_exit(rows(), '-O', _stdout=True)
+    assert analyze_exit(data, '-O', _stdout=True) == expected, 'A/A ratio depends on CSV row order'
+    data = rows()
+    data[1]['position'] = 0
+    assert analyze_exit(data, '-O') != 0
+    data = rows()
+    data[1]['block'] = 1
     assert analyze_exit(data, '-O') != 0
 
 
