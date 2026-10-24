@@ -44,4 +44,19 @@ mod tests {
             "refusal must happen before any file is written"
         );
     }
+
+    #[test]
+    fn evidence_gates_refuse_optimized_python() {
+        let status = std::process::Command::new("python3")
+            .args(["-O", "scripts/validate.py"])
+            .current_dir(env!("CARGO_MANIFEST_DIR"))
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .status()
+            .expect("python3 is required");
+        assert!(
+            !status.success(),
+            "python3 -O removes assert gates; validation must refuse to run"
+        );
+    }
 }

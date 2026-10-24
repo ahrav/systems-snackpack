@@ -11,6 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 FLAGS = ['-std=c11', '-O3', '-Wall', '-Wextra', '-Werror', '-pthread']
 MASK = (1 << 64) - 1
 
+# Every evidence gate below is an assert; python3 -O would remove them silently.
+if not __debug__:
+    raise SystemExit('run without python3 -O: the evidence gates are assert statements')
+
 
 def run(command, timeout=60):
     return subprocess.run(list(map(str, command)), check=True, capture_output=True,

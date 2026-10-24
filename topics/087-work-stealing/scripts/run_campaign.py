@@ -64,6 +64,7 @@ def main():
                     for position, mode in enumerate(order):
                         command = [str(binary), '--n', '262144', '--workers', '4', '--rounds', '32',
                                    '--skew', str(skew), '--grain', str(grain), '--reps', '1', '--mode', mode]
+                        identity = {'mode': mode, 'n': '262144', 'workers': '4', 'grain': str(grain), 'rounds': '32', 'skew': str(skew)}
                         result = subprocess.run(command, capture_output=True, text=True, timeout=60)
                         attempts.write(json.dumps(dict(command=command, block=block, position=position,
                                                        exit_code=result.returncode, stdout=result.stdout,
@@ -73,6 +74,7 @@ def main():
                         data = list(csv.DictReader(io.StringIO(result.stdout)))
                         assert len(data) == 1
                         row = data[0]
+                        assert {key: row[key] for key in identity} == identity, row
                         if expected is None:
                             expected = row['checksum']
                         assert row['checksum'] == expected

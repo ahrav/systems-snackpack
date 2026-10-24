@@ -2,7 +2,7 @@
 
 Static chunks win at grain 1 and have lower medians at grain 64 on both hosts. At grain 1024, static and stealing are an operational tie for these samples: every median differs by less than 0.4%. This is a practical selection from six observations per mode, rather than a statistical equivalence test.
 
-Measured source commit: `4a8ffe7be8d0b60d36d5a3913897cf1bd0f13570`. File hashes and archive identity are in [source.json](source.json). Both hosts ran the exact archived source. `work_stealing_bench.c` retains the measured bytes. After the campaign, review fixes removed the model's unreachable failed-steal counter from `work_stealing_demo.py` and made `scripts/run_campaign.py` refuse a nonempty output directory; neither change touches the measured binary or the recorded observations.
+Measured source commit: `4a8ffe7be8d0b60d36d5a3913897cf1bd0f13570`. File hashes and archive identity are in [source.json](source.json). Both hosts ran the exact archived source. `work_stealing_bench.c` retains the measured bytes. After the campaign, review fixes changed the Python model and scripts: `work_stealing_demo.py` lost its unreachable failed-steal counter, `scripts/run_campaign.py` refuses a nonempty output directory and checks each row's identity fields against its command, and `scripts/validate.py` refuses `python3 -O`. None of these touch the measured binary or the recorded observations.
 
 ## Workload and controls
 
