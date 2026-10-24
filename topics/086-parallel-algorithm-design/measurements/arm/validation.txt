@@ -1,0 +1,11 @@
+
+running 5 tests
+test tests::rejects_mismatched_output - should panic ... ok
+test tests::rejects_zero_workers - should panic ... ok
+test tests::running_example ... ok
+test tests::wraps_at_chunk_boundaries ... ok
+test tests::empty_uneven_and_more_workers_than_values ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+{"input_cases": 42, "variant_worker_cases": 378, "checked_values_including_totals": 10719, "seed": 86, "status": "pass"}

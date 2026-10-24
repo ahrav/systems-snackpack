@@ -1,0 +1,16 @@
+{
+  "host": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+  "platform": "Linux-6.12.111-136.204.amzn2023.x86_64-x86_64-with-glibc2.34",
+  "started_utc": "2026-10-23T13:39:31Z",
+  "pid": 2605433,
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ]
+}
