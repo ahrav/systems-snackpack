@@ -128,6 +128,10 @@ name = "futex-parking"
 version = "0.1.0"
 
 [[package]]
+name = "gpu-execution-mechanics"
+version = "0.1.0"
+
+[[package]]
 name = "hardware-software-prefetching"
 version = "0.1.0"
 
