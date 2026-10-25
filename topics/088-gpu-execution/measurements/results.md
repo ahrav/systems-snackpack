@@ -1,23 +1,28 @@
 # Topic 088 evidence
 
-2026-10-25. Final executable source commit: `7521bbd7bc7b071b5374db5f86de25a7a2fce2e8`.
+2026-10-25. Final executable source commit: `7a8cc9e9def1c03788fa9197abd20e52827b7b08`.
 The results commit changes only evidence. Source hashes are in `source.json`.
 Both Linux hosts verified the same Git archive SHA-256 before compiling. Detailed
 commands, architectures, toolchains, hashes, and output are retained per host.
+Review fixes after the first validated commit (`7521bbd`) changed `src/lib.rs`
+only; the evidence below was regenerated against the final source.
 
 | Host | Platform | Rust | Result |
 | --- | --- | --- | --- |
-| Local | Darwin arm64 | 1.99.0 | All six workspace gates pass; Python oracle passes |
-| dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com | Linux aarch64 | 1.98.1 | Six Rust tests, one doctest, model output, Python oracle pass |
-| xxl, resolved as dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com | Linux x86_64 | 1.99.0 | Six Rust tests, one doctest, model output, Python oracle pass |
+| dev-dsk-ahrav-2b-a030d1dc.us-west-2.amazon.com (workspace) | Linux aarch64 | 1.93.1 | All six workspace gates pass; Python oracle passes |
+| dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com | Linux aarch64 | 1.98.1 | Eight Rust tests, one doctest, model output, Python oracle pass |
+| xxl, resolved as dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com | Linux x86_64 | 1.99.0 | Eight Rust tests, one doctest, model output, Python oracle pass |
 
-The Rust suite checks 13,068 transpose results and 11,200 sector cases per host.
+The Rust suite checks 13,068 transpose results and 11,200 sector cases per host,
+plus two regression tests: a 2^36-sector wide-access count and zero-dimension
+shapes with a `usize::MAX` other dimension.
 The separate Python model checks 8,712 transpose results per host. Linux compiles
 use edition 2024 and warnings as errors; the printed model is optimized with
 `-O`. These runs measure correctness only.
 
-Local workspace gates passed formatting, Clippy with warnings denied, unit/bin/
-example tests, doctests, benchmark compilation, and rustdoc with warnings denied.
+Workspace gates passed formatting, Clippy with warnings denied, unit/bin/
+example tests, doctests, benchmark compilation, and rustdoc with warnings denied
+on the pinned toolchain.
 The topic has no external dependencies. The rendered diagram was visually
 inspected before the lesson was taught and before repository edits.
 
@@ -34,7 +39,7 @@ These are deterministic model comparisons, not elapsed-time measurements.
 Both declared hosts were reachable. Initial PATH probes and one bounded follow-up
 checked standard CUDA paths and the NVIDIA device interface. `nvcc`,
 `nvidia-smi`, `/usr/local/cuda/bin/nvcc`, `/opt/cuda/bin/nvcc`, and
-`/dev/nvidiactl` were absent in the final probes. Local Darwin has no `nvcc`.
+`/dev/nvidiactl` were absent in the final probes. The workspace host has no `nvcc`.
 
 CUDA compilation, generated code, Compute Sanitizer checks, GPU timing samples,
 variability, and workload-specific performance winners remain unmeasured. The

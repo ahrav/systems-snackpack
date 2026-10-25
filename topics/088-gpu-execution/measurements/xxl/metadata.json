@@ -1,8 +1,8 @@
 {
   "host": "xxl",
-  "source_commit": "7521bbd7bc7b071b5374db5f86de25a7a2fce2e8",
-  "archive_sha256": "6b4afcefb0561f8e5517d605f9479cda4e49f59a2084b829d922f2e516d47155",
+  "source_commit": "7a8cc9e9def1c03788fa9197abd20e52827b7b08",
+  "archive_sha256": "d5a97492e3c1f800825a4581973c7966d9c58582b4e756f0ed6ebd2ba4e29c6e",
   "exit_code": 0,
-  "run_time": "2026-10-25T17:13:05.576784+00:00",
+  "run_time": "2026-10-25T19:10:23.560731+00:00",
   "scope": "CPU model correctness; CUDA device execution unmeasured"
 }

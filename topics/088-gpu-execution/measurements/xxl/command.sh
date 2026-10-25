@@ -1,8 +1,8 @@
 set -eu
-cd /tmp/codex-topic088-20261025-7521bbd7bc7b
-printf '%s  source.tar\n' '6b4afcefb0561f8e5517d605f9479cda4e49f59a2084b829d922f2e516d47155' | sha256sum -c -
+cd /tmp/codex-topic088-20261025-7a8cc9e9def1
+printf '%s  source.tar\n' 'd5a97492e3c1f800825a4581973c7966d9c58582b4e756f0ed6ebd2ba4e29c6e' | sha256sum -c -
 tar -xf source.tar
-printf 'source_commit: 7521bbd7bc7b071b5374db5f86de25a7a2fce2e8\n'
+printf 'source_commit: 7a8cc9e9def1c03788fa9197abd20e52827b7b08\n'
 date -u +%FT%TZ
 hostname
 uname -sm
