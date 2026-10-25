@@ -25,12 +25,15 @@ pub fn sectors(addresses: &[u64], width: u64) -> usize {
         })
         .collect();
     ranges.sort_unstable();
-    let mut count = 0;
+    let mut count: usize = 0;
     let mut next_uncounted = 0;
     for (first, last) in ranges {
         let first = first.max(next_uncounted);
         if first <= last {
-            count += usize::try_from(last - first + 1).expect("sector count overflow");
+            let run = usize::try_from(last - first + 1).ok();
+            count = run
+                .and_then(|run| count.checked_add(run))
+                .expect("sector count overflow");
             next_uncounted = last + 1;
         }
     }
@@ -57,6 +60,9 @@ fn check_shape(input: &[u32], rows: usize, cols: usize) {
 /// Panics when the dimensions do not match `input.len()` or overflow.
 pub fn direct(input: &[u32], rows: usize, cols: usize) -> Vec<u32> {
     check_shape(input, rows, cols);
+    if input.is_empty() {
+        return Vec::new();
+    }
     let mut out = vec![0; input.len()];
     for row in 0..rows {
         for col in 0..cols {
@@ -74,6 +80,9 @@ pub fn direct(input: &[u32], rows: usize, cols: usize) -> Vec<u32> {
 /// Panics on a shape mismatch, overflow, missing producer, or duplicate writer.
 pub fn tiled(input: &[u32], rows: usize, cols: usize, padded: bool) -> Vec<u32> {
     check_shape(input, rows, cols);
+    if input.is_empty() {
+        return Vec::new();
+    }
     let pitch = 32 + usize::from(padded);
     let mut out = vec![None; input.len()];
     for by in (0..rows).step_by(32) {
@@ -175,6 +184,15 @@ mod tests {
         // proportional to the number of addresses.
         assert_eq!(sectors(&[0, 1 << 40], 1 << 40), 1 << 36);
         assert_eq!(sectors(&[1 << 39, 0], 1 << 40), 3 << 34);
+    }
+
+    #[test]
+    fn zero_dimension_shapes_finish() {
+        for (rows, cols) in [(usize::MAX, 0), (0, usize::MAX)] {
+            assert!(direct(&[], rows, cols).is_empty());
+            assert!(tiled(&[], rows, cols, false).is_empty());
+            assert!(tiled(&[], rows, cols, true).is_empty());
+        }
     }
 
     #[test]
