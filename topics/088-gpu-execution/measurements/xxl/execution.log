@@ -1,0 +1,47 @@
+source.tar: OK
+source_commit: 7521bbd7bc7b071b5374db5f86de25a7a2fce2e8
+2026-10-25T17:13:01Z
+dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com
+Linux x86_64
+rustc 1.99.0 (b940084d7 2026-09-28)
+Python 3.9.25
+CUDA discovery: nvcc absent from PATH
+nvidia-smi absent from PATH
+/usr/local/cuda/bin/nvcc absent
+/opt/cuda/bin/nvcc absent
+/dev/nvidiactl absent
+f7de93e1563c7997aac23bb73b313820874d418e904f4395e0e175a41863bae8  src/lib.rs
+a2d436832b355f75b9cc60a9baaa9aba6ae22ca7e50fc09e7e20f6444d327a1e  examples/model.rs
+94ff47154bc3d33daafad2730aaf5eb50c76b17ce495bdcd2f45bf7c6905b26f  model.py
+d8569a79dd71279f61e1fbb6d48941906e2fd8f4ec70002a6e10481c3a2f6cc2  cuda/transpose.cu
+
+running 6 tests
+test tests::broadcast_and_empty ... ok
+test tests::documented_counts ... ok
+test tests::overflow_is_rejected - should panic ... ok
+test tests::shape_is_checked - should panic ... ok
+test tests::byte_enumeration_oracle ... ok
+test tests::rectangular_oracle ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.77s
+
+contiguous: 4 sectors
+shifted: 5 sectors
+strided: 32 sectors
+pitch 32: bank depth 32
+pitch 33: bank depth 1
+GPU runtime and throughput require a CUDA device.
+
+running 1 test
+test src/lib.rs - sectors (line 12) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.14s; merged doctests compilation took 0.14s
+aligned contiguous sectors: 4
+one-word shifted sectors: 5
+1024-word stride sectors: 32
+pitch 32 column bank depth: 32
+pitch 33 column bank depth: 1
+broadcast bank depth: 1
+oracle comparisons: 8712
