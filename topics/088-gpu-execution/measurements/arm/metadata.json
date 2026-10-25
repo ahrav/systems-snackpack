@@ -1,0 +1,8 @@
+{
+  "host": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+  "source_commit": "7a8cc9e9def1c03788fa9197abd20e52827b7b08",
+  "archive_sha256": "d5a97492e3c1f800825a4581973c7966d9c58582b4e756f0ed6ebd2ba4e29c6e",
+  "exit_code": 0,
+  "run_time": "2026-10-25T19:10:15.996764+00:00",
+  "scope": "CPU model correctness; CUDA device execution unmeasured"
+}
