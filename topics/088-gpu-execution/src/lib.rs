@@ -14,14 +14,27 @@ use std::collections::BTreeSet;
 /// assert_eq!(sectors(&(0..32).map(|x| x * 4).collect::<Vec<_>>(), 4), 4);
 /// ```
 pub fn sectors(addresses: &[u64], width: u64) -> usize {
-    let mut seen = BTreeSet::new();
-    if width > 0 {
-        for &address in addresses {
+    if width == 0 {
+        return 0;
+    }
+    let mut ranges: Vec<(u64, u64)> = addresses
+        .iter()
+        .map(|&address| {
             let end = address.checked_add(width - 1).expect("address overflow");
-            seen.extend(address / 32..=end / 32);
+            (address / 32, end / 32)
+        })
+        .collect();
+    ranges.sort_unstable();
+    let mut count = 0;
+    let mut next_uncounted = 0;
+    for (first, last) in ranges {
+        let first = first.max(next_uncounted);
+        if first <= last {
+            count += usize::try_from(last - first + 1).expect("sector count overflow");
+            next_uncounted = last + 1;
         }
     }
-    seen.len()
+    count
 }
 
 /// Maximum distinct 32-bit words read from any of 32 shared-memory banks.
@@ -154,6 +167,14 @@ mod tests {
         assert_eq!(bank_depth(&[]), 0);
         assert_eq!(bank_depth(&[0, 0, 32, 64, 1]), 3);
         assert_eq!(sectors(&[0; 32], 4), 1);
+    }
+
+    #[test]
+    fn wide_access_counts_without_enumerating_sectors() {
+        // Two disjoint 1 TiB ranges cover 2^36 sectors; memory use stays
+        // proportional to the number of addresses.
+        assert_eq!(sectors(&[0, 1 << 40], 1 << 40), 1 << 36);
+        assert_eq!(sectors(&[1 << 39, 0], 1 << 40), 3 << 34);
     }
 
     #[test]
