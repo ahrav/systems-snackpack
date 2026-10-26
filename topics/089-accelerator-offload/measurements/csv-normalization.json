@@ -1,0 +1,12 @@
+{
+  "arm": {
+    "original_sha256": "8c91a8497daf4b105468a01f9061fd8557dff27b2ffd57db165fd2d95bad5582",
+    "git_lf_sha256": "bfe59edc5d36e9ac624d5c52418b46ca98026548240d0d66f44996d464d70418",
+    "change": "CRLF to LF only; CSV field equality verified"
+  },
+  "xxl": {
+    "original_sha256": "82c65c7b8a89359cb3998011e0266d83a03efd3000d8e523d50aa7814b053f8c",
+    "git_lf_sha256": "811454ebfe7602c13a328e8e6047e383119060e14cdf38c4b83b097db5f53a73",
+    "change": "CRLF to LF only; CSV field equality verified"
+  }
+}

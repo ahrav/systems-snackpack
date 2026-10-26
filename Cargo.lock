@@ -3,6 +3,10 @@
 version = 4
 
 [[package]]
+name = "accelerator-offload"
+version = "0.1.0"
+
+[[package]]
 name = "advanced-benchmarking-methodology"
 version = "0.1.0"
 

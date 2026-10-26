@@ -1,0 +1,14 @@
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.111-136.204.amzn2023.aarch64 #1 SMP Tue Oct  6 18:01:38 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+/home/ahrav/.cargo/bin/cargo
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+binary: rustc
+commit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf
+commit-date: 2026-02-11
+host: aarch64-unknown-linux-gnu
+release: 1.93.1
+LLVM version: 21.1.8
+nvcc unavailable
+nvidia-smi unavailable
+/dev/nvidia0 unavailable
+/dev/nvidiactl unavailable
+/dev/dri unavailable
