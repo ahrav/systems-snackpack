@@ -1,0 +1,42 @@
+{
+  "fmt": {
+    "status": "passed",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "clippy": {
+    "status": "passed",
+    "log_sha256": "bff3f21c1417a2d3eec2e614ca1a63ec1c444a30f062b1c023760db693e7d3d3"
+  },
+  "tests": {
+    "status": "passed",
+    "log_sha256": "24e7b7313f6aec55d08e224305f21c5f4fe1734a436d0bb30fe3fa6a2f8e0148"
+  },
+  "doctests": {
+    "status": "passed",
+    "log_sha256": "06a6934fa3f5542bb0dcb546c6ed9e62a3b942714f9013ef773a83ea6756ef21"
+  },
+  "bench-build": {
+    "status": "passed",
+    "log_sha256": "adddd6c85d4f4eef90e50d4e7c7eb0f35e4fa11d4e5d3cfd40543ccbeb9c982c"
+  },
+  "docs": {
+    "status": "passed",
+    "log_sha256": "34668475fb68c290ad41efc4593387571d08d5854328e5f521cafb7e32e3c669"
+  },
+  "source_commit": "116fbf3353c7ceebc7845c623589b90274289a97",
+  "local_oracles": {
+    "model_cases": 4500,
+    "transform_cases": 50,
+    "status": "passed",
+    "retained_source_replay": "passed"
+  },
+  "topic_rust": {
+    "unit_tests": 5,
+    "doctests": 1,
+    "hosts": [
+      "local macOS arm64",
+      "Linux aarch64",
+      "Linux x86_64"
+    ]
+  }
+}

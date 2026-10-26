@@ -1,0 +1,17 @@
+{
+  "source_commit": "116fbf3353c7ceebc7845c623589b90274289a97",
+  "base_commit": "37f1713c9919879f167f01da2bc5083982ff1f6b",
+  "archive_sha256": "4e7c5ba3c086d96ed342732f2eca6b28b391bab8283b98877fdbfc74e4fa035f",
+  "created_utc": "2026-10-26T14:11:52.332708+00:00",
+  "files": {
+    "topics/089-accelerator-offload/Cargo.toml": "7a5c557bb493777b8218ba196b45a6235e5fa83da686d5a63b0381be6a25ed96",
+    "topics/089-accelerator-offload/README.md": "ae07999a7ea35aeee11f70d2684b85eeb4765482a844f743093f0b457ceb1170",
+    "topics/089-accelerator-offload/measurements/results.md": "6f000386579c5c6517e8b086d0a3d943bce3a1d347aab687cdc23198d71b97b1",
+    "topics/089-accelerator-offload/scripts/measure.py": "298a7237c9902a9cfecacaf362c0e9367b1dc73aaae44754f094e6785b5a9ef7",
+    "topics/089-accelerator-offload/scripts/oracle.py": "bf0789a2fff386a79142038974859d1c8819bc34d1eb92ba9a9bbb58d6b140a6",
+    "topics/089-accelerator-offload/scripts/run_host.sh": "098cee5ff6fa2b4817524b28244bf19057684206797d33a6341e6eaf39ecfc9d",
+    "topics/089-accelerator-offload/sources.md": "e3c512e067d9564ce7b9dc6388b1fa46b84185c5edacb10b752bb8310d5b8e26",
+    "topics/089-accelerator-offload/src/lib.rs": "c92dbbe2062843a04c185291b708f443267b95137f688867f7cbe2b9f11fb56a",
+    "topics/089-accelerator-offload/src/main.rs": "1b2a71ca4be7d3984751275e0404014497b6545cc08781425f05bf7a4504fae9"
+  }
+}
