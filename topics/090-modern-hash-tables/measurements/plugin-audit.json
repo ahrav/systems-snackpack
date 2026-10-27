@@ -1,0 +1,13 @@
+{
+  "source_revision": "dddaa073e83b876c64d16988057362b86aa11125",
+  "blobs": {
+    "low-level-systems/skills/systems-data-structures/SKILL.md": "96aa3b0a64d977317700cd4373cfbd5c895e8fbc",
+    "low-level-systems/skills/systems-data-structures/references/hash-table-internals.md": "69cdf9271da7e8d39ca0279150631712729aa2d7",
+    "low-level-systems/skills/systems-data-structures/references/swisstable-and-f14-internals.md": "e953d7f956e0c465a1ffecd0fa2ac7729fe70ee0",
+    "low-level-systems/skills/systems-data-structures/references/open-addressing-mutation.md": "77e921538f3861d93985986bb801cfe41cf76b60",
+    "low-level-systems/skills/systems-data-structures/references/robin-hood-contracts.md": "852e82cc2661d261021ebda6d183d3a7183d2491"
+  },
+  "decision": "no change",
+  "behavioral_eval": "not applicable; no skill changes",
+  "routing_scope": "description terms and linked reference paths inspected; model routing accuracy unmeasured"
+}

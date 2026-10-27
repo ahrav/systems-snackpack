@@ -1,0 +1,20 @@
+[
+  {
+    "host": "local",
+    "original_sha256": "eb073e873d37e53649a16daba46b559a981876e4e283419f8e9a9bc8cf9e9ce9",
+    "repository_lf_sha256": "d50a8000477e6569d305964ee7a2eacd81ad275c28819e41e4e1b31a5671ad26",
+    "transformation": "CRLF to LF only"
+  },
+  {
+    "host": "linux-arm",
+    "original_sha256": "4277611dace6bbc0d45a0b8932b73c15122bce7f950c162932b3fa23fe83ff6f",
+    "repository_lf_sha256": "844ee9a2047e7ca8c03316c3d7fad7bec9eb78aaf046649cee30b9f689b566ac",
+    "transformation": "CRLF to LF only"
+  },
+  {
+    "host": "linux-x86",
+    "original_sha256": "caeff2c03b5a61fa5dca469589816dabb67579b6605892359f98c38d91282c55",
+    "repository_lf_sha256": "7196fdc844a3e1413c94c0025892f5b9a923eb9fd4ec4438c2f7b95fdcc1022d",
+    "transformation": "CRLF to LF only"
+  }
+]

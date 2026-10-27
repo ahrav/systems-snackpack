@@ -1,0 +1,14 @@
+{
+  "all_six_gates_passed": true,
+  "workspace_test_count": 518,
+  "doctest_count": 148,
+  "logs": {
+    "fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bench-build.log": "4f7aa50382715d851dd31ecf090cd013d76426d8d2dfe6163d9890182011f300",
+    "clippy.log": "91f42421418e9e269adea845fb2a0f77dd282ed87dbca14c49232cd2c1eeb91d",
+    "docs.log": "67daa845be1458ec0c66b507485e346e086524936cc20c87a151b4f4526765c1",
+    "local-topic.log": "27f1e3197a58a34a3547eec0aee2ed1a42e43b91aaac1725dc715926821eaf18",
+    "tests.log": "7e8f04fa6ddf4ecbf83d5c0e17daa25dcba9cbf21a8ea22f2701413a1477e429",
+    "doctests.log": "80b0c665e2fdd68c6b88d5ab9cd0c948ae24a79cef1e00df1a09916e94ed4606"
+  }
+}

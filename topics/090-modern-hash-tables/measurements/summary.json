@@ -1,0 +1,728 @@
+{
+  "local": {
+    "small_hit50": {
+      "timings": {
+        "plain": {
+          "median_ns": 5.1496429443359375,
+          "min_ns": 4.834491729736328,
+          "max_ns": 5.692243576049805
+        },
+        "tagged": {
+          "median_ns": 4.855832099914551,
+          "min_ns": 4.815736770629883,
+          "max_ns": 4.900615692138672
+        },
+        "std": {
+          "median_ns": 1.5877084732055664,
+          "min_ns": 1.4992561340332031,
+          "max_ns": 2.1368656158447266
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.059173423489368,
+          "min_ratio": 0.9954341450234302,
+          "max_ratio": 1.1820088694975073,
+          "outcome": "unresolved"
+        },
+        "plain/std": {
+          "median_ratio": 3.1634249883986616,
+          "min_ratio": 2.663828522412533,
+          "max_ratio": 3.4762773490475065,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 3.0561762061930735,
+          "min_ratio": 2.2536451215843862,
+          "max_ratio": 3.2474409764363736,
+          "outcome": "std"
+        }
+      }
+    },
+    "small_miss87": {
+      "timings": {
+        "plain": {
+          "median_ns": 18.043875694274902,
+          "min_ns": 17.01219940185547,
+          "max_ns": 19.28400993347168
+        },
+        "tagged": {
+          "median_ns": 17.438212394714355,
+          "min_ns": 16.886869430541992,
+          "max_ns": 17.842769622802734
+        },
+        "std": {
+          "median_ns": 12.752334594726562,
+          "min_ns": 12.360414505004883,
+          "max_ns": 13.071060180664062
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.0375306682549463,
+          "min_ratio": 0.9809369681472622,
+          "max_ratio": 1.0843920690226954,
+          "outcome": "unresolved"
+        },
+        "plain/std": {
+          "median_ratio": 1.4339566007003424,
+          "min_ratio": 1.3027442616643938,
+          "max_ratio": 1.5135858377933307,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 1.3699385249595974,
+          "min_ratio": 1.313250839048592,
+          "max_ratio": 1.4121353596973194,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_hit50": {
+      "timings": {
+        "plain": {
+          "median_ns": 6.003220558166504,
+          "min_ns": 5.91810417175293,
+          "max_ns": 6.142696380615234
+        },
+        "tagged": {
+          "median_ns": 5.258440971374512,
+          "min_ns": 5.171855926513672,
+          "max_ns": 5.333978652954102
+        },
+        "std": {
+          "median_ns": 2.0978851318359375,
+          "min_ns": 1.9756145477294922,
+          "max_ns": 2.4047698974609375
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.152288573160007,
+          "min_ratio": 1.1167811357453783,
+          "max_ratio": 1.1596722455340909,
+          "outcome": "tagged"
+        },
+        "plain/std": {
+          "median_ratio": 2.8933782721782424,
+          "min_ratio": 2.4872921147976825,
+          "max_ratio": 3.0414755486386733,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 2.503789065730274,
+          "min_ratio": 2.1573082633773057,
+          "max_ratio": 2.6795540799253903,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_miss87": {
+      "timings": {
+        "plain": {
+          "median_ns": 29.332916259765625,
+          "min_ns": 28.550941467285156,
+          "max_ns": 30.055362701416016
+        },
+        "tagged": {
+          "median_ns": 25.99481773376465,
+          "min_ns": 25.11763572692871,
+          "max_ns": 26.790699005126953
+        },
+        "std": {
+          "median_ns": 15.059033393859863,
+          "min_ns": 14.741579055786133,
+          "max_ns": 17.573196411132812
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.1290325290907406,
+          "min_ratio": 1.0719359799489774,
+          "max_ratio": 1.1688387960247173,
+          "outcome": "tagged"
+        },
+        "plain/std": {
+          "median_ratio": 1.9105581021658058,
+          "min_ratio": 1.6706389899251266,
+          "max_ratio": 2.0388156918386,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 1.7299731172513477,
+          "min_ratio": 1.4293151421796215,
+          "max_ratio": 1.7991406266411376,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_deleted_miss": {
+      "timings": {
+        "plain": {
+          "median_ns": 99.80316925048828,
+          "min_ns": 96.67237663269043,
+          "max_ns": 102.42319107055664
+        },
+        "tagged": {
+          "median_ns": 96.80871200561523,
+          "min_ns": 95.1169319152832,
+          "max_ns": 107.88075256347656
+        },
+        "std": {
+          "median_ns": 14.024059295654297,
+          "min_ns": 13.680377960205078,
+          "max_ns": 14.619112014770508
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.0137250481764593,
+          "min_ratio": 0.9494111659101682,
+          "max_ratio": 1.058369426926872,
+          "outcome": "unresolved"
+        },
+        "plain/std": {
+          "median_ratio": 7.083716049449645,
+          "min_ratio": 6.968133381989819,
+          "max_ratio": 7.203248872283393,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 7.015225993003721,
+          "min_ratio": 6.760645942345744,
+          "max_ratio": 7.379432653260923,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_rebuilt_miss": {
+      "timings": {
+        "plain": {
+          "median_ns": 8.694449424743652,
+          "min_ns": 8.32303237915039,
+          "max_ns": 9.503046035766602
+        },
+        "tagged": {
+          "median_ns": 8.220871925354004,
+          "min_ns": 8.17950439453125,
+          "max_ns": 8.71896743774414
+        },
+        "std": {
+          "median_ns": 1.676717758178711,
+          "min_ns": 1.6104373931884766,
+          "max_ns": 1.7944183349609375
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.0238715514040742,
+          "min_ratio": 1.0154554657048112,
+          "max_ratio": 1.1525283954809658,
+          "outcome": "unresolved"
+        },
+        "plain/std": {
+          "median_ratio": 5.154130333203027,
+          "min_ratio": 4.9384805568074555,
+          "max_ratio": 5.625254598581022,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 4.9901066637433225,
+          "min_ratio": 4.850744904293403,
+          "max_ratio": 5.079057670374129,
+          "outcome": "std"
+        }
+      }
+    }
+  },
+  "linux-arm": {
+    "small_hit50": {
+      "timings": {
+        "plain": {
+          "median_ns": 7.783466339111328,
+          "min_ns": 7.731271743774414,
+          "max_ns": 7.857755661010742
+        },
+        "tagged": {
+          "median_ns": 8.38620376586914,
+          "min_ns": 8.28115463256836,
+          "max_ns": 8.638227462768555
+        },
+        "std": {
+          "median_ns": 3.8685359954833984,
+          "min_ns": 3.826160430908203,
+          "max_ns": 3.916309356689453
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 0.9282094190943064,
+          "min_ratio": 0.9026169379492104,
+          "max_ratio": 0.9375289014710166,
+          "outcome": "plain"
+        },
+        "plain/std": {
+          "median_ratio": 2.0103976578389156,
+          "min_ratio": 1.9861883995998586,
+          "max_ratio": 2.0355666222999886,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 2.163031123799289,
+          "min_ratio": 2.1262583561667854,
+          "max_ratio": 2.2412923813006853,
+          "outcome": "std"
+        }
+      }
+    },
+    "small_miss87": {
+      "timings": {
+        "plain": {
+          "median_ns": 36.384809494018555,
+          "min_ns": 36.2591495513916,
+          "max_ns": 36.49507141113281
+        },
+        "tagged": {
+          "median_ns": 33.30090522766113,
+          "min_ns": 33.179609298706055,
+          "max_ns": 33.683292388916016
+        },
+        "std": {
+          "median_ns": 20.445263862609863,
+          "min_ns": 20.17303466796875,
+          "max_ns": 20.732074737548828
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.0929686969407122,
+          "min_ratio": 1.082387015662759,
+          "max_ratio": 1.0960234650055833,
+          "outcome": "tagged"
+        },
+        "plain/std": {
+          "median_ratio": 1.7745296489978002,
+          "min_ratio": 1.7589128115185337,
+          "max_ratio": 1.8091017049150568,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 1.6307366305803872,
+          "min_ratio": 1.60752800154707,
+          "max_ratio": 1.6697186587598143,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_hit50": {
+      "timings": {
+        "plain": {
+          "median_ns": 12.298005104064941,
+          "min_ns": 12.22549819946289,
+          "max_ns": 12.379322052001953
+        },
+        "tagged": {
+          "median_ns": 10.88558292388916,
+          "min_ns": 10.817668914794922,
+          "max_ns": 10.966609954833984
+        },
+        "std": {
+          "median_ns": 9.197895050048828,
+          "min_ns": 9.124553680419922,
+          "max_ns": 9.461648941040039
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.1323282067938278,
+          "min_ratio": 1.1171865407044796,
+          "max_ratio": 1.1407994395810679,
+          "outcome": "tagged"
+        },
+        "plain/std": {
+          "median_ratio": 1.33454071975867,
+          "min_ratio": 1.3027099990747142,
+          "max_ratio": 1.3448765812115997,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 1.1787862138120604,
+          "min_ratio": 1.152453045773026,
+          "max_ratio": 1.2018790550125065,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_miss87": {
+      "timings": {
+        "plain": {
+          "median_ns": 75.12355041503906,
+          "min_ns": 74.88886070251465,
+          "max_ns": 75.68705368041992
+        },
+        "tagged": {
+          "median_ns": 50.94002056121826,
+          "min_ns": 50.26798057556152,
+          "max_ns": 51.74882698059082
+        },
+        "std": {
+          "median_ns": 24.142909049987793,
+          "min_ns": 24.07562255859375,
+          "max_ns": 24.165794372558594
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.4744694896278512,
+          "min_ratio": 1.4494627218043346,
+          "max_ratio": 1.505671260588022,
+          "outcome": "tagged"
+        },
+        "plain/std": {
+          "median_ratio": 3.114041559989907,
+          "min_ratio": 3.0991589094285685,
+          "max_ratio": 3.1437215588596925,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 2.1119826691877632,
+          "min_ratio": 2.0823876148983174,
+          "max_ratio": 2.142689806406551,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_deleted_miss": {
+      "timings": {
+        "plain": {
+          "median_ns": 152.48910808563232,
+          "min_ns": 152.25103187561035,
+          "max_ns": 152.94128608703613
+        },
+        "tagged": {
+          "median_ns": 137.14395904541016,
+          "min_ns": 137.08224296569824,
+          "max_ns": 137.70304107666016
+        },
+        "std": {
+          "median_ns": 23.193471908569336,
+          "min_ns": 23.138885498046875,
+          "max_ns": 23.219009399414062
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.1114982517045706,
+          "min_ratio": 1.108154390492156,
+          "max_ratio": 1.115183605850142,
+          "outcome": "tagged"
+        },
+        "plain/std": {
+          "median_ratio": 6.57183303197583,
+          "min_ratio": 6.563131661629474,
+          "max_ratio": 6.598162181492806,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 5.916258959768351,
+          "min_ratio": 5.903879903212303,
+          "max_ratio": 5.936937070288627,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_rebuilt_miss": {
+      "timings": {
+        "plain": {
+          "median_ns": 15.125014305114746,
+          "min_ns": 15.063390731811523,
+          "max_ns": 15.277313232421875
+        },
+        "tagged": {
+          "median_ns": 13.580772399902344,
+          "min_ns": 13.54330062866211,
+          "max_ns": 13.613378524780273
+        },
+        "std": {
+          "median_ns": 3.857144355773926,
+          "min_ns": 3.8159446716308594,
+          "max_ns": 3.93768310546875
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.1135193994878145,
+          "min_ratio": 1.1082745076555929,
+          "max_ratio": 1.124724487748172,
+          "outcome": "tagged"
+        },
+        "plain/std": {
+          "median_ratio": 3.9190139519499634,
+          "min_ratio": 3.8287031116794545,
+          "max_ratio": 4.00354684018326,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 3.5272639314654293,
+          "min_ratio": 3.4394084708982406,
+          "max_ratio": 3.559874421064312,
+          "outcome": "std"
+        }
+      }
+    }
+  },
+  "linux-x86": {
+    "small_hit50": {
+      "timings": {
+        "plain": {
+          "median_ns": 9.565784454345703,
+          "min_ns": 8.17010498046875,
+          "max_ns": 12.637430191040039
+        },
+        "tagged": {
+          "median_ns": 10.800812721252441,
+          "min_ns": 7.918643951416016,
+          "max_ns": 13.17197036743164
+        },
+        "std": {
+          "median_ns": 5.278587341308594,
+          "min_ns": 3.325143814086914,
+          "max_ns": 7.665376663208008
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 0.9661406245558062,
+          "min_ratio": 0.7017170141445587,
+          "max_ratio": 1.2690721305898793,
+          "outcome": "unresolved"
+        },
+        "plain/std": {
+          "median_ratio": 1.9604168497709518,
+          "min_ratio": 1.5593372755740738,
+          "max_ratio": 2.481778294795085,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 1.9921566466129612,
+          "min_ratio": 1.3285875151254505,
+          "max_ratio": 3.4813058156643133,
+          "outcome": "std"
+        }
+      }
+    },
+    "small_miss87": {
+      "timings": {
+        "plain": {
+          "median_ns": 32.97615718841553,
+          "min_ns": 32.705583572387695,
+          "max_ns": 33.13780975341797
+        },
+        "tagged": {
+          "median_ns": 30.514863967895508,
+          "min_ns": 30.37881088256836,
+          "max_ns": 30.72267723083496
+        },
+        "std": {
+          "median_ns": 15.3324613571167,
+          "min_ns": 14.79144287109375,
+          "max_ns": 15.565692901611328
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.0787196789824678,
+          "min_ratio": 1.0705596655378158,
+          "max_ratio": 1.0896718990342777,
+          "outcome": "tagged"
+        },
+        "plain/std": {
+          "median_ratio": 2.1525183361229208,
+          "min_ratio": 2.117080705395895,
+          "max_ratio": 2.2111151601242867,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 1.998425664610962,
+          "min_ratio": 1.9537077133347696,
+          "max_ratio": 2.0538098377093625,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_hit50": {
+      "timings": {
+        "plain": {
+          "median_ns": 15.379671096801758,
+          "min_ns": 14.90047836303711,
+          "max_ns": 16.06659698486328
+        },
+        "tagged": {
+          "median_ns": 13.126242637634277,
+          "min_ns": 13.038543701171875,
+          "max_ns": 13.8455810546875
+        },
+        "std": {
+          "median_ns": 11.698933601379395,
+          "min_ns": 10.860868453979492,
+          "max_ns": 11.815885543823242
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.1778270460729559,
+          "min_ratio": 1.0761901796813698,
+          "max_ratio": 1.1988815499579286,
+          "outcome": "tagged"
+        },
+        "plain/std": {
+          "median_ratio": 1.3372763788837232,
+          "min_ratio": 1.2637008842671937,
+          "max_ratio": 1.3932645419752616,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 1.1339592814567943,
+          "min_ratio": 1.1137989688247967,
+          "max_ratio": 1.2066116834553196,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_miss87": {
+      "timings": {
+        "plain": {
+          "median_ns": 57.4669246673584,
+          "min_ns": 56.58572006225586,
+          "max_ns": 57.90793037414551
+        },
+        "tagged": {
+          "median_ns": 43.21998119354248,
+          "min_ns": 43.06925582885742,
+          "max_ns": 43.666982650756836
+        },
+        "std": {
+          "median_ns": 19.124629974365234,
+          "min_ns": 19.046390533447266,
+          "max_ns": 19.255273818969727
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.3250965851880252,
+          "min_ratio": 1.3062586717831142,
+          "max_ratio": 1.3433068016325636,
+          "outcome": "tagged"
+        },
+        "plain/std": {
+          "median_ratio": 2.998399153333301,
+          "min_ratio": 2.954622810515501,
+          "max_ratio": 3.039055503488493,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 2.262948861289649,
+          "min_ratio": 2.236751148478962,
+          "max_ratio": 2.288617339132803,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_deleted_miss": {
+      "timings": {
+        "plain": {
+          "median_ns": 173.5154628753662,
+          "min_ns": 172.29701232910156,
+          "max_ns": 174.65046501159668
+        },
+        "tagged": {
+          "median_ns": 170.89240646362305,
+          "min_ns": 170.32946586608887,
+          "max_ns": 171.24456977844238
+        },
+        "std": {
+          "median_ns": 17.927931785583496,
+          "min_ns": 17.848445892333984,
+          "max_ns": 18.062847137451172
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.0142422300000917,
+          "min_ratio": 1.0107750804506788,
+          "max_ratio": 1.0215712555129837,
+          "outcome": "practical tie"
+        },
+        "plain/std": {
+          "median_ratio": 9.671385685004443,
+          "min_ratio": 9.589014497180486,
+          "max_ratio": 9.736705505179797,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 9.540767539000814,
+          "min_ratio": 9.458224039786064,
+          "max_ratio": 9.556838733067972,
+          "outcome": "std"
+        }
+      }
+    },
+    "large_rebuilt_miss": {
+      "timings": {
+        "plain": {
+          "median_ns": 14.554099082946777,
+          "min_ns": 14.367317199707031,
+          "max_ns": 14.824747085571289
+        },
+        "tagged": {
+          "median_ns": 14.175156593322754,
+          "min_ns": 14.135004043579102,
+          "max_ns": 14.258525848388672
+        },
+        "std": {
+          "median_ns": 4.015138626098633,
+          "min_ns": 3.983196258544922,
+          "max_ns": 4.054685592651367
+        }
+      },
+      "winner": "std",
+      "pairs": {
+        "plain/tagged": {
+          "median_ratio": 1.0264076808056128,
+          "min_ratio": 1.0117260560861279,
+          "max_ratio": 1.0469725041037343,
+          "outcome": "practical tie"
+        },
+        "plain/std": {
+          "median_ratio": 3.6168389853374405,
+          "min_ratio": 3.579707247498969,
+          "max_ratio": 3.6997786668368984,
+          "outcome": "std"
+        },
+        "tagged/std": {
+          "median_ratio": 3.537003790296941,
+          "min_ratio": 3.508242219601538,
+          "max_ratio": 3.5513981905262644,
+          "outcome": "std"
+        }
+      }
+    }
+  }
+}
