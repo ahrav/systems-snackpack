@@ -1,6 +1,6 @@
 # Measured results
 
-Measured source and runner: `429f08d9807d318950a952bb5e0fc84238b95cc7`. Publication adds prose and retained evidence; executable source bytes remain identical.
+Measured source and runner: `429f08d9807d318950a952bb5e0fc84238b95cc7`. `evidence/source-identity.json` records the digests of the measured files at that commit. Publication adds prose and retained evidence. The compiled sources (`src/lib.rs`, `examples/replay.rs`, `Cargo.toml`) and `scripts/demo.py` remain byte-identical. Commit `7ad1581` later changed one statement in `scripts/campaign.py`: the resident-order check against the oracle raises `RuntimeError` instead of using `assert`. Traces, scheduling, and timing code are unchanged.
 
 All three hosts used Rust 1.93.1. Each completed four unit tests, one doctest, 160 measured fresh processes and 20 warmups. Native counts and final resident order agree with the independent Python oracle. Each sample processes eight fresh logical caches, each with the same 262,144-request trace.
 
