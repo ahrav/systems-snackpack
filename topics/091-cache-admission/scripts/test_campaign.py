@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """campaign.py rejects a replay whose resident order differs from the oracle, with or without -O."""
+import os
 import pathlib
 import subprocess
 import sys
@@ -14,12 +15,16 @@ print(json.dumps(dict(policy=policy, requests=262144, hits=int(expected), repeat
 
 
 def campaign_run(binary, out, *flags):
+    # The plain child runs at optimization level 0 even when the caller's environment sets PYTHONOPTIMIZE.
+    env = {k: v for k, v in os.environ.items() if k != 'PYTHONOPTIMIZE'}
     return subprocess.run([sys.executable, *flags, str(campaign), '--binary', str(binary), '--out', str(out)],
-                          text=True, capture_output=True, timeout=600)
+                          text=True, capture_output=True, timeout=600, env=env)
 
 
-def rejected_by_oracle(run):
-    return run.returncode != 0 and 'resident order differs from oracle' in run.stderr
+def require(condition, message):
+    # Explicit checks run under -O, which strips assert statements and their operands.
+    if not condition:
+        raise SystemExit(message)
 
 
 with tempfile.TemporaryDirectory() as tmp:
@@ -27,7 +32,11 @@ with tempfile.TemporaryDirectory() as tmp:
     fake = tmp / 'fake_replay.py'
     fake.write_text(FAKE_REPLAY)
     fake.chmod(0o755)
-    assert rejected_by_oracle(campaign_run(fake, tmp / 'plain')), 'campaign accepted a resident order that differs from the oracle'
-    assert rejected_by_oracle(campaign_run(fake, tmp / 'optimized', '-O')), 'campaign accepted a wrong resident order under python -O'
-    assert not (tmp / 'optimized' / 'summary.json').exists(), 'campaign wrote a summary for an invalid run'
+    plain = campaign_run(fake, tmp / 'plain')
+    require(plain.returncode != 0 and 'resident order differs from oracle' in plain.stderr,
+            'campaign accepted a resident order that differs from the oracle')
+    optimized = campaign_run(fake, tmp / 'optimized', '-O')
+    require(optimized.returncode != 0 and 'resident order differs from oracle' in optimized.stderr,
+            'campaign accepted a wrong resident order under python -O')
+    require(not (tmp / 'optimized' / 'summary.json').exists(), 'campaign wrote a summary for an invalid run')
 print('ok')
