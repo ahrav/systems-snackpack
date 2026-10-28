@@ -171,7 +171,8 @@ The README specifies exact counter semantics, workload sizes, memory, timing
 boundaries, process ordering, commands, and the descriptive decision rule.
 
 Final measurements use committed source, identical traces, fresh processes,
-balanced order, and repeated samples on the declared Arm Linux host and xxl.
+balanced order, and repeated samples on the declared Arm Linux, x86-64 Linux,
+and local macOS hosts.
 Exact misses and measured timing variability are reported separately in
 RESULTS.md. Concurrent throughput, real backend latency, and production
 cache-library rankings remain unmeasured.

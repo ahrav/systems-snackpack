@@ -100,7 +100,8 @@ def main():
                     expect = expectations[name]['policies'][policy]
                     cmd = [args.binary, policy, str(path), str(CAP), str(UNIVERSE), str(AGE), str(REPEATS), str(expect['hits'])]
                     record = json.loads(subprocess.check_output(cmd, text=True))
-                    assert record['residents'] == expect['residents']
+                    if record['residents'] != expect['residents']:
+                        raise RuntimeError(f'resident order differs from oracle for {cmd}: {record["residents"]} != {expect["residents"]}')
                     record.update(workload=name, block=block, position=position,
                                   ns_per_request=record['elapsed_ns'] / (N * REPEATS))
                     log.write(json.dumps(record) + '\n')
