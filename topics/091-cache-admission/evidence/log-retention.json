@@ -1,0 +1,62 @@
+[
+  {
+    "path": "local-tests.log",
+    "raw_sha256": "1be02e1ea75353f9addec01c6c1f412297b5fa7ecd073fa7c323e8b56ed625a3",
+    "committed_sha256": "1be02e1ea75353f9addec01c6c1f412297b5fa7ecd073fa7c323e8b56ed625a3",
+    "normalization": "remove trailing blank lines; original retained in standalone outputs"
+  },
+  {
+    "path": "x86-run.log",
+    "raw_sha256": "a3407a9803f6bedb7b0b44a23ca00d5508c04b8aa8822a846f64b0e2a0e5e4d2",
+    "committed_sha256": "a3407a9803f6bedb7b0b44a23ca00d5508c04b8aa8822a846f64b0e2a0e5e4d2",
+    "normalization": "remove trailing blank lines; original retained in standalone outputs"
+  },
+  {
+    "path": "arm-run.log",
+    "raw_sha256": "828ce78e256be988d6f5451f02f7c54acf46a78305667bf1aae141b8a9095b10",
+    "committed_sha256": "828ce78e256be988d6f5451f02f7c54acf46a78305667bf1aae141b8a9095b10",
+    "normalization": "remove trailing blank lines; original retained in standalone outputs"
+  },
+  {
+    "path": "validation/4.log",
+    "raw_sha256": "9d0dd3dd4b06906318195ac1cd7a22887aef8576784bc75ac7c6da9187820d63",
+    "committed_sha256": "9d0dd3dd4b06906318195ac1cd7a22887aef8576784bc75ac7c6da9187820d63",
+    "normalization": "remove trailing blank lines; original retained in standalone outputs"
+  },
+  {
+    "path": "validation/5.log",
+    "raw_sha256": "dcd6fe5c87c0cedc9141327cdead672992cc0c14c49330bced5113778a237b55",
+    "committed_sha256": "dcd6fe5c87c0cedc9141327cdead672992cc0c14c49330bced5113778a237b55",
+    "normalization": "remove trailing blank lines; original retained in standalone outputs"
+  },
+  {
+    "path": "validation/2.log",
+    "raw_sha256": "81c37d65f858afb8eab46a096d0f8d30627ac76e69499ddc68fa627f5a00b5ff",
+    "committed_sha256": "81c37d65f858afb8eab46a096d0f8d30627ac76e69499ddc68fa627f5a00b5ff",
+    "normalization": "remove trailing blank lines; original retained in standalone outputs"
+  },
+  {
+    "path": "validation/3.log",
+    "raw_sha256": "0f553ad911573a8f55a0f4b7bf11262f8d2011bc02cb47c4557645ca57fdc769",
+    "committed_sha256": "0f553ad911573a8f55a0f4b7bf11262f8d2011bc02cb47c4557645ca57fdc769",
+    "normalization": "remove trailing blank lines; original retained in standalone outputs"
+  },
+  {
+    "path": "validation/1.log",
+    "raw_sha256": "89ccd7ef94a050573a94154dcaeecf5a45ba4a7548e85333c6993930e6e6d788",
+    "committed_sha256": "89ccd7ef94a050573a94154dcaeecf5a45ba4a7548e85333c6993930e6e6d788",
+    "normalization": "remove trailing blank lines; original retained in standalone outputs"
+  },
+  {
+    "path": "validation/0.log",
+    "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "normalization": "remove trailing blank lines; original retained in standalone outputs"
+  },
+  {
+    "path": "validation/2-retry.log",
+    "raw_sha256": "b1e7c841dbc668035b80a48b1298456afcca4807b3ec0e0ff37dc77e56a68125",
+    "committed_sha256": "6de352cc66e6b8623e6ef277e516357f26adeca07738b98d2de66ce7ffae2da1",
+    "normalization": "remove trailing blank lines; original retained in standalone outputs"
+  }
+]

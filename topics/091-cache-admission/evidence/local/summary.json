@@ -1,0 +1,282 @@
+{
+  "hot": {
+    "timings": {
+      "fifo": {
+        "median": 1.3328590393066406,
+        "minimum": 1.157780647277832,
+        "maximum": 1.5111565589904785
+      },
+      "lru": {
+        "median": 2.390662670135498,
+        "minimum": 2.262453556060791,
+        "maximum": 2.457559108734131
+      },
+      "frequency": {
+        "median": 2.6474196910858154,
+        "minimum": 2.607245922088623,
+        "maximum": 2.7216477394104004
+      },
+      "aged": {
+        "median": 2.81606125831604,
+        "minimum": 2.7796030044555664,
+        "maximum": 2.9163761138916016
+      }
+    },
+    "comparisons": {
+      "fifo/lru": {
+        "verdict": "fifo",
+        "ratio_min": 0.4803842215902065,
+        "ratio_max": 0.6283841643396887
+      },
+      "fifo/frequency": {
+        "verdict": "fifo",
+        "ratio_min": 0.437402923631275,
+        "ratio_max": 0.5795987812994315
+      },
+      "fifo/aged": {
+        "verdict": "fifo",
+        "ratio_min": 0.3969929124583639,
+        "ratio_max": 0.5361196806691753
+      },
+      "lru/frequency": {
+        "verdict": "lru",
+        "ratio_min": 0.8312808168741609,
+        "ratio_max": 0.9425881494007361
+      },
+      "lru/aged": {
+        "verdict": "lru",
+        "ratio_min": 0.7959808637484056,
+        "ratio_max": 0.8757523338553893
+      },
+      "frequency/aged": {
+        "verdict": "unresolved",
+        "ratio_min": 0.9076137607004744,
+        "ratio_max": 0.9575354652613149
+      }
+    }
+  },
+  "scan": {
+    "timings": {
+      "fifo": {
+        "median": 2.656449794769287,
+        "minimum": 2.511481285095215,
+        "maximum": 2.7946629524230957
+      },
+      "lru": {
+        "median": 2.824594736099243,
+        "minimum": 2.661287784576416,
+        "maximum": 3.0644140243530273
+      },
+      "frequency": {
+        "median": 2.194643020629883,
+        "minimum": 2.090116024017334,
+        "maximum": 2.3650131225585938
+      },
+      "aged": {
+        "median": 2.5196075439453125,
+        "minimum": 2.483924388885498,
+        "maximum": 2.5787353515625
+      }
+    },
+    "comparisons": {
+      "fifo/lru": {
+        "verdict": "unresolved",
+        "ratio_min": 0.9048354569839339,
+        "ratio_max": 0.98074617572622
+      },
+      "fifo/frequency": {
+        "verdict": "frequency",
+        "ratio_min": 1.1657505401044659,
+        "ratio_max": 1.2868262139118158
+      },
+      "fifo/aged": {
+        "verdict": "unresolved",
+        "ratio_min": 0.9852995562130178,
+        "ratio_max": 1.1164909903791587
+      },
+      "lru/frequency": {
+        "verdict": "frequency",
+        "ratio_min": 1.2234613909135748,
+        "ratio_max": 1.3874373297267977
+      },
+      "lru/aged": {
+        "verdict": "unresolved",
+        "ratio_min": 1.049346574997081,
+        "ratio_max": 1.224258777257987
+      },
+      "frequency/aged": {
+        "verdict": "frequency",
+        "ratio_min": 0.8414571849971406,
+        "ratio_max": 0.944842325682139
+      }
+    }
+  },
+  "shift": {
+    "timings": {
+      "fifo": {
+        "median": 1.7643871307373047,
+        "minimum": 1.2895264625549316,
+        "maximum": 2.217968463897705
+      },
+      "lru": {
+        "median": 2.553711175918579,
+        "minimum": 2.4685659408569336,
+        "maximum": 2.6894607543945312
+      },
+      "frequency": {
+        "median": 2.29799747467041,
+        "minimum": 2.1789865493774414,
+        "maximum": 2.3227930068969727
+      },
+      "aged": {
+        "median": 3.033489227294922,
+        "minimum": 2.901017665863037,
+        "maximum": 3.162860870361328
+      }
+    },
+    "comparisons": {
+      "fifo/lru": {
+        "verdict": "fifo",
+        "ratio_min": 0.4851945957699973,
+        "ratio_max": 0.8703388141737809
+      },
+      "fifo/frequency": {
+        "verdict": "unresolved",
+        "ratio_min": 0.5551620220682576,
+        "ratio_max": 0.9622542990871713
+      },
+      "fifo/aged": {
+        "verdict": "fifo",
+        "ratio_min": 0.422444769882647,
+        "ratio_max": 0.7357265474773137
+      },
+      "lru/frequency": {
+        "verdict": "frequency",
+        "ratio_min": 1.1008705007885369,
+        "ratio_max": 1.1745845112586228
+      },
+      "lru/aged": {
+        "verdict": "lru",
+        "ratio_min": 0.780485150007538,
+        "ratio_max": 0.8889537957878235
+      },
+      "frequency/aged": {
+        "verdict": "frequency",
+        "ratio_min": 0.6889289914066034,
+        "ratio_max": 0.7940868278851883
+      }
+    }
+  },
+  "cycle": {
+    "timings": {
+      "fifo": {
+        "median": 3.1144421100616455,
+        "minimum": 3.0137500762939453,
+        "maximum": 3.210902214050293
+      },
+      "lru": {
+        "median": 3.1433305740356445,
+        "minimum": 3.111262798309326,
+        "maximum": 3.228823184967041
+      },
+      "frequency": {
+        "median": 2.8291642665863037,
+        "minimum": 2.6370482444763184,
+        "maximum": 3.1933188438415527
+      },
+      "aged": {
+        "median": 2.8889474868774414,
+        "minimum": 2.746800422668457,
+        "maximum": 2.9739537239074707
+      }
+    },
+    "comparisons": {
+      "fifo/lru": {
+        "verdict": "tie",
+        "ratio_min": 0.9644794043020503,
+        "ratio_max": 1.005566776283704
+      },
+      "fifo/frequency": {
+        "verdict": "unresolved",
+        "ratio_min": 0.9707575548296781,
+        "ratio_max": 1.1688580221185467
+      },
+      "fifo/aged": {
+        "verdict": "aged",
+        "ratio_min": 1.0544938324431317,
+        "ratio_max": 1.1209137414650836
+      },
+      "lru/frequency": {
+        "verdict": "unresolved",
+        "ratio_min": 0.9873884461035931,
+        "ratio_max": 1.1835574294372575
+      },
+      "lru/aged": {
+        "verdict": "aged",
+        "ratio_min": 1.0725592826568595,
+        "ratio_max": 1.1326861509970214
+      },
+      "frequency/aged": {
+        "verdict": "unresolved",
+        "ratio_min": 0.9318620572982443,
+        "ratio_max": 1.0862586927053537
+      }
+    }
+  },
+  "uniform": {
+    "timings": {
+      "fifo": {
+        "median": 3.9543509483337402,
+        "minimum": 3.632704257965088,
+        "maximum": 4.288911819458008
+      },
+      "lru": {
+        "median": 3.679504156112671,
+        "minimum": 3.4001073837280273,
+        "maximum": 3.9767823219299316
+      },
+      "frequency": {
+        "median": 1.8378300666809082,
+        "minimum": 1.723726749420166,
+        "maximum": 1.9192695617675781
+      },
+      "aged": {
+        "median": 2.055485963821411,
+        "minimum": 1.9188323020935059,
+        "maximum": 2.1069250106811523
+      }
+    },
+    "comparisons": {
+      "fifo/lru": {
+        "verdict": "unresolved",
+        "ratio_min": 0.9700431936562233,
+        "ratio_max": 1.177303365992065
+      },
+      "fifo/frequency": {
+        "verdict": "frequency",
+        "ratio_min": 1.8927535403726707,
+        "ratio_max": 2.2898613026261905
+      },
+      "fifo/aged": {
+        "verdict": "aged",
+        "ratio_min": 1.7747819568310483,
+        "ratio_max": 2.040185843022392
+      },
+      "lru/frequency": {
+        "verdict": "frequency",
+        "ratio_min": 1.7971057958683319,
+        "ratio_max": 2.307083952411632
+      },
+      "lru/aged": {
+        "verdict": "aged",
+        "ratio_min": 1.667767980353175,
+        "ratio_max": 1.8874816625031514
+      },
+      "frequency/aged": {
+        "verdict": "unresolved",
+        "ratio_min": 0.8181243948795779,
+        "ratio_max": 1.0002278780035103
+      }
+    }
+  }
+}

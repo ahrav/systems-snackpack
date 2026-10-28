@@ -1,0 +1,31 @@
+724584249128cf53d6a6af1e8e0eccea0099db923ba89ba5512b59507ae6da74  ../codex-topic091-20261028-429f08d.tar.gz
+   Compiling cache-admission v0.1.0 (/tmp/codex-topic091-20261028-429f08d/topics/091-cache-admission)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.28s
+     Running unittests src/lib.rs (target/debug/deps/cache_admission-04b21a045c666026)
+
+running 4 tests
+test tests::aging_adapts_after_popularity_shift ... ok
+test tests::invalid_key_is_rejected - should panic ... ok
+test tests::persistent_counts_saturate_and_rejections_count ... ok
+test tests::exhaustive_sequences_against_timestamp_oracle ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.13s
+
+   Doc-tests cache_admission
+
+running 1 test
+test topics/091-cache-admission/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.20s; merged doctests compilation took 0.20s
+    Checking cache-admission v0.1.0 (/tmp/codex-topic091-20261028-429f08d/topics/091-cache-admission)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.24s
+   Compiling cache-admission v0.1.0 (/tmp/codex-topic091-20261028-429f08d/topics/091-cache-admission)
+    Finished `release` profile [optimized] target(s) in 0.36s
+hot {'fifo': 262080, 'lru': 262080, 'frequency': 262080, 'aged': 262080}
+scan {'fifo': 114688, 'lru': 114688, 'frequency': 132032, 'aged': 131008}
+shift {'fifo': 261888, 'lru': 261888, 'frequency': 130944, 'aged': 253824}
+cycle {'fifo': 0, 'lru': 0, 'frequency': 259984, 'aged': 258241}
+uniform {'fifo': 4046, 'lru': 4044, 'frequency': 4130, 'aged': 4041}
+complete: 160 measured fresh processes and 20 warmups; all hits and resident orders match oracle

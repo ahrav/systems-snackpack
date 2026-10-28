@@ -1,0 +1,26 @@
+{
+  "platform": "macOS-26.7.1-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "host": "c0c7db201688",
+  "affinity": null,
+  "rust": {
+    "command": [
+      "rustc",
+      "+1.93.1",
+      "--version"
+    ],
+    "status": 0,
+    "stdout": "rustc 1.93.1 (01f6ddf75 2026-02-11)",
+    "stderr": ""
+  },
+  "cpu": {
+    "machine": "arm64"
+  },
+  "n": 262144,
+  "capacity": 128,
+  "universe": 8192,
+  "age": 8192,
+  "repeats": 8,
+  "start_utc": "2026-10-28T13:41:51Z",
+  "binary_sha256": "6c7e55f8d0a626abfc1b747bc84bc5d46f98533c777200b2704aa12401d75fe0"
+}

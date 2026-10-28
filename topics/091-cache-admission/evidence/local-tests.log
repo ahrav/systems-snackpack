@@ -1,0 +1,19 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running unittests src/lib.rs (target/debug/deps/cache_admission-34e8b5915cfcd750)
+
+running 4 tests
+test tests::aging_adapts_after_popularity_shift ... ok
+test tests::invalid_key_is_rejected - should panic ... ok
+test tests::persistent_counts_saturate_and_rejections_count ... ok
+test tests::exhaustive_sequences_against_timestamp_oracle ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.07s
+
+   Doc-tests cache_admission
+
+running 1 test
+test topics/091-cache-admission/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.71s; merged doctests compilation took 0.36s

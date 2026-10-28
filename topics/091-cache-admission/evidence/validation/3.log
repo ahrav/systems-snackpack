@@ -1,0 +1,760 @@
+   Compiling numa-first-touch-migration v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-28/advanced-systems-daily-lesson-every-local/work/systems-091/topics/025-numa-first-touch-migration)
+   Compiling allocator-internals-fragmentation v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-28/advanced-systems-daily-lesson-every-local/work/systems-091/topics/024-allocator-internals-fragmentation)
+   Compiling linkers-loaders-binary-layout v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-28/advanced-systems-daily-lesson-every-local/work/systems-091/topics/017-linkers-loaders-binary-layout)
+   Compiling work-stealing v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-28/advanced-systems-daily-lesson-every-local/work/systems-091/topics/087-work-stealing)
+   Compiling nic-datapath-cost-model v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-28/advanced-systems-daily-lesson-every-local/work/systems-091/topics/026-nic-datapath)
+   Compiling performance-portability-vector-width v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-28/advanced-systems-daily-lesson-every-local/work/systems-091/topics/045-performance-portability-vector-width)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.34s
+   Doc-tests accelerator_offload
+
+running 1 test
+test topics/089-accelerator-offload/src/lib.rs - (line 8) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.80s; merged doctests compilation took 0.35s
+   Doc-tests advanced_benchmarking_methodology
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests allocator_internals_fragmentation
+
+running 1 test
+test topics/024-allocator-internals-fragmentation/src/lib.rs - Geometry::new (line 45) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.77s; merged doctests compilation took 0.37s
+   Doc-tests async_runtime_mechanics
+
+running 4 tests
+test topics/041-async-runtime-mechanics/src/lib.rs - CancellationLatency::checked_floor (line 233) ... ok
+test topics/041-async-runtime-mechanics/src/lib.rs - checked_future_state_bytes (line 95) ... ok
+test topics/041-async-runtime-mechanics/src/lib.rs - future_frame_screen (line 53) ... ok
+test topics/041-async-runtime-mechanics/src/lib.rs - TaskResidency::checked_peak_bytes (line 153) ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.69s; merged doctests compilation took 0.34s
+   Doc-tests atomics_under_contention
+
+running 1 test
+test topics/047-atomics-under-contention/src/lib.rs - (line 22) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.73s; merged doctests compilation took 0.36s
+   Doc-tests backpressure_overload
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests bounded_mpmc_queue
+
+running 1 test
+test topics/078-bounded-mpmc-queue/src/lib.rs - (line 9) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.65s; merged doctests compilation took 0.32s
+   Doc-tests cache_admission
+
+running 1 test
+test topics/091-cache-admission/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.63s; merged doctests compilation took 0.30s
+   Doc-tests cache_coherence_false_sharing
+
+running 2 tests
+test topics/046-cache-coherence-false-sharing/src/lib.rs - split_layout_saving_ns (line 69) ... ok
+test topics/046-cache-coherence-false-sharing/src/lib.rs - average_update_cost_ns (line 34) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.62s; merged doctests compilation took 0.29s
+   Doc-tests cgroup_pressure
+
+running 1 test
+test topics/070-cgroup-pressure/src/lib.rs - oracle (line 21) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.59s; merged doctests compilation took 0.27s
+   Doc-tests compiler_optimization_boundaries
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests compression_systems_primitive
+
+running 1 test
+test topics/037-compression-systems-primitive/src/lib.rs - (line 12) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.61s; merged doctests compilation took 0.29s
+   Doc-tests connection_tracking_nat_limits
+
+running 1 test
+test topics/075-connection-tracking-nat-limits/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.61s; merged doctests compilation took 0.27s
+   Doc-tests consensus_leases_fencing
+
+running 1 test
+test topics/058-consensus-leases-fencing/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.60s; merged doctests compilation took 0.26s
+   Doc-tests consistent_hashing_movement
+
+running 1 test
+test topics/076-consistent-hashing-movement/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.59s; merged doctests compilation took 0.26s
+   Doc-tests constant_time_systems
+
+running 1 test
+test topics/068-constant-time-systems/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.59s; merged doctests compilation took 0.27s
+   Doc-tests cpu_frontend_bottlenecks
+
+running 6 tests
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - (line 19) ... ok
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - estimate_frontend_cycles (line 171) ... ok
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - SupplyTerm::new (line 61) ... ok
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - evaluate_outlining (line 282) ... ok
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - ExposedPenalty::new (line 96) ... ok
+test topics/019-cpu-frontend-bottlenecks/src/lib.rs - phase_cycle_floor (line 229) ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+all doctests ran in 0.65s; merged doctests compilation took 0.27s
+   Doc-tests atomic_lowering
+
+running 2 tests
+test topics/022-cpu-memory-model-atomic-lowering/src/lib.rs - (line 16) ... ok
+test topics/022-cpu-memory-model-atomic-lowering/src/lib.rs - publication_roundtrip (line 166) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.62s; merged doctests compilation took 0.29s
+   Doc-tests cpu_service_chain
+
+running 9 tests
+test topics/050-cpu-service-chain/src/lib.rs - (line 21) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - lock_blocking (line 92) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - smt_symmetric_per_thread_slowdown (line 213) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - deadline_utilization_sum (line 267) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - WakeService::new (line 316) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - smt_aggregate_gain (line 173) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - deadline_utilization (line 241) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - response_time (line 57) ... ok
+test topics/050-cpu-service-chain/src/lib.rs - fair_share (line 140) ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+all doctests ran in 0.65s; merged doctests compilation took 0.29s
+   Doc-tests data_layout_transformations
+
+running 1 test
+test topics/066-data-layout-transformations/src/lib.rs - (line 4) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.62s; merged doctests compilation took 0.29s
+   Doc-tests database_index_internals
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests distributed_time_ordering
+
+running 5 tests
+test topics/029-distributed-time-ordering/src/lib.rs - VectorClock (line 224) ... ok
+test topics/029-distributed-time-ordering/src/lib.rs - wall_clock_lww (line 97) ... ok
+test topics/029-distributed-time-ordering/src/lib.rs - UncertaintyInterval (line 522) ... ok
+test topics/029-distributed-time-ordering/src/lib.rs - HybridLogicalClock (line 358) ... ok
+test topics/029-distributed-time-ordering/src/lib.rs - LamportClock (line 128) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.65s; merged doctests compilation took 0.32s
+   Doc-tests dram_memory_controller_behavior
+
+running 9 tests
+test topics/049-dram-memory-controller-behavior/src/lib.rs - (line 20) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - refresh_duty_fraction (line 505) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - useful_throughput_cap (line 430) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - pin_bandwidth (line 344) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - required_inflight (line 276) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - DramTiming::new (line 86) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - BankStateMix::new (line 188) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - inflight_payload_ceiling (line 311) ... ok
+test topics/049-dram-memory-controller-behavior/src/lib.rs - expected_device_component_ns (line 237) ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+all doctests ran in 0.69s; merged doctests compilation took 0.30s
+   Doc-tests ebpf_internals
+
+running 10 tests
+test topics/040-ebpf-internals/src/lib.rs - ControlFlowProgram::check (line 88) ... ok
+test topics/040-ebpf-internals/src/lib.rs - ring_record_bytes (line 278) ... ok
+test topics/040-ebpf-internals/src/lib.rs - independent_binary_path_bound (line 340) ... ok
+test topics/040-ebpf-internals/src/lib.rs - ring_fill_seconds (line 300) ... ok
+test topics/040-ebpf-internals/src/lib.rs - amortized_setup_nanoseconds (line 213) ... ok
+test topics/040-ebpf-internals/src/lib.rs - ControlFlowProgram::instructions (line 65) ... ok
+test topics/040-ebpf-internals/src/lib.rs - EventCost::total_nanoseconds (line 181) ... ok
+test topics/040-ebpf-internals/src/lib.rs - align_to_eight (line 233) ... ok
+test topics/040-ebpf-internals/src/lib.rs - ControlFlowProgram::new (line 50) ... ok
+test topics/040-ebpf-internals/src/lib.rs - per_cpu_payload_bytes (line 254) ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+all doctests ran in 0.68s; merged doctests compilation took 0.31s
+   Doc-tests filesystem_crash_semantics
+
+running 1 test
+test topics/052-filesystem-crash-semantics/src/lib.rs - (line 27) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.58s; merged doctests compilation took 0.26s
+   Doc-tests finite_state_transducers_compact_dictionaries
+
+running 1 test
+test topics/035-finite-state-transducers-compact-dictionaries/src/lib.rs - (line 24) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.60s; merged doctests compilation took 0.26s
+   Doc-tests futex_parking
+
+running 1 test
+test topics/069-futex-parking/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.64s; merged doctests compilation took 0.28s
+   Doc-tests gpu_execution_mechanics
+
+running 1 test
+test topics/088-gpu-execution/src/lib.rs - sectors (line 12) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.61s; merged doctests compilation took 0.28s
+   Doc-tests hardware_software_prefetching
+
+running 1 test
+test topics/048-hardware-software-prefetching/src/lib.rs - (line 12) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.66s; merged doctests compilation took 0.30s
+   Doc-tests idempotency_concurrency
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests io_uring_lifetimes
+
+running 1 test
+test topics/054-io-uring-lifetimes/src/lib.rs - (line 33) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.63s; merged doctests compilation took 0.29s
+   Doc-tests iommu_dma_device_memory
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests linkers_loaders_binary_layout
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests lock_free_reclamation_aba
+
+running 2 tests
+test topics/023-lock-free-reclamation-aba/src/lib.rs - pack_head (line 46) ... ok
+test topics/023-lock-free-reclamation-aba/src/lib.rs - run_aba_witness (line 79) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.65s; merged doctests compilation took 0.30s
+   Doc-tests lsm_compaction_economics
+
+running 1 test
+test topics/059-lsm-compaction-economics/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.67s; merged doctests compilation took 0.28s
+   Doc-tests memory_level_parallelism
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests metadata_scalability
+
+running 1 test
+test topics/077-metadata-scalability/src/lib.rs - (line 9) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.67s; merged doctests compilation took 0.31s
+   Doc-tests modern_hash_tables
+
+running 1 test
+test topics/090-modern-hash-tables/src/lib.rs - (line 5) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.71s; merged doctests compilation took 0.28s
+   Doc-tests monomorphization
+
+running 1 test
+test topics/080-monomorphization/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.61s; merged doctests compilation took 0.27s
+   Doc-tests multipart_correctness
+
+running 1 test
+test topics/073-object-store-multipart-correctness/src/lib.rs - (line 5) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.72s; merged doctests compilation took 0.28s
+   Doc-tests mvcc_hot_vacuum
+
+running 5 tests
+test topics/032-mvcc-hot-vacuum/src/lib.rs - (line 12) ... ok
+test topics/032-mvcc-hot-vacuum/src/lib.rs - xid_visible (line 106) ... ok
+test topics/032-mvcc-hot-vacuum/src/lib.rs - visible_version (line 134) ... ok
+test topics/032-mvcc-hot-vacuum/src/lib.rs - reclaimable_count (line 178) ... ok
+test topics/032-mvcc-hot-vacuum/src/lib.rs - self_check_receipt (line 209) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 0.74s; merged doctests compilation took 0.29s
+   Doc-tests nic_datapath_cost_model
+
+running 6 tests
+test topics/026-nic-datapath/src/lib.rs - compare_gro_receive_cost (line 268) ... ok
+test topics/026-nic-datapath/src/lib.rs - (line 34) ... ok
+test topics/026-nic-datapath/src/lib.rs - udp_buffer_fill_time_seconds (line 406) ... ok
+test topics/026-nic-datapath/src/lib.rs - listen_backlog_burst_need (line 358) ... ok
+test topics/026-nic-datapath/src/lib.rs - tcp_bandwidth_delay_window_bytes (line 323) ... ok
+test topics/026-nic-datapath/src/lib.rs - compare_transmit_cost (line 157) ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 0.74s; merged doctests compilation took 0.30s
+   Doc-tests numa_first_touch_migration
+
+running 6 tests
+test topics/025-numa-first-touch-migration/src/lib.rs - (line 16) ... ok
+test topics/025-numa-first-touch-migration/src/lib.rs - classify_access (line 60) ... ok
+test topics/025-numa-first-touch-migration/src/lib.rs - choose_strategy (line 330) ... ok
+test topics/025-numa-first-touch-migration/src/lib.rs - migration_break_even_accesses (line 182) ... ok
+test topics/025-numa-first-touch-migration/src/lib.rs - replication_break_even_remote_reads (line 242) ... ok
+test topics/025-numa-first-touch-migration/src/lib.rs - estimate_latency_cost (line 123) ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 0.64s; merged doctests compilation took 0.28s
+   Doc-tests nvme_blk_mq
+
+running 5 tests
+test topics/053-nvme-blk-mq/src/lib.rs - (line 18) ... ok
+test topics/053-nvme-blk-mq/src/lib.rs - concurrency_limited_iops (line 149) ... ok
+test topics/053-nvme-blk-mq/src/lib.rs - effective_queue_depth (line 113) ... ok
+test topics/053-nvme-blk-mq/src/lib.rs - cpu_batch_cost (line 219) ... ok
+test topics/053-nvme-blk-mq/src/lib.rs - bandwidth_bytes_per_second (line 180) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 0.75s; merged doctests compilation took 0.30s
+   Doc-tests packet_steering_interrupts
+
+running 1 test
+test topics/055-packet-steering-interrupts/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.64s; merged doctests compilation took 0.30s
+   Doc-tests page_cache_io
+
+running 6 tests
+test topics/051-page-cache-io/src/lib.rs - required_readahead_bytes (line 111) ... ok
+test topics/051-page-cache-io/src/lib.rs - expected_read_seconds (line 75) ... ok
+test topics/051-page-cache-io/src/lib.rs - dirty_headroom (line 176) ... ok
+test topics/051-page-cache-io/src/lib.rs - required_direct_queue_depth (line 224) ... ok
+test topics/051-page-cache-io/src/lib.rs - read_amplification (line 141) ... ok
+test topics/051-page-cache-io/src/lib.rs - reuse_ledger (line 269) ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+all doctests ran in 0.70s; merged doctests compilation took 0.29s
+   Doc-tests parallel_algorithm_design
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests performance_portability_vector_width
+
+running 4 tests
+test topics/045-performance-portability-vector-width/src/lib.rs - break_even_elements (line 162) ... ok
+test topics/045-performance-portability-vector-width/src/lib.rs - clock_adjusted_time_ratio (line 104) ... ok
+test topics/045-performance-portability-vector-width/src/lib.rs - fixed_work_time_ns (line 127) ... ok
+test topics/045-performance-portability-vector-width/src/lib.rs - roofline_elements_per_second (line 58) ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.66s; merged doctests compilation took 0.29s
+   Doc-tests pgo_post_link_optimization
+
+running 1 test
+test topics/018-pgo-post-link-optimization/src/lib.rs - summarize_ratios (line 29) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.63s; merged doctests compilation took 0.27s
+   Doc-tests queueing_service_design
+
+running 1 test
+test topics/027-queueing-service-design/src/lib.rs - (line 14) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.83s; merged doctests compilation took 0.28s
+   Doc-tests quorum_consistency_costs
+
+running 1 test
+test topics/057-quorum-consistency-costs/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.63s; merged doctests compilation took 0.29s
+   Doc-tests reader_writer_collapse
+
+running 1 test
+test topics/083-reader-writer-collapse/src/lib.rs - admission (line 51) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.73s; merged doctests compilation took 0.28s
+   Doc-tests roaring_bitmaps_compressed_sets
+
+running 1 test
+test topics/036-roaring-bitmaps-compressed-sets/src/lib.rs - (line 8) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.71s; merged doctests compilation took 0.27s
+   Doc-tests rust_aliasing_provenance
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests sequence_locks
+
+running 1 test
+test topics/079-sequence-locks/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.69s; merged doctests compilation took 0.27s
+   Doc-tests spectre_era_performance_tradeoffs
+
+running 5 tests
+test topics/043-spectre-era-performance-tradeoffs/src/lib.rs - topic43_plain_lookup (line 52) ... ok
+test topics/043-spectre-era-performance-tradeoffs/src/lib.rs - topic43_mask_lookup (line 74) ... ok
+test topics/043-spectre-era-performance-tradeoffs/src/lib.rs - topic43_barrier_lookup (line 207) ... ok
+test topics/043-spectre-era-performance-tradeoffs/src/lib.rs - lookup (line 227) ... ok
+test topics/043-spectre-era-performance-tradeoffs/src/lib.rs - topic43_speculation_barrier (line 188) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+all doctests ran in 0.62s; merged doctests compilation took 0.27s
+   Doc-tests ssd_gc
+
+running 1 test
+test topics/071-ssd-garbage-collection/src/lib.rs - (line 5) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.61s; merged doctests compilation took 0.26s
+   Doc-tests string_matching_selection
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_001
+
+running 1 test
+test topics/001-swar-simd-scalar/src/lib.rs - (line 9) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.64s; merged doctests compilation took 0.28s
+   Doc-tests systems_snackpack_topic_002
+
+running 1 test
+test topics/002-intrinsics-vs-assembly/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.60s; merged doctests compilation took 0.27s
+   Doc-tests systems_snackpack_topic_003
+
+running 1 test
+test topics/003-linux-perf-workflow/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.62s; merged doctests compilation took 0.27s
+   Doc-tests systems_snackpack_topic_004
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_005
+
+running 1 test
+test topics/005-webassembly-performance-model/src/lib.rs - iterate (line 22) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.63s; merged doctests compilation took 0.26s
+   Doc-tests systems_snackpack_topic_006
+
+running 5 tests
+test topics/006-ngram-text-indexing/src/lib.rs - TrigramIndex::query (line 116) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - (line 14) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - scan_count (line 179) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - TrigramIndex::document_count (line 96) ... ok
+test topics/006-ngram-text-indexing/src/lib.rs - TrigramIndex::build (line 64) ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.70s; merged doctests compilation took 0.33s
+   Doc-tests systems_snackpack_topic_007
+
+running 1 test
+test topics/007-branchless-predictable-control-flow/src/lib.rs - (line 15) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.59s; merged doctests compilation took 0.26s
+   Doc-tests systems_snackpack_topic_008
+
+running 1 test
+test topics/008-tlbs-address-translation/src/lib.rs - (line 13) - compile ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.59s; merged doctests compilation took 0.24s
+   Doc-tests systems_snackpack_topic_009
+
+running 1 test
+test topics/009-succinct-static-index-structures/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.58s; merged doctests compilation took 0.25s
+   Doc-tests systems_snackpack_topic_010
+
+running 1 test
+test topics/010-hashing-checksums-prng/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.60s; merged doctests compilation took 0.26s
+   Doc-tests systems_snackpack_topic_011
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_012
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_013
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests systems_snackpack_topic_014
+
+running 1 test
+test topics/014-cpu-dispatch-portable-optimization/src/lib.rs - (line 16) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.65s; merged doctests compilation took 0.32s
+   Doc-tests histogram_merge_errors
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests tcp_quic_application_pacing
+
+running 1 test
+test topics/056-tcp-quic-application-pacing/src/lib.rs - (line 10) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.62s; merged doctests compilation took 0.26s
+   Doc-tests tls_record_sizing
+
+running 1 test
+test topics/074-tls-record-sizing/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.59s; merged doctests compilation took 0.26s
+   Doc-tests topic_021_store_write_path
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests wal_crash_consistency
+
+running 3 tests
+test topics/033-wal-crash-consistency/src/lib.rs - recover_prefix (line 257) ... ok
+test topics/033-wal-crash-consistency/src/lib.rs - encode_frame (line 158) ... ok
+test topics/033-wal-crash-consistency/src/lib.rs - topic33_crc32c (line 124) ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+all doctests ran in 0.62s; merged doctests compilation took 0.26s
+   Doc-tests topic_067_abi_ffi_performance_boundaries
+
+running 1 test
+test topics/067-abi-ffi-performance-boundaries/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.56s; merged doctests compilation took 0.23s
+   Doc-tests topic_072_storage_layout
+
+running 1 test
+test topics/072-storage-layout-and-device-geometry-sparse-files-extents-and-zoned-storage/src/lib.rs - Zone::new (line 75) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.57s; merged doctests compilation took 0.23s
+   Doc-tests topic060_deterministic_simulation
+
+running 1 test
+test topics/060-deterministic-simulation/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.60s; merged doctests compilation took 0.28s
+   Doc-tests topic061_probabilistic_filters
+
+running 1 test
+test topics/061-probabilistic-filters/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.59s; merged doctests compilation took 0.24s
+   Doc-tests topic062_load_balancing
+
+running 1 test
+test topics/062-load-balancing/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.56s; merged doctests compilation took 0.23s
+   Doc-tests topic063_anti_entropy
+
+running 1 test
+test topics/063-anti-entropy/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.60s; merged doctests compilation took 0.24s
+   Doc-tests topic064_kernel_bypass
+
+running 1 test
+test topics/064-kernel-bypass/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.58s; merged doctests compilation took 0.25s
+   Doc-tests topic065_query_execution
+
+running 1 test
+test topics/065-query-execution/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.62s; merged doctests compilation took 0.29s
+   Doc-tests topic081_rust_runtime
+
+running 2 tests
+test topics/081-rust-runtime-semantics/src/lib.rs - (line 4) - compile fail ... ok
+test topics/081-rust-runtime-semantics/src/lib.rs - (line 10) - compile fail ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+   Doc-tests topic082_linux_runtime
+
+running 1 test
+test topics/082-linux-runtime/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.61s; merged doctests compilation took 0.28s
+   Doc-tests work_stealing
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests zero_copy_limits
+
+running 2 tests
+test topics/038-zero-copy-limits/src/lib.rs - pages_spanned (line 155) ... ok
+test topics/038-zero-copy-limits/src/lib.rs - (line 9) ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.64s; merged doctests compilation took 0.31s

@@ -1,0 +1,18 @@
+{
+  "commit": "429f08d9807d318950a952bb5e0fc84238b95cc7",
+  "archive_sha256": "724584249128cf53d6a6af1e8e0eccea0099db923ba89ba5512b59507ae6da74",
+  "files": {
+    "Cargo.lock": "87cc5913289d7fd31904f41256eba73906e9fd413acef638f2d55f1ce3c02161",
+    "Cargo.toml": "f4fafc36b3b192392e9596a60ea28331b976460c76a737ac6ae8b90fc5ca18c5",
+    "rust-toolchain.toml": "18a06f0348348b4c43af5dc52b582ed0959d90a2d5105d39bf4085136a67c59b",
+    "topics/091-cache-admission/Cargo.toml": "b37272c907f122027dfeb09257dd9ab1ad8051378471b29f75f7daaed57d8876",
+    "topics/091-cache-admission/LESSON.md": "3e8f060deea10e8397e4b98734655690707cd971d7939b955bfd998cf927ca4a",
+    "topics/091-cache-admission/README.md": "2e73ca1a7d31ac250ffe29621f110f5aa18980e6b394c22b35eff007792519dd",
+    "topics/091-cache-admission/SOURCES.md": "114352323991eeec93d5bf497a98fee36e1a744ee843b230a50a15b39ccce68e",
+    "topics/091-cache-admission/admission.png": "6b178b2833ccf54216358acbbd2494725716596120d74ae9102ab42ede27c7bf",
+    "topics/091-cache-admission/examples/replay.rs": "161437489a077f22fb31edbfa7543f1548b5bd11cb6476486fab67cc7a1614e0",
+    "topics/091-cache-admission/scripts/campaign.py": "2322c63a1869b0391aea2a1afb9716d51f971d3beb8b4006841e37f918ae0863",
+    "topics/091-cache-admission/scripts/demo.py": "1109417679008ed468b8a66a352793c39982c6ac425237c4c6070c3f8df9c885",
+    "topics/091-cache-admission/src/lib.rs": "d7a20ff6206290d2a06acb77ebfdf1118504698b362906dd0896260f60d64e06"
+  }
+}
