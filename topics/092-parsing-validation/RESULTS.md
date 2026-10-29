@@ -4,6 +4,16 @@ Source commit: `6d099b74eb8efba6ea294da7f23a97e6d8e50f77`.
 
 All three machines executed the same committed source and runner archive.
 Archive SHA-256: `eb7cf4daa86de73e77484c387f681df68e430c691285135935cec61ec80126c9`.
+Review changes after measurement changed three source files and added
+`test_experiment.py`. `experiment.py` raises
+`RuntimeError` instead of `assert` when parser or benchmark output differs from
+the oracle, so the checks run under `python3 -O`; `test_experiment.py` exercises
+both modes. The `#[cfg(test)]` module in `src/lib.rs` gained capacity assertions
+and the input `4294967300\n`; a local rebuild produced byte-identical `.text` and
+`.rodata` sections, with only LLVM module-hash symbol suffixes differing. `demo.py`
+cross-checks `parse` against `oracle`. `src/bin/parsing.rs`, the production code
+in `src/lib.rs`, `Cargo.toml`, the workloads, and the timing and summary code are
+byte-identical to the measured commit.
 
 Each machine passed four unit tests, one doctest, 136335 independent parser comparisons
 across 45445 inputs, and exact output checks for all seven measured workloads.
@@ -34,17 +44,18 @@ Each sample validates and produces every value. Throughput includes output and i
 
 ## Malformed batches
 
-Entries are median microseconds per rejected batch [minimum, maximum].
-The complete input length is not a processed-byte count for an early exit.
+Entries are median nanoseconds per rejected batch [minimum, maximum] across six
+processes. The complete input length is not a processed-byte count for an early
+exit. The pairwise rule is the one used for valid batches.
 
-| Host | Error position | Fused | Split | Indexed |
-|---|---|---:|---:|---:|
-| local | invalid_early | 0.001 [0.001, 0.001] | 2.993 [2.969, 3.150] | 126.482 [125.187, 133.977] |
-| local | invalid_late | 153.151 [137.592, 161.794] | 295.844 [286.786, 304.590] | 365.143 [358.755, 387.303] |
-| arm | invalid_early | 0.004 [0.004, 0.005] | 7.706 [7.700, 7.711] | 271.014 [267.510, 275.410] |
-| arm | invalid_late | 426.109 [423.783, 433.806] | 543.766 [539.796, 547.303] | 718.910 [711.671, 754.078] |
-| x86 | invalid_early | 0.003 [0.003, 0.003] | 5.269 [5.260, 5.329] | 381.871 [379.933, 383.310] |
-| x86 | invalid_late | 488.550 [484.505, 492.119] | 618.553 [616.253, 621.660] | 916.190 [911.551, 920.949] |
+| Host | Error position | Fused | Split | Indexed | Pairwise decision |
+|---|---|---:|---:|---:|---|
+| local | invalid_early | 1.39 [1.36, 1.45] | 2,993 [2,969, 3,150] | 126,482 [125,187, 133,977] | fused/split: fused; fused/indexed: fused; split/indexed: split |
+| local | invalid_late | 153,151 [137,592, 161,794] | 295,844 [286,786, 304,590] | 365,143 [358,755, 387,303] | fused/split: fused; fused/indexed: fused; split/indexed: split |
+| arm | invalid_early | 4.41 [3.85, 5.22] | 7,706 [7,700, 7,711] | 271,014 [267,510, 275,410] | fused/split: fused; fused/indexed: fused; split/indexed: split |
+| arm | invalid_late | 426,109 [423,783, 433,806] | 543,766 [539,796, 547,303] | 718,910 [711,671, 754,078] | fused/split: fused; fused/indexed: fused; split/indexed: split |
+| x86 | invalid_early | 3.03 [2.82, 3.18] | 5,269 [5,260, 5,329] | 381,871 [379,933, 383,310] | fused/split: fused; fused/indexed: fused; split/indexed: split |
+| x86 | invalid_late | 488,550 [484,505, 492,119] | 618,553 [616,253, 621,660] | 916,190 [911,551, 920,949] | fused/split: fused; fused/indexed: fused; split/indexed: split |
 
 ## Controls and interpretation
 
@@ -69,14 +80,20 @@ I/O and production tail latency remain unmeasured.
 
 ## Machine identities
 
-- local: c0c7db201688, arm64, CPU model unavailable: sysctl permission denied; affinity OS scheduled.
-- arm: dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com, aarch64, See metadata.json; affinity [0].
-- x86: dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com, x86_64, Intel(R) Xeon(R) Platinum 8488C; affinity [0].
+- local: c0c7db201688, arm64, macOS 26.7.1; CPU model unavailable because
+  `sysctl machdep.cpu.brand_string` returned "Operation not permitted"; affinity
+  OS scheduled.
+- arm: dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com, aarch64, Amazon Linux 2023
+  kernel 6.12.111; `lscpu` reports vendor ARM, model 1, stepping r1p1, 64 cores,
+  one thread per core, and no model name; affinity [0].
+- x86: dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com, x86_64, Amazon Linux 2023
+  kernel 6.12.113; Intel(R) Xeon(R) Platinum 8488C, 2 sockets, 48 cores per
+  socket, 2 threads per core; affinity [0].
 
 Raw samples, workload hashes, compiler identities and binary hashes are in
 `measurements/<host>/`. Local validation logs and original SSH transcripts are
-retained with the standalone lesson outputs. The published source files and
-runner must match the measured commit byte-for-byte.
+retained with the standalone lesson outputs. The measured commit above is the
+source identity for every number in this file.
 
 ## Repository validation
 

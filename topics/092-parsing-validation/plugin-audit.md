@@ -25,4 +25,6 @@ This is a source-coverage finding. Runtime routing and behavioral lift were not
 measured today. With no changed skill inputs, no new development evaluation,
 source plugin PR or evaluator evidence PR is applicable. Current instructions,
 references and canonical cases are recorded by revision and SHA-256 in
-`evidence/plugin-audit-inputs.json`. Historical pending evaluations remain separate.
+`plugin-audit-inputs.json`, retained with the standalone lesson outputs alongside
+the validation logs named in RESULTS.md; this repository holds the audit summary
+only. Historical pending evaluations remain separate.

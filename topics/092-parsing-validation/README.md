@@ -75,13 +75,20 @@ From this directory:
 ```bash
 python3 demo.py
 cargo test -p parsing-validation
+python3 test_experiment.py
 cargo build --release -p parsing-validation
 python3 experiment.py ../../target/release/parsing results/local
 ```
 
+The example writes to `results/local`, a scratch directory, so the committed
+artifacts in `measurements/<host>/` remain unchanged. `test_experiment.py` runs
+the runner against fake binaries whose output differs from the oracle and
+requires rejection with and without `python3 -O`.
+
 The demo prints `[12, 0, 4294967295]` for the valid batch and rejects `01\n`,
-`4294967296\n` and `12`. The Rust parsers produce every value in order, or an
-empty output and `Invalid`. The independent Python oracle combines a bytes
+`4294967296\n` and `12`, and exits with an error if `parse` and `oracle`
+disagree. The Rust parsers produce every value in order, or an empty output and
+`Invalid`. The independent Python oracle combines a bytes
 regular expression with arbitrary-precision `int` conversion. It shares no Rust
 conversion routine. `experiment.py` compares exact vectors and acceptance for
 exhaustive short strings, all-byte substitutions, random valid records and
@@ -105,7 +112,8 @@ An early malformed byte can stop a fused parser quickly. The indexed path scans
 all delimiters before converting the first field. Error latency therefore
 captures a real architectural difference. Dividing the whole buffer length by
 early-rejection time would misstate processed-byte throughput. The results
-report nanoseconds per rejected batch for both error positions.
+report nanoseconds per rejected batch for both error positions, with the same
+pairwise rule as valid batches.
 
 For streaming, carry the current numeric value and digit state across chunks.
 Finalize the record only at LF, and check completeness at stream end. Test every
@@ -117,8 +125,9 @@ additional boundary state. An error discards the entire batch.
 ## Experiment contract
 
 The seven deterministic workloads are tiny (32 records), short (32768 one-digit
-values), long (32768 ten-digit values), mixed (32768 variable-width values), large
-(262144 u32 values), and mixed batches corrupted near the start or end.
+values), long (32768 ten-digit values), mixed (32768 values of one to nine
+digits), large (262144 u32 values), and mixed batches corrupted near the start
+or end.
 
 Six measured blocks use all six algorithm permutations. Each sample runs in a
 fresh process with four internal warmup parses. A separate excluded process per

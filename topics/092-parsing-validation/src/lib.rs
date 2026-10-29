@@ -132,12 +132,22 @@ mod tests {
     #[test]
     fn canonical_values_and_empty_batch() {
         for strategy in STRATEGIES {
-            let mut output = vec![999];
-            let mut scratch = vec![999];
+            let mut output = Vec::with_capacity(64);
+            let mut scratch = Vec::with_capacity(64);
+            output.push(999);
+            scratch.push(999);
             parse(b"0\n1\n4294967295\n", strategy, &mut output, &mut scratch).unwrap();
             assert_eq!(output, [0, 1, u32::MAX]);
             parse(b"", strategy, &mut output, &mut scratch).unwrap();
             assert!(output.is_empty());
+            assert!(
+                output.capacity() >= 64,
+                "valid and empty batches retain output capacity"
+            );
+            assert!(
+                scratch.capacity() >= 64,
+                "valid and empty batches retain scratch capacity"
+            );
         }
     }
 
@@ -154,6 +164,7 @@ mod tests {
             b"1\r\n",
             b"1",
             b"4294967296\n",
+            b"4294967300\n",
             b"999999999999999999999\n",
             b"1\n\n",
             b"1\n2",
@@ -163,12 +174,22 @@ mod tests {
         ];
         for strategy in STRATEGIES {
             for &input in bad {
-                let mut output = vec![123];
+                let mut output = Vec::with_capacity(64);
+                let mut scratch = Vec::with_capacity(64);
+                output.push(123);
                 assert_eq!(
-                    parse(input, strategy, &mut output, &mut Vec::new()),
+                    parse(input, strategy, &mut output, &mut scratch),
                     Err(Invalid)
                 );
                 assert!(output.is_empty(), "failed batch leaked output");
+                assert!(
+                    output.capacity() >= 64,
+                    "failed batch retains output capacity"
+                );
+                assert!(
+                    scratch.capacity() >= 64,
+                    "failed batch retains scratch capacity"
+                );
             }
         }
     }

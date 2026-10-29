@@ -24,12 +24,14 @@ def verify(binary, cases):
     request = ''.join(data.hex() + '\n' for data in cases)
     result = subprocess.run([str(binary), 'verify'], input=request, text=True, capture_output=True, check=True)
     lines = result.stdout.splitlines()
-    assert len(lines) == len(cases) * 3
+    if len(lines) != len(cases) * 3:
+        raise RuntimeError(f'parser output differs from oracle: {len(lines)} lines for {len(cases)} inputs')
     for index, data in enumerate(cases):
         values = oracle(data)
         expected = 'ERR' if values is None else 'OK' + ''.join(f' {value}' for value in values)
         for arm in range(3):
-            assert lines[index * 3 + arm] == expected, (index, arm, data[:40])
+            if lines[index * 3 + arm] != expected:
+                raise RuntimeError(f'parser output differs from oracle: input {index} arm {arm} {data[:40]!r}')
     return len(cases) * 3
 
 
@@ -118,10 +120,12 @@ def main():
         run = subprocess.run([str(binary), 'bench', algorithm, str(paths[name]), str(iters)], capture_output=True, text=True, check=True)
         arm, size, repetitions, ns, valid, count, checksum = run.stdout.strip().split(',')
         expected = oracle(data[name])
-        assert arm == algorithm and int(size) == len(data[name]) and int(repetitions) == iters
-        assert (valid == 'true') == (expected is not None)
-        assert int(count) == (len(expected) if expected is not None else 0)
-        assert int(checksum) == (sum(expected) if expected is not None else 0)
+        # Explicit checks run under -O, which strips assert statements.
+        if arm != algorithm or int(size) != len(data[name]) or int(repetitions) != iters:
+            raise RuntimeError(f'benchmark output differs from oracle: {name} {algorithm} header {run.stdout.strip()!r}')
+        if (valid == 'true') != (expected is not None) or int(count) != (len(expected) if expected is not None else 0) \
+                or int(checksum) != (sum(expected) if expected is not None else 0):
+            raise RuntimeError(f'benchmark output differs from oracle: {name} {algorithm} {run.stdout.strip()!r}')
         return {'workload': name, 'algorithm': arm, 'block': block, 'bytes': int(size), 'iterations': iters,
                 'total_ns': int(ns), 'ns_per_batch': int(ns) / iters, 'accepted': valid == 'true', 'count': int(count), 'checksum': int(checksum)}
     for name in data:

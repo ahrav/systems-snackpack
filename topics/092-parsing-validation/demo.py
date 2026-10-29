@@ -33,9 +33,19 @@ def oracle(data: bytes) -> list[int]:
     return values
 
 
+def accepted(function, data: bytes):
+    """Return the values function produces for data, or None when it raises ValueError."""
+    try:
+        return function(data)
+    except ValueError:
+        return None
+
+
 if __name__ == '__main__':
     for data in (b'12\n0\n4294967295\n', b'01\n', b'4294967296\n', b'12'):
         try:
             print(repr(data), '=>', parse(data))
         except ValueError as error:
             print(repr(data), '=> reject:', error)
+        if accepted(parse, data) != accepted(oracle, data):
+            raise SystemExit(f'parse and oracle disagree on {data!r}')
