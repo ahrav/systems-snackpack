@@ -18,7 +18,7 @@ def oracle(data):
 # WRONG_VERIFY exercises oracle-mismatch rejection: it answers every verify request with the vector [1].
 WRONG_VERIFY = '#!/usr/bin/env python3\nimport sys\nfor line in sys.stdin:\n    print("OK 1\\nOK 1\\nOK 1")\n'
 # WRONG_BENCH passes verification and exercises benchmark rejection by reporting one extra value for inputs the oracle accepts.
-WRONG_BENCH = '#!/usr/bin/env python3' + ORACLE + '''
+FAKE_BENCH = '#!/usr/bin/env python3' + ORACLE + '''
 if sys.argv[1] == 'verify':
     for line in sys.stdin:
         values = oracle(bytes.fromhex(line.strip()))
@@ -28,16 +28,19 @@ else:
     _, _, algorithm, path, iters = sys.argv
     data = open(path, 'rb').read()
     values = oracle(data)
-    count = 0 if values is None else len(values) + 1
+    count = 0 if values is None else len(values) + EXTRA
     checksum = 0 if values is None else sum(values)
     print(f'{algorithm},{len(data)},{iters},1000,{"true" if values is not None else "false"},{count},{checksum}')
 '''
+WRONG_BENCH = FAKE_BENCH.replace('EXTRA', '1')
+# CORRECT_BENCH agrees with the oracle in both modes, so a full run completes and writes samples.json and summary.json.
+CORRECT_BENCH = FAKE_BENCH.replace('EXTRA', '0')
 
 
-def experiment_run(binary, out, *flags):
+def experiment_run(binary, out, *flags, arguments=()):
     # The plain child runs at optimization level 0 even when the caller's environment sets PYTHONOPTIMIZE.
     env = {k: v for k, v in os.environ.items() if k != 'PYTHONOPTIMIZE'}
-    return subprocess.run([sys.executable, *flags, str(experiment), str(binary), str(out)],
+    return subprocess.run([sys.executable, *flags, str(experiment), str(binary), str(out), *arguments],
                           text=True, capture_output=True, timeout=600, env=env)
 
 
@@ -61,4 +64,16 @@ with tempfile.TemporaryDirectory() as tmp:
                     f'experiment accepted {name} with flags {flags!r}: exit {run.returncode}, stderr tail: {run.stderr[-300:]!r}')
             require(not (out / 'summary.json').exists(),
                     f'experiment wrote a summary for an invalid run of {name} with flags {flags!r}')
+    # A --verify-only rerun into a reused directory replaces metadata.json and removes stale samples.json and summary.json.
+    correct = tmp / 'correct_bench.py'
+    correct.write_text(CORRECT_BENCH)
+    correct.chmod(0o755)
+    out = tmp / 'reused'
+    full = experiment_run(correct, out)
+    require(full.returncode == 0 and (out / 'samples.json').exists() and (out / 'summary.json').exists(),
+            f'full run with correct_bench.py failed: exit {full.returncode}, stderr tail: {full.stderr[-300:]!r}')
+    verify_only = experiment_run(correct, out, arguments=('--verify-only',))
+    require(verify_only.returncode == 0, f'verify-only rerun failed: {verify_only.stderr[-300:]!r}')
+    require((out / 'metadata.json').exists() and not (out / 'samples.json').exists() and not (out / 'summary.json').exists(),
+            'verify-only rerun left samples.json or summary.json from the earlier run beside the new metadata.json')
 print('ok')

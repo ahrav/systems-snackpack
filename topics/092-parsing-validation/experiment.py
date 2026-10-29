@@ -105,6 +105,9 @@ def main():
     data = workloads()
     meta['workloads'] = {name: {'bytes': len(buf), 'sha256': hashlib.sha256(buf).hexdigest(), 'valid': oracle(buf) is not None} for name, buf in data.items()}
     meta['workload_parser_comparisons'] = verify(binary, list(data.values()))
+    # The runner removes stale samples.json and summary.json so the directory's artifacts match the run metadata.json describes.
+    for stale in ('samples.json', 'summary.json'):
+        (args.output / stale).unlink(missing_ok=True)
     (args.output / 'metadata.json').write_text(json.dumps(meta, indent=2) + '\n')
     print(json.dumps(meta['correctness']), flush=True)
     if args.verify_only:

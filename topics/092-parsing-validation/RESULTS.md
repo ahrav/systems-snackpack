@@ -5,15 +5,16 @@ Source commit: `6d099b74eb8efba6ea294da7f23a97e6d8e50f77`.
 All three machines executed the same committed source and runner archive.
 Archive SHA-256: `eb7cf4daa86de73e77484c387f681df68e430c691285135935cec61ec80126c9`.
 Review changes after measurement changed three source files and added
-`test_experiment.py`. `experiment.py` raises
-`RuntimeError` instead of `assert` when parser or benchmark output differs from
-the oracle, so the checks run under `python3 -O`; `test_experiment.py` exercises
-both modes. The `#[cfg(test)]` module in `src/lib.rs` gained capacity assertions
-and the input `4294967300\n`; a local rebuild produced byte-identical `.text` and
-`.rodata` sections, with only LLVM module-hash symbol suffixes differing. `demo.py`
-cross-checks `parse` against `oracle`. `src/bin/parsing.rs`, the production code
-in `src/lib.rs`, `Cargo.toml`, the workloads, and the timing and summary code are
-byte-identical to the measured commit.
+`test_experiment.py`. `experiment.py` raises `RuntimeError` instead of `assert`
+when parser or benchmark output differs from the oracle, so the checks run under
+`python3 -O`, and removes `samples.json` and `summary.json` left by an earlier
+run in the same directory before writing `metadata.json`; `test_experiment.py`
+exercises both. The `#[cfg(test)]` module in `src/lib.rs` gained capacity
+assertions and the input `4294967300\n`; a local rebuild produced byte-identical
+`.text` and `.rodata` sections, with only LLVM module-hash symbol suffixes
+differing. `demo.py` cross-checks `parse` against `oracle`. `src/bin/parsing.rs`,
+the production code in `src/lib.rs`, `Cargo.toml`, the workloads, and the timing
+and summary code are byte-identical to the measured commit.
 
 Each machine passed four unit tests, one doctest, 136335 independent parser comparisons
 across 45445 inputs, and exact output checks for all seven measured workloads.
