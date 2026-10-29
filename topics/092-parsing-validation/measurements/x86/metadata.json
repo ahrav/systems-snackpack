@@ -1,0 +1,74 @@
+{
+  "platform": "Linux-6.12.113-138.209.amzn2023.x86_64-x86_64-with-glibc2.34",
+  "machine": "x86_64",
+  "hostname": "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com",
+  "toolchain": {
+    "command": [
+      "rustc",
+      "+1.93.1",
+      "-vV"
+    ],
+    "returncode": 0,
+    "stdout": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: x86_64-unknown-linux-gnu\nrelease: 1.93.1\nLLVM version: 21.1.8",
+    "stderr": ""
+  },
+  "binary_sha256": "cca622cbc659e43a39d2dc17299258cb21acb6c7fe87e3abdcfabf4a3a7ad74c",
+  "build": "cargo build --release; Rust 1.93.1; default target CPU; no RUSTFLAGS",
+  "rules": "six permutation-balanced blocks; win iff all six paired times >5% faster; tie iff all within 5%; otherwise unresolved; descriptive only",
+  "timing": "warm reusable input/output/scratch; includes validation, conversion, output writes; excludes file I/O, initial allocation, checksum and oracle",
+  "limits": "single thread; clock, thermals, system load and SMT sibling uncontrolled; no cold-cache claim",
+  "correctness": {
+    "inputs": 45445,
+    "parser_comparisons": 136335,
+    "oracle": "Python bytes regex + arbitrary-precision int; exact vectors"
+  },
+  "affinity": [
+    0
+  ],
+  "cpu": {
+    "command": [
+      "lscpu"
+    ],
+    "returncode": 0,
+    "stdout": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           46 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  192\nOn-line CPU(s) list:                     0-191\nVendor ID:                               GenuineIntel\nModel name:                              Intel(R) Xeon(R) Platinum 8488C\nCPU family:                              6\nModel:                                   143\nThread(s) per core:                      2\nCore(s) per socket:                      48\nSocket(s):                               2\nStepping:                                8\nBogoMIPS:                                4800.00\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd ida arat avx512vbmi umip pku ospke waitpkg avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg tme avx512_vpopcntdq rdpid cldemote movdiri movdir64b md_clear serialize amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nHypervisor vendor:                       KVM\nVirtualization type:                     full\nL1d cache:                               4.5 MiB (96 instances)\nL1i cache:                               3 MiB (96 instances)\nL2 cache:                                192 MiB (96 instances)\nL3 cache:                                210 MiB (2 instances)\nNUMA node(s):                            2\nNUMA node0 CPU(s):                       0-47,96-143\nNUMA node1 CPU(s):                       48-95,144-191\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected",
+    "stderr": ""
+  },
+  "workloads": {
+    "tiny": {
+      "bytes": 124,
+      "sha256": "0b80bda9342f12c1900953cfc21826c0613522e64592d13f45812111bd4a7d4d",
+      "valid": true
+    },
+    "short": {
+      "bytes": 65536,
+      "sha256": "7971222aaabe8d01e2a8b235b1d7301443ec68a5718091425f718cc4d58791ba",
+      "valid": true
+    },
+    "long": {
+      "bytes": 360448,
+      "sha256": "4fe979611ef0f5801495cbbfcf82f8227fa887af87e51905ae6a38c80b56783f",
+      "valid": true
+    },
+    "mixed": {
+      "bytes": 192897,
+      "sha256": "4539978d1755c5c8b996fa21d3123e22bdb1987296f1f310f7a861ad82607d6e",
+      "valid": true
+    },
+    "large": {
+      "bytes": 2816239,
+      "sha256": "d9aa2fb1092977d8d589be8406e62906a969b4221c53bdfdc1cf51cfc9a7796b",
+      "valid": true
+    },
+    "invalid_early": {
+      "bytes": 192897,
+      "sha256": "e9453db56981fc080dde8b9e4058208400f314a15fa6a0c7e02b45bee664f61e",
+      "valid": false
+    },
+    "invalid_late": {
+      "bytes": 192897,
+      "sha256": "aee335ad7910c1f19436bf2a79de9caff84b570bf63748fc872d3045ed957d80",
+      "valid": false
+    }
+  },
+  "workload_parser_comparisons": 21
+}

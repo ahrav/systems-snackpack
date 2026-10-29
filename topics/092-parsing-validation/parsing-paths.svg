@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560">
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#52667b"/></marker></defs>
+<rect width="1200" height="560" fill="#f6f8fb"/>
+<g font-family="Arial,sans-serif" fill="#132840">
+<text x="35" y="55" font-size="30" font-weight="bold">One input contract, three parsing paths</text>
+<text x="35" y="100" font-size="23">Input: 12\n0\n4294967295\n → [12, 0, 4294967295]</text>
+<g stroke="#c6ced8" stroke-width="2">
+<rect x="35" y="140" width="310" height="90" rx="10" fill="#d8ece6"/>
+<rect x="35" y="270" width="310" height="90" rx="10" fill="#dce7f7"/>
+<rect x="405" y="270" width="360" height="90" rx="10" fill="#dce7f7"/>
+<rect x="35" y="400" width="310" height="90" rx="10" fill="#f2e4ce"/>
+<rect x="405" y="400" width="360" height="90" rx="10" fill="#f2e4ce"/>
+<rect x="890" y="270" width="275" height="90" rx="10" fill="#e7e3f4"/>
+</g>
+<g font-size="22" font-weight="bold"><text x="50" y="176">Fused byte scan</text><text x="50" y="306">String split</text><text x="420" y="306">Per-field conversion</text><text x="50" y="436">Indexed scan</text><text x="420" y="436">Second pass</text><text x="905" y="306">Same output</text></g>
+<g font-size="17"><text x="50" y="208">Validate + convert + find LF</text><text x="50" y="338">Validate UTF-8 + find LF</text><text x="420" y="338">Grammar checks + standard u32</text><text x="50" y="468">Collect every LF byte offset</text><text x="420" y="468">Validate + convert each slice</text><text x="905" y="338">Reusable Vec&lt;u32&gt;</text></g>
+<g stroke="#52667b" stroke-width="2" fill="none" marker-end="url(#arrow)"><path d="M345,185 H1030 V265"/><path d="M345,315 H400"/><path d="M765,315 H885"/><path d="M345,445 H400"/><path d="M765,445 H1030 V365"/></g>
+<text x="35" y="535" font-size="18">Every path rejects bad digits, leading zeros, overflow, empty records and incomplete final records.</text>
+</g></svg>

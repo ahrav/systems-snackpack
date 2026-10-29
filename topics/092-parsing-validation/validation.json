@@ -1,0 +1,25 @@
+{
+  "gates": {
+    "fmt": 0,
+    "clippy": 0,
+    "tests_initial": 101,
+    "topic015_retry": 0,
+    "tests_retry": 0,
+    "doctests": 0,
+    "bench": 0,
+    "docs": 0
+  },
+  "counts": {
+    "tests-retry": {
+      "passed": 526,
+      "failed": 0,
+      "ignored": 0
+    },
+    "doctests": {
+      "passed": 150,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "initial_failure": "Unchanged Topic015 pair_uses_identical_work asserted pair.second_ns > 0. Targeted and full retry passed; original log retained."
+}

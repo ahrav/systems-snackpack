@@ -1,0 +1,74 @@
+{
+  "platform": "macOS-26.7.1-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "hostname": "c0c7db201688",
+  "toolchain": {
+    "command": [
+      "rustc",
+      "+1.93.1",
+      "-vV"
+    ],
+    "returncode": 0,
+    "stdout": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8",
+    "stderr": ""
+  },
+  "binary_sha256": "43adbb9d1e4b8ee6e8de680723bc2926251d938ba07ecb70ca4ba432bb38de61",
+  "build": "cargo build --release; Rust 1.93.1; default target CPU; no RUSTFLAGS",
+  "rules": "six permutation-balanced blocks; win iff all six paired times >5% faster; tie iff all within 5%; otherwise unresolved; descriptive only",
+  "timing": "warm reusable input/output/scratch; includes validation, conversion, output writes; excludes file I/O, initial allocation, checksum and oracle",
+  "limits": "single thread; clock, thermals, system load and SMT sibling uncontrolled; no cold-cache claim",
+  "correctness": {
+    "inputs": 45445,
+    "parser_comparisons": 136335,
+    "oracle": "Python bytes regex + arbitrary-precision int; exact vectors"
+  },
+  "affinity": "OS scheduled",
+  "cpu": {
+    "command": [
+      "sysctl",
+      "-n",
+      "machdep.cpu.brand_string"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "sysctl: sysctl fmt -1 1024 1: Operation not permitted"
+  },
+  "workloads": {
+    "tiny": {
+      "bytes": 124,
+      "sha256": "0b80bda9342f12c1900953cfc21826c0613522e64592d13f45812111bd4a7d4d",
+      "valid": true
+    },
+    "short": {
+      "bytes": 65536,
+      "sha256": "7971222aaabe8d01e2a8b235b1d7301443ec68a5718091425f718cc4d58791ba",
+      "valid": true
+    },
+    "long": {
+      "bytes": 360448,
+      "sha256": "4fe979611ef0f5801495cbbfcf82f8227fa887af87e51905ae6a38c80b56783f",
+      "valid": true
+    },
+    "mixed": {
+      "bytes": 192897,
+      "sha256": "4539978d1755c5c8b996fa21d3123e22bdb1987296f1f310f7a861ad82607d6e",
+      "valid": true
+    },
+    "large": {
+      "bytes": 2816239,
+      "sha256": "d9aa2fb1092977d8d589be8406e62906a969b4221c53bdfdc1cf51cfc9a7796b",
+      "valid": true
+    },
+    "invalid_early": {
+      "bytes": 192897,
+      "sha256": "e9453db56981fc080dde8b9e4058208400f314a15fa6a0c7e02b45bee664f61e",
+      "valid": false
+    },
+    "invalid_late": {
+      "bytes": 192897,
+      "sha256": "aee335ad7910c1f19436bf2a79de9caff84b570bf63748fc872d3045ed957d80",
+      "valid": false
+    }
+  },
+  "workload_parser_comparisons": 21
+}

@@ -1,0 +1,11 @@
+{
+  "source_commit": "6d099b74eb8efba6ea294da7f23a97e6d8e50f77",
+  "source_archive_sha256": "eb7cf4daa86de73e77484c387f681df68e430c691285135935cec61ec80126c9",
+  "base_commit": "ba932be87f62b4fc56fcd12f2bb1371caf5b63db",
+  "plugin_audit_revision": "1cfd8040aa9632097fa9d851bf268810044bf94b",
+  "required_hosts": [
+    "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+    "dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com"
+  ],
+  "rust_toolchain": "1.93.1"
+}
