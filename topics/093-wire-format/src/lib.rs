@@ -9,7 +9,7 @@
 //! ```
 
 /// A malformed header, directory or payload extent.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Invalid;
 
 fn word(bytes: &[u8], at: usize) -> u32 {
@@ -17,6 +17,7 @@ fn word(bytes: &[u8], at: usize) -> u32 {
 }
 
 /// A validated immutable view that borrows its input.
+#[derive(Clone, Copy, Debug)]
 pub struct View<'a> {
     bytes: &'a [u8],
     count: usize,
@@ -137,7 +138,7 @@ mod tests {
         let mut extra = valid.clone();
         extra.push(0);
         assert!(View::parse(&extra).is_err());
-        for at in [4, 12, 16, 24, 28] {
+        for at in [0, 4, 12, 16, 24, 28] {
             for value in [0, 1, 8, 31, 33, u32::MAX] {
                 let mut bad = valid.clone();
                 bad[at..at + 4].copy_from_slice(&value.to_le_bytes());

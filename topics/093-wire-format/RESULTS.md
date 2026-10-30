@@ -5,6 +5,13 @@ Archive SHA-256: `7ecbc10f091cf6405e3ffc2b96483129b7908d18d853d5c9e164a640fec927
 Both remote archive hashes matched before testing. Published source/runner parity is checked separately.
 Rust 1.93.1, Cargo release profile, default target CPU, no custom RUSTFLAGS.
 
+Review changes after measurement: `src/lib.rs` gained trait derives and one extra unit-test mutation offset;
+`scripts/run.py` replaced `assert` gates with explicit checks, truncates `samples.jsonl` on start and records
+`binary_sha256`; `demo.py` casts its memoryview to bytes. `View::parse`, `View::record`, `decode_owned` and the
+timed loop in `probe.rs` are unchanged, and the release probe's `.text` section is byte-identical on Linux
+AArch64 with Rust 1.93.1 (`objcopy -O binary --only-section=.text`, SHA-256 `df6c8d50…`, 248,952 bytes).
+The correctness corpus and its SHA-256 are unchanged.
+
 Each host passed 3 unit tests and 1 doctest, plus 37,750 decoder comparisons across 18,875 inputs.
 The independent Python parser accepted 3,834 inputs. Full IDs and payload bytes match both Rust paths.
 Corpus SHA-256: `e2c44f4f73ea38ab15564a2e2ae29b1c4baad2d7a8f13d93a6c57cc5ebfa90ec`.

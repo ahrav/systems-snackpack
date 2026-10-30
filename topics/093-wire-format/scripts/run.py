@@ -85,7 +85,11 @@ def main():
     p = subprocess.run([binary, 'check'], input=encoded, text=True, capture_output=True, check=True)
     actual = p.stdout.splitlines()
     expected = [oracle(x) for x in inputs]
-    assert actual == expected, next(((i, a, e) for i, (a, e) in enumerate(zip(actual, expected)) if a != e), 'line count')
+    # The oracle check remains active under python -O and PYTHONOPTIMIZE.
+    if actual != expected:
+        i = next((i for i in range(min(len(actual), len(expected))) if actual[i] != expected[i]), None)
+        detail = (i, actual[i], expected[i]) if i is not None else f'line count {len(actual)} != {len(expected)}'
+        raise SystemExit(f'decoder disagrees with oracle: {detail}')
     report = {'inputs': len(inputs), 'accepted': sum(x.startswith('OK') for x in expected),
               'decoder_comparisons': len(inputs) * 2,
               'corpus_sha256': hashlib.sha256(encoded.encode()).hexdigest()}
@@ -98,24 +102,28 @@ def main():
     metadata = {'uname': list(platform.uname()), 'cpu': cpu,
                 'cpuinfo': cpuinfo.read_text() if cpuinfo.exists() else 'unavailable on macOS',
                 'rustc': subprocess.check_output(['rustc', '--version'], text=True).strip(),
+                'binary_sha256': hashlib.sha256(Path(binary).read_bytes()).hexdigest(),
                 'workloads': WORKLOADS, 'blocks': 8,
                 'limits': 'Warm input; allocation/copy/drop included for owned. Input construction and process startup excluded. Frequency, thermals, competing load and SMT uncontrolled.'}
     (out / 'metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
     samples = []
-    for name, params in WORKLOADS.items():
-        for mode in ['borrowed', 'owned']:
-            subprocess.run([binary, mode, *map(str, params)], check=True, capture_output=True)
-        for block in range(8):
-            modes = ['borrowed', 'owned'] if block % 2 == 0 else ['owned', 'borrowed']
-            for mode in modes:
-                raw = subprocess.check_output([binary, mode, *map(str, params)], text=True).strip()
-                observed, ns, iterations, checksum = raw.split(',')
-                assert observed == mode
-                row = dict(workload=name, block=block, mode=mode, ns=int(ns),
-                           iterations=int(iterations), checksum=int(checksum), ns_per_batch=int(ns)/int(iterations))
-                samples.append(row)
-                with (out / 'samples.jsonl').open('a') as f:
+    # Every campaign starts from an empty samples file, matching summary.json.
+    with (out / 'samples.jsonl').open('w') as f:
+        for name, params in WORKLOADS.items():
+            for mode in ['borrowed', 'owned']:
+                subprocess.run([binary, mode, *map(str, params)], check=True, capture_output=True)
+            for block in range(8):
+                modes = ['borrowed', 'owned'] if block % 2 == 0 else ['owned', 'borrowed']
+                for mode in modes:
+                    raw = subprocess.check_output([binary, mode, *map(str, params)], text=True).strip()
+                    observed, ns, iterations, checksum = raw.split(',')
+                    if observed != mode:
+                        raise SystemExit(f'probe reported mode {observed!r} for {mode!r}')
+                    row = dict(workload=name, block=block, mode=mode, ns=int(ns),
+                               iterations=int(iterations), checksum=int(checksum), ns_per_batch=int(ns)/int(iterations))
+                    samples.append(row)
                     f.write(json.dumps(row) + '\n')
+                    f.flush()
     summaries = []
     for name in WORKLOADS:
         stats = {}

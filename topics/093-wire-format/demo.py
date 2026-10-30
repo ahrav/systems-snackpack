@@ -1,8 +1,8 @@
-"""One-record wire example. Python 3, standard library only."""
+"""Multi-record wire example. Python 3, standard library only."""
 import struct
 
 def decode(buf):
-    b = memoryview(buf)
+    b = memoryview(buf).cast('B')
     if len(b) < 8 or b[:4] != b'W093':
         raise ValueError('header')
     n, = struct.unpack_from('<I', b, 4)

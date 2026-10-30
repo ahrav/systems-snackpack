@@ -53,7 +53,7 @@ Save as `one.py`; run `python3 one.py`:
 import struct
 
 def decode_one(buf):
-    b = memoryview(buf)
+    b = memoryview(buf).cast("B")
     if len(b) < 20 or b[:4] != b"W093":
         raise ValueError("header")
     count, ident, off, size = struct.unpack_from("<IIII", b, 4)
