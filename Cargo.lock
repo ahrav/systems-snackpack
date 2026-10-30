@@ -390,6 +390,10 @@ name = "topic082-linux-runtime"
 version = "0.1.0"
 
 [[package]]
+name = "topic093-wire-format"
+version = "0.1.0"
+
+[[package]]
 name = "work-stealing"
 version = "0.1.0"
 
