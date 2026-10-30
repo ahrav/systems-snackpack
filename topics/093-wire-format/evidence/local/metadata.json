@@ -1,0 +1,59 @@
+{
+  "uname": [
+    "Darwin",
+    "c0c7db201688",
+    "25.6.0",
+    "Darwin Kernel Version 25.6.0: Tue Aug 18 17:51:47 PDT 2026; root:xnu-12377.161.15.700.19~2/RELEASE_ARM64_T6050",
+    "arm64",
+    "arm"
+  ],
+  "cpu": null,
+  "cpuinfo": "unavailable on macOS",
+  "rustc": "rustc 1.93.1 (01f6ddf75 2026-02-11)",
+  "workloads": {
+    "small_sparse": [
+      128,
+      16,
+      16,
+      1,
+      5000
+    ],
+    "small_full": [
+      128,
+      16,
+      1,
+      1,
+      5000
+    ],
+    "large_sparse": [
+      128,
+      4096,
+      16,
+      1,
+      300
+    ],
+    "large_full": [
+      128,
+      4096,
+      1,
+      1,
+      100
+    ],
+    "repeated_metadata": [
+      4096,
+      0,
+      1,
+      32,
+      50
+    ],
+    "repeated_payload": [
+      128,
+      64,
+      1,
+      16,
+      300
+    ]
+  },
+  "blocks": 8,
+  "limits": "Warm input; allocation/copy/drop included for owned. Input construction and process startup excluded. Frequency, thermals, competing load and SMT uncontrolled."
+}
