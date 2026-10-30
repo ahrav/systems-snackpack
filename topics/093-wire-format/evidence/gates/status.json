@@ -1,0 +1,62 @@
+[
+  {
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "cargo",
+      "clippy",
+      "--workspace",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--lib",
+      "--bins",
+      "--examples"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "cargo",
+      "test",
+      "--workspace",
+      "--doc"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "cargo",
+      "bench",
+      "--workspace",
+      "--no-run"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "cargo",
+      "doc",
+      "--workspace",
+      "--no-deps"
+    ],
+    "exit": 0
+  }
+]

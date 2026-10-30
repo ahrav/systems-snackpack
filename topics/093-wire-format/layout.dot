@@ -1,0 +1,12 @@
+digraph G {
+ graph [rankdir=TB,bgcolor="white",pad="0.25",nodesep="0.4",ranksep="0.4"];
+ node [shape=box,style="rounded,filled",fillcolor="#edf4fc",fontname="Helvetica",fontsize=16,margin="0.2"];
+ edge [fontname="Helvetica",fontsize=13];
+ wire [label="Immutable input buffer: 23 bytes\n[0..4) W093 | [4..8) count = 1\n[8..12) id = 7 | [12..16) offset = 20\n[16..20) length = 3 | [20..23) abc"];
+ check [label="Validate before access\nheader + count + each extent + exact end\nAll offsets refer to this same buffer",fillcolor="#fff1d6"];
+ view [label="Borrowed view\npayload = input[20..23)\nInput stays alive and immutable"];
+ own [label="Owned decode\ncopy payload into a new allocation\nInput can be released"];
+ wire -> check;
+ check -> view [label="retain buffer"];
+ check -> own [label="allocate + copy"];
+}
