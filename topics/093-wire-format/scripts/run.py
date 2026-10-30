@@ -79,6 +79,9 @@ def main():
     args = ap.parse_args()
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
+    # Runner-owned result files belong to this campaign, even if a subprocess fails.
+    for name in ['correctness.json', 'metadata.json', 'samples.jsonl', 'summary.json']:
+        (out / name).unlink(missing_ok=True)
     binary = str(Path(args.binary).resolve())
     inputs = cases()
     encoded = '\n'.join(x.hex() for x in inputs) + '\n'
@@ -107,7 +110,6 @@ def main():
                 'limits': 'Warm input; allocation/copy/drop included for owned. Input construction and process startup excluded. Frequency, thermals, competing load and SMT uncontrolled.'}
     (out / 'metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
     samples = []
-    # Every campaign starts from an empty samples file, matching summary.json.
     with (out / 'samples.jsonl').open('w') as f:
         for name, params in WORKLOADS.items():
             for mode in ['borrowed', 'owned']:

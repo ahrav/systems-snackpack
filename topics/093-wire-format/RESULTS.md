@@ -6,7 +6,7 @@ Both remote archive hashes matched before testing. Published source/runner parit
 Rust 1.93.1, Cargo release profile, default target CPU, no custom RUSTFLAGS.
 
 Review changes after measurement: `src/lib.rs` gained trait derives and one extra unit-test mutation offset;
-`scripts/run.py` replaced `assert` gates with explicit checks, truncates `samples.jsonl` on start and records
+`scripts/run.py` replaced `assert` gates with explicit checks, removes its four result files on start and records
 `binary_sha256`; `demo.py` casts its memoryview to bytes. `View::parse`, `View::record`, `decode_owned` and the
 timed loop in `probe.rs` are unchanged, and the release probe's `.text` section is byte-identical on Linux
 AArch64 with Rust 1.93.1 (`objcopy -O binary --only-section=.text`, SHA-256 `df6c8d50…`, 248,952 bytes).
