@@ -25,5 +25,5 @@ was denied before measurement and its log is retained. Final campaigns completed
 Raw full-workspace gate logs (`gate-1.log` through `gate-6.log`) are retained
 with the standalone lesson outputs outside this repository; their digests are in
 `evidence/raw-log-sha256.txt` alongside the committed host logs, so
-`sha256sum -c --ignore-missing evidence/raw-log-sha256.txt` verifies the
-committed files.
+`(cd evidence && sha256sum -c --ignore-missing raw-log-sha256.txt)` verifies
+the committed files.
