@@ -1,0 +1,26 @@
+Darwin c0c7db201688 25.6.0 Darwin Kernel Version 25.6.0: Mon Oct 12 00:41:41 PDT 2026; root:xnu-12377.161.15.701.48~2/RELEASE_ARM64_T6050 arm64
+CPU model unavailable: sandbox denies sysctl; architecture reported by uname
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+   Compiling topic094-concurrent-gc v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-31/advanced-systems-daily-lesson-every-local/work/replay/topics/094-concurrent-gc)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.36s
+     Running unittests src/lib.rs (target/debug/deps/topic094_concurrent_gc-52f828e00fa910e6)
+
+running 3 tests
+test tests::cycles_and_duplicate_barriers_terminate ... ok
+test tests::hidden_live_object ... ok
+test tests::snapshot_retains_deleted_chain ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests topic094_concurrent_gc
+
+running 1 test
+test topics/094-concurrent-gc/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.63s; merged doctests compilation took 0.20s
+   Compiling topic094-concurrent-gc v0.1.0 (/Users/ahrav/Documents/Codex/2026-10-31/advanced-systems-daily-lesson-every-local/work/replay/topics/094-concurrent-gc)
+    Finished `release` profile [optimized] target(s) in 0.30s
+333504 oracle comparisons passed; 64 initial graphs, two stores, 16 scan schedules
+72 measured processes, 9 excluded warmups; workload counts passed

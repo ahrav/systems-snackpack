@@ -1,0 +1,10 @@
+digraph G {
+ graph [rankdir=LR, bgcolor="white", pad="0.3", nodesep="0.5", fontname="Helvetica", label="Concurrent marking: a live object can be hidden by two stores", labelloc=t];
+ node [shape=box, style="rounded,filled", fontname="Helvetica", margin="0.2"];
+ subgraph cluster_before { label="1. After scanning A"; a [label="A: scanned (black)", fillcolor="#303e51", fontcolor=white]; b [label="B: queued (gray)",fillcolor="#cad4df"]; c [label="C: unseen (white)",fillcolor=white]; b -> c [label="only heap reference"]; }
+ stores [label="2. Mutator stores\nA.slot = C\nB.slot = null",fillcolor="#fff0cd"];
+ subgraph cluster_after { label="3. Without barriers"; aa [label="A: already scanned",fillcolor="#303e51",fontcolor=white]; bb [label="B: scanned next\nno child",fillcolor="#cad4df"]; cc [label="C: live but unmarked\nunsafe to reclaim",fillcolor="#ffe0df"]; aa -> cc; }
+ c -> stores [style=invis]; stores -> aa [style=invis];
+ fix [label="Insertion barrier: shade C at A.slot = C\nDeletion barrier: shade old C before B.slot = null\nShade = mark and queue for scanning",fillcolor="#daf0e4"];
+ cc -> fix [style=dashed, label="either repair"];
+}
