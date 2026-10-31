@@ -41,7 +41,7 @@ interval. Scan counts describe modeled work; timings include the model's bookkee
 
 ## Boundaries
 
-The model proves finite schedules under atomic steps. Production implementations
+The oracle validates the tested finite schedules under atomic steps. Production implementations
 also need root handshakes, allocation coloring, buffer draining and termination,
 weak-reference rules, compiler integration, memory ordering and reclamation.
 Concurrent relocation additionally requires safe reference repair. Production

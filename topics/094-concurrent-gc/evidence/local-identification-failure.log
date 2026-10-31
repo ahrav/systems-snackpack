@@ -1,0 +1,2 @@
+Darwin c0c7db201688 25.6.0 Darwin Kernel Version 25.6.0: Mon Oct 12 00:41:41 PDT 2026; root:xnu-12377.161.15.701.48~2/RELEASE_ARM64_T6050 arm64
+sysctl: sysctl fmt -1 1024 1: Operation not permitted

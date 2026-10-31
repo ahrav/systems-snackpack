@@ -1,0 +1,10 @@
+{
+  "fmt": 0,
+  "clippy": 0,
+  "tests": 0,
+  "doctests": 0,
+  "bench_compile": 0,
+  "docs": 0,
+  "tests_passed": 532,
+  "doctests_passed": 152
+}
