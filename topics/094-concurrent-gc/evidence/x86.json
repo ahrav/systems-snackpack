@@ -1,0 +1,654 @@
+{
+  "host": "Linux-6.12.113-138.209.amzn2023.x86_64-x86_64-with-glibc2.34",
+  "machine": "x86_64",
+  "rows": [
+    {
+      "workload": "keep",
+      "block": 0,
+      "mode": "stw",
+      "ns": 8011592,
+      "scans": 1048576,
+      "barriers": 0,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 0,
+      "mode": "insertion",
+      "ns": 11053609,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 0,
+      "mode": "satb",
+      "ns": 11518143,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 1,
+      "mode": "stw",
+      "ns": 7934147,
+      "scans": 1048576,
+      "barriers": 0,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 1,
+      "mode": "satb",
+      "ns": 11429802,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 1,
+      "mode": "insertion",
+      "ns": 11243086,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 2,
+      "mode": "insertion",
+      "ns": 11139765,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 2,
+      "mode": "stw",
+      "ns": 7908308,
+      "scans": 1048576,
+      "barriers": 0,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 2,
+      "mode": "satb",
+      "ns": 11461262,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 3,
+      "mode": "insertion",
+      "ns": 11277418,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 3,
+      "mode": "satb",
+      "ns": 11405681,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 3,
+      "mode": "stw",
+      "ns": 7934605,
+      "scans": 1048576,
+      "barriers": 0,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 4,
+      "mode": "satb",
+      "ns": 11439927,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 4,
+      "mode": "stw",
+      "ns": 8029279,
+      "scans": 1048576,
+      "barriers": 0,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 4,
+      "mode": "insertion",
+      "ns": 11054225,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 5,
+      "mode": "satb",
+      "ns": 11387702,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 5,
+      "mode": "insertion",
+      "ns": 11287351,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 5,
+      "mode": "stw",
+      "ns": 8006391,
+      "scans": 1048576,
+      "barriers": 0,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 6,
+      "mode": "stw",
+      "ns": 7898234,
+      "scans": 1048576,
+      "barriers": 0,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 6,
+      "mode": "insertion",
+      "ns": 11119688,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 6,
+      "mode": "satb",
+      "ns": 11474462,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 7,
+      "mode": "satb",
+      "ns": 11795400,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 7,
+      "mode": "insertion",
+      "ns": 11081388,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "keep",
+      "block": 7,
+      "mode": "stw",
+      "ns": 7873903,
+      "scans": 1048576,
+      "barriers": 0,
+      "retained": 1048576
+    },
+    {
+      "workload": "delete",
+      "block": 0,
+      "mode": "stw",
+      "ns": 4162248,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 0,
+      "mode": "insertion",
+      "ns": 4585875,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 0,
+      "mode": "satb",
+      "ns": 11350818,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "delete",
+      "block": 1,
+      "mode": "stw",
+      "ns": 4166667,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 1,
+      "mode": "satb",
+      "ns": 11642057,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "delete",
+      "block": 1,
+      "mode": "insertion",
+      "ns": 4473632,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 2,
+      "mode": "insertion",
+      "ns": 4879059,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 2,
+      "mode": "stw",
+      "ns": 4178822,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 2,
+      "mode": "satb",
+      "ns": 11561008,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "delete",
+      "block": 3,
+      "mode": "insertion",
+      "ns": 4637700,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 3,
+      "mode": "satb",
+      "ns": 11383771,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "delete",
+      "block": 3,
+      "mode": "stw",
+      "ns": 4222782,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 4,
+      "mode": "satb",
+      "ns": 11324580,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "delete",
+      "block": 4,
+      "mode": "stw",
+      "ns": 4182615,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 4,
+      "mode": "insertion",
+      "ns": 4492513,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 5,
+      "mode": "satb",
+      "ns": 11370302,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "delete",
+      "block": 5,
+      "mode": "insertion",
+      "ns": 4459696,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 5,
+      "mode": "stw",
+      "ns": 4165004,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 6,
+      "mode": "stw",
+      "ns": 4163119,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 6,
+      "mode": "insertion",
+      "ns": 4476125,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 6,
+      "mode": "satb",
+      "ns": 11598440,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "delete",
+      "block": 7,
+      "mode": "satb",
+      "ns": 11372052,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "delete",
+      "block": 7,
+      "mode": "insertion",
+      "ns": 4472463,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "delete",
+      "block": 7,
+      "mode": "stw",
+      "ns": 4254340,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 0,
+      "mode": "stw",
+      "ns": 4695391,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 0,
+      "mode": "insertion",
+      "ns": 4946642,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 0,
+      "mode": "satb",
+      "ns": 11838626,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "replace",
+      "block": 1,
+      "mode": "stw",
+      "ns": 4395420,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 1,
+      "mode": "satb",
+      "ns": 11504181,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "replace",
+      "block": 1,
+      "mode": "insertion",
+      "ns": 4955726,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 2,
+      "mode": "insertion",
+      "ns": 5029791,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 2,
+      "mode": "stw",
+      "ns": 4705102,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 2,
+      "mode": "satb",
+      "ns": 11428085,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "replace",
+      "block": 3,
+      "mode": "insertion",
+      "ns": 4940822,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 3,
+      "mode": "satb",
+      "ns": 11577805,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "replace",
+      "block": 3,
+      "mode": "stw",
+      "ns": 4424080,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 4,
+      "mode": "satb",
+      "ns": 11703274,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "replace",
+      "block": 4,
+      "mode": "stw",
+      "ns": 4572743,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 4,
+      "mode": "insertion",
+      "ns": 5031569,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 5,
+      "mode": "satb",
+      "ns": 11560882,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "replace",
+      "block": 5,
+      "mode": "insertion",
+      "ns": 4855632,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 5,
+      "mode": "stw",
+      "ns": 4456312,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 6,
+      "mode": "stw",
+      "ns": 4703225,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 6,
+      "mode": "insertion",
+      "ns": 5033873,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 6,
+      "mode": "satb",
+      "ns": 11565306,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "replace",
+      "block": 7,
+      "mode": "satb",
+      "ns": 11780722,
+      "scans": 1048576,
+      "barriers": 1048576,
+      "retained": 1048576
+    },
+    {
+      "workload": "replace",
+      "block": 7,
+      "mode": "insertion",
+      "ns": 4977768,
+      "scans": 64,
+      "barriers": 1048576,
+      "retained": 64
+    },
+    {
+      "workload": "replace",
+      "block": 7,
+      "mode": "stw",
+      "ns": 4611721,
+      "scans": 64,
+      "barriers": 0,
+      "retained": 64
+    }
+  ]
+}
