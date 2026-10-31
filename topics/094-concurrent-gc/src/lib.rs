@@ -56,11 +56,11 @@ impl Marker {
         s
     }
     fn shade(&mut self, obj: Option<usize>) {
-        if let Some(x) = obj {
-            if !self.marked[x] {
-                self.marked[x] = true;
-                self.pending.push(x);
-            }
+        if let Some(x) = obj
+            && !self.marked[x]
+        {
+            self.marked[x] = true;
+            self.pending.push(x);
         }
     }
     /// Execute one atomic scan. STW scans begin only in `finish`.
