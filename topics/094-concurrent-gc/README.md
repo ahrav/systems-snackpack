@@ -32,7 +32,8 @@ pair. Each workload/policy has one excluded warmup. Each measured process includ
 graph creation, validation, allocation, marking, stores, and destruction. Input and
 policy dispatch are identical across alternatives. Rust release defaults apply.
 Linux runs pin the lowest CPU in the process's allowed set and record it in the
-samples file. Frequency, thermals, host load and SMT are uncontrolled.
+samples file; the committed `evidence/*.json` predate that field and were pinned
+to CPU 0 (see results.md). Frequency, thermals, host load and SMT are uncontrolled.
 
 Report medians and minimum/maximum durations. Declare A faster than B only if
 `t_A < 0.95 * t_B` in each of the eight paired blocks. Declare a tie if
