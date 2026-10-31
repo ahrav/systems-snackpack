@@ -31,11 +31,13 @@ Eight fresh-process blocks use all six policy orders followed by a forward/rever
 pair. Each workload/policy has one excluded warmup. Each measured process includes
 graph creation, validation, allocation, marking, stores, and destruction. Input and
 policy dispatch are identical across alternatives. Rust release defaults apply.
-Linux runs pin CPU 0. Frequency, thermals, host load and SMT are uncontrolled.
+Linux runs pin the lowest CPU in the process's allowed set and record it in the
+samples file. Frequency, thermals, host load and SMT are uncontrolled.
 
-Report medians and minimum/maximum durations. Declare A faster than B only if all
-eight paired blocks make A at least 5% faster. Declare a tie if all paired ratios
-are within 5%; otherwise report unresolved. These descriptive labels apply to the
+Report medians and minimum/maximum durations. Declare A faster than B only if
+`t_A < 0.95 * t_B` in each of the eight paired blocks. Declare a tie if
+`|t_A - t_B| <= 0.05 * max(t_A, t_B)` in every block; otherwise report unresolved.
+These descriptive labels apply to the
 simulator workloads. They provide no production collector ranking or confidence
 interval. Scan counts describe modeled work; timings include the model's bookkeeping.
 

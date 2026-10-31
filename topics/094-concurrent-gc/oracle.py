@@ -28,14 +28,17 @@ for edges in itertools.product(range(-1, 3), repeat=3):
             for mode in ('stw', 'insertion', 'satb'):
                 lines.append(' '.join(map(str, [mode, *edges, before1, owner1, new1, before2, owner2, new2])))
                 expected.append((mode, initial, live))
-result = subprocess.run([sys.argv[1], 'batch'], input='\n'.join(lines)+'\n', text=True, capture_output=True, check=True)
+# stderr is inherited so a probe panic stays visible. Checks raise so they hold under python -O.
+result = subprocess.run([sys.argv[1], 'batch'], input='\n'.join(lines)+'\n', text=True, stdout=subprocess.PIPE, check=True)
 answers = result.stdout.splitlines()
-assert len(answers) == len(expected)
+if len(answers) != len(expected):
+    raise SystemExit(f'{len(answers)} answers for {len(expected)} cases')
 for line, answer, (mode, initial, live) in zip(lines, answers, expected):
     mask = int(answer)
-    assert mask & live == live, (line, mask, live)
-    if mode == 'stw':
-        assert mask == live, (line, mask, live)
-    if mode == 'satb':
-        assert mask & initial == initial, (line, mask, initial)
+    if mask & live != live:
+        raise SystemExit(f'lost live object: {line} mask={mask} live={live}')
+    if mode == 'stw' and mask != live:
+        raise SystemExit(f'stw retention differs from final reachability: {line} mask={mask} live={live}')
+    if mode == 'satb' and mask & initial != initial:
+        raise SystemExit(f'satb lost initial object: {line} mask={mask} initial={initial}')
 print(f'{len(expected)} oracle comparisons passed; 64 initial graphs, two stores, 16 scan schedules')

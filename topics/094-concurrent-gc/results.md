@@ -17,7 +17,7 @@ Each host passed three unit tests, one doctest, 333,504 independent reachability
 | x86 | delete | 4.173 [4.162,4.254] | 4.484 [4.460,4.879] | 11.378 [11.325,11.642] | stw/insertion unresolved; stw faster than satb; insertion faster than satb |
 | x86 | replace | 4.592 [4.395,4.705] | 4.967 [4.856,5.034] | 11.572 [11.428,11.839] | stw faster than insertion; stw faster than satb; insertion faster than satb |
 
-Eight paired blocks; faster requires every block to exceed 5%. Tie requires every pair within 5%; otherwise unresolved. These are descriptive comparisons, with no population confidence bound. Raw samples are retained in `evidence/*.json`.
+Eight paired blocks; A is faster than B when `t_A < 0.95 * t_B` in every block. Tie requires `|t_A - t_B| <= 0.05 * max(t_A, t_B)` in every block; otherwise unresolved. The x86 delete stw/insertion pair is unresolved because block 7 reduces duration by 4.88%. These are descriptive comparisons, with no population confidence bound. Raw samples are retained in `evidence/*.json`.
 
 Per cycle, keep scans and retains 16,384 objects for every policy. Delete and replace scan/retain one object for STW and insertion, and 16,384 for SATB. Insertion and SATB each execute 16,384 barrier calls; STW executes zero. SATB preserves its initial-snapshot contract and pays additional retention and scanning in these schedules.
 
