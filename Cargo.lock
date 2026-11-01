@@ -398,6 +398,10 @@ name = "topic094-concurrent-gc"
 version = "0.1.0"
 
 [[package]]
+name = "topic095-jit-specialization"
+version = "0.1.0"
+
+[[package]]
 name = "work-stealing"
 version = "0.1.0"
 
