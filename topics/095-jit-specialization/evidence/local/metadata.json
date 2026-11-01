@@ -1,0 +1,13 @@
+{
+  "platform": "macOS-26.7.2-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "cpu": "arm",
+  "affinity": null,
+  "script_sha256": "ce892e703bd6d25e737a0b325c87af1fabef7bbf60387377b606efaf7f1c693d",
+  "flags": {
+    "default": [],
+    "jitless": [
+      "--jitless"
+    ]
+  }
+}

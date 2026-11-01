@@ -1,0 +1,192 @@
+Linux dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com 6.12.113-138.209.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Oct 20 21:57:40 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+a24437b2597a3553488f8d5cbf53c7cf5281bc4c4e691af682f71b2e168ddc30  topics/095-jit-specialization/src/lib.rs
+9735b6be92a408dc3261dc1dcd0d5b1375c3ae4938a0371715b58a4953fbfba6  topics/095-jit-specialization/experiment/oracle.py
+1db5823f9de02f24522db4f81ee91b1593bff245b76cc12e2dff463588850dd9  topics/095-jit-specialization/experiment/run.py
+ce892e703bd6d25e737a0b325c87af1fabef7bbf60387377b606efaf7f1c693d  topics/095-jit-specialization/experiment/bench.js
+
+running 3 tests
+test tests::overflow_preserves_prefix_and_failing_row ... ok
+test tests::restarting_or_skipping_changes_observable_effects ... ok
+test tests::every_shape_bailout_preserves_effect_order ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test topics/095-jit-specialization/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.19s; merged doctests compilation took 0.19s
+PASS 55987 independent sum, effect-order and bailout comparisons
+{
+  "stable": {
+    "coldNs": {
+      "verdict": "jitless",
+      "default": {
+        "median": 1641268.0,
+        "minimum": 1348894,
+        "maximum": 1730268
+      },
+      "jitless": {
+        "median": 249645.0,
+        "minimum": 239207,
+        "maximum": 256101
+      }
+    },
+    "transitionNs": {
+      "verdict": "default",
+      "default": {
+        "median": 11149.0,
+        "minimum": 11075,
+        "maximum": 11345
+      },
+      "jitless": {
+        "median": 198321.0,
+        "minimum": 188826,
+        "maximum": 206399
+      }
+    },
+    "steadyNs": {
+      "verdict": "default",
+      "default": {
+        "median": 2909021.0,
+        "minimum": 2761924,
+        "maximum": 3037172
+      },
+      "jitless": {
+        "median": 50035507.0,
+        "minimum": 49288001,
+        "maximum": 50513506
+      }
+    },
+    "wallNs": {
+      "verdict": "default",
+      "default": {
+        "median": 36310406.5,
+        "minimum": 35316369,
+        "maximum": 40542106
+      },
+      "jitless": {
+        "median": 112117885.5,
+        "minimum": 109850843,
+        "maximum": 114613763
+      }
+    }
+  },
+  "shift": {
+    "coldNs": {
+      "verdict": "jitless",
+      "default": {
+        "median": 1450015.5,
+        "minimum": 410380,
+        "maximum": 1614000
+      },
+      "jitless": {
+        "median": 246719.5,
+        "minimum": 240968,
+        "maximum": 256798
+      }
+    },
+    "transitionNs": {
+      "verdict": "jitless",
+      "default": {
+        "median": 1196914.5,
+        "minimum": 245599,
+        "maximum": 1215551
+      },
+      "jitless": {
+        "median": 215799.5,
+        "minimum": 208376,
+        "maximum": 222229
+      }
+    },
+    "steadyNs": {
+      "verdict": "default",
+      "default": {
+        "median": 3408148.0,
+        "minimum": 3305294,
+        "maximum": 9093606
+      },
+      "jitless": {
+        "median": 51989659.5,
+        "minimum": 51593743,
+        "maximum": 53205969
+      }
+    },
+    "wallNs": {
+      "verdict": "default",
+      "default": {
+        "median": 36708276.5,
+        "minimum": 35298778,
+        "maximum": 43072791
+      },
+      "jitless": {
+        "median": 114219164.0,
+        "minimum": 112603108,
+        "maximum": 116444466
+      }
+    }
+  },
+  "mixed": {
+    "coldNs": {
+      "verdict": "jitless",
+      "default": {
+        "median": 1546493.5,
+        "minimum": 497586,
+        "maximum": 1920239
+      },
+      "jitless": {
+        "median": 257813.0,
+        "minimum": 256156,
+        "maximum": 265256
+      }
+    },
+    "transitionNs": {
+      "verdict": "default",
+      "default": {
+        "median": 12243.5,
+        "minimum": 11744,
+        "maximum": 38950
+      },
+      "jitless": {
+        "median": 220230.5,
+        "minimum": 204682,
+        "maximum": 233852
+      }
+    },
+    "steadyNs": {
+      "verdict": "default",
+      "default": {
+        "median": 3141100.5,
+        "minimum": 3071147,
+        "maximum": 5568805
+      },
+      "jitless": {
+        "median": 53547997.5,
+        "minimum": 52583799,
+        "maximum": 54786421
+      }
+    },
+    "wallNs": {
+      "verdict": "default",
+      "default": {
+        "median": 38426476.5,
+        "minimum": 35015867,
+        "maximum": 41993936
+      },
+      "jitless": {
+        "median": 117931426.5,
+        "minimum": 116437841,
+        "maximum": 119872410
+      }
+    }
+  }
+}
+   Compiling topic095-jit-specialization v0.1.0 (/tmp/codex-topic095-ce874cc/topics/095-jit-specialization)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.33s
+     Running unittests src/lib.rs (target/debug/deps/topic095_jit_specialization-2c5acf5532304055)
+   Doc-tests topic095_jit_specialization
+   Compiling topic095-jit-specialization v0.1.0 (/tmp/codex-topic095-ce874cc/topics/095-jit-specialization)
+    Finished `release` profile [optimized] target(s) in 0.26s

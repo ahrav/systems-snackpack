@@ -1,0 +1,26 @@
+[
+  {
+    "path": "topics/095-jit-specialization/Cargo.toml",
+    "sha256": "66c0f0f58c0a84cc2e915185fe7f8f12969508d7d1d0051455aaf21317236f37"
+  },
+  {
+    "path": "topics/095-jit-specialization/examples/probe.rs",
+    "sha256": "025cd325c331b4f3e20b73e210d843c19e4bce05bb9e0203e893f48cabbfe1f4"
+  },
+  {
+    "path": "topics/095-jit-specialization/experiment/bench.js",
+    "sha256": "ce892e703bd6d25e737a0b325c87af1fabef7bbf60387377b606efaf7f1c693d"
+  },
+  {
+    "path": "topics/095-jit-specialization/experiment/oracle.py",
+    "sha256": "9735b6be92a408dc3261dc1dcd0d5b1375c3ae4938a0371715b58a4953fbfba6"
+  },
+  {
+    "path": "topics/095-jit-specialization/experiment/run.py",
+    "sha256": "1db5823f9de02f24522db4f81ee91b1593bff245b76cc12e2dff463588850dd9"
+  },
+  {
+    "path": "topics/095-jit-specialization/src/lib.rs",
+    "sha256": "a24437b2597a3553488f8d5cbf53c7cf5281bc4c4e691af682f71b2e168ddc30"
+  }
+]

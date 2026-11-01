@@ -1,0 +1,28 @@
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.113-138.209.amzn2023.aarch64 #1 SMP Tue Oct 20 21:58:08 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+a24437b2597a3553488f8d5cbf53c7cf5281bc4c4e691af682f71b2e168ddc30  topics/095-jit-specialization/src/lib.rs
+9735b6be92a408dc3261dc1dcd0d5b1375c3ae4938a0371715b58a4953fbfba6  topics/095-jit-specialization/experiment/oracle.py
+1db5823f9de02f24522db4f81ee91b1593bff245b76cc12e2dff463588850dd9  topics/095-jit-specialization/experiment/run.py
+ce892e703bd6d25e737a0b325c87af1fabef7bbf60387377b606efaf7f1c693d  topics/095-jit-specialization/experiment/bench.js
+
+running 3 tests
+test tests::overflow_preserves_prefix_and_failing_row ... ok
+test tests::restarting_or_skipping_changes_observable_effects ... ok
+test tests::every_shape_bailout_preserves_effect_order ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test topics/095-jit-specialization/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.40s; merged doctests compilation took 0.39s
+PASS 55987 independent sum, effect-order and bailout comparisons
+   Compiling topic095-jit-specialization v0.1.0 (/tmp/codex-topic095-ce874cc/topics/095-jit-specialization)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running unittests src/lib.rs (target/debug/deps/topic095_jit_specialization-996f7b6e8340a4e4)
+   Doc-tests topic095_jit_specialization
+   Compiling topic095-jit-specialization v0.1.0 (/tmp/codex-topic095-ce874cc/topics/095-jit-specialization)
+    Finished `release` profile [optimized] target(s) in 0.34s
