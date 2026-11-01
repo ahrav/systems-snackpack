@@ -23,7 +23,11 @@ confidence intervals. Every attempt is retained, including the slow local
 stable whole-process sample. No timing samples were discarded.
 
 Steady-loop timing excludes allocation and warmup but includes loop execution
-and any ongoing optimization. Whole-process timing includes startup, allocation,
+and any ongoing optimization. Every workload allocates both row arrays before
+the cold call; the separate stable traces on both hosts show `makeB` and its
+`Array.from` mapper compiled concurrently on Maglev immediately before `sumRows`,
+so default-mode cold-call timing includes background compiler work that
+`--jitless` has no equivalent for. Whole-process timing includes startup, allocation,
 all calls, assertions, output and shutdown. Trace runs are separate and excluded
 from timing tables. Default versus jitless combines the effect of multiple
 execution tiers. Neither comparison isolates compile time or recovery cost.
@@ -105,3 +109,6 @@ Git operations completed without changing hooks or platform controls.
 
 Repository logs normalize trailing whitespace; original-byte hashes accompany
 them. Original logs and source archives remain in the standalone deliverable.
+`run.py` writes one `<workload>-<block>-<mode>.stderr` file per measured
+process; each host's 36 files are committed as one `evidence/<host>/stderr.json`
+object keyed by file name, and every value is the empty string.
