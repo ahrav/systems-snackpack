@@ -16,8 +16,10 @@ Stable uses layout A, shift trains A then measures B, and mixed alternates A/B
 throughout. Values and checksum are identical across layouts. Sum bounds remain
 inside signed 32-bit range in the JavaScript benchmark; Rust tests cover overflow.
 
-The default mode wins a metric only when all six paired samples are at least
-5% lower; jitless uses the reciprocal rule. A tie requires all pairs within 5%.
+Default wins a metric only when every paired default sample is below 0.95
+times its jitless partner (`t_default < 0.95 * t_jitless`) in all six blocks;
+jitless uses the reciprocal rule. A tie requires
+`|t_default - t_jitless| <= 0.05 * max(t_default, t_jitless)` in every block.
 Other outcomes are unresolved. These descriptive rules supply no population
 confidence intervals. Every attempt is retained, including the slow local
 stable whole-process sample. No timing samples were discarded.
