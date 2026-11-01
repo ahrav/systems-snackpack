@@ -1,0 +1,9 @@
+Preparation failures retained separately from final validation:
+1. Cargo fmt/test/build invoked from the projectless directory: could not find Cargo.toml. No compilation ran.
+2. node invocation from worktree: zsh: command not found: node. Final local campaign uses /Users/ahrav/.nvm/versions/node/v24.22.0/bin/node.
+3. Arm runtime location probe: zsh: no matches found: /home/ahrav/.nvm/versions/node/*/bin/node. Corrected with nonomatch; no executable found in checked paths.
+4. sysctl CPU model: Operation not permitted. Model remains unavailable; no timing sample discarded.
+5. ps process inspection: operation not permitted. Gate status comes from captured command completion.
+6. Prior-source ancestor check used a squash-merged feature head unavailable in local clone. Merge-commit identity checked separately.
+7. Writing-policy invocation from projectless directory failed git rev-parse. Repeated from task worktree.
+8. Existing Git integration reported CodeDefender log-file open denied. Git commands completed; hooks and security controls unchanged.

@@ -1,0 +1,11 @@
+{
+  "evidence/local-correctness.log": "38d851a3b1f81a5e62121cf05977a24337a65990574dd73a77cfbbf667a93092",
+  "evidence/xxl-run.log": "ffe858cd38f695c9bfc32fc62606911221edde96bee1763d5b8ced1bd0dd1d43",
+  "evidence/arm-run.log": "0a7c5b7eac609072354ead53d515cb317efa18343b841413867de0d3ad2221c4",
+  "evidence/xxl/trace-mixed.log": "bee4f46d8a53f83e3ee88bdf1f4c1a30e614547f936d1880cdcb9217d7e64194",
+  "evidence/xxl/trace-stable.log": "cdd3a02f94b938b3658c64ef09e77b9d9c2d055f355792f8d2293ed8a0475db4",
+  "evidence/xxl/trace-shift.log": "ef96394eb27c0041557806f81d232ed5d44e697edf239dac36d18c31fb9cfd04",
+  "evidence/local/trace-mixed.log": "65d8c3aa8a76b0005a44c3e3a0a54710abdfa62593b06fa684d55e7fbf2476c3",
+  "evidence/local/trace-stable.log": "bc493115a2173770cb23de3a476f1c47347e564ffc88b22ec0ff0bd6ba9a683c",
+  "evidence/local/trace-shift.log": "2a9da1725b709889c7516db6cb8a7a89a44028e5f72ca740f0b4b96e9ceab077"
+}

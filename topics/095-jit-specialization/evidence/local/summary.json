@@ -1,0 +1,164 @@
+{
+  "stable": {
+    "coldNs": {
+      "verdict": "unresolved",
+      "default": {
+        "median": 222770.5,
+        "minimum": 171375,
+        "maximum": 410083
+      },
+      "jitless": {
+        "median": 180229.0,
+        "minimum": 168958,
+        "maximum": 184333
+      }
+    },
+    "transitionNs": {
+      "verdict": "default",
+      "default": {
+        "median": 8708.0,
+        "minimum": 6458,
+        "maximum": 9042
+      },
+      "jitless": {
+        "median": 130979.0,
+        "minimum": 126833,
+        "maximum": 131625
+      }
+    },
+    "steadyNs": {
+      "verdict": "default",
+      "default": {
+        "median": 1557437.5,
+        "minimum": 1448541,
+        "maximum": 2040708
+      },
+      "jitless": {
+        "median": 33035375.0,
+        "minimum": 32371791,
+        "maximum": 35600084
+      }
+    },
+    "wallNs": {
+      "verdict": "unresolved",
+      "default": {
+        "median": 61046333.5,
+        "minimum": 56667500,
+        "maximum": 239477042
+      },
+      "jitless": {
+        "median": 110802000.5,
+        "minimum": 106179291,
+        "maximum": 126151292
+      }
+    }
+  },
+  "shift": {
+    "coldNs": {
+      "verdict": "unresolved",
+      "default": {
+        "median": 231396.0,
+        "minimum": 140917,
+        "maximum": 464166
+      },
+      "jitless": {
+        "median": 180500.0,
+        "minimum": 147083,
+        "maximum": 225709
+      }
+    },
+    "transitionNs": {
+      "verdict": "unresolved",
+      "default": {
+        "median": 132667.0,
+        "minimum": 113875,
+        "maximum": 327166
+      },
+      "jitless": {
+        "median": 155083.5,
+        "minimum": 145084,
+        "maximum": 190541
+      }
+    },
+    "steadyNs": {
+      "verdict": "default",
+      "default": {
+        "median": 2459854.0,
+        "minimum": 2057333,
+        "maximum": 2971625
+      },
+      "jitless": {
+        "median": 33640291.5,
+        "minimum": 33222625,
+        "maximum": 34210042
+      }
+    },
+    "wallNs": {
+      "verdict": "default",
+      "default": {
+        "median": 53160166.5,
+        "minimum": 42914875,
+        "maximum": 75830667
+      },
+      "jitless": {
+        "median": 109836958.0,
+        "minimum": 95918125,
+        "maximum": 124029958
+      }
+    }
+  },
+  "mixed": {
+    "coldNs": {
+      "verdict": "unresolved",
+      "default": {
+        "median": 213625.5,
+        "minimum": 186250,
+        "maximum": 519583
+      },
+      "jitless": {
+        "median": 191041.5,
+        "minimum": 149083,
+        "maximum": 212750
+      }
+    },
+    "transitionNs": {
+      "verdict": "default",
+      "default": {
+        "median": 9187.5,
+        "minimum": 7958,
+        "maximum": 9916
+      },
+      "jitless": {
+        "median": 134750.0,
+        "minimum": 131875,
+        "maximum": 137292
+      }
+    },
+    "steadyNs": {
+      "verdict": "default",
+      "default": {
+        "median": 1859479.0,
+        "minimum": 1682500,
+        "maximum": 2248833
+      },
+      "jitless": {
+        "median": 34373083.0,
+        "minimum": 34145208,
+        "maximum": 45383333
+      }
+    },
+    "wallNs": {
+      "verdict": "default",
+      "default": {
+        "median": 51645791.5,
+        "minimum": 45652375,
+        "maximum": 61345083
+      },
+      "jitless": {
+        "median": 113135500.0,
+        "minimum": 100485458,
+        "maximum": 143091125
+      }
+    }
+  }
+}

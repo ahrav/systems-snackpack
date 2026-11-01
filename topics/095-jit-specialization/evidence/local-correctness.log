@@ -1,0 +1,22 @@
+   Compiling topic095-jit-specialization v0.1.0 (/Users/ahrav/Documents/Codex/2026-11-01/advanced-systems-daily-lesson-every-local/outputs/topic-095-jit/source/topics/095-jit-specialization)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.35s
+     Running unittests src/lib.rs (target/debug/deps/topic095_jit_specialization-20da1d5300b13dc6)
+
+running 3 tests
+test tests::overflow_preserves_prefix_and_failing_row ... ok
+test tests::restarting_or_skipping_changes_observable_effects ... ok
+test tests::every_shape_bailout_preserves_effect_order ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests topic095_jit_specialization
+
+running 1 test
+test topics/095-jit-specialization/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 2.21s; merged doctests compilation took 0.19s
+   Compiling topic095-jit-specialization v0.1.0 (/Users/ahrav/Documents/Codex/2026-11-01/advanced-systems-daily-lesson-every-local/outputs/topic-095-jit/source/topics/095-jit-specialization)
+    Finished `release` profile [optimized] target(s) in 0.62s
+PASS 55987 independent sum, effect-order and bailout comparisons
