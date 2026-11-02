@@ -149,6 +149,13 @@ mod tests {
 
     #[test]
     fn malformed_geometry_faults() {
+        let good = Table {
+            shift: 1,
+            leaves: vec![Some(Leaf {
+                frame: 0,
+                writable: true,
+            })],
+        };
         let bad = Table {
             shift: usize::BITS,
             leaves: vec![Some(Leaf {
@@ -157,6 +164,7 @@ mod tests {
             })],
         };
         assert_eq!(translate(&bad, &bad, 0, false), Err(Fault::Guest));
+        assert_eq!(translate(&good, &bad, 0, false), Err(Fault::Host));
         let overflow = Table {
             shift: 1,
             leaves: vec![Some(Leaf {
@@ -165,5 +173,6 @@ mod tests {
             })],
         };
         assert_eq!(translate(&overflow, &overflow, 0, false), Err(Fault::Guest));
+        assert_eq!(translate(&good, &overflow, 0, false), Err(Fault::Host));
     }
 }
