@@ -402,6 +402,10 @@ name = "topic095-jit-specialization"
 version = "0.1.0"
 
 [[package]]
+name = "topic096-virtualization"
+version = "0.1.0"
+
+[[package]]
 name = "work-stealing"
 version = "0.1.0"
 
