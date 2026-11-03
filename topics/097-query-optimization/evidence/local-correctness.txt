@@ -1,0 +1,1 @@
+Local exact-source SQLite oracle: 2100 pairs, 4200 comparisons passed. Local timings omitted while workspace validation runs.

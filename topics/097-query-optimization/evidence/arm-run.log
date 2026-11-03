@@ -1,0 +1,181 @@
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.113-138.209.amzn2023.aarch64 #1 SMP Tue Oct 20 21:58:08 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+Architecture:                            aarch64
+CPU op-mode(s):                          32-bit, 64-bit
+Byte Order:                              Little Endian
+CPU(s):                                  64
+On-line CPU(s) list:                     0-63
+Vendor ID:                               ARM
+Model:                                   1
+Thread(s) per core:                      1
+Core(s) per socket:                      64
+Socket(s):                               1
+Stepping:                                r1p1
+BogoMIPS:                                2100.00
+Flags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng
+L1d cache:                               4 MiB (64 instances)
+L1i cache:                               4 MiB (64 instances)
+L2 cache:                                64 MiB (64 instances)
+L3 cache:                                32 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-63
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; CSV2, BHB
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+binary: rustc
+commit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf
+commit-date: 2026-02-11
+host: aarch64-unknown-linux-gnu
+release: 1.93.1
+LLVM version: 21.1.8
+
+running 2 tests
+test tests::empty_disjoint_duplicates_and_extreme_keys ... ok
+test tests::correlation_changes_decision ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 1 test
+test topics/097-query-optimization/src/lib.rs - nested_count (line 9) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.33s; merged doctests compilation took 0.33s
+{
+  "oracle_comparisons": 4200,
+  "summary": [
+    {
+      "mode": "independent",
+      "nested": {
+        "median_ns": 829.364,
+        "min_ns": 823.576,
+        "max_ns": 845.528
+      },
+      "hash": {
+        "median_ns": 71506.669,
+        "min_ns": 71444.826,
+        "max_ns": 71569.623
+      },
+      "winner": "nested",
+      "paired_ratios": [
+        86.89187761663769,
+        86.23528659315092,
+        84.52381588782393,
+        84.63675199013834,
+        86.14601381677585,
+        86.33122680974462,
+        86.51568535799139,
+        85.21589326662496
+      ],
+      "estimated_plan": "nested",
+      "joint_plan": "nested",
+      "estimated_plan_regret": 1.0,
+      "joint_plan_regret": 1.0
+    },
+    {
+      "mode": "correlated",
+      "nested": {
+        "median_ns": 96320.79000000001,
+        "min_ns": 95977.59,
+        "max_ns": 97538.94
+      },
+      "hash": {
+        "median_ns": 72368.025,
+        "min_ns": 72179.84,
+        "max_ns": 72555.08
+      },
+      "winner": "hash",
+      "paired_ratios": [
+        1.336970568432989,
+        1.3361557162160203,
+        1.3238786312412583,
+        1.3398507117776932,
+        1.3247140487190516,
+        1.327994701170859,
+        1.3487188138225132,
+        1.3252538228553972
+      ],
+      "estimated_plan": "nested",
+      "joint_plan": "hash",
+      "estimated_plan_regret": 1.3309854732114081,
+      "joint_plan_regret": 1.0
+    },
+    {
+      "mode": "exclusive",
+      "nested": {
+        "median_ns": 1.155155,
+        "min_ns": 1.15485,
+        "max_ns": 1.15568
+      },
+      "hash": {
+        "median_ns": 2.86116,
+        "min_ns": 2.66523,
+        "max_ns": 3.41065
+      },
+      "winner": "nested",
+      "paired_ratios": [
+        2.4017919750681735,
+        2.551932199868417,
+        2.9519980612271395,
+        2.327098757414383,
+        2.327294602361251,
+        2.809934812531923,
+        2.6542057692973646,
+        2.3062006783884814
+      ],
+      "estimated_plan": "nested",
+      "joint_plan": "nested",
+      "estimated_plan_regret": 1.0,
+      "joint_plan_regret": 1.0
+    },
+    {
+      "mode": "dense",
+      "nested": {
+        "median_ns": 4794897.45,
+        "min_ns": 4787839.6,
+        "max_ns": 4799234.1
+      },
+      "hash": {
+        "median_ns": 111173.45000000001,
+        "min_ns": 110347.4,
+        "max_ns": 112627.6
+      },
+      "winner": "hash",
+      "paired_ratios": [
+        43.39176999186207,
+        42.86865455234581,
+        43.159153099565906,
+        43.197579973060755,
+        43.13294076093257,
+        42.607095418884896,
+        42.781723693004935,
+        43.16924166912734
+      ],
+      "estimated_plan": "hash",
+      "joint_plan": "hash",
+      "estimated_plan_regret": 1.0,
+      "joint_plan_regret": 1.0
+    }
+  ]
+}
+   Compiling topic097-query-optimization v0.1.0 (/tmp/topic097-20261103-8e75f0c/topics/097-query-optimization)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.16s
+     Running unittests src/lib.rs (target/debug/deps/topic097_query_optimization-98e2e8483e07a0a8)
+   Doc-tests topic097_query_optimization
+   Compiling topic097-query-optimization v0.1.0 (/tmp/topic097-20261103-8e75f0c/topics/097-query-optimization)
+    Finished `release` profile [optimized] target(s) in 0.45s
