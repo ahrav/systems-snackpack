@@ -54,10 +54,12 @@ The full JSON files retain raw samples, excluded warmups and paired ratios.
 Joint-plan median regret is 1.00x for every cell. Regret is relative only to
 the two tested alternatives. No ties or unresolved cells occurred.
 
-The Python estimate script produced exactly the three expected lines.
-The optional PostgreSQL SQL script was retained but not executed: local
-psql is unavailable. PostgreSQL estimate correction remains a source-backed
-example; the SQL oracle above used SQLite.
+`evidence/estimate-example-output.txt` holds the three expected estimate lines
+for the independent, correlated and exclusive workloads. Its values match the
+`correlation_changes_decision` unit test. The PostgreSQL lesson script ran under
+PostgreSQL 16.15 (postgres:16-alpine container, x86-64): the filter estimate
+rose from rows=1 to rows=100 after `CREATE STATISTICS (dependencies)`, matching
+the 100 actual rows. The SQL oracle above used SQLite.
 
 ## Repository validation
 
