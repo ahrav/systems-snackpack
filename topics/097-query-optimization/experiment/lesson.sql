@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS lesson_customers;
+DROP TABLE IF EXISTS pg_temp.lesson_customers;
 CREATE TEMP TABLE lesson_customers AS
 SELECT i AS id, i % 100 AS a, i % 100 AS b
 FROM generate_series(1, 10000) AS g(i);
