@@ -1,0 +1,18 @@
+   Compiling distributed-atomic-commit v0.1.0 (/Users/ahrav/Documents/Codex/2026-11-04/advanced-systems-daily-lesson-every-local/work/exact-source/topics/098-distributed-atomic-commit)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.72s
+     Running unittests src/lib.rs (target/debug/deps/distributed_atomic_commit-e52c7db93da0de7b)
+
+running 2 tests
+test tests::both_faults_have_terminal_disagreement ... ok
+test tests::safe_graph_preserves_agreement_and_reaches_both_outcomes ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests distributed_atomic_commit
+
+running 1 test
+test topics/098-distributed-atomic-commit/src/lib.rs - (line 8) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 1.01s; merged doctests compilation took 0.62s

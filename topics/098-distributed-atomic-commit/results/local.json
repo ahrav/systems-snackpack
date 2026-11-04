@@ -1,0 +1,209 @@
+{
+  "host": {
+    "platform": "macOS-26.7.2-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "python": "3.13.16 (main, Sep 30 2026, 18:57:20) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "source_commit": "8f32345431201f2a84d826a398867e9997418d6b",
+    "rust": "rustc 1.93.1 (01f6ddf75 2026-02-11)\nbinary: rustc\ncommit-hash: 01f6ddf7588f42ae2d7eb0a2f21d44e8e96674cf\ncommit-date: 2026-02-11\nhost: aarch64-apple-darwin\nrelease: 1.93.1\nLLVM version: 21.1.8\n"
+  },
+  "safe-2": {
+    "mode": "Safe",
+    "participants": 2,
+    "states": 187,
+    "edges": 702,
+    "violations": {},
+    "states_with_completion_path": 187,
+    "witness": []
+  },
+  "safe-3": {
+    "mode": "Safe",
+    "participants": 3,
+    "states": 1279,
+    "edges": 6861,
+    "violations": {},
+    "states_with_completion_path": 1279,
+    "witness": []
+  },
+  "timeout-2": {
+    "mode": "Timeout",
+    "participants": 2,
+    "states": 295,
+    "edges": 1270,
+    "violations": {
+      "abstract_step": 40,
+      "agreement": 20,
+      "commit_validity": 20,
+      "terminal_transfer_total": 20
+    },
+    "states_with_completion_path": 275,
+    "witness": [
+      {
+        "action": "prepare0",
+        "participants": [
+          1,
+          0
+        ],
+        "decision": 0
+      },
+      {
+        "action": "vote0",
+        "participants": [
+          1,
+          0
+        ],
+        "decision": 0
+      },
+      {
+        "action": "timeout0",
+        "participants": [
+          3,
+          0
+        ],
+        "decision": 0
+      },
+      {
+        "action": "prepare1",
+        "participants": [
+          3,
+          1
+        ],
+        "decision": 0
+      },
+      {
+        "action": "vote1",
+        "participants": [
+          3,
+          1
+        ],
+        "decision": 0
+      },
+      {
+        "action": "persist_commit",
+        "participants": [
+          3,
+          1
+        ],
+        "decision": 2
+      },
+      {
+        "action": "send_commit1",
+        "participants": [
+          3,
+          1
+        ],
+        "decision": 2
+      },
+      {
+        "action": "deliver_commit1",
+        "participants": [
+          3,
+          2
+        ],
+        "decision": 2
+      }
+    ]
+  },
+  "early-2": {
+    "mode": "Early",
+    "participants": 2,
+    "states": 488,
+    "edges": 2073,
+    "violations": {
+      "abstract_step": 80,
+      "agreement": 40,
+      "commit_validity": 40,
+      "terminal_transfer_total": 40
+    },
+    "states_with_completion_path": 406,
+    "witness": [
+      {
+        "action": "prepare0",
+        "participants": [
+          1,
+          0
+        ],
+        "decision": 0
+      },
+      {
+        "action": "vote0",
+        "participants": [
+          1,
+          0
+        ],
+        "decision": 0
+      },
+      {
+        "action": "prepare1",
+        "participants": [
+          1,
+          1
+        ],
+        "decision": 0
+      },
+      {
+        "action": "vote1",
+        "participants": [
+          1,
+          1
+        ],
+        "decision": 0
+      },
+      {
+        "action": "choose_volatile_commit",
+        "participants": [
+          1,
+          1
+        ],
+        "decision": 0
+      },
+      {
+        "action": "send_commit0",
+        "participants": [
+          1,
+          1
+        ],
+        "decision": 0
+      },
+      {
+        "action": "deliver_commit0",
+        "participants": [
+          2,
+          1
+        ],
+        "decision": 0
+      },
+      {
+        "action": "crash",
+        "participants": [
+          2,
+          1
+        ],
+        "decision": 0
+      },
+      {
+        "action": "recover",
+        "participants": [
+          2,
+          1
+        ],
+        "decision": 3
+      },
+      {
+        "action": "send_abort1",
+        "participants": [
+          2,
+          1
+        ],
+        "decision": 3
+      },
+      {
+        "action": "deliver_abort1",
+        "participants": [
+          2,
+          3
+        ],
+        "decision": 3
+      }
+    ]
+  }
+}
