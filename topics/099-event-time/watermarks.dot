@@ -1,0 +1,11 @@
+digraph windows {
+ graph [rankdir=LR, bgcolor="white", pad=0.25, nodesep=0.3];
+ node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=14, fillcolor="#EDF4FF", color="#5478A4", margin=0.18];
+ edge [fontname="Helvetica", fontsize=11, color="#5478A4"];
+ a [label="Input A frontier = 14"];
+ b [label="Input B frontier = 10"];
+ m [label="Operator frontier F = min(A, B) = 10\nExpected future event times: t >= F"];
+ w [label="Window [0, 10), lateness L = 5\nF = 10: emit total 12\nLate t = 8: replace total with 15\nF = 15: discard window state", fillcolor="#E9F6EC"];
+ d [label="After F = 15\nt = 9 goes to late side output", fillcolor="#FFF0E5"];
+ a -> m; b -> m; m -> w; w -> d;
+}
