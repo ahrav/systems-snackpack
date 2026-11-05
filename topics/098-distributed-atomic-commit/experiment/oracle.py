@@ -46,12 +46,12 @@ def check(path):
                      or (old == 1 and new == 3 and 2 not in before and nodes[a][2] == 3)
                      or (old == 1 and new == 2 and all(p in (1, 2) for p in before)
                          and nodes[a][2] == 2))
+            if (old, new) == (1, 3) and nodes[a][2] != 3:
+                violations['prepared_abort_before_decision'] += 1
+            if (old, new) == (1, 2) and nodes[a][2] != 2:
+                violations['commit_before_decision'] += 1
         if not legal:
             violations['abstract_step'] += 1
-            if len(changed) == 1 and (old, new) == (1, 3) and nodes[a][2] != 3:
-                violations['prepared_abort_before_decision'] += 1
-            if len(changed) == 1 and (old, new) == (1, 2) and nodes[a][2] != 2:
-                violations['commit_before_decision'] += 1
         if nodes[a][2] != nodes[b][2] and not (nodes[a][2] == 0 and nodes[b][2] in (2, 3)):
             violations['decision_changed'] += 1
         if changed and nodes[b][2] != nodes[a][2]:
