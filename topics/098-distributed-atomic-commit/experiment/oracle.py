@@ -69,6 +69,8 @@ def check(path):
                 bad = i
         if 2 in p and any(x not in (1, 2) for x in p):
             violations['commit_validity'] += 1
+        if (2 in p and decision != 2) or (3 in p and decision == 2):
+            violations['decision_mismatch'] += 1
         if all(x in (2, 3) for x in p):
             terminal.add(i)
             if sum(d for d, x in zip(delta, p) if x == 2) != 0:

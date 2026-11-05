@@ -46,7 +46,8 @@ real locks, reads, and physical network/storage I/O require a richer model.
 The independent Python oracle projects each edge onto participant states. Its
 abstract legal-step relation permits preparation, abort before any commitment,
 and commitment after every participant prepared. It also checks terminal
-stability, decision stability, agreement, commit validity, and terminal balance
+stability, decision stability, agreement, commit validity, consistency between
+terminal participants and the durable decision, and terminal balance
 conservation. Reverse reachability checks that each safe state has some path to
 uniform completion. This existential property permits unfair infinite executions;
 it does not prove eventual termination. The Rust explorer owns graph completeness.

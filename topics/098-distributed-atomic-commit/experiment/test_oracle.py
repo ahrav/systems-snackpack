@@ -17,6 +17,25 @@ SPLIT_GRAPH = ['meta\t2\tTimeout',
                'edge\t0\t1\tprepare',
                'edge\t1\t2\tsplit']
 TERMINAL_FLIP = ['node\t3\t33\t3\t2\t0\t1\t1\t0', 'edge\t2\t3\tuncommit']
+# ABORT_THEN_COMMIT persists coordinator ABORT, then both participants commit
+# through participant-legal steps; a uniform abort branch keeps the Safe-mode
+# completion and uniform-state requirements satisfied.
+ABORT_THEN_COMMIT = ['meta\t2\tSafe',
+                     'node\t0\t00\t0\t0\t0\t1\t0\t0',
+                     'node\t1\t00\t0\t3\t0\t1\t0\t1',
+                     'node\t2\t10\t0\t3\t0\t1\t0\t1',
+                     'node\t3\t11\t0\t3\t0\t1\t0\t1',
+                     'node\t4\t21\t0\t3\t0\t1\t1\t1',
+                     'node\t5\t22\t0\t3\t0\t1\t2\t1',
+                     'node\t6\t31\t0\t3\t0\t1\t0\t1',
+                     'node\t7\t33\t0\t3\t0\t1\t0\t1',
+                     'edge\t0\t1\tcoordinator_abort',
+                     'edge\t1\t2\tprepare0',
+                     'edge\t2\t3\tprepare1',
+                     'edge\t3\t4\tcommit0',
+                     'edge\t4\t5\tcommit1',
+                     'edge\t3\t6\tabort0',
+                     'edge\t6\t7\tabort1']
 
 
 def run_oracle(lines, *interpreter_flags):
@@ -37,6 +56,11 @@ class OracleGateTest(unittest.TestCase):
         result = run_oracle(SPLIT_GRAPH + TERMINAL_FLIP)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('terminal record changed', result.stderr)
+
+    def test_safe_mode_rejects_commit_under_durable_abort(self):
+        result = run_oracle(ABORT_THEN_COMMIT)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('"decision_mismatch": 2', result.stdout)
 
     def test_gate_survives_optimized_interpreter(self):
         safe = ['meta\t2\tSafe'] + SPLIT_GRAPH[1:]

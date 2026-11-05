@@ -12,8 +12,11 @@ matched. Later commits add results and revise the Python checker and runner. The
 Rust model, explorer, and Cargo manifests are byte-identical to the tested source,
 so every recorded graph comes from the shipped model. The three-host runs used the
 checker at the tested source. The final checker and runner were re-run on the
-aarch64 Linux host only: graphs and oracle output matched `arm.json` exactly, and
-the checker's own regression tests (`experiment/test_oracle.py`,
+aarch64 Linux host only: graphs, state and transition counts, completion paths,
+witnesses, and every violation class recorded in `arm.json` matched exactly. The
+revised checker also reports a `decision_mismatch` class, zero for both safe
+graphs, 80 for the timeout fault, and 150 for the early-COMMIT fault. The
+checker's own regression tests (`experiment/test_oracle.py`,
 `experiment/test_run.py`) passed. The macOS and x86_64 runs predate the checker
 revision.
 
