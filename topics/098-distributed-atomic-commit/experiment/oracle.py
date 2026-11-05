@@ -48,6 +48,10 @@ def check(path):
                          and nodes[a][2] == 2))
         if not legal:
             violations['abstract_step'] += 1
+            if len(changed) == 1 and (old, new) == (1, 3) and nodes[a][2] != 3:
+                violations['prepared_abort_before_decision'] += 1
+            if len(changed) == 1 and (old, new) == (1, 2) and nodes[a][2] != 2:
+                violations['commit_before_decision'] += 1
         if nodes[a][2] != nodes[b][2] and not (nodes[a][2] == 0 and nodes[b][2] in (2, 3)):
             violations['decision_changed'] += 1
         if changed and nodes[b][2] != nodes[a][2]:
@@ -108,6 +112,8 @@ def check(path):
         require(any(p == (2,) * n for p, *_ in nodes.values()), 'no uniform commit state')
         require(any(p == (3,) * n for p, *_ in nodes.values()), 'no uniform abort state')
     else:
+        mutant_step = {'Timeout': 'prepared_abort_before_decision', 'Early': 'commit_before_decision'}
+        require(violations[mutant_step[mode]] > 0, f'{mode} graph lacks its mutant step')
         require(violations['agreement'] > 0, 'fault was not detected')
         require(witness, 'fault needs a reachable witness')
 

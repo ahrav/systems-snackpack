@@ -151,7 +151,12 @@ class OracleGateTest(unittest.TestCase):
         self.assert_rejected(without_branch(6), 'no uniform abort state')
 
     def test_fault_mode_requires_detected_fault(self):
-        self.assert_rejected(['meta\t2\tTimeout'] + SAFE_GRAPH[1:], 'fault was not detected')
+        self.assert_rejected(['meta\t2\tTimeout'] + SAFE_GRAPH[1:], 'Timeout graph lacks its mutant step')
+        self.assert_rejected(['meta\t2\tEarly'] + SAFE_GRAPH[1:], 'Early graph lacks its mutant step')
+
+    def test_fault_mode_requires_its_own_mutant_step(self):
+        self.assert_rejected(['meta\t2\tEarly'] + SPLIT_GRAPH[1:], 'Early graph lacks its mutant step',
+                             '"prepared_abort_before_decision": 1')
 
     def test_fault_mode_accepts_split_with_stable_records(self):
         self.assertEqual(run_oracle(SPLIT_GRAPH).returncode, 0)

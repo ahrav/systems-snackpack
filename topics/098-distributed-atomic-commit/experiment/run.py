@@ -36,9 +36,9 @@ for mode, n in [('safe', 2), ('safe', 3), ('timeout', 2), ('early', 2)]:
              '--', mode, str(n)], stdout=stream)
     verdict = run([sys.executable, str(topic / 'experiment/oracle.py'), str(graph)], capture_output=True)
     (out / f'{mode}-{n}.json').write_text(verdict.stdout)
-    exported = json.loads(verdict.stdout)['mode']
-    if exported.lower() != mode:
-        sys.exit(f'{graph.name}: explorer exported mode {exported}')
+    exported = json.loads(verdict.stdout)
+    if exported['mode'].lower() != mode or exported['participants'] != n:
+        sys.exit(f'{graph.name}: explorer exported {exported["mode"]} with {exported["participants"]} participants')
 (out / 'sha256.json').write_text(json.dumps({p.name: hashlib.sha256(p.read_bytes()).hexdigest()
     for p in sorted(out.iterdir()) if p.is_file() and p.name != 'sha256.json'}, indent=2) + '\n')
 print(json.dumps({'result': 'PASS', 'output': str(out)}))
