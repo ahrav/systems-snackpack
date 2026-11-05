@@ -19,7 +19,8 @@ participant's abort from a state without durable ABORT, raising the timeout faul
 from 40 to 146, and each participant commit from a state without durable COMMIT,
 raising the early-COMMIT fault from 80 to 212. The revised checker also reports a
 `decision_mismatch` class, zero for both safe graphs, 80 for the timeout fault,
-and 150 for the early-COMMIT fault. `arm.json` remains the record of the
+and 150 for the early-COMMIT fault, and a `two_durable_records` class that is zero
+for every graph. `arm.json` remains the record of the
 three-host run at the tested source and is unchanged. The
 checker's own regression tests (`experiment/test_oracle.py`,
 `experiment/test_run.py`) passed. The macOS and x86_64 runs predate the checker

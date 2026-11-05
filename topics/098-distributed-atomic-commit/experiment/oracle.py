@@ -50,6 +50,8 @@ def check(path):
             violations['abstract_step'] += 1
         if nodes[a][2] in (2, 3) and nodes[b][2] != nodes[a][2]:
             violations['decision_changed'] += 1
+        if changed and nodes[b][2] != nodes[a][2]:
+            violations['two_durable_records'] += 1
         for i in range(n):
             if before[i] in (2, 3) and after[i] != before[i]:
                 violations['terminal_changed'] += 1
@@ -99,6 +101,7 @@ def check(path):
     print(json.dumps(result, indent=2))
     require(not violations['terminal_changed'], 'terminal record changed')
     require(not violations['decision_changed'], 'durable decision changed')
+    require(not violations['two_durable_records'], 'one step changed two durable records')
     if mode == 'Safe':
         require(not violations, 'safe model violates abstract specification')
         require(len(can_finish) == len(nodes), 'state without a completion path')

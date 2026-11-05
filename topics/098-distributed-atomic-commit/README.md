@@ -47,10 +47,10 @@ The independent Python oracle projects each edge onto participant states and the
 durable coordinator decision. Its abstract legal-step relation permits
 preparation, abort by a working participant before any commitment, abort by a
 prepared participant only after durable ABORT, and commitment only after every
-participant prepared and the coordinator durably committed. It also checks terminal
-stability, decision stability, agreement, commit validity, consistency between
-terminal participants and the durable decision, and terminal balance
-conservation. Reverse reachability checks that each safe state has some path to
+participant prepared and the coordinator durably committed. Each step changes at
+most one durable record. It also checks terminal stability, decision stability,
+agreement, commit validity, consistency between terminal participants and the
+durable decision, and terminal balance conservation. Reverse reachability checks that each safe state has some path to
 uniform completion. This existential property permits unfair infinite executions;
 it does not prove eventual termination. The Rust explorer owns graph completeness.
 
