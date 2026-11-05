@@ -11,6 +11,8 @@ root = pathlib.Path(__file__).resolve().parents[3]
 topic = pathlib.Path(__file__).resolve().parents[1]
 out = pathlib.Path(sys.argv[1]).resolve()
 out.mkdir(parents=True, exist_ok=True)
+if any(out.iterdir()):
+    sys.exit(f'output directory must be empty: {out}')
 
 def run(args, **kw):
     return subprocess.run(args, cwd=root, check=True, text=True, **kw)
@@ -24,6 +26,9 @@ if cpu.exists():
 (out / 'host.json').write_text(json.dumps(metadata, indent=2) + '\n')
 with (out / 'cargo-test.log').open('w') as log:
     run(['cargo', '+1.93.1', 'test', '-p', 'distributed-atomic-commit'], stdout=log, stderr=subprocess.STDOUT)
+with (out / 'python-test.log').open('w') as log:
+    run([sys.executable, '-m', 'unittest', 'discover', '-s', str(topic / 'experiment')],
+        stdout=log, stderr=subprocess.STDOUT)
 for mode, n in [('safe', 2), ('safe', 3), ('timeout', 2), ('early', 2)]:
     graph = out / f'{mode}-{n}.tsv'
     with graph.open('w') as stream:

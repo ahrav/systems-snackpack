@@ -8,7 +8,14 @@ Tested source: `8f32345431201f2a84d826a398867e9997418d6b`.
 Source archive SHA256:
 `8ad1b45bdbc8748c8d59b424edf1fea1a80e2ac972950bb5c9dc12bcaae6f4ce`.
 All nine archive file members were compared with Git. Both Linux transfer hashes
-matched. Later commits add results only; executable and checker bytes stay fixed.
+matched. Later commits add results and revise the Python checker and runner. The
+Rust model, explorer, and Cargo manifests are byte-identical to the tested source,
+so every recorded graph comes from the shipped model. The three-host runs used the
+checker at the tested source. The final checker and runner were re-run on the
+aarch64 Linux host only: graphs and oracle output matched `arm.json` exactly, and
+the checker's own regression tests (`experiment/test_oracle.py`,
+`experiment/test_run.py`) passed. The macOS and x86_64 runs predate the checker
+revision.
 
 | Model | Participants | States | Transitions | Disagreement states | States with a path to uniform completion |
 |---|---:|---:|---:|---:|---:|
