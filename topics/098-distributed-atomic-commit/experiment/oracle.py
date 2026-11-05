@@ -43,11 +43,11 @@ def check(path):
         if len(changed) == 1:
             i = changed[0]
             old, new = before[i], after[i]
-            legal = ((old, new) == (0, 1)
-                     or (old == 0 and new == 3 and 2 not in before)
-                     or (old == 1 and new == 3 and 2 not in before and nodes[a][2] == 3)
-                     or (old == 1 and new == 2 and all(p in (1, 2) for p in before)
-                         and nodes[a][2] == 2))
+            # Global conditions (no peer committed before an abort, every peer
+            # prepared before a commit) are state invariants checked below.
+            legal = ((old, new) in ((0, 1), (0, 3))
+                     or ((old, new) == (1, 3) and nodes[a][2] == 3)
+                     or ((old, new) == (1, 2) and nodes[a][2] == 2))
             if (old, new) == (1, 3) and nodes[a][2] != 3:
                 violations['prepared_abort_before_decision'] += 1
                 mutant_edges.add((a, b, 'prepared_abort_before_decision'))
@@ -123,6 +123,8 @@ def check(path):
         require(violations[mutant_step[mode]] > 0, f'{mode} graph lacks its mutant step')
         require(violations['agreement'] > 0, 'fault was not detected')
         require(witness, 'fault needs a witness through its mutant step')
+        require(violations['abstract_step'] == violations[mutant_step[mode]],
+                'fault graph has illegal steps beyond its mutant')
 
 
 if __name__ == '__main__':

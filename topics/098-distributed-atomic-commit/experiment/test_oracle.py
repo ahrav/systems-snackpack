@@ -100,6 +100,8 @@ SPLIT_GRAPH = ['meta\t2\tTimeout'] + SAFE_GRAPH[1:] + ['node\t9\t13\t0\t0\t0\t1\
 TERMINAL_FLIP = ['node\t12\t33\t0\t2\t0\t1\t1\t2', 'edge\t11\t12\tuncommit']
 # Both participants abort in one step.
 DOUBLE_ABORT = ['node\t12\t33\t0\t0\t0\t1\t0\t2', 'edge\t2\t12\tabort_both']
+# A working participant commits directly.
+DIRECT_COMMIT = ['node\t12\t20\t0\t0\t0\t1\t1\t0', 'edge\t0\t12\tcommit_from_working']
 # An early commit that never splits, beside the timeout split trace.
 UNRELATED_EARLY_COMMIT = ['node\t12\t21\t0\t0\t0\t1\t1\t0', 'edge\t2\t12\tdeliver_commit0',
                           'node\t13\t21\t0\t2\t0\t1\t1\t0', 'edge\t12\t13\tpersist_commit',
@@ -171,6 +173,10 @@ class OracleGateTest(unittest.TestCase):
 
     def test_fault_mode_rejects_multi_participant_step(self):
         self.assert_rejected(SPLIT_GRAPH + DOUBLE_ABORT, 'one step changed two durable records')
+
+    def test_fault_mode_rejects_illegal_steps_beyond_its_mutant(self):
+        self.assert_rejected(SPLIT_GRAPH + DIRECT_COMMIT, 'fault graph has illegal steps beyond its mutant',
+                             '"abstract_step": 2')
 
     def test_fault_mode_accepts_split_with_stable_records(self):
         self.assertEqual(run_oracle(SPLIT_GRAPH).returncode, 0)

@@ -16,15 +16,17 @@ byte-identical to those from the tested source for all four configurations. The
 three-host runs used the checker at the tested source. The final checker and runner were re-run on the
 aarch64 Linux host only: graphs, state and transition counts, completion paths,
 witnesses, and every violation class recorded in `arm.json` matched exactly, except
-`abstract_step`: the tightened step relation also counts each prepared
-participant's abort from a state without durable ABORT, raising the timeout fault
-from 40 to 146, and each participant commit from a state without durable COMMIT,
-raising the early-COMMIT fault from 80 to 212. The revised checker also reports a
-`decision_mismatch` class, zero for both safe graphs, 80 for the timeout fault,
-and 150 for the early-COMMIT fault; a `two_durable_records` class that is zero
-for every graph; and the mutant-step classes `prepared_abort_before_decision`
-(126 in the timeout fault) and `commit_before_decision` (172 in the early-COMMIT
-fault), which each fault mode must exhibit. `arm.json` remains the record of the
+`abstract_step`: the step relation is now participant-local plus the durable
+decision, so it counts each prepared participant's abort without durable ABORT
+(126 in the timeout fault, previously 40) and each participant commit without
+durable COMMIT (172 in the early-COMMIT fault, previously 80); the global
+conditions it used to count are reported by the state-level classes. The revised
+checker also reports a `decision_mismatch` class, zero for both safe graphs, 80
+for the timeout fault, and 150 for the early-COMMIT fault; a `two_durable_records`
+class that is zero for every graph; and the mutant-step classes
+`prepared_abort_before_decision` (126) and `commit_before_decision` (172), which
+each fault mode must exhibit and which must account for every illegal step in
+that mode. `arm.json` remains the record of the
 three-host run at the tested source and is unchanged. The
 checker's own regression tests (`experiment/test_oracle.py`,
 `experiment/test_run.py`) passed. The macOS and x86_64 runs predate the checker
