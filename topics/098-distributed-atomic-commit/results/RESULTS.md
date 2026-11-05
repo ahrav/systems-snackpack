@@ -14,10 +14,13 @@ so every recorded graph comes from the shipped model. The three-host runs used t
 checker at the tested source. The final checker and runner were re-run on the
 aarch64 Linux host only: graphs, state and transition counts, completion paths,
 witnesses, and every violation class recorded in `arm.json` matched exactly, except
-that the tightened step relation raises the timeout fault's `abstract_step` count
-from 40 to 146 by also counting each prepared participant's unilateral abort. The
-revised checker also reports a `decision_mismatch` class, zero for both safe
-graphs, 80 for the timeout fault, and 150 for the early-COMMIT fault. The
+`abstract_step`: the tightened step relation also counts each prepared
+participant's abort from a state without durable ABORT, raising the timeout fault
+from 40 to 146, and each participant commit from a state without durable COMMIT,
+raising the early-COMMIT fault from 80 to 212. The revised checker also reports a
+`decision_mismatch` class, zero for both safe graphs, 80 for the timeout fault,
+and 150 for the early-COMMIT fault. `arm.json` remains the record of the
+three-host run at the tested source and is unchanged. The
 checker's own regression tests (`experiment/test_oracle.py`,
 `experiment/test_run.py`) passed. The macOS and x86_64 runs predate the checker
 revision.

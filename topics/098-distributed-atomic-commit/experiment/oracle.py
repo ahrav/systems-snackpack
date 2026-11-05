@@ -2,7 +2,8 @@
 """Check an abstract transaction specification, independently of Rust transitions.
 
 The oracle ignores implementation action labels when checking safety. It projects
-onto participant states and applies a separate declarative legal-step relation.
+onto participant states plus the durable coordinator decision and applies a
+separate declarative legal-step relation.
 Graph coverage is the explorer's responsibility; this checker validates its output.
 """
 import collections
@@ -43,7 +44,8 @@ def check(path):
             legal = ((old, new) == (0, 1)
                      or (old == 0 and new == 3 and 2 not in before)
                      or (old == 1 and new == 3 and 2 not in before and nodes[a][2] == 3)
-                     or (old == 1 and new == 2 and all(p in (1, 2) for p in before)))
+                     or (old == 1 and new == 2 and all(p in (1, 2) for p in before)
+                         and nodes[a][2] == 2))
         if not legal:
             violations['abstract_step'] += 1
         if nodes[a][2] in (2, 3) and nodes[b][2] != nodes[a][2]:
@@ -63,14 +65,15 @@ def check(path):
     terminal = set()
     # A sends 10 to B; third participant audits the transaction with delta zero.
     delta = (-10, 10, 0)[:n]
-    for i, (p, votes, decision, volatile, alive, commits, aborts) in nodes.items():
+    for i in parents:
+        p, votes, decision, volatile, alive, commits, aborts = nodes[i]
         if 2 in p and 3 in p:
             violations['agreement'] += 1
             if bad is None:
                 bad = i
         if 2 in p and any(x not in (1, 2) for x in p):
             violations['commit_validity'] += 1
-        if (2 in p and decision != 2) or (3 in p and decision == 2):
+        if (2 in p and decision != 2) or (decision == 2 and any(x not in (1, 2) for x in p)):
             violations['decision_mismatch'] += 1
         if all(x in (2, 3) for x in p):
             terminal.add(i)

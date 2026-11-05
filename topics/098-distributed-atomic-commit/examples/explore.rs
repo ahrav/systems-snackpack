@@ -22,5 +22,5 @@ fn main() -> io::Result<()> {
     for (from, to, label) in g.edges {
         writeln!(out, "edge\t{from}\t{to}\t{label}")?;
     }
-    Ok(())
+    out.flush()
 }

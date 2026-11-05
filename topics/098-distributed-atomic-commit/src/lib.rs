@@ -42,6 +42,9 @@ pub struct State {
 
 impl State {
     /// Export fields for a separately implemented abstract-specification checker.
+    ///
+    /// # Panics
+    /// Panics when `n` exceeds the three stored participant slots.
     pub fn fields(self, n: usize) -> String {
         let p: String = self.participants[..n]
             .iter()
