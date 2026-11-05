@@ -41,7 +41,8 @@ def check(path):
             i = changed[0]
             old, new = before[i], after[i]
             legal = ((old, new) == (0, 1)
-                     or (old in (0, 1) and new == 3 and 2 not in before)
+                     or (old == 0 and new == 3 and 2 not in before)
+                     or (old == 1 and new == 3 and 2 not in before and nodes[a][2] == 3)
                      or (old == 1 and new == 2 and all(p in (1, 2) for p in before)))
         if not legal:
             violations['abstract_step'] += 1

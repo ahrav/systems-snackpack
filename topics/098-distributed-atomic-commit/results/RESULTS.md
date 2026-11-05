@@ -13,7 +13,9 @@ Rust model, explorer, and Cargo manifests are byte-identical to the tested sourc
 so every recorded graph comes from the shipped model. The three-host runs used the
 checker at the tested source. The final checker and runner were re-run on the
 aarch64 Linux host only: graphs, state and transition counts, completion paths,
-witnesses, and every violation class recorded in `arm.json` matched exactly. The
+witnesses, and every violation class recorded in `arm.json` matched exactly, except
+that the tightened step relation raises the timeout fault's `abstract_step` count
+from 40 to 146 by also counting each prepared participant's unilateral abort. The
 revised checker also reports a `decision_mismatch` class, zero for both safe
 graphs, 80 for the timeout fault, and 150 for the early-COMMIT fault. The
 checker's own regression tests (`experiment/test_oracle.py`,

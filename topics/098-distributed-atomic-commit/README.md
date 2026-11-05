@@ -44,7 +44,8 @@ membership, multiple transaction IDs, acknowledgment tracking, log reclamation,
 real locks, reads, and physical network/storage I/O require a richer model.
 
 The independent Python oracle projects each edge onto participant states. Its
-abstract legal-step relation permits preparation, abort before any commitment,
+abstract legal-step relation permits preparation, abort by a working participant
+before any commitment, abort by a prepared participant only after durable ABORT,
 and commitment after every participant prepared. It also checks terminal
 stability, decision stability, agreement, commit validity, consistency between
 terminal participants and the durable decision, and terminal balance
