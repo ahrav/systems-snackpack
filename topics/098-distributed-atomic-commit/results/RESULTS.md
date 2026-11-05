@@ -9,9 +9,11 @@ Source archive SHA256:
 `8ad1b45bdbc8748c8d59b424edf1fea1a80e2ac972950bb5c9dc12bcaae6f4ce`.
 All nine archive file members were compared with Git. Both Linux transfer hashes
 matched. Later commits add results and revise the Python checker and runner. The
-Rust model, explorer, and Cargo manifests are byte-identical to the tested source,
-so every recorded graph comes from the shipped model. The three-host runs used the
-checker at the tested source. The final checker and runner were re-run on the
+Rust transition logic and Cargo manifests are byte-identical to the tested source;
+`src/lib.rs` gained a doc comment and `examples/explore.rs` now flushes its
+writer explicitly, and the explorer built from the final source emits graphs
+byte-identical to those from the tested source for all four configurations. The
+three-host runs used the checker at the tested source. The final checker and runner were re-run on the
 aarch64 Linux host only: graphs, state and transition counts, completion paths,
 witnesses, and every violation class recorded in `arm.json` matched exactly, except
 `abstract_step`: the tightened step relation also counts each prepared

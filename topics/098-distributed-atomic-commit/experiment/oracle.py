@@ -48,7 +48,7 @@ def check(path):
                          and nodes[a][2] == 2))
         if not legal:
             violations['abstract_step'] += 1
-        if nodes[a][2] in (2, 3) and nodes[b][2] != nodes[a][2]:
+        if nodes[a][2] != nodes[b][2] and not (nodes[a][2] == 0 and nodes[b][2] in (2, 3)):
             violations['decision_changed'] += 1
         if changed and nodes[b][2] != nodes[a][2]:
             violations['two_durable_records'] += 1

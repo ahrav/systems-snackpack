@@ -47,6 +47,10 @@ COMMIT_BEFORE_PREPARE = SAFE_GRAPH + ['node\t9\t10\t0\t2\t0\t1\t0\t0',
 DECISION_FLIP = SAFE_GRAPH + ['node\t9\t11\t0\t3\t0\t1\t0\t0',
                               'edge\t3\t9\tflip_decision',
                               'edge\t9\t7\tabort0']
+# The undecided coordinator detours through a decision value outside {0, 2, 3}.
+DECISION_DETOUR = SAFE_GRAPH + ['node\t9\t00\t0\t4\t0\t1\t0\t0',
+                                'edge\t0\t9\tdecision_to_4',
+                                'edge\t9\t0\tdecision_back']
 # A rejecting participant leaves the transaction in a state with no way to finish.
 DEAD_END = SAFE_GRAPH + ['node\t9\t30\t0\t0\t0\t1\t0\t1',
                          'edge\t0\t9\treject0']
@@ -54,6 +58,8 @@ DEAD_END = SAFE_GRAPH + ['node\t9\t30\t0\t0\t0\t1\t0\t1',
 TWO_RECORDS = SAFE_GRAPH + ['node\t9\t30\t0\t3\t0\t1\t0\t1',
                             'edge\t0\t9\treject0_and_persist_abort',
                             'edge\t9\t8\tabort1']
+# One step prepares the last participant and persists COMMIT.
+PREPARE_WITH_DECISION = SAFE_GRAPH + ['edge\t1\t3\tprepare1_and_persist_commit']
 
 
 def without_branch(first_node):
@@ -131,9 +137,11 @@ class OracleGateTest(unittest.TestCase):
 
     def test_every_mode_rejects_decision_change(self):
         self.assert_rejected(DECISION_FLIP, 'durable decision changed')
+        self.assert_rejected(DECISION_DETOUR, 'durable decision changed', '"decision_changed": 2')
 
     def test_every_mode_rejects_two_durable_records_in_one_step(self):
         self.assert_rejected(TWO_RECORDS, 'one step changed two durable records')
+        self.assert_rejected(PREPARE_WITH_DECISION, 'one step changed two durable records')
 
     def test_safe_mode_rejects_state_without_completion_path(self):
         self.assert_rejected(DEAD_END, 'state without a completion path')
