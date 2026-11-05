@@ -7,7 +7,7 @@ The later publication commit adds documentation and results; tested Rust/oracle 
 
 | Host | Correctness | Output digest |
 |---|---|---|
-| macOS 25.6 arm64 | 3,180 schedules; 61,980 state comparisons | `4465552cca441a1d9ff9f86f3d875c9988e82144b518514e9379aa42b643114c` |
+| macOS arm64 (Darwin 25.6) | 3,180 schedules; 61,980 state comparisons | `4465552cca441a1d9ff9f86f3d875c9988e82144b518514e9379aa42b643114c` |
 | dev-dsk-ahrav-2b-7dc7bd93, Linux aarch64 | 3,180 schedules; 61,980 state comparisons | same |
 | xxl, Linux x86_64, Xeon Platinum 8488C | 3,180 schedules; 61,980 state comparisons | same |
 
