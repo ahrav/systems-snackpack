@@ -98,6 +98,12 @@ SPLIT_GRAPH = ['meta\t2\tTimeout'] + SAFE_GRAPH[1:] + ['node\t9\t13\t0\t0\t0\t1\
                                                      'edge\t10\t11\tcommit0']
 # The committed participant then flips to aborted.
 TERMINAL_FLIP = ['node\t12\t33\t0\t2\t0\t1\t1\t2', 'edge\t11\t12\tuncommit']
+# Both participants abort in one step.
+DOUBLE_ABORT = ['node\t12\t33\t0\t0\t0\t1\t0\t2', 'edge\t2\t12\tabort_both']
+# An early commit that never splits, beside the timeout split trace.
+UNRELATED_EARLY_COMMIT = ['node\t12\t21\t0\t0\t0\t1\t1\t0', 'edge\t2\t12\tdeliver_commit0',
+                          'node\t13\t21\t0\t2\t0\t1\t1\t0', 'edge\t12\t13\tpersist_commit',
+                          'edge\t13\t5\tcommit1']
 
 
 def run_oracle(lines, *interpreter_flags):
@@ -157,6 +163,14 @@ class OracleGateTest(unittest.TestCase):
     def test_fault_mode_requires_its_own_mutant_step(self):
         self.assert_rejected(['meta\t2\tEarly'] + SPLIT_GRAPH[1:], 'Early graph lacks its mutant step',
                              '"prepared_abort_before_decision": 1')
+
+    def test_fault_witness_descends_from_the_mode_mutant_step(self):
+        self.assert_rejected(['meta\t2\tEarly'] + SPLIT_GRAPH[1:] + UNRELATED_EARLY_COMMIT,
+                             'fault needs a witness through its mutant step',
+                             '"commit_before_decision": 1')
+
+    def test_fault_mode_rejects_multi_participant_step(self):
+        self.assert_rejected(SPLIT_GRAPH + DOUBLE_ABORT, 'one step changed two durable records')
 
     def test_fault_mode_accepts_split_with_stable_records(self):
         self.assertEqual(run_oracle(SPLIT_GRAPH).returncode, 0)

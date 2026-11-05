@@ -32,6 +32,8 @@ def check(path):
     violations = collections.Counter()
     parents: dict = {0: None}
     forward, reverse = collections.defaultdict(list), collections.defaultdict(list)
+    mutant_step = {'Timeout': 'prepared_abort_before_decision', 'Early': 'commit_before_decision'}
+    mutant_edges = set()
     for a, b, label in edges:
         forward[a].append((b, label))
         reverse[b].append(a)
@@ -48,23 +50,29 @@ def check(path):
                          and nodes[a][2] == 2))
             if (old, new) == (1, 3) and nodes[a][2] != 3:
                 violations['prepared_abort_before_decision'] += 1
+                mutant_edges.add((a, b, 'prepared_abort_before_decision'))
             if (old, new) == (1, 2) and nodes[a][2] != 2:
                 violations['commit_before_decision'] += 1
+                mutant_edges.add((a, b, 'commit_before_decision'))
         if not legal:
             violations['abstract_step'] += 1
         if nodes[a][2] != nodes[b][2] and not (nodes[a][2] == 0 and nodes[b][2] in (2, 3)):
             violations['decision_changed'] += 1
-        if changed and nodes[b][2] != nodes[a][2]:
+        if len(changed) + (nodes[b][2] != nodes[a][2]) > 1:
             violations['two_durable_records'] += 1
         for i in range(n):
             if before[i] in (2, 3) and after[i] != before[i]:
                 violations['terminal_changed'] += 1
+    # A fault witness must pass through the requested mode's mutant step.
+    wanted = mutant_step.get(mode)
+    through_mutant = {0: wanted is None}
     queue = collections.deque([0])
     while queue:
         a = queue.popleft()
         for b, label in forward[a]:
             if b not in parents:
                 parents[b] = (a, label)
+                through_mutant[b] = through_mutant[a] or (a, b, wanted) in mutant_edges
                 queue.append(b)
     require(len(parents) == len(nodes), 'unreachable exported node')
     bad = None
@@ -75,7 +83,7 @@ def check(path):
         p, votes, decision, volatile, alive, commits, aborts = nodes[i]
         if 2 in p and 3 in p:
             violations['agreement'] += 1
-            if bad is None:
+            if bad is None and through_mutant[i]:
                 bad = i
         if 2 in p and any(x not in (1, 2) for x in p):
             violations['commit_validity'] += 1
@@ -112,10 +120,9 @@ def check(path):
         require(any(p == (2,) * n for p, *_ in nodes.values()), 'no uniform commit state')
         require(any(p == (3,) * n for p, *_ in nodes.values()), 'no uniform abort state')
     else:
-        mutant_step = {'Timeout': 'prepared_abort_before_decision', 'Early': 'commit_before_decision'}
         require(violations[mutant_step[mode]] > 0, f'{mode} graph lacks its mutant step')
         require(violations['agreement'] > 0, 'fault was not detected')
-        require(witness, 'fault needs a reachable witness')
+        require(witness, 'fault needs a witness through its mutant step')
 
 
 if __name__ == '__main__':
