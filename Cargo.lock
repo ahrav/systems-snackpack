@@ -108,6 +108,10 @@ name = "database-index-internals"
 version = "0.1.0"
 
 [[package]]
+name = "distributed-atomic-commit"
+version = "0.1.0"
+
+[[package]]
 name = "distributed-time-ordering"
 version = "0.1.0"
 
