@@ -24,11 +24,11 @@ if cpu.exists():
 (out / 'host.json').write_text(json.dumps(metadata, indent=2) + '\n')
 with (out / 'cargo-test.log').open('w') as log:
     run(['cargo', '+1.93.1', 'test', '-p', 'distributed-atomic-commit'], stdout=log, stderr=subprocess.STDOUT)
-run(['cargo', '+1.93.1', 'build', '-p', 'distributed-atomic-commit', '--example', 'explore'])
 for mode, n in [('safe', 2), ('safe', 3), ('timeout', 2), ('early', 2)]:
     graph = out / f'{mode}-{n}.tsv'
     with graph.open('w') as stream:
-        run([str(root / 'target/debug/examples/explore'), mode, str(n)], stdout=stream)
+        run(['cargo', '+1.93.1', 'run', '-q', '-p', 'distributed-atomic-commit', '--example', 'explore',
+             '--', mode, str(n)], stdout=stream)
     with (out / f'{mode}-{n}.json').open('w') as stream:
         run([sys.executable, str(topic / 'experiment/oracle.py'), str(graph)], stdout=stream)
 (out / 'sha256.json').write_text(json.dumps({p.name: hashlib.sha256(p.read_bytes()).hexdigest()

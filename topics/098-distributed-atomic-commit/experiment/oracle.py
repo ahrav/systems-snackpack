@@ -10,8 +10,14 @@ import json
 import sys
 
 
+def require(condition, message):
+    """Fail the check with a nonzero exit; an explicit check survives ``python -O``."""
+    if not condition:
+        sys.exit('oracle: ' + message)
+
+
 def check(path):
-    nodes, edges = {}, []
+    nodes, edges, n, mode = {}, [], 0, ''
     with open(path) as stream:
         for line in stream:
             f = line.rstrip().split('\t')
@@ -21,9 +27,10 @@ def check(path):
                 nodes[int(f[1])] = (tuple(map(int, f[2])), *map(int, f[3:]))
             elif f[0] == 'edge':
                 edges.append((int(f[1]), int(f[2]), f[3]))
-    assert nodes[0] == ((0,) * n, 0, 0, 0, 1, 0, 0)
+    require(nodes[0] == ((0,) * n, 0, 0, 0, 1, 0, 0), 'initial state mismatch')
     violations = collections.Counter()
-    parents, forward, reverse = {0: None}, collections.defaultdict(list), collections.defaultdict(list)
+    parents: dict = {0: None}
+    forward, reverse = collections.defaultdict(list), collections.defaultdict(list)
     for a, b, label in edges:
         forward[a].append((b, label))
         reverse[b].append(a)
@@ -50,7 +57,7 @@ def check(path):
             if b not in parents:
                 parents[b] = (a, label)
                 queue.append(b)
-    assert len(parents) == len(nodes), 'unreachable exported node'
+    require(len(parents) == len(nodes), 'unreachable exported node')
     bad = None
     terminal = set()
     # A sends 10 to B; third participant audits the transaction with delta zero.
@@ -84,14 +91,16 @@ def check(path):
                   violations=dict(violations), states_with_completion_path=len(can_finish),
                   witness=list(reversed(witness)))
     print(json.dumps(result, indent=2))
+    require(not violations['terminal_changed'], 'terminal record changed')
+    require(not violations['decision_changed'], 'durable decision changed')
     if mode == 'Safe':
-        assert not violations, 'safe model violates abstract specification'
-        assert len(can_finish) == len(nodes), 'state without a completion path'
-        assert any(p == (2,) * n for p, *_ in nodes.values())
-        assert any(p == (3,) * n for p, *_ in nodes.values())
+        require(not violations, 'safe model violates abstract specification')
+        require(len(can_finish) == len(nodes), 'state without a completion path')
+        require(any(p == (2,) * n for p, *_ in nodes.values()), 'no uniform commit state')
+        require(any(p == (3,) * n for p, *_ in nodes.values()), 'no uniform abort state')
     else:
-        assert violations['agreement'] > 0, 'fault was not detected'
-        assert witness, 'fault needs a reachable witness'
+        require(violations['agreement'] > 0, 'fault was not detected')
+        require(witness, 'fault needs a reachable witness')
 
 
 if __name__ == '__main__':
