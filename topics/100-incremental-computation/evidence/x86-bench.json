@@ -1,0 +1,408 @@
+{
+  "platform": "Linux-6.12.113-138.209.amzn2023.x86_64-x86_64-with-glibc2.34",
+  "machine": "x86_64",
+  "cpu": 0,
+  "criterion": "winner must exceed 5 percent in every pair; otherwise unresolved",
+  "cells": [
+    {
+      "n": 65536,
+      "k": 1,
+      "rounds": 200,
+      "samples": [
+        {
+          "delta": {
+            "ns_per_batch": 37.81,
+            "checksum": 78643200
+          },
+          "recompute": {
+            "ns_per_batch": 37545.33,
+            "checksum": 78643200
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 36993.115,
+            "checksum": 78643200
+          },
+          "delta": {
+            "ns_per_batch": 35.245,
+            "checksum": 78643200
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 91.835,
+            "checksum": 78643200
+          },
+          "recompute": {
+            "ns_per_batch": 36864.915,
+            "checksum": 78643200
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 36760.415,
+            "checksum": 78643200
+          },
+          "delta": {
+            "ns_per_batch": 35.605,
+            "checksum": 78643200
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 35.395,
+            "checksum": 78643200
+          },
+          "recompute": {
+            "ns_per_batch": 37149.68,
+            "checksum": 78643200
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 37249.92,
+            "checksum": 78643200
+          },
+          "delta": {
+            "ns_per_batch": 35.015,
+            "checksum": 78643200
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 35.725,
+            "checksum": 78643200
+          },
+          "recompute": {
+            "ns_per_batch": 36807.735,
+            "checksum": 78643200
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 36766.785,
+            "checksum": 78643200
+          },
+          "delta": {
+            "ns_per_batch": 36.45,
+            "checksum": 78643200
+          }
+        }
+      ],
+      "stats": {
+        "delta": {
+          "median_ns": 35.665,
+          "min_ns": 35.015,
+          "max_ns": 91.835
+        },
+        "recompute": {
+          "median_ns": 36929.015,
+          "min_ns": 36760.415,
+          "max_ns": 37545.33
+        }
+      },
+      "winner": "delta"
+    },
+    {
+      "n": 65536,
+      "k": 256,
+      "rounds": 100,
+      "samples": [
+        {
+          "delta": {
+            "ns_per_batch": 8643.27,
+            "checksum": 39321600
+          },
+          "recompute": {
+            "ns_per_batch": 45047.44,
+            "checksum": 39321600
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 44584.36,
+            "checksum": 39321600
+          },
+          "delta": {
+            "ns_per_batch": 8377.88,
+            "checksum": 39321600
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 7905.02,
+            "checksum": 39321600
+          },
+          "recompute": {
+            "ns_per_batch": 44388.48,
+            "checksum": 39321600
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 44963.13,
+            "checksum": 39321600
+          },
+          "delta": {
+            "ns_per_batch": 7903.71,
+            "checksum": 39321600
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 8055.13,
+            "checksum": 39321600
+          },
+          "recompute": {
+            "ns_per_batch": 44874,
+            "checksum": 39321600
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 45191.62,
+            "checksum": 39321600
+          },
+          "delta": {
+            "ns_per_batch": 8034.6,
+            "checksum": 39321600
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 8169.68,
+            "checksum": 39321600
+          },
+          "recompute": {
+            "ns_per_batch": 44918.19,
+            "checksum": 39321600
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 44815.81,
+            "checksum": 39321600
+          },
+          "delta": {
+            "ns_per_batch": 7891.77,
+            "checksum": 39321600
+          }
+        }
+      ],
+      "stats": {
+        "delta": {
+          "median_ns": 8044.865,
+          "min_ns": 7891.77,
+          "max_ns": 8643.27
+        },
+        "recompute": {
+          "median_ns": 44896.095,
+          "min_ns": 44388.48,
+          "max_ns": 45191.62
+        }
+      },
+      "winner": "delta"
+    },
+    {
+      "n": 65536,
+      "k": 65536,
+      "rounds": 8,
+      "samples": [
+        {
+          "delta": {
+            "ns_per_batch": 6321649.375,
+            "checksum": 3145728
+          },
+          "recompute": {
+            "ns_per_batch": 6330548.375,
+            "checksum": 3145728
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 6328135.5,
+            "checksum": 3145728
+          },
+          "delta": {
+            "ns_per_batch": 6328378.5,
+            "checksum": 3145728
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 6334306.625,
+            "checksum": 3145728
+          },
+          "recompute": {
+            "ns_per_batch": 6319525.375,
+            "checksum": 3145728
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 6327237.25,
+            "checksum": 3145728
+          },
+          "delta": {
+            "ns_per_batch": 6341062.75,
+            "checksum": 3145728
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 6340545.5,
+            "checksum": 3145728
+          },
+          "recompute": {
+            "ns_per_batch": 6352660.75,
+            "checksum": 3145728
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 6316143.125,
+            "checksum": 3145728
+          },
+          "delta": {
+            "ns_per_batch": 6338988,
+            "checksum": 3145728
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 6329560.125,
+            "checksum": 3145728
+          },
+          "recompute": {
+            "ns_per_batch": 6353002.625,
+            "checksum": 3145728
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 6327551.625,
+            "checksum": 3145728
+          },
+          "delta": {
+            "ns_per_batch": 6320925,
+            "checksum": 3145728
+          }
+        }
+      ],
+      "stats": {
+        "delta": {
+          "median_ns": 6331933.375,
+          "min_ns": 6320925,
+          "max_ns": 6341062.75
+        },
+        "recompute": {
+          "median_ns": 6327843.5625,
+          "min_ns": 6316143.125,
+          "max_ns": 6353002.625
+        }
+      },
+      "winner": "unresolved"
+    },
+    {
+      "n": 8,
+      "k": 8,
+      "rounds": 2000,
+      "samples": [
+        {
+          "delta": {
+            "ns_per_batch": 132.286,
+            "checksum": 96000
+          },
+          "recompute": {
+            "ns_per_batch": 145.5365,
+            "checksum": 96000
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 126.091,
+            "checksum": 96000
+          },
+          "delta": {
+            "ns_per_batch": 133.565,
+            "checksum": 96000
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 137.962,
+            "checksum": 96000
+          },
+          "recompute": {
+            "ns_per_batch": 155.424,
+            "checksum": 96000
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 160.6265,
+            "checksum": 96000
+          },
+          "delta": {
+            "ns_per_batch": 133.492,
+            "checksum": 96000
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 149.251,
+            "checksum": 96000
+          },
+          "recompute": {
+            "ns_per_batch": 151.4215,
+            "checksum": 96000
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 153.775,
+            "checksum": 96000
+          },
+          "delta": {
+            "ns_per_batch": 140.149,
+            "checksum": 96000
+          }
+        },
+        {
+          "delta": {
+            "ns_per_batch": 131.593,
+            "checksum": 96000
+          },
+          "recompute": {
+            "ns_per_batch": 127.815,
+            "checksum": 96000
+          }
+        },
+        {
+          "recompute": {
+            "ns_per_batch": 154.927,
+            "checksum": 96000
+          },
+          "delta": {
+            "ns_per_batch": 131.7085,
+            "checksum": 96000
+          }
+        }
+      ],
+      "stats": {
+        "delta": {
+          "median_ns": 133.5285,
+          "min_ns": 131.593,
+          "max_ns": 149.251
+        },
+        "recompute": {
+          "median_ns": 152.59825,
+          "min_ns": 126.091,
+          "max_ns": 160.6265
+        }
+      },
+      "winner": "unresolved"
+    }
+  ]
+}

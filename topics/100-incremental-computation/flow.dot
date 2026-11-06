@@ -1,0 +1,11 @@
+digraph G {
+rankdir=LR; graph [bgcolor="#f8fafc",pad="0.3",nodesep="0.5",ranksep="0.65",label="Topic 100 | Maintaining a join count",labelloc=t,fontname="Helvetica",fontsize=22];
+node [shape=box,style="rounded,filled",fillcolor="#e0e7ff",color="#475569",fontname="Helvetica",fontsize=15,margin="0.18,0.13"];
+edge [color="#475569",fontname="Helvetica",fontsize=13];
+a [label="Old counts for key k\nOrders A = 2\nEligible rows B = 3\nJoin count = 6"];
+b [label="One atomic batch\ndA = +1\ndB = -1",fillcolor="#fef3c7"];
+c [label="Delta join\ndA*B + A*dB + dA*dB\n3 - 2 - 1 = 0",fillcolor="#dcfce7"];
+d [label="New counts\nA = 3, B = 2\nJoin count = 6"];
+e [label="Omitting the cross term\npredicts delta +1\nWrong count = 7",fillcolor="#fee2e2"];
+a->b->c->d; b->e [style=dashed];
+}
