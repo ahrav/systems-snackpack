@@ -1,0 +1,4 @@
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+ProductName:		macOS
+ProductVersion:		26.7.2
+BuildVersion:		25G332
