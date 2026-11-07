@@ -11,8 +11,8 @@
   },
   "gate-fmt.log": {
     "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "repository_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-    "normalization": "strip trailing whitespace at file end, retain one newline"
+    "repository_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "normalization": "empty log retained unchanged"
   },
   "gate-test.log": {
     "raw_sha256": "e6c03983e579875c0f472f3dc20c1d9759d359a03c077f6fd5a2e50ee55f33cd",
