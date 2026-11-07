@@ -79,4 +79,50 @@ mod tests {
         }
         assert_eq!(prev, data.len());
     }
+
+    fn window_oracle(data: &[u8]) -> Vec<usize> {
+        let (mut ends, mut start) = (Vec::new(), 0);
+        for end in 1..=data.len() {
+            let fp = data[start.max(end.saturating_sub(64))..end]
+                .iter()
+                .fold(0_u64, |acc, b| {
+                    acc.wrapping_mul(257).wrapping_add(u64::from(*b))
+                });
+            if end - start >= 16384 || (end - start >= 2048 && fp & 4095 == 0) {
+                ends.push(end);
+                start = end;
+            }
+        }
+        if start < data.len() {
+            ends.push(data.len());
+        }
+        ends
+    }
+
+    #[test]
+    fn rolling_window_matches_direct_oracle() {
+        let mut state = 0x9E37_79B9_7F4A_7C15_u64;
+        let data: Vec<u8> = (0..40000)
+            .map(|_| {
+                state = state
+                    .wrapping_mul(6_364_136_223_846_793_005)
+                    .wrapping_add(1_442_695_040_888_963_407);
+                (state >> 56) as u8
+            })
+            .collect();
+        let ends = boundaries(&data, Policy::Content);
+        assert_eq!(ends, window_oracle(&data));
+        assert!(
+            ends[0] < 16384,
+            "first cut must come from the fingerprint, not the ceiling"
+        );
+    }
+
+    #[test]
+    fn whole_and_fixed_edges() {
+        assert!(boundaries(&[], Policy::Whole).is_empty());
+        assert_eq!(boundaries(&[7; 3], Policy::Whole), vec![3]);
+        assert!(boundaries(&[], Policy::Fixed).is_empty());
+        assert_eq!(boundaries(&[0; 4096], Policy::Fixed), vec![4096]);
+    }
 }

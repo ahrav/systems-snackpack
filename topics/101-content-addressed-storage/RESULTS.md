@@ -62,3 +62,9 @@ Writing and full-branch whitespace checks pass; logs are retained.
 The source archive transfers have matching SHA-256 hashes. Only the temporary root
 workspace member glob is narrowed for isolated Linux builds; implementation, checker,
 driver, package manifest and toolchain bytes remain exact committed source.
+Commits after the campaign change validation code only: `experiment/cas.py` refuses
+optimized Python, `experiment/check.py` compares stored chunk payloads as an exact
+set, and `src/lib.rs` gains unit tests under `#[cfg(test)]`. The `boundaries`
+function, the `chunks` example, `bench.py`, the package manifest and the toolchain
+pin are byte-identical to the tested commit, and the hardened checker reproduces
+171 comparisons against the same chunker locally.
