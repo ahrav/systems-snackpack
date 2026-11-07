@@ -1,0 +1,42 @@
+{
+  "gate-doctest.log": {
+    "raw_sha256": "f74e3fee5cf0bb158911d3928f7534438d10833cec4a36297b8ff9e754ba286e",
+    "repository_sha256": "f74e3fee5cf0bb158911d3928f7534438d10833cec4a36297b8ff9e754ba286e",
+    "normalization": "strip trailing whitespace at file end, retain one newline"
+  },
+  "gate-bench.log": {
+    "raw_sha256": "6da8e2e035a4fa2718c92de964e1b6a919ecda245e3eeb8a62db6110273bb465",
+    "repository_sha256": "6da8e2e035a4fa2718c92de964e1b6a919ecda245e3eeb8a62db6110273bb465",
+    "normalization": "strip trailing whitespace at file end, retain one newline"
+  },
+  "gate-fmt.log": {
+    "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "repository_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "normalization": "strip trailing whitespace at file end, retain one newline"
+  },
+  "gate-test.log": {
+    "raw_sha256": "e6c03983e579875c0f472f3dc20c1d9759d359a03c077f6fd5a2e50ee55f33cd",
+    "repository_sha256": "bc601b5a2751d0ca90ac9c0f6be8c78fe22494bd74a6806b1da23780c35938be",
+    "normalization": "strip trailing whitespace at file end, retain one newline"
+  },
+  "arm-check.log": {
+    "raw_sha256": "ebead2a530c0edb2337949d4b580d4c12b8fbfdd37656bff9a2e8f7b8f901f7c",
+    "repository_sha256": "ebead2a530c0edb2337949d4b580d4c12b8fbfdd37656bff9a2e8f7b8f901f7c",
+    "normalization": "strip trailing whitespace at file end, retain one newline"
+  },
+  "gate-doc.log": {
+    "raw_sha256": "ca57a444616331003c2da4c8b83baa194bb8e8d3ec21b9900c7d1d1db0277b7c",
+    "repository_sha256": "ca57a444616331003c2da4c8b83baa194bb8e8d3ec21b9900c7d1d1db0277b7c",
+    "normalization": "strip trailing whitespace at file end, retain one newline"
+  },
+  "x86-check.log": {
+    "raw_sha256": "767fddf43fe315fdb7d397914df1df7d42028916ecb0fab43900f68506cfd496",
+    "repository_sha256": "767fddf43fe315fdb7d397914df1df7d42028916ecb0fab43900f68506cfd496",
+    "normalization": "strip trailing whitespace at file end, retain one newline"
+  },
+  "gate-clippy.log": {
+    "raw_sha256": "7b9e58d07cbdc2bd33c363e1f5a474cf5d4bef87e2209776ff7780f05ef5ac39",
+    "repository_sha256": "7b9e58d07cbdc2bd33c363e1f5a474cf5d4bef87e2209776ff7780f05ef5ac39",
+    "normalization": "strip trailing whitespace at file end, retain one newline"
+  }
+}
