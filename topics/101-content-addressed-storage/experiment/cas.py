@@ -2,6 +2,9 @@
 from hashlib import sha256
 import struct
 import subprocess
+import sys
+if sys.flags.optimize:
+    raise SystemExit('validation uses assert: run without python -O or PYTHONOPTIMIZE')
 
 
 def digest(data):

@@ -38,7 +38,7 @@ def main(binary):
             store = Store()
             root = store.publish("a", got)
             assert store.restore(root) == data
-            assert sum(len(v) - 9 for v in store.objects.values() if v.startswith(b"chunk-v1\0")) == sum(map(len, set(expected)))
+            assert {v[9:] for v in store.objects.values() if v.startswith(b"chunk-v1\0")} == set(expected)
             comparisons += 1
     s = Store()
     a = s.publish("a", [b"a", b"b", b"a"])
