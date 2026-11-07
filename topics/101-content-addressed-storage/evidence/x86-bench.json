@@ -1,0 +1,906 @@
+{
+  "affinity": [
+    0
+  ],
+  "cells": {
+    "identical": {
+      "cdc": [
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.372093023256,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.606655660328,
+          "encoded_bytes": 1055648,
+          "logical": 2097152,
+          "ns": 12673724,
+          "objects": 173,
+          "payload": 1048576,
+          "refs": 344
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.372093023256,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.606655660328,
+          "encoded_bytes": 1055648,
+          "logical": 2097152,
+          "ns": 12519726,
+          "objects": 173,
+          "payload": 1048576,
+          "refs": 344
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.372093023256,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.606655660328,
+          "encoded_bytes": 1055648,
+          "logical": 2097152,
+          "ns": 12431366,
+          "objects": 173,
+          "payload": 1048576,
+          "refs": 344
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.372093023256,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.606655660328,
+          "encoded_bytes": 1055648,
+          "logical": 2097152,
+          "ns": 12725807,
+          "objects": 173,
+          "payload": 1048576,
+          "refs": 344
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.372093023256,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.606655660328,
+          "encoded_bytes": 1055648,
+          "logical": 2097152,
+          "ns": 12555614,
+          "objects": 173,
+          "payload": 1048576,
+          "refs": 344
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.372093023256,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.606655660328,
+          "encoded_bytes": 1055648,
+          "logical": 2097152,
+          "ns": 12458126,
+          "objects": 173,
+          "payload": 1048576,
+          "refs": 344
+        }
+      ],
+      "fixed": [
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1059092,
+          "logical": 2097152,
+          "ns": 9693883,
+          "objects": 257,
+          "payload": 1048576,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1059092,
+          "logical": 2097152,
+          "ns": 9761124,
+          "objects": 257,
+          "payload": 1048576,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1059092,
+          "logical": 2097152,
+          "ns": 9623141,
+          "objects": 257,
+          "payload": 1048576,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1059092,
+          "logical": 2097152,
+          "ns": 9592584,
+          "objects": 257,
+          "payload": 1048576,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1059092,
+          "logical": 2097152,
+          "ns": 9685899,
+          "objects": 257,
+          "payload": 1048576,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1059092,
+          "logical": 2097152,
+          "ns": 9563050,
+          "objects": 257,
+          "payload": 1048576,
+          "refs": 512
+        }
+      ],
+      "whole": [
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1048637,
+          "logical": 2097152,
+          "ns": 8394330,
+          "objects": 2,
+          "payload": 1048576,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1048637,
+          "logical": 2097152,
+          "ns": 8764590,
+          "objects": 2,
+          "payload": 1048576,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1048637,
+          "logical": 2097152,
+          "ns": 8319579,
+          "objects": 2,
+          "payload": 1048576,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1048637,
+          "logical": 2097152,
+          "ns": 8289453,
+          "objects": 2,
+          "payload": 1048576,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1048637,
+          "logical": 2097152,
+          "ns": 8402304,
+          "objects": 2,
+          "payload": 1048576,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1048637,
+          "logical": 2097152,
+          "ns": 8316077,
+          "objects": 2,
+          "payload": 1048576,
+          "refs": 2
+        }
+      ]
+    },
+    "insert": {
+      "cdc": [
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.375,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.613588272895,
+          "encoded_bytes": 1091547,
+          "logical": 2097153,
+          "ns": 12591779,
+          "objects": 176,
+          "payload": 1078933,
+          "refs": 344
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.375,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.613588272895,
+          "encoded_bytes": 1091547,
+          "logical": 2097153,
+          "ns": 12507568,
+          "objects": 176,
+          "payload": 1078933,
+          "refs": 344
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.375,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.613588272895,
+          "encoded_bytes": 1091547,
+          "logical": 2097153,
+          "ns": 12516294,
+          "objects": 176,
+          "payload": 1078933,
+          "refs": 344
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.375,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.613588272895,
+          "encoded_bytes": 1091547,
+          "logical": 2097153,
+          "ns": 12725308,
+          "objects": 176,
+          "payload": 1078933,
+          "refs": 344
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.375,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.613588272895,
+          "encoded_bytes": 1091547,
+          "logical": 2097153,
+          "ns": 12933118,
+          "objects": 176,
+          "payload": 1078933,
+          "refs": 344
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6096.375,
+          "chunk_min": 2064,
+          "chunk_stdev": 3302.613588272895,
+          "encoded_bytes": 1091547,
+          "logical": 2097153,
+          "ns": 12850530,
+          "objects": 176,
+          "payload": 1078933,
+          "refs": 344
+        }
+      ],
+      "fixed": [
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4088.0175438596493,
+          "chunk_min": 1,
+          "chunk_stdev": 180.6223637557216,
+          "encoded_bytes": 2105911,
+          "logical": 2097153,
+          "ns": 9520030,
+          "objects": 512,
+          "payload": 2084865,
+          "refs": 513
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4088.0175438596493,
+          "chunk_min": 1,
+          "chunk_stdev": 180.6223637557216,
+          "encoded_bytes": 2105911,
+          "logical": 2097153,
+          "ns": 9440970,
+          "objects": 512,
+          "payload": 2084865,
+          "refs": 513
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4088.0175438596493,
+          "chunk_min": 1,
+          "chunk_stdev": 180.6223637557216,
+          "encoded_bytes": 2105911,
+          "logical": 2097153,
+          "ns": 9495742,
+          "objects": 512,
+          "payload": 2084865,
+          "refs": 513
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4088.0175438596493,
+          "chunk_min": 1,
+          "chunk_stdev": 180.6223637557216,
+          "encoded_bytes": 2105911,
+          "logical": 2097153,
+          "ns": 9428378,
+          "objects": 512,
+          "payload": 2084865,
+          "refs": 513
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4088.0175438596493,
+          "chunk_min": 1,
+          "chunk_stdev": 180.6223637557216,
+          "encoded_bytes": 2105911,
+          "logical": 2097153,
+          "ns": 9709135,
+          "objects": 512,
+          "payload": 2084865,
+          "refs": 513
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4088.0175438596493,
+          "chunk_min": 1,
+          "chunk_stdev": 180.6223637557216,
+          "encoded_bytes": 2105911,
+          "logical": 2097153,
+          "ns": 9525944,
+          "objects": 512,
+          "payload": 2084865,
+          "refs": 513
+        }
+      ],
+      "whole": [
+        {
+          "chunk_max": 1048577,
+          "chunk_mean": 1048576.5,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.5,
+          "encoded_bytes": 2097275,
+          "logical": 2097153,
+          "ns": 8313087,
+          "objects": 4,
+          "payload": 2097153,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048577,
+          "chunk_mean": 1048576.5,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.5,
+          "encoded_bytes": 2097275,
+          "logical": 2097153,
+          "ns": 8400459,
+          "objects": 4,
+          "payload": 2097153,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048577,
+          "chunk_mean": 1048576.5,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.5,
+          "encoded_bytes": 2097275,
+          "logical": 2097153,
+          "ns": 8422724,
+          "objects": 4,
+          "payload": 2097153,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048577,
+          "chunk_mean": 1048576.5,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.5,
+          "encoded_bytes": 2097275,
+          "logical": 2097153,
+          "ns": 8350878,
+          "objects": 4,
+          "payload": 2097153,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048577,
+          "chunk_mean": 1048576.5,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.5,
+          "encoded_bytes": 2097275,
+          "logical": 2097153,
+          "ns": 8272793,
+          "objects": 4,
+          "payload": 2097153,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048577,
+          "chunk_mean": 1048576.5,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.5,
+          "encoded_bytes": 2097275,
+          "logical": 2097153,
+          "ns": 8560612,
+          "objects": 4,
+          "payload": 2097153,
+          "refs": 2
+        }
+      ]
+    },
+    "overwrite": {
+      "cdc": [
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6078.701449275362,
+          "chunk_min": 2048,
+          "chunk_stdev": 3291.11514436614,
+          "encoded_bytes": 1091587,
+          "logical": 2097152,
+          "ns": 12648336,
+          "objects": 177,
+          "payload": 1078932,
+          "refs": 345
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6078.701449275362,
+          "chunk_min": 2048,
+          "chunk_stdev": 3291.11514436614,
+          "encoded_bytes": 1091587,
+          "logical": 2097152,
+          "ns": 12820123,
+          "objects": 177,
+          "payload": 1078932,
+          "refs": 345
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6078.701449275362,
+          "chunk_min": 2048,
+          "chunk_stdev": 3291.11514436614,
+          "encoded_bytes": 1091587,
+          "logical": 2097152,
+          "ns": 12895127,
+          "objects": 177,
+          "payload": 1078932,
+          "refs": 345
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6078.701449275362,
+          "chunk_min": 2048,
+          "chunk_stdev": 3291.11514436614,
+          "encoded_bytes": 1091587,
+          "logical": 2097152,
+          "ns": 12579903,
+          "objects": 177,
+          "payload": 1078932,
+          "refs": 345
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6078.701449275362,
+          "chunk_min": 2048,
+          "chunk_stdev": 3291.11514436614,
+          "encoded_bytes": 1091587,
+          "logical": 2097152,
+          "ns": 12420645,
+          "objects": 177,
+          "payload": 1078932,
+          "refs": 345
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 6078.701449275362,
+          "chunk_min": 2048,
+          "chunk_stdev": 3291.11514436614,
+          "encoded_bytes": 1091587,
+          "logical": 2097152,
+          "ns": 12503303,
+          "objects": 177,
+          "payload": 1078932,
+          "refs": 345
+        }
+      ],
+      "fixed": [
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1071409,
+          "logical": 2097152,
+          "ns": 9619581,
+          "objects": 259,
+          "payload": 1052672,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1071409,
+          "logical": 2097152,
+          "ns": 9946218,
+          "objects": 259,
+          "payload": 1052672,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1071409,
+          "logical": 2097152,
+          "ns": 9880543,
+          "objects": 259,
+          "payload": 1052672,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1071409,
+          "logical": 2097152,
+          "ns": 9819740,
+          "objects": 259,
+          "payload": 1052672,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1071409,
+          "logical": 2097152,
+          "ns": 9759640,
+          "objects": 259,
+          "payload": 1052672,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 1071409,
+          "logical": 2097152,
+          "ns": 9672999,
+          "objects": 259,
+          "payload": 1052672,
+          "refs": 512
+        }
+      ],
+      "whole": [
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 8366404,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 8346107,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 8416055,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 8679621,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 8677730,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 8673703,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        }
+      ]
+    },
+    "unrelated": {
+      "cdc": [
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 5745.621917808219,
+          "chunk_min": 2064,
+          "chunk_stdev": 3269.3356368487043,
+          "encoded_bytes": 2112157,
+          "logical": 2097152,
+          "ns": 12563077,
+          "objects": 367,
+          "payload": 2097152,
+          "refs": 365
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 5745.621917808219,
+          "chunk_min": 2064,
+          "chunk_stdev": 3269.3356368487043,
+          "encoded_bytes": 2112157,
+          "logical": 2097152,
+          "ns": 12892552,
+          "objects": 367,
+          "payload": 2097152,
+          "refs": 365
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 5745.621917808219,
+          "chunk_min": 2064,
+          "chunk_stdev": 3269.3356368487043,
+          "encoded_bytes": 2112157,
+          "logical": 2097152,
+          "ns": 18266378,
+          "objects": 367,
+          "payload": 2097152,
+          "refs": 365
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 5745.621917808219,
+          "chunk_min": 2064,
+          "chunk_stdev": 3269.3356368487043,
+          "encoded_bytes": 2112157,
+          "logical": 2097152,
+          "ns": 12502121,
+          "objects": 367,
+          "payload": 2097152,
+          "refs": 365
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 5745.621917808219,
+          "chunk_min": 2064,
+          "chunk_stdev": 3269.3356368487043,
+          "encoded_bytes": 2112157,
+          "logical": 2097152,
+          "ns": 12741831,
+          "objects": 367,
+          "payload": 2097152,
+          "refs": 365
+        },
+        {
+          "chunk_max": 16384,
+          "chunk_mean": 5745.621917808219,
+          "chunk_min": 2064,
+          "chunk_stdev": 3269.3356368487043,
+          "encoded_bytes": 2112157,
+          "logical": 2097152,
+          "ns": 12893539,
+          "objects": 367,
+          "payload": 2097152,
+          "refs": 365
+        }
+      ],
+      "fixed": [
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2118184,
+          "logical": 2097152,
+          "ns": 9419891,
+          "objects": 514,
+          "payload": 2097152,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2118184,
+          "logical": 2097152,
+          "ns": 9553373,
+          "objects": 514,
+          "payload": 2097152,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2118184,
+          "logical": 2097152,
+          "ns": 14230137,
+          "objects": 514,
+          "payload": 2097152,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2118184,
+          "logical": 2097152,
+          "ns": 9887531,
+          "objects": 514,
+          "payload": 2097152,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2118184,
+          "logical": 2097152,
+          "ns": 13486118,
+          "objects": 514,
+          "payload": 2097152,
+          "refs": 512
+        },
+        {
+          "chunk_max": 4096,
+          "chunk_mean": 4096,
+          "chunk_min": 4096,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2118184,
+          "logical": 2097152,
+          "ns": 9585465,
+          "objects": 514,
+          "payload": 2097152,
+          "refs": 512
+        }
+      ],
+      "whole": [
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 8578490,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 8489117,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 12555529,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 8572997,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 8670831,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        },
+        {
+          "chunk_max": 1048576,
+          "chunk_mean": 1048576,
+          "chunk_min": 1048576,
+          "chunk_stdev": 0.0,
+          "encoded_bytes": 2097274,
+          "logical": 2097152,
+          "ns": 8836937,
+          "objects": 4,
+          "payload": 2097152,
+          "refs": 2
+        }
+      ]
+    }
+  },
+  "host": "Linux-6.12.113-138.209.amzn2023.x86_64-x86_64-with-glibc2.34",
+  "machine": "x86_64",
+  "python": "3.9.25 (main, Oct 19 2026, 00:00:00) \n[GCC 11.5.0 20240719 (Red Hat 11.5.0-5)]"
+}
