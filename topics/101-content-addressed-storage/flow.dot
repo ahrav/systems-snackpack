@@ -1,0 +1,13 @@
+digraph G {
+graph [rankdir=LR, bgcolor="white", pad="0.3", label="Topic 101: two snapshots share immutable chunks", labelloc=t, fontsize=20];
+node [shape=box, style="rounded,filled", fillcolor="#edf5ff", fontname="Helvetica", fontsize=15];
+a [label="Snapshot A\nordered manifest: h1, h2, h3"];
+b [label="Snapshot B\nordered manifest: h1, hx, h2, h3"];
+c1 [label="h1 = H(type, bytes)\nchunk 1"];
+c2 [label="h2\nchunk 2"];
+c3 [label="h3\nchunk 3"];
+cx [label="hx\ninserted chunk",fillcolor="#fff1d6"];
+a -> c1; a -> c2; a -> c3;
+b -> c1; b -> cx; b -> c2; b -> c3;
+p [label="Publish order\n1. Write and verify chunks\n2. Write immutable manifest\n3. Atomically update snapshot root",fillcolor="#e7f7ed"];
+}
