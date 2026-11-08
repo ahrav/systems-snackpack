@@ -1,0 +1,14 @@
+digraph G {
+ graph [rankdir=LR, bgcolor="white", pad=0.3, label="IVF example: nearest centroid can hide the nearest vector", labelloc=t, fontsize=20];
+ node [shape=box, style="rounded,filled", fillcolor="#eef4ff", fontname="Helvetica", fontsize=15];
+ q [label="Query q = 4.9\nk = 1"];
+ a [label="Centroid 0\nList A: id 0 at x = 0"];
+ b [label="Centroid 10\nList B: id 1 at x = 5.1"];
+ r1 [label="nprobe = 1\nreturns id 0\nsquared distance = 24.01", fillcolor="#fff1dd"];
+ r2 [label="nprobe = 2\nreturns id 1\nsquared distance = 0.04", fillcolor="#e3f4e5"];
+ q -> a [label="centroid distance 4.9\nsearched first"];
+ q -> b [label="centroid distance 5.1\nsearched second",style=dashed];
+ a -> r1;
+ a -> r2;
+ b -> r2;
+}
