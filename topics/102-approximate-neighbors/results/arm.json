@@ -1,0 +1,2178 @@
+{
+  "platform": "Linux-6.12.113-138.209.amzn2023.aarch64-aarch64-with-glibc2.34",
+  "machine": "aarch64",
+  "python": "3.9.25 (main, Oct 19 2026, 00:00:00) \n[GCC 11.5.0 20240719 (Red Hat 11.5.0-5)]",
+  "cpu": "processor\t: 0\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 1\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 2\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 3\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 4\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 5\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 6\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 7\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 8\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 9\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 10\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 11\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 12\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 13\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 14\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 15\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 16\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 17\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 18\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 19\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 20\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 21\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 22\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 23\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 24\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 25\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 26\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 27\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 28\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 29\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 30\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 31\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 32\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 33\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 34\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 35\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 36\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 37\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 38\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 39\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 40\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 41\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 42\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 43\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 44\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 45\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 46\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 47\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 48\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 49\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 50\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 51\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 52\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 53\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 54\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 55\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 56\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 57\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 58\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 59\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 60\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 61\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 62\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\nprocessor\t: 63\nBogoMIPS\t: 2100.00\nFeatures\t: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng\nCPU implementer\t: 0x41\nCPU architecture: 8\nCPU variant\t: 0x1\nCPU part\t: 0xd40\nCPU revision\t: 1\n\n",
+  "samples": [
+    {
+      "workload": "tiny",
+      "mode": "exact",
+      "ns_per_query": 122622.1875,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 1983443,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf1",
+      "ns_per_query": 43487.625,
+      "recall": 0.6875,
+      "mean_candidates": 3.9375,
+      "build_ns": 1994479,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf4",
+      "ns_per_query": 71629.875,
+      "recall": 0.99375,
+      "mean_candidates": 17.28125,
+      "build_ns": 1990736,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf16",
+      "ns_per_query": 155094.65625,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 1990835,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf16",
+      "ns_per_query": 153209.09375,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 1985416,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf4",
+      "ns_per_query": 72360.0,
+      "recall": 0.99375,
+      "mean_candidates": 17.28125,
+      "build_ns": 2003514,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf1",
+      "ns_per_query": 43301.96875,
+      "recall": 0.6875,
+      "mean_candidates": 3.9375,
+      "build_ns": 2004151,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "tiny",
+      "mode": "exact",
+      "ns_per_query": 124740.1875,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 1992844,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf1",
+      "ns_per_query": 43276.34375,
+      "recall": 0.6875,
+      "mean_candidates": 3.9375,
+      "build_ns": 2041597,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf4",
+      "ns_per_query": 71580.21875,
+      "recall": 0.99375,
+      "mean_candidates": 17.28125,
+      "build_ns": 1995587,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf16",
+      "ns_per_query": 152710.25,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 1982448,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "tiny",
+      "mode": "exact",
+      "ns_per_query": 122199.1875,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 2037521,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "tiny",
+      "mode": "exact",
+      "ns_per_query": 122058.4375,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 1985707,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf16",
+      "ns_per_query": 153043.5625,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 1990524,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf4",
+      "ns_per_query": 72021.8125,
+      "recall": 0.99375,
+      "mean_candidates": 17.28125,
+      "build_ns": 1978190,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf1",
+      "ns_per_query": 43665.75,
+      "recall": 0.6875,
+      "mean_candidates": 3.9375,
+      "build_ns": 1994094,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf4",
+      "ns_per_query": 71192.9375,
+      "recall": 0.99375,
+      "mean_candidates": 17.28125,
+      "build_ns": 1994097,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf16",
+      "ns_per_query": 157415.5,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 1995565,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "tiny",
+      "mode": "exact",
+      "ns_per_query": 122156.78125,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 1988137,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf1",
+      "ns_per_query": 43377.8125,
+      "recall": 0.6875,
+      "mean_candidates": 3.9375,
+      "build_ns": 1997076,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf1",
+      "ns_per_query": 43458.09375,
+      "recall": 0.6875,
+      "mean_candidates": 3.9375,
+      "build_ns": 1991132,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "tiny",
+      "mode": "exact",
+      "ns_per_query": 122075.90625,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 1994284,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf16",
+      "ns_per_query": 153219.5,
+      "recall": 1.0,
+      "mean_candidates": 64.0,
+      "build_ns": 1989000,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "tiny",
+      "mode": "ivf4",
+      "ns_per_query": 71281.65625,
+      "recall": 0.99375,
+      "mean_candidates": 17.28125,
+      "build_ns": 2077372,
+      "list_sizes": [
+        3,
+        3,
+        6,
+        7,
+        7,
+        3,
+        3,
+        8,
+        6,
+        1,
+        2,
+        2,
+        3,
+        3,
+        4,
+        3
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "separated",
+      "mode": "exact",
+      "ns_per_query": 3641986.09375,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 60850365,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf1",
+      "ns_per_query": 264062.84375,
+      "recall": 1.0,
+      "mean_candidates": 127.5,
+      "build_ns": 60894896,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf4",
+      "ns_per_query": 934651.9375,
+      "recall": 1.0,
+      "mean_candidates": 508.53125,
+      "build_ns": 60989911,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf16",
+      "ns_per_query": 3653385.125,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61013724,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf16",
+      "ns_per_query": 3647600.71875,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61071449,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf4",
+      "ns_per_query": 939251.03125,
+      "recall": 1.0,
+      "mean_candidates": 508.53125,
+      "build_ns": 61069202,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf1",
+      "ns_per_query": 264770.09375,
+      "recall": 1.0,
+      "mean_candidates": 127.5,
+      "build_ns": 61056312,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "separated",
+      "mode": "exact",
+      "ns_per_query": 3614659.9375,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61117680,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf1",
+      "ns_per_query": 264817.21875,
+      "recall": 1.0,
+      "mean_candidates": 127.5,
+      "build_ns": 60895140,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf4",
+      "ns_per_query": 934013.53125,
+      "recall": 1.0,
+      "mean_candidates": 508.53125,
+      "build_ns": 61068889,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf16",
+      "ns_per_query": 3654844.4375,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 60965427,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "separated",
+      "mode": "exact",
+      "ns_per_query": 3614041.6875,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 60953946,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "separated",
+      "mode": "exact",
+      "ns_per_query": 3613701.8125,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 60929941,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf16",
+      "ns_per_query": 3651268.0,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 60830133,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf4",
+      "ns_per_query": 934781.65625,
+      "recall": 1.0,
+      "mean_candidates": 508.53125,
+      "build_ns": 61019760,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf1",
+      "ns_per_query": 264910.0625,
+      "recall": 1.0,
+      "mean_candidates": 127.5,
+      "build_ns": 60873006,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf4",
+      "ns_per_query": 936214.90625,
+      "recall": 1.0,
+      "mean_candidates": 508.53125,
+      "build_ns": 61055347,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf16",
+      "ns_per_query": 3645125.28125,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 60899229,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "separated",
+      "mode": "exact",
+      "ns_per_query": 3606710.9375,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 60837114,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf1",
+      "ns_per_query": 264510.9375,
+      "recall": 1.0,
+      "mean_candidates": 127.5,
+      "build_ns": 60825419,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf1",
+      "ns_per_query": 263984.53125,
+      "recall": 1.0,
+      "mean_candidates": 127.5,
+      "build_ns": 60848360,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "separated",
+      "mode": "exact",
+      "ns_per_query": 3607422.8125,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 60817824,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf16",
+      "ns_per_query": 3651874.25,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 60773033,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "separated",
+      "mode": "ivf4",
+      "ns_per_query": 936364.78125,
+      "recall": 1.0,
+      "mean_candidates": 508.53125,
+      "build_ns": 60827468,
+      "list_sizes": [
+        138,
+        123,
+        131,
+        120,
+        133,
+        115,
+        148,
+        134,
+        149,
+        108,
+        128,
+        136,
+        131,
+        115,
+        130,
+        109
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "overlap",
+      "mode": "exact",
+      "ns_per_query": 3637117.4375,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61427958,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf1",
+      "ns_per_query": 274767.34375,
+      "recall": 0.7125,
+      "mean_candidates": 129.59375,
+      "build_ns": 61300848,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf4",
+      "ns_per_query": 972224.625,
+      "recall": 0.99375,
+      "mean_candidates": 518.40625,
+      "build_ns": 61513770,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf16",
+      "ns_per_query": 3707417.59375,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61402211,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf16",
+      "ns_per_query": 3698194.0625,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61421833,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf4",
+      "ns_per_query": 971510.9375,
+      "recall": 0.99375,
+      "mean_candidates": 518.40625,
+      "build_ns": 61339448,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf1",
+      "ns_per_query": 274830.96875,
+      "recall": 0.7125,
+      "mean_candidates": 129.59375,
+      "build_ns": 61310325,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "overlap",
+      "mode": "exact",
+      "ns_per_query": 3641279.75,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61320181,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 0
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf1",
+      "ns_per_query": 274552.625,
+      "recall": 0.7125,
+      "mean_candidates": 129.59375,
+      "build_ns": 61346373,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf4",
+      "ns_per_query": 973871.34375,
+      "recall": 0.99375,
+      "mean_candidates": 518.40625,
+      "build_ns": 61408410,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf16",
+      "ns_per_query": 3693371.5625,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61429784,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "overlap",
+      "mode": "exact",
+      "ns_per_query": 3638174.28125,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61600178,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "overlap",
+      "mode": "exact",
+      "ns_per_query": 3638303.375,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61345415,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf16",
+      "ns_per_query": 3692994.34375,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61410193,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf4",
+      "ns_per_query": 973066.59375,
+      "recall": 0.99375,
+      "mean_candidates": 518.40625,
+      "build_ns": 61300834,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf1",
+      "ns_per_query": 275173.375,
+      "recall": 0.7125,
+      "mean_candidates": 129.59375,
+      "build_ns": 61353146,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 1
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf4",
+      "ns_per_query": 972726.46875,
+      "recall": 0.99375,
+      "mean_candidates": 518.40625,
+      "build_ns": 61387128,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf16",
+      "ns_per_query": 3697990.21875,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61436561,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "overlap",
+      "mode": "exact",
+      "ns_per_query": 3632685.5625,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61373310,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf1",
+      "ns_per_query": 274188.625,
+      "recall": 0.7125,
+      "mean_candidates": 129.59375,
+      "build_ns": 61329748,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf1",
+      "ns_per_query": 276156.40625,
+      "recall": 0.7125,
+      "mean_candidates": 129.59375,
+      "build_ns": 61617577,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "overlap",
+      "mode": "exact",
+      "ns_per_query": 3646836.40625,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61365481,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf16",
+      "ns_per_query": 3700033.59375,
+      "recall": 1.0,
+      "mean_candidates": 2048.0,
+      "build_ns": 61435162,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    },
+    {
+      "workload": "overlap",
+      "mode": "ivf4",
+      "ns_per_query": 974640.84375,
+      "recall": 0.99375,
+      "mean_candidates": 518.40625,
+      "build_ns": 61357509,
+      "list_sizes": [
+        130,
+        133,
+        131,
+        127,
+        141,
+        132,
+        125,
+        134,
+        119,
+        103,
+        140,
+        135,
+        132,
+        116,
+        123,
+        127
+      ],
+      "affinity": [
+        0
+      ],
+      "block": 2
+    }
+  ],
+  "correctness": {
+    "comparisons": 5760,
+    "digest": "64971325dab9ba62014d9987499dff09cbfdf9bfe3b8818bf05bd49731d52118",
+    "invalid_inputs_rejected": 7,
+    "boundary_miss_detected": true
+  },
+  "source_hashes": {
+    "ann.py": "ee9c53c416205f179eb0569ce9b0fc60b238cec4908a1ca3158b989379373a03",
+    "experiment.py": "84ac44e345e01ab0ea9865481bcdaaa9429903cf8c938c0cefae5f8e1f10c117"
+  }
+}
