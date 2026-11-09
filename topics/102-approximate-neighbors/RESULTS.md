@@ -136,11 +136,17 @@ cargo test -p approximate-neighbors
 cd experiment
 python3 ann.py demo
 python3 experiment.py check
+python3 -m unittest test_ann
 python3 experiment.py bench > results.json
 ```
 
 Raw final host data are in results/local.json, results/arm.json, and results/x86.json.
 Each JSON includes exact source hashes, all timing samples, list sizes, affinity, and oracle results.
+Commits after the campaign change `experiment/ann.py` only: it refuses optimized
+Python at import, and construction stores the per-centroid ID lists as tuples.
+`Index.search`, `experiment/experiment.py`, and the Rust crate are byte-identical to
+the tested commit; `check` reproduces the recorded oracle digest. The recorded
+construction times predate the one tuple conversion per list.
 
 ## Repository validation
 

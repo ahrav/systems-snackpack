@@ -13,18 +13,22 @@ independent absolute-distance ranking comparisons. The doctest demonstrates
 one-probe failure and full-probe recovery.
 
 The Python companion uses bounded-heap selection for both exact and IVF search.
-Its independent SQLite oracle checks assignment and ranking. Run from this topic:
+Its checks compare centroid assignment with a separate Python expression and
+result ranking with an independent SQLite oracle. Run from this topic:
 
 ```bash
 cargo test -p approximate-neighbors
 cd experiment
 python3 ann.py demo
 python3 experiment.py check
+python3 -m unittest test_ann
 python3 experiment.py bench > results.json
 ```
 
 Expected demo: `1 0 2401`, then `2 1 4`. Expected oracle: 5760 comparisons,
 seven invalid inputs rejected, and the deliberate one-probe miss detected.
+`test_ann.py` checks that the index lists are immutable tuples and that
+optimized Python (`-O`, `PYTHONOPTIMIZE`) is refused before any check runs.
 
 [Results and controls](RESULTS.md) describe the Python measurements and limits.
 Rust performance is unmeasured. Fixed centroids, exact integers, and immutable

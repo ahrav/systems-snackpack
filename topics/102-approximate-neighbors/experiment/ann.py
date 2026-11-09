@@ -2,6 +2,9 @@
 import heapq
 import sys
 
+if sys.flags.optimize:
+    raise SystemExit('validation uses assert: run without python -O or PYTHONOPTIMIZE')
+
 
 def distance(a, b):
     """Squared Euclidean distance for equal-dimensional integer vectors."""
@@ -13,7 +16,8 @@ class Index:
 
     Inputs are copied into tuples. All coordinates must be integers and every
     vector must have the same positive dimension. Query results are (distance,
-    ID) pairs. Empty populations return empty results. This model is immutable.
+    ID) pairs. Empty populations return empty results. This model is immutable:
+    points, centroids, and the per-centroid ID lists are tuples.
     """
     def __init__(self, points, centroids):
         self.points = tuple(tuple(p) for p in points)
@@ -23,11 +27,12 @@ class Index:
         self.dim = len(self.centroids[0])
         for vector in self.points + self.centroids:
             self.validate(vector)
-        self.lists = [[] for _ in self.centroids]
+        lists = [[] for _ in self.centroids]
         for i, point in enumerate(self.points):
             owner = min(range(len(self.centroids)),
                         key=lambda c: (distance(point, self.centroids[c]), c))
-            self.lists[owner].append(i)
+            lists[owner].append(i)
+        self.lists = tuple(tuple(ids) for ids in lists)
 
     def validate(self, vector):
         """Reject dimensions or coordinate types outside the model contract."""
