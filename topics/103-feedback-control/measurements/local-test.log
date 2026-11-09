@@ -1,0 +1,27 @@
+   Compiling feedback-control v0.1.0 (/Users/ahrav/Documents/Codex/2026-11-09/advanced-systems-daily-lesson-every-local/work/exact/topics/103-feedback-control)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.86s
+     Running unittests src/lib.rs (target/debug/deps/feedback_control-1cb14a9a977f70ea)
+
+running 3 tests
+test tests::delay_free_linear_recurrence_matches_closed_form ... ok
+test tests::missing_samples_hold_state_and_saturation_releases ... ok
+test tests::command_becomes_ready_at_declared_tick ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/feedback_control-d649d8818f30e571)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests feedback_control
+
+running 1 test
+test topics/103-feedback-control/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+all doctests ran in 0.80s; merged doctests compilation took 0.35s
+   Compiling feedback-control v0.1.0 (/Users/ahrav/Documents/Codex/2026-11-09/advanced-systems-daily-lesson-every-local/work/exact/topics/103-feedback-control)
+    Finished `release` profile [optimized] target(s) in 0.77s
