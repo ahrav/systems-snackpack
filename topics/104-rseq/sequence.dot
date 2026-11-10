@@ -1,0 +1,12 @@
+digraph rseq {
+rankdir=LR; bgcolor="white"; node [shape=box style="rounded,filled" fillcolor="#e8f0fb" fontname="Arial" fontsize=14]; edge [fontname="Arial" fontsize=12];
+read [label="Read CPU ID\nSelect counter slot"];
+start [label="Publish descriptor\nCheck CPU ID"];
+load [label="Load slot\nCompute value + 1"];
+commit [label="Commit: one store\nEnd protected interval" fillcolor="#d4edda"];
+abort [label="Abort handler\nDiscard register value\nRetry with fresh CPU ID" fillcolor="#fff0d0"];
+read -> start; start -> load [label="ID matches"]; load -> commit;
+start -> abort [label="ID mismatch"];
+load -> abort [label="Preemption / signal\nbefore commit"];
+abort -> read;
+}

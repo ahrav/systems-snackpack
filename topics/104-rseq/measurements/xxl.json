@@ -1,0 +1,1644 @@
+{
+  "machine": "x86_64",
+  "platform": "Linux-6.12.113-138.209.amzn2023.x86_64-x86_64-with-glibc2.34",
+  "records": [
+    {
+      "method": "rseq",
+      "threads": 1,
+      "iterations": 0,
+      "cpus": 1,
+      "stress": 0,
+      "total": 0,
+      "retries": 0,
+      "seconds": 2.8362e-05,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 1,
+      "iterations": 1,
+      "cpus": 1,
+      "stress": 0,
+      "total": 1,
+      "retries": 0,
+      "seconds": 2.374e-05,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 1,
+      "iterations": 17,
+      "cpus": 1,
+      "stress": 0,
+      "total": 17,
+      "retries": 0,
+      "seconds": 1.4994e-05,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 1,
+      "iterations": 100000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 100000,
+      "retries": 0,
+      "seconds": 0.000301498,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "warmup",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 1,
+      "iterations": 0,
+      "cpus": 1,
+      "stress": 0,
+      "total": 0,
+      "retries": 0,
+      "seconds": 1.7275e-05,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 1,
+      "iterations": 1,
+      "cpus": 1,
+      "stress": 0,
+      "total": 1,
+      "retries": 0,
+      "seconds": 2.687e-05,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 1,
+      "iterations": 17,
+      "cpus": 1,
+      "stress": 0,
+      "total": 17,
+      "retries": 0,
+      "seconds": 2.301e-05,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 1,
+      "iterations": 100000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 100000,
+      "retries": 0,
+      "seconds": 0.000200196,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "warmup",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 1,
+      "iterations": 0,
+      "cpus": 1,
+      "stress": 0,
+      "total": 0,
+      "retries": 0,
+      "seconds": 2.4402e-05,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 1,
+      "iterations": 1,
+      "cpus": 1,
+      "stress": 0,
+      "total": 1,
+      "retries": 0,
+      "seconds": 1.8811e-05,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 1,
+      "iterations": 17,
+      "cpus": 1,
+      "stress": 0,
+      "total": 17,
+      "retries": 0,
+      "seconds": 2.1723e-05,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 1,
+      "iterations": 100000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 100000,
+      "retries": 0,
+      "seconds": 0.00059167,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "warmup",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.005751196,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.00457671,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.016980851,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.005677209,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 1
+    },
+    {
+      "method": "atomic",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.018773723,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 1
+    },
+    {
+      "method": "tls",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.005562366,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 1
+    },
+    {
+      "method": "tls",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.004989705,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 2
+    },
+    {
+      "method": "rseq",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.006532299,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 2
+    },
+    {
+      "method": "atomic",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.017717579,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 2
+    },
+    {
+      "method": "tls",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.005609244,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 3
+    },
+    {
+      "method": "atomic",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.017355676,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 3
+    },
+    {
+      "method": "rseq",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.00708314,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 3
+    },
+    {
+      "method": "atomic",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.017612556,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 4
+    },
+    {
+      "method": "rseq",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.005779096,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 4
+    },
+    {
+      "method": "tls",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.005123262,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 4
+    },
+    {
+      "method": "atomic",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.01792086,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 5
+    },
+    {
+      "method": "tls",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.004539077,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 5
+    },
+    {
+      "method": "rseq",
+      "threads": 1,
+      "iterations": 3000000,
+      "cpus": 1,
+      "stress": 0,
+      "total": 3000000,
+      "retries": 0,
+      "seconds": 0.00694628,
+      "cpu_ids": [
+        0
+      ],
+      "phase": "measurement",
+      "block": 5
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 0,
+      "cpus": 8,
+      "stress": 0,
+      "total": 0,
+      "retries": 0,
+      "seconds": 0.000799779,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 1,
+      "cpus": 8,
+      "stress": 0,
+      "total": 8,
+      "retries": 0,
+      "seconds": 6.8374e-05,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 17,
+      "cpus": 8,
+      "stress": 0,
+      "total": 136,
+      "retries": 0,
+      "seconds": 3.4078e-05,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 100000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 800000,
+      "retries": 0,
+      "seconds": 0.000285163,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "warmup",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 0,
+      "cpus": 8,
+      "stress": 0,
+      "total": 0,
+      "retries": 0,
+      "seconds": 3.3272e-05,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 1,
+      "cpus": 8,
+      "stress": 0,
+      "total": 8,
+      "retries": 0,
+      "seconds": 3.027e-05,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 17,
+      "cpus": 8,
+      "stress": 0,
+      "total": 136,
+      "retries": 0,
+      "seconds": 3.4747e-05,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 100000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 800000,
+      "retries": 0,
+      "seconds": 0.000273474,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "warmup",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 0,
+      "cpus": 8,
+      "stress": 0,
+      "total": 0,
+      "retries": 0,
+      "seconds": 3.2852e-05,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 1,
+      "cpus": 8,
+      "stress": 0,
+      "total": 8,
+      "retries": 0,
+      "seconds": 7.1508e-05,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 17,
+      "cpus": 8,
+      "stress": 0,
+      "total": 136,
+      "retries": 0,
+      "seconds": 7.2636e-05,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 100000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 800000,
+      "retries": 0,
+      "seconds": 0.019845134,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "warmup",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.006166473,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.006607037,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.40800448,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.006039503,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 1
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.588617129,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 1
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.006641204,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 1
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.00594665,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 2
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.006142987,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 2
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.489430833,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 2
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.006821361,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 3
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.550589808,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 3
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.006296443,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 3
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.401427909,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 4
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.005872406,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 4
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.006944325,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 4
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.478863736,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 5
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.007023985,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 5
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 8,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.005921696,
+      "cpu_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "phase": "measurement",
+      "block": 5
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 0,
+      "cpus": 2,
+      "stress": 0,
+      "total": 0,
+      "retries": 0,
+      "seconds": 2.1698e-05,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 1,
+      "cpus": 2,
+      "stress": 0,
+      "total": 8,
+      "retries": 0,
+      "seconds": 3.8107e-05,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 17,
+      "cpus": 2,
+      "stress": 0,
+      "total": 136,
+      "retries": 0,
+      "seconds": 1.9763e-05,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 100000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 800000,
+      "retries": 0,
+      "seconds": 0.000832739,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "warmup",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 0,
+      "cpus": 2,
+      "stress": 0,
+      "total": 0,
+      "retries": 0,
+      "seconds": 2.1255e-05,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 1,
+      "cpus": 2,
+      "stress": 0,
+      "total": 8,
+      "retries": 0,
+      "seconds": 2.0099e-05,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 17,
+      "cpus": 2,
+      "stress": 0,
+      "total": 136,
+      "retries": 0,
+      "seconds": 2.3589e-05,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 100000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 800000,
+      "retries": 0,
+      "seconds": 0.000566192,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "warmup",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 0,
+      "cpus": 2,
+      "stress": 0,
+      "total": 0,
+      "retries": 0,
+      "seconds": 2.809e-05,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 1,
+      "cpus": 2,
+      "stress": 0,
+      "total": 8,
+      "retries": 0,
+      "seconds": 2.5643e-05,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 17,
+      "cpus": 2,
+      "stress": 0,
+      "total": 136,
+      "retries": 0,
+      "seconds": 2.6464e-05,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "correctness",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 100000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 800000,
+      "retries": 0,
+      "seconds": 0.016238573,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "warmup",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.024641659,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 0
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.024722489,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 0
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.479632559,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 1,
+      "seconds": 0.025582319,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 1
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.455484532,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 1
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.021777457,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 1
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.023993981,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 2
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.025455141,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 2
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.458948045,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 2
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.021632482,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 3
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.411249156,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 3
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.023851725,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 3
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.388928045,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 4
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.024115076,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 4
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.025275359,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 4
+    },
+    {
+      "method": "atomic",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.419702051,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 5
+    },
+    {
+      "method": "tls",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 0,
+      "seconds": 0.020041388,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 5
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 3000000,
+      "cpus": 2,
+      "stress": 0,
+      "total": 24000000,
+      "retries": 1,
+      "seconds": 0.024182496,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "measurement",
+      "block": 5
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 100000,
+      "cpus": 2,
+      "stress": 1,
+      "total": 800000,
+      "retries": 617,
+      "seconds": 0.041649764,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "stress",
+      "block": 0
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 100000,
+      "cpus": 2,
+      "stress": 1,
+      "total": 800000,
+      "retries": 810,
+      "seconds": 0.051054635,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "stress",
+      "block": 1
+    },
+    {
+      "method": "rseq",
+      "threads": 8,
+      "iterations": 100000,
+      "cpus": 2,
+      "stress": 1,
+      "total": 800000,
+      "retries": 610,
+      "seconds": 0.0437873,
+      "cpu_ids": [
+        0,
+        1
+      ],
+      "phase": "stress",
+      "block": 2
+    }
+  ]
+}
