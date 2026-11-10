@@ -5,7 +5,7 @@ digraph loop {
  plant [label="Ready replicas + queue\n1,000 requests / replica / tick"];
  sensor [label="Measurement delay\n2 ticks (20 seconds)"];
  control [label="Controller\nTarget: 600 arrivals / replica / tick\nGain: 1 or 1/8"];
- actuator [label="Absolute replica command\nceil + clamp [1, 40]\nReady after 3 ticks"];
+ actuator [label="Absolute replica command\nclamp [1, 40] + ceil\nReady after 3 ticks"];
  load -> plant; plant -> sensor [label="Ready count"];
  load -> sensor [label="arrival count"];
  sensor -> control; control -> actuator; actuator -> plant [label="useful capacity"];

@@ -41,9 +41,13 @@ Tested source: `936c93f1f6ee13a7dd705596f4fadf315b00c5f6`.
 
 Local macOS arm64, Linux AArch64, and Linux x86_64 each pass 72,000 complete
 state comparisons (288,000 field comparisons), three unit tests, and one doctest.
-All three have identical state-output digests. Rust 1.93.1 release builds; Python
-versions and CPU/kernel metadata are retained with each host result. These are
-deterministic simulation outcomes; host runtime speed is outside the experiment.
+All three have identical state-output digests. The workspace pins Rust 1.93.1;
+builds use the release profile. Each host JSON retains the platform string,
+machine architecture, and Python version. The Linux run logs also retain the
+archive SHA-256, `uname -a`, `lscpu`, and the `rustc` version. The local log
+retains the test and release-build output; the local CPU model and `rustc`
+version were not captured. These are deterministic simulation outcomes; host
+runtime speed is outside the experiment.
 
 | Workload | Policy | Queue area median [min, max] | Replica-ticks median | Command changes median | Final queue median |
 |---|---|---:|---:|---:|---:|
@@ -84,10 +88,11 @@ capacity. Slow ends with 10,606..14,190 queued requests; feed-forward ends with
 backlog-aware controller and explicit drain-time objective are the next experiment.
 All policies exceed available service during the surge.
 
-Fast keeps a final ready span of 39 on every workload and every seed. This
-persistent oscillation occurs after noisy step/burst/saturation transients end.
-Lowering gain removes that cycle in the tested constant-load tails. The lower
-gain alone leaves the saturation-recovery queue problem unresolved.
+Fast keeps a final ready span of 39 on every workload and every seed: the
+`final_ready_span` minimum and maximum are both 39 in each host JSON summary.
+This persistent oscillation occurs after noisy step/burst/saturation transients
+end. Lowering gain removes that cycle in the tested constant-load tails. The
+lower gain alone leaves the saturation-recovery queue problem unresolved.
 
 These traces support workload-specific comparisons. Production stability,
 untested delay distributions, and universal optimal gains require further
@@ -96,5 +101,15 @@ evidence. The model omits dependency saturation and service-time drift.
 Raw JSON is retained losslessly as `measurements/{local,arm,x86}.json.gz`.
 Read it with `gzip -dc measurements/arm.json.gz`. Identity files record archive,
 raw-data, and compressed-data SHA-256 values. The exact tested source archive
-contains workspace manifests, toolchain pin, and this topic's files. Host scripts
-verify its hash before extracting, compiling, and running it.
+contains workspace manifests, toolchain pin, and this topic's files. The Linux
+host scripts verify its hash before extracting, compiling, and running it, and
+their logs retain the hash line. The local identity file records the same archive
+hash; the local log starts at the test build.
+
+Commits after the tested source correct documentation, reorder the diagram
+label, and add one unit test to `src/lib.rs`. That test covers both gain
+policies with a fractional deficit, ceiling rounding, and the lower clamp. The
+tested source ran three unit tests on each host; the head runs four, checked on
+Linux x86_64 with Rust 1.93.1. `simulate`, `src/main.rs`, and
+`experiment/check.py` are byte-identical to the tested commit, and the head
+release binary reproduces the recorded state digest on Linux x86_64.

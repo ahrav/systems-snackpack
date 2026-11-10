@@ -117,6 +117,25 @@ mod tests {
     }
 
     #[test]
+    fn gain_policies_accumulate_fractional_deficits_and_clamp_low() {
+        // 6,300 arrivals against ten ready replicas is a deficit of half a replica.
+        let fast = simulate(&[6_300; 2], &[true; 2], Policy::Fast, 0, 1);
+        assert_eq!((fast[0].desired, fast[0].command), (50_400, 11));
+        assert_eq!(
+            (fast[1].ready, fast[1].desired, fast[1].command),
+            (11, 48_000, 10)
+        );
+        let slow = simulate(&[6_300; 2], &[true; 2], Policy::Slow, 0, 1);
+        assert_eq!((slow[0].desired, slow[0].command), (48_300, 11));
+        assert_eq!(
+            (slow[1].ready, slow[1].desired, slow[1].command),
+            (11, 48_000, 10)
+        );
+        let idle = simulate(&[0], &[true], Policy::Fast, 0, 1);
+        assert_eq!((idle[0].desired, idle[0].command), (4_800, 1));
+    }
+
+    #[test]
     fn delay_free_linear_recurrence_matches_closed_form() {
         let mut error = 1.0_f64;
         for k in 0..100 {

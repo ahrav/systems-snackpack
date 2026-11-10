@@ -53,10 +53,13 @@ remain active.
 
 For the ideal scalar error recurrence `e[k+1] = e[k] - g*e[k-d]`, all roots of
 `z^(d+1) - z^d + g` must lie inside the unit circle. The positive-gain interval
-is `0 < g < 2*sin(pi/(4*d+2))`. For d=0 this is 0<g<2; for d=2 the upper bound
-is about 0.618. This result concerns a continuous-valued linear recurrence.
-Replay integer rounding, saturation, missing observations, and readiness state
-for an actual autoscaler.
+is `0 < g < 2*sin(pi/(4*d+2))`. The sampled ready count reflects a command
+issued one actuation delay earlier, so measurement delay m and actuation delay
+a give `d = m + a - 1`. For d=0 this is 0<g<2. This experiment has m=2 and a=3,
+so d=4 and the upper bound is about 0.347. Gain 1/8 lies inside that interval;
+gain 1 lies outside it. This result concerns a continuous-valued linear
+recurrence. Replay integer rounding, saturation, missing observations, and
+readiness state for an actual autoscaler.
 
 Use lower gain for delay-driven overcorrection. Filtering reduces noise and adds
 lag. Tolerance accepts small error. Hysteresis uses distinct switching thresholds.
