@@ -1,6 +1,6 @@
 # Exact-source results
 
-Tested commit: `0754c64` (full identity in tested-commit.txt).
+Tested commit: `0754c64d9720457731d194dbace1e4c4d32011f5`.
 
 Linux GCC 11.5.0, -O2 -std=c11 -pthread. Rust 1.93.1.
 Arm host: AArch64. xxl: x86_64 Intel Xeon Platinum 8488C.
