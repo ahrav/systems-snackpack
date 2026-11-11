@@ -1,0 +1,60 @@
+dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.113-138.209.amzn2023.aarch64 #1 SMP Tue Oct 20 21:58:08 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+Python 3.9.25
+Architecture:                            aarch64
+CPU op-mode(s):                          32-bit, 64-bit
+Byte Order:                              Little Endian
+CPU(s):                                  64
+On-line CPU(s) list:                     0-63
+Vendor ID:                               ARM
+Model:                                   1
+Thread(s) per core:                      1
+Core(s) per socket:                      64
+Socket(s):                               1
+Stepping:                                r1p1
+BogoMIPS:                                2100.00
+Flags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 sm3 sm4 asimddp sha512 sve asimdfhm dit uscat ilrcpc flagm paca pacg dcpodp svei8mm svebf16 i8mm bf16 dgh rng
+L1d cache:                               4 MiB (64 instances)
+L1i cache:                               4 MiB (64 instances)
+L2 cache:                                64 MiB (64 instances)
+L3 cache:                                32 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-63
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; CSV2, BHB
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+95b5294db6527f26bf3651889bb8baf01c5e884f89d10a1e4333ed4c7751eb5b  /tmp/topic105-source-20261111.tar.gz
+   Compiling fork-cow v0.1.0 (/tmp/topic105-20261111/topics/105-fork-cow)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.40s
+     Running unittests src/lib.rs (target/debug/deps/fork_cow-2739748cc3ef063b)
+
+running 2 tests
+test tests::packed_scattered_and_repeated ... ok
+test tests::exhaustive_byte_history_oracle ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+
+   Doc-tests fork_cow
+
+running 1 test
+test topics/105-fork-cow/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.36s; merged doctests compilation took 0.35s
+parent=43 child=42: snapshot preserved
