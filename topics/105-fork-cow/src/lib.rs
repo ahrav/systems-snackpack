@@ -58,8 +58,10 @@ mod tests {
             for _ in 0..5 {
                 let offset = code % 8;
                 code /= 8;
+                let page = offset / 2;
+                let first = bytes.range(page * 2..page * 2 + 2).next().is_none();
                 bytes.insert(offset);
-                model.write(offset);
+                assert_eq!(model.write(offset), first);
                 let expected = (0..4)
                     .filter(|p| bytes.range(p * 2..p * 2 + 2).next().is_some())
                     .count();

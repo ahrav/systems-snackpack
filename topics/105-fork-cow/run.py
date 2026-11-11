@@ -5,6 +5,9 @@ import platform
 import subprocess
 import sys
 
+if not __debug__:
+    raise SystemExit("validation uses assert: run without python3 -O or PYTHONOPTIMIZE")
+
 binary = os.path.abspath(sys.argv[1])
 rows = []
 # Keep all parent/child work on one permitted CPU to control placement.
@@ -19,6 +22,7 @@ for count in (1024, 4096):
             for layout in order:
                 r = json.loads(subprocess.check_output(
                     [binary, layout, str(count), str(passes)], timeout=30))
+                assert (r["layout"], r["count"], r["passes"]) == (layout, count, passes), r
                 p = r["page_size"]
                 offsets = range(count) if layout == "packed" else range(0, count * p, p)
                 pages = len({offset // p for offset in offsets})
@@ -28,6 +32,8 @@ for count in (1024, 4096):
                         s = r[actor + "_" + phase]
                         assert s["rss_kib"] == count * p // 1024, r
                         assert s["huge_kib"] == 0 and s["swap_kib"] == 0, r
+                shared = sum(r[a + "_before"]["pss_kib"] for a in ("parent", "child"))
+                assert shared == count * p // 1024, r
                 gain = sum(r[a + "_after"]["pss_kib"] - r[a + "_before"]["pss_kib"]
                            for a in ("parent", "child"))
                 assert gain == expected, (gain, expected, r)

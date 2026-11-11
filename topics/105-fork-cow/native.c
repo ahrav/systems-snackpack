@@ -39,7 +39,7 @@ static struct stats sample(pid_t pid, const void *address, size_t size) {
             if (sscanf(line, "Swap: %ld kB", &s.swap) == 1) continue;
         }
     }
-    check(fclose(f) == 0); check(found == 1);
+    check(!ferror(f) && fclose(f) == 0); check(found == 1);
     return s;
 }
 static void print_stats(const char *name, struct stats s) {

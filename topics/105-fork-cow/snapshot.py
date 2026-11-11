@@ -1,6 +1,10 @@
 """Portable single-threaded snapshot-isolation check."""
 import mmap
 import os
+
+if not __debug__:
+    raise SystemExit("validation uses assert: run without python3 -O or PYTHONOPTIMIZE")
+
 page = mmap.PAGESIZE
 count = 4096
 buf = mmap.mmap(-1, count * page, flags=mmap.MAP_PRIVATE | mmap.MAP_ANONYMOUS,
