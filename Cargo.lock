@@ -148,6 +148,10 @@ name = "floating-point-contract"
 version = "0.1.0"
 
 [[package]]
+name = "fork-cow"
+version = "0.1.0"
+
+[[package]]
 name = "futex-parking"
 version = "0.1.0"
 
