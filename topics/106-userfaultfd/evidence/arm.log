@@ -1,0 +1,388 @@
+5a17953d889e347b7f5eddea18d2f0bc0f99c7e1a87a294b9b9dc4955d6d2b45  /tmp/topic106-source.tar
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.113-138.209.amzn2023.aarch64 #1 SMP Tue Oct 20 21:58:08 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+cc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+   Compiling userfaultfd-snapshot v0.1.0 (/tmp/topic106-arm/topics/106-userfaultfd)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.14s
+     Running unittests src/lib.rs (target/debug/deps/userfaultfd_snapshot-0955f7e573e17d01)
+
+running 2 tests
+test tests::empty_snapshot ... ok
+test tests::histories_match_eager_copy_oracle ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.39s
+
+   Doc-tests userfaultfd_snapshot
+
+running 1 test
+test topics/106-userfaultfd/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.46s; merged doctests compilation took 0.45s
+{
+  "status": "pass",
+  "processes": 36,
+  "results": [
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "race"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "race"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "race"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 3,
+      "fault_copies": 3,
+      "scan_copies": 14,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 3,
+      "fault_copies": 3,
+      "scan_copies": 14,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 10,
+      "fault_copies": 8,
+      "scan_copies": 9,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 10,
+      "fault_copies": 10,
+      "scan_copies": 7,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 71,
+      "fault_copies": 71,
+      "scan_copies": 185,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 74,
+      "fault_copies": 74,
+      "scan_copies": 182,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 114,
+      "fault_copies": 112,
+      "scan_copies": 144,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 115,
+      "fault_copies": 114,
+      "scan_copies": 142,
+      "mode": "race"
+    }
+  ]
+}

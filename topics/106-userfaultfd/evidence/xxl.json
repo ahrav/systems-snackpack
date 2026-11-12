@@ -1,0 +1,366 @@
+{
+  "status": "pass",
+  "processes": 36,
+  "results": [
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "race"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "race"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "race"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 4,
+      "fault_copies": 3,
+      "scan_copies": 14,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 4,
+      "fault_copies": 4,
+      "scan_copies": 13,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 11,
+      "fault_copies": 11,
+      "scan_copies": 6,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 11,
+      "fault_copies": 11,
+      "scan_copies": 6,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 75,
+      "fault_copies": 75,
+      "scan_copies": 181,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 77,
+      "fault_copies": 77,
+      "scan_copies": 179,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 123,
+      "fault_copies": 122,
+      "scan_copies": 134,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 118,
+      "fault_copies": 117,
+      "scan_copies": 139,
+      "mode": "race"
+    }
+  ]
+}
