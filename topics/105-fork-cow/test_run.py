@@ -1,4 +1,5 @@
 """Regression tests for the Topic 105 runner and snapshot checks."""
+import json
 import os
 import pathlib
 import subprocess
@@ -26,31 +27,40 @@ print(json.dumps(row))
 '''
 
 
-def run_fake(fault="", flags=()):
+ENV = {k: v for k, v in os.environ.items() if k != "PYTHONOPTIMIZE"}
+
+
+def run(*args, fault=""):
+    return subprocess.run([sys.executable, *args], env=dict(ENV, FAULT=fault),
+                          text=True, capture_output=True, timeout=120)
+
+
+def run_fake(*flags, fault=""):
     with tempfile.TemporaryDirectory() as scratch:
         fake = pathlib.Path(scratch, "fake")
         fake.write_text(FAKE)
         fake.chmod(0o755)
-        return subprocess.run(
-            [sys.executable, *flags, str(HERE / "run.py"), str(fake)],
-            env=dict(os.environ, FAULT=fault), text=True, capture_output=True)
+        return run(*flags, str(HERE / "run.py"), str(fake), fault=fault)
 
 
 class Runner(unittest.TestCase):
     def test_accepts_exact_accounting(self):
         result = run_fake()
         self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(len(json.loads(result.stdout)["trials"]), 72)
 
     def test_rejects_wrong_label_and_unshared_baseline(self):
         for fault in ("label", "baseline"):
-            self.assertNotEqual(run_fake(fault).returncode, 0, fault)
+            result = run_fake(fault=fault)
+            self.assertNotEqual(result.returncode, 0, fault)
+            self.assertIn("AssertionError", result.stderr, fault)
+            self.assertEqual(result.stdout, "", fault)
 
 
 class OptimizedPython(unittest.TestCase):
     def test_runner_and_snapshot_refuse_optimized_python(self):
-        snapshot = subprocess.run([sys.executable, "-O", str(HERE / "snapshot.py")],
-                                  text=True, capture_output=True)
-        for name, result in (("run.py", run_fake(flags=["-O"])), ("snapshot.py", snapshot)):
+        snapshot = run("-O", str(HERE / "snapshot.py"))
+        for name, result in (("run.py", run_fake("-O")), ("snapshot.py", snapshot)):
             self.assertNotEqual(result.returncode, 0, name)
             self.assertIn("python3 -O", result.stderr, name)
             self.assertEqual(result.stdout, "", name)
