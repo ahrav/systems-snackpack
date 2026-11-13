@@ -9,7 +9,7 @@ import platform
 import sys
 
 FUTURE = 0x10  # Linux UAPI F_SEAL_FUTURE_WRITE, available since Linux 5.1.
-W, S, G = f.F_SEAL_WRITE, f.F_SEAL_SHRINK, f.F_SEAL_GROW
+W, S, G = 0x08, 0x02, 0x04  # Linux UAPI values; allow a macOS skip.
 REQUIRED = W | S | G
 
 
