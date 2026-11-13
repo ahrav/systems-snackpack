@@ -12,13 +12,30 @@ HERE = pathlib.Path(__file__).resolve().parent
 ENV = {k: v for k, v in os.environ.items() if k != "PYTHONOPTIMIZE"}
 ENV["LC_ALL"] = "C"
 CC = ["cc", "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror"]
-# FAKE prints a parseable row beside wrong bytes, wrong counters and a failing status.
-FAKE = """#!/bin/sh
+# FAILING prints a parseable row beside wrong bytes, wrong counters and a failing status.
+FAILING = """#!/bin/sh
 echo wrong > snapshot.bin
 echo wrong > live.bin
 echo '{"page_size":4096,"events":9,"fault_copies":0,"scan_copies":0}'
 exit 1
 """
+# CORRECT satisfies every checker rule. FAULT selects one deviation: page_size halves the
+# reported page size and both images to match; writers misreports the writer count.
+CORRECT = "#!" + sys.executable + '''
+import json, os, sys
+pages, writers, passes, mode = int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), sys.argv[4]
+fault = os.environ.get("FAULT")
+size = os.sysconf("SC_PAGESIZE") // (2 if fault == "page_size" else 1)
+initial = bytes((p * 17 + j * 3) % 256 for p in range(pages) for j in range(size))
+with open("snapshot.bin", "wb") as f:
+    f.write(initial)
+with open("live.bin", "wb") as f:
+    f.write(bytes((b + passes) % 256 for b in initial))
+faulted = pages if mode == "fault" else 0
+print(json.dumps({"pages": pages, "page_size": size, "writers": writers + (fault == "writers"),
+                  "passes": passes, "events": faulted, "fault_copies": faulted,
+                  "scan_copies": pages - faulted}))
+'''
 
 
 def check(binary, *flags, **env):
@@ -26,22 +43,42 @@ def check(binary, *flags, **env):
                           env=dict(ENV, **env), text=True, capture_output=True, timeout=300)
 
 
+def check_fake(source, *flags, **env):
+    with tempfile.TemporaryDirectory() as scratch:
+        fake = pathlib.Path(scratch, "fake")
+        fake.write_text(source)
+        fake.chmod(0o755)
+        return check(fake, *flags, **env)
+
+
 class OptimizedPython(unittest.TestCase):
     def test_checker_refuses_optimized_python(self):
-        with tempfile.TemporaryDirectory() as scratch:
-            fake = pathlib.Path(scratch, "fake")
-            fake.write_text(FAKE)
-            fake.chmod(0o755)
-            for name, result in (("-O", check(fake, "-O")),
-                                 ("PYTHONOPTIMIZE", check(fake, PYTHONOPTIMIZE="1"))):
-                with self.subTest(optimized=name):
-                    self.assertNotEqual(result.returncode, 0)
-                    self.assertIn("python3 -O", result.stderr)
-                    self.assertEqual(result.stdout, "")
-            plain = check(fake)
-            self.assertNotEqual(plain.returncode, 0)
-            self.assertIn("AssertionError", plain.stderr)
-            self.assertEqual(plain.stdout, "")
+        for name, result in (("-O", check_fake(FAILING, "-O")),
+                             ("PYTHONOPTIMIZE", check_fake(FAILING, PYTHONOPTIMIZE="1"))):
+            with self.subTest(optimized=name):
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("python3 -O", result.stderr)
+                self.assertEqual(result.stdout, "")
+        plain = check_fake(FAILING)
+        self.assertNotEqual(plain.returncode, 0)
+        self.assertIn("AssertionError", plain.stderr)
+        self.assertEqual(plain.stdout, "")
+
+
+class Oracle(unittest.TestCase):
+    def test_accepts_correct_binary(self):
+        result = check_fake(CORRECT)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout)
+        self.assertEqual((report["status"], report["processes"]), ("pass", 36))
+
+    def test_rejects_reported_page_size_and_writer_count(self):
+        for fault in ("page_size", "writers"):
+            with self.subTest(fault=fault):
+                result = check_fake(CORRECT, FAULT=fault)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn("AssertionError", result.stderr)
+                self.assertEqual(result.stdout, "")
 
 
 @unittest.skipUnless(sys.platform == "linux" and shutil.which("cc"), "requires Linux and cc")

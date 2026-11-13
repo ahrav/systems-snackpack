@@ -45,13 +45,17 @@ long syscall(long number, ...) {
     if (!next) next = (long (*)(long, ...))dlsym(RTLD_NEXT, "syscall");
     va_list ap;
     va_start(ap, number);
-    // glibc's syscall() loads six argument slots for every call; forward the same six.
+    if (number == SYS_userfaultfd) {
+        int flags = va_arg(ap, int);
+        va_end(ap);
+        if ((flags & UFFD_USER_MODE_ONLY) && selected("no_user_mode_only")) {
+            errno = EINVAL;
+            return -1;
+        }
+        return next(number, flags);
+    }
     long a[6];
     for (int i = 0; i < 6; ++i) a[i] = va_arg(ap, long);
     va_end(ap);
-    if (number == SYS_userfaultfd && ((int)a[0] & UFFD_USER_MODE_ONLY) && selected("no_user_mode_only")) {
-        errno = EINVAL;
-        return -1;
-    }
     return next(number, a[0], a[1], a[2], a[3], a[4], a[5]);
 }
