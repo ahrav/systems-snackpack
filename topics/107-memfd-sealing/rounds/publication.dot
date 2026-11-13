@@ -1,0 +1,13 @@
+digraph G {
+rankdir=LR; bgcolor="white"; graph [pad="0.25",nodesep="0.4",ranksep="0.4"];
+node [shape=box,style="rounded,filled",fillcolor="#e8f0fa",fontname="Helvetica",fontsize=13];
+edge [fontname="Helvetica",fontsize=11];
+a [label="Producer\nCreate + size + fill"];
+b [label="Quiesce writers\nUnmap shared writer views"];
+c [label="Seal succeeds\nWRITE + SHRINK + GROW\nOptionally SEAL"];
+d [label="Publish descriptor\nSCM_RIGHTS or inheritance"];
+e [label="Consumer\nCheck seals, then size\nMap read-only + validate"];
+f [label="FUTURE_WRITE only\nOld writable mapping survives", fillcolor="#ffe6cc"];
+a -> b -> c -> d -> e;
+a -> f [label="Different contract"];
+}

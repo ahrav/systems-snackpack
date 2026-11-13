@@ -1,0 +1,23 @@
+66f83f4bf179bbf62f3a3e9d0af8e88cb1bc774512b221806a958b385356e2ae  /tmp/topic107-source.tar
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.113-138.209.amzn2023.aarch64 #1 SMP Tue Oct 20 21:58:08 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+Python 3.9.25
+route=worker-7
+shrink blocked
+   Compiling memfd-sealing v0.1.0 (/tmp/topic107-final/topics/107-memfd-sealing)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.25s
+     Running unittests src/lib.rs (target/debug/deps/memfd_sealing-8833d4faaccb7469)
+
+running 2 tests
+test tests::immutable_requires_each_restriction ... ok
+test tests::ranges_match_enumerated_membership ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests memfd_sealing
+
+running 1 test
+test topics/107-memfd-sealing/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.38s; merged doctests compilation took 0.38s
