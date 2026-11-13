@@ -1,0 +1,422 @@
+{
+  "status": "PASS",
+  "host": {
+    "system": "Linux",
+    "node": "dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com",
+    "release": "6.12.113-138.209.amzn2023.aarch64",
+    "version": "#1 SMP Tue Oct 20 21:58:08 UTC 2026",
+    "machine": "aarch64"
+  },
+  "python": "3.9.25 (main, Oct 19 2026, 00:00:00) \n[GCC 11.5.0 20240719 (Red Hat 11.5.0-5)]",
+  "matrix": [
+    {
+      "mask": 0,
+      "operation": "overwrite",
+      "blocked": false
+    },
+    {
+      "mask": 0,
+      "operation": "shrink",
+      "blocked": false
+    },
+    {
+      "mask": 0,
+      "operation": "grow",
+      "blocked": false
+    },
+    {
+      "mask": 0,
+      "operation": "shared_write",
+      "blocked": false
+    },
+    {
+      "mask": 0,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 16,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 16,
+      "operation": "shrink",
+      "blocked": false
+    },
+    {
+      "mask": 16,
+      "operation": "grow",
+      "blocked": false
+    },
+    {
+      "mask": 16,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 16,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 4,
+      "operation": "overwrite",
+      "blocked": false
+    },
+    {
+      "mask": 4,
+      "operation": "shrink",
+      "blocked": false
+    },
+    {
+      "mask": 4,
+      "operation": "grow",
+      "blocked": true
+    },
+    {
+      "mask": 4,
+      "operation": "shared_write",
+      "blocked": false
+    },
+    {
+      "mask": 4,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 20,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 20,
+      "operation": "shrink",
+      "blocked": false
+    },
+    {
+      "mask": 20,
+      "operation": "grow",
+      "blocked": true
+    },
+    {
+      "mask": 20,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 20,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 2,
+      "operation": "overwrite",
+      "blocked": false
+    },
+    {
+      "mask": 2,
+      "operation": "shrink",
+      "blocked": true
+    },
+    {
+      "mask": 2,
+      "operation": "grow",
+      "blocked": false
+    },
+    {
+      "mask": 2,
+      "operation": "shared_write",
+      "blocked": false
+    },
+    {
+      "mask": 2,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 18,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 18,
+      "operation": "shrink",
+      "blocked": true
+    },
+    {
+      "mask": 18,
+      "operation": "grow",
+      "blocked": false
+    },
+    {
+      "mask": 18,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 18,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 6,
+      "operation": "overwrite",
+      "blocked": false
+    },
+    {
+      "mask": 6,
+      "operation": "shrink",
+      "blocked": true
+    },
+    {
+      "mask": 6,
+      "operation": "grow",
+      "blocked": true
+    },
+    {
+      "mask": 6,
+      "operation": "shared_write",
+      "blocked": false
+    },
+    {
+      "mask": 6,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 22,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 22,
+      "operation": "shrink",
+      "blocked": true
+    },
+    {
+      "mask": 22,
+      "operation": "grow",
+      "blocked": true
+    },
+    {
+      "mask": 22,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 22,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 8,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 8,
+      "operation": "shrink",
+      "blocked": false
+    },
+    {
+      "mask": 8,
+      "operation": "grow",
+      "blocked": false
+    },
+    {
+      "mask": 8,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 8,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 24,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 24,
+      "operation": "shrink",
+      "blocked": false
+    },
+    {
+      "mask": 24,
+      "operation": "grow",
+      "blocked": false
+    },
+    {
+      "mask": 24,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 24,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 12,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 12,
+      "operation": "shrink",
+      "blocked": false
+    },
+    {
+      "mask": 12,
+      "operation": "grow",
+      "blocked": true
+    },
+    {
+      "mask": 12,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 12,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 28,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 28,
+      "operation": "shrink",
+      "blocked": false
+    },
+    {
+      "mask": 28,
+      "operation": "grow",
+      "blocked": true
+    },
+    {
+      "mask": 28,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 28,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 10,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 10,
+      "operation": "shrink",
+      "blocked": true
+    },
+    {
+      "mask": 10,
+      "operation": "grow",
+      "blocked": false
+    },
+    {
+      "mask": 10,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 10,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 26,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 26,
+      "operation": "shrink",
+      "blocked": true
+    },
+    {
+      "mask": 26,
+      "operation": "grow",
+      "blocked": false
+    },
+    {
+      "mask": 26,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 26,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 14,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 14,
+      "operation": "shrink",
+      "blocked": true
+    },
+    {
+      "mask": 14,
+      "operation": "grow",
+      "blocked": true
+    },
+    {
+      "mask": 14,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 14,
+      "operation": "private_write",
+      "blocked": false
+    },
+    {
+      "mask": 30,
+      "operation": "overwrite",
+      "blocked": true
+    },
+    {
+      "mask": 30,
+      "operation": "shrink",
+      "blocked": true
+    },
+    {
+      "mask": 30,
+      "operation": "grow",
+      "blocked": true
+    },
+    {
+      "mask": 30,
+      "operation": "shared_write",
+      "blocked": true
+    },
+    {
+      "mask": 30,
+      "operation": "private_write",
+      "blocked": false
+    }
+  ],
+  "inherited_writer": "PASS",
+  "published_sizes": [
+    1,
+    4095,
+    4096,
+    4097,
+    65536,
+    1048576
+  ]
+}
