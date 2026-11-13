@@ -1,0 +1,388 @@
+5a17953d889e347b7f5eddea18d2f0bc0f99c7e1a87a294b9b9dc4955d6d2b45  /tmp/topic106-source.tar
+Linux dev-dsk-ahrav-2c-32182091.us-west-2.amazon.com 6.12.113-138.209.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Oct 20 21:57:40 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+cc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+   Compiling userfaultfd-snapshot v0.1.0 (/tmp/topic106-xxl/topics/106-userfaultfd)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.98s
+     Running unittests src/lib.rs (target/debug/deps/userfaultfd_snapshot-e4b781927153fb6e)
+
+running 2 tests
+test tests::empty_snapshot ... ok
+test tests::histories_match_eager_copy_oracle ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+   Doc-tests userfaultfd_snapshot
+
+running 1 test
+test topics/106-userfaultfd/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.23s; merged doctests compilation took 0.22s
+{
+  "status": "pass",
+  "processes": 36,
+  "results": [
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "race"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "race"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "race"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 1,
+      "mode": "pre"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 1,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 1,
+      "fault_copies": 1,
+      "scan_copies": 0,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 4,
+      "fault_copies": 3,
+      "scan_copies": 14,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 4,
+      "fault_copies": 4,
+      "scan_copies": 13,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 11,
+      "fault_copies": 11,
+      "scan_copies": 6,
+      "mode": "race"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 17,
+      "mode": "pre"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 17,
+      "fault_copies": 17,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 17,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 11,
+      "fault_copies": 11,
+      "scan_copies": 6,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 1,
+      "events": 75,
+      "fault_copies": 75,
+      "scan_copies": 181,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 1,
+      "passes": 8,
+      "events": 77,
+      "fault_copies": 77,
+      "scan_copies": 179,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 1,
+      "events": 123,
+      "fault_copies": 122,
+      "scan_copies": 134,
+      "mode": "race"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 0,
+      "fault_copies": 0,
+      "scan_copies": 256,
+      "mode": "pre"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 256,
+      "fault_copies": 256,
+      "scan_copies": 0,
+      "mode": "fault"
+    },
+    {
+      "pages": 256,
+      "page_size": 4096,
+      "writers": 4,
+      "passes": 8,
+      "events": 118,
+      "fault_copies": 117,
+      "scan_copies": 139,
+      "mode": "race"
+    }
+  ]
+}
