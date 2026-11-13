@@ -6,6 +6,9 @@ import subprocess
 import sys
 import tempfile
 
+if not __debug__:
+    raise SystemExit("validation uses assert: run without python3 -O or PYTHONOPTIMIZE")
+
 binary = str(pathlib.Path(sys.argv[1]).resolve())
 results = []
 for pages, writers, passes, mode in itertools.product((1, 17, 256), (1, 4), (1, 8), ("pre", "fault", "race")):

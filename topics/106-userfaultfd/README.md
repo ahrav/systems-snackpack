@@ -16,11 +16,17 @@ cargo test -p userfaultfd-snapshot
 cd topics/106-userfaultfd
 cc -std=c11 -O2 -Wall -Wextra -Werror -pthread experiment/snapshot.c -o /tmp/topic106-snapshot
 python3 experiment/check.py /tmp/topic106-snapshot
+python3 experiment/test_check.py
 ```
 
 The checker starts 36 processes: 1/17/256 pages, 1/4 writers, 1/8 passes,
 and pre-copy/fault-only/racing-scanner schedules. Each process has a 20-second
 limit. Exit 77 records unavailable facilities; other failures fail the check.
+A kernel that rejects the WP feature or the user-mode-only flag with `EINVAL`
+counts as unavailable. The checker validates with `assert` and exits under
+`python3 -O`. `test_check.py` checks that exit. On Linux it also builds
+`uffd_shim.c`, a preload library that answers as a kernel without one
+facility, and requires exit 77 for each such answer and exit 1 for `EIO`.
 Direct runs write `snapshot.bin` and `live.bin` in the current directory.
 
 Protection is page-granular. Page events identify blocked attempts; they do

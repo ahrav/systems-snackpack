@@ -107,10 +107,16 @@ int main(int argc, char **argv) {
     uffd = (int)syscall(SYS_userfaultfd, O_CLOEXEC | O_NONBLOCK | UFFD_USER_MODE_ONLY);
     if (uffd < 0) {
         fprintf(stderr, "userfaultfd unavailable: %s\n", strerror(errno));
-        return errno == EPERM || errno == ENOSYS || errno == EACCES ? 77 : 1;
+        // EINVAL: the kernel predates UFFD_USER_MODE_ONLY (Linux 5.11).
+        return errno == EPERM || errno == ENOSYS || errno == EACCES || errno == EINVAL ? 77 : 1;
     }
     struct uffdio_api api = { .api = UFFD_API, .features = UFFD_FEATURE_PAGEFAULT_FLAG_WP };
-    if (ioctl(uffd, UFFDIO_API, &api) < 0) fail("UFFDIO_API");
+    if (ioctl(uffd, UFFDIO_API, &api) < 0) {
+        // On a fresh descriptor, EINVAL means UFFD_API or UFFD_FEATURE_PAGEFAULT_FLAG_WP exceeds kernel support.
+        if (errno != EINVAL) fail("UFFDIO_API");
+        fprintf(stderr, "UFFDIO_API unavailable: %s\n", strerror(EINVAL));
+        return 77;
+    }
     if (!(api.features & UFFD_FEATURE_PAGEFAULT_FLAG_WP)) return 77;
     live = mmap(NULL, pages * ps, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (live == MAP_FAILED) fail("mmap");
