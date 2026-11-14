@@ -1,0 +1,27 @@
+   Compiling topic108-fd-reuse v0.1.0 (/Users/ahrav/Documents/Codex/2026-11-14/advanced-systems-daily-lesson-every-local/outputs/topic-108-fd-reuse/source/topics/108-fd-reuse)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.39s
+     Running unittests src/lib.rs (target/debug/deps/topic108_fd_reuse-caaf0d16f2733806)
+
+running 3 tests
+test tests::exhaustion_retires_slot_instead_of_wrapping ... ok
+test tests::validate_then_release_ownership_leaves_a_gap ... ok
+test tests::stale_retirement_and_invalid_tokens ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests topic108_fd_reuse
+
+running 1 test
+test topics/108-fd-reuse/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.70s; merged doctests compilation took 0.26s
+   Compiling topic108-fd-reuse v0.1.0 (/Users/ahrav/Documents/Codex/2026-11-14/advanced-systems-daily-lesson-every-local/outputs/topic-108-fd-reuse/source/topics/108-fd-reuse)
+    Finished `release` profile [optimized] target(s) in 0.33s
+     Running `target/release/examples/oracle`
+histories=65536 comparisons=819328 raw_misroutes=97536 guarded_misroutes=0
+generation check: stale callback rejected
+raw fd callback: consumed B
+Darwin c0c7db201688 25.6.0 Darwin Kernel Version 25.6.0: Mon Oct 12 00:41:41 PDT 2026; root:xnu-12377.161.15.701.48~2/RELEASE_ARM64_T6050 arm64
+rustc 1.93.1 (01f6ddf75 2026-02-11)
