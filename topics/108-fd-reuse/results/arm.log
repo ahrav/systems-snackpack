@@ -1,0 +1,30 @@
+29269b2c7477a4270f7150c4dc56c76515522814a4ed0ffdc5b3c8852ac92963  source.tar
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.113-138.209.amzn2023.aarch64 #1 SMP Tue Oct 20 21:58:08 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+cc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+   Compiling topic108-fd-reuse v0.1.0 (/tmp/topic108-fd-reuse-20261114/topics/108-fd-reuse)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.81s
+     Running unittests src/lib.rs (target/debug/deps/topic108_fd_reuse-844d49acb911a6ce)
+
+running 3 tests
+test tests::exhaustion_retires_slot_instead_of_wrapping ... ok
+test tests::stale_retirement_and_invalid_tokens ... ok
+test tests::validate_then_release_ownership_leaves_a_gap ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests topic108_fd_reuse
+
+running 1 test
+test topics/108-fd-reuse/src/lib.rs - (line 6) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.40s; merged doctests compilation took 0.39s
+   Compiling topic108-fd-reuse v0.1.0 (/tmp/topic108-fd-reuse-20261114/topics/108-fd-reuse)
+    Finished `release` profile [optimized] target(s) in 0.35s
+     Running `target/release/examples/oracle`
+histories=65536 comparisons=819328 raw_misroutes=97536 guarded_misroutes=0
+generation check: stale callback rejected
+raw fd callback: consumed B
+native_cases=256 stale_rejected=256 raw_reads_B=256 fresh_reads_C=256 alias_cases=64
