@@ -61,3 +61,8 @@ int main(void) {
             for (int del = 0; del < 2; ++del) run(alias, del);
     puts("native_cases=256 stale_rejected=256 raw_reads_B=256 fresh_reads_C=256 alias_cases=64");
 }
+
+/* The assertions are the checks. This guard follows main so assert line numbers stay fixed. */
+#ifdef NDEBUG
+#error "epoll_reuse.c validates with assert: build without -DNDEBUG"
+#endif

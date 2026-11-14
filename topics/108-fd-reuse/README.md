@@ -15,12 +15,19 @@ cargo +1.93.1 run --release -p topic108-fd-reuse --example oracle
 python3 topics/108-fd-reuse/examples/reuse.py
 cc -std=c11 -O2 -Wall -Wextra -Werror topics/108-fd-reuse/native/epoll_reuse.c -o /tmp/topic108-epoll
 /tmp/topic108-epoll
+python3 topics/108-fd-reuse/test_checks.py
 ```
 
-The C commands require Linux. The Python program runs in an isolated process and
-forces descriptor reuse. Expect a rejected stale token and a raw callback that
-consumes B. The native test captures a real event, forces reuse, compares data
-bytes from distinct pipes, and checks all four duplicate/deregister combinations.
+Run from the repository root. The C commands require Linux. The Python program
+runs in an isolated process and forces descriptor reuse. Expect a rejected stale
+token and a raw callback that consumes B. The native test captures a real event,
+forces reuse, and checks all four duplicate/deregister combinations. It leaves A
+unread in the first pipe and requires the raw descriptor to read B and C from
+the replacement pipe.
+
+Both programs validate with `assert`. `reuse.py` exits under `python3 -O` or
+`PYTHONOPTIMIZE`, and `epoll_reuse.c` refuses to compile with `-DNDEBUG`.
+`test_checks.py` checks both refusals; its native case requires Linux.
 
 The independent oracle tracks unique connection identities in a separate ledger.
 It compares every retained token after each operation in all 65,536 eight-action
@@ -43,8 +50,9 @@ lookup. A 32-bit generation wraps after about 71.6 minutes at one million reuses
 per second. This arithmetic motivates explicit exhaustion behavior.
 
 `EPOLL_CTL_DEL` removes the interest entry; copied userspace events remain.
-Aliases can preserve the old registration after close. `EPOLLONESHOT` controls
-rearming. Applications still own callback identity and lifetime. Valid readiness
-requires nonblocking error handling, including `EAGAIN`.
+Without `EPOLL_CTL_DEL`, open aliases preserve the old registration across
+`close`. `EPOLLONESHOT` controls rearming. Applications still own callback
+identity and lifetime. Valid readiness requires nonblocking error handling,
+including `EAGAIN`.
 
 Results and scope appear in [RESULTS.md](RESULTS.md); sources in [SOURCES.md](SOURCES.md).

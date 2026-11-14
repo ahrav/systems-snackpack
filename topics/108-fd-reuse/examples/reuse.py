@@ -1,6 +1,9 @@
 """A delayed callback reads the replacement pipe through a recycled descriptor."""
 import os
 
+if not __debug__:
+    raise SystemExit("validation uses assert: run without python3 -O or PYTHONOPTIMIZE")
+
 a, aw = os.pipe()
 fd = a
 generation = 1

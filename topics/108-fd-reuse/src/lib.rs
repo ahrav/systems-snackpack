@@ -36,8 +36,8 @@ impl Registry {
         }
     }
 
-    /// Inserts a nonnegative descriptor into a vacant slot.
-    /// Returns `None` for occupied, invalid, or exhausted slots.
+    /// Inserts a nonnegative descriptor into a vacant slot. The caller registers it in one slot.
+    /// Returns `None` for a negative descriptor or an out-of-range, occupied, or exhausted slot.
     pub fn insert(&mut self, slot: u32, fd: i32) -> Option<Token> {
         let entry = self.slots.get_mut(slot as usize)?;
         if fd < 0 || entry.fd.is_some() {
@@ -106,5 +106,26 @@ mod tests {
         let b = r.insert(0, 7).unwrap();
         assert_eq!(r.resolve(a), None);
         assert_eq!(r.resolve(b), Some(copied_fd));
+    }
+
+    #[test]
+    fn second_slot_descriptor_zero_and_vacant_retirement() {
+        let mut r = Registry::new(2);
+        assert_eq!(r.insert(1, -1), None);
+        let first = r.insert(1, 0).unwrap();
+        assert_eq!(first, Token((1 << 32) | 1));
+        assert_eq!(r.resolve(first), Some(0));
+        assert_eq!(r.resolve(Token(1 << 32)), None);
+        assert_eq!(r.retire(first), Some(0));
+        assert_eq!(r.retire(first), None);
+        let second = r.insert(1, 9).unwrap();
+        assert_eq!(second, Token((2 << 32) | 1));
+        assert_eq!(r.resolve(second), Some(9));
+        let moved = r.insert(0, 0).unwrap();
+        assert_eq!(r.resolve(moved), Some(0));
+        assert_eq!(r.resolve(first), None);
+        assert_eq!(r.retire(second), Some(9));
+        assert_eq!(r.resolve(moved), Some(0));
+        assert_eq!(Registry::new(0).insert(0, 7), None);
     }
 }
