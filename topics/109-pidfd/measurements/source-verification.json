@@ -1,0 +1,17 @@
+{
+  "commit": "f3645696b7f713cdd438410089056da723b184c5",
+  "archive_sha256": "7052e122616310401aed23ad3fbd6131e6163a8626a7067ce35a60b4cd39fe8c",
+  "members": {
+    "Cargo.lock": "4b8372efabe4ce32f9d1fd184c3d2d707ab5d52c2c634b0e4fd320cc57700c4e",
+    "Cargo.toml": "f4fafc36b3b192392e9596a60ea28331b976460c76a737ac6ae8b90fc5ca18c5",
+    "topics/109-pidfd/Cargo.toml": "4653d7de4ef03776e00f93b9098883cf3fab1c4f999388506c01bb68748d0764",
+    "topics/109-pidfd/README.md": "273e1218c056451974748dafcacaf5a0b2fd08bfacc2e693cf9ec8f34fd35774",
+    "topics/109-pidfd/RESULTS.md": "c7b978783d185a8c4046eca9fa0aad7d61f4bfed7c92b9a8f571e5197b4a11a7",
+    "topics/109-pidfd/SOURCES.md": "9a844a3c1c7e8c47a3fa0084c37a06482e67c5b5747f1cb2a6b25e61ff89ac97",
+    "topics/109-pidfd/check.sh": "5387a909263e07994127efcecdb6fbf1f7af444f8ecd1a5b89dbafae5f40309b",
+    "topics/109-pidfd/examples/demo.py": "aefb2acce61dfaf747c8c499673714f79aee600b0e24aa08ac0fcc2880323980",
+    "topics/109-pidfd/examples/oracle.rs": "3f9cfad2c744529d8f7456e0d127449e843e73fd71f2c1b88f5f92c68c28db2f",
+    "topics/109-pidfd/native/supervise.c": "7f8d20a7014b4a4d0425511888cb6b7a956ce091f642bbadb459d67db1137642",
+    "topics/109-pidfd/src/lib.rs": "b3ec6900e9b4e2694729f57c6ab1ba872fc07c7eee672505a2811555cb1fc9d5"
+  }
+}

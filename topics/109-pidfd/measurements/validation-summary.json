@@ -1,0 +1,16 @@
+{
+  "workspace_checks": [
+    "fmt",
+    "clippy",
+    "tests",
+    "doctests",
+    "bench-build",
+    "docs"
+  ],
+  "result": "PASS",
+  "counts": {
+    "tests": 570,
+    "doctests": 167
+  },
+  "final_oracle_change": "fmt and workspace clippy repeated; topic tests, doctest, oracle and bench build repeated"
+}

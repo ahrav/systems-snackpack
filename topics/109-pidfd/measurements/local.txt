@@ -1,0 +1,26 @@
+Darwin c0c7db201688 25.6.0 Darwin Kernel Version 25.6.0: Mon Oct 12 00:41:41 PDT 2026; root:xnu-12377.161.15.701.48~2/RELEASE_ARM64_T6050 arm64
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+Python 3.13.16
+   Compiling topic109-pidfd v0.1.0 (/Users/ahrav/Documents/Codex/2026-11-15/advanced-systems-daily-lesson-every-local-2/outputs/topic-109-pidfd/source/topics/109-pidfd)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.35s
+     Running unittests src/lib.rs (target/debug/deps/topic109_pidfd-8efe8612e770b67d)
+
+running 2 tests
+test tests::zombie_retains_identity_until_reap ... ok
+test tests::running_reap_invalid_pid_and_identity_exhaustion ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests topic109_pidfd
+
+running 1 test
+test topics/109-pidfd/src/lib.rs - (line 7) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.57s; merged doctests compilation took 0.25s
+   Compiling topic109-pidfd v0.1.0 (/Users/ahrav/Documents/Codex/2026-11-15/advanced-systems-daily-lesson-every-local-2/outputs/topic-109-pidfd/source/topics/109-pidfd)
+    Finished `release` profile [optimized] target(s) in 0.30s
+     Running `target/release/examples/oracle`
+histories=279936 identity_comparisons=1918044 wrong_raw_targets=15486 PASS
+LIMIT: native pidfd checks require Linux

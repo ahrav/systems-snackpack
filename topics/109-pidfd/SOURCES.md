@@ -9,3 +9,5 @@ Checked 2026-11-15 against the Linux man-pages project:
 
 The example uses syscall macros from system headers for C portability across
 AArch64 and x86-64. The native runs establish behavior on their recorded kernels.
+
+- [Linux wait UAPI](https://github.com/torvalds/linux/blob/master/include/uapi/linux/wait.h): P_PIDFD selection constant for older libc headers.
