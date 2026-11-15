@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <sys/syscall.h>
 #include <sys/wait.h>
+/* Linux UAPI supplies P_PIDFD when libc headers predate its wrapper support. */
+#include <linux/wait.h>
 #include <time.h>
 #include <unistd.h>
 
