@@ -12,6 +12,7 @@ fn main() {
         // it cannot change an old object's live flag or redirect its reference.
         let mut slots: [Option<Rc<Cell<bool>>>; 2] = [None, None];
         let mut saved = Vec::new();
+        let mut oracle_birth = 0_u64;
         for _ in 0..7 {
             let action = digits % 6;
             digits /= 6;
@@ -21,9 +22,11 @@ fn main() {
                     let handle = actual.spawn(pid);
                     assert_eq!(handle.is_some(), slots[pid].is_none());
                     if let Some(handle) = handle {
+                        oracle_birth += 1;
+                        assert_eq!(handle.identity(), oracle_birth);
                         let object = Rc::new(Cell::new(true));
                         slots[pid] = Some(object.clone());
-                        saved.push((pid, handle, object));
+                        saved.push((pid, handle, object, oracle_birth));
                     }
                 }
                 1 => {
@@ -39,12 +42,12 @@ fn main() {
                     }
                 }
             }
-            for (pid, handle, object) in &saved {
-                let expected = object.get().then_some(handle.identity());
+            for (pid, handle, object, birth) in &saved {
+                let expected = object.get().then_some(*birth);
                 assert_eq!(actual.signal(*handle), expected);
                 comparisons += 1;
                 if let Some(target) = actual.raw_signal(*pid)
-                    && target != handle.identity()
+                    && target != *birth
                 {
                     wrong_raw_targets += 1;
                 }
