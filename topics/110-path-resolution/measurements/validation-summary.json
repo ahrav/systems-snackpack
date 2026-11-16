@@ -1,0 +1,75 @@
+{
+  "gates": [
+    {
+      "command": [
+        "cargo",
+        "+1.93.1",
+        "fmt",
+        "--all",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "+1.93.1",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "+1.93.1",
+        "test",
+        "--workspace",
+        "--lib",
+        "--bins",
+        "--examples"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "+1.93.1",
+        "test",
+        "--workspace",
+        "--doc"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "+1.93.1",
+        "bench",
+        "--workspace",
+        "--no-run"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "cargo",
+        "+1.93.1",
+        "doc",
+        "--workspace",
+        "--no-deps"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "tests_passed": 573,
+  "doctests_passed": 168,
+  "writing_policy": "passed",
+  "full_branch_whitespace": "passed",
+  "cache": "task-local writable cache; initial unpack permission failures retained"
+}
