@@ -1,0 +1,18 @@
+{
+  "tested_commit": "7afe438b6694e9bed2a1e72f194dad6842bd8ea6",
+  "archive_sha256": "806c3e83e3bb45f6b55e5e38e6f58fa46403a6daa1f1edf18c10e98205da3531",
+  "git_files_verified": 3330,
+  "host_transfer_hashes": "passed on Arm and x86",
+  "executable_paths": [
+    "Cargo.toml",
+    "Cargo.lock",
+    "topics/110-path-resolution/Cargo.toml",
+    "topics/110-path-resolution/src/lib.rs",
+    "topics/110-path-resolution/native/open_report.c",
+    "topics/110-path-resolution/examples/demo.py",
+    "topics/110-path-resolution/examples/native_oracle.py",
+    "topics/110-path-resolution/check.sh"
+  ],
+  "retained_archive": "tested-source.tar.gz",
+  "compressed_archive_sha256": "27262f4fc96ccaba8e01158de6e58cb4ccd8b0e8438fd19f882d777f1efc5cdd"
+}
