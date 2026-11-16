@@ -1,0 +1,11 @@
+digraph G {
+ graph [rankdir=LR, bgcolor="white", pad="0.3", nodesep="0.35"];
+ node [shape=box, style="rounded,filled", fillcolor="#edf3fa", fontname="Helvetica", fontsize=15];
+ edge [fontname="Helvetica", fontsize=12];
+ check [label="1. Check root/job/report\nCurrently resolves inside root"];
+ swap [label="2. Replace job with symlink\njob -> ../outside", fillcolor="#fff0d6"];
+ unsafe [label="3a. openat(rootfd, job/report)\nOpens OUTSIDE file", fillcolor="#ffe4e4"];
+ safe [label="3b. openat2 + BENEATH\nRejects escape", fillcolor="#e1f3e6"];
+ handle [label="Already-open file descriptor\nKeeps original object identity"];
+ check -> swap; swap -> unsafe; swap -> safe; check -> handle [label="open before replacement"];
+}
