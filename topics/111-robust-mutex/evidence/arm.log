@@ -1,0 +1,31 @@
+Linux dev-dsk-ahrav-2b-7dc7bd93.us-west-2.amazon.com 6.12.115-140.210.amzn2023.aarch64 #1 SMP Wed Nov 11 00:31:12 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+66d9985e0d3e2609e7acd9da7c4c8e047814b8340d6c4b194ba32052b3b44aa3  source.tar
+   Compiling topic111-robust-mutex v0.1.0 (/tmp/systems-topic111-20261117/source/topics/111-robust-mutex)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.05s
+     Running unittests src/lib.rs (target/debug/deps/topic111_robust_mutex-69e731e9605c9114)
+
+running 3 tests
+test tests::interrupted_repair_repeats_assignments ... ok
+test tests::invalid_recovery_evidence ... ok
+test tests::serial_transaction_oracle ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests topic111_robust_mutex
+
+running 1 test
+test topics/111-robust-mutex/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.37s; merged doctests compilation took 0.37s
+0 (60, 40)
+1 (60, 40)
+2 (60, 40)
+3 (60, 40)
+4 (60, 40)
+5 (50, 50)
+PASS: six crash points and repeated recovery
+PASS: {'repair': 360, 'poison': 12, 'premature': 12} total=384
