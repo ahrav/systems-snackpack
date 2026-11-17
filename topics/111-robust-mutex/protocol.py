@@ -1,3 +1,9 @@
+import sys
+
+if sys.flags.optimize:
+    raise SystemExit("validation uses assert: run without python -O or PYTHONOPTIMIZE")
+
+
 def recover(a, b, active, undo):
     if active:
         a, b = undo

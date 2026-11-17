@@ -1,5 +1,5 @@
-"""oracle.py passes the retained native CSVs, rejects optimized Python,
-and rejects rows outside the declared scenario matrix."""
+"""oracle.py passes the retained native CSVs and rejects rows outside the declared
+scenario matrix; oracle.py and protocol.py both exit under optimized Python."""
 import csv
 import os
 import pathlib
@@ -12,13 +12,17 @@ ROOT = pathlib.Path(__file__).resolve().parent
 HEADER = ["initial", "amount", "point", "repair_cut", "mode", "a", "b"]
 
 
-def run_oracle(path, optimize=""):
-    """Run oracle.py on `path`; a non-empty `optimize` strips assert statements."""
+def run_script(name, *args, optimize=""):
+    """Run one topic script; a non-empty `optimize` strips assert statements."""
     env = {k: v for k, v in os.environ.items() if k != "PYTHONOPTIMIZE"}
     return subprocess.run(
-        [sys.executable, str(ROOT / "oracle.py"), str(path)],
+        [sys.executable, str(ROOT / name), *map(str, args)],
         env={**env, "PYTHONOPTIMIZE": optimize}, text=True, capture_output=True, timeout=60, check=False,
     )
+
+
+def run_oracle(path, optimize=""):
+    return run_script("oracle.py", path, optimize=optimize)
 
 
 def run_rows(rows, optimize=""):
@@ -62,6 +66,18 @@ class Oracle(unittest.TestCase):
                 proc = run_rows(candidate)
                 self.assertNotEqual(proc.returncode, 0, proc.stdout)
                 self.assertNotIn("PASS", proc.stdout)
+
+class Protocol(unittest.TestCase):
+    def test_portable_example_passes(self):
+        proc = run_script("protocol.py")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertEqual(proc.stdout.splitlines()[-1], "PASS: six crash points and repeated recovery")
+
+    def test_optimized_python_never_reports_pass(self):
+        proc = run_script("protocol.py", optimize="1")
+        self.assertNotEqual(proc.returncode, 0, proc.stdout)
+        self.assertNotIn("PASS", proc.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

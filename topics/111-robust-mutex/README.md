@@ -94,15 +94,15 @@ python3 protocol.py
 cc -std=c11 -O2 -Wall -Wextra -Werror -pthread native.c -o /tmp/topic111-native
 timeout 30s /tmp/topic111-native > /tmp/topic111-native.csv
 python3 oracle.py /tmp/topic111-native.csv
-python3 -m unittest test_oracle.py
+python3 -m unittest test_checks.py
 ```
 
 The portable example prints `(60, 40)` for crash points 0 through 4 and `(50, 50)`
 for point 5. Its final line reports six crash points and repeated recovery.
 The native oracle expects 360 repaired cases, 12 poisoned cases and 12 premature
-consistency cases. It requires the exact 384 scenario keys that `native.c` emits
-and exits under `python3 -O` or `PYTHONOPTIMIZE`, which strip its assertions.
-`test_oracle.py` checks those refusals against the retained CSV files.
+consistency cases. It requires the exact 384 scenario keys that `native.c` emits.
+Both Python scripts exit under `python3 -O` or `PYTHONOPTIMIZE`, which strip their
+assertions. `test_checks.py` checks those refusals and the retained CSV files.
 Premature consistency is an intentional negative control:
 a subsequent normal acquisition succeeds while the balances still violate the invariant.
 
