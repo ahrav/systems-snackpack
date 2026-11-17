@@ -3,7 +3,17 @@ import csv
 import sys
 from collections import Counter
 
+if sys.flags.optimize:
+    raise SystemExit("validation uses assert: run without python -O or PYTHONOPTIMIZE")
+
+expected = Counter()
+for a in (10, 40, 60, 100):
+    for amount in (1, a // 2, a):
+        expected.update((a, amount, point, cut, "repair") for point in range(6) for cut in range(-1, 4))
+        expected.update((a, amount, 3, -1, mode) for mode in ("poison", "premature"))
+
 counts = Counter()
+seen = Counter()
 rows = list(csv.DictReader(open(sys.argv[1], encoding="utf-8")))
 for row in rows:
     a, amount, point, cut, left, right = (int(row[k]) for k in
@@ -18,6 +28,6 @@ for row in rows:
     else:
         assert mode == "poison" and point == 3 and cut == -1, row
     counts[mode] += 1
-assert counts == {"repair": 360, "poison": 12, "premature": 12}, counts
-assert len({tuple(row.values()) for row in rows}) == 384
+    seen[a, amount, point, cut, mode] += 1
+assert seen == expected, ("native.c matrix: missing", expected - seen, "unexpected", seen - expected)
 print("PASS:", dict(counts), "total=384")

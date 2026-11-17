@@ -3,7 +3,8 @@
 Tested source: `557b84f34dc1914b661ab4b783a9a64eac81357f`.
 Archive SHA256: `66d9985e0d3e2609e7acd9da7c4c8e047814b8340d6c4b194ba32052b3b44aa3`.
 Both Linux hosts received that exact committed archive. Publication adds documentation
-and retained results; the implementation and oracle bytes remain unchanged.
+and retained results. `native.c`, `protocol.py` and the Rust source are
+byte-identical to the tested commit.
 
 | Host | Rust model | Native pthread cases | Portable Python |
 |---|---|---|---|
@@ -32,6 +33,16 @@ waiter contention, SIGKILL injection, power loss, latency, throughput and arbitr
 memory corruption are unmeasured. The Rust model does not implement pthread ownership;
 native tests supply that independent operating-system check. The poison oracle checks
 record shape while the C program asserts `ENOTRECOVERABLE` directly.
+
+A commit after the tested source changes `oracle.py` and adds `test_oracle.py`.
+The oracle exits under optimized Python and requires the exact 384 scenario keys
+of the native matrix. Its balance checks are byte-identical to the tested commit.
+`test_oracle.py` checks both refusals and the two retained CSV files. Linux x86_64
+host dev-dsk-ahrav-2c-32182091, with kernel 6.12.115, GCC 11.5.0 and Python 3.9.25,
+ran the head oracle on `evidence/arm.csv`, on `evidence/x86.csv`, and on one fresh
+native run built with the flags above. Each run prints the `PASS` line retained in
+the logs, and the fresh CSV is byte-identical to `evidence/x86.csv`. The logs under
+`evidence/` and the archive hash record the tested-commit oracle.
 
 Raw host metadata, CSV rows, gate logs and source-identity evidence accompany this
 lesson under `evidence/`. Commands and invariants are in [README.md](README.md).
