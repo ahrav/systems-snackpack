@@ -1,0 +1,15 @@
+digraph recovery {
+  graph [rankdir=LR, bgcolor="white", pad="0.3"];
+  node [shape=box, style="rounded,filled", fillcolor="#edf4ff", fontname="Helvetica", fontsize=14];
+  edge [fontname="Helvetica", fontsize=12];
+  update [label="Owner updates shared state\nUndo record retained"];
+  died [label="Owner dies holding lock\nNext lock: EOWNERDEAD\nCaller now owns mutex", fillcolor="#fff0d8"];
+  repair [label="Restore old values\nValidate invariant\nKeep recovery repeatable"];
+  ready [label="pthread_mutex_consistent\nUnlock\nNormal access resumes", fillcolor="#e1f5e5"];
+  poison [label="Repair cannot establish truth\nUnlock without consistent\nLater lock: ENOTRECOVERABLE", fillcolor="#ffe3e3"];
+  update -> died;
+  died -> repair [label="valid undo record"];
+  repair -> ready;
+  repair -> died [label="repairer dies"];
+  died -> poison [label="invalid evidence"];
+}
