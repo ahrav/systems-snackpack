@@ -12,9 +12,12 @@ The source commit was `14b40f16b93a546e0e5febef550fe503a428de3a`. All three host
 
 The Rust tests ran in the default test profile. The local workspace passed formatting, Clippy with warnings denied, 578 unit/binary/example tests, 170 doctests, benchmark compilation, and documentation with warnings denied. The workload measured correctness for one stable generation. Concurrent mutation, truncation, and performance were outside the experiment.
 
+The table and logs describe the scripts at that commit. Later commits change `two_readers` in `inventory.py` and add `test_inventory.py`. The parent compares its decode with an explicit check, which also runs under `python3 -O` and `PYTHONOPTIMIZE`. The child exits through `os._exit` on every path and reports a failure as a nonzero wait status. `selected`, `demo`, and the Rust crate are unchanged from the tested commit. The changed script and `test_inventory.py` passed on Linux 6.12.115 x86-64 with Python 3.9.25.
+
 Repeat from the repository root.
 
 ```sh
 cargo test -p topic112-relocatable-inventory
 python3 topics/112-relocatable-inventory/inventory.py
+python3 topics/112-relocatable-inventory/test_inventory.py
 ```

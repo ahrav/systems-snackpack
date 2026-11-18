@@ -2,6 +2,7 @@
 import mmap
 import os
 import struct
+import sys
 import tempfile
 
 
@@ -29,15 +30,23 @@ def two_readers():
         file.write(struct.pack("<4s5I", b"INV1", 16, 11, 3, 42, 7))
         file.flush()
         with mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as first:
-            assert selected(first) == (42, 7)
+            if selected(first) != (42, 7):
+                raise RuntimeError("parent decoded a different record")
             child = os.fork()
             if child == 0:
-                # The inherited mapping still occupies the parent's address.
-                # A second, non-overlapping mapping must have a different base.
-                with mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as second:
-                    result = selected(second)
-                    print(f"child read {result} from a distinct mapping", flush=True)
-                os._exit(0 if result == (42, 7) else 1)
+                # os._exit ends the child inside this branch and gives the parent its status.
+                status = 1
+                try:
+                    # The inherited mapping still occupies the parent's address.
+                    # A second, non-overlapping mapping must have a different base.
+                    with mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as second:
+                        result = selected(second)
+                        print(f"child read {result} from a distinct mapping", flush=True)
+                    status = 0 if result == (42, 7) else 1
+                except BaseException as error:
+                    print(f"child failed: {error!r}", file=sys.stderr, flush=True)
+                finally:
+                    os._exit(status)
             _, status = os.waitpid(child, 0)
             if status != 0:
                 raise RuntimeError(f"child wait status {status}")

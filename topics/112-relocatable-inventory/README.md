@@ -11,7 +11,7 @@ Two processes can read the same inventory file at different virtual addresses. S
 
 ## Resolve the selected inventory record
 
-The eight-byte header starts with the four bytes `INV1`. This identifies the format and version. The next four encode an unsigned little-endian byte offset from the start of the segment. Each record holds two little-endian 32-bit unsigned integers, item ID and quantity. The file must contain a header and at least one whole record. This format requires a selection.
+The eight-byte header starts with the four bytes `INV1`. This identifies the format and version. The next four encode an unsigned little-endian byte offset from the start of the segment. Each record holds two little-endian 32-bit unsigned integers, item ID and quantity. The file is the header followed by one or more whole records, so its length is a multiple of eight bytes and at least 16. This format requires a selection.
 
 ![Two mapping bases and one selected record](layout.png)
 
