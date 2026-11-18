@@ -1,0 +1,9 @@
+digraph layout {
+graph [bgcolor="white", rankdir=TB, pad=0.2, nodesep=0.3, ranksep=0.4];
+node [shape=box, style="rounded,filled", fillcolor="#ecf4f6", color="#375661", fontname="Helvetica", margin="0.18,0.12"];
+segment [label="Immutable segment  ·  24 bytes\n[0, 8) header     [8, 16) record 0     [16, 24) record 1\nHeader selects byte offset 16"];
+a [label="Process A\nbase 0x100000 + 16 = 0x100010"];
+b [label="Process B\nbase 0x700000 + 16 = 0x700010"];
+v [label="Both read record 1\nitem 42, quantity 7", fillcolor="#daf2dc"];
+segment -> {a b}; {a b} -> v;
+}
