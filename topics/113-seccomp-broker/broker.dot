@@ -1,0 +1,14 @@
+digraph broker {
+ graph [rankdir=TB, bgcolor="white", pad=0.25, nodesep=0.3, ranksep=0.32]
+ node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=15, color="#476070", fillcolor="#eff4f6", margin="0.20,0.12"]
+ edge [fontname="Helvetica", fontsize=13, color="#476070"]
+ a [label="Target requests the read-only catalog"]
+ b [label="Kernel parks the calling thread\nand assigns notification ID 41"]
+ c [label="Broker checks its private copy of the request\nand selects its own catalog descriptor"]
+ d [label="Kernel processes ADDFD with SEND for ID 41", fillcolor="#dcecf9"]
+ e [label="Live ID and space available\nInstall descriptor and return its target number", fillcolor="#dbefdd"]
+ f [label="Expired ID\nReturn ENOENT to broker", fillcolor="#fae5dc"]
+ a -> b -> c -> d
+ d -> e
+ d -> f
+}
