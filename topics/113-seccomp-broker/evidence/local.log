@@ -1,0 +1,20 @@
+   Compiling topic113-seccomp-broker v0.1.0 (/Users/ahrav/Documents/Codex/2026-11-19/advanced-systems-daily-lesson-every-local/work/local-exact/topics/113-seccomp-broker)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.44s
+     Running unittests src/lib.rs (target/debug/deps/topic113_seccomp_broker-fef8331ad76acccb)
+
+running 1 test
+test tests::rejects_partial_names_and_single_byte_substitutions ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests topic113_seccomp_broker
+
+running 1 test
+test topics/113-seccomp-broker/src/lib.rs - (line 5) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+all doctests ran in 0.57s; merged doctests compilation took 0.22s
+read-only catalog
+denied
+expired
