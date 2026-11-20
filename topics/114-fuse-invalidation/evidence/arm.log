@@ -1,0 +1,33 @@
+source.tar: OK
+Linux 6.12.115-140.210.amzn2023.aarch64 aarch64
+fuse3-libs-3.10.4-1.amzn2023.0.2.aarch64
+gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+rustc 1.93.1 (01f6ddf75 2026-02-11)
+   Compiling topic114-fuse-invalidation v0.1.0 (/tmp/topic114-waXx7A4i/topics/114-fuse-invalidation)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.29s
+     Running unittests src/lib.rs (target/debug/deps/topic114_fuse_invalidation-94eac5e73a1ad529)
+
+running 1 test
+test tests::full_invalidation_matches_each_committed_version ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests topic114_fuse_invalidation
+
+running 1 test
+test topics/114-fuse-invalidation/src/lib.rs - (line 3) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 0.29s; merged doctests compilation took 0.29s
+0400 BLUE
+0400 GOLD
+b'none' 0400 b'BLUE'
+b'a' 0400 b'BLUE'
+b'p' 0400 b'GOLD'
+b'none' 0400 b'BLUE'
+b'a' 0400 b'BLUE'
+b'p' 0400 b'GOLD'
+b'none' 0400 b'BLUE'
+b'a' 0400 b'BLUE'
+b'p' 0400 b'GOLD'
