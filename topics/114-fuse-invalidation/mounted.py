@@ -36,14 +36,18 @@ def experiment(binary, directory):
                 os.fchmod(writer.fileno(), 0o400)
                 oracle = observe(writer.fileno())
                 assert oracle == (0o400, b"GOLD")
-                for command, expected in [(None, (0o444, b"BLUE")),
+                for command, expected in [(None, None),
                                           (b"a", (0o400, b"BLUE")), (b"p", oracle)]:
                     if command:
                         server.stdin.write(command)
                         assert reply(server) == b"0"
                     actual = observe(fd)
                     print(command or b"none", format(actual[0], "04o"), actual[1])
-                    assert actual == expected, (actual, expected)
+                    if command is None:
+                        # The kernel may already have refreshed mode on this descriptor.
+                        assert actual[0] in (0o444, 0o400) and actual[1] == b"BLUE"
+                    else:
+                        assert actual == expected, (actual, expected)
         finally:
             server.stdin.close()
             if os.path.ismount(mountpoint):
@@ -52,5 +56,7 @@ def experiment(binary, directory):
 
 
 if __name__ == "__main__":
+    if not __debug__:
+        raise RuntimeError("Run this test with Python assertions enabled")
     with tempfile.TemporaryDirectory() as tmp:
         experiment(Path(sys.argv[1]).resolve(), Path(tmp))

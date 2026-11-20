@@ -85,7 +85,7 @@ python3 mounted.py /tmp/topic114-palette
 
 The driver creates a private directory and uses one descriptor per side. It
 warms the mounted descriptor and changes the backing file through the other.
-A direct fstat/pread pair supplies the oracle. Expect `0444 BLUE` with no
+A direct fstat/pread pair supplies the oracle. Expect cached `BLUE` with either mode before a
 notification, `0400 BLUE` after attribute invalidation and `0400 GOLD` after
 full invalidation. The daemon disables automatic mtime-based page invalidation
 and writeback, uses one-hour metadata and entry timeouts, and serves reads
