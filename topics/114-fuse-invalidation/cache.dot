@@ -1,0 +1,12 @@
+digraph cache {
+ graph [rankdir=TB, bgcolor="white", pad=0.25, nodesep=0.40, ranksep=0.5];
+ node [shape=box,style="rounded,filled",fontname="Helvetica",color="#43566a",fillcolor="#eef4fa",margin="0.18,0.13"];
+ edge [fontname="Helvetica",fontsize=11,color="#43566a"];
+ old [label="Reader warms inode 12\nmode = 0444, bytes = BLUE"];
+ write [label="External writer commits GOLD\nsame length, mode = 0400",fillcolor="#fff2cf"];
+ attr [label="Invalidate attributes only\ngetattr refills mode = 0400"];
+ both [label="Invalidate attributes and all pages\ngetattr and read refill from backing file"];
+ stale [label="Cached bytes can still be BLUE",fillcolor="#fee3da"];
+ fresh [label="Reader sees GOLD",fillcolor="#dcf3e3"];
+ old -> write; write -> attr; write -> both; attr -> stale; both -> fresh;
+}
