@@ -42,8 +42,9 @@ cargo test --locked -p topic115-nfs-delegation
 cargo build --locked -p topic115-nfs-delegation
 python3 oracle.py ../../target/debug/topic115-nfs-delegation
 python3 cost.py > cost.csv
+python3 test_cost.py
 ```
 
 The Python example prints `return: B reads GOLD at 7 model ms` and `revoke: B reads BLUE at 31 model ms`. These times are chosen inputs. The Rust model tests acknowledgment, flush, cooperative return, revocation and retry as separate events. The Python oracle derives the expected result from event positions. Both use one whole-file update, compatible share modes, a single holder and no server restart.
 
-The cost harness starts after A's file has closed and any grant is already installed. It times zero or eight compatible reopen/close pairs on A followed by one conflicting open on B. Two policies use the same serial socket request service with a 500 µs sleep per message. Delegated A handles its reopens locally and makes two extra exchanges on recall. The output gives total time and B's open time in microseconds. The program uses a local socket protocol. Real NFS can combine operations and pipeline writeback. See [results](RESULTS.md) for measured distributions and limits.
+The cost harness starts after A's file has closed and any grant is already installed. It times zero or eight compatible reopen/close pairs on A followed by one conflicting open on B. Two policies use the same serial socket request service with a 500 µs sleep per message. Delegated A handles its reopens locally and makes two extra exchanges on recall. The service holds B's OPEN while the grant is installed and answers it after the delegation return. `test_cost.py` checks that message order. The output gives total time and B's open time in microseconds. B's open time runs from B's request to B's reply. The program uses a local socket protocol. Real NFS can combine operations and pipeline writeback. See [results](RESULTS.md) for measured distributions and limits.

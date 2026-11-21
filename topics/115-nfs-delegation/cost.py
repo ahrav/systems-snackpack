@@ -8,28 +8,38 @@ import threading
 import time
 
 
-def serve(sock):
+def serve(sock, grant):
+    held = b''
     with sock:
         while True:
             message = sock.recv(1)
             if not message:
                 return
             time.sleep(0.0005)
-            sock.sendall(message)
+            if grant and message == b'O':
+                held = message  # A conflicting OPEN waits for the return.
+            elif message == b'R':
+                sock.sendall(message + held)
+                grant, held = False, b''
+            else:
+                sock.sendall(message)
 
 
 def trial(policy, reopens):
     client, peer = socket.socketpair()
-    worker = threading.Thread(target=serve, args=(peer,))
+    worker = threading.Thread(target=serve, args=(peer, policy == "delegated"))
     worker.start()
     count = 0
 
-    def rpc(op):
+    def reply(op):
         nonlocal count
-        client.sendall(op)
         if client.recv(1) != op:
             raise RuntimeError("bad reply")
         count += 1
+
+    def rpc(op):
+        client.sendall(op)
+        reply(op)
 
     with client:
         rpc(b'!')  # Both paths start with a warm connection and a closed file.
@@ -40,10 +50,11 @@ def trial(policy, reopens):
                 rpc(b'O')
                 rpc(b'C')
         conflict = time.perf_counter_ns()
-        rpc(b'O')  # B requests write access.
+        client.sendall(b'O')  # B requests write access.
         if policy == "delegated":
-            rpc(b'K')  # Callback with reply.
+            rpc(b'K')  # Callback with reply. The service holds B's reply.
             rpc(b'R')  # Clean delegation return.
+        reply(b'O')  # B's open ends at its reply.
         end = time.perf_counter_ns()
     worker.join()
     expected = 1 + (2 * reopens if policy == "plain" else 2)
