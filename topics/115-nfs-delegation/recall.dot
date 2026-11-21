@@ -1,0 +1,14 @@
+digraph recall {
+ graph [rankdir=TB, bgcolor="white", pad=0.2, ranksep=0.42, nodesep=0.38]
+ node [shape=box,style="rounded,filled",fontname="Helvetica",fontsize=14,color="#4f6472",fillcolor="#eef3f6",margin="0.18,0.11"]
+ edge [fontname="Helvetica",fontsize=12,color="#526473",arrowsize=0.75]
+ a [label="A has a write delegation\nServer has BLUE. A has dirty GOLD."]
+ b [label="B requests a read OPEN\nServer waits and sends CB_RECALL."]
+ c [label="A acknowledges the callback\nB still waits."]
+ d [label="A flushes GOLD, restores open and lock\nstate as needed, then sends DELEGRETURN.",fillcolor="#e0f3ee"]
+ e [label="B reads GOLD",fillcolor="#bce7da"]
+ f [label="A stays unreachable\nServer revokes A’s delegation after waiting.",fillcolor="#f9ecd9"]
+ g [label="B reads BLUE if no write reached the server.\nA must keep stale GOLD off the original file.",fillcolor="#f8dfb5"]
+ a->b; b->c [label="  callback delivered"]; c->d; d->e
+ b->f [label="  callback path fails"]; f->g
+}
