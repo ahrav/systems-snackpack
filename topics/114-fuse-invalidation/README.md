@@ -28,6 +28,9 @@ both changes are visible in the backing store.
 | Clean file data | Inode and page offset | Evict the page covering bytes 0 through 3. |
 
 With a warm page, an attribute-only notification can produce `0400 BLUE`.
+That result requires `FUSE_CAP_AUTO_INVAL_DATA` to be off. libfuse enables it
+by default, and the kernel then discards cached pages when a refreshed mtime
+differs.
 Calling `fuse_lowlevel_notify_inval_inode(se, 12, 0, 0)` expires attributes
 and invalidates data from offset zero to the end. After the daemon returns
 success, the reader can obtain `0400 GOLD`. A negative offset selects
@@ -37,14 +40,18 @@ changed. Whole-inode invalidation costs more refills on a large hot file.
 If an external writer replaces the name with a different inode, invalidate
 the entry by parent and name. A fresh lookup can find the replacement while
 an open descriptor continues to identify the old inode. Also invalidate cached
-absence on external creation. Send entry notifications outside related request
-callbacks and locks those operations may need.
+absence on external creation. Send notifications outside related request
+callbacks and locks those operations may need. A data invalidation waits for
+a read in flight on the same pages, so sending it from that read's callback
+deadlocks.
 
 ## Choose the read contract
 
 Long-lived caches suit repeated reads when every mount receives changes.
 Make the committed version readable, order old in-flight replies against the
-change, then invalidate and check the result. Acknowledge strict visibility
+change, then invalidate and check the result. A mount that holds no cached
+state for the inode returns `-ENOENT`, which also satisfies the check.
+Acknowledge strict visibility
 once all participating mounts satisfy that contract. If a mount loses its
 event stream, reconcile from a known version or suspend freshness-dependent
 reads. An asynchronous event leaves an interval between commit and delivery.
@@ -73,7 +80,8 @@ cargo test -p topic114-fuse-invalidation
 ```
 
 Expect `0400 BLUE` then `0400 GOLD` from the model. The Rust unit test checks
-256 successive full invalidations. The doctest covers the stale-page control.
+256 successive full invalidations. The doctest follows one descriptor through
+the cached answer, attribute invalidation and full invalidation.
 
 On Linux with libfuse3 development headers, fusermount3 and permission to
 mount a private FUSE filesystem, run:
@@ -85,9 +93,12 @@ python3 mounted.py /tmp/topic114-palette
 
 The driver creates a private directory and uses one descriptor per side. It
 warms the mounted descriptor and changes the backing file through the other.
-A direct fstat/pread pair supplies the oracle. Expect cached `BLUE` with either mode before a
-notification, `0400 BLUE` after attribute invalidation and `0400 GOLD` after
-full invalidation. The daemon disables automatic mtime-based page invalidation
+A direct fstat/pread pair supplies the oracle before each mounted observation.
+Expect `0444 BLUE` before a notification, `0400 BLUE` after attribute
+invalidation and `0400 GOLD` after full invalidation. The daemon mounts
+read-only. On a writable mount a completed `FUSE_READ` marks atime stale, and
+the next fstat asks the daemon for attributes inside the timeout. The daemon
+disables automatic mtime-based page invalidation
 and writeback, uses one-hour metadata and entry timeouts, and serves reads
 on a single four-byte file. Readers are quiescent during the update.
 [Measured results](RESULTS.md).

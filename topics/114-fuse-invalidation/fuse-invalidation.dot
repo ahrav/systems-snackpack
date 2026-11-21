@@ -4,9 +4,9 @@ digraph cache {
  edge [fontname="Helvetica",fontsize=11,color="#43566a"];
  old [label="Reader warms inode 12\nmode = 0444, bytes = BLUE"];
  write [label="External writer commits GOLD\nsame length, mode = 0400",fillcolor="#fff2cf"];
- attr [label="Invalidate attributes only\ngetattr refills mode = 0400"];
- both [label="Invalidate attributes and all pages\ngetattr and read refill from backing file"];
- stale [label="Cached bytes can still be BLUE",fillcolor="#fee3da"];
- fresh [label="Reader sees GOLD",fillcolor="#dcf3e3"];
+ attr [label="Invalidate attributes only\nnext getattr refills mode = 0400"];
+ both [label="Invalidate attributes and all pages\nnext getattr and read refill from backing file"];
+ stale [label="Reader sees 0400 BLUE\ncached page remains",fillcolor="#fee3da"];
+ fresh [label="Reader sees 0400 GOLD",fillcolor="#dcf3e3"];
  old -> write; write -> attr; write -> both; attr -> stale; both -> fresh;
 }

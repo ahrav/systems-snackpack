@@ -1,4 +1,7 @@
-//! Cached answers for a single open file on a read-only mount.
+//! Model the attributes and one data page that Linux caches for a held FUSE descriptor.
+//!
+//! A cached answer changes only through [`Cache::invalidate`]. Reads between
+//! notifications return cached values even after the backing file changes.
 //!
 //! ```
 //! use topic114_fuse_invalidation::{Cache, File};
@@ -6,8 +9,9 @@
 //! let old = File { mode: 0o444, bytes: *b"BLUE" };
 //! let new = File { mode: 0o400, bytes: *b"GOLD" };
 //! assert_eq!(cache.read(old), old);
+//! assert_eq!(cache.read(new), old);
 //! cache.invalidate(false);
-//! assert_eq!(cache.read(new).bytes, old.bytes);
+//! assert_eq!(cache.read(new), File { mode: new.mode, bytes: old.bytes });
 //! cache.invalidate(true);
 //! assert_eq!(cache.read(new), new);
 //! ```
@@ -15,7 +19,7 @@
 /// Two independently cached answers for a four-byte file.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct File {
-    /// Permission bits.
+    /// Permission bits, the value of `st_mode & 0o7777`.
     pub mode: u16,
     /// File contents.
     pub bytes: [u8; 4],

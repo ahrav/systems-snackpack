@@ -104,22 +104,23 @@ int main(int argc, char **argv)
         fprintf(stderr, "usage: palette BACKING MOUNTPOINT\n");
         return 2;
     }
-    backing_fd = open(argv[1], O_RDONLY);
+    backing_fd = open(argv[1], O_RDONLY | O_CLOEXEC);
     if (backing_fd < 0) {
         perror("open backing");
         return 1;
     }
-    struct fuse_args args = FUSE_ARGS_INIT(1, argv);
+    char *fuse_argv[] = {argv[0], "-oro", NULL};
+    struct fuse_args args = FUSE_ARGS_INIT(2, fuse_argv);
     struct fuse_lowlevel_ops ops = {.init = init, .lookup = lookup, .getattr = getattr_cb,
                                     .open = open_cb, .read = read_cb};
     struct fuse_session *se = fuse_session_new(&args, &ops, sizeof ops, NULL);
     if (!se || fuse_session_mount(se, argv[2]) != 0)
         return 1;
+    puts("mounted"); /* The driver reads this line before it sends a command. */
+    fflush(stdout);
     pthread_t worker;
     int result = pthread_create(&worker, NULL, control, se);
     if (result == 0) {
-        puts("mounted");
-        fflush(stdout);
         result = fuse_session_loop(se);
         pthread_join(worker, NULL); /* The driver closes stdin before unmount. */
     }
