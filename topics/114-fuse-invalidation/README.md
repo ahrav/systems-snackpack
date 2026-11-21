@@ -28,9 +28,9 @@ both changes are visible in the backing store.
 | Clean file data | Inode and page offset | Evict the page covering bytes 0 through 3. |
 
 With a warm page, an attribute-only notification can produce `0400 BLUE`.
-That result requires `FUSE_CAP_AUTO_INVAL_DATA` to be off. libfuse enables it
-by default, and the kernel then discards cached pages when a refreshed mtime
-differs.
+libfuse enables `FUSE_CAP_AUTO_INVAL_DATA` by default, and the kernel then
+discards cached pages when a refreshed mtime differs. The lesson's daemon
+turns it off, which makes the result independent of mtime.
 Calling `fuse_lowlevel_notify_inval_inode(se, 12, 0, 0)` expires attributes
 and invalidates data from offset zero to the end. After the daemon returns
 success, the reader can obtain `0400 GOLD`. A negative offset selects
