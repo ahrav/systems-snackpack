@@ -1,11 +1,18 @@
-source.tar: OK
+d4969e7f8d9ee1659debe9a839725d5477aac4271f74a599283e6fa060cdd3f4  source.tar
 Linux 6.12.115-140.210.amzn2023.x86_64 x86_64
+Vendor ID: GenuineIntel
+Model name: Intel(R) Xeon(R) Platinum 8488C
+CPU family: 6
+Model: 143
+Stepping: 8
 fuse3-libs-3.10.4-1.amzn2023.0.2.x86_64
+fuse3-3.10.4-1.amzn2023.0.2.x86_64
 gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)
+Python 3.9.25
 rustc 1.93.1 (01f6ddf75 2026-02-11)
-   Compiling topic114-fuse-invalidation v0.1.0 (/tmp/topic114-VuJxnEKx/topics/114-fuse-invalidation)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
-     Running unittests src/lib.rs (target/debug/deps/topic114_fuse_invalidation-4b0ad7bce9a15bba)
+   Compiling topic114-fuse-invalidation v0.1.0 (/local/home/ahrav/.tmp/topic114-x86.BEDkIe/src/topics/114-fuse-invalidation)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.19s
+     Running unittests src/lib.rs (/local/home/ahrav/.tmp/topic114-x86.BEDkIe/src/target/debug/deps/topic114_fuse_invalidation-4b0ad7bce9a15bba)
 
 running 1 test
 test tests::full_invalidation_matches_each_committed_version ... ok
@@ -15,19 +22,23 @@ test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
    Doc-tests topic114_fuse_invalidation
 
 running 1 test
-test topics/114-fuse-invalidation/src/lib.rs - (line 3) ... ok
+test topics/114-fuse-invalidation/src/lib.rs - (line 6) ... ok
 
 test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
-all doctests ran in 0.22s; merged doctests compilation took 0.21s
+all doctests ran in 0.16s; merged doctests compilation took 0.16s
 0400 BLUE
 0400 GOLD
-b'none' 0400 b'BLUE'
++ cc -std=gnu11 -O2 -Wall -Wextra -Werror -pthread palette.c -I../../../inc /usr/lib64/libfuse3.so.3 -o ../../../palette
++ set +x
+b'none' 0444 b'BLUE'
 b'a' 0400 b'BLUE'
 b'p' 0400 b'GOLD'
-b'none' 0400 b'BLUE'
+b'none' 0444 b'BLUE'
 b'a' 0400 b'BLUE'
 b'p' 0400 b'GOLD'
-b'none' 0400 b'BLUE'
+b'none' 0444 b'BLUE'
 b'a' 0400 b'BLUE'
 b'p' 0400 b'GOLD'
+this test uses assert: run without python -O or PYTHONOPTIMIZE
+optimized run refused, exit 1
