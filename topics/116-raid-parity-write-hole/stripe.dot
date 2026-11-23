@@ -1,0 +1,12 @@
+digraph stripe {
+ graph [bgcolor="white", rankdir=TB, pad="0.22", nodesep="0.3", ranksep="0.34", fontname="Helvetica", fontsize=18];
+ node [shape=box style="rounded,filled" fontname="Helvetica" fontsize=15 margin="0.18,0.12" color="#79909e" fillcolor="#edf4f8" fontcolor="#152d3a"];
+ edge [color="#657984" arrowsize=0.7];
+ old [label="Durable stripe\nA = 3c     B = 55     P = 69"];
+ crash [label="A changes to a6 and reaches disk. Power fails.\nA = a6     B = 55     P = 69" fillcolor="#fff0cf" color="#ad7b24"];
+ lost [label="B becomes unreadable\nA = a6     B = ??     P = 69"];
+ plain [label="Use stale parity\na6 XOR 69 = cf\nWrong B" fillcolor="#fde6e2" color="#b24e45"];
+ redo [label="Replay durable A = a6 and P = f3\na6 XOR f3 = 55\nOriginal B recovered" fillcolor="#dcf2ea" color="#3d836c"];
+ old -> crash -> lost;
+ lost -> plain; lost -> redo;
+}
