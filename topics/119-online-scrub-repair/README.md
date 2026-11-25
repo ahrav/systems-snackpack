@@ -56,3 +56,5 @@ conditional 0 8 GOLD True
 The columns give rows updated, final generation, final target and agreement with the final digest. The first row demonstrates the lost write. The second preserves the client's value.
 
 The independent oracle consumes only scheduled logical writes and physical faults. It records the index of the last logical mutation. It predicts the target bytes and repair row count after each event without using database versions, SQL or digests. The Rust model uses exclusive access to a slot and an owned copy of verified bytes. A two-thread test pauses the scrubber after inspection and resumes it after a replacement or deletion.
+
+[Three-host results and controls](RESULTS.md)
