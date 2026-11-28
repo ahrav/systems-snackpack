@@ -502,6 +502,10 @@ name = "topic121-conditional-writes"
 version = "0.1.0"
 
 [[package]]
+name = "topic122-buffer-pinning"
+version = "0.1.0"
+
+[[package]]
 name = "userfaultfd-snapshot"
 version = "0.1.0"
 
